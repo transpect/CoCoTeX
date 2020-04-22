@@ -1,0 +1,75 @@
+%    \begin{macrocode}
+%%
+%% common document class for le-tex transpect projects.
+%%
+%% Maintainer: p.schulz@le-tex.de
+%%
+%% lualatex  -  texlive > 2019
+%%
+\NeedsTeXFormat{LaTeX2e}[2019/01/01]
+\ProvidesClass{transpect}
+    [\filedate \fileversion le-tex transpect]
+\frenchspacing
+\clubpenalty10000
+\widowpenalty10000
+\RequirePackage{kvoptions-patch}%%%NEW
+\RequirePackage{xkeyval}
+\PassOptionsToPackage{cmyk}{xcolor}
+\PassOptionsToPackage{}{transpect-endnotes}
+\RequirePackage{transpect-endnotes}
+
+\DeclareOptionX{book}{\global\collectionfalse}
+\DeclareOptionX{collection}{\global\collectiontrue}
+\DeclareOption*{\PassOptionsToClass{\CurrentOption}{book}}
+
+\ProcessOptionsX
+\LoadClass[10pt,a4paper]{book}
+
+\emergencystretch=2em
+
+
+
+\RequirePackage{babel}
+
+\voffset-1in\relax
+\hoffset-1in\relax
+
+
+
+\def\ps@empty{%
+  \let\@oddhead\@empty
+  \let\@oddfoot\@empty
+  \let\@evenhead\@empty
+  \let\@evenfoot\@empty
+}
+
+\gdef\cleardoublepage{%
+  \clearpage
+  \ifodd\c@page\relax\else
+    \ifx\lay f\else
+      \hbox{}\thispagestyle{empty}\newpage
+      \if@twocolumn\hbox{}\thispagestyle{empty}\newpage\fi
+    \fi
+  \fi}
+
+\usepackage{color}
+\usepackage{graphicx}
+\usepackage{soul}
+\def\afterfi#1\fi{\fi#1}
+
+
+\def\@afterbox{%
+  \everypar{%
+    \if@nobreak
+      \@nobreakfalse
+      \clubpenalty \@M
+      \if@afterindent \else
+        {\setbox\z@\lastbox}%
+        \everypar{}%2015-04-09
+      \fi
+    \else
+      \clubpenalty \@clubpenalty
+      {\setbox\z@\lastbox}%
+      \everypar{}%
+    \fi}}
+%    \end{macrocode}

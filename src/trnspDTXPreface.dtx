@@ -1,0 +1,119 @@
+%\iffalse
+%<*driver>
+\ProvidesFile{transpect.dtx}
+%</driver>
+%<package>\NeedsTeXFormat{LaTeX2e}[2019/01/01]
+%<package>\ProvidesClass{transpect}
+%<*package>
+    [\filedate\space\fileversion\space transpect]
+%</package>
+%<*driver>
+\documentclass[a4paper]{ltxdoc}
+  \frenchspacing
+  \parindent0pt
+  \parskip\medskipamount
+  \makeatletter
+  \def\@listi{\leftmargin\leftmargini
+              \parsep\z@
+              \topsep\z@
+              \itemsep\z@}
+  \let\@listI\@listi
+  \@listi
+  \def\@listii{\leftmargin\leftmarginii
+              \labelwidth\leftmarginii
+              \advance\labelwidth-\labelsep
+              \parsep\z@
+              \topsep\z@
+              \itemsep\z@}
+  \makeatother
+  \emergencystretch1em
+  \clubpenalty10000
+  \widowpenalty10000
+  \def\hack#1{#1}
+  \RequirePackage[T1]{fontenc}
+  \RequirePackage[utf8]{inputenc}
+  \RequirePackage{color}
+  \RequirePackage{graphicx}
+  \RequirePackage{lmodern}
+  \RequirePackage[breaklinks,pdfborder={0 0 0}]{hyperref}
+  \OnlyDescription
+\usepackage{listings}
+\usepackage{xcolor}
+\lstdefinestyle{macrocode}{%
+  name=macrocode,
+  language=[LaTeX]TeX,
+  basicstyle=\fontfamily{lmvtt}\selectfont\small,
+  basicstyle=\ttfamily\small,
+  columns=fullflexible,
+  numbers=left,
+  numberfirstline=1,
+  firstnumber=auto,
+  numberstyle=\scriptsize,
+  numbersep=5pt,
+  backgroundcolor=\color{yellow!20}, % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+  basicstyle=\scriptsize,          % the size of the fonts that are used for the code
+  breakatwhitespace=false,           % sets if automatic breaks should only happen at whitespace
+  breaklines=true,                   % sets automatic line breaking
+  captionpos=t,                      % sets the caption-position
+  commentstyle={\color{green}\itshape},      % comment style
+  extendedchars=true,                % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+  frame=single,                      % adds a frame around the code
+  keepspaces=false,                   % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  keywordstyle=\color{red},          % keyword style
+  rulecolor=\color{gray!70},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+  showspaces=false,                  % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=true,             % underline spaces within strings only
+  showtabs=true,                     % show tabs within strings adding particular underscores
+  stringstyle={\color{mymauve}},     % string literal style
+  tabsize=2,                         % sets default tabsize to 2 spaces
+}
+\lstdefinestyle{docstrip}{%
+  style=macrocode,
+  basicstyle=\sffamily\small,
+  literate=<{$\langle$}1>{$\rangle$}1,
+}
+\def\macrocode{\begin{lstlisting}[style=macrocode]}
+
+\makeatletter
+\let\old@endmacrocode\endmacrocode
+\def\endmacrocode{\end{lstlisting}\old@endmacrocode}
+\makeatother
+
+\begin{document}
+  \DocInput{htmltabs.dtx}
+\end{document}
+%</driver>
+%\fi
+%
+% \CheckSum{8353}
+% \CharacterTable
+%    {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%     Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%     Digits        \0\1\2\3\4\5\6\7\8\9
+%     Exclamation   \!     Double quote  \"     Hash (number) \#
+%     Dollar        \$     Percent       \%     Ampersand     \&
+%     Acute accent  \'     Left paren    \(     Right paren   \)
+%     Asterisk      \*     Plus          \+     Comma         \,
+%     Minus         \-     Point         \.     Solidus       \/
+%     Colon         \:     Semicolon     \;     Less than     \<
+%     Equals        \=     Greater than  \>     Question mark \?
+%     Commercial at \@     Left bracket  \[     Backslash     \\
+%     Right bracket \]     Circumflex    \^     Underscore    \_
+%     Grave accent  \`     Left brace    \{     Vertical bar  \|
+%     Right brace   \}     Tilde         \~}
+%
+% \GetFileInfo{htmltabs.dtx}
+%
+% \title{The \filename\space Package\,\thanks{This package was
+% created by le-tex publishing services,
+% Leipzig.\hfil\break\hspace*{1.8em}This file has version
+% \fileversion.}}%
+% \author{Lupino}%
+% \date{\filedate}%
+%
+% \maketitle
+% \tableofcontents
+%
+% \clearpage
+%
+%

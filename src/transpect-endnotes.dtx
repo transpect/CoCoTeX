@@ -1,0 +1,16 @@
+%%
+%% module for le-tex transpect.cls that handles footnote/endnote switching.
+%%
+%% Maintainer: p.schulz@le-tex.de
+%%
+%% lualatex  -  texlive > 2019
+%%
+\NeedsTeXFormat{LaTeX2e}[2019/01/01]
+\ProvidesPackage{transpect-endnotes}
+    [2020/22/04 0.90 le-tex transpect endnotes module]
+\newif\ifendnotes \endnotesfalse
+\DeclareOptionX{endnotes}{\global\endnotestrue}
+\DeclareOptionX{endnotesperchapter}{\global\endnotestrue\global\let\endnotes@per@chapter\relax}
+\ProcessOptionsX
+
+\usepackage{footnote}

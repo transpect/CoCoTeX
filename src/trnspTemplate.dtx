@@ -1,0 +1,30 @@
+\def\fileversion{0.90}%
+\def\filedate{2020-04-22}%
+%% INCLUDE-DOC
+%<*class>
+%    \begin{macrocode}
+
+\message{le-tex transpect package version \fileversion\space (\filedate)^^J}
+
+\def\includeDTX#1{\input src/#1.dtx}
+
+%    \end{macrocode}
+\includeDTX{transpect}
+%</class>
+%<*endnotes>
+%    \begin{macrocode}
+\includeDTX{transpect-endnotes}
+%    \end{macrocode}
+%</endnotes>
+%<*script>
+%    \begin{macrocode}
+\includeDTX{transpect-script}
+%    \end{macrocode}
+%</script>
+%<*floats>
+%    \begin{macrocode}
+\includeDTX{transpect-floats}
+%    \end{macrocode}
+%</floats>
+%\Finale
+\endinput

@@ -1,0 +1,230 @@
+%%
+%% module for le-tex transpect.cls that extends floating objects.
+%%
+%% Maintainer: p.schulz@le-tex.de
+%%
+%% lualatex  -  texlive > 2019
+%%
+\NeedsTeXFormat{LaTeX2e}[2019/01/01]
+\ProvidesPackage{transpect-floats}
+    [2020/22/04 0.90 le-tex transpect floats module]
+
+\usepackage{tabularx}
+\usepackage{multirow}
+
+\newcolumntype{Q}{>{\raggedright\arraybackslash\unskip}X} % gleich wie X, nur bei einer Kolumne verwenden, mk
+\newcolumntype{W}{>{\raggedleft\arraybackslash\unskip}X} % rechtsbündig, wie X, nur 1x verwenden
+\newcolumntype{L}{>{\raggedright\arraybackslash\unskip}p} % wie p nur linksbündig*
+\newcolumntype{P}{>{\RaggedRight\arraybackslash\unskip}p} % wie p und linksbündig und erlaubt Silbentrennung*
+\newcolumntype{R}{>{\raggedleft\arraybackslash\unskip}p} % rechtsbündig, wie p*
+\newcolumntype{C}{>{\centering\arraybackslash\unskip}X} % zentriert wie X
+\newcolumntype{Z}{>{\centering\arraybackslash\unskip}p} % zentriert wie p*
+\newcolumntype{e}{!{\extracolsep{\fill}}} % wird nicht verwendet
+
+\usepackage{caption}
+
+\renewcommand \thefigure
+     {\@arabic\c@figure}
+\@removefromreset{figure}{chapter}
+
+\renewcommand \thetable
+     {\@arabic\c@table}
+\@removefromreset{table}{chapter}
+
+\captionsetup{%
+   format=plain
+  ,labelformat=empty
+  ,font+=it
+  ,singlelinecheck=false
+  ,justification=RaggedRight
+  ,listformat=empty
+}
+
+\newlength\aboveSourceSkip \aboveSourceSkip0mm
+\newcommand\transcriptBild[3][]{\tr@nscriptFloat{#1}{#2}{#3}}
+\newcommand\transcriptTab[3][]{\aboveSourceSkip1mm\let\use@depth\relax\tr@nscriptFloat{#1}{#2}{#3}}
+
+\newbox\tr@nscriptFlt
+\newdimen\tr@nscriptFltWd
+\newdimen\tr@nscriptWd
+\newdimen\tr@nscriptHt
+\newdimen\tr@nscriptSep
+
+
+%% BEGIN: sameheight
+\newbox\@includesubgraphicsbox
+\newcount\c@includesubgraphics \c@includesubgraphics\z@
+\newdimen\includesubgraphics@maxheight
+\newdimen\subgraphicssep \subgraphicssep\fboxsep
+\newdimen\shhsize \shhsize=\hsize\relax
+\newdimen\sh@margins
+\RequirePackage{ltxcmds}
+
+\newcommand*\includesubgraphics[2][]{%
+  \global\advance\c@includesubgraphics\@ne
+  \ltx@LocalExpandAfter\gdef\csname subgraphics@caption@\the\c@includesubgraphics\endcsname{#1}%
+  \ltx@LocalExpandAfter\gdef\csname subgraphics@name@\the\c@includesubgraphics\endcsname{#2}%
+  \setbox\@includesubgraphicsbox\hbox{\includegraphics{#2}}%
+  \ltx@LocalExpandAfter\xdef\csname subgraphics@width@\the\c@includesubgraphics\endcsname{\the\wd\@includesubgraphicsbox}%
+  \ltx@LocalExpandAfter\xdef\csname subgraphics@height@\the\c@includesubgraphics\endcsname{\the\ht\@includesubgraphicsbox}%
+  \expandafter\ifdim\csname subgraphics@height@\the\c@includesubgraphics\endcsname>\includesubgraphics@maxheight\relax
+    \ltx@LocalExpandAfter\global\expandafter\includesubgraphics@maxheight=\csname subgraphics@height@\the\c@includesubgraphics\endcsname\relax
+  \fi}
+
+\def\CalcRatio#1#2{\strip@pt\dimexpr\number\numexpr\number\dimexpr#1\relax*65536/\number\dimexpr#2\relax\relax sp}
+
+%% Gehe schrittweise durch counter #1, startend bei #2 bis einschließlich #3 und tue nach jeder Inkrementierung #4 (aus forloop.sty):
+\long\def\sh@iterate#1#2#3#4{% #1=counter; #2=Startwert; #3=Endwert; #4=Anweisungen
+  \advance#1\@ne\relax
+  #1=#2\relax%
+  \expandafter\ifnum#1>#3\relax%
+  \else
+    #4%
+    \sh@iterate{#1}{\the#1}{#3}{#4}%
+  \fi}%
+
+
+\def\sameheight#1{%
+  \bgroup
+  \let\c@psource\@undefined
+  \c@includesubgraphics=\z@\relax
+  \let\@shhsize\shhsize
+  \includesubgraphics@maxheight=\z@\relax
+  %% Measurement
+  \setbox\@tempboxa\hbox{#1}%
+  %% 1st iteration: Calculate widths of all subfigures when scaled up to the highest subfigure's height:
+  %% \@tempdima: total sum of those widths
+  \@tempdima=\z@\relax
+  \sh@iterate{\@tempcnta}{\@ne}{\c@includesubgraphics}{%
+    \edef\@tempa{\CalcRatio{\includesubgraphics@maxheight}{\csname subgraphics@height@\the\@tempcnta\endcsname}}%
+    \ifnum\@tempcnta>\@ne\global\advance\@shhsize-\subgraphicssep\relax\fi
+    \expandafter\@tempdimc\csname subgraphics@width@\the\@tempcnta\endcsname\relax
+    \@tempdimb=\@tempa\@tempdimc\relax
+    \expandafter\xdef\csname  subgraphics@adjusted@width@\the\@tempcnta\endcsname{\the\@tempdimb}%
+    \global\advance\@tempdima\@tempdimb
+  }%
+  %% 2nd iteration: Calculate width ratio of all adjusted subfigures against total width of all figures plus separators and output:
+  \@tempcnta\z@
+  \sh@iterate{\@tempcnta}{\@ne}{\c@includesubgraphics}{%
+    \edef\@tempa{\CalcRatio{\csname subgraphics@adjusted@width@\the\@tempcnta\endcsname}{\@tempdima}}%
+    \@tempdimb\@tempa\@shhsize\relax
+    \edef\@tempb{\csname subgraphics@name@\the\@tempcnta\endcsname}%
+    \ifnum\@tempcnta>\@ne\hskip\subgraphicssep\fi
+    \def\@igopts{width=\linewidth}%
+    \begin{minipage}[b]{\@tempdimb}%
+      \captionsetup{margin=\z@}%
+      \csname subgraphics@caption@\the\@tempcnta\endcsname%
+      \expandafter\expandafter\expandafter\includegraphics\expandafter\expandafter\expandafter[\expandafter\@igopts\expandafter]\expandafter{\@tempb}%
+      \ifx\c@psource\@undefined\else
+        \vskip\dimexpr-\topskip+\aboveSourceSkip+.5mm\relax
+        \vtop{\captionsetup{font=footnotesize}\caption*{\c@psource}}%
+        \global\let\c@psource\@undefined
+      \fi
+    \end{minipage}%
+  }%
+  \egroup
+}
+
+%% END: sameheight
+
+\newcommand\transriptFixedFigure[3][]{% #1: Layout-Variante, #2 Teilbilder
+  \bgroup
+  \shhsize\hsize
+  \subgraphicssep2mm
+  \ifx#2A\relax
+    \@tempdima\z@
+  \else
+    \ifx#2B\relax
+      \@tempdima20mm
+    \else
+      \ifx#2C\relax
+        \@tempdima30mm
+      \else
+        \ifx#2D\relax
+          \@tempdima50mm
+        \fi
+      \fi
+    \fi
+  \fi
+  \advance\shhsize-\@tempdima
+  \sh@margins.5\@tempdima
+  \vskip1\baselineskip
+  \captionsetup{margin=\sh@margins\relax}%
+  \if!#1!\else#1\fi
+  \hskip\sh@margins\sameheight{#3}%
+  \ifx\c@psource\@undefined\else
+    \vskip\aboveSourceSkip
+    \captionsetup{font=footnotesize,skip=-1mm}%
+    \caption*{\c@psource}%
+    \global\let\c@psource\@undefined
+  \fi
+  \egroup}
+
+\def\capsource#1{\def\c@psource{#1}}%
+
+\let\oldfigure\figure
+\let\oldendfigure\endfigure
+
+\renewenvironment{figure}{\savenotes\oldfigure}{\oldendfigure\spewnotes}
+
+
+\long\def\tr@nscriptFloat#1#2#3{%
+  \def\@rgi{#1}%
+  \setbox\tr@nscriptFlt\hbox{#3}%
+  \tr@nscriptFltWd=\wd\tr@nscriptFlt\relax
+  \tr@nscriptHt=\dimexpr\ht\tr@nscriptFlt\ifx\use@depth\relax+\dp\tr@nscriptFlt\fi\relax
+  \tr@nscriptSep\dimexpr(\textwidth-\tr@nscriptFltWd)/2\relax
+  \vskip\baselineskip
+  \ifdim\tr@nscriptFltWd<.5\textwidth\relax
+    \bgroup
+      %\tr@nscriptSep4mm
+      \tr@nscriptWd\dimexpr\textwidth-\tr@nscriptFltWd\relax
+      \noindent\begin{minipage}[\ifx\use@depth\relax t\else b\fi][\tr@nscriptHt][t]{\tr@nscriptWd}%
+        \captionsetup{justification=RaggedRight}%
+        \captionof{figure}{#2}%
+        \ifx\@rgi\@empty\else
+          \vfill
+        \captionsetup{font=footnotesize,skip=\z@}%
+        \caption*{#1}%
+        \vspace*{\dimexpr-\dp\tr@nscriptFlt-1mm}%
+       \fi
+      \end{minipage}\hfill
+      \begin{minipage}[t][\tr@nscriptHt]{\tr@nscriptFltWd}\centering
+        \unhbox\tr@nscriptFlt%
+      \end{minipage}%
+    \egroup
+  \else
+    \noindent\hskip\tr@nscriptSep
+    \begin{minipage}{\tr@nscriptFltWd}\centering%
+      \captionof{figure}{#2}%
+      \unhbox\tr@nscriptFlt\par
+      \ifx\@rgi\@empty\else
+        \captionsetup{font=footnotesize,skip=-1mm}\caption*{#1}%
+        \vspace*{\dimexpr-\dp\tr@nscriptFlt-1mm}%
+      \fi
+    \end{minipage}%
+  \fi
+  \vskip\baselineskip
+  \global\let\use@depth\@undefined
+  \tr@nscriptWd\z@% \tr@nscriptSep\z@
+}
+
+\def\tablefont{\nsffamily\small}
+\def\arraystretch{1.3}
+\def\@tabular{%
+  \leavevmode
+  \hbox \bgroup\tablefont $\col@sep\tabcolsep \let\d@llarbegin\begingroup%$
+                                    \let\d@llarend\endgroup
+  \ifx\ST@tableformat\@undefined\gdef\@tablefont{\tablefont}\fi
+  \@tabarray}
+\let\@classzold\@classz
+\def\@classz{%
+   \expandafter\ifx\d@llarbegin\begingroup
+     \toks \count@ =
+     \expandafter{\expandafter\@tablefont\the\toks\count@}%
+   \fi
+   \@classzold}
+\def\endtabular{%
+  \endarray
+  $\egroup}%$
+\expandafter\let\csname endtabular*\endcsname=\endtabular
