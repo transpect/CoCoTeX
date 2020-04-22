@@ -72,15 +72,14 @@
   basicstyle=\sffamily\small,
   literate=<{$\langle$}1>{$\rangle$}1,
 }
-\def\macrocode{\begin{lstlisting}[style=macrocode]}
 
-\makeatletter
-\let\old@endmacrocode\endmacrocode
-\def\endmacrocode{\end{lstlisting}\old@endmacrocode}
-\makeatother
+\let\macrocode\relax
+\lstnewenvironment{macrocode}[1][]{%
+  \lstset{style=macrocode,#1}%
+}{}
 
 \begin{document}
-  \DocInput{htmltabs.dtx}
+  \DocInput{transpect.dtx}
 \end{document}
 %</driver>
 %\fi
@@ -102,7 +101,7 @@
 %     Grave accent  \`     Left brace    \{     Vertical bar  \|
 %     Right brace   \}     Tilde         \~}
 %
-% \GetFileInfo{htmltabs.dtx}
+% \GetFileInfo{transpect.dtx}
 %
 % \title{The \filename\space Package\,\thanks{This package was
 % created by le-tex publishing services,
@@ -115,5 +114,4 @@
 % \tableofcontents
 %
 % \clearpage
-%
 %

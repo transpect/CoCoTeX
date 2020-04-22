@@ -12,14 +12,14 @@
 \usepackage{tabularx}
 \usepackage{multirow}
 
-\newcolumntype{Q}{>{\raggedright\arraybackslash\unskip}X} % gleich wie X, nur bei einer Kolumne verwenden, mk
-\newcolumntype{W}{>{\raggedleft\arraybackslash\unskip}X} % rechtsbündig, wie X, nur 1x verwenden
-\newcolumntype{L}{>{\raggedright\arraybackslash\unskip}p} % wie p nur linksbündig*
-\newcolumntype{P}{>{\RaggedRight\arraybackslash\unskip}p} % wie p und linksbündig und erlaubt Silbentrennung*
-\newcolumntype{R}{>{\raggedleft\arraybackslash\unskip}p} % rechtsbündig, wie p*
-\newcolumntype{C}{>{\centering\arraybackslash\unskip}X} % zentriert wie X
-\newcolumntype{Z}{>{\centering\arraybackslash\unskip}p} % zentriert wie p*
-\newcolumntype{e}{!{\extracolsep{\fill}}} % wird nicht verwendet
+\newcolumntype{Q}{>{\raggedright\arraybackslash\unskip}X}
+\newcolumntype{W}{>{\raggedleft\arraybackslash\unskip}X}
+\newcolumntype{L}{>{\raggedright\arraybackslash\unskip}p}
+\newcolumntype{P}{>{\RaggedRight\arraybackslash\unskip}p}
+\newcolumntype{R}{>{\raggedleft\arraybackslash\unskip}p}
+\newcolumntype{C}{>{\centering\arraybackslash\unskip}X}
+\newcolumntype{Z}{>{\centering\arraybackslash\unskip}p}
+\newcolumntype{e}{!{\extracolsep{\fill}}}
 
 \usepackage{caption}
 
@@ -73,8 +73,11 @@
 
 \def\CalcRatio#1#2{\strip@pt\dimexpr\number\numexpr\number\dimexpr#1\relax*65536/\number\dimexpr#2\relax\relax sp}
 
-%% Gehe schrittweise durch counter #1, startend bei #2 bis einschließlich #3 und tue nach jeder Inkrementierung #4 (aus forloop.sty):
-\long\def\sh@iterate#1#2#3#4{% #1=counter; #2=Startwert; #3=Endwert; #4=Anweisungen
+%    \end{macrocode}
+%% traverse step-wise through \#1, start at \#2 until and including \#3 and do at every loop \#4 (from forloop.sty):
+%    \begin{macrocode}
+
+\long\def\sh@iterate#1#2#3#4{%
   \advance#1\@ne\relax
   #1=#2\relax%
   \expandafter\ifnum#1>#3\relax%
@@ -90,10 +93,14 @@
   \c@includesubgraphics=\z@\relax
   \let\@shhsize\shhsize
   \includesubgraphics@maxheight=\z@\relax
-  %% Measurement
+%    \end{macrocode}
+%% measurement
+%    \begin{macrocode}
   \setbox\@tempboxa\hbox{#1}%
-  %% 1st iteration: Calculate widths of all subfigures when scaled up to the highest subfigure's height:
-  %% \@tempdima: total sum of those widths
+%    \end{macrocode}
+%% 1st iteration: Calculate widths of all subfigures when scaled up to the highest subfigure's height:
+%% \lstinline{\@tempdima}: total sum of those widths
+%    \begin{macrocode}
   \@tempdima=\z@\relax
   \sh@iterate{\@tempcnta}{\@ne}{\c@includesubgraphics}{%
     \edef\@tempa{\CalcRatio{\includesubgraphics@maxheight}{\csname subgraphics@height@\the\@tempcnta\endcsname}}%
@@ -103,7 +110,9 @@
     \expandafter\xdef\csname  subgraphics@adjusted@width@\the\@tempcnta\endcsname{\the\@tempdimb}%
     \global\advance\@tempdima\@tempdimb
   }%
-  %% 2nd iteration: Calculate width ratio of all adjusted subfigures against total width of all figures plus separators and output:
+%    \end{macrocode}
+%% 2nd iteration: Calculate width ratio of all adjusted subfigures against total width of all figures plus separators and output:
+%    \begin{macrocode}
   \@tempcnta\z@
   \sh@iterate{\@tempcnta}{\@ne}{\c@includesubgraphics}{%
     \edef\@tempa{\CalcRatio{\csname subgraphics@adjusted@width@\the\@tempcnta\endcsname}{\@tempdima}}%
@@ -124,10 +133,12 @@
   }%
   \egroup
 }
-
-%% END: sameheight
-
-\newcommand\transriptFixedFigure[3][]{% #1: Layout-Variante, #2 Teilbilder
+%    \end{macrocode}
+% END: sameheight
+%
+% \#1: layout variant, \#2 subufigures
+%    \begin{macrocode}
+\newcommand\transriptFixedFigure[3][]{%
   \bgroup
   \shhsize\hsize
   \subgraphicssep2mm
