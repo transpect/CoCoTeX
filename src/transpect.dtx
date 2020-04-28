@@ -1,6 +1,11 @@
+%    \end{macrocode}
+% \chapter{transpect.dtx}
+%
+% This is the main class file for the Transpect LaTeX package.
+%
 %    \begin{macrocode}
 %%
-%% common document class for le-tex transpect projects.
+%% Common document class for le-tex Transpect projects.
 %%
 %% Maintainer: p.schulz@le-tex.de
 %%
@@ -9,62 +14,84 @@
 \NeedsTeXFormat{LaTeX2e}[2019/01/01]
 \ProvidesClass{transpect}
     [\filedate \fileversion le-tex transpect]
-\frenchspacing
-\clubpenalty10000
-\widowpenalty10000
 \RequirePackage{kvoptions-patch}%%%NEW
 \RequirePackage{xkeyval}
+\RequirePackage{transpect-helpers}
 \PassOptionsToPackage{cmyk}{xcolor}
 \PassOptionsToPackage{}{transpect-endnotes}
+\PassOptionsToPackage{}{babel}
 \RequirePackage{transpect-endnotes}
-
+%    \end{macrocode}
+% The options \lstinline{book} (default, included only for legacy
+% reasons) and \lstinline{collection} are used to switch between
+% single and multiple contributors documents. The latter is used when
+% the document's components (i.\,e., chapters) are contributed to
+% different authors like journals, collections, or
+% proceedings. \lstinline{book} is used where the whole document has
+% the same author(s).
+%    \begin{macrocode}
 \DeclareOptionX{book}{\global\collectionfalse}
 \DeclareOptionX{collection}{\global\collectiontrue}
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{book}}
+\DeclareOption*{\PassOptionsToClass{\CurrentOption}{transpect-script}}
 
 \ProcessOptionsX
-\LoadClass[10pt,a4paper]{book}
-
-\emergencystretch=2em
-
-\RequirePackage{babel}
-
+%    \end{macrocode}
+% Offsets are the removed to make all values relative to the upper left corner of the page to ease maintainance.
+%    \begin{macrocode}
 \voffset-1in\relax
 \hoffset-1in\relax
-
+%    \end{macrocode}
+% All transpect derived classes base on \LaTeX's default class \lstinline{book}:
+%    \begin{macrocode}
+\LoadClass[10pt,a4paper]{book}
+%    \end{macrocode}
+% typesetting automata need some room to play:
+%    \begin{macrocode}
+\emergencystretch=2em
+%    \end{macrocode}
+% and strong restrictions:
+%    \begin{macrocode}
+\frenchspacing
+\clubpenalty10000
+\widowpenalty10000
+%    \end{macrocode}
+% page style without any headers or footers
+%    \begin{macrocode}
 \def\ps@empty{%
   \let\@oddhead\@empty
   \let\@oddfoot\@empty
   \let\@evenhead\@empty
   \let\@evenfoot\@empty
 }
+%    \end{macrocode}
+% vacancy pages need to have page style \lstinline{empty}:
+%    \begin{macrocode}
+\def\cleardoublepage{\clearpage\if@twoside \ifodd\c@page\else
+    \hbox{}\thispagestyle{empty}\newpage\if@twocolumn\hbox{}\newpage\fi\fi\fi}
+%    \end{macrocode}
+% re-defined to make front- and backmatter components distinguish-able
+%    \begin{macrocode}
+\newif\if@frontmatter  \@frontmatterfalse
+\renewcommand\frontmatter{%
+  \cleardoublepage
+  \@mainmatterfalse
+  \@frontmattertrue
+  \pagenumbering{arabic}}
 
-\gdef\cleardoublepage{%
-  \clearpage
-  \ifodd\c@page\relax\else
-    \ifx\lay f\else
-      \hbox{}\thispagestyle{empty}\newpage
-      \if@twocolumn\hbox{}\thispagestyle{empty}\newpage\fi
-    \fi
-  \fi}
+\renewcommand\mainmatter{%
+  \cleardoublepage
+  \@frontmatterfalse
+  \@mainmattertrue}
 
+\renewcommand\backmatter{%
+  \cleardoublepage
+  \@mainmatterfalse
+  \@frontmatterfalse}
+
+%    \end{macrocode}
+% hard requirements for all transpect derivates:
+%    \begin{macrocode}
 \usepackage{color}
 \usepackage{graphicx}
 \usepackage{soul}
-\def\afterfi#1\fi{\fi#1}
-
-\def\@afterbox{%
-  \everypar{%
-    \if@nobreak
-      \@nobreakfalse
-      \clubpenalty \@M
-      \if@afterindent \else
-        {\setbox\z@\lastbox}%
-        \everypar{}%2015-04-09
-      \fi
-    \else
-      \clubpenalty \@clubpenalty
-      {\setbox\z@\lastbox}%
-      \everypar{}%
-    \fi}}
-%    \end{macrocode}

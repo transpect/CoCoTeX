@@ -1,0 +1,54 @@
+%    \end{macrocode}
+% \chapter{transpect-helpers.dtx}
+% This file provides some basic macros and facilities like macro
+% hooks.
+%
+%    \begin{macrocode}
+%%
+%% module for le-tex transpect.cls that provides some commonly used base macros.
+%%
+%% Maintainer: p.schulz@le-tex.de
+%%
+%% lualatex  -  texlive > 2019
+%%
+\NeedsTeXFormat{LaTeX2e}[2019/01/01]
+\ProvidesPackage{transpect-helpers}
+    [2020/22/04 0.90 le-tex transpect helpers module]
+%    \end{macrocode}
+% prefix macro used to execute code after the next \lstinline{\fi}:
+%    \begin{macrocode}
+\def\afterfi#1\fi{\fi#1}
+%    \end{macrocode}
+% \lstinline{\afterbox} prevents indentation and additional spacing after
+% environments. Intended to be used in combination with
+% \lstinline{\aftergroup}.
+%    \begin{macrocode}
+\def\@afterbox{%
+  \everypar{%
+    \if@nobreak
+      \@nobreakfalse
+      \clubpenalty \@M
+      \if@afterindent \else
+        {\setbox\z@\lastbox}%
+        \everypar{}%
+      \fi
+    \else
+      \clubpenalty \@clubpenalty
+      {\setbox\z@\lastbox}%
+      \everypar{}%
+    \fi}}
+%    \end{macrocode}
+% This macro is used to calculate the ratio between two integers.
+%    \begin{macrocode}
+\def\CalcRatio#1#2{\strip@pt\dimexpr\number\numexpr\number\dimexpr#1\relax*65536/\number\dimexpr#2\relax\relax sp}
+%    \end{macrocode}
+%% traverse step-wise through counter \#1, start at number \#2 until and including number \#3 and do at every loop \#4 (from \lstinline{forloop.sty}):
+%    \begin{macrocode}
+\long\def\sh@iterate#1#2#3#4{%
+  \advance#1\@ne\relax
+  #1=#2\relax%
+  \expandafter\ifnum#1>#3\relax%
+  \else
+    #4%
+    \sh@iterate{#1}{\the#1}{#3}{#4}%
+  \fi}%

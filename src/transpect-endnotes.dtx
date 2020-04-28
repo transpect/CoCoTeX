@@ -1,3 +1,10 @@
+%    \end{macrocode}
+% \chapter{transpect-endnotes.dtx}
+% This file contains the code for footnote handling. It provides a
+% switch between endnotes and footnotes as well as options to handle
+% the resetting of footnote/endnote counters.
+%
+%    \begin{macrocode}
 %%
 %% module for le-tex transpect.cls that handles footnote/endnote switching.
 %%
@@ -8,9 +15,66 @@
 \NeedsTeXFormat{LaTeX2e}[2019/01/01]
 \ProvidesPackage{transpect-endnotes}
     [2020/22/04 0.90 le-tex transpect endnotes module]
+%    \end{macrocode}
+% internal switch for endnotes (\lstinline{\endnotestrue}) or footnotes (\lstinline{\endnotesfalse}, default).
+%    \begin{macrocode}
 \newif\ifendnotes \endnotesfalse
+%    \end{macrocode}
+% package options:
+% \begin{itemize}
+% \item \lstinline{endnotes} activates endnotes.
+% \item \lstinline{resetperchapter} resets notes per chapter. if omitted (default) foot- or endnotes are numbered throughout the whole document
+% \end{itemize}
+%    \begin{macrocode}
 \DeclareOptionX{endnotes}{\global\endnotestrue}
-\DeclareOptionX{endnotesperchapter}{\global\endnotestrue\global\let\endnotes@per@chapter\relax}
+\DeclareOptionX{resetperchapter}{\global\endnotestrue\global\let\endnotes@per@chapter\relax}
+%    \end{macrocode}
+% legacy option (deprecated; DO NOT USE!):
+%    \begin{macrocode}
+\DeclareOptionX{footnotesperchapter}{\global\endnotestrue\global\let\endnotes@per@chapter\relax}
 \ProcessOptionsX
-
+%    \end{macrocode}
+% footnote package is mandatory since it provides the \lstinline{\savenotes} and \lstinline{\spewnotes} macros:
+%    \begin{macrocode}
 \usepackage{footnote}
+%    \end{macrocode}
+% Handling of endnotes:
+%    \begin{macrocode}
+\newif\if@enotesopen
+\ifendnotes
+  \RequirePackage{endnotes}
+  \let\footnote=\endnote
+  \def\enotesize{\normalsize}%
+  \def\enoteformat{\leavevmode\hskip-2em\hb@xt@2em{\@theenmark\hss}}%
+  \def\enoteheading{%
+    \ifcollection
+      \ifx\endnotes@per@chapter\relax
+        \chapter*{\notesname}%
+        \addcontentsline{toc}{chapter}{\notesname}%
+      \else
+        \section*{\notesname}%
+        \addcontentsline{toc}{chapter}{\notesname}%
+      \fi
+    \else
+      \chapter*{\notesname}%
+      \addcontentsline{toc}{chapter}{\notesname}%
+    \fi
+    \leftskip2em
+  }%
+  \def\printnotes{%
+    \ifx\endnotes@per@chapter\relax
+      \ifnum\c@endnote>\z@
+        \expandafter\global\expandafter\let\csname enotes@in@\the\realchap\endcsname\@empty
+      \fi
+    \fi
+    \if@enotesopen
+      \global\c@endnote\z@%
+      \bgroup
+      \parindent\z@
+      \parskip\z@
+      \theendnotes
+      \egroup
+    \fi}
+\else
+  \let\printnotes\relax
+\fi

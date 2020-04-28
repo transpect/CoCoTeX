@@ -8,6 +8,9 @@
     [\filedate\space\fileversion\space transpect]
 %</package>
 %<*driver>
+\RequirePackage{scrlfile}
+\ReplaceClass{article}{book}
+\BeforePackage{doc}{\let\oldmaketitle\maketitle}
 \documentclass[a4paper]{ltxdoc}
   \frenchspacing
   \parindent0pt
@@ -109,9 +112,14 @@
 % \fileversion.}}%
 % \author{Lupino}%
 % \date{\filedate}%
-%
+% \let\maketitle\oldmaketitle
 % \maketitle
 % \tableofcontents
 %
 % \clearpage
+%
+% \part{Documentation}
+%
+%
+% \part{Implementation}
 %

@@ -1,4 +1,9 @@
-%%
+%    \end{macrocode}
+% \chapter{transpect-script.dtx}
+% This package is used to handle non-latin based script systems like
+% Japanese, Chinese, Armenian and the like.
+%
+%    \begin{macrocode}
 %% module for le-tex transpect.cls that handles script switching.
 %%
 %% Maintainer: p.schulz@le-tex.de
@@ -9,6 +14,12 @@
 \ProvidesPackage{transpect-script}
     [2020/22/04 0.90 le-tex transpect script module]
 
+\RequirePackage{babel}
+%    \end{macrocode}
+% The argument of the \lstinline{usescript} option is a list of script
+% systems that are used in the document. It is used to determine the
+% additional fonts that are to be loaded via the babel package.
+%    \begin{macrocode}
 \let\usescript\relax
 \define@key{transcript-script.cls}{usescript}[none]{\def\usescript{#1}}
 \ProcessOptionsX
@@ -23,4 +34,29 @@
 
 \ifx\usescript\relax\else
   \expandafter\parse@script\usescript,,\relax
+\fi
+%    \end{macrocode}
+% \section{Predefined script systems}
+% \subsection{Support for Armenian script}
+%    \begin{macrocode}
+\ifx\use@script@armenian\relax
+  \message{^^JLoaded Script: Armenian^^J}
+  \def\NotoSansArmenianPath{fonts/NotoSans/Armenian/}
+  \newfontfamily\fallbackfont@armenian{NotoSansArmenian-Regular.ttf}%
+    [BoldFont = NotoSansArmenian-Bold.ttf,%
+    Path = \NotoSansArmenianPath,%
+    WordSpace = 1.25]
+  \DeclareTextFontCommand\armenian{\fallbackfont@armenian}
+\fi
+%    \end{macrocode}
+% \subsection{Support for Chinese script}
+%    \begin{macrocode}
+\ifx\use@script@chinese\relax
+  \def\NotoSansCJKPath{fonts/NotoSans/Chinese/}
+  \message{^^JLoaded Script: Chinese^^J}
+  \newfontfamily\fallbackfont@chinese{NotoSansCJKsc-Regular.otf}%
+    [BoldFont = NotoSansCJKsc-Bold.otf,%
+    Path = \NotoSansCJKPath,%
+    WordSpace = 1.25]
+  \DeclareTextFontCommand\chin{\fallbackfont@chinese}
 \fi
