@@ -1,7 +1,9 @@
 %    \end{macrocode}
 % \chapter{transpect-script.dtx}
 % This package is used to handle non-latin based script systems like
-% Japanese, Chinese, Armenian and the like.
+% Japanese, Chinese, Armenian and the like. Since it requires babel to
+% be loaded first, it is not loaded automaticly with transpect.cls but
+% has to be incorporated via the publisher's specific styles.
 %
 %    \begin{macrocode}
 %% module for le-tex transpect.cls that handles script switching.
@@ -14,14 +16,14 @@
 \ProvidesPackage{transpect-script}
     [2020/22/04 0.90 le-tex transpect script module]
 
-\RequirePackage{babel}
+ %\RequirePackage{babel}
 %    \end{macrocode}
 % The argument of the \lstinline{usescript} option is a list of script
 % systems that are used in the document. It is used to determine the
 % additional fonts that are to be loaded via the babel package.
 %    \begin{macrocode}
 \let\usescript\relax
-\define@key{transcript-script.cls}{usescript}[none]{\def\usescript{#1}}
+\define@key{transpect-script.sty}{usescript}[none]{\def\usescript{#1}}
 \ProcessOptionsX
 
 \def\parse@script#1,#2,\relax{%

@@ -18,9 +18,8 @@
 \RequirePackage{xkeyval}
 \RequirePackage{transpect-helpers}
 \PassOptionsToPackage{cmyk}{xcolor}
-\PassOptionsToPackage{}{transpect-endnotes}
-\PassOptionsToPackage{}{babel}
-\RequirePackage{transpect-endnotes}
+\PassOptionsToPackage{endnotes,resetperchapter,footnotesperchapter}{transpect-endnotes}
+ %\PassOptionsToPackage{}{transpect-script}
 %    \end{macrocode}
 % The options \lstinline{book} (default, included only for legacy
 % reasons) and \lstinline{collection} are used to switch between
@@ -30,21 +29,26 @@
 % proceedings. \lstinline{book} is used where the whole document has
 % the same author(s).
 %    \begin{macrocode}
+\newif\ifcollection \collectionfalse
+\newif\ifhasparts \haspartsfalse
 \DeclareOptionX{book}{\global\collectionfalse}
 \DeclareOptionX{collection}{\global\collectiontrue}
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{book}}
-\DeclareOption*{\PassOptionsToClass{\CurrentOption}{transpect-script}}
 
 \ProcessOptionsX
+%    \end{macrocode}
+% All transpect derived classes base on \LaTeX's default class \lstinline{book}:
+%    \begin{macrocode}
+\LoadClass[10pt,a4paper]{book}
 %    \end{macrocode}
 % Offsets are the removed to make all values relative to the upper left corner of the page to ease maintainance.
 %    \begin{macrocode}
 \voffset-1in\relax
 \hoffset-1in\relax
 %    \end{macrocode}
-% All transpect derived classes base on \LaTeX's default class \lstinline{book}:
+% Inclusion of transpect-endnotes
 %    \begin{macrocode}
-\LoadClass[10pt,a4paper]{book}
+\RequirePackage{transpect-endnotes}
 %    \end{macrocode}
 % typesetting automata need some room to play:
 %    \begin{macrocode}
@@ -95,3 +99,6 @@
 \usepackage{color}
 \usepackage{graphicx}
 \usepackage{soul}
+
+
+\usepackage{transpect-floats}
