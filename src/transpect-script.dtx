@@ -16,49 +16,88 @@
 \ProvidesPackage{transpect-script}
     [2020/22/04 0.90 le-tex transpect script module]
 
- %\RequirePackage{babel}
 %    \end{macrocode}
 % The argument of the \lstinline{usescript} option is a list of script
 % systems that are used in the document. It is used to determine the
 % additional fonts that are to be loaded via the babel package.
 %    \begin{macrocode}
 \let\usescript\relax
-\define@key{transpect-script.sty}{usescript}[none]{\def\usescript{#1}}
+\define@key{transpect-script.sty}{usescript}{\def\usescript{#1}}
 \ProcessOptionsX
 
+\RequirePackage{babel}
 \def\parse@script#1,#2,\relax{%
   \expandafter\let\csname use@script@#1\endcsname\relax%
-  \def\@argii{#2}%
+  \edef\@argii{#2}%
   \let\next\relax
   \ifx\@argii\@empty\else
-    \def\next{\parse@script#2,,\relax}%
+    \def\next{\parse@script#2,\relax}%
   \fi\next}
 
 \ifx\usescript\relax\else
   \expandafter\parse@script\usescript,,\relax
 \fi
+
+\message{^^J  [transpect-script Fonts loaded: \meaning\usescript]^^J}
+
+%    \end{macrocode}
+% \section{Default fallback font}
+% The default fall backfont is the NotoSans Font Family
+%
+%    \begin{macrocode}
+
+\newfontfamily\fallbackfont{NotoSans-Regular.ttf}%
+[BoldFont = NotoSans-Bold.ttf,%
+ ItalicFont = NotoSans-Italic.ttf,%
+ BoldItalicFont = NotoSans-BoldItalic.ttf,%
+ Path = fonts/Noto/,%
+ WordSpace = 1.25]
+\DeclareTextFontCommand\textfallback{\fallbackfont}
+
 %    \end{macrocode}
 % \section{Predefined script systems}
 % \subsection{Support for Armenian script}
 %    \begin{macrocode}
 \ifx\use@script@armenian\relax
-  \message{^^JLoaded Script: Armenian^^J}
-  \def\NotoSansArmenianPath{fonts/NotoSans/Armenian/}
-  \newfontfamily\fallbackfont@armenian{NotoSansArmenian-Regular.ttf}%
+  \message{^^J  [transpect-script Loaded Script: Armenian]^^J}
+  \def\NotoArmenianPath{fonts/Noto/Armenian/}
+  \babelfont{armenian}%
     [BoldFont = NotoSansArmenian-Bold.ttf,%
-    Path = \NotoSansArmenianPath,%
-    WordSpace = 1.25]
+     Path = \NotoArmenianPath,%
+     WordSpace = 1.25]{NotoSansArmenian-Regular.ttf}
   \DeclareTextFontCommand\armenian{\fallbackfont@armenian}
 \fi
 %    \end{macrocode}
 % \subsection{Support for Chinese script}
 %    \begin{macrocode}
 \ifx\use@script@chinese\relax
-  \def\NotoSansCJKPath{fonts/NotoSans/Chinese/}
-  \message{^^JLoaded Script: Chinese^^J}
-  \newfontfamily\fallbackfont@chinese{NotoSansCJKsc-Regular.otf}%
-    [BoldFont = NotoSansCJKsc-Bold.otf,%
-    Path = \NotoSansCJKPath,%
-    WordSpace = 1.25]
-  \DeclareTextFontCommand\chin{\fallbackfont@chinese}
+  \def\NotoCJKPath{fonts/Noto/Chinese/}
+  \message{^^J  [transpect-script Loaded Script: Chinese]^^J}
+  \babelprovide{chinese}
+  \babelfont[chinese]{rm}[%
+    Path=\NotoCJKPath,%
+    BoldFont = NotoSansCJKsc-Bold.otf,%
+    WordSpace = 1.25]{NotoSansMonoCJKsc-Regular.otf}
+  \DeclareTextFontCommand\chin{\selectlanguage{chinese}}
+\fi
+%    \end{macrocode}
+% \subsection{Support for Hebrew script}
+%    \begin{macrocode}
+\ifx\use@script@hebrew\relax
+  \message{^^J  [transpect-script Loaded Script: Hebrew]^^J}
+  \def\NotoHebrewPath{fonts/Noto/Hebrew/}
+  \babelfont[hebrew]{rm}[%
+    Scale=MatchUppercase,%
+    Ligatures=TeX,%
+    BoldFont = NotoSerifHebrew-Bold.ttf,%
+    Path=\NotoHebrewPath Serif/,%
+    Contextuals=Alternate]{NotoSerifHebrew-Regular.ttf}
+  \babelfont[hebrew]{sf}[%
+    Scale=MatchUppercase,
+    Ligatures=TeX,
+    Path=\NotoHebrewPath Sans/,%
+    BoldFont = NotoSansHebrew-Bold.ttf,%
+    Contextuals=Alternate%
+    ]{NotoSansHebrew-Regular.ttf}
+  \DeclareTextFontCommand\hebrew{\selectlanguage{hebrew}}
 \fi

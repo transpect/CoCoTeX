@@ -26,13 +26,13 @@
 % \item \lstinline{resetperchapter} resets notes per chapter. if omitted (default) foot- or endnotes are numbered throughout the whole document
 % \end{itemize}
 %    \begin{macrocode}
-\DeclareOptionX{endnotes}{\global\endnotestrue}
-\DeclareOptionX{resetperchapter}{\global\endnotestrue\global\let\endnotes@per@chapter\relax}
+\DeclareOption{endnotes}{\global\endnotestrue}
+\DeclareOption{resetperchapter}{\global\endnotestrue\global\let\endnotes@per@chapter\relax}
 %    \end{macrocode}
 % legacy option (deprecated; DO NOT USE!):
 %    \begin{macrocode}
-\DeclareOptionX{footnotesperchapter}{\global\endnotestrue\global\let\endnotes@per@chapter\relax}
-\ProcessOptionsX
+\DeclareOption{footnotesperchapter}{\global\endnotestrue\global\let\endnotes@per@chapter\relax}
+\ProcessOptions
 %    \end{macrocode}
 % footnote package is mandatory since it provides the \lstinline{\savenotes} and \lstinline{\spewnotes} macros:
 %    \begin{macrocode}
