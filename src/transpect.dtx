@@ -18,7 +18,7 @@
 \RequirePackage{xkeyval}
 \RequirePackage{transpect-helpers}
 \PassOptionsToPackage{cmyk}{xcolor}
-\PassOptionsToPackage{endnotes,resetperchapter,footnotesperchapter}{transpect-endnotes}
+\PassOptionsToPackage{endnotes,resetnotesperchapter,endnotesperchapter}{transpect-endnotes}
  %\PassOptionsToPackage{}{transpect-script}
 %    \end{macrocode}
 % The options \lstinline{book} (default, included only for legacy
@@ -46,10 +46,6 @@
 \voffset-1in\relax
 \hoffset-1in\relax
 %    \end{macrocode}
-% Inclusion of transpect-endnotes
-%    \begin{macrocode}
-\RequirePackage{transpect-endnotes}
-%    \end{macrocode}
 % typesetting automata need some room to play:
 %    \begin{macrocode}
 \emergencystretch=2em
@@ -64,8 +60,8 @@
 %    \begin{macrocode}
 \def\ps@empty{%
   \let\@oddhead\@empty
-  \let\@oddfoot\@empty
   \let\@evenhead\@empty
+  \let\@oddfoot\@empty
   \let\@evenfoot\@empty
 }
 %    \end{macrocode}
@@ -100,5 +96,213 @@
 \usepackage{graphicx}
 \usepackage{soul}
 
+%    \end{macrocode}
+% \section{Headings}
+% \subsection{Parts}
+%    \begin{macrocode}
+
+\renewcommand\part{%
+  \cleardoublepage
+  \pagestyle{empty}%
+  \@tempswafalse
+  \secdef\@part\@spart}
+
+\def\partmark{}%
+\let\oldaddcontentsline\addcontentsline
+
+%    \end{macrocode}
+% The macro \lstinline{\tpPartFont} is a Hook for the font parameters of part headings.
+%    \begin{macrocode}
+\def\tpPartFont{\sffamily\sbseries\HUGE}%
+%    \end{macrocode}
+% \lstinline{\tpBeforePartSkip} is the vertical space before part headings. It is defines as a macro and fed through \lstinline{\dimexpr}.
+%    \begin{macrocode}
+\def\tpBeforePartSkip{5\baselineskip}%
+
+\def\@part[#1]#2{%
+    \ifnum \c@secnumdepth >-2\relax
+      \refstepcounter{part}%
+    \fi
+    \addcontentsline{toc}{part}{{#1}}%
+    \def\partmark{#2}%
+    \global\let\partmarkoverride\@undefined
+    \markboth{}{}%
+    {\interlinepenalty \@M
+     \parindent\z@
+     \null\vskip\dimexpr\tpBeforePartSkip\relax%
+     \tpPartFont #2\par}%
+    \global\c@footnote0\relax
+    \@endpart}
+
+\def\@spart#1{%
+    {\interlinepenalty \@M
+     \parindent\z@
+     \null\vskip\dimexpr\tpBeforePartSkip\relax%
+     \tpPartFont #1\par}%
+    \@endpart}
+
+%    \end{macrocode}
+% \subsection{Chapter and contribution headings}
+% First we define a counter for all headings on chapter level,
+% independent from \LaTeX's displayed chapter counter:
+%    \begin{macrocode}
+\newcount\real@chap \real@chap\z@
+%    \end{macrocode}
+% \lstinline{\tpBeforeChapterSkip} is the vertical offset of a chapter heading:
+%    \begin{macrocode}
+\def\tpBeforeChapterSkip{12mm}%
+\def\tpAfterChapterSkip{8mm}%
+%    \end{macrocode}
+% \lstinline{\tpChapterFont} is the font setup for the chapter heading:
+%    \begin{macrocode}
+\def\tpChapterFont{\bfseries\Huge}%
+%    \end{macrocode}
+% The \lstinline{BeforeChapterHook} is used to execute collected code
+% at the very beginning of a new chapter:
+%    \begin{macrocode}
+\tpDeclareHook{BeforeChapterHook}
+%    \end{macrocode}
+% The \lstinline{Before@ChapterHook} is used to execute collected code
+% at the beginning of unstarred chapters:
+%    \begin{macrocode}
+\tpDeclareHook{Before@ChapterHook}
+%    \end{macrocode}
+% Then we redefine the chapter macro and enrich it with hooks for customization:
+%    \begin{macrocode}
+\renewcommand\chapter{\cleardoublepage
+                    \pagestyle{headings}%
+                    \thispagestyle{empty}%
+                    \global\@topnum\z@
+                    \@afterindentfalse
+                    \tpUseHook{BeforeChapterHook}%
+                    \secdef\@chapter\@schapter}
+
+\ifcollection\c@tocdepth=0\relax\else\c@tocdepth=3\relax\fi
+
+\let\old@thechapter\thechapter
+\newcount\realchap\realchap\z@
+
+\def\@chapter[#1]#2{%
+  \tpUseHook{Before@ChapterHook}%
+  \hypersetup{bookmarksdepth=-1}%
+  % \ifx\@subtitle\@empty\else
+  %   \addcontentsline{toc}{chapsub}{\@subtitle}%
+  % \fi
+  % \ifx\@author\@empty\else
+  %   \addcontentsline{toc}{chapauthor}{\@author}%
+  % \fi
+  \hypersetup{bookmarksdepth}%
+  \ifnum \c@secnumdepth >\m@ne
+    \if@mainmatter
+      \refstepcounter{chapter}%
+      \typeout{\@chapapp\space\thechapter.}%
+      \ifcollection
+        \addcontentsline{toc}{chapter}{#1}%
+      \else
+        \addtocontents{toc}{\protect\let\string\usenumberline\protect\relax}%
+        \addcontentsline{toc}{chapter}{\numberline{\thechapter}#1}%
+      \fi
+    \else
+      \addcontentsline{toc}{chapter}{#1}%
+    \fi
+  \else
+    \addcontentsline{toc}{chapter}{#1}%
+  \fi
+  \chaptermark{#1}%
+  \addtocontents{lof}{\protect\addvspace{10\p@}}%
+  \addtocontents{lot}{\protect\addvspace{10\p@}}%
+  \if@twocolumn
+    \@topnewpage[\@makechapterhead{#2}]%
+  \else
+    \@makechapterhead{#2}%
+    \@afterheading
+  \fi
+  \let\thechapter\old@thechapter
+}
+
+\long\def\chapterquote#1{\long\gdef\@chapterquote{#1}}
+
+\def\@makechapterhead#1{{%
+    \parindent\z@
+    \null\vskip\dimexpr\tpBeforeChapterSkip\relax%
+    {\parindent \z@
+      \raggedright \normalfont
+      \tpChapterFont
+      \interlinepenalty\@M
+      \if@mainmatter
+        \bgroup
+        % \ifnum \c@secnumdepth >\m@ne
+        %   \leftskip7mm
+        %   {\sfchap
+        %   \hskip-7mm\hb@xt@7mm{\thechapter\hfill}#1}\par%
+        %   \ifx\@subtitle\@empty\else
+        %   %     \vskip.25\baselineskip
+        %     {\normalfont\fontsize{14.7bp}{17.2bp}\selectfont\sffamily\@subtitle}\par
+        %   \fi
+        %   \global\let\partmarkoverride\@undefined
+        % \else
+        {\tpChapterFont #1}\par%
+        % \ifx\@subtitle\@empty\else
+        %   {\normalfont\fontsize{14.7bp}{17.2bp}\selectfont\sffamily\@subtitle}\par%\vskip2mm
+        % \fi
+        % \fi
+        \egroup
+      \else
+        {\tpChapterFont #1}\par\nobreak
+      \fi
+    }%
+    \tpUseHook{AfterChapterHook}% transkript: \vskip\dimexpr-1\baselineskip\relax\smash{\rlap{\lower3.5mm\vbox{\rule{\textwidth}{.4\p@}}}}\par%
+    % \global\let\authormark\@empty
+    % \ifx\@author\@empty\else
+    %   \bgroup\large
+    %   \vskip\baselineskip
+    %   \sfwide\itshape\@author%
+    %   \xdef\authormark{\@author}%
+    %   \egroup
+    % \fi
+    \par%
+    % \ifx\@chapterquote\@undefined\else
+    %   \ifx\@author\@empty\vskip\baselineskip\par\fi
+    %   \savenotes
+    %   \hfill\vbox{\hsize.5\textwidth%
+    %   \vskip\baselineskip
+    %   \normalsize\nsfwider
+    %   \@chapterquote
+    % }%
+    %   \spewnotes
+    % \fi
+    \vskip\dimexpr\tpAfterChapterSkip\relax
+    % \ifx\@author\@empty\ifx\@chapterquote\@undefined\vskip2\baselineskip\fi\fi
+    % \global\let\@subtitle\@empty
+    % \global\let\@author\@empty
+    % \global\let\@chapterquote\@undefined
+  }}
+
+ % \def\@schapter[#1]#2{\if@twocolumn
+ % \@topnewpage[\@makeschapterhead{#1}]%
+ % \else
+ %   \@makeschapterhead{#1}%
+ %   \@afterheading
+ % \fi}
+
+\def\@makeschapterhead#1{%
+  % \@makechapterhead{#1}%
+  \null\vskip\dimexpr\tpBeforeChapterSkip\relax%
+  {\parindent \z@
+    \interlinepenalty\@M
+    {\tpChapterFont #1}\par\nobreak
+    \vskip\dimexpr\tpAfterChapterSkip\relax
+  }%
+}
+
 
 \usepackage{transpect-floats}
+%    \end{macrocode}
+% Inclusion of transpect-endnotes
+%    \begin{macrocode}
+\RequirePackage{transpect-endnotes}
+
+
+
+
+\usepackage[breaklinks,linktocpage,pdfborder={0 0 0},pdfencoding=auto,bookmarksnumbered=true]{hyperref}

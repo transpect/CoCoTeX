@@ -23,15 +23,18 @@
 % package options:
 % \begin{itemize}
 % \item \lstinline{endnotes} activates endnotes.
-% \item \lstinline{resetperchapter} resets notes per chapter. if omitted (default) foot- or endnotes are numbered throughout the whole document
+% \item \lstinline{resetnotesperchapter} resets foot- and endnotes at
+%   the start of each chapter level heading. If omitted (default)
+%   foot- or endnotes are numbered throughout the whole document
+% \item \lstinline{endnotesperchapter} implies \lstinline{endnotes}
+%   and allows the output of all collected endnotes at the end of each
+%   chapter. It also sets the note's heading to section level
+%   (otherwise it is chapter level).
 % \end{itemize}
 %    \begin{macrocode}
 \DeclareOption{endnotes}{\global\endnotestrue}
-\DeclareOption{resetperchapter}{\global\endnotestrue\global\let\endnotes@per@chapter\relax}
-%    \end{macrocode}
-% legacy option (deprecated; DO NOT USE!):
-%    \begin{macrocode}
-\DeclareOption{footnotesperchapter}{\global\endnotestrue\global\let\endnotes@per@chapter\relax}
+\DeclareOption{resetnotesperchapter}{\global\let\reset@notes@per@chapter\relax}
+\DeclareOption{endnotesperchapter}{\global\endnotestrue\global\let\endnotes@per@chapter\relax}
 \ProcessOptions
 %    \end{macrocode}
 % footnote package is mandatory since it provides the \lstinline{\savenotes} and \lstinline{\spewnotes} macros:
@@ -77,4 +80,19 @@
     \fi}
 \else
   \let\printnotes\relax
+\fi
+
+\ifx\reset@notes@per@chapter\relax
+  \tpAddToHook{BeforeChapterHook}{\global\c@footnote\z@}
+\fi
+
+\ifx\endnotes@per@chapter\relax
+  \tpAddToHook{Before@ChapterHook}{%
+    \ifnum\c@endnote>\z@\relax
+      \expandafter\global\expandafter\let\csname enotes@in@\the\realchap\endcsname\@empty
+    \fi
+    \advance\realchap\@ne
+    \global\c@endnote\z@
+    \addtoendnotes{\noexpand\expandafter\noexpand\ifx\noexpand\csname enotes@in@\the\realchap\noexpand\endcsname\noexpand\@empty\bgroup\leftskip\z@\protect\section*{#1}\egroup\noexpand\fi}%
+  }
 \fi
