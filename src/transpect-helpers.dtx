@@ -57,6 +57,6 @@
 %% In this part we provide the facility to utilize Hooks to patch code into different parts of the package depending on options and loaded packages.
 %    \begin{macrocode}
 \RequirePackage{etoolbox}
-\def\tpDeclareHook#1{\expandafter\let\csname tp@hook@#1\endcsname\@empty}
+\def\tpDeclareHook#1{\expandafter\global\expandafter\let\csname tp@hook@#1\endcsname\@empty}
 \def\tpAddToHook#1#2{\expandafter\ifx\csname tp@hook@#1\endcsname\relax\else\csgappto{tp@hook@#1}{#2}\fi}
 \def\tpUseHook#1{\expandafter\ifx\csname tp@hook@#1\endcsname\relax\else\csname tp@hook@#1\endcsname\fi}
