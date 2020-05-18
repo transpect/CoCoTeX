@@ -1,0 +1,363 @@
+%    \end{macrocode}
+% \chapter{transpect-headings.dtx}
+% This module provides handlers for headings like parts, chapters,
+% sections, or inline headings common to all Transpect projects
+%
+%    \begin{macrocode}
+%%
+%% module for le-tex transpect.cls that extends heading objects.
+%%
+%% Maintainer: p.schulz@le-tex.de
+%%
+%% lualatex  -  texlive >= 2019
+%%
+\NeedsTeXFormat{LaTeX2e}[2019/01/01]
+\ProvidesPackage{transpect-headings}
+    [2020/18/05 0.90 le-tex transpect headings module]
+%    \end{macrocode}
+%
+% Headings are handled differently with \lstinline{transpect.cls}
+% compared to standard \LaTeX, since transpect manuscripts tend to
+% have a whole collection of additional information that are pressed
+% into the headings, like subtitles or section authors down to
+% subsection level, etc. Therefore, the \lstinline{\@startsection} and
+% \lstinline{\@make[s]chapterhead} facilities from {\LaTeX} are no longer
+% sufficient. At the same time, the package does not redefine those
+% macros and keeps them available for backwards compatibility.
+%
+% \section{Blocks}
+% Blocks are bundled units of heading elements. They provide three
+% hooks: \lstinline{Before<Name><Level>},
+% \lstinline{After<Name><Level>}, and
+% \lstinline{<Name>Format<Level>}. The arguments are \#1:
+% \lstinline{<Name>}, \#2 \lstinline{<Level>}.
+%    \begin{macrocode}
+\def\tpDeclareBlock#1#2{%
+  \tpDeclareHook{Before#1#2}%
+  \tpDeclareHook{#1Format#2}%
+  \tpDeclareHook{After#1#2}%
+}
+%    \end{macrocode}
+% The use-call function for Blocks
+%    \begin{macrocode}
+\def\tpUseHeadingBlock#1#2{%
+  \expandafter\ifx\csname heading@#1\endcsname\relax\else
+    \tpUseHook{Before#1#2}%
+    {\tpUseHook{#1Format#2}\csname heading@#1\endcsname}%
+    \tpUseHook{After#1#2}%
+  \fi}
+%    \end{macrocode}
+%
+% \section{Facility for declaring heading levels and their layouts}%
+% \begin{description}
+% \item[1] level: used for toc entries. -1 for part, 0 for chapter, 1 for section, etc.
+% \item[2] name: part, chapter, section, etc, to be used in toc, head lines, bookmarks, etc.
+% \item[3] Property definitions and switches
+% \end{description}
+%    \begin{macrocode}
+\def\tpDeclareHeading#1#2#3{%
+  \expandafter\def\csname heading@#2@name\endcsname{#2}%
+  \def\tpHeadingProperty##1##2{\tpAddToHook{##1#2}{##2}}%
+%    \end{macrocode}
+% \subsection{Block hooks}
+% Formatting and upper/lower boundaries of the author's names
+%    \begin{macrocode}
+  \tpDeclareBlock{Author}{#2}%
+%    \end{macrocode}
+% Formatting and upper/lower boundaries of the subtitle
+%    \begin{macrocode}
+  \tpDeclareBlock{Subtitle}{#2}%
+%    \end{macrocode}
+% Formatting and upper/lower boundaries of mottos/quotes/quotations
+%    \begin{macrocode}
+  \tpDeclareBlock{Quote}{#2}%
+%    \end{macrocode}
+% Formatting and upper/lower boundaries of heading counters. Thise are formatted as the actual title, bzt can be overridden with \lstinline{\NumberFormat}.
+%    \begin{macrocode}
+  \tpDeclareBlock{Number}{#2}%
+%    \end{macrocode}
+%
+% \subsection{Heading-wide hooks}
+% Block format for the whole title, used for properties that afffect the whole heading, like horizontal alignment
+%    \begin{macrocode}
+  \tpDeclareHook{BlockFormat#2}%
+%    \end{macrocode}
+% Code that is applied at the very beginning of the heading, usually contains a \lstinline{\clearpage} for the lower levels, but also preceeding skips
+%    \begin{macrocode}
+  \tpDeclareHook{BeforeHeading#2}%
+%    \end{macrocode}
+% Code that is applied at the end of the heading (but before \lstinline{\@afterheading}). This does NOT contain after-heading skips.
+%    \begin{macrocode}
+  \tpDeclareHook{AfterHeading#2}%
+%    \end{macrocode}
+% After heading skip. This is used to separate inline headings (value
+% < 0pt) from free-floating headings (else), compare
+% \lstinline{\@startsection}'s fifth argument.
+%    \begin{macrocode}
+  \tpDeclareHook{AfterSkip#2}%
+%    \end{macrocode}
+% format of the actual heading title
+%    \begin{macrocode}
+  \tpDeclareHook{TitleFormat#2}%
+%    \end{macrocode}
+% This switch provides a way to put the author's name(s) after the
+% heading. Default is that the author's are put on top of the heading.
+%    \begin{macrocode}
+  \def\tpAuthorAfter{\expandafter\global\expandafter\let\csname tp@author@fter@#2\endcsname\@empty}%
+%    \end{macrocode}
+% Evaluation of user's overrides
+%    \begin{macrocode}
+  #3
+%    \end{macrocode}
+% Once a heading level is declared, we can now provide the facilities
+% to output the headings. This code largely resembles \LaTeX's
+% \lstinline{\@startsection} mechanism, albeit with some tweaks.
+% \subsection{Providing the actual heading macro}
+%    \begin{macrocode}
+  \expandafter\def\csname tpUseHeading#2\endcsname{%
+    \xdef\heading@level{#1}%
+    \if@noskipsec \leavevmode \fi
+    \par\tpUseHook{BeforeHeading#2}%
+    \@afterindenttrue
+    \everypar{}%
+    \def\@svsec{%
+      \bgroup
+        \parindent\z@ \parskip\z@
+        \tpUseHook{BlockFormat#2}%
+        \expandafter\ifx\csname tp@author@fter@#2\endcsname\relax
+          \tpUseHeadingBlock{Author}{#2}%
+        \fi
+        {\tpUseHook{TitleFormat#2}%
+         \tpUseHeadingBlock{Number}{#2}%
+         \heading@Title}%
+        \tpUseHeadingBlock{Subtitle}{#2}%
+        \expandafter\ifx\csname tp@author@fter@#2\endcsname\relax\else
+          \tpUseHeadingBlock{Author}{#2}%
+        \fi
+        \tpUseHeadingBlock{Quote}{#2}%
+%    \end{macrocode}
+% Since all counters are taken from Word input, we can safely override \lstinline{\the<name>}:
+%    \begin{macrocode}
+        \ifx\heading@Number\relax
+          \expandafter\global\expandafter\let\csname the#2\endcsname\@empty%
+        \else
+          \expandafter\xdef\csname the#2\endcsname{\heading@Number}%
+        \fi
+%    \end{macrocode}
+% Entry in table of contents
+%    \begin{macrocode}
+        \expandafter\ifnum\heading@level<\c@tocdepth\relax
+          \ifx\heading@Toctitle\relax
+            \ifx\heading@Number\relax
+              \addcontentsline{toc}{#2}{\heading@Title}%
+            \else
+              \addcontentsline{toc}{#2}{\protect\numberline{\heading@Number}\heading@Title}%
+            \fi
+          \else
+            \addcontentsline{toc}{#2}{\heading@Toctitle}%
+          \fi
+        \fi
+%    \end{macrocode}
+% Running headers
+%    \begin{macrocode}
+        \ifx\heading@Runtitle\relax
+          \ifx\heading@Number\relax
+            \csname #2mark\endcsname{\heading@Title}%
+          \else
+%    \end{macrocode}
+% note that \lstinline{\chaptermark} and \lstinline{\sectionmark} need
+% to be dealt with in your page style definitions or you might get
+% faulty \lstinline{\thechapter} and \lstinline{\thesection} readings!
+%    \begin{macrocode}
+            \csname #2mark\endcsname{\numberline{\heading@Number}\heading@Title}%
+          \fi
+        \else
+          \csname #2mark\endcsname{\heading@Runtitle}%
+        \fi
+      \egroup
+%    \end{macrocode}
+% catch \LaTeX's referencing facility with magick for \lstinline{hyperref}:
+%    \begin{macrocode}
+      \ifx\tp@label\relax\else
+        \ifx\heading@Number\relax
+        \else
+          \let\@currentlabel\heading@Number
+          \let\@currentlabelname\heading@Title
+          \expandafter\ltx@label\expandafter{\tp@label}%
+        \fi
+      \fi
+      \global\let\label\ltx@label
+      \tpUseHook{AfterHeading#2}%
+    }%
+%    \end{macrocode}
+% Skip after the heading, taken partially from the definition of
+% \LaTeX's \lstinline{\@xsect} macro:
+%    \begin{macrocode}
+    \expandafter\ifx\csname tp@hook@AfterSkip#2\endcsname\@empty
+      \global\@tempskipa=1sp\relax
+    \else
+      \expandafter\expandafter\expandafter\global\expandafter\expandafter\@tempskipa\expandafter=\csname tp@hook@AfterSkip#2\endcsname\relax%
+    \fi
+    \ifdim\@tempskipa <\z@\relax
+      \global\@afterindentfalse
+      \expandafter\gdef\expandafter\@svsechd\expandafter{\@svsec}%
+      \@nobreakfalse
+      \global\@noskipsectrue
+      \global\everypar{%
+        \if@noskipsec
+          \global\@noskipsecfalse
+          {\setbox\z@\lastbox}%
+          \clubpenalty\@M
+          \begingroup \@svsechd \endgroup
+          \unskip
+          \hskip -\@tempskipa
+        \else
+          \clubpenalty \@clubpenalty
+          \everypar{}%
+        \fi}%
+      \ignorespaces
+    \else
+      \@svsec
+      \par \nobreak
+      \vskip \@tempskipa
+      \global\@afterindentfalse
+      \aftergroup\@afterheading%
+    \fi}}
+
+%    \end{macrocode}
+%
+% \section{The headings environment}
+%
+%    \begin{macrocode}
+\def\heading{\@ifnextchar [{\@heading}{\@heading[]}}%]
+
+\def\@heading[#1]#2{%
+  \global\let\heading@Author\relax
+  \global\let\heading@Title\relax
+  \global\let\heading@Number\relax
+  \global\let\heading@Subtitle\relax
+  \global\let\heading@Toctitle\relax
+  \global\let\heading@Runtitle\relax
+  \global\let\heading@Quote\relax
+  \global\let\@optarg\relax
+  \global\let\ltx@label\label
+  \global\let\tp@label\relax
+  \bgroup
+%    \end{macrocode}
+% handling of the optional argument
+%    \begin{macrocode}
+    \xdef\@optarg{#1}%
+%    \end{macrocode}
+% The mandatory argument contains the section level, this corresponds
+% to \LaTeX's way of counting where part is -1, chapter is 0, section
+% is 1, etc.
+%    \begin{macrocode}
+    \xdef\heading@name{#2}%
+    \def\label##1{\gdef\tp@label{##1}}%
+    \def\author##1{\gdef\heading@Author{##1}}%
+    \def\title##1{\gdef\heading@Title{##1}}%
+    \def\subtitle##1{\gdef\heading@Subtitle{##1}}%
+    \def\toctitle##1{\gdef\heading@Toctitle{##1}}%
+    \def\runtitle##1{\gdef\heading@Runtitle{##1}}%
+    \def\number##1{\gdef\heading@Number{##1}}%
+    \long\def\quote##1{\long\gdef\heading@Quote{##1}}%
+}
+%    \end{macrocode}
+% The ending part of the heading environment.
+%    \begin{macrocode}
+\def\endheading{%
+  \egroup
+  \expandafter\ifx\csname tpUseHeading\heading@name\endcsname\relax
+    \PackageError{transpect.cls}{Heading level \heading@name\space unknown!}{A Heading with level \heading@name\space is unknown. Use the \string\tpDeclareHeading\space macro to declare heading levels.}%
+  \fi
+  \csname tpUseHeading\heading@name\endcsname}
+%    \end{macrocode}
+%
+% \section{Defaults}
+%    \begin{macrocode}
+
+\def\partmark#1{}%
+\tpDeclareHeading{-1}{part}{%
+  \tpHeadingProperty{BlockFormat}{\centering
+    \markboth{}{}%
+    \thispagestyle{empty}%
+  }%
+  \tpHeadingProperty{BeforeHeading}{\cleardoublepage\null\vskip10mm}%
+  \tpHeadingProperty{AfterHeading}{\vfill}%
+  \tpHeadingProperty{AuthorFormat}{\itshape}%
+  \tpHeadingProperty{AfterAuthor}{\@@par\vskip2\baselineskip}%
+  \tpHeadingProperty{TitleFormat}{\Huge}%
+  \tpHeadingProperty{BeforeSubtitle}{\@@par\vskip\baselineskip}%
+  \tpHeadingProperty{SubtitleFormat}{\leavevmode\vskip\baselineskip\large\bfseries}%
+  \tpHeadingProperty{AfterNumber}{:\@@par}%
+}
+
+\tpDeclareHeading{0}{chapter}{%
+  \tpHeadingProperty{BlockFormat}{\centering
+    \markboth{}{}%
+    \thispagestyle{empty}%
+  }%
+  \tpHeadingProperty{BeforeHeading}{\cleardoublepage\null\vskip10mm}%
+  \tpHeadingProperty{AfterSkip}{3\baselineskip}%
+  \tpHeadingProperty{AuthorFormat}{\itshape}%
+  \tpHeadingProperty{AfterAuthor}{\@@par\vskip\baselineskip}%
+  \tpHeadingProperty{TitleFormat}{\LARGE}%
+  \tpHeadingProperty{SubtitleFormat}{\leavevmode\vskip\baselineskip\Large\bfseries}%
+  \tpHeadingProperty{BeforeSubtitle}{\@@par\vskip.5\baselineskip}%
+  \tpHeadingProperty{BeforeQuote}{\strut\@@par\vskip\baselineskip\hfil\hbox\bgroup\centering\vbox\bgroup\hsize.5\textwidth\centering}%
+  \tpHeadingProperty{AfterQuote}{\egroup\egroup}%
+  \tpHeadingProperty{AfterNumber}{:\enskip}%
+}
+
+\tpDeclareHeading{1}{section}{%
+  \tpAuthorAfter
+  \tpHeadingProperty{BeforeHeading}{\vskip2\baselineskip}%
+  \tpHeadingProperty{AfterSkip}{1\baselineskip}%
+  \tpHeadingProperty{BeforeSubtitle}{ -- }%
+  \tpHeadingProperty{BeforeAuthor}{\@@par}%
+  \tpHeadingProperty{AuthorFormat}{\itshape}%
+  \tpHeadingProperty{AfterAuthor}{\@@par}%
+  \tpHeadingProperty{TitleFormat}{\Large}%
+  \tpHeadingProperty{SubtitleFormat}{\Large}%
+  \tpHeadingProperty{BeforeQuote}{\@@par\vskip.5\baselineskip}%
+  \tpHeadingProperty{AfterNumber}{:\enskip}%
+  % \tpHeadingProperty{AfterQuote}{\@@par\vskip.5\baselineskip}%
+}
+
+\tpDeclareHeading{2}{subsection}{%
+  \tpHeadingProperty{BeforeHeading}{\vskip1.5\baselineskip}%
+  \tpHeadingProperty{AfterSkip}{0.5\baselineskip}%
+  \tpHeadingProperty{BeforeSubtitle}{ -- }%
+  \tpHeadingProperty{AfterAuthor}{\@@par}%
+  \tpHeadingProperty{TitleFormat}{\large}%
+  \tpHeadingProperty{SubtitleFormat}{}%
+  \tpHeadingProperty{BeforeQuote}{\@@par\vskip.5\baselineskip}%
+  \tpHeadingProperty{AfterNumber}{:\enskip}%
+}
+
+
+\tpDeclareHeading{3}{subsubsection}{}
+
+\tpDeclareHeading{4}{paragraph}{%
+  \tpHeadingProperty{BeforeHeading}{\vskip1\baselineskip \@minus5bp}%
+  \tpHeadingProperty{AfterSkip}{-.5em}%
+  \tpHeadingProperty{BeforeSubtitle}{ -- }%
+  \tpHeadingProperty{AfterAuthor}{\@@par}%
+  \tpHeadingProperty{TitleFormat}{\normalsize\bfseries}%
+  \tpHeadingProperty{SubtitleFormat}{}%
+  \tpHeadingProperty{AfterNumber}{:\enskip}%
+}
+
+\let\ltx@ps@headings\ps@headings
+\def\ps@headings{%
+  \ltx@ps@headings
+  \def\chaptermark##1{%
+    \def\numberline####1{####1\enskip}%
+    \markboth{%
+      ##1
+    }{}}%
+  \def\sectionmark##1{%
+    \def\numberline####1{####1\enskip}%
+    \markright{##1}}%
+}
+
