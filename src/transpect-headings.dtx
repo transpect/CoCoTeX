@@ -113,7 +113,8 @@
   \def\tpHangNumber{\expandafter\global\expandafter\let\csname tp@hang@number@#2\endcsname\@empty}%
 %    \end{macrocode}
 % \lstinline{\tpHangNumber} can be used when the hanging indent should
-% always be of a fixed width.
+% always be of a fixed width. If ommitted, the hanging indent is
+% determined by the number's overall width for each heading separately.
 %    \begin{macrocode}
   \def\tpHangFixed##1{\expandafter\gdef\csname tp@hang@fixed@#2\endcsname{##1}}%
   \tpHangFixed{\z@}%
@@ -395,3 +396,66 @@
     \markright{##1}}%
 }
 
+%    \end{macrocode}
+%
+% \section{ToC entries}
+%    \begin{macrocode}
+\def\l@part#1#2{%
+  \ifnum \c@tocdepth >-2\relax
+    \addpenalty{-\@highpenalty}%
+    \addvspace{2.25em \@plus\p@}%
+    \setlength\@tempdima{3em}%
+    \begingroup
+      \parindent \z@ \rightskip \@pnumwidth
+      \parfillskip -\@pnumwidth
+      {\leavevmode
+       \large \bfseries #1\hfil
+       \hb@xt@\@pnumwidth{\hss #2%
+                          \kern-\p@\kern\p@}}\par
+       \nobreak
+         \global\@nobreaktrue
+         \everypar{\global\@nobreakfalse\everypar{}}%
+    \endgroup
+  \fi}
+
+
+\def\tp@toc@before@chaper{\vskip 1.0em \@plus\p@}%
+\let\tp@toc@hangnum@chapter\relax
+\def\tp@toc@numsep@chapter{\enskip}
+\let\tp@toc@hangfixed@chapter\z@
+\def\tp@toc@format@chapter{\bfseries}%
+\def\tp@toc@after@chapter{}%
+
+\renewcommand*\l@chapter[2]{%
+  \ifnum \c@tocdepth >\m@ne
+    \addpenalty{-\@highpenalty}%
+    \tp@toc@before@chaper
+    \ifx\tp@toc@hangnum@chapter\relax
+      \def\numberline##1{%
+        \setbox\@tempboxa\hbox{##1\tp@toc@numsep@chapter}}
+      \sbox\z@{#1}%
+      \expandafter\@tempdima\wd\@tempboxa%
+    \else
+      \@tempdima\tp@toc@hangfixed@chapter
+    \fi
+    \def\numberline##1{##1\tp@toc@numsep@chapter}%
+    \begingroup
+      \parindent \z@ \rightskip \@pnumwidth
+      \parfillskip -\@pnumwidth
+      \leavevmode
+      \tp@toc@format@chapter
+      \advance\leftskip\@tempdima
+      \hskip -\@tempdima
+      #1\nobreak\hfil
+      \nobreak\hb@xt@\@pnumwidth{\hss #2%
+                                 \kern-\p@\kern\p@}\par
+      \penalty\@highpenalty
+      \tp@toc@after@chapter
+    \endgroup
+  \fi}
+
+\renewcommand*\l@section{\@dottedtocline{1}{1.5em}{2.3em}}
+\renewcommand*\l@subsection{\@dottedtocline{2}{3.8em}{3.2em}}
+\renewcommand*\l@subsubsection{\@dottedtocline{3}{7.0em}{4.1em}}
+\renewcommand*\l@paragraph{\@dottedtocline{4}{10em}{5em}}
+\renewcommand*\l@subparagraph{\@dottedtocline{5}{12em}{6em}}
