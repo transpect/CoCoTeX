@@ -121,6 +121,7 @@
 %    \end{macrocode}
 % Evaluation of user's overrides
 %    \begin{macrocode}
+  \tp@init@l@{#2}%
   #3
 %    \end{macrocode}
 % Once a heading level is declared, we can now provide the facilities
@@ -306,9 +307,78 @@
   \csname tpUseHeading\heading@name\endcsname}
 %    \end{macrocode}
 %
+% \section{Facility for ToC and ListOf entries}
+%    \begin{macrocode}
+\def\tp@init@l@#1{%
+  \def\tpToCProperty##1##2{\tpAddToHook{##1#2}{##2}}%
+%    \end{macrocode}
+% Code to be inserted before the toc entry for that level
+%    \begin{macrocode}
+  \def\tpToCBefore##1{\expandafter\gdef\csname tp@toc@before@#1\endcsname{##1}}%\vskip 1.0em \@plus\p@
+%    \end{macrocode}
+% Code to be inserted after the toc entry for that level
+%    \begin{macrocode}
+  \def\tpToCAfter##1{\expandafter\def\csname tp@toc@after@#1\endcsname{##1}}%
+%    \end{macrocode}
+% If used, create a hanging indent the width of the heading's number
+%    \begin{macrocode}
+  \def\tpToCHangNumber{\expandafter\global\expandafter\let\csname tp@toc@hangnum@#1\endcsname\@empty}%
+%    \end{macrocode}
+% If greater than 0pt, use hanging indent of that width, needs to be defined as a dimension.
+%    \begin{macrocode}
+  \def\tpToCHangFixed##1{\expandafter\xdef\csname tp@toc@hangfixed@#1\endcsname{\dimexpr##1\relax}}%
+  \expandafter\let\csname tp@toc@hangfixed@#1\endcsname\z@
+%    \end{macrocode}
+% Separator between the heading number and the heading title
+%    \begin{macrocode}
+  \def\tpToCNumSep##1{\expandafter\gdef\csname tp@toc@numsep@#1\endcsname{##1}}%\enskip
+%    \end{macrocode}
+% Separator between the heading title and the page number
+%    \begin{macrocode}
+  \def\tpToCPageSep##1{\expandafter\gdef\csname tp@toc@pagesep@#1\endcsname{##1}}%\dotfill
+%    \end{macrocode}
+% Format of the page number; extends \lstinline{\toTocFormat<level>}.
+%    \begin{macrocode}
+  \def\tpToCPageFormat##1{\expandafter\gdef\csname tp@toc@pageformat@#1\endcsname{##1}}%
+%    \end{macrocode}
+% Format of the entire toc entry, i.e., number, title, and page.
+%    \begin{macrocode}
+  \def\tpToCFormat##1{\expandafter\def\csname tp@toc@format@#1\endcsname{##1}}%\bfseries
+%    \end{macrocode}
+% Generically provide \LaTeX's internal toc entry formatting macros:
+%    \begin{macrocode}
+  \expandafter\def\csname l@#1\endcsname##1##2{%
+    \addpenalty{-\@highpenalty}%
+    \csname tp@toc@before@#1\endcsname
+    \expandafter\ifx\csname tp@toc@hangnum@#1\endcsname\@empty
+      \expandafter\@tempdima\csname tp@toc@hangfixed@#1\endcsname
+    \else
+      \def\numberline####1{%
+        \setbox\@tempboxa\hbox{####1\csname tp@toc@numsep@#1\endcsname}}%
+      \sbox\z@{##1}%
+      \expandafter\@tempdima\wd\@tempboxa%
+    \fi
+    \def\numberline####1{####1\csname tp@toc@numsep@#1\endcsname}%
+    \begingroup
+      \parindent \z@ \rightskip \@pnumwidth
+      \parfillskip -\@pnumwidth
+      \leavevmode
+      \csname tp@toc@format@#1\endcsname
+      \advance\leftskip\@tempdima
+      \hskip -\@tempdima
+      ##1\nobreak
+      \csname tp@toc@pagesep@#1\endcsname
+      \nobreak\hb@xt@\@pnumwidth{\hss\csname tp@toc@pageformat@#1\endcsname ##2%
+        \kern-\p@\kern\p@}\par
+      \penalty\@highpenalty
+      \csname tp@toc@after@#1\endcsname
+    \endgroup
+  }%
+}
+%    \end{macrocode}
+%
 % \section{Defaults}
 %    \begin{macrocode}
-
 \def\partmark#1{}%
 \tpDeclareHeading{-1}{part}{%
   \tpHeadingProperty{BlockFormat}{\centering
@@ -339,6 +409,8 @@
   \tpHeadingProperty{BeforeSubtitle}{\@@par\vskip.5\baselineskip}%
   \tpHeadingProperty{BeforeQuote}{\strut\@@par\vskip\baselineskip\hfil\hbox\bgroup\centering\vbox\bgroup\hsize.5\textwidth\centering}%
   \tpHeadingProperty{AfterQuote}{\egroup\egroup}%
+  \tpHeadingProperty{AfterNumber}{:\enskip}%
+ %%
   \tpHeadingProperty{AfterNumber}{:\enskip}%
 }
 
@@ -400,62 +472,28 @@
 %
 % \section{ToC entries}
 %    \begin{macrocode}
-\def\l@part#1#2{%
-  \ifnum \c@tocdepth >-2\relax
-    \addpenalty{-\@highpenalty}%
-    \addvspace{2.25em \@plus\p@}%
-    \setlength\@tempdima{3em}%
-    \begingroup
-      \parindent \z@ \rightskip \@pnumwidth
-      \parfillskip -\@pnumwidth
-      {\leavevmode
-       \large \bfseries #1\hfil
-       \hb@xt@\@pnumwidth{\hss #2%
-                          \kern-\p@\kern\p@}}\par
-       \nobreak
-         \global\@nobreaktrue
-         \everypar{\global\@nobreakfalse\everypar{}}%
-    \endgroup
-  \fi}
+% \def\l@part#1#2{%
+%   \ifnum \c@tocdepth >-2\relax
+%     \addpenalty{-\@highpenalty}%
+%     \addvspace{2.25em \@plus\p@}%
+%     \setlength\@tempdima{3em}%
+%     \begingroup
+%       \parindent \z@ \rightskip \@pnumwidth
+%       \parfillskip -\@pnumwidth
+%       {\leavevmode
+%        \large \bfseries #1\hfil
+%        \hb@xt@\@pnumwidth{\hss #2%
+%                           \kern-\p@\kern\p@}}\par
+%        \nobreak
+%          \global\@nobreaktrue
+%          \everypar{\global\@nobreakfalse\everypar{}}%
+%     \endgroup
+%   \fi}
 
 
-\def\tp@toc@before@chaper{\vskip 1.0em \@plus\p@}%
-\let\tp@toc@hangnum@chapter\relax
-\def\tp@toc@numsep@chapter{\enskip}
-\let\tp@toc@hangfixed@chapter\z@
-\def\tp@toc@format@chapter{\bfseries}%
-\def\tp@toc@after@chapter{}%
 
-\renewcommand*\l@chapter[2]{%
-  \ifnum \c@tocdepth >\m@ne
-    \addpenalty{-\@highpenalty}%
-    \tp@toc@before@chaper
-    \ifx\tp@toc@hangnum@chapter\relax
-      \def\numberline##1{%
-        \setbox\@tempboxa\hbox{##1\tp@toc@numsep@chapter}}
-      \sbox\z@{#1}%
-      \expandafter\@tempdima\wd\@tempboxa%
-    \else
-      \@tempdima\tp@toc@hangfixed@chapter
-    \fi
-    \def\numberline##1{##1\tp@toc@numsep@chapter}%
-    \begingroup
-      \parindent \z@ \rightskip \@pnumwidth
-      \parfillskip -\@pnumwidth
-      \leavevmode
-      \tp@toc@format@chapter
-      \advance\leftskip\@tempdima
-      \hskip -\@tempdima
-      #1\nobreak\hfil
-      \nobreak\hb@xt@\@pnumwidth{\hss #2%
-                                 \kern-\p@\kern\p@}\par
-      \penalty\@highpenalty
-      \tp@toc@after@chapter
-    \endgroup
-  \fi}
-
-\renewcommand*\l@section{\@dottedtocline{1}{1.5em}{2.3em}}
-\renewcommand*\l@subsection{\@dottedtocline{2}{3.8em}{3.2em}}
-\renewcommand*\l@subsubsection{\@dottedtocline{3}{7.0em}{4.1em}}
-\renewcommand*\l@paragraph{\@dottedtocline{4}{10em}{5em}}
-\renewcommand*\l@subparagraph{\@dottedtocline{5}{12em}{6em}}
+% \renewcommand*\l@section{\@dottedtocline{1}{1.5em}{2.3em}}
+% \renewcommand*\l@subsection{\@dottedtocline{2}{3.8em}{3.2em}}
+% \renewcommand*\l@subsubsection{\@dottedtocline{3}{7.0em}{4.1em}}
+% \renewcommand*\l@paragraph{\@dottedtocline{4}{10em}{5em}}
+% \renewcommand*\l@subparagraph{\@dottedtocline{5}{12em}{6em}}
