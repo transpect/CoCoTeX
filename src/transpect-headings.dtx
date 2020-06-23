@@ -310,7 +310,7 @@
 % \section{Facility for ToC and ListOf entries}
 %    \begin{macrocode}
 \def\tp@init@l@#1{%
-  \def\tpToCProperty##1##2{\tpAddToHook{##1#2}{##2}}%
+  \def\tpToCProperty##1##2{\tpAddToHook{##1#1}{##2}}%
 %    \end{macrocode}
 % Code to be inserted before the toc entry for that level
 %    \begin{macrocode}
@@ -393,6 +393,9 @@
   \tpHeadingProperty{BeforeSubtitle}{\@@par\vskip\baselineskip}%
   \tpHeadingProperty{SubtitleFormat}{\leavevmode\vskip\baselineskip\large\bfseries}%
   \tpHeadingProperty{AfterNumber}{:\@@par}%
+  \tpToCBefore{\vskip2\baselineskip}%
+  \tpToCFormat{\bfseries}%
+  \tpToCPageSep{\hfill}%
 }
 
 \tpDeclareHeading{0}{chapter}{%
@@ -410,7 +413,10 @@
   \tpHeadingProperty{BeforeQuote}{\strut\@@par\vskip\baselineskip\hfil\hbox\bgroup\centering\vbox\bgroup\hsize.5\textwidth\centering}%
   \tpHeadingProperty{AfterQuote}{\egroup\egroup}%
   \tpHeadingProperty{AfterNumber}{:\enskip}%
- %%
+  \tpToCBefore{\vskip1\baselineskip}%
+  \tpToCFormat{\bfseries}%
+  \tpToCPageSep{\bfseries\dotfill}%
+  %% 
   \tpHeadingProperty{AfterNumber}{:\enskip}%
 }
 
