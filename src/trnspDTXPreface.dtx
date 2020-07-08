@@ -38,6 +38,7 @@
   \RequirePackage{color}
   \RequirePackage{graphicx}
   \RequirePackage{lmodern}
+  \RequirePackage{courier}
   \RequirePackage[breaklinks,pdfborder={0 0 0}]{hyperref}
   \OnlyDescription
 \usepackage{listings}
@@ -45,24 +46,34 @@
 \lstdefinestyle{macrocode}{%
   name=macrocode,
   language=[LaTeX]TeX,
-  basicstyle=\fontfamily{lmvtt}\selectfont\small,
-  basicstyle=\ttfamily\small,
+  literate={%
+    {Ö}{{\"O}}1
+    {Ä}{{\"A}}1
+    {Ü}{{\"U}}1
+    {ß}{{\ss}}1
+    {ü}{{\"u}}1
+    {ä}{{\"a}}1
+    {ö}{{\"o}}1
+    {«}{{\guillemotright}}1
+    {»}{{\guillemotleft}}1
+    {~}{{\textasciitilde}}1},
+  inputencoding=utf8,
+  basicstyle={\ttfamily\small},
   columns=fullflexible,
-  numbers=left,
-  numberfirstline=1,
-  firstnumber=auto,
-  numberstyle=\scriptsize,
-  numbersep=5pt,
-  backgroundcolor=\color{yellow!20}, % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
-  basicstyle=\scriptsize,          % the size of the fonts that are used for the code
+  numbers=none,
+  % firstnumber=auto,
+  % numberstyle=\scriptsize,
+  % numbersep=5pt,
+  backgroundcolor=\color{yellow!10}, % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+  %basicstyle=\scriptsize,          % the size of the fonts that are used for the code
   breakatwhitespace=false,           % sets if automatic breaks should only happen at whitespace
   breaklines=true,                   % sets automatic line breaking
   captionpos=t,                      % sets the caption-position
-  commentstyle={\color{green}\itshape},      % comment style
+  commentstyle={\color[HTML]{009900}\itshape},      % comment style
   extendedchars=true,                % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
   frame=single,                      % adds a frame around the code
   keepspaces=false,                   % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
-  keywordstyle=\color{red},          % keyword style
+  keywordstyle={\color{black!60}\bfseries},          % keyword style
   rulecolor=\color{gray!70},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
   showspaces=false,                  % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
   showstringspaces=true,             % underline spaces within strings only

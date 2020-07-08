@@ -71,7 +71,7 @@
   \def\biblioinfoname{{\sffamily\bfseries Bibliografische Information der Deutschen Nationalbibliothek}\\
     Die Deutsche Nationalbibliothek verzeichnet diese Publikation in der Deutschen Nationalbibliografie; detaillierte bibliografische Daten sind im Internet über \url{http://dnb.d-nb.de} abrufbar.}%
   \def\cctextname{Dieses Werk ist lizenziert unter der Creative Commons Attribution-NonCommercial-NoDerivs 4.0 Lizenz (BY-NC-ND). Diese Lizenz erlaubt die private Nutzung, gestattet aber keine Bearbeitung und keine kommerzielle Nutzung. Weitere Informationen finden Sie unter \url{https://creativecommons.org/licenses/by-nc-nd/4.0/deed.de}\\
-Um Genehmigungen für Adaptionen, Übersetzungen, Derivate oder Wiederverwendung zu kommerziellen Zwecken einzuholen, wenden Sie sich bitte an \url{rights@transcript-verlag.de}\\
+Um Genehmigungen für Adaptionen, Übersetzungen, Derivate oder Wiederverwendung zu kommerziellen Zwecken einzuholen, wenden Sie sich bitte an \@publweb\\
 Die Bedingungen der Creative-Commons-Lizenz gelten nur für Originalmaterial. Die Wiederverwendung von Material aus anderen Quellen (gekennzeichnet mit Quellenangabe) wie z.B. Schaubilder, Abbildungen, Fotos und Textauszüge erfordert ggf. weitere Nutzungsgenehmigungen durch den jeweiligen Rechteinhaber.}
 }
 \expandafter\addto\expandafter\captionsgerman\expandafter{\@tempa}
@@ -80,54 +80,49 @@ Die Bedingungen der Creative-Commons-Lizenz gelten nur für Originalmaterial. Di
 \def\the@authorinfos{}
 \let\authormark\@empty
 \def\authorinfo#1#2{\expandafter\def\expandafter\the@authorinfos\expandafter{\the@authorinfos{\bfseries #1} #2\par}}
-\def\edition#1{\def\@edition{#1}} \edition{}%
-\def\editor#1{\def\@editor{#1}} \editor{}%
-\def\volume#1{\def\@volume{#1}}       \volume{}%
-\def\subtitle#1{\def\@subtitle{#1}} \subtitle{}%
+\def\edition#1{\def\@edition{#1}}                 \edition{}%
+\def\editor#1{\def\@editor{#1}}                   \editor{}%
+\def\volume#1{\def\@volume{#1}}                   \volume{}%
+\def\subtitle#1{\def\@subtitle{#1}}               \subtitle{}%
 \def\logo#1{\let\@logo\@empty\if!#1!\else\def\@logo{\includegraphics{#1}}\fi} \logo{}
-\def\thanks#1{\def\@thanks{#1}} \thanks{}
+\def\thanks#1{\def\@thanks{#1}}                   \thanks{}
 \def\biblioInfo#1{%
   \def\@biblioInfo{\biblioinfoname}%
-  \if!#1!\else\def\@biblioInfo{#1}\fi} \biblioInfo{}
-\def\publ#1{\def\@publ{#1}} \publ{transcript Verlag}
-\def\publyear#1{\def\@publyear{#1}} \publyear{2019}
-\def\place#1{\def\@place{#1}} \place{Bielefeld}
-\long\def\editorial#1{\long\def\@editorial{#1}} \editorial{}
-\newif\ifdocopydisclaimer \docopydisclaimertrue
+  \if!#1!\else\def\@biblioInfo{#1}\fi}            \biblioInfo{}
+\def\publ#1{\def\@publ{#1}}                       \publ{}
+\def\publyear#1{\def\@publyear{#1}}               \publyear{}
+\def\place#1{\def\@place{#1}}                     \place{}
+\long\def\editorial#1{\long\def\@editorial{#1}}  \editorial{}
+\newif\ifdocopydisclaimer                         \docopydisclaimertrue
 
 \def\copyrightDisclaimer#1{\def\@copyrightDiscl{#1}}
 \copyrightDisclaimer{\copyrightDisclaimername}
-
 \newif\ifprintpublinfo \printpublinfotrue
 \def\environmentDisclaimer#1{\def\@envdiscl{#1}} \environmentDisclaimer{Gedruckt auf alterungsbeständigem Papier mit chlorfrei gebleichtem Zellstoff.}
-\def\publweb#1{\def\@publweb{#1}}                \publweb{Besuchen Sie uns im Internet: \url{https://www.transcript-verlag.de}}
-\def\publgesamt#1{\def\@publgesamt{#1}}          \publgesamt{Bitte fordern Sie unser Gesamtverzeichnis und andere Broschüren an unter:\\\url{info@transcript-verlag.de}}
-\def\dedication#1{\def\@dedication{#1}}     \dedication{}
-\def\lectorate#1{\def\@lectorate{#1}}     \lectorate{}
-\def\translator#1{\def\@translator{#1}}     \translator{}
-\def\qualification#1{\def\@qualification{#1}}     \qualification{}
-\def\appraiser#1{\def\@appraiser{#1}}     \appraiser{}
-\def\coverDesign#1{\def\@coverdesign{#1}} \coverDesign{}
-\def\coverImage#1{\def\@coverimage{#1}}   \coverImage{}
-\def\QandA#1{\def\@QandA{#1}}             \QandA{}
-\def\typesetter#1{\def\@typesetter{#1}}   \typesetter{}
-\def\print#1{\def\@print{#1}}             \print{}
-\def\isbn#1{\def\@isbn{#1}}               \isbn{}
-\def\eisbn#1{\def\@eisbn{#1}}             \eisbn{}
-\def\epubisbn#1{\def\@epubisbn{#1}}       \epubisbn{}
-\def\doi#1{\def\@doi{#1}}                 \doi{}
-\def\conversion#1{\def\@conversion{#1}}   \conversion{}
-\def\shorttext#1{\def\@shorttext{#1}}     \shorttext{}
-\def\keywords#1{\def\@keywords{#1}}       \keywords{}
-\def\discussion#1{\def\@discussion{#1}}   \discussion{}
-
-\def\ccimage#1{\def\@ccimage{#1}}         \ccimage{}
-\def\cctext#1{\def\cctextname{#1}} \AtBeginDocument{\cctext{\cctextname}}
-
-\def\grantlogo#1{\def\@grantlogo{#1}}     \grantlogo{}
-\def\granttext#1{\def\@granttext{#1}}     \granttext{}
-
-
+\def\publweb#1{\def\@publweb{#1}}                \publweb{}
+\def\publgesamt#1{\def\@publgesamt{#1}}          \publgesamt{}
+\def\dedication#1{\def\@dedication{#1}}          \dedication{}
+\def\lectorate#1{\def\@lectorate{#1}}            \lectorate{}
+\def\translator#1{\def\@translator{#1}}          \translator{}
+\def\qualification#1{\def\@qualification{#1}}    \qualification{}
+\def\appraiser#1{\def\@appraiser{#1}}            \appraiser{}
+\def\coverDesign#1{\def\@coverdesign{#1}}        \coverDesign{}
+\def\coverImage#1{\def\@coverimage{#1}}          \coverImage{}
+\def\QandA#1{\def\@QandA{#1}}                    \QandA{}
+\def\typesetter#1{\def\@typesetter{#1}}          \typesetter{}
+\def\print#1{\def\@print{#1}}                    \print{}
+\def\isbn#1{\def\@isbn{#1}}                      \isbn{}
+\def\eisbn#1{\def\@eisbn{#1}}                    \eisbn{}
+\def\epubisbn#1{\def\@epubisbn{#1}}              \epubisbn{}
+\def\doi#1{\def\@doi{#1}}                        \doi{}
+\def\conversion#1{\def\@conversion{#1}}          \conversion{}
+\def\shorttext#1{\def\@shorttext{#1}}            \shorttext{}
+\def\keywords#1{\def\@keywords{#1}}              \keywords{}
+\def\discussion#1{\def\@discussion{#1}}          \discussion{}
+\def\ccimage#1{\def\@ccimage{#1}}                \ccimage{}
+\def\cctext#1{\def\cctextname{#1}}               \AtBeginDocument{\cctext{\cctextname}}
+\def\grantlogo#1{\def\@grantlogo{#1}}            \grantlogo{}
+\def\granttext#1{\def\@granttext{#1}}            \granttext{}
 
 \def\maketitle{%
   \bgroup
