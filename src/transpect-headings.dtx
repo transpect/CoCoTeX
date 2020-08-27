@@ -265,46 +265,52 @@
 %    \begin{macrocode}
 \def\heading{\@ifnextchar [{\@heading}{\@heading[]}}%]
 
+\DeclareRobustCommand{\TitleBreak}{\hfill\break}
+
 \def\@heading[#1]#2{%
-  \global\let\heading@Author\relax
-  \global\let\heading@Title\relax
-  \global\let\heading@Number\relax
-  \global\let\heading@Subtitle\relax
-  \global\let\heading@Toctitle\relax
-  \global\let\heading@Runtitle\relax
-  \global\let\heading@Quote\relax
-  \global\let\@optarg\relax
-  \global\let\ltx@label\label
-  \global\let\tp@label\relax
   \bgroup
+    \let\\\TitleBreak
+    \global\let\heading@Author\relax
+    \global\let\heading@Title\relax
+    \global\let\heading@Number\relax
+    \global\let\heading@Subtitle\relax
+    \global\let\heading@Toctitle\relax
+    \global\let\heading@Runtitle\relax
+    \global\let\heading@Quote\relax
+    \global\let\@optarg\relax
+    \global\let\ltx@label\label
+    \global\let\tp@label\relax
+    \bgroup
 %    \end{macrocode}
 % handling of the optional argument
 %    \begin{macrocode}
-    \xdef\@optarg{#1}%
+      \xdef\@optarg{#1}%
 %    \end{macrocode}
 % The mandatory argument contains the section level, this corresponds
 % to \LaTeX's way of counting where part is -1, chapter is 0, section
 % is 1, etc.
 %    \begin{macrocode}
-    \xdef\heading@name{#2}%
-    \def\label##1{\gdef\tp@label{##1}}%
-    \def\author##1{\gdef\heading@Author{##1}}%
-    \def\title##1{\gdef\heading@Title{##1}}%
-    \def\subtitle##1{\gdef\heading@Subtitle{##1}}%
-    \def\toctitle##1{\gdef\heading@Toctitle{##1}}%
-    \def\runtitle##1{\gdef\heading@Runtitle{##1}}%
-    \def\number##1{\gdef\heading@Number{##1}}%
-    \long\def\quote##1{\long\gdef\heading@Quote{##1}}%
+      \xdef\heading@name{#2}%
+      \def\label##1{\gdef\tp@label{##1}}%
+      \def\author##1{\gdef\heading@Author{##1}}%
+      \long\def\title##1{\long\gdef\heading@Title{##1}}%
+      \long\def\subtitle##1{\long\gdef\heading@Subtitle{##1}}%
+      \long\def\toctitle##1{\long\gdef\heading@Toctitle{##1}}%
+      \def\runtitle##1{\gdef\heading@Runtitle{##1}}%
+      \def\number##1{\gdef\heading@Number{##1}}%
+      \long\def\quote##1{\long\gdef\heading@Quote{##1}}%
 }
 %    \end{macrocode}
 % The ending part of the heading environment.
 %    \begin{macrocode}
 \def\endheading{%
+    \egroup
+    \expandafter\ifx\csname tpUseHeading\heading@name\endcsname\relax
+      \PackageError{transpect.cls}{Heading level \heading@name\space unknown!}{A Heading with level \heading@name\space is unknown. Use the \string\tpDeclareHeading\space macro to declare heading levels.}%
+    \fi
+    \csname tpUseHeading\heading@name\endcsname
   \egroup
-  \expandafter\ifx\csname tpUseHeading\heading@name\endcsname\relax
-    \PackageError{transpect.cls}{Heading level \heading@name\space unknown!}{A Heading with level \heading@name\space is unknown. Use the \string\tpDeclareHeading\space macro to declare heading levels.}%
-  \fi
-  \csname tpUseHeading\heading@name\endcsname}
+}
 %    \end{macrocode}
 %
 % \section{Facility for ToC and ListOf entries}

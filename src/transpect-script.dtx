@@ -87,6 +87,7 @@
 \ifx\use@script@hebrew\relax
   \message{^^J  [transpect-script Loaded Script: Hebrew]^^J}
   \def\NotoHebrewPath{./fonts/Noto/Hebrew/}
+  \babelprovide{hebrew}%
   \babelfont[hebrew]{rm}[%
     Scale=MatchUppercase,%
     Ligatures=TeX,%
