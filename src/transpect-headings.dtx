@@ -40,7 +40,7 @@
 %    \end{macrocode}
 % The use-call function for Blocks
 %    \begin{macrocode}
-\def\tpUseHeadingBlock#1#2{%
+\def\tp@use@heading@block#1#2{%
   \expandafter\ifx\csname heading@#1\endcsname\relax\else
     \tpUseHook{Before#1#2}%
     {\tpUseHook{#1Format#2}\csname heading@#1\endcsname}%
@@ -50,103 +50,124 @@
 %
 % \section{Facility for declaring heading levels and their layouts}%
 % \begin{description}
-% \item[1] level: used for toc entries. -1 for part, 0 for chapter, 1 for section, etc.
-% \item[2] name: part, chapter, section, etc, to be used in toc, head lines, bookmarks, etc.
-% \item[3] Property definitions and switches
+% \item[1] (optional) inherit-from: load all properties from that class, first.
+% \item[2] level: used for toc entries. -1 for part, 0 for chapter, 1 for section, etc.
+% \item[3] name: part, chapter, section, etc, to be used in toc, head lines, bookmarks, etc.
+% \item[4] Property definitions and switches
 % \end{description}
 %    \begin{macrocode}
-\def\tpDeclareHeading#1#2#3{%
-  \expandafter\def\csname heading@#2@name\endcsname{#2}%
-  \def\tpHeadingProperty##1##2{\tpAddToHook{##1#2}{##2}}%
+\def\tpDeclareHeading{\@ifnextchar[{\@tpDeclareHeading}{\@tpDeclareHeading[]}}%]
+\def\@tpDeclareHeading[#1]#2#3#4{%
+  \expandafter\gdef\csname tp@decl@#3\endcsname{#4}%
+  \global\let\tp@inherit\relax
+  \if!#1!\else
+    \xdef\tp@inherit{#1}%
+    \expandafter\xdef\csname tp@inherit@#3\expandafter\endcsname{#1}%
+  \fi
+  \expandafter\def\csname heading@#3@name\endcsname{#3}%
+  \def\tpHeadingProperty##1##2{%
+    \ifx\tp@inherit\relax\else\tpDeclareHook{##1#3}\fi
+    \tpAddToHook{##1#3}{##2}%
+  }%
 %    \end{macrocode}
 % \subsection{Block hooks}
 % Formatting and upper/lower boundaries of the author's names
 %    \begin{macrocode}
-  \tpDeclareBlock{Author}{#2}%
+  \tpDeclareBlock{Author}{#3}%
 %    \end{macrocode}
 % Formatting and upper/lower boundaries of the subtitle
 %    \begin{macrocode}
-  \tpDeclareBlock{Subtitle}{#2}%
+  \tpDeclareBlock{Subtitle}{#3}%
 %    \end{macrocode}
 % Formatting and upper/lower boundaries of mottos/quotes/quotations
 %    \begin{macrocode}
-  \tpDeclareBlock{Quote}{#2}%
+  \tpDeclareBlock{Quote}{#3}%
 %    \end{macrocode}
 % Formatting and upper/lower boundaries of heading counters. Thise are formatted as the actual title, bzt can be overridden with \lstinline{\NumberFormat}.
 %    \begin{macrocode}
-  \tpDeclareBlock{Number}{#2}%
+  \tpDeclareBlock{Number}{#3}%
 %    \end{macrocode}
 %
 % \subsection{Heading-wide hooks}
 % Block format for the whole title, used for properties that afffect the whole heading, like horizontal alignment
 %    \begin{macrocode}
-  \tpDeclareHook{BlockFormat#2}%
+  \tpDeclareHook{BlockFormat#3}%
 %    \end{macrocode}
 % Code that is applied at the very beginning of the heading, usually contains a \lstinline{\clearpage} for the lower levels, but also preceeding skips
 %    \begin{macrocode}
-  \tpDeclareHook{BeforeHeading#2}%
+  \tpDeclareHook{BeforeHeading#3}%
 %    \end{macrocode}
 % Code that is applied at the end of the heading (but before \lstinline{\@afterheading}). This does NOT contain after-heading skips.
 %    \begin{macrocode}
-  \tpDeclareHook{AfterHeading#2}%
+  \tpDeclareHook{AfterHeading#3}%
 %    \end{macrocode}
 % After heading skip. This is used to separate inline headings (value
 % < 0pt) from free-floating headings (else), compare
 % \lstinline{\@startsection}'s fifth argument.
 %    \begin{macrocode}
-  \tpDeclareHook{AfterSkip#2}%
+  \tpDeclareHook{AfterSkip#3}%
 %    \end{macrocode}
 % format of the actual heading title
 %    \begin{macrocode}
-  \tpDeclareHook{TitleFormat#2}%
+  \tpDeclareHook{TitleFormat#3}%
 %    \end{macrocode}
 % This switch provides a way to put the author's name(s) after the
 % heading. Default is that the author's are put on top of the heading.
 %    \begin{macrocode}
-  \def\tpAuthorAfter{\expandafter\global\expandafter\let\csname tp@author@fter@#2\endcsname\@empty}%
+  \def\tpAuthorAfter{\expandafter\global\expandafter\let\csname tp@author@fter@#3\endcsname\@empty}%
+%    \end{macrocode}
+% This switch suppresses the output of author names all-together.
+%    \begin{macrocode}
+  \def\tpHideAuthor{\expandafter\global\expandafter\let\csname tp@hide@uthor@#3\endcsname\@empty}%
 %    \end{macrocode}
 % Facility for hanging indents in headings.
 %
 % \lstinline{\tpHangNumber} triggers hanging indent by the total width
 % of the number block.
 %    \begin{macrocode}
-  \def\tpHangNumber{\expandafter\global\expandafter\let\csname tp@hang@number@#2\endcsname\@empty}%
+  \def\tpHangNumber{\expandafter\global\expandafter\let\csname tp@hang@number@#3\endcsname\@empty}%
 %    \end{macrocode}
 % \lstinline{\tpHangNumber} can be used when the hanging indent should
 % always be of a fixed width. If ommitted, the hanging indent is
 % determined by the number's overall width for each heading separately.
 %    \begin{macrocode}
-  \def\tpHangFixed##1{\expandafter\gdef\csname tp@hang@fixed@#2\endcsname{##1}}%
+  \def\tpHangFixed##1{\expandafter\gdef\csname tp@hang@fixed@#3\endcsname{##1}}%
   \tpHangFixed{\z@}%
 %    \end{macrocode}
 % Evaluation of user's overrides
 %    \begin{macrocode}
-  \tp@init@l@{#2}%
-  #3
+  \tp@init@l@{#3}%
+  \ifx\tp@inherit\relax\else
+    \csname tp@decl@\tp@inherit\endcsname
+  \fi
+  \csname tp@decl@#3\endcsname
 %    \end{macrocode}
 % Once a heading level is declared, we can now provide the facilities
 % to output the headings. This code largely resembles \LaTeX's
 % \lstinline{\@startsection} mechanism, albeit with some tweaks.
 % \subsection{Providing the actual heading macro}
 %    \begin{macrocode}
-  \expandafter\def\csname tpUseHeading#2\endcsname{%
-    \xdef\heading@level{#1}%
-    \edef\Hy@toclevel{\csname toclevel@#1\endcsname}%
+  \expandafter\def\csname tpUseHeading#3\endcsname{%
+    \expandafter\let\expandafter\tp@inherit@name\csname tp@inherit@#3\endcsname
+    \xdef\heading@level{#2}%
+    \edef\Hy@toclevel{\csname toclevel@#2\endcsname}%
     \if@noskipsec \leavevmode \fi
     \par\@afterindenttrue
-    \tpUseHook{BeforeHeading#2}%
+    \tpUseHook{BeforeHeading#3}%
     \everypar{}%
     \def\@svsec{%
       \bgroup
         \parindent\z@ \parskip\z@
-        \tpUseHook{BlockFormat#2}%
-        \expandafter\ifx\csname tp@author@fter@#2\endcsname\relax
-          \tpUseHeadingBlock{Author}{#2}%
+        \tpUseHook{BlockFormat#3}%
+        \expandafter\ifx\csname tp@hide@uthor@#3\endcsname\relax
+          \expandafter\ifx\csname tp@author@fter@#3\endcsname\relax
+            \tp@use@heading@block{Author}{#3}%
+          \fi
         \fi
-        \expandafter\ifx\csname tp@hang@number@#2\endcsname\@empty
-          \expandafter\@tempdimb\dimexpr\csname tp@hang@fixed@#2\endcsname\relax
+        \expandafter\ifx\csname tp@hang@number@#3\endcsname\@empty
+          \expandafter\@tempdimb\dimexpr\csname tp@hang@fixed@#3\endcsname\relax
           \ifdim\@tempdimb>\z@\relax\else
-            \setbox\z@\hbox{\tpUseHook{TitleFormat#2}\tpUseHeadingBlock{Number}{#2}\strut}%
+            \setbox\z@\hbox{\tpUseHook{TitleFormat#3}\tp@use@heading@block{Number}{#3}\strut}%
             \@tempdimb\wd\z@
           \fi
           \expandafter\@tempdima\dimexpr\hsize-\@tempdimb\relax
@@ -154,83 +175,99 @@
             \hsize\@tempdima\relax
             \hskip-\@tempdimb
         \fi
-        {\tpUseHook{TitleFormat#2}%
-         \tpUseHeadingBlock{Number}{#2}%
+        {\tpUseHook{TitleFormat#3}%
+         \tp@use@heading@block{Number}{#3}%
          \heading@Title}%
-        \tpUseHeadingBlock{Subtitle}{#2}%
-        \expandafter\ifx\csname tp@author@fter@#2\endcsname\relax\else
-          \tpUseHeadingBlock{Author}{#2}%
+        \tp@use@heading@block{Subtitle}{#3}%
+        \expandafter\ifx\csname tp@hide@uthor@#3\endcsname\relax
+          \expandafter\ifx\csname tp@author@fter@#3\endcsname\relax\else
+            \tp@use@heading@block{Author}{#3}%
+          \fi
         \fi
-        \expandafter\ifx\csname tp@hang@number@#2\endcsname\@empty
+        \expandafter\ifx\csname tp@hang@number@#3\endcsname\@empty
           \vss\egroup
         \fi
-        \tpUseHeadingBlock{Quote}{#2}%
+        \tp@use@heading@block{Quote}{#3}%
 %    \end{macrocode}
 % Since all counters are taken from Word input, we can safely override \lstinline{\the<name>}:
 %    \begin{macrocode}
         \ifx\heading@Number\relax
-          \expandafter\global\expandafter\let\csname the#2\endcsname\@empty%
+          \expandafter\global\expandafter\let\csname the#3\endcsname\@empty%
         \else
-          \expandafter\xdef\csname the#2\endcsname{\heading@Number}%
+          \expandafter\xdef\csname the#3\endcsname{\heading@Number}%
         \fi
 %    \end{macrocode}
 % catch \LaTeX's referencing facility with some magick for \lstinline{hyperref}:
 %    \begin{macrocode}
-      \ifx\Hy@MakeCurrentHrefAuto\@undefined\else
-        \Hy@MakeCurrentHrefAuto{#2}%
-        \Hy@raisedlink{\hyper@anchorstart{\@currentHref}\hyper@anchorend}%
-      \fi
-      \ifx\tp@label\relax\else
-        \ifx\heading@Number\relax
-        \else
-          \let\@currentlabel\heading@Number
-          \let\@currentlabelname\heading@Title
-          \expandafter\ltx@label\expandafter{\tp@label}%
+        \ifx\Hy@MakeCurrentHrefAuto\@undefined\else
+          \Hy@MakeCurrentHrefAuto{#3}%
+          \Hy@raisedlink{\hyper@anchorstart{\@currentHref}\hyper@anchorend}%
         \fi
-      \fi
-      \global\let\label\ltx@label
+        \ifx\tp@label\relax\else
+          \ifx\heading@Number\relax
+          \else
+            \let\@currentlabel\heading@Number
+            \let\@currentlabelname\heading@Title
+            \expandafter\ltx@label\expandafter{\tp@label}%
+          \fi
+        \fi
+        \global\let\label\ltx@label
 %    \end{macrocode}
 % Entry in table of contents
 %    \begin{macrocode}
-        \expandafter\ifnum\heading@level<\c@tocdepth\relax
-          \ifx\heading@Toctitle\relax
-            \ifx\heading@Number\relax
-              \addcontentsline{toc}{#2}{\heading@Title}\relax
+        \expandafter\ifx\tp@notoc\relax
+          \global\let\tp@notoc\@empty
+        \else
+          \ifx\tp@notocnumber\relax
+            \let\numberline\@gobble
+            \global\let\tp@notocnumber\@empty
+          \fi
+          \expandafter\ifnum\heading@level<\c@tocdepth\relax
+            \ifx\heading@Toctitle\relax
+              \ifx\heading@Number\relax
+                \addcontentsline{toc}{#3}{\heading@Title}\relax
+              \else
+                \addcontentsline{toc}{#3}{\protect\numberline{\heading@Number}\heading@Title}\relax
+              \fi
             \else
-              \addcontentsline{toc}{#2}{\protect\numberline{\heading@Number}\heading@Title}\relax
+              \addcontentsline{toc}{#3}{\heading@Toctitle}\relax
             \fi
-          \else
-            \addcontentsline{toc}{#2}{\heading@Toctitle}\relax
           \fi
         \fi
 %    \end{macrocode}
 % Running headers
 %    \begin{macrocode}
-        \ifx\heading@Runtitle\relax
-          \ifx\heading@Number\relax
-            \csname #2mark\endcsname{\heading@Title}%
-          \else
+        \expandafter\let\expandafter\tp@mark@name\csname #3mark\endcsname%
+        \ifx\tp@mark@name\relax
+          \expandafter\let\expandafter\tp@mark@name\csname \tp@inherit@name mark\endcsname
+        \fi
+        \ifx\tp@mark@name\relax\else
+          \ifx\heading@Runtitle\relax
+            \ifx\heading@Number\relax
+              \tp@mark@name{\heading@Title}%
+            \else
 %    \end{macrocode}
 % note that \lstinline{\chaptermark} and \lstinline{\sectionmark} need
 % to be dealt with in your page style definitions or you might get
 % faulty \lstinline{\thechapter} and \lstinline{\thesection} readings!
 %    \begin{macrocode}
-            \csname #2mark\endcsname{\numberline{\heading@Number}\heading@Title}%
+              \tp@mark@name{\numberline{\heading@Number}\heading@Title}%
+            \fi
+          \else
+            \tp@mark@name{\heading@Runtitle}%
           \fi
-        \else
-          \csname #2mark\endcsname{\heading@Runtitle}%
         \fi
       \egroup
-      \tpUseHook{AfterHeading#2}%
+      \tpUseHook{AfterHeading#3}%
     }%
 %    \end{macrocode}
 % Skip after the heading, taken partially from the definition of
 % \LaTeX's \lstinline{\@xsect} macro:
 %    \begin{macrocode}
-    \expandafter\ifx\csname tp@hook@AfterSkip#2\endcsname\@empty
+    \expandafter\ifx\csname tp@hook@AfterSkip#3\endcsname\@empty
       \global\@tempskipa=1sp\relax
     \else
-      \expandafter\expandafter\expandafter\global\expandafter\expandafter\@tempskipa\expandafter=\csname tp@hook@AfterSkip#2\endcsname\relax%
+      \expandafter\expandafter\expandafter\global\expandafter\expandafter\@tempskipa\expandafter=\csname tp@hook@AfterSkip#3\endcsname\relax%
     \fi
     \ifdim\@tempskipa <\z@\relax
       \global\@afterindentfalse
@@ -267,6 +304,15 @@
 
 \DeclareRobustCommand{\TitleBreak}{\hfill\break}
 
+\def\tp@parse@opt#1{\@tp@parse@opt#1,,\@nil}
+\def\@tp@parse@opt#1,#2,\@nil{%
+  \expandafter\ifx\csname tp@#1\endcsname\@empty
+    \expandafter\global\expandafter\let\csname tp@#1\endcsname\relax
+  \fi
+  \if!#2!\else
+    \@tp@parse@opt#2,\@nil
+  \fi}
+
 \def\@heading[#1]#2{%
   \bgroup
     \let\\\TitleBreak
@@ -277,14 +323,15 @@
     \global\let\heading@Toctitle\relax
     \global\let\heading@Runtitle\relax
     \global\let\heading@Quote\relax
-    \global\let\@optarg\relax
     \global\let\ltx@label\label
     \global\let\tp@label\relax
-    \bgroup
 %    \end{macrocode}
 % handling of the optional argument
 %    \begin{macrocode}
-      \xdef\@optarg{#1}%
+    \global\let\tp@notoc\@empty
+    \global\let\tp@notocnumber\@empty
+    \tp@parse@opt{#1}%
+    \bgroup
 %    \end{macrocode}
 % The mandatory argument contains the section level, this corresponds
 % to \LaTeX's way of counting where part is -1, chapter is 0, section
