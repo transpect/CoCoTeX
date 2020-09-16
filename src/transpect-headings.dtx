@@ -133,8 +133,8 @@
     \xdef\heading@level{#1}%
     \edef\Hy@toclevel{\csname toclevel@#1\endcsname}%
     \if@noskipsec \leavevmode \fi
-    \par\tpUseHook{BeforeHeading#2}%
-    \@afterindenttrue
+    \par\@afterindenttrue
+    \tpUseHook{BeforeHeading#2}%
     \everypar{}%
     \def\@svsec{%
       \bgroup
