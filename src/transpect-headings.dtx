@@ -127,6 +127,11 @@
 %    \begin{macrocode}
   \def\tpHangNumber{\expandafter\global\expandafter\let\csname tp@hang@number@#3\endcsname\@empty}%
 %    \end{macrocode}
+% \lstinline{\tpNoToc} triggers the heading level to never get an
+% entry in the table of contents.
+%    \begin{macrocode}
+  \def\tpNoToc{\expandafter\global\expandafter\let\csname tp@no@toc@#3\endcsname\@empty}%
+%    \end{macrocode}
 % \lstinline{\tpHangNumber} can be used when the hanging indent should
 % always be of a fixed width. If ommitted, the hanging indent is
 % determined by the number's overall width for each heading separately.
@@ -215,22 +220,24 @@
 %    \end{macrocode}
 % Entry in table of contents
 %    \begin{macrocode}
-        \expandafter\ifx\tp@notoc\relax
-          \global\let\tp@notoc\@empty
-        \else
-          \ifx\tp@notocnumber\relax
-            \let\numberline\@gobble
-            \global\let\tp@notocnumber\@empty
-          \fi
-          \expandafter\ifnum\heading@level<\c@tocdepth\relax
-            \ifx\heading@Toctitle\relax
-              \ifx\heading@Number\relax
-                \addcontentsline{toc}{#3}{\heading@Title}\relax
+        \expandafter\ifx\csname tp@no@toc@#3\endcsname\@empty\else
+          \expandafter\ifx\tp@notoc\relax
+            \global\let\tp@notoc\@empty
+          \else
+            \ifx\tp@notocnumber\relax
+              \let\numberline\@gobble
+              \global\let\tp@notocnumber\@empty
+            \fi
+            \expandafter\ifnum\heading@level<\c@tocdepth\relax
+              \ifx\heading@Toctitle\relax
+                \ifx\heading@Number\relax
+                  \addcontentsline{toc}{#3}{\heading@Title}\relax
+                \else
+                  \addcontentsline{toc}{#3}{\protect\numberline{\heading@Number}\heading@Title}\relax
+                \fi
               \else
-                \addcontentsline{toc}{#3}{\protect\numberline{\heading@Number}\heading@Title}\relax
+                \addcontentsline{toc}{#3}{\heading@Toctitle}\relax
               \fi
-            \else
-              \addcontentsline{toc}{#3}{\heading@Toctitle}\relax
             \fi
           \fi
         \fi
@@ -239,7 +246,9 @@
 %    \begin{macrocode}
         \expandafter\let\expandafter\tp@mark@name\csname #3mark\endcsname%
         \ifx\tp@mark@name\relax
-          \expandafter\let\expandafter\tp@mark@name\csname \tp@inherit@name mark\endcsname
+          \ifx\tp@inherit@name\relax\else
+            \expandafter\let\expandafter\tp@mark@name\csname \tp@inherit@name mark\endcsname
+          \fi
         \fi
         \ifx\tp@mark@name\relax\else
           \ifx\heading@Runtitle\relax
