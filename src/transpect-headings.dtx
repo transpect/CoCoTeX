@@ -83,6 +83,10 @@
 %    \begin{macrocode}
   \tpDeclareBlock{Quote}{#3}%
 %    \end{macrocode}
+% Formatting and upper/lower boundaries of quote sources
+%    \begin{macrocode}
+  \tpDeclareBlock{QuoteSource}{#3}%
+%    \end{macrocode}
 % Formatting and upper/lower boundaries of heading counters. Thise are formatted as the actual title, bzt can be overridden with \lstinline{\NumberFormat}.
 %    \begin{macrocode}
   \tpDeclareBlock{Number}{#3}%
@@ -110,6 +114,16 @@
 % format of the actual heading title
 %    \begin{macrocode}
   \tpDeclareHook{TitleFormat#3}%
+%    \end{macrocode}
+% The following hooks allow the whole heading to be placed inside a
+% box, e.g., when the heading area should have a fixed overall height.
+%    \begin{macrocode}
+  \tpDeclareHook{BeforeBox#3}%
+  \tpDeclareHook{AfterBox#3}%
+%    \end{macrocode}
+% This switch enables parindents immediately after the heading.
+%    \begin{macrocode}
+  \def\tpAfterIndent{\expandafter\global\expandafter\let\csname tp@fter@indent@#3\endcsname\@empty}%
 %    \end{macrocode}
 % This switch provides a way to put the author's name(s) after the
 % heading. Default is that the author's are put on top of the heading.
@@ -161,6 +175,7 @@
     \tpUseHook{BeforeHeading#3}%
     \everypar{}%
     \def\@svsec{%
+      \tpUseHook{BeforeBox#3}%
       \bgroup
         \parindent\z@ \parskip\z@
         \tpUseHook{BlockFormat#3}%
@@ -193,6 +208,7 @@
           \vss\egroup
         \fi
         \tp@use@heading@block{Quote}{#3}%
+        \tp@use@heading@block{QuoteSource}{#3}%
 %    \end{macrocode}
 % Since all counters are taken from Word input, we can safely override \lstinline{\the<name>}:
 %    \begin{macrocode}
@@ -266,6 +282,7 @@
             \tp@mark@name{\heading@Runtitle}%
           \fi
         \fi
+        \tpUseHook{AfterBox#3}%
       \egroup
       \tpUseHook{AfterHeading#3}%
     }%
@@ -279,7 +296,11 @@
       \expandafter\expandafter\expandafter\global\expandafter\expandafter\@tempskipa\expandafter=\csname tp@hook@AfterSkip#3\endcsname\relax%
     \fi
     \ifdim\@tempskipa <\z@\relax
-      \global\@afterindentfalse
+      \expandafter\ifx\csname tp@fter@indent@#3\endcsname\relax
+        \global\@afterindentfalse
+      \else
+        \global\@afterindenttrue
+      \fi
       \expandafter\gdef\expandafter\@svsechd\expandafter{\@svsec}%
       \@nobreakfalse
       \global\@noskipsectrue
@@ -300,7 +321,11 @@
       \@svsec
       \par \nobreak
       \vskip \@tempskipa
-      \global\@afterindentfalse
+      \expandafter\ifx\csname tp@fter@indent@#3\endcsname\relax
+        \global\@afterindentfalse
+      \else
+        \global\@afterindenttrue
+      \fi
       \aftergroup\@afterheading%
     \fi}}
 
@@ -332,6 +357,7 @@
     \global\let\heading@Toctitle\relax
     \global\let\heading@Runtitle\relax
     \global\let\heading@Quote\relax
+    \global\let\heading@QuoteSource\relax
     \global\let\ltx@label\label
     \global\let\tp@label\relax
 %    \end{macrocode}
@@ -355,6 +381,7 @@
       \def\runtitle##1{\gdef\heading@Runtitle{##1}}%
       \def\number##1{\gdef\heading@Number{##1}}%
       \long\def\quote##1{\long\gdef\heading@Quote{##1}}%
+      \long\def\quotesource##1{\long\gdef\heading@QuoteSource{##1}}%
 }
 %    \end{macrocode}
 % The ending part of the heading environment.
@@ -364,7 +391,7 @@
     \expandafter\ifx\csname tpUseHeading\heading@name\endcsname\relax
       \PackageError{transpect.cls}{Heading level \heading@name\space unknown!}{A Heading with level \heading@name\space is unknown. Use the \string\tpDeclareHeading\space macro to declare heading levels.}%
     \fi
-    \csname tpUseHeading\heading@name\endcsname
+    \expandafter\aftergroup\csname tpUseHeading\heading@name\endcsname
   \egroup
   \nopagebreak
 }
