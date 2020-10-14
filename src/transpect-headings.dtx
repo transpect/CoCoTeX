@@ -435,31 +435,39 @@
 %    \begin{macrocode}
   \def\tpToCFormat##1{\expandafter\def\csname tp@toc@format@#1\endcsname{##1}}%\bfseries
 %    \end{macrocode}
+% Use this switch to suppress the output of the page number at all.
+%    \begin{macrocode}
+  \def\tpToCNoPage{\expandafter\let\csname tp@toc@nopage@#1\endcsname\@empty}%\bfseries
+%    \end{macrocode}
 % Generically provide \LaTeX's internal toc entry formatting macros:
 %    \begin{macrocode}
   \expandafter\def\csname l@#1\endcsname##1##2{%
     \addpenalty{-\@highpenalty}%
     \csname tp@toc@before@#1\endcsname
-    \expandafter\ifx\csname tp@toc@hangnum@#1\endcsname\@empty
-      \expandafter\@tempdima\csname tp@toc@hangfixed@#1\endcsname
-    \else
-      \def\numberline####1{%
-        \setbox\@tempboxa\hbox{####1\csname tp@toc@numsep@#1\endcsname}}%
-      \sbox\z@{##1}%
-      \expandafter\@tempdima\wd\@tempboxa%
-    \fi
-    \def\numberline####1{####1\csname tp@toc@numsep@#1\endcsname}%
     \begingroup
       \parindent \z@ \rightskip \@pnumwidth
       \parfillskip -\@pnumwidth
       \leavevmode
       \csname tp@toc@format@#1\endcsname
+      \expandafter\ifx\csname tp@toc@hangnum@#1\endcsname\relax
+        \expandafter\@tempdima\csname tp@toc@hangfixed@#1\endcsname
+      \else
+        \def\numberline####1{\global\setbox\@tempboxa\hbox{####1\csname tp@toc@numsep@#1\endcsname}}%
+        \sbox\z@{##1}%
+        \expandafter\@tempdima\wd\@tempboxa%
+        \global\setbox\@tempboxa\box\voidb@x
+      \fi
+      \def\numberline####1{####1\csname tp@toc@numsep@#1\endcsname\ignorespaces}%
       \advance\leftskip\@tempdima
       \hskip -\@tempdima
-      ##1\nobreak
-      \csname tp@toc@pagesep@#1\endcsname
-      \nobreak\hb@xt@\@pnumwidth{\hss\csname tp@toc@pageformat@#1\endcsname ##2%
-        \kern-\p@\kern\p@}\par
+      ##1%
+      \expandafter\ifx\csname tp@toc@nopage@#1\endcsname\relax
+        \nobreak
+        \csname tp@toc@pagesep@#1\endcsname
+        \nobreak\hb@xt@\@pnumwidth{\hss\csname tp@toc@pageformat@#1\endcsname ##2%
+          \kern-\p@\kern\p@}%
+      \fi
+      \par
       \penalty\@highpenalty
       \csname tp@toc@after@#1\endcsname
     \endgroup
