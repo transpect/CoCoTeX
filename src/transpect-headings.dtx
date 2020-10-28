@@ -115,6 +115,12 @@
 %    \begin{macrocode}
   \tpDeclareHook{TitleFormat#3}%
 %    \end{macrocode}
+% This hook is inserted after the main title. Redefine this if you
+% need to put the subtitle immediately after the main title, or else a
+% \lstinline{\par} is inserted.
+%    \begin{macrocode}
+  \def\tpAfterTitle##1{\def\csname tp@after@title@#3\endcsname{##1}}\expandafter\let\csname tp@after@title@#3\endcsname\par
+%    \end{macrocode}
 % The following hooks allow the whole heading to be placed inside a
 % box, e.g., when the heading area should have a fixed overall height.
 %    \begin{macrocode}
@@ -155,7 +161,7 @@
 %    \end{macrocode}
 % Evaluation of user's overrides
 %    \begin{macrocode}
-  \tp@init@l@{#3}%
+  \tp@init@l@{#3}{#2}%
   \ifx\tp@inherit\relax\else
     \csname tp@decl@\tp@inherit\endcsname
   \fi
@@ -174,6 +180,64 @@
     \par\@afterindenttrue
     \tpUseHook{BeforeHeading#3}%
     \everypar{}%
+%    \end{macrocode}
+% Running headers
+%    \begin{macrocode}
+    \expandafter\let\expandafter\tp@mark@name\csname #3mark\endcsname%
+    \ifx\tp@mark@name\relax
+      \ifx\tp@inherit@name\relax\else
+        \expandafter\let\expandafter\tp@mark@name\csname \tp@inherit@name mark\endcsname
+      \fi
+    \fi
+    \ifx\tp@mark@name\relax
+    \else
+      \ifx\heading@Runtitle\relax
+        \ifx\heading@Number\relax
+          \tp@mark@name{\heading@Title}%
+        \else
+%    \end{macrocode}
+% note that \lstinline{\chaptermark} and \lstinline{\sectionmark} need
+% to be dealt with in your page style definitions or you might get
+% faulty \lstinline{\thechapter} and \lstinline{\thesection} readings!
+%    \begin{macrocode}
+          \tp@mark@name{\protect\numberline{\heading@Number}\heading@Title}%
+        \fi
+      \else
+        \tp@mark@name{\heading@Runtitle}%
+      \fi
+    \fi
+%    \end{macrocode}
+% Entry in table of contents
+%    \begin{macrocode}
+    \expandafter\ifx\csname tp@no@toc@#3\endcsname\@empty\else
+      \expandafter\ifx\tp@notoc\relax
+        \global\let\tp@notoc\@empty
+      \else
+        \ifx\tp@notocnumber\relax
+          \let\numberline\@gobble
+          \global\let\tp@notocnumber\@empty
+        \fi
+        \expandafter\ifnum\heading@level<\c@tocdepth\relax
+          \ifx\heading@Toctitle\relax
+            \ifx\heading@Number\relax
+              \ifx\heading@Author\relax
+                \addcontentsline{toc}{#3}{\heading@Title}\relax
+              \else
+                \ifx\heading@Tocauthor\relax
+                  \addcontentsline{toc}{#3}{\string\tpToCAuthor{\heading@Author}\heading@Title}\relax
+                \else
+                  \addcontentsline{toc}{#3}{\string\tpToCAuthor{\heading@Tocauthor}\heading@Title}\relax
+                \fi
+              \fi
+            \else
+              \addcontentsline{toc}{#3}{\protect\numberline{\heading@Number}\heading@Title}\relax
+            \fi
+          \else
+            \addcontentsline{toc}{#3}{\heading@Toctitle}\relax
+          \fi
+        \fi
+      \fi
+    \fi
     \def\@svsec{%
       \tpUseHook{BeforeBox#3}%
       \bgroup
@@ -196,8 +260,10 @@
             \hskip-\@tempdimb
         \fi
         {\tpUseHook{TitleFormat#3}%
-         \tp@use@heading@block{Number}{#3}%
-         \heading@Title}%
+          \tp@use@heading@block{Number}{#3}%
+          \heading@Title
+          \csname tp@after@title@#3\endcsname
+        }%
         \tp@use@heading@block{Subtitle}{#3}%
         \expandafter\ifx\csname tp@hide@uthor@#3\endcsname\relax
           \expandafter\ifx\csname tp@author@fter@#3\endcsname\relax\else
@@ -233,55 +299,6 @@
           \fi
         \fi
         \global\let\label\ltx@label
-%    \end{macrocode}
-% Entry in table of contents
-%    \begin{macrocode}
-        \expandafter\ifx\csname tp@no@toc@#3\endcsname\@empty\else
-          \expandafter\ifx\tp@notoc\relax
-            \global\let\tp@notoc\@empty
-          \else
-            \ifx\tp@notocnumber\relax
-              \let\numberline\@gobble
-              \global\let\tp@notocnumber\@empty
-            \fi
-            \expandafter\ifnum\heading@level<\c@tocdepth\relax
-              \ifx\heading@Toctitle\relax
-                \ifx\heading@Number\relax
-                  \addcontentsline{toc}{#3}{\heading@Title}\relax
-                \else
-                  \addcontentsline{toc}{#3}{\protect\numberline{\heading@Number}\heading@Title}\relax
-                \fi
-              \else
-                \addcontentsline{toc}{#3}{\heading@Toctitle}\relax
-              \fi
-            \fi
-          \fi
-        \fi
-%    \end{macrocode}
-% Running headers
-%    \begin{macrocode}
-        \expandafter\let\expandafter\tp@mark@name\csname #3mark\endcsname%
-        \ifx\tp@mark@name\relax
-          \ifx\tp@inherit@name\relax\else
-            \expandafter\let\expandafter\tp@mark@name\csname \tp@inherit@name mark\endcsname
-          \fi
-        \fi
-        \ifx\tp@mark@name\relax\else
-          \ifx\heading@Runtitle\relax
-            \ifx\heading@Number\relax
-              \tp@mark@name{\heading@Title}%
-            \else
-%    \end{macrocode}
-% note that \lstinline{\chaptermark} and \lstinline{\sectionmark} need
-% to be dealt with in your page style definitions or you might get
-% faulty \lstinline{\thechapter} and \lstinline{\thesection} readings!
-%    \begin{macrocode}
-              \tp@mark@name{\numberline{\heading@Number}\heading@Title}%
-            \fi
-          \else
-            \tp@mark@name{\heading@Runtitle}%
-          \fi
-        \fi
         \tpUseHook{AfterBox#3}%
       \egroup
       \tpUseHook{AfterHeading#3}%
@@ -320,13 +337,15 @@
     \else
       \@svsec
       \par \nobreak
-      \vskip \@tempskipa
-      \expandafter\ifx\csname tp@fter@indent@#3\endcsname\relax
-        \global\@afterindentfalse
-      \else
-        \global\@afterindenttrue
-      \fi
-      \aftergroup\@afterheading%
+      \gdef\next{%
+        \vskip \@tempskipa
+        \expandafter\ifx\csname tp@fter@indent@#3\endcsname\relax
+          \global\@afterindentfalse
+        \else
+          \global\@afterindenttrue
+        \fi
+        \@afterheading}%
+      \aftergroup\next%
     \fi}}
 
 %    \end{macrocode}
@@ -355,6 +374,7 @@
     \global\let\heading@Number\relax
     \global\let\heading@Subtitle\relax
     \global\let\heading@Toctitle\relax
+    \global\let\heading@Tocauthor\relax
     \global\let\heading@Runtitle\relax
     \global\let\heading@Quote\relax
     \global\let\heading@QuoteSource\relax
@@ -378,6 +398,7 @@
       \long\def\title##1{\long\gdef\heading@Title{##1}}%
       \long\def\subtitle##1{\long\gdef\heading@Subtitle{##1}}%
       \long\def\toctitle##1{\long\gdef\heading@Toctitle{##1}}%
+      \long\def\tocauthor##1{\long\gdef\heading@Tocauthor{##1}}%
       \def\runtitle##1{\gdef\heading@Runtitle{##1}}%
       \def\number##1{\gdef\heading@Number{##1}}%
       \long\def\quote##1{\long\gdef\heading@Quote{##1}}%
@@ -399,7 +420,7 @@
 %
 % \section{Facility for ToC and ListOf entries}
 %    \begin{macrocode}
-\def\tp@init@l@#1{%
+\def\tp@init@l@#1#2{%
   \def\tpToCProperty##1##2{\tpAddToHook{##1#1}{##2}}%
 %    \end{macrocode}
 % Code to be inserted before the toc entry for that level
@@ -410,11 +431,15 @@
 %    \begin{macrocode}
   \def\tpToCAfter##1{\expandafter\def\csname tp@toc@after@#1\endcsname{##1}}%
 %    \end{macrocode}
-% If used, create a hanging indent the width of the heading's number
+% If used, create a hanging indent the width of the heading level's widest number
 %    \begin{macrocode}
   \def\tpToCHangNumber{\expandafter\global\expandafter\let\csname tp@toc@hangnum@#1\endcsname\@empty}%
 %    \end{macrocode}
-% If greater than 0pt, use hanging indent of that width, needs to be defined as a dimension.
+% If greater than 0pt, and no \lstinline{\tpToCHangNumber} is set, use
+% hanging indent of that width, needs to be defined as a dimension. Is
+% used together with \lstinline{\tpToCHangNumber}, that is the minimum
+% amount of the hanging indent, even if the heading level's widest
+% number is narrower than that amount.
 %    \begin{macrocode}
   \def\tpToCHangFixed##1{\expandafter\xdef\csname tp@toc@hangfixed@#1\endcsname{\dimexpr##1\relax}}%
   \expandafter\let\csname tp@toc@hangfixed@#1\endcsname\z@
@@ -427,39 +452,88 @@
 %    \begin{macrocode}
   \def\tpToCPageSep##1{\expandafter\gdef\csname tp@toc@pagesep@#1\endcsname{##1}}%\dotfill
 %    \end{macrocode}
+% Separator between author and whatever comes next.
+%    \begin{macrocode}
+  \def\tpToCAuthorAfter##1{\expandafter\gdef\csname tp@toc@author@after@#1\endcsname{##1}}%;
+  \def\tpToCAuthorBefore##1{\expandafter\gdef\csname tp@toc@author@before@#1\endcsname{##1}}%;
+  \def\tpToCAuthorFormat##1{\expandafter\gdef\csname tp@toc@authorformat@#1\endcsname{##1}}%
+%    \end{macrocode}
+% If set, Author comes after the toc line
+%    \begin{macrocode}
+  \def\tpToCAuthorAfterHeading{\expandafter\global\expandafter\let\csname tp@toc@author@after@heading@#1\endcsname\@empty}%
+%    \end{macrocode}
 % Format of the page number; extends \lstinline{\toTocFormat<level>}.
 %    \begin{macrocode}
   \def\tpToCPageFormat##1{\expandafter\gdef\csname tp@toc@pageformat@#1\endcsname{##1}}%
 %    \end{macrocode}
 % Format of the entire toc entry, i.e., number, title, and page.
 %    \begin{macrocode}
-  \def\tpToCFormat##1{\expandafter\def\csname tp@toc@format@#1\endcsname{##1}}%\bfseries
+  \def\tpToCFormat##1{\expandafter\gdef\csname tp@toc@format@#1\endcsname{##1}}%\bfseries
 %    \end{macrocode}
 % Use this switch to suppress the output of the page number at all.
 %    \begin{macrocode}
-  \def\tpToCNoPage{\expandafter\let\csname tp@toc@nopage@#1\endcsname\@empty}%\bfseries
+  \def\tpToCNoPage{\expandafter\global\expandafter\let\csname tp@toc@nopage@#1\endcsname\@empty}%
 %    \end{macrocode}
 % Generically provide \LaTeX's internal toc entry formatting macros:
 %    \begin{macrocode}
   \expandafter\def\csname l@#1\endcsname##1##2{%
+    \@tempdima\z@%% Breite der eigenen numberline
+    \@tempdimc\z@%% Breite des linken Einzugs der nächsthöheren ÜS
     \addpenalty{-\@highpenalty}%
+    \setbox\@tempboxa\box\voidb@x
     \csname tp@toc@before@#1\endcsname
     \begingroup
-      \parindent \z@ \rightskip \@pnumwidth
-      \parfillskip -\@pnumwidth
+      \@tempcnta\numexpr#2-1\relax
+      \@whilenum\@tempcnta>\m@ne\do{%
+        \expandafter\ifx\csname numberlinewidth\the\@tempcnta\endcsname\relax\else
+          \expandafter\advance\expandafter\@tempdimc\csname numberlinewidth\the\@tempcnta\endcsname
+        \fi
+        \advance\@tempcnta\m@ne
+      }%
+      \parindent \z@
+      \rightskip \@pnumwidth\@plus1fill\relax
+      \parfillskip -\rightskip
       \leavevmode
       \csname tp@toc@format@#1\endcsname
-      \expandafter\ifx\csname tp@toc@hangnum@#1\endcsname\relax
-        \expandafter\@tempdima\csname tp@toc@hangfixed@#1\endcsname
+      \let\tp@toc@author@after@heading\relax
+      \expandafter\ifx\csname tp@toc@author@after@heading@#1\endcsname\@empty
+        \def\tpToCAuthor####1{\gdef\tp@toc@author@after@heading{\csname tp@toc@author@before@#1\endcsname{\csname tp@toc@authorformat@#1\endcsname ####1\csname tp@toc@author@after@#1\endcsname}}}%
       \else
-        \def\numberline####1{\global\setbox\@tempboxa\hbox{####1\csname tp@toc@numsep@#1\endcsname}}%
-        \sbox\z@{##1}%
-        \expandafter\@tempdima\wd\@tempboxa%
-        \global\setbox\@tempboxa\box\voidb@x
+        \def\tpToCAuthor####1{\csname tp@toc@author@before@#1\endcsname{\csname tp@toc@authorformat@#1\endcsname ####1\csname tp@toc@author@after@#1\endcsname}}%
       \fi
-      \def\numberline####1{####1\csname tp@toc@numsep@#1\endcsname\ignorespaces}%
-      \advance\leftskip\@tempdima
-      \hskip -\@tempdima
+      \sbox\z@{\def\numberline####1{\global\sbox\@tempboxa{####1\enskip}}##1}%
+      \expandafter\@tempdima\csname  tp@toc@hangfixed@#1\endcsname\relax
+      \ifvoid\@tempboxa
+      \else
+        \expandafter\ifx\csname tp@toc@hangnum@#1\endcsname\@empty
+          \@tempdima\dimexpr\wd\@tempboxa\relax
+        \fi
+      \fi
+      \edef\@tempa{%
+        \string\expandafter\string\gdef\string\csname\space numberlinewidth#2\string\endcsname{\the\@tempdima}%
+      }%
+      \expandafter\ifx\csname numberlinewidth#2\endcsname\relax
+        \expandafter\xdef\csname numberlinewidth#2\endcsname{\the\@tempdima}%
+        \expandafter\write\expandafter\@auxout\expandafter{\@tempa}%
+      \else
+        \expandafter\ifdim\csname numberlinewidth#2\endcsname<\@tempdima\relax
+          \expandafter\xdef\csname numberlinewidth#2\endcsname{\the\@tempdima}%
+          \expandafter\write\expandafter\@auxout\expandafter{\@tempa}%
+        \else
+          \expandafter\ifdim\csname numberlinewidth#2\endcsname=\@tempdima\relax
+            \expandafter\write\expandafter\@auxout\expandafter{\@tempa}%
+          \else
+            \expandafter\@tempdima\csname numberlinewidth#2\endcsname\relax
+          \fi
+        \fi
+      \fi
+      \def\numberline####1{\hb@xt@\@tempdima{####1\csname tp@toc@numsep@#1\endcsname\ignorespaces}}%
+      \ifvoid\@tempboxa
+        \leftskip \dimexpr\@tempdimc\relax
+      \else
+        \leftskip \dimexpr\@tempdima+\@tempdimc\relax
+        \hskip -\@tempdima
+      \fi
       ##1%
       \expandafter\ifx\csname tp@toc@nopage@#1\endcsname\relax
         \nobreak
@@ -467,6 +541,7 @@
         \nobreak\hb@xt@\@pnumwidth{\hss\csname tp@toc@pageformat@#1\endcsname ##2%
           \kern-\p@\kern\p@}%
       \fi
+      \tp@toc@author@after@heading
       \par
       \penalty\@highpenalty
       \csname tp@toc@after@#1\endcsname

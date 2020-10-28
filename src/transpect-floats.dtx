@@ -44,218 +44,353 @@
 \newcolumntype{Z}{>{\centering\arraybackslash\unskip}p}
 \newcolumntype{e}{!{\extracolsep{\fill}}}
 
-\renewcommand \thefigure
-     {\@arabic\c@figure}
-%% TODO: Projektspezifisch!
-\@removefromreset{figure}{chapter}
 
-\renewcommand \thetable
-     {\@arabic\c@table}
-%% TODO: Projektspezifisch!
-\@removefromreset{table}{chapter}
+\newbox \tp@subfltbox
+\newcount\tp@subflts          \tp@subflts=\z@\relax
+\newdimen\tp@subflt@maxheight \tp@subflt@maxheight=\z@\relax
+\newdimen\tp@subflt@sep       \tp@subflt@sep=\fboxsep\relax
+\newdimen\tp@subflt@hsize     \tp@subflt@hsize=\textwidth\relax
 
-\captionsetup{%
-   format=plain
-  ,labelformat=empty
-  ,font+=it
-  ,singlelinecheck=false
-  ,justification=RaggedRight
-  ,listformat=empty
+\def\tp@provide@setting#1#2{%
+  \expandafter\def\csname #1\endcsname{\@ifnextchar[{\csname @#1\endcsname}{\csname @#1\endcsname[]}}%]
+  \expandafter\def\csname @#1\endcsname[##1]##2{\ltx@LocalExpandAfter\gdef\csname #2\if!##1!\else##1\fi\endcsname{##2}}%
 }
 
+\tp@provide@setting{tpCaptionLabelSep}{tp@cap@labelsep@}
+\tp@provide@setting{tpCaptionSourceSep}{tp@cap@sourcesep@}
+\tp@provide@setting{tpCaptionSep}{tp@cap@sep@}
+\tp@provide@setting{tpAboveFloatSkip}{tp@above@flt@skip@}
+\tp@provide@setting{tpBelowFloatSkip}{tp@below@flt@skip@}
+\tp@provide@setting{tpSubFloatSep}{tp@subflt@sep}
+
+\def\tp@reset@subflts{%
+  \global\tp@subflts=\z@
+  \global\tp@subflt@maxheight=\z@\relax
+}
+
+\def\tpFigure{\@ifnextchar[{\tp@Figure}{\tp@Figure[!]}}%]
+\def\tp@Figure[#1]{\tp@float[#1]{figure}}
+\def\endtpFigure{\endtp@float}
+
 %    \end{macrocode}
-% \section{Sources}
-% Many Transpect projects use different markup for the caption of a floating object and its source.
+% \#1: caption type
+% \#2: float pos
 %    \begin{macrocode}
-\newlength\aboveSourceSkip \aboveSourceSkip0mm
+\def\tp@float[#1]#2{%
+  \begingroup
+    \tp@reset@subflts
+    \tp@reset@caption{0}%
+    \def\@captype{#2}%
+    \def\Fig##1{\ltx@LocalExpandAfter\gdef\csname tp@subflt@fig@\the\tp@subflts\endcsname{##1}}%
+    \def\Caption##1{\ltx@LocalExpandAfter\gdef\csname tp@subflt@cpt@\the\tp@subflts\endcsname{##1}}%
+    \def\Source##1{\ltx@LocalExpandAfter\gdef\csname tp@subflt@src@\the\tp@subflts\endcsname{##1}}%
+    \def\Label##1{\ltx@LocalExpandAfter\gdef\csname tp@subflt@lbl@\the\tp@subflts\endcsname{##1}}%
+    \parindent\z@
+    \ifx\csname tp@above@flt@skip@\@captype\endcsname\relax\else
+      \expandafter\addvspace\expandafter{\csname tp@above@flt@skip@\@captype\endcsname}%
+    \fi
+  }
 
-\newcommand\transcriptBild[3][]{\tr@nscriptFloat{#1}{#2}{#3}}
-\newcommand\transcriptTab[3][]{\aboveSourceSkip1mm\let\use@depth\relax\tr@nscriptFloat{#1}{#2}{#3}}
-
-\newbox\tr@nscriptFlt
-\newdimen\tr@nscriptFltWd
-\newdimen\tr@nscriptWd
-\newdimen\tr@nscriptHt
-\newdimen\tr@nscriptSep
-
-
-%    \end{macrocode}
-% \section{Scaling graphics to a common height}
-% The \lstinline{\sameheight} macro is used to scale all figures
-% incorporated via \lstinline{\includesubgraphics} to a common height
-% such that the line of graphics fills \lstinline{\shhsize} (\lstinline{\hsize} by default).
-%    \begin{macrocode}
-
-\newbox\@includesubgraphicsbox
-\newcount\c@includesubgraphics \c@includesubgraphics\z@
-\newdimen\includesubgraphics@maxheight
-\newdimen\subgraphicssep \subgraphicssep\fboxsep
-\newdimen\shhsize \shhsize=\hsize\relax
-\newdimen\sh@margins
-\RequirePackage{ltxcmds}
-
-\newcommand*\includesubgraphics[2][]{%
-  \global\advance\c@includesubgraphics\@ne
-  \ltx@LocalExpandAfter\gdef\csname subgraphics@caption@\the\c@includesubgraphics\endcsname{#1}%
-  \ltx@LocalExpandAfter\gdef\csname subgraphics@name@\the\c@includesubgraphics\endcsname{#2}%
-  \setbox\@includesubgraphicsbox\hbox{\includegraphics{#2}}%
-  \ltx@LocalExpandAfter\xdef\csname subgraphics@width@\the\c@includesubgraphics\endcsname{\the\wd\@includesubgraphicsbox}%
-  \ltx@LocalExpandAfter\xdef\csname subgraphics@height@\the\c@includesubgraphics\endcsname{\the\ht\@includesubgraphicsbox}%
-  \expandafter\ifdim\csname subgraphics@height@\the\c@includesubgraphics\endcsname>\includesubgraphics@maxheight\relax
-    \ltx@LocalExpandAfter\global\expandafter\includesubgraphics@maxheight=\csname subgraphics@height@\the\c@includesubgraphics\endcsname\relax
-  \fi}
-%    \end{macrocode}
-%
-%    \begin{macrocode}
-\def\sameheight#1{%
-  \bgroup
-  \let\c@psource\@undefined
-  \c@includesubgraphics=\z@\relax
-  \let\@shhsize\shhsize
-  \includesubgraphics@maxheight=\z@\relax
-%    \end{macrocode}
-%% measurement
-%    \begin{macrocode}
-  \setbox\@tempboxa\hbox{#1}%
-%    \end{macrocode}
-%% 1st iteration: Calculate widths of all subfigures when scaled up to the highest subfigure's height:
-%% \lstinline{\@tempdima}: total sum of those widths
-%    \begin{macrocode}
-  \@tempdima=\z@\relax
-  \sh@iterate{\@tempcnta}{\@ne}{\c@includesubgraphics}{%
-    \edef\@tempa{\CalcRatio{\includesubgraphics@maxheight}{\csname subgraphics@height@\the\@tempcnta\endcsname}}%
-    \ifnum\@tempcnta>\@ne\global\advance\@shhsize-\subgraphicssep\relax\fi
-    \expandafter\@tempdimc\csname subgraphics@width@\the\@tempcnta\endcsname\relax
-    \@tempdimb=\@tempa\@tempdimc\relax
-    \expandafter\xdef\csname  subgraphics@adjusted@width@\the\@tempcnta\endcsname{\the\@tempdimb}%
-    \global\advance\@tempdima\@tempdimb
-  }%
+\def\endtp@float{%
+   \tp@subflt@hsize=\hsize\relax
+   \bgroup
+      \@tempdima=\z@\relax
+      \ifnum\tp@subflts=\z@\relax
+        \tp@usefloat0%
+      \else
+        \sh@iterate{\@tempcnta}{\@ne}{\tp@subflts}{%
+          \edef\@tempa{\CalcRatio{\tp@subflt@maxheight}{\csname tp@subflt@height@\the\@tempcnta\endcsname}}%
+          \ifnum\@tempcnta>\@ne\global\advance\tp@subflt@hsize-\tp@subflt@sep\relax\fi
+          \expandafter\@tempdimc\csname tp@subflt@width@\the\@tempcnta\endcsname\relax
+          \@tempdimb=\@tempa\@tempdimc\relax
+          \expandafter\edef\csname  tp@subflt@adj@width@\the\@tempcnta\endcsname{\the\@tempdimb}%
+          \advance\@tempdima\@tempdimb
+        }%
 %    \end{macrocode}
 %% 2nd iteration: Calculate width ratio of all adjusted subfigures against total width of all figures plus separators and output:
 %    \begin{macrocode}
-  \@tempcnta\z@
-  \sh@iterate{\@tempcnta}{\@ne}{\c@includesubgraphics}{%
-    \edef\@tempa{\CalcRatio{\csname subgraphics@adjusted@width@\the\@tempcnta\endcsname}{\@tempdima}}%
-    \@tempdimb\@tempa\@shhsize\relax
-    \edef\@tempb{\csname subgraphics@name@\the\@tempcnta\endcsname}%
-    \ifnum\@tempcnta>\@ne\hskip\subgraphicssep\fi
-    \def\@igopts{width=\linewidth}%
-    \begin{minipage}[b]{\@tempdimb}%
-      \captionsetup{margin=\z@}%
-      \csname subgraphics@caption@\the\@tempcnta\endcsname%
-      \expandafter\expandafter\expandafter\includegraphics\expandafter\expandafter\expandafter[\expandafter\@igopts\expandafter]\expandafter{\@tempb}%
-      \ifx\c@psource\@undefined\else
-        \vskip\dimexpr-\topskip+\aboveSourceSkip+.5mm\relax
-        \vtop{\captionsetup{font=footnotesize}\caption*{\c@psource}}%
-        \global\let\c@psource\@undefined
+        \@tempcnta\z@
+        \sh@iterate{\@tempcnta}{\@ne}{\tp@subflts}{%
+          \edef\@tempa{\CalcRatio{\csname tp@subflt@adj@width@\the\@tempcnta\endcsname}{\@tempdima}}%
+          \@tempdimb\@tempa\tp@subflt@hsize\relax
+          \ifnum\@tempcnta>\@ne\hskip\tp@subflt@sep\fi
+          \begin{minipage}[t]{\@tempdimb}%
+            \captionsetup{margin=\z@}%
+            \tp@usefloat{\the\@tempcnta}%
+          \end{minipage}%
+        }%
       \fi
-    \end{minipage}%
-  }%
-  \egroup
-}
-%    \end{macrocode}
-% END: sameheight
-%
-% \#1: layout variant, \#2 subufigures
-%    \begin{macrocode}
-\newcommand\transriptFixedFigure[3][]{%
-  \bgroup
-  \shhsize\hsize
-  \subgraphicssep2mm
-  \ifx#2A\relax
-    \@tempdima\z@
-  \else
-    \ifx#2B\relax
-      \@tempdima20mm
-    \else
-      \ifx#2C\relax
-        \@tempdima30mm
-      \else
-        \ifx#2D\relax
-          \@tempdima50mm
-        \fi
-      \fi
-    \fi
-  \fi
-  \advance\shhsize-\@tempdima
-  \sh@margins.5\@tempdima
-  \vskip1\baselineskip
-  \captionsetup{margin=\sh@margins\relax}%
-  \if!#1!\else#1\fi
-  \hskip\sh@margins\sameheight{#3}%
-  \ifx\c@psource\@undefined\else
-    \vskip\aboveSourceSkip
-    \captionsetup{font=footnotesize,skip=-1mm}%
-    \caption*{\c@psource}%
-    \global\let\c@psource\@undefined
-  \fi
-  \egroup}
-
-\def\capsource#1{\def\c@psource{#1}}%
-
-\let\oldfigure\figure
-\let\oldendfigure\endfigure
-
-\renewenvironment{figure}{\savenotes\oldfigure}{\oldendfigure\spewnotes}
-
-
-\long\def\tr@nscriptFloat#1#2#3{%
-  \def\@rgi{#1}%
-  \setbox\tr@nscriptFlt\hbox{#3}%
-  \tr@nscriptFltWd=\wd\tr@nscriptFlt\relax
-  \tr@nscriptHt=\dimexpr\ht\tr@nscriptFlt\ifx\use@depth\relax+\dp\tr@nscriptFlt\fi\relax
-  \tr@nscriptSep\dimexpr(\textwidth-\tr@nscriptFltWd)/2\relax
-  \vskip\baselineskip
-  \ifdim\tr@nscriptFltWd<.5\textwidth\relax
-    \bgroup
-      %\tr@nscriptSep4mm
-      \tr@nscriptWd\dimexpr\textwidth-\tr@nscriptFltWd\relax
-      \noindent\begin{minipage}[\ifx\use@depth\relax t\else b\fi][\tr@nscriptHt][t]{\tr@nscriptWd}%
-        \captionsetup{justification=RaggedRight}%
-        \captionof{figure}{#2}%
-        \ifx\@rgi\@empty\else
-          \vfill
-        \captionsetup{font=footnotesize,skip=\z@}%
-        \caption*{#1}%
-        \vspace*{\dimexpr-\dp\tr@nscriptFlt-1mm}%
-       \fi
-      \end{minipage}\hfill
-      \begin{minipage}[t][\tr@nscriptHt]{\tr@nscriptFltWd}\centering
-        \unhbox\tr@nscriptFlt%
-      \end{minipage}%
     \egroup
-  \else
-    \noindent\hskip\tr@nscriptSep
-    \begin{minipage}{\tr@nscriptFltWd}\centering%
-      \captionof{figure}{#2}%
-      \unhbox\tr@nscriptFlt\par
-      \ifx\@rgi\@empty\else
-        \captionsetup{font=footnotesize,skip=-1mm}\caption*{#1}%
-        \vspace*{\dimexpr-\dp\tr@nscriptFlt-1mm}%
-      \fi
-    \end{minipage}%
-  \fi
-  \vskip\baselineskip
-  \global\let\use@depth\@undefined
-  \tr@nscriptWd\z@% \tr@nscriptSep\z@
+    \expandafter\ifx\csname tp@subflt@cpt@0\endcsname\relax\else
+      \tp@make@caption{0}%
+    \fi
+    \ifx\csname tp@below@flt@skip@\@captype\endcsname\relax\else
+      \expandafter\vskip\csname tp@below@flt@skip@\@captype\endcsname
+    \fi
+  \endgroup
 }
 
-\def\tablefont{\small}
-\def\arraystretch{1.3}
-\def\@tabular{%
-  \leavevmode
-  \hbox \bgroup\tablefont $\col@sep\tabcolsep \let\d@llarbegin\begingroup%$
-                                    \let\d@llarend\endgroup
-  \ifx\ST@tableformat\@undefined\gdef\@tablefont{\tablefont}\fi
-  \@tabarray}
-\let\@classzold\@classz
-\def\@classz{%
-   \expandafter\ifx\d@llarbegin\begingroup
-     \toks \count@ =
-     \expandafter{\expandafter\@tablefont\the\toks\count@}%
-   \fi
-   \@classzold}
-\def\endtabular{%
-  \endarray
-  $\egroup}%$
-\expandafter\let\csname endtabular*\endcsname=\endtabular
+\def\tp@usefloat#1{{%
+    \parindent\z@
+    \csname tp@subflt@fig@#1\endcsname\par
+    \expandafter\ifx\csname tp@cap@sep@\@captype\endcsname\relax\else
+      \expandafter\vskip\csname tp@cap@sep@\@captype\endcsname
+    \fi
+    \expandafter\ifx\csname tp@subflt@cpt@#1\endcsname\relax
+    \else
+      \tp@make@caption{#1}%
+    \fi
+}}
+
+\def\tp@make@caption#1{%
+  {\edef\tp@cap{%
+     \csname tp@subflt@lbl@#1\endcsname\csname tp@cap@labelsep@\@captype\endcsname%
+     \csname tp@subflt@cpt@#1\endcsname\csname tp@cap@sourcesep@\@captype\endcsname
+     \csname tp@subflt@src@#1\endcsname}
+   \expandafter\caption\expandafter*\expandafter{\tp@cap}%
+   \addcontentsline{lof}{figure}{\string\numberline{\csname tp@subflt@lbl@#1\endcsname}\csname tp@subflt@cpt@#1\endcsname\csname tp@subflt@src@#1\endcsname}%
+   \tp@reset@caption{#1}%
+ }}
+
+\def\tp@reset@caption#1{
+  \ltx@LocalExpandAfter\global\expandafter\let\csname tp@subflt@fig@#1\endcsname\relax%
+  \ltx@LocalExpandAfter\global\expandafter\let\csname tp@subflt@cpt@#1\endcsname\relax%
+  \ltx@LocalExpandAfter\global\expandafter\let\csname tp@subflt@src@#1\endcsname\relax%
+  \ltx@LocalExpandAfter\global\expandafter\let\csname tp@subflt@lbl@#1\endcsname\relax%
+  }
+
+\def\tpSubFloat{%
+  \global\advance\tp@subflts\@ne
+}
+
+
+\def\endtpSubFloat{%
+  \setbox\tp@subfltbox\hbox{\csname tp@subflt@fig@\the\tp@subflts\endcsname}%
+  \expandafter\xdef\csname tp@subflt@width@\the\tp@subflts\endcsname{\the\wd\tp@subfltbox}%
+  \expandafter\xdef\csname tp@subflt@height@\the\tp@subflts\endcsname{\the\ht\tp@subfltbox}%
+  \expandafter\ifdim\csname tp@subflt@height@\the\tp@subflts\endcsname>\tp@subflt@maxheight\relax
+    \expandafter\global\expandafter\tp@subflt@maxheight=\csname tp@subflt@height@\the\tp@subflts\endcsname\relax
+  \fi}
+
+
+
+%%%%%%%%%%
+% LEGACY %
+%%%%%%%%%%
+
+
+
+% \renewcommand \thefigure
+%      {\@arabic\c@figure}
+% %% TODO: Projektspezifisch!
+% \@removefromreset{figure}{chapter}
+
+% \renewcommand \thetable
+%      {\@arabic\c@table}
+% %% TODO: Projektspezifisch!
+% \@removefromreset{table}{chapter}
+
+% \captionsetup{%
+%    format=plain
+%   ,labelformat=empty
+%   ,font+=it
+%   ,singlelinecheck=false
+%   ,justification=RaggedRight
+%   ,listformat=empty
+% }
+
+% %    \end{macrocode}
+% % \section{Sources}
+% % Many Transpect projects use different markup for the caption of a floating object and its source.
+% %    \begin{macrocode}
+% \newlength\aboveSourceSkip \aboveSourceSkip0mm
+
+% \newcommand\transpectBild[3][]{\tr@nspectFloat{#1}{#2}{#3}}
+% \newcommand\transpectTab[3][]{\aboveSourceSkip1mm\let\use@depth\relax\tr@nspectFloat{#1}{#2}{#3}}
+% \let\transcriptBild\transpectBild
+% \let\transcriptTab\transpectTab
+
+% \newbox\tr@nspectFlt
+% \newdimen\tr@nspectFltWd
+% \newdimen\tr@nspectWd
+% \newdimen\tr@nspectHt
+% \newdimen\tr@nspectSep
+
+
+% %    \end{macrocode}
+% % \section{Scaling graphics to a common height}
+% % The \lstinline{\sameheight} macro is used to scale all figures
+% % incorporated via \lstinline{\includesubgraphics} to a common height
+% % such that the line of graphics fills \lstinline{\shhsize} (\lstinline{\hsize} by default).
+% %    \begin{macrocode}
+
+% \newbox\@includesubgraphicsbox
+% \newcount\c@includesubgraphics \c@includesubgraphics\z@
+% \newdimen\includesubgraphics@maxheight
+% \newdimen\subgraphicssep \subgraphicssep\fboxsep
+% \newdimen\sh@margins
+% \RequirePackage{ltxcmds}
+
+% \newcommand*\includesubgraphics[2][]{%
+%   \global\advance\c@includesubgraphics\@ne
+%   \ltx@LocalExpandAfter\gdef\csname subgraphics@caption@\the\c@includesubgraphics\endcsname{#1}%
+%   \ltx@LocalExpandAfter\gdef\csname subgraphics@name@\the\c@includesubgraphics\endcsname{#2}%
+%   \setbox\@includesubgraphicsbox\hbox{\includegraphics{#2}}%
+%   \ltx@LocalExpandAfter\xdef\csname subgraphics@width@\the\c@includesubgraphics\endcsname{\the\wd\@includesubgraphicsbox}%
+%   \ltx@LocalExpandAfter\xdef\csname subgraphics@height@\the\c@includesubgraphics\endcsname{\the\ht\@includesubgraphicsbox}%
+%   \expandafter\ifdim\csname subgraphics@height@\the\c@includesubgraphics\endcsname>\includesubgraphics@maxheight\relax
+%     \ltx@LocalExpandAfter\global\expandafter\includesubgraphics@maxheight=\csname subgraphics@height@\the\c@includesubgraphics\endcsname\relax
+%   \fi}
+% %    \end{macrocode}
+% %
+% %    \begin{macrocode}
+% % \def\sameheight#1{%
+% %   \bgroup
+% %     \tp@reset@subflts
+% % %    \end{macrocode}
+% % %% measurement
+% % %    \begin{macrocode}
+% %     \setbox\@tempboxa\hbox{#1}%
+% % %    \end{macrocode}
+% % %% 1st iteration: Calculate widths of all subfigures when scaled up to the highest subfigure's height:
+% % %% \lstinline{\@tempdima}: total sum of those widths
+% % %    \begin{macrocode}
+% %     \@tempdima=\z@\relax
+% %     \sh@iterate{\@tempcnta}{\@ne}{\tp@subflts}{%
+% %       \edef\@tempa{\CalcRatio{\tp@subflt@maxheight}{\csname tp@subflt@height@\the\@tempcnta\endcsname}}%
+% %       \ifnum\@tempcnta>\@ne\global\advance\@shhsize-\tp@subflt@sep\relax\fi
+% %       \expandafter\@tempdimc\csname tp@subflt@width@\the\@tempcnta\endcsname\relax
+% %       \@tempdimb=\@tempa\@tempdimc\relax
+% %       \expandafter\edef\csname  tp@subflt@adj@width@\the\@tempcnta\endcsname{\the\@tempdimb}%
+% %       \global\advance\@tempdima\@tempdimb
+% %   }%
+% % %    \end{macrocode}
+% % %% 2nd iteration: Calculate width ratio of all adjusted subfigures against total width of all figures plus separators and output:
+% % %    \begin{macrocode}
+% %   \@tempcnta\z@
+% %   \sh@iterate{\@tempcnta}{\@ne}{\tp@subflts}{%
+% %     \edef\@tempa{\CalcRatio{\csname tp@subflt@adj@width@\the\@tempcnta\endcsname}{\@tempdima}}%
+% %     \@tempdimb\@tempa\@shhsize\relax
+% %     %\edef\@tempb{\csname subgraphics@name@\the\@tempcnta\endcsname}%
+% %     \ifnum\@tempcnta>\@ne\hskip\subgraphicssep\fi
+% %     \def\@igopts{width=\linewidth}%
+% %     \begin{minipage}[b]{\@tempdimb}%
+% %       \captionsetup{margin=\z@}%
+% %       %\csname subgraphics@caption@\the\@tempcnta\endcsname%
+% %       \csname tp@subflt@fig@\the\@tempcnta\endcsname
+% %       %\expandafter\expandafter\expandafter\includegraphics\expandafter\expandafter\expandafter[\expandafter\@igopts\expandafter]\expandafter{\@tempb}%
+% %       % \ifx\c@psource\@undefined\else
+% %       %   \vskip\dimexpr-\topskip+\aboveSourceSkip+.5mm\relax
+% %       %   \vtop{\captionsetup{font=footnotesize}\caption*{\c@psource}}%
+% %       %   \global\let\c@psource\@undefined
+% %       % \fi
+% %     \end{minipage}%
+% %   }%
+% %   \egroup
+% % }
+% %    \end{macrocode}
+% % END: sameheight
+% %
+% % \#1: layout variant, \#2 subufigures
+% %    \begin{macrocode}
+% \newcommand\transriptFixedFigure[3][]{%
+%   \bgroup
+%   \shhsize\hsize
+%   \subgraphicssep2mm
+%   \ifx#2A\relax
+%     \@tempdima\z@
+%   \else
+%     \ifx#2B\relax
+%       \@tempdima20mm
+%     \else
+%       \ifx#2C\relax
+%         \@tempdima30mm
+%       \else
+%         \ifx#2D\relax
+%           \@tempdima50mm
+%         \fi
+%       \fi
+%     \fi
+%   \fi
+%   \advance\shhsize-\@tempdima
+%   \sh@margins.5\@tempdima
+%   \vskip1\baselineskip
+%   \captionsetup{margin=\sh@margins\relax}%
+%   \if!#1!\else#1\fi
+%   \hskip\sh@margins\sameheight{#3}%
+%   \ifx\c@psource\@undefined\else
+%     \vskip\aboveSourceSkip
+%     \captionsetup{font=footnotesize,skip=-1mm}%
+%     \caption*{\c@psource}%
+%     \global\let\c@psource\@undefined
+%   \fi
+%   \egroup}
+
+% \def\capsource#1{\def\c@psource{#1}}%
+
+% \let\oldfigure\figure
+% \let\oldendfigure\endfigure
+
+% \renewenvironment{figure}{\savenotes\oldfigure}{\oldendfigure\spewnotes}
+
+
+% \long\def\tr@nspectFloat#1#2#3{%
+%   \def\@rgi{#1}%
+%   \setbox\tr@nspectFlt\hbox{#3}%
+%   \tr@nspectFltWd=\wd\tr@nspectFlt\relax
+%   \tr@nspectHt=\dimexpr\ht\tr@nspectFlt\ifx\use@depth\relax+\dp\tr@nspectFlt\fi\relax
+%   \tr@nspectSep\dimexpr(\textwidth-\tr@nspectFltWd)/2\relax
+%   \vskip\baselineskip
+%   \ifdim\tr@nspectFltWd<.5\textwidth\relax
+%     \bgroup
+%       %\tr@nspectSep4mm
+%       \tr@nspectWd\dimexpr\textwidth-\tr@nspectFltWd\relax
+%       \noindent\begin{minipage}[\ifx\use@depth\relax t\else b\fi][\tr@nspectHt][t]{\tr@nspectWd}%
+%         \captionsetup{justification=RaggedRight}%
+%         \captionof{figure}{#2}%
+%         \ifx\@rgi\@empty\else
+%           \vfill
+%         \captionsetup{font=footnotesize,skip=\z@}%
+%         \caption*{#1}%
+%         \vspace*{\dimexpr-\dp\tr@nspectFlt-1mm}%
+%        \fi
+%       \end{minipage}\hfill
+%       \begin{minipage}[t][\tr@nspectHt]{\tr@nspectFltWd}\centering
+%         \unhbox\tr@nspectFlt%
+%       \end{minipage}%
+%     \egroup
+%   \else
+%     \noindent\hskip\tr@nspectSep
+%     \begin{minipage}{\tr@nspectFltWd}\centering%
+%       \captionof{figure}{#2}%
+%       \unhbox\tr@nspectFlt\par
+%       \ifx\@rgi\@empty\else
+%         \captionsetup{font=footnotesize,skip=-1mm}\caption*{#1}%
+%         \vspace*{\dimexpr-\dp\tr@nspectFlt-1mm}%
+%       \fi
+%     \end{minipage}%
+%   \fi
+%   \vskip\baselineskip
+%   \global\let\use@depth\@undefined
+%   \tr@nspectWd\z@% \tr@nspectSep\z@
+% }
+
+% \def\tablefont{\small}
+% \def\arraystretch{1.3}
+% \def\@tabular{%
+%   \leavevmode
+%   \hbox \bgroup\tablefont $\col@sep\tabcolsep \let\d@llarbegin\begingroup%$
+%                                     \let\d@llarend\endgroup
+%   \ifx\ST@tableformat\@undefined\gdef\@tablefont{\tablefont}\fi
+%   \@tabarray}
+% \let\@classzold\@classz
+% \def\@classz{%
+%    \expandafter\ifx\d@llarbegin\begingroup
+%      \toks \count@ =
+%      \expandafter{\expandafter\@tablefont\the\toks\count@}%
+%    \fi
+%    \@classzold}
+% \def\endtabular{%
+%   \endarray
+%   $\egroup}%$
+% \expandafter\let\csname endtabular*\endcsname=\endtabular
