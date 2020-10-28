@@ -375,22 +375,22 @@
 %   \tr@nspectWd\z@% \tr@nspectSep\z@
 % }
 
-% \def\tablefont{\small}
-% \def\arraystretch{1.3}
-% \def\@tabular{%
-%   \leavevmode
-%   \hbox \bgroup\tablefont $\col@sep\tabcolsep \let\d@llarbegin\begingroup%$
-%                                     \let\d@llarend\endgroup
-%   \ifx\ST@tableformat\@undefined\gdef\@tablefont{\tablefont}\fi
-%   \@tabarray}
-% \let\@classzold\@classz
-% \def\@classz{%
-%    \expandafter\ifx\d@llarbegin\begingroup
-%      \toks \count@ =
-%      \expandafter{\expandafter\@tablefont\the\toks\count@}%
-%    \fi
-%    \@classzold}
-% \def\endtabular{%
-%   \endarray
-%   $\egroup}%$
-% \expandafter\let\csname endtabular*\endcsname=\endtabular
+\def\tablefont{\small}
+\def\arraystretch{1.3}
+\def\@tabular{%
+  \leavevmode
+  \hbox \bgroup\tablefont $\col@sep\tabcolsep \let\d@llarbegin\begingroup%$
+                                    \let\d@llarend\endgroup
+  \ifx\ST@tableformat\@undefined\gdef\@tablefont{\tablefont}\fi
+  \@tabarray}
+\let\@classzold\@classz
+\def\@classz{%
+   \expandafter\ifx\d@llarbegin\begingroup
+     \toks \count@ =
+     \expandafter{\expandafter\@tablefont\the\toks\count@}%
+   \fi
+   \@classzold}
+\def\endtabular{%
+  \endarray
+  $\egroup}%$
+\expandafter\let\csname endtabular*\endcsname=\endtabular
