@@ -58,6 +58,7 @@
 
 \tp@provide@setting{tpCaptionLabelSep}{tp@cap@labelsep@}
 \tp@provide@setting{tpCaptionSourceSep}{tp@cap@sourcesep@}
+\tp@provide@setting{tpCaptionLegendSep}{tp@cap@lgdsep@}
 \tp@provide@setting{tpCaptionSep}{tp@cap@sep@}
 \tp@provide@setting{tpAboveFloatSkip}{tp@above@flt@skip@}
 \tp@provide@setting{tpBelowFloatSkip}{tp@below@flt@skip@}
@@ -73,8 +74,8 @@
 \def\endtpFigure{\endtp@float}
 
 %    \end{macrocode}
-% \#1: caption type
-% \#2: float pos
+% \#1: float pos
+% \#2: caption type
 %    \begin{macrocode}
 \def\tp@float[#1]#2{%
   \begingroup
@@ -83,6 +84,7 @@
     \def\@captype{#2}%
     \def\Fig##1{\ltx@LocalExpandAfter\gdef\csname tp@subflt@fig@\the\tp@subflts\endcsname{##1}}%
     \def\Caption##1{\ltx@LocalExpandAfter\gdef\csname tp@subflt@cpt@\the\tp@subflts\endcsname{##1}}%
+    \def\Legend##1{\ltx@LocalExpandAfter\gdef\csname tp@subflt@lgd@\the\tp@subflts\endcsname{##1}}%
     \def\Source##1{\ltx@LocalExpandAfter\gdef\csname tp@subflt@src@\the\tp@subflts\endcsname{##1}}%
     \def\Label##1{\ltx@LocalExpandAfter\gdef\csname tp@subflt@lbl@\the\tp@subflts\endcsname{##1}}%
     \parindent\z@
@@ -146,8 +148,12 @@
 
 \def\tp@make@caption#1{%
   {\edef\tp@cap{%
-     \csname tp@subflt@lbl@#1\endcsname\csname tp@cap@labelsep@\@captype\endcsname%
-     \csname tp@subflt@cpt@#1\endcsname\csname tp@cap@sourcesep@\@captype\endcsname
+     \csname tp@subflt@lbl@#1\endcsname%
+     \csname tp@cap@labelsep@\@captype\endcsname%
+     \csname tp@subflt@cpt@#1\endcsname%
+     \csname tp@cap@lgdsep@\@captype\endcsname%
+     \csname tp@subflt@lgd@#1\endcsname%
+     \csname tp@cap@sourcesep@\@captype\endcsname%
      \csname tp@subflt@src@#1\endcsname}%
    \expandafter\caption\expandafter*\expandafter{\tp@cap}%
    \addcontentsline{lof}{figure}{\string\numberline{\csname tp@subflt@lbl@#1\endcsname}\csname tp@subflt@cpt@#1\endcsname\csname tp@subflt@src@#1\endcsname}%
