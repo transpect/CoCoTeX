@@ -181,6 +181,22 @@
     \tpUseHook{BeforeHeading#3}%
     \everypar{}%
 %    \end{macrocode}
+% catch \LaTeX's referencing facility with some magick for \lstinline{hyperref}:
+%    \begin{macrocode}
+    \ifx\Hy@MakeCurrentHrefAuto\@undefined\else
+      \Hy@MakeCurrentHrefAuto{#3}%
+      \Hy@raisedlink{\hyper@anchorstart{\@currentHref}\hyper@anchorend}%
+    \fi
+    \ifx\tp@label\relax\else
+      \ifx\heading@Number\relax
+      \else
+        \let\@currentlabel\heading@Number
+        \let\@currentlabelname\heading@Title
+        \expandafter\ltx@label\expandafter{\tp@label}%
+      \fi
+    \fi
+    \global\let\label\ltx@label
+%    \end{macrocode}
 % Running headers
 %    \begin{macrocode}
     \expandafter\let\expandafter\tp@mark@name\csname #3mark\endcsname%
@@ -224,9 +240,9 @@
                 \addcontentsline{toc}{#3}{\heading@Title}\relax
               \else
                 \ifx\heading@Tocauthor\relax
-                  \addcontentsline{toc}{#3}{\string\tpToCAuthor{\heading@Author}\heading@Title}\relax
+                  \addcontentsline{toc}{#3}{\protect\tpToCAuthor{\heading@Author}\heading@Title}\relax
                 \else
-                  \addcontentsline{toc}{#3}{\string\tpToCAuthor{\heading@Tocauthor}\heading@Title}\relax
+                  \addcontentsline{toc}{#3}{\protect\tpToCAuthor{\heading@Tocauthor}\heading@Title}\relax
                 \fi
               \fi
             \else
@@ -283,22 +299,6 @@
         \else
           \expandafter\xdef\csname the#3\endcsname{\heading@Number}%
         \fi
-%    \end{macrocode}
-% catch \LaTeX's referencing facility with some magick for \lstinline{hyperref}:
-%    \begin{macrocode}
-        \ifx\Hy@MakeCurrentHrefAuto\@undefined\else
-          \Hy@MakeCurrentHrefAuto{#3}%
-          \Hy@raisedlink{\hyper@anchorstart{\@currentHref}\hyper@anchorend}%
-        \fi
-        \ifx\tp@label\relax\else
-          \ifx\heading@Number\relax
-          \else
-            \let\@currentlabel\heading@Number
-            \let\@currentlabelname\heading@Title
-            \expandafter\ltx@label\expandafter{\tp@label}%
-          \fi
-        \fi
-        \global\let\label\ltx@label
         \tpUseHook{AfterBox#3}%
       \egroup
       \tpUseHook{AfterHeading#3}%
@@ -646,33 +646,9 @@
     \def\numberline####1{####1\enskip}%
     \markright{##1}}%
 }
-
 %    \end{macrocode}
-%
-% \section{ToC entries}
+% This macro is re-defined in \lstinline{\l@<level>}. This default definition is only used for pdf bookmarks:
 %    \begin{macrocode}
-% \def\l@part#1#2{%
-%   \ifnum \c@tocdepth >-2\relax
-%     \addpenalty{-\@highpenalty}%
-%     \addvspace{2.25em \@plus\p@}%
-%     \setlength\@tempdima{3em}%
-%     \begingroup
-%       \parindent \z@ \rightskip \@pnumwidth
-%       \parfillskip -\@pnumwidth
-%       {\leavevmode
-%        \large \bfseries #1\hfil
-%        \hb@xt@\@pnumwidth{\hss #2%
-%                           \kern-\p@\kern\p@}}\par
-%        \nobreak
-%          \global\@nobreaktrue
-%          \everypar{\global\@nobreakfalse\everypar{}}%
-%     \endgroup
-%   \fi}
 
+\def\tpToCAuthor#1{#1: }
 
-
-% \renewcommand*\l@section{\@dottedtocline{1}{1.5em}{2.3em}}
-% \renewcommand*\l@subsection{\@dottedtocline{2}{3.8em}{3.2em}}
-% \renewcommand*\l@subsubsection{\@dottedtocline{3}{7.0em}{4.1em}}
-% \renewcommand*\l@paragraph{\@dottedtocline{4}{10em}{5em}}
-% \renewcommand*\l@subparagraph{\@dottedtocline{5}{12em}{6em}}

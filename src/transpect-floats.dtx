@@ -91,39 +91,41 @@
     \fi
   }
 
-\def\endtp@float{%
-   \tp@subflt@hsize=\hsize\relax
-   \bgroup
-      \@tempdima=\z@\relax
-      \ifnum\tp@subflts=\z@\relax
-        \tp@usefloat0%
-      \else
-        \sh@iterate{\@tempcnta}{\@ne}{\tp@subflts}{%
-          \edef\@tempa{\CalcRatio{\tp@subflt@maxheight}{\csname tp@subflt@height@\the\@tempcnta\endcsname}}%
-          \ifnum\@tempcnta>\@ne\global\advance\tp@subflt@hsize-\tp@subflt@sep\relax\fi
-          \expandafter\@tempdimc\csname tp@subflt@width@\the\@tempcnta\endcsname\relax
-          \@tempdimb=\@tempa\@tempdimc\relax
-          \expandafter\edef\csname  tp@subflt@adj@width@\the\@tempcnta\endcsname{\the\@tempdimb}%
-          \advance\@tempdima\@tempdimb
-        }%
+  \def\endtp@float{%
+    \tp@subflt@hsize=\hsize\relax
+    \vbox{%
+      \bgroup
+        \@tempdima=\z@\relax
+        \ifnum\tp@subflts=\z@\relax
+          \tp@usefloat0%
+        \else
+          \sh@iterate{\@tempcnta}{\@ne}{\tp@subflts}{%
+            \edef\@tempa{\CalcRatio{\tp@subflt@maxheight}{\csname tp@subflt@height@\the\@tempcnta\endcsname}}%
+            \ifnum\@tempcnta>\@ne\global\advance\tp@subflt@hsize-\tp@subflt@sep\relax\fi
+            \expandafter\@tempdimc\csname tp@subflt@width@\the\@tempcnta\endcsname\relax
+            \@tempdimb=\@tempa\@tempdimc\relax
+            \expandafter\edef\csname  tp@subflt@adj@width@\the\@tempcnta\endcsname{\the\@tempdimb}%
+            \advance\@tempdima\@tempdimb
+          }%
+          \@tempcnta\z@
 %    \end{macrocode}
 %% 2nd iteration: Calculate width ratio of all adjusted subfigures against total width of all figures plus separators and output:
 %    \begin{macrocode}
-        \@tempcnta\z@
-        \sh@iterate{\@tempcnta}{\@ne}{\tp@subflts}{%
-          \edef\@tempa{\CalcRatio{\csname tp@subflt@adj@width@\the\@tempcnta\endcsname}{\@tempdima}}%
-          \@tempdimb\@tempa\tp@subflt@hsize\relax
-          \ifnum\@tempcnta>\@ne\hskip\tp@subflt@sep\fi
-          \begin{minipage}[t]{\@tempdimb}%
-            \captionsetup{margin=\z@}%
-            \tp@usefloat{\the\@tempcnta}%
-          \end{minipage}%
-        }%
+          \sh@iterate{\@tempcnta}{\@ne}{\tp@subflts}{%
+            \edef\@tempa{\CalcRatio{\csname tp@subflt@adj@width@\the\@tempcnta\endcsname}{\@tempdima}}%
+            \@tempdimb\@tempa\tp@subflt@hsize\relax
+            \ifnum\@tempcnta>\@ne\hskip\tp@subflt@sep\fi
+            \begin{minipage}[t]{\@tempdimb}%
+              \captionsetup{margin=\z@}%
+              \tp@usefloat{\the\@tempcnta}%
+            \end{minipage}%
+          }%
+        \fi
+      \egroup
+      \expandafter\ifx\csname tp@subflt@cpt@0\endcsname\relax\else
+        \tp@make@caption{0}%
       \fi
-    \egroup
-    \expandafter\ifx\csname tp@subflt@cpt@0\endcsname\relax\else
-      \tp@make@caption{0}%
-    \fi
+    }
     \ifx\csname tp@below@flt@skip@\@captype\endcsname\relax\else
       \expandafter\vskip\csname tp@below@flt@skip@\@captype\endcsname
     \fi
@@ -132,7 +134,7 @@
 
 \def\tp@usefloat#1{{%
     \parindent\z@
-    \csname tp@subflt@fig@#1\endcsname\par
+    \csname tp@subflt@fig@#1\endcsname\nobreak\par
     \expandafter\ifx\csname tp@cap@sep@\@captype\endcsname\relax\else
       \expandafter\vskip\csname tp@cap@sep@\@captype\endcsname
     \fi
@@ -146,7 +148,7 @@
   {\edef\tp@cap{%
      \csname tp@subflt@lbl@#1\endcsname\csname tp@cap@labelsep@\@captype\endcsname%
      \csname tp@subflt@cpt@#1\endcsname\csname tp@cap@sourcesep@\@captype\endcsname
-     \csname tp@subflt@src@#1\endcsname}
+     \csname tp@subflt@src@#1\endcsname}%
    \expandafter\caption\expandafter*\expandafter{\tp@cap}%
    \addcontentsline{lof}{figure}{\string\numberline{\csname tp@subflt@lbl@#1\endcsname}\csname tp@subflt@cpt@#1\endcsname\csname tp@subflt@src@#1\endcsname}%
    \tp@reset@caption{#1}%
