@@ -334,6 +334,7 @@
           \everypar{}%
         \fi}%
       \ignorespaces
+      \let\next\relax
     \else
       \@svsec
       \par \nobreak
@@ -345,8 +346,9 @@
           \global\@afterindenttrue
         \fi
         \@afterheading}%
-      \aftergroup\next%
-    \fi}}
+    \fi
+    \aftergroup\next%
+  }}
 
 %    \end{macrocode}
 %
