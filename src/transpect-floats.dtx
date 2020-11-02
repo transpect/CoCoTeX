@@ -56,9 +56,9 @@
   \expandafter\def\csname @#1\endcsname[##1]##2{\ltx@LocalExpandAfter\gdef\csname #2\if!##1!\else##1\fi\endcsname{##2}}%
 }
 
-\tp@provide@setting{tpCaptionLabelSep}{tp@cap@labelsep@}
-\tp@provide@setting{tpCaptionSourceSep}{tp@cap@sourcesep@}
-\tp@provide@setting{tpCaptionLegendSep}{tp@cap@lgdsep@}
+\tp@provide@setting{tpCaptionLabelSep}{tp@cap@lbl@sep@}
+\tp@provide@setting{tpCaptionSourceSep}{tp@cap@src@sep@}
+\tp@provide@setting{tpCaptionLegendSep}{tp@cap@lgd@sep@}
 \tp@provide@setting{tpCaptionSep}{tp@cap@sep@}
 \tp@provide@setting{tpAboveFloatSkip}{tp@above@flt@skip@}
 \tp@provide@setting{tpBelowFloatSkip}{tp@below@flt@skip@}
@@ -148,13 +148,19 @@
 
 \def\tp@make@caption#1{%
   {\edef\tp@cap{%
-     \csname tp@subflt@lbl@#1\endcsname%
-     \csname tp@cap@labelsep@\@captype\endcsname%
+     \expandafter\ifx\csname tp@subflt@lbl@#1\endcsname\relax\else
+       \csname tp@subflt@lbl@#1\endcsname%
+       \csname tp@cap@lbl@sep@\@captype\endcsname%
+     \fi
      \csname tp@subflt@cpt@#1\endcsname%
-     \csname tp@cap@lgdsep@\@captype\endcsname%
-     \csname tp@subflt@lgd@#1\endcsname%
-     \csname tp@cap@sourcesep@\@captype\endcsname%
-     \csname tp@subflt@src@#1\endcsname}%
+     \expandafter\ifx\csname tp@subflt@lgd@#1\endcsname\relax\else
+       \csname tp@cap@lgd@sep@\@captype\endcsname%
+       \csname tp@subflt@lgd@#1\endcsname%
+     \fi
+     \expandafter\ifx\csname tp@cap@src@sep@\@captype\endcsname\relax\else%
+       \csname tp@cap@src@sep@\@captype\endcsname%
+       \csname tp@subflt@src@#1\endcsname
+     \fi}%
    \expandafter\caption\expandafter*\expandafter{\tp@cap}%
    \addcontentsline{lof}{figure}{\string\numberline{\csname tp@subflt@lbl@#1\endcsname}\csname tp@subflt@cpt@#1\endcsname\csname tp@subflt@src@#1\endcsname}%
    \tp@reset@caption{#1}%
