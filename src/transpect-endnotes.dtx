@@ -14,7 +14,7 @@
 %%
 \NeedsTeXFormat{LaTeX2e}[2019/01/01]
 \ProvidesPackage{transpect-endnotes}
-    [2020/22/04 0.90 le-tex transpect endnotes module]
+    [\filedate \fileversion le-tex transpect endnotes module]
 %    \end{macrocode}
 % internal switch for endnotes (\lstinline{\endnotestrue}) or footnotes (\lstinline{\endnotesfalse}, default).
 %    \begin{macrocode}
@@ -46,21 +46,29 @@
 \newif\if@enotesopen
 \ifendnotes
   \RequirePackage{endnotes}
+  \@ifpackageloaded{transpect-headings}{\let\tp@useTeXHeading\relax}{}
   \let\footnote=\endnote
   \def\enotesize{\normalsize}%
   \def\enoteformat{\leavevmode\hskip-2em\hb@xt@2em{\@theenmark\hss}}%
   \def\enoteheading{%
-    \ifcollection
-      \ifx\endnotes@per@chapter\relax
-        \chapter*{\notesname}%
-        \addcontentsline{toc}{chapter}{\notesname}%
-      \else
+    \ifx\endnotes@per@chapter\relax
+      \ifx\tp@useTeXHeading\relax
+        \begin{heading}{section}%
+          \title{\notesname}%
+        \end{heading}
+      \else%
         \section*{\notesname}%
         \addcontentsline{toc}{chapter}{\notesname}%
       \fi
     \else
-      \chapter*{\notesname}%
-      \addcontentsline{toc}{chapter}{\notesname}%
+      \ifx\tp@useTeXHeading\relax
+        \begin{heading}{chapter}%
+          \title{\notesname}%
+        \end{heading}
+      \else%
+        \chapter*{\notesname}%
+        \addcontentsline{toc}{chapter}{\notesname}%
+      \fi
     \fi
     \leftskip2em
   }%
@@ -86,6 +94,7 @@
   \tpAddToHook{BeforeChapterHook}{\global\c@footnote\z@}
 \fi
 
+\newcount\realchap \realchap\z@
 \ifx\endnotes@per@chapter\relax
   \tpAddToHook{Before@ChapterHook}{%
     \ifnum\c@endnote>\z@\relax
