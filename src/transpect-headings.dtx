@@ -119,7 +119,7 @@
 % need to put the subtitle immediately after the main title, or else a
 % \lstinline{\par} is inserted.
 %    \begin{macrocode}
-  \def\tpAfterTitle##1{\def\csname tp@after@title@#3\endcsname{##1}}\expandafter\let\csname tp@after@title@#3\endcsname\par
+  \def\tpAfterTitle##1{\expandafter\def\csname tp@after@title@#3\endcsname{##1}}%
 %    \end{macrocode}
 % The following hooks allow the whole heading to be placed inside a
 % box, e.g., when the heading area should have a fixed overall height.
@@ -174,6 +174,27 @@
 %    \begin{macrocode}
   \expandafter\def\csname tpUseHeading#3\endcsname{%
     \expandafter\let\expandafter\tp@inherit@name\csname tp@inherit@#3\endcsname
+%    \end{macrocode}
+% Check some default overrides. The \lstinline{tpAfterSkip} hook
+% determines whether a heading is placed inline or as block:
+%    \begin{macrocode}
+    \expandafter\ifx\csname tp@hook@AfterSkip#3\endcsname\@empty
+      \global\@tempskipa=1sp\relax
+    \else
+      \expandafter\expandafter\expandafter\global\expandafter\expandafter\@tempskipa\expandafter=\csname tp@hook@AfterSkip#3\endcsname\relax%
+    \fi
+%    \end{macrocode}
+% If \lstinline{\tpAfterTitle} hasn't been overridden by the user, we
+% need to set its default value depending on whether the heading is
+% placed inline or as block.
+%    \begin{macrocode}
+    \expandafter\ifx\csname tp@after@title@#3\endcsname\@undefined
+      \ifdim\@tempskipa<\z@\relax
+        \expandafter\global\expandafter\let\csname tp@after@title@#3\endcsname\relax
+      \else
+        \expandafter\global\expandafter\let\csname tp@after@title@#3\endcsname\par
+      \fi
+    \fi
     \xdef\heading@level{#2}%
     \edef\Hy@toclevel{\csname toclevel@#2\endcsname}%
     \if@noskipsec \leavevmode \fi
@@ -307,11 +328,6 @@
 % Skip after the heading, taken partially from the definition of
 % \LaTeX's \lstinline{\@xsect} macro:
 %    \begin{macrocode}
-    \expandafter\ifx\csname tp@hook@AfterSkip#3\endcsname\@empty
-      \global\@tempskipa=1sp\relax
-    \else
-      \expandafter\expandafter\expandafter\global\expandafter\expandafter\@tempskipa\expandafter=\csname tp@hook@AfterSkip#3\endcsname\relax%
-    \fi
     \ifdim\@tempskipa <\z@\relax
       \expandafter\ifx\csname tp@fter@indent@#3\endcsname\relax
         \global\@afterindentfalse
@@ -321,20 +337,21 @@
       \expandafter\gdef\expandafter\@svsechd\expandafter{\@svsec}%
       \@nobreakfalse
       \global\@noskipsectrue
-      \global\everypar{%
-        \if@noskipsec
-          \global\@noskipsecfalse
-          {\setbox\z@\lastbox}%
-          \clubpenalty\@M
-          \begingroup \@svsechd \endgroup
-          \unskip
-          \hskip -\@tempskipa
-        \else
-          \clubpenalty \@clubpenalty
-          \everypar{}%
-        \fi}%
-      \ignorespaces
-      \let\next\relax
+      \gdef\next{%
+        \global\everypar{%
+          \if@noskipsec
+            \global\@noskipsecfalse
+            {\setbox\z@\lastbox}%
+            \clubpenalty\@M
+            \begingroup \@svsechd \endgroup
+            \unskip
+            \hskip -\@tempskipa
+          \else
+            \clubpenalty \@clubpenalty
+            \everypar{}%
+          \fi}%
+        \ignorespaces
+      }%
     \else
       \@svsec
       \par \nobreak
