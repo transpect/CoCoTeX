@@ -136,6 +136,20 @@
 %    \begin{macrocode}
   \def\tpAuthorAfter{\expandafter\global\expandafter\let\csname tp@author@fter@#3\endcsname\@empty}%
 %    \end{macrocode}
+% Hook to change behaviour of consecutive headings
+%    \begin{macrocode}
+  \def\tpHeadingPar{%
+    \ifx\tp@interline@paragraphs\relax\else
+      \if@noskipsec \leavevmode \fi
+    \fi
+    \@@par\@afterindenttrue
+  }%
+%    \end{macrocode}
+% Switch to print consecutive inline headings inline instead of block.
+%    \begin{macrocode}
+  \def\tpInterlineParagraphs{\global\let\tp@interline@paragraphs\relax}%
+  \def\tpInterlineParaSep{\space}%
+%    \end{macrocode}
 % This switch suppresses the output of author names all-together.
 %    \begin{macrocode}
   \def\tpHideAuthor{\expandafter\global\expandafter\let\csname tp@hide@uthor@#3\endcsname\@empty}%
@@ -197,8 +211,7 @@
     \fi
     \xdef\heading@level{#2}%
     \edef\Hy@toclevel{\csname toclevel@#2\endcsname}%
-    \if@noskipsec \leavevmode \fi
-    \par\@afterindenttrue
+    \tpHeadingPar
     \tpUseHook{BeforeHeading#3}%
     \everypar{}%
 %    \end{macrocode}
@@ -334,7 +347,11 @@
       \else
         \global\@afterindenttrue
       \fi
-      \global\setbox\@tempboxa\hbox{\@svsec}%
+      \ifx\tp@interline@paragraphs\relax
+        \global\setbox\@tempboxa\hbox{\ifvoid\@tempboxa\else\unhbox\@tempboxa\tpInterlineParaSep\fi\@svsec}%
+      \else
+        \global\setbox\@tempboxa\hbox{\@svsec}%
+      \fi
       \@nobreakfalse
       \global\@noskipsectrue
       \gdef\next{%
@@ -348,6 +365,7 @@
             \hskip -\@tempskipa
           \else
             \clubpenalty \@clubpenalty
+            \global\setbox\@tempboxa\box\voidb@x
             \everypar{}%
           \fi}%
         \ignorespaces
