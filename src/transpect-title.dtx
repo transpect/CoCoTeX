@@ -126,17 +126,18 @@ Die Bedingungen der Creative-Commons-Lizenz gelten nur für Originalmaterial. Di
 
 \def\maketitle{%
   \bgroup
+    %% Seite i
     \parindent\z@
     \def\UrlFont{\rmfamily\itshape}%
     \fontsize{9.5}{11}\selectfont
-    %% Seite i
     \thispagestyle{empty}%
     \ifx\@editor\@empty
       \@author
     \else
       \@editor\space\editorabbrevname
     \fi\par
-    \@title\par
+    \vskip.5\baselineskip
+    {\large\@title\par}%
     \vfill
     \ifx\@edition\@empty\else{\sffamily\fontsize{10.5}{11}\selectfont\@edition}\ifx\@band\@empty\else\enskip\lower.5\dp\strutbox\hbox{\rule{.5\p@}{\ht\strutbox}}\enskip \volname~\@volume\fi\fi
     \clearpage
