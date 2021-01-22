@@ -25,6 +25,15 @@
 % sufficient. At the same time, the package does not redefine those
 % macros and keeps them available for backwards compatibility.
 %
+% First, we load the \lstinline{bookmark} package:
+%    \begin{macrocode}
+\RequirePackage{bookmark}
+%    \end{macrocode}
+% Since we use our own heading levels, we disable all automatically generated bookmarks.
+%    \begin{macrocode}
+\hypersetup{bookmarksdepth=-999}
+%    \end{macrocode}
+%
 % \section{Blocks}
 % Blocks are bundled units of heading elements. They provide three
 % hooks: \lstinline{Before<Name><Level>},
@@ -275,18 +284,23 @@
             \ifx\heading@Number\relax
               \ifx\heading@Author\relax
                 \addcontentsline{toc}{#3}{\heading@Title}\relax
+                \bookmark[level=#2,dest=\@currentHref]{\heading@Title}%
               \else
                 \ifx\heading@Tocauthor\relax
                   \addcontentsline{toc}{#3}{\protect\tpToCAuthor{\heading@Author}\heading@Title}\relax
+                  \bookmark[level=#2,dest=\@currentHref]{\heading@Author\space\heading@Title}%
                 \else
                   \addcontentsline{toc}{#3}{\protect\tpToCAuthor{\heading@Tocauthor}\heading@Title}\relax
+                  \bookmark[level=#2,dest=\@currentHref]{\heading@Tocauthor\space\heading@Title}%
                 \fi
               \fi
             \else
               \addcontentsline{toc}{#3}{\protect\numberline{\heading@Number}\heading@Title}\relax
+              \bookmark[level=#2,dest=\@currentHref]{\Hy@numberline{\heading@Number}\heading@Title}%
             \fi
           \else
             \addcontentsline{toc}{#3}{\heading@Toctitle}\relax
+            \bookmark[level=#2,dest=\@currentHref]{\heading@Toctitle}%
           \fi
         \fi
       \fi

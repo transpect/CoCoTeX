@@ -95,7 +95,12 @@
 \usepackage{color}
 \usepackage{graphicx}
 \usepackage{soul}
-
+%    \end{macrocode}
+% In the \lstinline{transpect-headings.sty}, we include the
+% \lstinline{bookmark} package, which within calls the
+% \lstinline{hyperref} package.
+%    \begin{macrocode}
+\PassOptionsToPackage{breaklinks,linktocpage,pdfborder={0 0 0},pdfencoding=auto,bookmarksnumbered=true}{hyperref}
 \usepackage{transpect-headings}
 \usepackage{transpect-floats}
 %    \end{macrocode}
@@ -106,8 +111,8 @@
 % Inclusion of transpect-title
 %    \begin{macrocode}
  % \RequirePackage{transpect-title}
-
-
-
-
-\usepackage[breaklinks,linktocpage,pdfborder={0 0 0},pdfencoding=auto,bookmarksnumbered=true]{hyperref}
+%    \end{macrocode}
+% Fallback, in case, \lstinline{transpect-headings.sty} is not loaded for
+% some reason.
+%    \begin{macrocode}
+\RequirePackage{hyperref}
