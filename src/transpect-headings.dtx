@@ -315,16 +315,18 @@
             \tp@use@heading@block{Author}{#3}%
           \fi
         \fi
-        \expandafter\ifx\csname tp@hang@number@#3\endcsname\@empty
-          \expandafter\@tempdimb\dimexpr\csname tp@hang@fixed@#3\endcsname\relax
-          \ifdim\@tempdimb>\z@\relax\else
-            \setbox\z@\hbox{\tpUseHook{TitleFormat#3}\tp@use@heading@block{Number}{#3}\strut}%
-            \@tempdimb\wd\z@
-          \fi
-          \expandafter\@tempdima\dimexpr\hsize-\@tempdimb\relax
-          \hskip\@tempdimb\vbox\bgroup
+        \ifx\heading@Number\relax
+          \expandafter\ifx\csname tp@hang@number@#3\endcsname\@empty
+            \expandafter\@tempdimb\dimexpr\csname tp@hang@fixed@#3\endcsname\relax
+            \ifdim\@tempdimb>\z@\relax\else
+              \setbox\z@\hbox{\tpUseHook{TitleFormat#3}\tp@use@heading@block{Number}{#3}\strut}%
+              \@tempdimb\wd\z@
+            \fi
+            \expandafter\@tempdima\dimexpr\hsize-\@tempdimb\relax
+            \hskip\@tempdimb\vbox\bgroup
             \hsize\@tempdima\relax
             \hskip-\@tempdimb
+          \fi
         \fi
         {\tpUseHook{TitleFormat#3}%
           \tp@use@heading@block{Number}{#3}%
@@ -337,8 +339,10 @@
             \tp@use@heading@block{Author}{#3}%
           \fi
         \fi
-        \expandafter\ifx\csname tp@hang@number@#3\endcsname\@empty
-          \vss\egroup
+        \ifx\heading@Number\relax
+          \expandafter\ifx\csname tp@hang@number@#3\endcsname\@empty
+            \vss\egroup
+          \fi
         \fi
         \tp@use@heading@block{Quote}{#3}%
         \tp@use@heading@block{QuoteSource}{#3}%
@@ -519,6 +523,11 @@
 %    \begin{macrocode}
   \def\tpToCBefore##1{\expandafter\gdef\csname tp@toc@before@#1\endcsname{##1}}%\vskip 1.0em \@plus\p@
 %    \end{macrocode}
+% Hook to be executed at the end of a contents line, usually an ending paragraph.
+%    \begin{macrocode}
+  \def\tpToCLineEnd##1{\expandafter\def\csname tp@toc@line@end@#1\endcsname{##1}}%
+  \expandafter\def\csname tp@toc@line@end@#1\endcsname{\@par\penalty\@highpenalty}% default
+%    \end{macrocode}
 % Code to be inserted after the toc entry for that level
 %    \begin{macrocode}
   \def\tpToCAfter##1{\expandafter\def\csname tp@toc@after@#1\endcsname{##1}}%
@@ -571,7 +580,6 @@
   \expandafter\def\csname l@#1\endcsname##1##2{%
     \@tempdima\z@%% Breite der eigenen numberline
     \@tempdimc\z@%% Breite des linken Einzugs der nächsthöheren ÜS
-    \addpenalty{-\@highpenalty}%
     \setbox\@tempboxa\box\voidb@x
     \csname tp@toc@before@#1\endcsname
     \begingroup
@@ -634,10 +642,10 @@
           \kern-\p@\kern\p@}%
       \fi
       \tp@toc@author@after@heading
-      \par
-      \penalty\@highpenalty
-      \csname tp@toc@after@#1\endcsname
+      \csname tp@toc@line@end@#1\endcsname
+      %\penalty\@highpenalty
     \endgroup
+    \csname tp@toc@after@#1\endcsname
   }%
 }
 %    \end{macrocode}
