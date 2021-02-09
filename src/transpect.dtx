@@ -31,15 +31,21 @@
 %    \begin{macrocode}
 \newif\ifcollection \collectionfalse
 \newif\ifhasparts \haspartsfalse
-\DeclareOptionX{book}{\global\collectionfalse}
-\DeclareOptionX{collection}{\global\collectiontrue}
+\newif\if@article \@articlefalse
+\DeclareOptionX{book}{\global\collectionfalse\global\@articlefalse}
+\DeclareOptionX{article}{\global\collectionfalse\global\@articletrue}
+\DeclareOptionX{collection}{\global\collectiontrue\global\@articlefalse}
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{book}}
 
 \ProcessOptionsX
 %    \end{macrocode}
-% All transpect derived classes base on \LaTeX's default class \lstinline{book}:
+% All transpect derived classes base on \LaTeX's default class \lstinline{book} or \lstinline{article}:
 %    \begin{macrocode}
-\LoadClass[10pt,a4paper]{book}
+\if@article
+  \LoadClass[10pt,a4paper]{article}
+\else
+  \LoadClass[10pt,a4paper]{book}
+\fi
 %    \end{macrocode}
 % Offsets are the removed to make all values relative to the upper left corner of the page to ease maintainance.
 %    \begin{macrocode}
@@ -72,23 +78,24 @@
 %    \end{macrocode}
 % re-defined to make front- and backmatter components distinguish-able
 %    \begin{macrocode}
-\newif\if@frontmatter  \@frontmatterfalse
-\renewcommand\frontmatter{%
-  \cleardoublepage
-  \@mainmatterfalse
-  \@frontmattertrue
-  \pagenumbering{arabic}}
+\if@article\else
+  \newif\if@frontmatter  \@frontmatterfalse
+  \renewcommand\frontmatter{%
+    \cleardoublepage
+    \@mainmatterfalse
+    \@frontmattertrue
+    \pagenumbering{arabic}}
 
-\renewcommand\mainmatter{%
-  \cleardoublepage
-  \@frontmatterfalse
-  \@mainmattertrue}
+  \renewcommand\mainmatter{%
+    \cleardoublepage
+    \@frontmatterfalse
+    \@mainmattertrue}
 
-\renewcommand\backmatter{%
-  \cleardoublepage
-  \@mainmatterfalse
-  \@frontmatterfalse}
-
+  \renewcommand\backmatter{%
+    \cleardoublepage
+    \@mainmatterfalse
+    \@frontmatterfalse}
+\fi
 %    \end{macrocode}
 % hard requirements for all transpect derivates:
 %    \begin{macrocode}
