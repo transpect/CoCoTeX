@@ -103,6 +103,17 @@
 \def\tp@Figure[#1]{\tp@float[#1]{figure}}
 \def\endtpFigure{\endtp@float}
 %    \end{macrocode}
+% Saving and restoring latex default commands
+%    \begin{macrocode}
+\def\tp@save@ltx{%
+  \let\ltx@caption\caption
+  \let\ltx@number\number
+}
+\def\tp@restore@ltx{%
+  \let\caption\ltx@caption
+  \let\number\ltx@number
+}
+%    \end{macrocode}
 % Internal macros for generalized floating environments. They provide
 % the macros used to compose floats to make sure they are used only
 % within the \lstinline{tp@float}-derived environments.
@@ -113,14 +124,15 @@
 \def\tp@float[#1]#2{%
   \begingroup
     \def\tp@fps{#1}%
+    \tp@save@ltx
     \tp@reset@subflts
     \tp@reset@caption{0}%
     \def\tp@captype{#2}%
-    \def\Fig##1{\ltx@LocalExpandAfter\gdef\csname tp@subflt@fig@\the\tp@subflts\endcsname{##1}}%
-    \def\Caption##1{\ltx@LocalExpandAfter\gdef\csname tp@subflt@cpt@\the\tp@subflts\endcsname{##1}}%
-    \def\Legend##1{\ltx@LocalExpandAfter\gdef\csname tp@subflt@lgd@\the\tp@subflts\endcsname{##1}}%
-    \def\Source##1{\ltx@LocalExpandAfter\gdef\csname tp@subflt@src@\the\tp@subflts\endcsname{##1}}%
-    \def\Label##1{\ltx@LocalExpandAfter\gdef\csname tp@subflt@lbl@\the\tp@subflts\endcsname{##1}}%
+    \def\fig##1{\ltx@LocalExpandAfter\gdef\csname tp@subflt@fig@\the\tp@subflts\endcsname{##1}}%
+    \def\caption##1{\ltx@LocalExpandAfter\gdef\csname tp@subflt@cpt@\the\tp@subflts\endcsname{##1}}%
+    \def\legend##1{\ltx@LocalExpandAfter\gdef\csname tp@subflt@lgd@\the\tp@subflts\endcsname{##1}}%
+    \def\source##1{\ltx@LocalExpandAfter\gdef\csname tp@subflt@src@\the\tp@subflts\endcsname{##1}}%
+    \def\number##1{\ltx@LocalExpandAfter\gdef\csname tp@subflt@lbl@\the\tp@subflts\endcsname{##1}}%
     \parindent\z@
     \ifx\tp@fps\@empty
       \expandafter\addvspace\expandafter{\tp@use@setting{tpAboveFloatSkip}}%
@@ -130,6 +142,7 @@
 % 1st iteration: only reading.
 %    \begin{macrocode}
   \def\endtp@float{%
+    \tp@restore@ltx
     \ifx\tp@fps\@empty\else
       \expandafter\@float\expandafter{\expandafter\tp@captype\expandafter}\expandafter[\tp@fps]%
     \fi
