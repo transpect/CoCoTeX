@@ -35,6 +35,7 @@
 \DeclareOptionX{book}{\global\collectionfalse\global\@articlefalse}
 \DeclareOptionX{article}{\global\collectionfalse\global\@articletrue}
 \DeclareOptionX{collection}{\global\collectiontrue\global\@articlefalse}
+\DeclareOption*{\PassOptionsToClass{\CurrentOption}{article}}
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{book}}
 
 \ProcessOptionsX
