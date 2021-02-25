@@ -130,6 +130,7 @@
     \ifx\tp@fps\@empty
       \expandafter\addvspace\expandafter{\tp@use@setting{tpAboveFloatSkip}}%
     \fi
+    \let\htOutputTable\relax
   }
 \let\tp@dblfloat\tp@float
 %    \end{macrocode}
@@ -143,6 +144,38 @@
         \expandafter\@float\expandafter{\expandafter\tp@captype\expandafter}\expandafter[\tp@fps]%
       \fi
     \fi
+    \csname tp@\tp@captype @float\endcsname
+    \ifx\tp@fps\@empty
+      \expandafter\vskip\tp@use@setting{tpBelowFloatSkip}\relax%
+    \else
+      \ifx\tp@do@dblfloat\relax
+        \end@dblfloat
+        \global\let\tp@do@dblfloat\@undefined
+      \else
+        \end@float
+      \fi
+    \fi
+  \endgroup
+}
+\def\endtp@dblfloat{\let\tp@do@dblfloat\relax\endtp@float}%
+%    \end{macrocode}
+% Sub-routine for tables
+%    \begin{macrocode}
+
+\def\tp@table@float{%
+  \expandafter\ifx\csname tp@subflt@cpt@0\endcsname\relax
+  \else
+    \tp@make@caption{0}%
+  \fi
+  \vskip\tp@use@setting{tpCaptionSep}%
+  \box\htTableBox
+}
+
+%    \end{macrocode}
+% Sub-routine for figures
+%    \begin{macrocode}
+
+\def\tp@figure@float{%
     \tp@subflt@hsize=\hsize\relax
     \vbox{%
       \bgroup
@@ -184,20 +217,8 @@
       \expandafter\ifx\csname tp@subflt@cpt@0\endcsname\relax\else
         \tp@make@caption{0}%
       \fi
-    }
-    \ifx\tp@fps\@empty
-      \expandafter\vskip\tp@use@setting{tpBelowFloatSkip}\relax%
-    \else
-      \ifx\tp@do@dblfloat\relax
-        \end@dblfloat
-        \global\let\tp@do@dblfloat\@undefined
-      \else
-        \end@float
-      \fi
-    \fi
-  \endgroup
+    }%
 }
-\def\endtp@dblfloat{\let\tp@do@dblfloat\relax\endtp@float}%
 
 %    \end{macrocode}
 % prints a sub figure
