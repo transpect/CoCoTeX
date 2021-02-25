@@ -82,8 +82,10 @@
 % built in float settings
 %    \begin{macrocode}
 \tp@provide@setting{tpCaptionLabelSep}{}
+\tp@provide@setting{tpCaptionLabelFont}{}
 \tp@provide@setting{tpCaptionSourceSep}{}
 \tp@provide@setting{tpCaptionLegendSep}{}
+\tp@provide@setting{tpCaptionFont}{}
 \tp@provide@setting{tpCaptionSep}{\z@}
 \tp@provide@setting{tpAboveFloatSkip}{\@fptop}
 \tp@provide@setting{tpBelowFloatSkip}{\@fpbot}
@@ -99,20 +101,11 @@
 % User macros. The optional argument corresponds to the placement
 % parameter in standard \LaTeX\ environments.
 %    \begin{macrocode}
-\def\tpFigure{\@ifnextchar[{\tp@Figure}{\tp@Figure[]}}%]
-\def\tp@Figure[#1]{\tp@float[#1]{figure}}
-\def\endtpFigure{\endtp@float}
-%    \end{macrocode}
-% Saving and restoring latex default commands
-%    \begin{macrocode}
-\def\tp@save@ltx{%
-  \let\ltx@caption\caption
-  \let\ltx@number\number
-}
-\def\tp@restore@ltx{%
-  \let\caption\ltx@caption
-  \let\number\ltx@number
-}
+\newenvironment{tpFigure}[1][]{\tp@float[#1]{figure}{lof}}{\endtp@float}
+\newenvironment{tpFigure*}[1][]{\tp@dblfloat[#1]{figure}{lof}}{\endtp@dblfloat}
+\newenvironment{tpTable}[1][]{\tp@float[#1]{table}{lot}}{\endtp@float}
+\newenvironment{tpTable*}[1][]{\tp@dblfloat[#1]{table}{lot}}{\endtp@dblfloat}
+
 %    \end{macrocode}
 % Internal macros for generalized floating environments. They provide
 % the macros used to compose floats to make sure they are used only
@@ -121,30 +114,34 @@
 % \#1: float pos, e.g. \lstinline{h}, \lstinline{t}, etc.\\
 % \#2: caption type, e.g. \lstinline{figure} or \lstinline{table}
 %    \begin{macrocode}
-\def\tp@float[#1]#2{%
+\def\tp@float[#1]#2#3{%
   \begingroup
     \def\tp@fps{#1}%
-    \tp@save@ltx
     \tp@reset@subflts
     \tp@reset@caption{0}%
     \def\tp@captype{#2}%
-    \def\fig##1{\ltx@LocalExpandAfter\gdef\csname tp@subflt@fig@\the\tp@subflts\endcsname{##1}}%
-    \def\caption##1{\ltx@LocalExpandAfter\gdef\csname tp@subflt@cpt@\the\tp@subflts\endcsname{##1}}%
-    \def\legend##1{\ltx@LocalExpandAfter\gdef\csname tp@subflt@lgd@\the\tp@subflts\endcsname{##1}}%
-    \def\source##1{\ltx@LocalExpandAfter\gdef\csname tp@subflt@src@\the\tp@subflts\endcsname{##1}}%
-    \def\number##1{\ltx@LocalExpandAfter\gdef\csname tp@subflt@lbl@\the\tp@subflts\endcsname{##1}}%
+    \def\tp@caplisttype{#3}%
+    \def\tpFig##1{\ltx@LocalExpandAfter\gdef\csname tp@subflt@fig@\the\tp@subflts\endcsname{##1}}%
+    \def\tpCaption##1{\ltx@LocalExpandAfter\gdef\csname tp@subflt@cpt@\the\tp@subflts\endcsname{##1}}%
+    \def\tpLegend##1{\ltx@LocalExpandAfter\gdef\csname tp@subflt@lgd@\the\tp@subflts\endcsname{##1}}%
+    \def\tpSource##1{\ltx@LocalExpandAfter\gdef\csname tp@subflt@src@\the\tp@subflts\endcsname{##1}}%
+    \def\tpNumber##1{\ltx@LocalExpandAfter\gdef\csname tp@subflt@lbl@\the\tp@subflts\endcsname{##1}}%
     \parindent\z@
     \ifx\tp@fps\@empty
       \expandafter\addvspace\expandafter{\tp@use@setting{tpAboveFloatSkip}}%
     \fi
   }
+\let\tp@dblfloat\tp@float
 %    \end{macrocode}
-% 1st iteration: only reading.
+% 1st iteration: only reading. This step happens when the contents of the float environment are read.
 %    \begin{macrocode}
   \def\endtp@float{%
-    \tp@restore@ltx
     \ifx\tp@fps\@empty\else
-      \expandafter\@float\expandafter{\expandafter\tp@captype\expandafter}\expandafter[\tp@fps]%
+      \ifx\tp@do@dblfloat\relax
+        \expandafter\@dblfloat\expandafter{\expandafter\tp@captype\expandafter}\expandafter[\tp@fps]%
+      \else
+        \expandafter\@float\expandafter{\expandafter\tp@captype\expandafter}\expandafter[\tp@fps]%
+      \fi
     \fi
     \tp@subflt@hsize=\hsize\relax
     \vbox{%
@@ -191,10 +188,17 @@
     \ifx\tp@fps\@empty
       \expandafter\vskip\tp@use@setting{tpBelowFloatSkip}\relax%
     \else
-      \end@float
+      \ifx\tp@do@dblfloat\relax
+        \end@dblfloat
+        \global\let\tp@do@dblfloat\@undefined
+      \else
+        \end@float
+      \fi
     \fi
   \endgroup
 }
+\def\endtp@dblfloat{\let\tp@do@dblfloat\relax\endtp@float}%
+
 %    \end{macrocode}
 % prints a sub figure
 %    \begin{macrocode}
@@ -213,10 +217,16 @@
 \def\tp@make@caption#1{%
   {\edef\tp@cap{%
      \expandafter\ifx\csname tp@subflt@lbl@#1\endcsname\relax\else
-       \csname tp@subflt@lbl@#1\endcsname%
+       \bgroup
+         \expandonce{\tp@use@setting{tpCaptionLabelFont}}%
+         \csname tp@subflt@lbl@#1\endcsname%
+       \egroup
        \tp@use@setting{tpCaptionLabelSep}%
      \fi
-     \csname tp@subflt@cpt@#1\endcsname%
+     \bgroup
+       \expandonce{\tp@use@setting{tpCaptionFont}}%
+       \csname tp@subflt@cpt@#1\endcsname%
+     \egroup
      \expandafter\ifx\csname tp@subflt@lgd@#1\endcsname\relax\else
        \tp@use@setting{tpCaptionLegendSep}%
        \csname tp@subflt@lgd@#1\endcsname%
@@ -225,7 +235,7 @@
      \csname tp@subflt@src@#1\endcsname
    }%
    \expandafter\captionof\expandafter{\expandafter\tp@captype\expandafter}\expandafter*\expandafter{\tp@cap}%
-   \addcontentsline{lof}{\tp@captype}{\string\numberline{\csname tp@subflt@lbl@#1\endcsname}\csname tp@subflt@cpt@#1\endcsname\csname tp@subflt@src@#1\endcsname}%
+   \addcontentsline{\tp@caplisttype}{\tp@captype}{\string\numberline{\csname tp@subflt@lbl@#1\endcsname}\csname tp@subflt@cpt@#1\endcsname\csname tp@subflt@src@#1\endcsname}%
    \tp@reset@caption{#1}%
  }}
 %    \end{macrocode}
