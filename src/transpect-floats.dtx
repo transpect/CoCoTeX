@@ -246,7 +246,7 @@
      \fi
      \bgroup
        \expandonce{\tp@use@setting{tpCaptionFont}}%
-       \csname tp@subflt@cpt@#1\endcsname%
+       \expandonce{\csname tp@subflt@cpt@#1\endcsname}%
      \egroup
      \expandafter\ifx\csname tp@subflt@lgd@#1\endcsname\relax\else
        \tp@use@setting{tpCaptionLegendSep}%
