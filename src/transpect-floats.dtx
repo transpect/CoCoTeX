@@ -121,11 +121,11 @@
     \tp@reset@caption{0}%
     \def\tp@captype{#2}%
     \def\tp@caplisttype{#3}%
-    \def\tpFig##1{\ltx@LocalExpandAfter\gdef\csname tp@subflt@fig@\the\tp@subflts\endcsname{##1}}%
-    \def\tpCaption##1{\ltx@LocalExpandAfter\gdef\csname tp@subflt@cpt@\the\tp@subflts\endcsname{##1}}%
-    \def\tpLegend##1{\ltx@LocalExpandAfter\gdef\csname tp@subflt@lgd@\the\tp@subflts\endcsname{##1}}%
-    \def\tpSource##1{\ltx@LocalExpandAfter\gdef\csname tp@subflt@src@\the\tp@subflts\endcsname{##1}}%
-    \def\tpNumber##1{\ltx@LocalExpandAfter\gdef\csname tp@subflt@lbl@\the\tp@subflts\endcsname{##1}}%
+    \protected\def\tpFig##1{\ltx@LocalExpandAfter\protected\expandafter\gdef\csname tp@subflt@fig@\the\tp@subflts\endcsname{##1}}%
+    \protected\def\tpCaption##1{\ltx@LocalExpandAfter\protected\expandafter\gdef\csname tp@subflt@cpt@\the\tp@subflts\endcsname{##1}}%
+    \protected\def\tpLegend##1{\ltx@LocalExpandAfter\protected\expandafter\gdef\csname tp@subflt@lgd@\the\tp@subflts\endcsname{##1}}%
+    \protected\def\tpSource##1{\ltx@LocalExpandAfter\protected\expandafter\gdef\csname tp@subflt@src@\the\tp@subflts\endcsname{##1}}%
+    \protected\def\tpNumber##1{\ltx@LocalExpandAfter\protected\expandafter\gdef\csname tp@subflt@lbl@\the\tp@subflts\endcsname{##1}}%
     \parindent\z@
     \ifx\tp@fps\@empty
       \expandafter\addvspace\expandafter{\tp@use@setting{tpAboveFloatSkip}}%
@@ -136,25 +136,25 @@
 %    \end{macrocode}
 % 1st iteration: only reading. This step happens when the contents of the float environment are read.
 %    \begin{macrocode}
-  \def\endtp@float{%
-    \ifx\tp@fps\@empty\else
-      \ifx\tp@do@dblfloat\relax
-        \expandafter\@dblfloat\expandafter{\expandafter\tp@captype\expandafter}\expandafter[\tp@fps]%
-      \else
-        \expandafter\@float\expandafter{\expandafter\tp@captype\expandafter}\expandafter[\tp@fps]%
-      \fi
-    \fi
-    \csname tp@\tp@captype @float\endcsname
-    \ifx\tp@fps\@empty
-      \expandafter\vskip\tp@use@setting{tpBelowFloatSkip}\relax%
+\def\endtp@float{%
+  \ifx\tp@fps\@empty\else
+    \ifx\tp@do@dblfloat\relax
+      \expandafter\@dblfloat\expandafter{\expandafter\tp@captype\expandafter}\expandafter[\tp@fps]%
     \else
-      \ifx\tp@do@dblfloat\relax
-        \end@dblfloat
-        \global\let\tp@do@dblfloat\@undefined
-      \else
-        \end@float
-      \fi
+      \expandafter\@float\expandafter{\expandafter\tp@captype\expandafter}\expandafter[\tp@fps]%
     \fi
+  \fi
+  \csname tp@\tp@captype @float\endcsname
+  \ifx\tp@fps\@empty
+    \expandafter\vskip\tp@use@setting{tpBelowFloatSkip}\relax%
+  \else
+    \ifx\tp@do@dblfloat\relax
+      \end@dblfloat
+      \global\let\tp@do@dblfloat\@undefined
+    \else
+      \end@float
+    \fi
+  \fi
   \endgroup
 }
 \def\endtp@dblfloat{\let\tp@do@dblfloat\relax\endtp@float}%
@@ -176,48 +176,48 @@
 %    \begin{macrocode}
 
 \def\tp@figure@float{%
-    \tp@subflt@hsize=\hsize\relax
-    \vbox{%
-      \bgroup
-        \expandafter\tp@subflt@sep=\tp@use@setting{tpSubFloatSep}%
-        \@tempdima=\z@\relax
-        \ifnum\tp@subflts=\z@\relax
-          \tp@usefloat0%
-        \else
+  \tp@subflt@hsize=\hsize\relax
+  \vbox{%
+    \bgroup
+      \expandafter\tp@subflt@sep=\tp@use@setting{tpSubFloatSep}%
+      \@tempdima=\z@\relax
+      \ifnum\tp@subflts=\z@\relax
+        \tp@usefloat0%
+      \else
 %    \end{macrocode}
 % 2nd iteration: calculate the ratio between each subfigure's height and the height of the largest subfigure
 %    \begin{macrocode}
-          \sh@iterate{\@tempcnta}{\@ne}{\tp@subflts}{%
-            \edef\@tempa{\CalcRatio{\tp@subflt@maxheight}{\csname tp@subflt@height@\the\@tempcnta\endcsname}}%
-            \ifnum\@tempcnta>\@ne
-              \expandafter\global\expandafter\advance\expandafter\tp@subflt@hsize\expandafter-\tp@subflt@sep\relax%
-            \fi
-            \expandafter\@tempdimc\csname tp@subflt@width@\the\@tempcnta\endcsname\relax
-            \@tempdimb=\@tempa\@tempdimc\relax
-            \expandafter\edef\csname  tp@subflt@adj@width@\the\@tempcnta\endcsname{\the\@tempdimb}%
-            \advance\@tempdima\@tempdimb
-          }%
-          \@tempcnta\z@
+        \sh@iterate{\@tempcnta}{\@ne}{\tp@subflts}{%
+          \edef\@tempa{\CalcRatio{\tp@subflt@maxheight}{\csname tp@subflt@height@\the\@tempcnta\endcsname}}%
+          \ifnum\@tempcnta>\@ne
+            \expandafter\global\expandafter\advance\expandafter\tp@subflt@hsize\expandafter-\tp@subflt@sep\relax%
+          \fi
+          \expandafter\@tempdimc\csname tp@subflt@width@\the\@tempcnta\endcsname\relax
+          \@tempdimb=\@tempa\@tempdimc\relax
+          \expandafter\edef\csname  tp@subflt@adj@width@\the\@tempcnta\endcsname{\the\@tempdimb}%
+          \advance\@tempdima\@tempdimb
+        }% /sh@iterate
+        \@tempcnta\z@
 %    \end{macrocode}
 % 3rd iteration: Calculate width ratio of all adjusted subfigures against total width of all figures plus separators and print:
 %    \begin{macrocode}
-          \sh@iterate{\@tempcnta}{\@ne}{\tp@subflts}{%
-            \edef\@tempa{\CalcRatio{\csname tp@subflt@adj@width@\the\@tempcnta\endcsname}{\@tempdima}}%
-            \@tempdimb\@tempa\tp@subflt@hsize\relax
-            \ifnum\@tempcnta>\@ne\relax
-              \hskip\tp@subflt@sep\relax
-            \fi
-            \begin{minipage}[t]{\@tempdimb}%
-              \captionsetup{margin=\z@}%
-              \tp@usefloat{\the\@tempcnta}%
-            \end{minipage}%
-          }%
-        \fi
-      \egroup
-      \expandafter\ifx\csname tp@subflt@cpt@0\endcsname\relax\else
-        \tp@make@caption{0}%
+        \sh@iterate{\@tempcnta}{\@ne}{\tp@subflts}{%
+          \edef\@tempa{\CalcRatio{\csname tp@subflt@adj@width@\the\@tempcnta\endcsname}{\@tempdima}}%
+          \@tempdimb\@tempa\tp@subflt@hsize\relax
+          \ifnum\@tempcnta>\@ne\relax
+            \hskip\tp@subflt@sep\relax
+          \fi
+          \begin{minipage}[t]{\@tempdimb}%
+            \captionsetup{margin=\z@}%
+            \tp@usefloat{\the\@tempcnta}%
+          \end{minipage}%
+        }% /sh@iterate
       \fi
-    }%
+    \egroup
+    \expandafter\ifx\csname tp@subflt@cpt@0\endcsname\relax\else
+      \tp@make@caption{0}%
+    \fi
+  }% /vbox
 }
 
 %    \end{macrocode}
