@@ -315,7 +315,7 @@
             \tp@use@heading@block{Author}{#3}%
           \fi
         \fi
-        \ifx\heading@Number\relax
+        \ifx\heading@Number\relax\else
           \expandafter\ifx\csname tp@hang@number@#3\endcsname\@empty
             \expandafter\@tempdimb\dimexpr\csname tp@hang@fixed@#3\endcsname\relax
             \ifdim\@tempdimb>\z@\relax\else
@@ -339,7 +339,7 @@
             \tp@use@heading@block{Author}{#3}%
           \fi
         \fi
-        \ifx\heading@Number\relax
+        \ifx\heading@Number\relax\else
           \expandafter\ifx\csname tp@hang@number@#3\endcsname\@empty
             \vss\egroup
           \fi
