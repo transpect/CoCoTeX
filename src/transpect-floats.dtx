@@ -84,7 +84,9 @@
 \tp@provide@setting{tpCaptionLabelSep}{}
 \tp@provide@setting{tpCaptionLabelFont}{}
 \tp@provide@setting{tpCaptionSourceSep}{}
+\tp@provide@setting{tpCaptionSourceFont}{}
 \tp@provide@setting{tpCaptionLegendSep}{}
+\tp@provide@setting{tpCaptionLegendFont}{}
 \tp@provide@setting{tpCaptionFont}{}
 \tp@provide@setting{tpCaptionSep}{\z@}
 \tp@provide@setting{tpAboveFloatSkip}{\@fptop}
@@ -250,10 +252,16 @@
      \egroup
      \expandafter\ifx\csname tp@subflt@lgd@#1\endcsname\relax\else
        \tp@use@setting{tpCaptionLegendSep}%
-       \csname tp@subflt@lgd@#1\endcsname%
+       \bgroup
+         \tp@use@setting{tpCaptionLegendFont}%
+         \csname tp@subflt@lgd@#1\endcsname%
+       \egroup
      \fi
      \tp@use@setting{tpCaptionSourceSep}%
-     \csname tp@subflt@src@#1\endcsname
+     \bgroup
+       \tp@use@setting{tpCaptionSourceFont}%
+       \csname tp@subflt@src@#1\endcsname
+     \egroup
    }%
    \expandafter\captionof\expandafter{\expandafter\tp@captype\expandafter}\expandafter*\expandafter{\tp@cap}%
    \addcontentsline{\tp@caplisttype}{\tp@captype}{\string\numberline{\csname tp@subflt@lbl@#1\endcsname}\csname tp@subflt@cpt@#1\endcsname\csname tp@subflt@src@#1\endcsname}%
