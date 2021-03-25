@@ -253,14 +253,14 @@
      \expandafter\ifx\csname tp@subflt@lgd@#1\endcsname\relax\else
        \tp@use@setting{tpCaptionLegendSep}%
        \bgroup
-         \tp@use@setting{tpCaptionLegendFont}%
-         \csname tp@subflt@lgd@#1\endcsname%
+         \expandonce{\tp@use@setting{tpCaptionLegendFont}}%
+         \expandonce{\csname tp@subflt@lgd@#1\endcsname}%
        \egroup
      \fi
      \tp@use@setting{tpCaptionSourceSep}%
      \bgroup
-       \tp@use@setting{tpCaptionSourceFont}%
-       \csname tp@subflt@src@#1\endcsname
+       \expandonce{\tp@use@setting{tpCaptionSourceFont}}%
+       \expandonce{\csname tp@subflt@src@#1\endcsname}%
      \egroup
    }%
    \expandafter\captionof\expandafter{\expandafter\tp@captype\expandafter}\expandafter*\expandafter{\tp@cap}%
