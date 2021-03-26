@@ -69,6 +69,23 @@
   }%
 }
 %    \end{macrocode}
+% This macro simplifies the definition of switches with no
+% arguments. They are always \lstinline{\relax} by default, and
+% \lstinline{\@empty} if set by the user.
+%    \begin{macrocode}
+\def\tp@provide@switch#1{%
+  \expandafter\let\csname @#1@internal@\endcsname\relax%
+  \expandafter\def\csname #1\endcsname{\@ifnextchar[{\csname @#1\endcsname}{\csname @#1\endcsname[]}}%]
+  \expandafter\def\csname @#1\endcsname[##1]{%
+    \edef\tp@opt@arg{##1}%
+    \ifx\tp@opt@arg\@empty
+      \ltx@LocalExpandAfter\global\expandafter\let\csname @#1@internal@\endcsname\@empty%
+    \else
+      \ltx@LocalExpandAfter\global\expandafter\let\csname @#1@internal@##1\endcsname\@empty%
+    \fi
+  }%
+}
+%    \end{macrocode}
 % Macro to expand the float settings and select between (global)
 % default and type specific values.
 %    \begin{macrocode}
@@ -87,7 +104,14 @@
 \tp@provide@setting{tpCaptionSourceFont}{}
 \tp@provide@setting{tpCaptionLegendSep}{}
 \tp@provide@setting{tpCaptionLegendFont}{}
+\tp@provide@setting{tpCaptionFormat}{}
 \tp@provide@setting{tpCaptionFont}{}
+\tp@provide@setting{tpCaptionOrderTop}{}
+\tp@provide@setting{tpCaptionOrderBelow}{}
+\tpCaptionOrderTop[figure]{}
+\tpCaptionOrderBelow[figure]{label,caption,source,legend}
+\tpCaptionOrderTop[table]{label,caption,source}
+\tpCaptionOrderBelow[table]{legend}
 \tp@provide@setting{tpCaptionSep}{\z@}
 \tp@provide@setting{tpAboveFloatSkip}{\@fptop}
 \tp@provide@setting{tpBelowFloatSkip}{\@fpbot}
@@ -167,10 +191,12 @@
 \def\tp@table@float{%
   \expandafter\ifx\csname tp@subflt@cpt@0\endcsname\relax
   \else
-    \tp@make@caption{0}%
+    \tp@make@caption{0}{Top}\nobreak%
+    \vskip\tp@use@setting{tpCaptionSep}%
+    \nobreak %
   \fi
-  \vskip\tp@use@setting{tpCaptionSep}%
   \box\htTableBox
+  \tp@make@caption{0}{Below}\nobreak%
 }
 
 %    \end{macrocode}
@@ -217,7 +243,8 @@
       \fi
     \egroup
     \expandafter\ifx\csname tp@subflt@cpt@0\endcsname\relax\else
-      \tp@make@caption{0}%
+      \nobreak
+      \tp@make@caption{0}{Below}%
     \fi
   }% /vbox
 }
@@ -229,52 +256,92 @@
     \parindent\z@
     \csname tp@subflt@fig@#1\endcsname\nobreak\par
     \vskip\tp@use@setting{tpCaptionSep}%
-    \expandafter\ifx\csname tp@subflt@cpt@#1\endcsname\relax
-    \else
-      \tp@make@caption{#1}%
+    \expandafter\ifx\csname tp@subflt@cpt@#1\endcsname\relax\else
+      \nobreak
+      \tp@make@caption{#1}{Below}\nobreak%
     \fi
 }}
+
+%    \end{macrocode}
+% Mechanism to determine the correct order of caption constituents
+%    \begin{macrocode}
+\def\tp@use@label#1{%
+  \expandafter\ifx\csname tp@subflt@lbl@#1\endcsname\relax\else
+    \bgroup
+      \expandonce{\tp@use@setting{tpCaptionLabelFont}}%
+      \csname tp@subflt@lbl@#1\endcsname%
+    \egroup
+    \tp@use@setting{tpCaptionLabelSep}%
+  \fi
+}
+\def\tp@use@legend#1{%
+  \expandafter\ifx\csname tp@subflt@lgd@#1\endcsname\relax\else
+    \tp@use@setting{tpCaptionLegendSep}%
+    \bgroup
+      \expandonce{\tp@use@setting{tpCaptionLegendFont}}%
+      \expandonce{\csname tp@subflt@lgd@#1\endcsname}%
+    \egroup
+  \fi
+}
+\def\tp@use@source#1{%
+  \expandafter\ifx\csname tp@subflt@src@#1\endcsname\relax\else
+    \tp@use@setting{tpCaptionSourceSep}%
+    \bgroup
+      \expandonce{\tp@use@setting{tpCaptionSourceFont}}%
+      \expandonce{\csname tp@subflt@src@#1\endcsname}%
+    \egroup
+  \fi
+}
+\def\tp@use@caption#1{%
+  \bgroup
+    \expandonce{\tp@use@setting{tpCaptionFont}}%
+    \expandonce{\csname tp@subflt@cpt@#1\endcsname}%
+  \egroup}
+
+%    \end{macrocode}
+% split comma separated list of constituents given by
+% \lstinline{\tpCaptionOrderTop} and
+% \lstinline{\tpCaptionOrderBottom}, respectively
+%    \begin{macrocode}
+\def\tp@traverse@cap@order #1,#2,\@nil#3{%
+  \if!#1!\else
+    \expandafter\ifx\csname tp@use@#1\endcsname\relax\else%
+      \csname tp@use@#1\endcsname{#3}%
+    \fi
+    \if!#2!\else
+      \tp@traverse@cap@order#2,\@nil{#3}%
+    \fi
+  \fi
+}
+\def\tp@caption@order#1#2{%
+  \edef\@tp@cap@odr{\tp@use@setting{tpCaptionOrder#2}}%
+  \expandafter\tp@traverse@cap@order\@tp@cap@odr,,\@nil{#1}%
+}
+
 %    \end{macrocode}
 % prints the caption
 %    \begin{macrocode}
-\def\tp@make@caption#1{%
-  {\edef\tp@cap{%
-     \expandafter\ifx\csname tp@subflt@lbl@#1\endcsname\relax\else
-       \bgroup
-         \expandonce{\tp@use@setting{tpCaptionLabelFont}}%
-         \csname tp@subflt@lbl@#1\endcsname%
-       \egroup
-       \tp@use@setting{tpCaptionLabelSep}%
-     \fi
-     \bgroup
-       \expandonce{\tp@use@setting{tpCaptionFont}}%
-       \expandonce{\csname tp@subflt@cpt@#1\endcsname}%
-     \egroup
-     \expandafter\ifx\csname tp@subflt@lgd@#1\endcsname\relax\else
-       \tp@use@setting{tpCaptionLegendSep}%
-       \bgroup
-         \expandonce{\tp@use@setting{tpCaptionLegendFont}}%
-         \expandonce{\csname tp@subflt@lgd@#1\endcsname}%
-       \egroup
-     \fi
-     \tp@use@setting{tpCaptionSourceSep}%
-     \bgroup
-       \expandonce{\tp@use@setting{tpCaptionSourceFont}}%
-       \expandonce{\csname tp@subflt@src@#1\endcsname}%
-     \egroup
-   }%
-   \expandafter\captionof\expandafter{\expandafter\tp@captype\expandafter}\expandafter*\expandafter{\tp@cap}%
-   \addcontentsline{\tp@caplisttype}{\tp@captype}{\string\numberline{\csname tp@subflt@lbl@#1\endcsname}\csname tp@subflt@cpt@#1\endcsname\csname tp@subflt@src@#1\endcsname}%
-   \tp@reset@caption{#1}%
- }}
+\def\tp@make@caption#1#2{%
+  \bgroup%
+    \expandonce{\tp@use@setting{tpCaptionFormat}}%
+    \tp@caption@order{#1}{#2}%
+    \nobreak\par
+  \egroup
+  \edef\@argii{#2}\def\@tempa{Below}%
+  \ifx\@argii\@tempa
+    \addcontentsline{\tp@caplisttype}{\tp@captype}{\string\numberline{\csname tp@subflt@lbl@#1\endcsname}\csname tp@subflt@cpt@#1\endcsname\csname tp@subflt@src@#1\endcsname}%
+    \tp@reset@caption{#1}%
+  \fi
+}
 %    \end{macrocode}
 % Resetting caption parameters
 %    \begin{macrocode}
-\def\tp@reset@caption#1{
+\def\tp@reset@caption#1{%
   \ltx@LocalExpandAfter\global\expandafter\let\csname tp@subflt@fig@#1\endcsname\relax%
   \ltx@LocalExpandAfter\global\expandafter\let\csname tp@subflt@cpt@#1\endcsname\relax%
   \ltx@LocalExpandAfter\global\expandafter\let\csname tp@subflt@src@#1\endcsname\relax%
   \ltx@LocalExpandAfter\global\expandafter\let\csname tp@subflt@lbl@#1\endcsname\relax%
+  \ltx@LocalExpandAfter\global\expandafter\let\csname tp@subflt@lgd@#1\endcsname\relax%
   }
 %    \end{macrocode}
 % shell for sub floats
