@@ -279,7 +279,7 @@
           \let\numberline\@gobble
           \global\let\tp@notocnumber\@empty
         \fi
-        \expandafter\ifnum\heading@level<\c@tocdepth\relax
+        \expandafter\ifnum\heading@level>\c@tocdepth\relax\else
           \ifx\heading@Toctitle\relax
             \ifx\heading@Number\relax
               \ifx\heading@Author\relax
