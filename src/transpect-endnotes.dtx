@@ -34,7 +34,7 @@
 %    \begin{macrocode}
 \DeclareOption{endnotes}{\global\endnotestrue}
 \DeclareOption{resetnotesperchapter}{\global\let\reset@notes@per@chapter\relax}
-\DeclareOption{endnotesperchapter}{\global\endnotestrue\global\let\endnotes@per@chapter\relax}
+\DeclareOption{endnoteswithchapters}{\global\endnotestrue\global\let\endnotes@with@chapters\relax}
 \ProcessOptions
 %    \end{macrocode}
 % footnote package is mandatory since it provides the \lstinline{\savenotes} and \lstinline{\spewnotes} macros:
@@ -51,29 +51,10 @@
   \def\enotesize{\normalsize}%
   \def\enoteformat{\leavevmode\hskip-2em\hb@xt@2em{\@theenmark\hss}}%
   \def\enoteheading{%
-    \ifx\endnotes@per@chapter\relax
-      \ifx\tp@useTeXHeading\relax
-        \begin{heading}{section}%
-          \title{\notesname}%
-        \end{heading}
-      \else%
-        \section*{\notesname}%
-        \addcontentsline{toc}{chapter}{\notesname}%
-      \fi
-    \else
-      \ifx\tp@useTeXHeading\relax
-        \begin{heading}{chapter}%
-          \title{\notesname}%
-        \end{heading}
-      \else%
-        \chapter*{\notesname}%
-        \addcontentsline{toc}{chapter}{\notesname}%
-      \fi
-    \fi
     \leftskip2em
   }%
   \def\printnotes{%
-    \ifx\endnotes@per@chapter\relax
+    \ifx\endnotes@with@chapters\relax
       \ifnum\c@endnote>\z@
         \expandafter\global\expandafter\let\csname enotes@in@\the\realchap\endcsname\@empty
       \fi
@@ -87,21 +68,35 @@
       \egroup
     \fi}
 \else
+  \newcount\c@endnote \c@endnote\z@
   \let\printnotes\relax
 \fi
 
-\ifx\reset@notes@per@chapter\relax
-  \tpAddToHook{BeforeChapterHook}{\global\c@footnote\z@}
+\newcount\realchap \realchap\z@
+\ifx\endnotes@with@chapters\relax
+  \AtBeginDocument{%
+    \tpAddToHook{BeforeHeadingchapter}{%
+      \ifnum\c@endnote>\z@\relax
+        \expandafter\global\expandafter\let\csname enotes@in@\the\realchap\endcsname\@empty
+      \fi
+      \global\advance\realchap\@ne
+      \global\c@endnote\z@
+      \addtoendnotes{%
+        \noexpand\expandafter\noexpand\ifx\noexpand\csname enotes@in@\the\realchap\noexpand\endcsname\noexpand\@empty
+          \bgroup
+            \leftskip\z@
+            \protect\section*{\heading@Title}%
+          \egroup
+        \noexpand\fi}%
+    }%
+  }
 \fi
 
-\newcount\realchap \realchap\z@
-\ifx\endnotes@per@chapter\relax
-  \tpAddToHook{Before@ChapterHook}{%
-    \ifnum\c@endnote>\z@\relax
-      \expandafter\global\expandafter\let\csname enotes@in@\the\realchap\endcsname\@empty
-    \fi
-    \advance\realchap\@ne
-    \global\c@endnote\z@
-    \addtoendnotes{\noexpand\expandafter\noexpand\ifx\noexpand\csname enotes@in@\the\realchap\noexpand\endcsname\noexpand\@empty\bgroup\leftskip\z@\protect\section*{#1}\egroup\noexpand\fi}%
-  }
+\ifx\reset@notes@per@chapter\relax
+  \AtBeginDocument{%
+    \tpAddToHook{BeforeHeadingchapter}{%
+      \global\c@footnote\z@
+      \global\c@endnote\z@
+    }%
+  }%
 \fi
