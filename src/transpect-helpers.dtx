@@ -65,3 +65,31 @@
   \csgappto{tp@hook@#1}{#2}%
 }
 \def\tpUseHook#1{\expandafter\ifx\csname tp@hook@#1\endcsname\relax\else\csname tp@hook@#1\endcsname\fi}
+%    \end{macrocode}
+% \section{Attributes}
+% In this part, we provide some macros to parse enviroment attributes. Curtesy of the \lstinline{htmltabs} package.
+%    \begin{macrocode}
+
+
+\def\tp@parse@attributes#1\@nil{%
+  \if!#1!\else
+    \@tp@parse@attributes#1 ="" =""\@nil%
+  \fi
+}
+\def\@tp@parse@attributes#1="#2" #3=""\@nil{%
+  \edef\@argi{#1}%
+  \edef\@argiii{#3}%
+  \ifx\@argi\@empty\else%
+    \ifx\@argi\space\else%
+      \expandafter\def\csname tp@attr@#1\endcsname{#2}%
+      \ifx\@argiii\@empty\else
+        \ifx\@argiii\space\else
+          \def\@tempa{="" }%
+          \ifx\@argiii\@tempa\else%
+            \expandafter\@tp@parse@attributes #3=""\@nil%
+          \fi
+        \fi
+      \fi
+    \fi
+  \fi
+}%
