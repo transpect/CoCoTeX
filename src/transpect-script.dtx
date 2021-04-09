@@ -103,3 +103,16 @@
     ]{NotoSansHebrew-Regular.ttf}
   \DeclareTextFontCommand\hebrew{\selectlanguage{hebrew}}
 \fi
+%    \end{macrocode}
+% \subsection{Support for Arabic script}
+%    \begin{macrocode}
+
+\ifx\use@script@arabic\relax
+  \message{^^J  [transpect-script Loaded Script: Arabic]^^J}
+  \babelprovide{arabic}%
+  \def\NotoArabPath{./fonts/NotoSans/Arabic/}
+  \babelfont[arabic]{rm}[BoldFont = NotoNaskhArabic-Bold.ttf,%
+    Path = \NotoArabPath,%
+    ]{NotoNaskhArabic-Regular.ttf}%
+  \DeclareTextFontCommand\arab{\selectlanguage{arabic}}
+\fi
