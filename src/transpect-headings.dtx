@@ -177,6 +177,7 @@
 % entry in the table of contents.
 %    \begin{macrocode}
   \def\tpNoToc{\expandafter\global\expandafter\let\csname tp@no@toc@#3\endcsname\@empty}%
+  \def\tpToCNoNumber{\expandafter\global\expandafter\let\csname tp@toc@no@number@#3\endcsname\@empty}%
 %    \end{macrocode}
 % \lstinline{\tpHangNumber} can be used when the hanging indent should
 % always be of a fixed width. If ommitted, the hanging indent is
@@ -271,6 +272,7 @@
 %    \end{macrocode}
 % Entry in table of contents
 %    \begin{macrocode}
+    \let\tp@save@heading@Number\heading@Number
     \expandafter\ifx\csname tp@no@toc@#3\endcsname\@empty\else
       \expandafter\ifx\tp@notoc\relax
         \global\let\tp@notoc\@empty
@@ -281,6 +283,12 @@
         \fi
         \expandafter\ifnum\heading@level>\c@tocdepth\relax\else
           \ifx\heading@Toctitle\relax
+            \ifx\heading@Subtitle\relax\else
+              \edef\heading@Title{\expandonce{\heading@Title}\string\protect\string\tpToCSubTitle{\heading@Subtitle}}%
+            \fi
+            \expandafter\ifx\csname tp@toc@no@number@#3\endcsname\@empty
+              \let\heading@Number\relax
+            \fi
             \ifx\heading@Number\relax
               \ifx\heading@Author\relax
                 \addcontentsline{toc}{#3}{\heading@Title}\relax
@@ -305,6 +313,7 @@
         \fi
       \fi
     \fi
+    \let\heading@Number\tp@save@heading@Number
     \def\@svsec{%
       \tpUseHook{BeforeBox#3}%
       \bgroup
@@ -519,6 +528,23 @@
 \def\tp@init@l@#1#2{%
   \def\tpToCProperty##1##2{\tpAddToHook{##1#1}{##2}}%
 %    \end{macrocode}
+% Code to format the page number
+%    \begin{macrocode}
+  \def\tpToCPageOut##1{\expandafter\gdef\csname tp@toc@pageout@#1\endcsname{##1}}
+  \expandafter\def\csname tp@toc@pageout@#1\endcsname{%
+    \nobreak\hb@xt@\@pnumwidth{\hss\csname tp@toc@pageformat@#1\endcsname \tp@toc@the@page%
+      \kern-\p@\kern\p@}%
+  }%
+%    \end{macrocode}
+% Code to format the overall alignment of the toc entry
+%    \begin{macrocode}
+  \def\tpToCAlign##1{\expandafter\gdef\csname tp@toc@alignment@#1\endcsname{##1}}
+  \expandafter\def\csname tp@toc@alignment@#1\endcsname{%
+    \parindent \z@
+    \rightskip \@pnumwidth\@plus1fil\relax
+    \parfillskip -\rightskip
+  }%
+%    \end{macrocode}
 % Code to be inserted before the toc entry for that level
 %    \begin{macrocode}
   \def\tpToCBefore##1{\expandafter\gdef\csname tp@toc@before@#1\endcsname{##1}}%\vskip 1.0em \@plus\p@
@@ -557,7 +583,14 @@
 %    \begin{macrocode}
   \def\tpToCAuthorAfter##1{\expandafter\gdef\csname tp@toc@author@after@#1\endcsname{##1}}%;
   \def\tpToCAuthorBefore##1{\expandafter\gdef\csname tp@toc@author@before@#1\endcsname{##1}}%;
-  \def\tpToCAuthorFormat##1{\expandafter\gdef\csname tp@toc@authorformat@#1\endcsname{##1}}%
+  \def\tpToCAuthorFormat##1{\expandafter\gdef\csname tp@toc@author@format@#1\endcsname{##1}}%
+%    \end{macrocode}
+% Group for subtitle in toc.
+%    \begin{macrocode}
+  \def\tpToCSubTitleAfter##1{\expandafter\gdef\csname tp@toc@subtitle@after@#1\endcsname{##1}}%;
+  \def\tpToCSubTitleBefore##1{\expandafter\gdef\csname tp@toc@subtitle@before@#1\endcsname{##1}}%;
+  \def\tpToCSubTitleFormat##1{\expandafter\gdef\csname tp@toc@subtitle@format@#1\endcsname{##1}}%
+  \def\tpToCSubTitle{\expandafter\global\expandafter\let\csname tp@toc@subtitle@#1\endcsname\@empty}%
 %    \end{macrocode}
 % If set, Author comes after the toc line
 %    \begin{macrocode}
@@ -578,6 +611,7 @@
 % Generically provide \LaTeX's internal toc entry formatting macros:
 %    \begin{macrocode}
   \expandafter\def\csname l@#1\endcsname##1##2{%
+    \gdef\tp@toc@the@page{##2}%
     \@tempdima\z@%% Breite der eigenen numberline
     \@tempdimc\z@%% Breite des linken Einzugs der nächsthöheren ÜS
     \setbox\@tempboxa\box\voidb@x
@@ -590,16 +624,19 @@
         \fi
         \advance\@tempcnta\m@ne
       }%
-      \parindent \z@
-      \rightskip \@pnumwidth\@plus1fill\relax
-      \parfillskip -\rightskip
+      \csname tp@toc@alignment@#1\endcsname
       \leavevmode
       \csname tp@toc@format@#1\endcsname
       \let\tp@toc@author@after@heading\relax
-      \expandafter\ifx\csname tp@toc@author@after@heading@#1\endcsname\@empty
-        \def\tpToCAuthor####1{\gdef\tp@toc@author@after@heading{\csname tp@toc@author@before@#1\endcsname{\csname tp@toc@authorformat@#1\endcsname ####1\csname tp@toc@author@after@#1\endcsname}}}%
+      \expandafter\ifx\csname tp@toc@subtitle@#1\endcsname\@empty
+        \def\tpToCSubTitle####1{\csname tp@toc@subtitle@before@#1\endcsname{\csname tp@toc@subtitle@format@#1\endcsname ####1\csname tp@toc@subtitle@after@#1\endcsname}}%
       \else
-        \def\tpToCAuthor####1{\csname tp@toc@author@before@#1\endcsname{\csname tp@toc@authorformat@#1\endcsname ####1\csname tp@toc@author@after@#1\endcsname}}%
+        \let\tpToCSubTitle\@gobble
+      \fi
+      \expandafter\ifx\csname tp@toc@author@after@heading@#1\endcsname\@empty
+        \def\tpToCAuthor####1{\gdef\tp@toc@author@after@heading{\csname tp@toc@author@before@#1\endcsname{\csname tp@toc@author@format@#1\endcsname ####1\csname tp@toc@author@after@#1\endcsname}}}%
+      \else
+        \def\tpToCAuthor####1{\csname tp@toc@author@before@#1\endcsname{\csname tp@toc@author@format@#1\endcsname ####1\csname tp@toc@author@after@#1\endcsname}}%
       \fi
       \sbox\z@{\def\numberline####1{\global\sbox\@tempboxa{####1\enskip}}##1}%
       \expandafter\@tempdima\csname  tp@toc@hangfixed@#1\endcsname\relax
@@ -638,8 +675,7 @@
       \expandafter\ifx\csname tp@toc@nopage@#1\endcsname\relax
         \nobreak
         \csname tp@toc@pagesep@#1\endcsname
-        \nobreak\hb@xt@\@pnumwidth{\hss\csname tp@toc@pageformat@#1\endcsname ##2%
-          \kern-\p@\kern\p@}%
+        \csname tp@toc@pageout@#1\endcsname
       \fi
       \tp@toc@author@after@heading
       \csname tp@toc@line@end@#1\endcsname

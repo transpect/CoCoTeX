@@ -70,13 +70,14 @@
 % In this part, we provide some macros to parse enviroment attributes. Curtesy of the \lstinline{htmltabs} package.
 %    \begin{macrocode}
 
-
-\def\tp@parse@attributes#1\@nil{%
+\begingroup
+\catcode`\"=\active
+\gdef\tp@parse@attributes#1\@nil{%
   \if!#1!\else
     \@tp@parse@attributes#1 ="" =""\@nil%
   \fi
 }
-\def\@tp@parse@attributes#1="#2" #3=""\@nil{%
+\gdef\@tp@parse@attributes#1="#2" #3=""\@nil{%
   \edef\@argi{#1}%
   \edef\@argiii{#3}%
   \ifx\@argi\@empty\else%
@@ -93,3 +94,4 @@
     \fi
   \fi
 }%
+\endgroup
