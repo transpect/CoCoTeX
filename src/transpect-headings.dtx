@@ -215,10 +215,8 @@
 % need to set its default value depending on whether the heading is
 % placed inline or as block.
 %    \begin{macrocode}
-    \expandafter\ifx\csname tp@after@title@#3\endcsname\@undefined
-      \ifdim\@tempskipa<\z@\relax
-        \expandafter\global\expandafter\let\csname tp@after@title@#3\endcsname\relax
-      \else
+    \expandafter\ifx\csname tp@after@title@#3\endcsname\relax
+      \ifdim\@tempskipa<\z@\relax\else
         \expandafter\global\expandafter\let\csname tp@after@title@#3\endcsname\par
       \fi
     \fi
@@ -272,48 +270,54 @@
 %    \end{macrocode}
 % Entry in table of contents
 %    \begin{macrocode}
-    \let\tp@save@heading@Number\heading@Number
     \expandafter\ifx\csname tp@no@toc@#3\endcsname\@empty\else
       \expandafter\ifx\tp@notoc\relax
         \global\let\tp@notoc\@empty
       \else
-        \ifx\tp@notocnumber\relax
-          \let\numberline\@gobble
-          \global\let\tp@notocnumber\@empty
-        \fi
         \expandafter\ifnum\heading@level>\c@tocdepth\relax\else
           \ifx\heading@Toctitle\relax
-            \ifx\heading@Subtitle\relax\else
-              \edef\heading@Title{\expandonce{\heading@Title}\string\protect\string\tpToCSubTitle{\heading@Subtitle}}%
-            \fi
-            \expandafter\ifx\csname tp@toc@no@number@#3\endcsname\@empty
-              \let\heading@Number\relax
-            \fi
-            \ifx\heading@Number\relax
-              \ifx\heading@Author\relax
-                \addcontentsline{toc}{#3}{\heading@Title}\relax
-                \bookmark[level=#2,dest=\@currentHref]{\heading@Title}%
-              \else
-                \ifx\heading@Tocauthor\relax
-                  \addcontentsline{toc}{#3}{\protect\tpToCAuthor{\heading@Author}\heading@Title}\relax
-                  \bookmark[level=#2,dest=\@currentHref]{\heading@Author\space\heading@Title}%
-                \else
-                  \addcontentsline{toc}{#3}{\protect\tpToCAuthor{\heading@Tocauthor}\heading@Title}\relax
-                  \bookmark[level=#2,dest=\@currentHref]{\heading@Tocauthor\space\heading@Title}%
+            \edef\heading@Toctitle{%
+              \expandafter\ifx\csname tp@toc@no@number@#3\endcsname\@empty\else
+                \ifx\heading@Number\relax\else
+                  \noexpand\protect\noexpand\numberline{\heading@Number}%
                 \fi
               \fi
-            \else
-              \addcontentsline{toc}{#3}{\protect\numberline{\heading@Number}\heading@Title}\relax
-              \bookmark[level=#2,dest=\@currentHref]{\Hy@numberline{\heading@Number}\heading@Title}%
-            \fi
-          \else
-            \addcontentsline{toc}{#3}{\heading@Toctitle}\relax
-            \bookmark[level=#2,dest=\@currentHref]{\heading@Toctitle}%
+              \ifx\heading@Subtitle\relax\else
+                \noexpand\protect\noexpand\tpToCSubTitle{\heading@Subtitle}%
+              \fi
+              \ifx\heading@Tocauthor\relax
+                \ifx\heading@Author\relax\else
+                  \noexpand\protect\noexpand\tpToCAuthor{\heading@Author}%
+                \fi
+              \else
+                  \noexpand\protect\noexpand\tpToCAuthor{\heading@Tocauthor}%
+              \fi
+              \expandonce{\heading@Title}%
+            }%
+%    \end{macrocode}
+% Bookmark version of the heading
+%    \begin{macrocode}
+            \edef\heading@BMtitle{%
+              \ifx\heading@Tocauthor\relax
+                \ifx\heading@Author\relax\else
+                  \noexpand\protect\noexpand\tpToCAuthor{\heading@Author}%
+                \fi
+              \else
+                \noexpand\protect\noexpand\tpToCAuthor{\heading@Tocauthor}%
+              \fi
+              \expandafter\ifx\csname tp@toc@no@number@#3\endcsname\@empty\else
+                \ifx\heading@Number\relax\else
+                  \noexpand\protect\noexpand\Hy@numberline{\heading@Number}%
+                \fi
+              \fi
+              \expandonce{\heading@Title}%
+            }%
           \fi
+          \addcontentsline{toc}{#3}{\heading@Toctitle}\relax
+          \bookmark[level=#2,dest=\@currentHref]{\heading@BMtitle}%
         \fi
       \fi
     \fi
-    \let\heading@Number\tp@save@heading@Number
     \def\@svsec{%
       \tpUseHook{BeforeBox#3}%
       \bgroup
