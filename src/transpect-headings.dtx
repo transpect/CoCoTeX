@@ -128,13 +128,14 @@
 % need to put the subtitle immediately after the main title, or else a
 % \lstinline{\par} is inserted.
 %    \begin{macrocode}
-  \def\tpAfterTitle##1{\expandafter\def\csname tp@after@title@#3\endcsname{##1}}%
+  \def\tpAfterTitle##1{\expandafter\gdef\csname tp@after@title@#3\endcsname{##1}}%
 %    \end{macrocode}
 % The following hooks allow the whole heading to be placed inside a
 % box, e.g., when the heading area should have a fixed overall height.
 %    \begin{macrocode}
   \tpDeclareHook{BeforeBox#3}%
   \tpDeclareHook{AfterBox#3}%
+  \tpDeclareHook{AfterTitles#3}%
 %    \end{macrocode}
 % This switch enables parindents immediately after the heading.
 %    \begin{macrocode}
@@ -144,6 +145,7 @@
 % heading. Default is that the author's are put on top of the heading.
 %    \begin{macrocode}
   \def\tpAuthorAfter{\expandafter\global\expandafter\let\csname tp@author@fter@#3\endcsname\@empty}%
+  \def\tpAuthorAfterIndent{\expandafter\global\expandafter\let\csname tp@author@fter@indent@#3\endcsname\@empty}%
 %    \end{macrocode}
 % Hook to change behaviour of consecutive headings
 %    \begin{macrocode}
@@ -186,9 +188,12 @@
   \def\tpHangFixed##1{\expandafter\gdef\csname tp@hang@fixed@#3\endcsname{##1}}%
   \tpHangFixed{\z@}%
 %    \end{macrocode}
-% Evaluation of user's overrides
+% Calling the facility for toc entries, see below.
 %    \begin{macrocode}
   \tp@init@l@{#3}{#2}%
+%    \end{macrocode}
+% Evaluation of user's overrides
+%    \begin{macrocode}
   \ifx\tp@inherit\relax\else
     \csname tp@decl@\tp@inherit\endcsname
   \fi
@@ -272,7 +277,7 @@
 %    \begin{macrocode}
     \expandafter\ifx\csname tp@no@toc@#3\endcsname\@empty\else
       \expandafter\ifx\tp@notoc\relax
-        \global\let\tp@notoc\@empty
+        \let\tp@notoc\@empty
       \else
         \expandafter\ifnum\heading@level>\c@tocdepth\relax\else
           \ifx\heading@Toctitle\relax
@@ -325,9 +330,12 @@
         \tpUseHook{BlockFormat#3}%
         \expandafter\ifx\csname tp@hide@uthor@#3\endcsname\relax
           \expandafter\ifx\csname tp@author@fter@#3\endcsname\relax
-            \tp@use@heading@block{Author}{#3}%
+            \expandafter\ifx\csname tp@author@fter@indent@#3\endcsname\relax
+              \tp@use@heading@block{Author}{#3}%
+            \fi
           \fi
         \fi
+        \@tempdimb\z@
         \ifx\heading@Number\relax\else
           \expandafter\ifx\csname tp@hang@number@#3\endcsname\@empty
             \expandafter\@tempdimb\dimexpr\csname tp@hang@fixed@#3\endcsname\relax
@@ -335,26 +343,27 @@
               \setbox\z@\hbox{\tpUseHook{TitleFormat#3}\tp@use@heading@block{Number}{#3}\strut}%
               \@tempdimb\wd\z@
             \fi
-            \expandafter\@tempdima\dimexpr\hsize-\@tempdimb\relax
-            \hskip\@tempdimb\vbox\bgroup
-            \hsize\@tempdima\relax
-            \hskip-\@tempdimb
           \fi
         \fi
-        {\tpUseHook{TitleFormat#3}%
-          \tp@use@heading@block{Number}{#3}%
-          \heading@Title
-          \csname tp@after@title@#3\endcsname
-        }%
-        \tp@use@heading@block{Subtitle}{#3}%
+        \bgroup
+          \leftskip\@tempdimb
+          \hskip-\@tempdimb
+          {\tpUseHook{TitleFormat#3}%
+            \tp@use@heading@block{Number}{#3}%
+            \heading@Title
+            \csname tp@after@title@#3\endcsname
+          }%
+          \tp@use@heading@block{Subtitle}{#3}%
+          \expandafter\ifx\csname tp@hide@uthor@#3\endcsname\relax
+            \expandafter\ifx\csname tp@author@fter@#3\endcsname\relax\else
+              \tp@use@heading@block{Author}{#3}%
+            \fi
+          \fi
+        \egroup
+        \tpUseHook{AfterTitles#3}%
         \expandafter\ifx\csname tp@hide@uthor@#3\endcsname\relax
-          \expandafter\ifx\csname tp@author@fter@#3\endcsname\relax\else
+          \expandafter\ifx\csname tp@author@fter@indent@#3\endcsname\relax\else
             \tp@use@heading@block{Author}{#3}%
-          \fi
-        \fi
-        \ifx\heading@Number\relax\else
-          \expandafter\ifx\csname tp@hang@number@#3\endcsname\@empty
-            \vss\egroup
           \fi
         \fi
         \tp@use@heading@block{Quote}{#3}%
@@ -577,7 +586,8 @@
 %    \end{macrocode}
 % Separator between the heading number and the heading title
 %    \begin{macrocode}
-  \def\tpToCNumSep##1{\expandafter\gdef\csname tp@toc@numsep@#1\endcsname{##1}}%\enskip
+  \def\tpToCNumSep##1{\expandafter\gdef\csname tp@toc@numsep@#1\endcsname{##1}}%
+  \expandafter\def\csname tp@toc@numsep@#1\endcsname{\enskip}%
 %    \end{macrocode}
 % Separator between the heading title and the page number
 %    \begin{macrocode}
@@ -632,8 +642,9 @@
       \leavevmode
       \csname tp@toc@format@#1\endcsname
       \let\tp@toc@author@after@heading\relax
+      \let\tp@toc@subtitle\relax
       \expandafter\ifx\csname tp@toc@subtitle@#1\endcsname\@empty
-        \def\tpToCSubTitle####1{\csname tp@toc@subtitle@before@#1\endcsname{\csname tp@toc@subtitle@format@#1\endcsname ####1\csname tp@toc@subtitle@after@#1\endcsname}}%
+        \def\tpToCSubTitle####1{\gdef\tp@toc@subtitle{\csname tp@toc@subtitle@before@#1\endcsname{\csname tp@toc@subtitle@format@#1\endcsname ####1\csname tp@toc@subtitle@after@#1\endcsname}}}%
       \else
         \let\tpToCSubTitle\@gobble
       \fi
@@ -642,7 +653,7 @@
       \else
         \def\tpToCAuthor####1{\csname tp@toc@author@before@#1\endcsname{\csname tp@toc@author@format@#1\endcsname ####1\csname tp@toc@author@after@#1\endcsname}}%
       \fi
-      \sbox\z@{\def\numberline####1{\global\sbox\@tempboxa{####1\enskip}}##1}%
+      \sbox\z@{\def\numberline####1{\global\sbox\@tempboxa{####1\csname tp@toc@numsep@#1\endcsname}}##1}%
       \expandafter\@tempdima\csname  tp@toc@hangfixed@#1\endcsname\relax
       \ifvoid\@tempboxa
       \else
@@ -676,6 +687,7 @@
         \hskip -\@tempdima
       \fi
       ##1%
+      \tp@toc@subtitle
       \expandafter\ifx\csname tp@toc@nopage@#1\endcsname\relax
         \nobreak
         \csname tp@toc@pagesep@#1\endcsname
