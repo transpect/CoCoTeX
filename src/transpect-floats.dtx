@@ -116,13 +116,18 @@
 \tp@provide@setting{tpCaptionLegendFont}{}
 \tp@provide@setting{tpCaptionFormat}{}
 \tp@provide@setting{tpCaptionFont}{}
+%    \end{macrocode}
+% Space between caption apparatus (top and below) and float apparatus
+%    \begin{macrocode}
+\tp@provide@setting{tpCaptionTopSkip}{\z@}
+\tp@provide@setting{tpCaptionBelowSkip}{\z@}
 \tp@provide@setting{tpCaptionOrderTop}{}
 \tp@provide@setting{tpCaptionOrderBelow}{}
 \tpCaptionOrderTop[figure]{}
 \tpCaptionOrderBelow[figure]{label,caption,source,legend}
 \tpCaptionOrderTop[table]{label,caption,source}
 \tpCaptionOrderBelow[table]{legend}
-\tp@provide@setting{tpCaptionSep}{\z@}
+ %\tp@provide@setting{tpCaptionSep}{\z@}
 \tp@provide@setting{tpAboveFloatSkip}{\@fptop}
 \tp@provide@setting{tpBelowFloatSkip}{\@fpbot}
 \tp@provide@setting{tpSubFloatSep}{\tp@subflt@sep}
@@ -155,6 +160,7 @@
 % \end{description}
 %    \begin{macrocode}
 \def\tp@float[#1]#2#3{%
+  \savenotes
   \begingroup
     \tp@reset@subflts
     \tp@reset@caption{0}%
@@ -207,6 +213,7 @@
     \fi
   \fi
   \endgroup
+  \spewnotes
 }
 \def\endtp@dblfloat{\let\tp@do@dblfloat\relax\endtp@float}%
 %    \end{macrocode}
@@ -215,17 +222,16 @@
 \def\tp@table@float{%
   \expandafter\ifx\csname tp@subflt@cpt@0\endcsname\relax
   \else
-    \tp@make@caption{0}{Top}\nobreak%
-    \vskip\tp@use@setting{tpCaptionSep}%
-    \nobreak %
+    \tp@make@caption{0}{Top}\nobreak\par%
+    \vskip\tp@use@setting{tpCaptionTopSkip}%
   \fi
   \ifx\htTableBox\@undefined
   \else
     \box\htTableBox
   \fi
-  \nobreak
-  \expandafter\ifx\csname tp@subflt@cpt@0\endcsname\relax
-  \else
+  \nobreak\par
+  \expandafter\ifx\csname tp@subflt@cpt@0\endcsname\relax\else
+    \vskip\tp@use@setting{tpCaptionBelowSkip}%
     \tp@make@caption{0}{Below}\nobreak%
     \tp@add@list{0}%
   \fi
@@ -251,12 +257,13 @@
 %    \end{macrocode}
 % Sub-routine for figures
 %    \begin{macrocode}
-
 \def\tp@figure@float{%
   \tp@subflt@hsize=\hsize\relax
   \vbox{%
     \expandafter\ifx\csname tp@subflt@cpt@0\endcsname\relax\else
       \tp@make@caption{0}{Top}%
+      \nobreak\par
+      \vskip\tp@use@setting{tpCaptionTopSkip}%
     \fi
     \bgroup
       \expandafter\tp@subflt@sep=\tp@use@setting{tpSubFloatSep}%
@@ -288,18 +295,26 @@
             \hskip\tp@subflt@sep\relax
           \fi
           \begin{minipage}[t]{\@tempdimb}%
-            \captionsetup{margin=\z@}%
+            \let\includegraphics\tp@includesubgraphics
             \tp@usefloat{\the\@tempcnta}%
           \end{minipage}%
         }% /sh@iterate
       \fi
     \egroup
     \expandafter\ifx\csname tp@subflt@cpt@0\endcsname\relax\else
-      \nobreak\par
+      \nobreak
+      \vskip\tp@use@setting{tpCaptionBelowSkip}%
       \tp@make@caption{0}{Below}%
       \tp@add@list{0}%
     \fi
   }% /vbox
+}
+\let\ltx@includegraphics\includegraphics
+
+\def\tp@includesubgraphics{\@ifnextchar [\@tp@includesubgraphics{\@tp@includesubgraphics[]}}%]
+\def\@tp@includesubgraphics[#1]#2{%
+  \def\@igopts{#1,width=\hsize}%
+  \expandafter\ltx@includegraphics\expandafter[\@igopts]{#2}%
 }
 
 %    \end{macrocode}
@@ -307,16 +322,21 @@
 %    \begin{macrocode}
 \def\tp@usefloat#1{{%
     \parindent\z@
-    \expandafter\ifx\csname tp@subflt@cpt@#1\endcsname\relax\else
-      \tp@make@caption{#1}{Top}\nobreak%
-      \nobreak\par
+    \ifnum\tp@subflts=\z@\relax\else
+      \expandafter\ifx\csname tp@subflt@cpt@#1\endcsname\relax\else
+        \tp@make@caption{#1}{Top}\nobreak%
+        \nobreak\par
+        \vskip\tp@use@setting{tpCaptionTopSkip}%
+      \fi
     \fi
     \csname tp@subflt@fig@#1\endcsname\nobreak\par
-    \vskip\tp@use@setting{tpCaptionSep}%
-    \expandafter\ifx\csname tp@subflt@cpt@#1\endcsname\relax\else
-      \nobreak\par
-      \tp@make@caption{#1}{Below}\nobreak%
-      \tp@add@list{#1}%
+    \ifnum\tp@subflts=\z@\relax\else
+      \expandafter\ifx\csname tp@subflt@cpt@#1\endcsname\relax\else
+        \nobreak
+        \vskip\tp@use@setting{tpCaptionBelowSkip}%
+        \tp@make@caption{#1}{Below}\nobreak%
+        \tp@add@list{#1}%
+      \fi
     \fi
 }}
 
