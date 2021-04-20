@@ -215,8 +215,7 @@
     \fi
   \fi
   \endgroup
-  \spewnotes
-}
+  \spewnotes}
 \def\endtp@dblfloat{\let\tp@do@dblfloat\relax\endtp@float}%
 %    \end{macrocode}
 % Sub-routine for tables
@@ -236,8 +235,8 @@
     \vskip\tp@use@setting{tpCaptionBelowSkip}%
     \tp@make@caption{0}{Below}\nobreak%
     \tp@add@list{0}%
-  \fi
-}
+  \fi}
+
 %    \end{macrocode}
 % This macro adds the entry for the float to the corresponding list.
 %    \begin{macrocode}
@@ -255,8 +254,8 @@
       \addcontentsline{\tp@caplisttype}{\tp@captype}{\string\numberline{\tp@lo@lbl}\tp@lo@cpt\tp@lo@src}%
     \fi
     \tp@reset@caption{#1}%
-  \fi
-}
+  \fi}
+
 %    \end{macrocode}
 % This is a rundimentary implementation of hyperref's anchor mechanism
 % to make labels work:
@@ -271,7 +270,7 @@
       \@currentHref
     }{\relax}%
     \expandafter\ltx@label\expandafter{\tp@lo@ref}%
-  \fi
+  \fi}
 
 %    \end{macrocode}
 % Sub-routine for figures
@@ -313,7 +312,7 @@
           \ifnum\@tempcnta>\@ne\relax
             \hskip\tp@subflt@sep\relax
           \fi
-          \begin{minipage}[t]{\@tempdimb}%
+          \begin{minipage}[t][][t]{\@tempdimb}%
             \let\includegraphics\tp@includesubgraphics
             \tp@usefloat{\the\@tempcnta}%
           \end{minipage}%
@@ -328,8 +327,8 @@
     \fi
   }% /vbox
 }
-\let\ltx@includegraphics\includegraphics
 
+\let\ltx@includegraphics\includegraphics
 \def\tp@includesubgraphics{\@ifnextchar [\@tp@includesubgraphics{\@tp@includesubgraphics[]}}%]
 \def\@tp@includesubgraphics[#1]#2{%
   \def\@igopts{#1,width=\hsize}%
@@ -446,6 +445,7 @@
   \setbox\tp@subfltbox\hbox{\csname tp@subflt@fig@\the\tp@subflts\endcsname}%
   \expandafter\xdef\csname tp@subflt@width@\the\tp@subflts\endcsname{\the\wd\tp@subfltbox}%
   \expandafter\xdef\csname tp@subflt@height@\the\tp@subflts\endcsname{\the\ht\tp@subfltbox}%
+  \expandafter\xdef\csname tp@subflt@depth@\the\tp@subflts\endcsname{\the\dp\tp@subfltbox}%
   \expandafter\ifdim\csname tp@subflt@height@\the\tp@subflts\endcsname>\tp@subflt@maxheight\relax
     \expandafter\global\expandafter\tp@subflt@maxheight=\csname tp@subflt@height@\the\tp@subflts\endcsname\relax
   \fi}
