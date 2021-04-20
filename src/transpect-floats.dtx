@@ -159,6 +159,7 @@
 % \item[class] Class\\
 % \end{description}
 %    \begin{macrocode}
+\let\ltx@label\label
 \def\tp@float[#1]#2#3{%
   \savenotes
   \begingroup
@@ -182,6 +183,7 @@
     \protected\def\tpLegend##1{\ltx@LocalExpandAfter\protected\expandafter\gdef\csname tp@subflt@lgd@\the\tp@subflts\endcsname{##1}}%
     \protected\def\tpSource##1{\ltx@LocalExpandAfter\protected\expandafter\gdef\csname tp@subflt@src@\the\tp@subflts\endcsname{##1}}%
     \protected\def\tpNumber##1{\ltx@LocalExpandAfter\protected\expandafter\gdef\csname tp@subflt@lbl@\the\tp@subflts\endcsname{##1}}%
+    \protected\def\label##1{\ltx@LocalExpandAfter\protected\expandafter\gdef\csname tp@subflt@ref@\the\tp@subflts\endcsname{##1}}%
     \parindent\z@
     \ifx\tp@fps\@empty
       \expandafter\addvspace\expandafter{\tp@use@setting{tpAboveFloatSkip}}%
@@ -243,16 +245,33 @@
   \expandafter\expandafter\expandafter\def\expandafter\expandafter\expandafter\tp@lo@cpt\expandafter\expandafter\expandafter{\csname tp@subflt@cpt@#1\endcsname}%
   \expandafter\expandafter\expandafter\def\expandafter\expandafter\expandafter\tp@lo@src\expandafter\expandafter\expandafter{\csname tp@subflt@src@#1\endcsname}%
   \expandafter\expandafter\expandafter\def\expandafter\expandafter\expandafter\tp@lo@lbl\expandafter\expandafter\expandafter{\csname tp@subflt@lbl@#1\endcsname}%
+  \expandafter\expandafter\expandafter\def\expandafter\expandafter\expandafter\tp@lo@ref\expandafter\expandafter\expandafter{\csname tp@subflt@ref@#1\endcsname}%
   \expandafter\ifx\tp@lo@src\relax\def\tp@lo@src{}\fi
   \expandafter\ifx\tp@lo@cpt\relax\else
     \expandafter\ifx\tp@lo@lbl\relax
       \addcontentsline{\tp@caplisttype}{\tp@captype}{\tp@lo@cpt\tp@lo@src}%
     \else
+      \tp@make@anchor%
       \addcontentsline{\tp@caplisttype}{\tp@captype}{\string\numberline{\tp@lo@lbl}\tp@lo@cpt\tp@lo@src}%
     \fi
     \tp@reset@caption{#1}%
   \fi
 }
+%    \end{macrocode}
+% This is a rundimentary implementation of hyperref's anchor mechanism
+% to make labels work:
+%    \begin{macrocode}
+\def\tp@make@anchor{%
+  \expandafter\ifx\tp@lo@ref\relax\else
+    \let\@currentlabel\tp@lo@lbl
+    \expandafter\H@refstepcounter\expandafter{\tp@captype}%
+    \expandafter\hyper@makecurrent\expandafter{\tp@captype}%
+    \let\Hy@tempa\Hy@float@caption
+    \expandafter\hyper@@anchor\expandafter{%
+      \@currentHref
+    }{\relax}%
+    \expandafter\ltx@label\expandafter{\tp@lo@ref}%
+  \fi
 
 %    \end{macrocode}
 % Sub-routine for figures
@@ -415,6 +434,7 @@
   \ltx@LocalExpandAfter\global\expandafter\let\csname tp@subflt@src@#1\endcsname\relax%
   \ltx@LocalExpandAfter\global\expandafter\let\csname tp@subflt@lbl@#1\endcsname\relax%
   \ltx@LocalExpandAfter\global\expandafter\let\csname tp@subflt@lgd@#1\endcsname\relax%
+  \ltx@LocalExpandAfter\global\expandafter\let\csname tp@subflt@ref@#1\endcsname\relax%
   }
 %    \end{macrocode}
 % shell for sub floats
@@ -456,73 +476,61 @@
 
 
 
-%%%%%%%%%%
-% LEGACY %
-%%%%%%%%%%
-
-
-
-% \renewcommand \thefigure
-%      {\@arabic\c@figure}
-% %% TODO: Projektspezifisch!
-% \@removefromreset{figure}{chapter}
-
-% \renewcommand \thetable
-%      {\@arabic\c@table}
-% %% TODO: Projektspezifisch!
-% \@removefromreset{table}{chapter}
-
-% \captionsetup{%
-%    format=plain
-%   ,labelformat=empty
-%   ,font+=it
-%   ,singlelinecheck=false
-%   ,justification=RaggedRight
-%   ,listformat=empty
-% }
-
+% %%%%%%%%%%
+% % LEGACY %
+% %%%%%%%%%%
+% % \renewcommand \thefigure
+% %      {\@arabic\c@figure}
+% % %% TODO: Projektspezifisch!
+% % \@removefromreset{figure}{chapter}
+% % \renewcommand \thetable
+% %      {\@arabic\c@table}
+% % %% TODO: Projektspezifisch!
+% % \@removefromreset{table}{chapter}
+% % \captionsetup{%
+% %    format=plain
+% %   ,labelformat=empty
+% %   ,font+=it
+% %   ,singlelinecheck=false
+% %   ,justification=RaggedRight
+% %   ,listformat=empty
+% % }
 % %    \end{macrocode}
 % % \section{Sources}
 % % Many Transpect projects use different markup for the caption of a floating object and its source.
 % %    \begin{macrocode}
-% \newlength\aboveSourceSkip \aboveSourceSkip0mm
-
-% \newcommand\transpectBild[3][]{\tr@nspectFloat{#1}{#2}{#3}}
-% \newcommand\transpectTab[3][]{\aboveSourceSkip1mm\let\use@depth\relax\tr@nspectFloat{#1}{#2}{#3}}
-% \let\transcriptBild\transpectBild
-% \let\transcriptTab\transpectTab
-
-% \newbox\tr@nspectFlt
-% \newdimen\tr@nspectFltWd
-% \newdimen\tr@nspectWd
-% \newdimen\tr@nspectHt
-% \newdimen\tr@nspectSep
-
-
+% % \newlength\aboveSourceSkip \aboveSourceSkip0mm
+% % \newcommand\transpectBild[3][]{\tr@nspectFloat{#1}{#2}{#3}}
+% % \newcommand\transpectTab[3][]{\aboveSourceSkip1mm\let\use@depth\relax\tr@nspectFloat{#1}{#2}{#3}}
+% % \let\transcriptBild\transpectBild
+% % \let\transcriptTab\transpectTab
+% % \newbox\tr@nspectFlt
+% % \newdimen\tr@nspectFltWd
+% % \newdimen\tr@nspectWd
+% % \newdimen\tr@nspectHt
+% % \newdimen\tr@nspectSep
 % %    \end{macrocode}
 % % \section{Scaling graphics to a common height}
 % % The \lstinline{\sameheight} macro is used to scale all figures
 % % incorporated via \lstinline{\includesubgraphics} to a common height
 % % such that the line of graphics fills \lstinline{\shhsize} (\lstinline{\hsize} by default).
 % %    \begin{macrocode}
-
-% \newbox\@includesubgraphicsbox
-% \newcount\c@includesubgraphics \c@includesubgraphics\z@
-% \newdimen\includesubgraphics@maxheight
-% \newdimen\subgraphicssep \subgraphicssep\fboxsep
-% \newdimen\sh@margins
-% \RequirePackage{ltxcmds}
-
-% \newcommand*\includesubgraphics[2][]{%
-%   \global\advance\c@includesubgraphics\@ne
-%   \ltx@LocalExpandAfter\gdef\csname subgraphics@caption@\the\c@includesubgraphics\endcsname{#1}%
-%   \ltx@LocalExpandAfter\gdef\csname subgraphics@name@\the\c@includesubgraphics\endcsname{#2}%
-%   \setbox\@includesubgraphicsbox\hbox{\includegraphics{#2}}%
-%   \ltx@LocalExpandAfter\xdef\csname subgraphics@width@\the\c@includesubgraphics\endcsname{\the\wd\@includesubgraphicsbox}%
-%   \ltx@LocalExpandAfter\xdef\csname subgraphics@height@\the\c@includesubgraphics\endcsname{\the\ht\@includesubgraphicsbox}%
-%   \expandafter\ifdim\csname subgraphics@height@\the\c@includesubgraphics\endcsname>\includesubgraphics@maxheight\relax
-%     \ltx@LocalExpandAfter\global\expandafter\includesubgraphics@maxheight=\csname subgraphics@height@\the\c@includesubgraphics\endcsname\relax
-%   \fi}
+% % \newbox\@includesubgraphicsbox
+% % \newcount\c@includesubgraphics \c@includesubgraphics\z@
+% % \newdimen\includesubgraphics@maxheight
+% % \newdimen\subgraphicssep \subgraphicssep\fboxsep
+% % \newdimen\sh@margins
+% % \RequirePackage{ltxcmds}
+% % \newcommand*\includesubgraphics[2][]{%
+% %   \global\advance\c@includesubgraphics\@ne
+% %   \ltx@LocalExpandAfter\gdef\csname subgraphics@caption@\the\c@includesubgraphics\endcsname{#1}%
+% %   \ltx@LocalExpandAfter\gdef\csname subgraphics@name@\the\c@includesubgraphics\endcsname{#2}%
+% %   \setbox\@includesubgraphicsbox\hbox{\includegraphics{#2}}%
+% %   \ltx@LocalExpandAfter\xdef\csname subgraphics@width@\the\c@includesubgraphics\endcsname{\the\wd\@includesubgraphicsbox}%
+% %   \ltx@LocalExpandAfter\xdef\csname subgraphics@height@\the\c@includesubgraphics\endcsname{\the\ht\@includesubgraphicsbox}%
+% %   \expandafter\ifdim\csname subgraphics@height@\the\c@includesubgraphics\endcsname>\includesubgraphics@maxheight\relax
+% %     \ltx@LocalExpandAfter\global\expandafter\includesubgraphics@maxheight=\csname subgraphics@height@\the\c@includesubgraphics\endcsname\relax
+% %   \fi}
 % %    \end{macrocode}
 % %
 % %    \begin{macrocode}
@@ -575,84 +583,79 @@
 % %
 % % \#1: layout variant, \#2 subufigures
 % %    \begin{macrocode}
-% \newcommand\transriptFixedFigure[3][]{%
-%   \bgroup
-%   \shhsize\hsize
-%   \subgraphicssep2mm
-%   \ifx#2A\relax
-%     \@tempdima\z@
-%   \else
-%     \ifx#2B\relax
-%       \@tempdima20mm
-%     \else
-%       \ifx#2C\relax
-%         \@tempdima30mm
-%       \else
-%         \ifx#2D\relax
-%           \@tempdima50mm
-%         \fi
-%       \fi
-%     \fi
-%   \fi
-%   \advance\shhsize-\@tempdima
-%   \sh@margins.5\@tempdima
-%   \vskip1\baselineskip
-%   \captionsetup{margin=\sh@margins\relax}%
-%   \if!#1!\else#1\fi
-%   \hskip\sh@margins\sameheight{#3}%
-%   \ifx\c@psource\@undefined\else
-%     \vskip\aboveSourceSkip
-%     \captionsetup{font=footnotesize,skip=-1mm}%
-%     \caption*{\c@psource}%
-%     \global\let\c@psource\@undefined
-%   \fi
-%   \egroup}
-
-% \def\capsource#1{\def\c@psource{#1}}%
-
-% \let\oldfigure\figure
-% \let\oldendfigure\endfigure
-
-% \renewenvironment{figure}{\savenotes\oldfigure}{\oldendfigure\spewnotes}
-
-
-% \long\def\tr@nspectFloat#1#2#3{%
-%   \def\@rgi{#1}%
-%   \setbox\tr@nspectFlt\hbox{#3}%
-%   \tr@nspectFltWd=\wd\tr@nspectFlt\relax
-%   \tr@nspectHt=\dimexpr\ht\tr@nspectFlt\ifx\use@depth\relax+\dp\tr@nspectFlt\fi\relax
-%   \tr@nspectSep\dimexpr(\textwidth-\tr@nspectFltWd)/2\relax
-%   \vskip\baselineskip
-%   \ifdim\tr@nspectFltWd<.5\textwidth\relax
-%     \bgroup
-%       %\tr@nspectSep4mm
-%       \tr@nspectWd\dimexpr\textwidth-\tr@nspectFltWd\relax
-%       \noindent\begin{minipage}[\ifx\use@depth\relax t\else b\fi][\tr@nspectHt][t]{\tr@nspectWd}%
-%         \captionsetup{justification=RaggedRight}%
-%         \captionof{figure}{#2}%
-%         \ifx\@rgi\@empty\else
-%           \vfill
-%         \captionsetup{font=footnotesize,skip=\z@}%
-%         \caption*{#1}%
-%         \vspace*{\dimexpr-\dp\tr@nspectFlt-1mm}%
-%        \fi
-%       \end{minipage}\hfill
-%       \begin{minipage}[t][\tr@nspectHt]{\tr@nspectFltWd}\centering
-%         \unhbox\tr@nspectFlt%
-%       \end{minipage}%
-%     \egroup
-%   \else
-%     \noindent\hskip\tr@nspectSep
-%     \begin{minipage}{\tr@nspectFltWd}\centering%
-%       \captionof{figure}{#2}%
-%       \unhbox\tr@nspectFlt\par
-%       \ifx\@rgi\@empty\else
-%         \captionsetup{font=footnotesize,skip=-1mm}\caption*{#1}%
-%         \vspace*{\dimexpr-\dp\tr@nspectFlt-1mm}%
-%       \fi
-%     \end{minipage}%
-%   \fi
-%   \vskip\baselineskip
-%   \global\let\use@depth\@undefined
-%   \tr@nspectWd\z@% \tr@nspectSep\z@
-% }
+% % \newcommand\transriptFixedFigure[3][]{%
+% %   \bgroup
+% %   \shhsize\hsize
+% %   \subgraphicssep2mm
+% %   \ifx#2A\relax
+% %     \@tempdima\z@
+% %   \else
+% %     \ifx#2B\relax
+% %       \@tempdima20mm
+% %     \else
+% %       \ifx#2C\relax
+% %         \@tempdima30mm
+% %       \else
+% %         \ifx#2D\relax
+% %           \@tempdima50mm
+% %         \fi
+% %       \fi
+% %     \fi
+% %   \fi
+% %   \advance\shhsize-\@tempdima
+% %   \sh@margins.5\@tempdima
+% %   \vskip1\baselineskip
+% %   \captionsetup{margin=\sh@margins\relax}%
+% %   \if!#1!\else#1\fi
+% %   \hskip\sh@margins\sameheight{#3}%
+% %   \ifx\c@psource\@undefined\else
+% %     \vskip\aboveSourceSkip
+% %     \captionsetup{font=footnotesize,skip=-1mm}%
+% %     \caption*{\c@psource}%
+% %     \global\let\c@psource\@undefined
+% %   \fi
+% %   \egroup}
+% % \def\capsource#1{\def\c@psource{#1}}%
+% % \let\oldfigure\figure
+% % \let\oldendfigure\endfigure
+% % \renewenvironment{figure}{\savenotes\oldfigure}{\oldendfigure\spewnotes}
+% % \long\def\tr@nspectFloat#1#2#3{%
+% %   \def\@rgi{#1}%
+% %   \setbox\tr@nspectFlt\hbox{#3}%
+% %   \tr@nspectFltWd=\wd\tr@nspectFlt\relax
+% %   \tr@nspectHt=\dimexpr\ht\tr@nspectFlt\ifx\use@depth\relax+\dp\tr@nspectFlt\fi\relax
+% %   \tr@nspectSep\dimexpr(\textwidth-\tr@nspectFltWd)/2\relax
+% %   \vskip\baselineskip
+% %   \ifdim\tr@nspectFltWd<.5\textwidth\relax
+% %     \bgroup
+% %       %\tr@nspectSep4mm
+% %       \tr@nspectWd\dimexpr\textwidth-\tr@nspectFltWd\relax
+% %       \noindent\begin{minipage}[\ifx\use@depth\relax t\else b\fi][\tr@nspectHt][t]{\tr@nspectWd}%
+% %         \captionsetup{justification=RaggedRight}%
+% %         \captionof{figure}{#2}%
+% %         \ifx\@rgi\@empty\else
+% %           \vfill
+% %         \captionsetup{font=footnotesize,skip=\z@}%
+% %         \caption*{#1}%
+% %         \vspace*{\dimexpr-\dp\tr@nspectFlt-1mm}%
+% %        \fi
+% %       \end{minipage}\hfill
+% %       \begin{minipage}[t][\tr@nspectHt]{\tr@nspectFltWd}\centering
+% %         \unhbox\tr@nspectFlt%
+% %       \end{minipage}%
+% %     \egroup
+% %   \else
+% %     \noindent\hskip\tr@nspectSep
+% %     \begin{minipage}{\tr@nspectFltWd}\centering%
+% %       \captionof{figure}{#2}%
+% %       \unhbox\tr@nspectFlt\par
+% %       \ifx\@rgi\@empty\else
+% %         \captionsetup{font=footnotesize,skip=-1mm}\caption*{#1}%
+% %         \vspace*{\dimexpr-\dp\tr@nspectFlt-1mm}%
+% %       \fi
+% %     \end{minipage}%
+% %   \fi
+% %   \vskip\baselineskip
+% %   \global\let\use@depth\@undefined
+% %   \tr@nspectWd\z@% \tr@nspectSep\z@
+% % }
