@@ -45,7 +45,7 @@
 \newcolumntype{Z}{>{\centering\arraybackslash\unskip}p}
 \newcolumntype{e}{!{\extracolsep{\fill}}}
 %    \end{macrocode}
-% for automatic typesetting and float positioning, we use very high latex tolerances:
+% for automatic typesetting and float positioning, we use very high tolerances from standard \LaTeX:
 %    \begin{macrocode}
 \def\topfraction{0.9}
 \def\textfraction{0.1}
@@ -61,7 +61,7 @@
 \newcount\tp@subflts          \tp@subflts=\z@\relax
 \newdimen\tp@subflt@maxheight \tp@subflt@maxheight=\z@\relax
 \newdimen\tp@subflt@sep       \tp@subflt@sep=\fboxsep\relax
-\newdimen\tp@subflt@hsize     \tp@subflt@hsize=\textwidth\relax
+\newdimen\tp@subflt@width     \tp@subflt@width=\textwidth\relax
 %    \end{macrocode}
 % This macro simplifies the definition of caption type specific
 % setups. \#1 is the property name; \#2 is the global default value.
@@ -160,6 +160,8 @@
 % \end{description}
 %    \begin{macrocode}
 \let\ltx@label\label
+\@ifpackageloaded{htmltabs}{\global\let\tp@uses@htmltabs\relax}{}%
+
 \def\tp@float[#1]#2#3{%
   \savenotes
   \begingroup
@@ -171,6 +173,8 @@
       \tp@parse@attributes#1\@nil%
       \expandafter\ifx\csname tp@attr@class\endcsname\relax\else
         \message{^^Jtranspect-floats.sty: Class of float \tp@captype\space is: `\tp@attr@class'.}%
+        \cssUseClass{default}%
+        \expandafter\cssUseClass\expandafter{\csname tp@attr@class\endcsname}%
       \fi
     \fi
     \expandafter\ifx\csname tp@attr@float-pos\endcsname\relax
@@ -188,7 +192,7 @@
     \ifx\tp@fps\@empty
       \expandafter\addvspace\expandafter{\tp@use@setting{tpAboveFloatSkip}}%
     \fi
-    \let\htOutputTable\relax
+    \ifx\tp@uses@htmltabs\relax\let\htOutputTable\relax\fi
   }
 
 %    \end{macrocode}
@@ -272,11 +276,19 @@
     \expandafter\ltx@label\expandafter{\tp@lo@ref}%
   \fi}
 
+
+\let\ltx@includegraphics\includegraphics
+\def\tp@includesubgraphics{\@ifnextchar [\@tp@includesubgraphics{\@tp@includesubgraphics[]}}%]
+\def\@tp@includesubgraphics[#1]#2{%
+  \def\@igopts{#1,width=\hsize}%
+  \expandafter\ltx@includegraphics\expandafter[\@igopts]{#2}%
+}
+
 %    \end{macrocode}
 % Sub-routine for figures
 %    \begin{macrocode}
 \def\tp@figure@float{%
-  \tp@subflt@hsize=\hsize\relax
+  \tp@subflt@width=\hsize\relax
   \vbox{%
     \expandafter\ifx\csname tp@subflt@cpt@0\endcsname\relax\else
       \tp@make@caption{0}{Top}%
@@ -295,7 +307,7 @@
         \sh@iterate{\@tempcnta}{\@ne}{\tp@subflts}{%
           \edef\@tempa{\CalcRatio{\tp@subflt@maxheight}{\csname tp@subflt@height@\the\@tempcnta\endcsname}}%
           \ifnum\@tempcnta>\@ne
-            \expandafter\global\expandafter\advance\expandafter\tp@subflt@hsize\expandafter-\tp@subflt@sep\relax%
+            \expandafter\global\expandafter\advance\expandafter\tp@subflt@width\expandafter-\tp@subflt@sep\relax%
           \fi
           \expandafter\@tempdimc\csname tp@subflt@width@\the\@tempcnta\endcsname\relax
           \@tempdimb=\@tempa\@tempdimc\relax
@@ -308,15 +320,12 @@
 %    \begin{macrocode}
         \sh@iterate{\@tempcnta}{\@ne}{\tp@subflts}{%
           \edef\@tempa{\CalcRatio{\csname tp@subflt@adj@width@\the\@tempcnta\endcsname}{\@tempdima}}%
-          \@tempdimb\@tempa\tp@subflt@hsize\relax
-          \ifnum\@tempcnta>\@ne\relax
-            \hskip\tp@subflt@sep\relax
-          \fi
-          \begin{minipage}[t][][t]{\@tempdimb}%
-            \let\includegraphics\tp@includesubgraphics
-            \tp@usefloat{\the\@tempcnta}%
-          \end{minipage}%
-        }% /sh@iterate
+          \expandafter\edef\csname tp@subflt@res@width@\the\@tempcnta\endcsname{\dimexpr\@tempa\tp@subflt@width\relax}%
+          \expandafter\ifx\csname tp@subflt@cpt@\the\@tempcnta\endcsname\relax\else\let\tp@has@capt\relax\fi
+        }%
+        \ifx\tp@has@capt\relax\tp@create@mp{\tp@usecapt{\the\@tempcnta}}\\\fi%
+        \tp@create@mp{\csname tp@subflt@fig@\the\@tempcnta\endcsname}%
+        \ifx\tp@has@capt\relax \\\tp@create@mp{\tp@usecapb{\the\@tempcnta}}\\\fi%
       \fi
     \egroup
     \expandafter\ifx\csname tp@subflt@cpt@0\endcsname\relax\else
@@ -327,18 +336,28 @@
     \fi
   }% /vbox
 }
-
-\let\ltx@includegraphics\includegraphics
-\def\tp@includesubgraphics{\@ifnextchar [\@tp@includesubgraphics{\@tp@includesubgraphics[]}}%]
-\def\@tp@includesubgraphics[#1]#2{%
-  \def\@igopts{#1,width=\hsize}%
-  \expandafter\ltx@includegraphics\expandafter[\@igopts]{#2}%
-}
+%    \end{macrocode}
+% creates a minipage of a fixed width for each part of a sub figure
+%    \begin{macrocode}
+\def\tp@create@mp#1{%
+  \sh@iterate{\@tempcnta}{\@ne}{\tp@subflts}{%
+    \ifnum\@tempcnta>\@ne\relax\hskip\tp@subflt@sep\relax\fi
+    \begin{minipage}[t][][t]{\the\csname tp@subflt@res@width@\the\@tempcnta\endcsname}%
+      \let\includegraphics\tp@includesubgraphics
+      #1\nobreak\par
+    \end{minipage}%
+  }}
 
 %    \end{macrocode}
-% prints a sub figure
+% prints a sub figure without a minipage
 %    \begin{macrocode}
 \def\tp@usefloat#1{{%
+    \tp@usecapt{#1}%
+    \csname tp@subflt@fig@#1\endcsname\nobreak\par
+    \tp@usecapb{#1}%
+}}
+
+\def\tp@usecapt#1{{%
     \parindent\z@
     \ifnum\tp@subflts=\z@\relax\else
       \expandafter\ifx\csname tp@subflt@cpt@#1\endcsname\relax\else
@@ -347,7 +366,9 @@
         \vskip\tp@use@setting{tpCaptionTopSkip}%
       \fi
     \fi
-    \csname tp@subflt@fig@#1\endcsname\nobreak\par
+}}
+
+\def\tp@usecapb#1{{%
     \ifnum\tp@subflts=\z@\relax\else
       \expandafter\ifx\csname tp@subflt@cpt@#1\endcsname\relax\else
         \nobreak
@@ -473,8 +494,41 @@
   \endarray
   $\egroup}%$
 \expandafter\let\csname endtabular*\endcsname=\endtabular
+%    \end{macrocode}
+%
+% \section{Class handler}
+%
+% % TODO: in eigene csstex.sty auslagern und dann hier und in htmltabs einbinden
+%
+% Declaring float classes.
+% \begin{description}
+% \item[\#1] scope: \lstinline{figure} or \lstinline{table}
+% \item[\#2] class name
+% \item[\#3] properties
+% \end{description}
+%    \begin{macrocode}
+\def\CSSDeclareClass{\@ifnextchar [{\css@set@class}{\css@set@class[]}}%]
 
+\gdef\css@@class@default{}
+\gdef\css@figure@class@default{}
+\gdef\css@table@class@default{}
 
+\def\css@set@class[#1]#2#3{%
+  \def\@argii{#2}\ifx\@argi\@empty\def\@argii{default}\fi%
+  \expandafter\def\csname css@#1@class@\@argii\endcsname{%
+    #3%
+  }%
+}
+
+\def\cssUseClass#1{%
+  \expandafter\ifx\csname css@\tp@captype @class@#1\endcsname\relax
+    \expandafter\ifx\csname css@@class@#1\endcsname\relax
+      \PackageError{transpect-flaots.sty}{Class `#1' not defined!}{Please declare the class `#1'!}%
+    \fi
+  \fi
+  %\csname css@@class@#1\endcsname
+  %\csname css@\tp@captype @class@#1\endcsname
+}
 
 % %%%%%%%%%%
 % % LEGACY %
