@@ -67,27 +67,36 @@
 \def\tpUseHook#1{\expandafter\ifx\csname tp@hook@#1\endcsname\relax\else\csname tp@hook@#1\endcsname\fi}
 %    \end{macrocode}
 % \section{Attributes}
-% In this part, we provide some macros to parse enviroment attributes. Curtesy of the \lstinline{htmltabs} package.
+% In this part, we provide some macros to parse enviroment
+% attributes. Curtesy of the \lstinline{htmltabs} package.
+%
+%
 %    \begin{macrocode}
-
 \begingroup
 \catcode`"=12
-\gdef\tp@parse@attributes#1\@nil{%
-  \if!#1!\else
-    \@tp@parse@attributes#1 ="" =""\@nil%
+%    \end{macrocode}
+% High level wrapper for the attribute parser; \#1 is the parent node of the attribute, \#2 is the attribute chain
+%    \begin{macrocode}
+\gdef\cssParseAttributes#1#2{%
+  \def\css@cur@node{#1}%
+  \if!#2!\else
+    \@css@parse@attributes#2 ="" =""\@nil%
   \fi
 }
-\gdef\@tp@parse@attributes#1="#2" #3=""\@nil{%
+%    \end{macrocode}
+% the actual, recursively applying, parser:
+%    \begin{macrocode}
+\gdef\@css@parse@attributes#1="#2" #3=""\@nil{%
   \edef\@argi{#1}%
   \edef\@argiii{#3}%
   \ifx\@argi\@empty\else%
     \ifx\@argi\space\else%
-      \expandafter\def\csname tp@attr@#1\endcsname{#2}%
+      \expandafter\def\csname css@\css@cur@node @attr@#1\endcsname{#2}%
       \ifx\@argiii\@empty\else
         \ifx\@argiii\space\else
           \def\@tempa{="" }%
           \ifx\@argiii\@tempa\else%
-            \expandafter\@tp@parse@attributes #3=""\@nil%
+            \expandafter\@css@parse@attributes #3=""\@nil%
           \fi
         \fi
       \fi
@@ -95,3 +104,4 @@
   \fi
 }%
 \endgroup
+\def\tp@str@default{default}

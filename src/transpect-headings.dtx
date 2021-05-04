@@ -259,18 +259,19 @@
     \else
       \ifx\heading@Runtitle\relax
         \ifx\heading@Number\relax
-          \tp@mark@name{\heading@Title}%
+          \protected@edef\@tp@mark@name{\heading@Title}%
         \else
 %    \end{macrocode}
 % note that \lstinline{\chaptermark} and \lstinline{\sectionmark} need
 % to be dealt with in your page style definitions or you might get
 % faulty \lstinline{\thechapter} and \lstinline{\thesection} readings!
 %    \begin{macrocode}
-          \tp@mark@name{\protect\numberline{\heading@Number}\heading@Title}%
+          \protected@edef\@tp@mark@name{\noexpand\numberline{\heading@Number}\heading@Title}%
         \fi
       \else
-        \tp@mark@name{\heading@Runtitle}%
+        \protected@edef\@tp@mark@name{\heading@Runtitle}%
       \fi
+      \expandafter\tp@mark@name\expandafter{\@tp@mark@name}%
     \fi
 %    \end{macrocode}
 % Entry in table of contents
@@ -299,26 +300,26 @@
               \fi
               \expandonce{\heading@Title}%
             }%
+          \fi
+          \addcontentsline{toc}{#3}{\heading@Toctitle}\relax
 %    \end{macrocode}
 % Bookmark version of the heading
 %    \begin{macrocode}
-            \edef\heading@BMtitle{%
-              \ifx\heading@Tocauthor\relax
-                \ifx\heading@Author\relax\else
-                  \noexpand\protect\noexpand\tpToCAuthor{\heading@Author}%
-                \fi
-              \else
-                \noexpand\protect\noexpand\tpToCAuthor{\heading@Tocauthor}%
+          \edef\heading@BMtitle{%
+            \ifx\heading@Tocauthor\relax
+              \ifx\heading@Author\relax\else
+                \noexpand\protect\noexpand\tpToCAuthor{\heading@Author}%
               \fi
-              \expandafter\ifx\csname tp@toc@no@number@#3\endcsname\@empty\else
-                \ifx\heading@Number\relax\else
-                  \noexpand\protect\noexpand\Hy@numberline{\heading@Number}%
-                \fi
+            \else
+              \noexpand\protect\noexpand\tpToCAuthor{\heading@Tocauthor}%
+            \fi
+            \expandafter\ifx\csname tp@toc@no@number@#3\endcsname\@empty\else
+              \ifx\heading@Number\relax\else
+                \noexpand\protect\noexpand\Hy@numberline{\heading@Number}%
               \fi
-              \expandonce{\heading@Title}%
-            }%
-          \fi
-          \addcontentsline{toc}{#3}{\heading@Toctitle}\relax
+            \fi
+            \expandonce{\heading@Title}%
+          }%
           \bookmark[level=#2,dest=\@currentHref]{\heading@BMtitle}%
         \fi
       \fi

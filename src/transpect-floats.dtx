@@ -61,7 +61,7 @@
 \newcount\tp@subflts          \tp@subflts=\z@\relax
 \newdimen\tp@subflt@maxheight \tp@subflt@maxheight=\z@\relax
 \newdimen\tp@subflt@sep       \tp@subflt@sep=\fboxsep\relax
-\newdimen\tp@subflt@width     \tp@subflt@width=\textwidth\relax
+\newdimen\tp@total@flt@width     \tp@total@flt@width=\textwidth\relax
 %    \end{macrocode}
 % This macro simplifies the definition of caption type specific
 % setups. \#1 is the property name; \#2 is the global default value.
@@ -115,22 +115,31 @@
 \tp@provide@setting{tpCaptionLegendSep}{}
 \tp@provide@setting{tpCaptionLegendFont}{}
 \tp@provide@setting{tpCaptionFormat}{}
+\tp@provide@setting{tpCaptionFormatBelow}{}
+\tp@provide@setting{tpCaptionFormatTop}{}
 \tp@provide@setting{tpCaptionFont}{}
 %    \end{macrocode}
 % Space between caption apparatus (top and below) and float apparatus
 %    \begin{macrocode}
-\tp@provide@setting{tpCaptionTopSkip}{\z@}
-\tp@provide@setting{tpCaptionBelowSkip}{\z@}
+\tp@provide@setting{tpCaptionTopSep}{\z@}
+\tp@provide@setting{tpCaptionBelowSep}{\z@}
 \tp@provide@setting{tpCaptionOrderTop}{}
 \tp@provide@setting{tpCaptionOrderBelow}{}
+\tp@provide@setting{tpCaptionVAlignTop}{t}
+\tpCaptionVAlignTop[table]{b}
+\tp@provide@setting{tpCaptionVAlignBottom}{t}
 \tpCaptionOrderTop[figure]{}
 \tpCaptionOrderBelow[figure]{label,caption,source,legend}
 \tpCaptionOrderTop[table]{label,caption,source}
 \tpCaptionOrderBelow[table]{legend}
+\tp@provide@setting{tpIntextSkipAbove}{\z@}
+\tp@provide@setting{tpIntextSkipBelow}{\z@}
  %\tp@provide@setting{tpCaptionSep}{\z@}
 \tp@provide@setting{tpAboveFloatSkip}{\@fptop}
 \tp@provide@setting{tpBelowFloatSkip}{\@fpbot}
 \tp@provide@setting{tpSubFloatSep}{\tp@subflt@sep}
+\tp@provide@setting{tpLeftSkip}{}
+\tp@provide@setting{tpRightSkip}{}
 %    \end{macrocode}
 % Resetting the subfloats
 %    \begin{macrocode}
@@ -160,7 +169,7 @@
 % \end{description}
 %    \begin{macrocode}
 \let\ltx@label\label
-\@ifpackageloaded{htmltabs}{\global\let\tp@uses@htmltabs\relax}{}%
+\AtBeginDocument{\@ifpackageloaded{htmltabs}{\global\let\tp@uses@htmltabs\relax}{}}%
 
 \def\tp@float[#1]#2#3{%
   \savenotes
@@ -170,27 +179,30 @@
     \def\tp@captype{#2}%
     \def\tp@caplisttype{#3}%
     \if!#1!\else
-      \tp@parse@attributes#1\@nil%
-      \expandafter\ifx\csname tp@attr@class\endcsname\relax\else
-        \message{^^Jtranspect-floats.sty: Class of float \tp@captype\space is: `\tp@attr@class'.}%
+      \cssParseAttributes{#2}{#1}%
+      \expandafter\ifx\csname css@#2@attr@class\endcsname\relax\else
+        \expandafter\global\expandafter\let\expandafter\tp@current@class\csname css@#2@attr@class\endcsname
+        \message{^^Jtranspect-floats.sty: Class of float \tp@captype\space is: `\csname css@#2@attr@class\endcsname'.}%
         \cssUseClass{default}%
-        \expandafter\cssUseClass\expandafter{\csname tp@attr@class\endcsname}%
+        \expandafter\cssUseClass\expandafter{\csname css@#2@attr@class\endcsname}%
       \fi
     \fi
-    \expandafter\ifx\csname tp@attr@float-pos\endcsname\relax
+    \expandafter\ifx\csname css@#2@attr@float-pos\endcsname\relax
       \let\tp@fps\@empty
     \else
-      \expandafter\let\expandafter\tp@fps\csname tp@attr@float-pos\endcsname
+      \expandafter\let\expandafter\tp@fps\csname css@#2@attr@float-pos\endcsname
     \fi
-    \protected\def\tpFig##1{\ltx@LocalExpandAfter\protected\expandafter\gdef\csname tp@subflt@fig@\the\tp@subflts\endcsname{##1}}%
-    \protected\def\tpCaption##1{\ltx@LocalExpandAfter\protected\expandafter\gdef\csname tp@subflt@cpt@\the\tp@subflts\endcsname{##1}}%
-    \protected\def\tpLegend##1{\ltx@LocalExpandAfter\protected\expandafter\gdef\csname tp@subflt@lgd@\the\tp@subflts\endcsname{##1}}%
-    \protected\def\tpSource##1{\ltx@LocalExpandAfter\protected\expandafter\gdef\csname tp@subflt@src@\the\tp@subflts\endcsname{##1}}%
-    \protected\def\tpNumber##1{\ltx@LocalExpandAfter\protected\expandafter\gdef\csname tp@subflt@lbl@\the\tp@subflts\endcsname{##1}}%
-    \protected\def\label##1{\ltx@LocalExpandAfter\protected\expandafter\gdef\csname tp@subflt@ref@\the\tp@subflts\endcsname{##1}}%
+    \protected\def\tpFig##1{\ltx@LocalExpandAfter\protected\expandafter\gdef\csname tp@subflt@fig@\the\tp@subflts\endcsname{##1}\ignorespaces}%
+    \protected\def\tpCaption##1{\ltx@LocalExpandAfter\protected\expandafter\gdef\csname tp@subflt@cpt@\the\tp@subflts\endcsname{##1}\ignorespaces}%
+    \protected\def\tpLegend##1{\ltx@LocalExpandAfter\protected\expandafter\gdef\csname tp@subflt@lgd@\the\tp@subflts\endcsname{##1}\ignorespaces}%
+    \protected\def\tpSource##1{\ltx@LocalExpandAfter\protected\expandafter\gdef\csname tp@subflt@src@\the\tp@subflts\endcsname{##1}\ignorespaces}%
+    \protected\def\tpNumber##1{\ltx@LocalExpandAfter\protected\expandafter\gdef\csname tp@subflt@lbl@\the\tp@subflts\endcsname{##1}\ignorespaces}%
+    \protected\def\label##1{\ltx@LocalExpandAfter\protected\expandafter\gdef\csname tp@subflt@ref@\the\tp@subflts\endcsname{##1}\ignorespaces}%
     \parindent\z@
     \ifx\tp@fps\@empty
       \expandafter\addvspace\expandafter{\tp@use@setting{tpAboveFloatSkip}}%
+    \else
+      \expandafter\addvspace\expandafter{\tp@use@setting{tpIntextSkipAbove}}%
     \fi
     \ifx\tp@uses@htmltabs\relax\let\htOutputTable\relax\fi
   }
@@ -211,6 +223,7 @@
   \ifx\tp@fps\@empty
     \expandafter\vskip\tp@use@setting{tpBelowFloatSkip}\relax%
   \else
+    \expandafter\vskip\tp@use@setting{tpIntextSkipBelow}\relax%
     \ifx\tp@do@dblfloat\relax
       \end@dblfloat
       \global\let\tp@do@dblfloat\@undefined
@@ -219,6 +232,7 @@
     \fi
   \fi
   \endgroup
+  \global\let\tp@current@class\relax
   \spewnotes}
 \def\endtp@dblfloat{\let\tp@do@dblfloat\relax\endtp@float}%
 %    \end{macrocode}
@@ -227,23 +241,20 @@
 \def\tp@table@float{%
   \expandafter\ifx\csname tp@subflt@cpt@0\endcsname\relax
   \else
-    \tp@make@caption{0}{Top}\nobreak\par%
-    \vskip\tp@use@setting{tpCaptionTopSkip}%
+    \tp@make@caption{0}{Top}%
   \fi
   \ifx\htTableBox\@undefined
   \else
     \box\htTableBox
   \fi
-  \nobreak\par
   \expandafter\ifx\csname tp@subflt@cpt@0\endcsname\relax\else
-    \vskip\tp@use@setting{tpCaptionBelowSkip}%
-    \tp@make@caption{0}{Below}\nobreak%
-    \tp@add@list{0}%
+    \tp@make@caption{0}{Below}%
   \fi}
 
 %    \end{macrocode}
 % This macro adds the entry for the float to the corresponding list.
 %    \begin{macrocode}
+\def\tpListEntry{\tp@lo@cpt\space\tp@lo@src}
 \def\tp@add@list#1{%
   \expandafter\expandafter\expandafter\def\expandafter\expandafter\expandafter\tp@lo@cpt\expandafter\expandafter\expandafter{\csname tp@subflt@cpt@#1\endcsname}%
   \expandafter\expandafter\expandafter\def\expandafter\expandafter\expandafter\tp@lo@src\expandafter\expandafter\expandafter{\csname tp@subflt@src@#1\endcsname}%
@@ -252,10 +263,10 @@
   \expandafter\ifx\tp@lo@src\relax\def\tp@lo@src{}\fi
   \expandafter\ifx\tp@lo@cpt\relax\else
     \expandafter\ifx\tp@lo@lbl\relax
-      \addcontentsline{\tp@caplisttype}{\tp@captype}{\tp@lo@cpt\tp@lo@src}%
+      \addcontentsline{\tp@caplisttype}{\tp@captype}{\tpListEntry}%
     \else
       \tp@make@anchor%
-      \addcontentsline{\tp@caplisttype}{\tp@captype}{\string\numberline{\tp@lo@lbl}\tp@lo@cpt\tp@lo@src}%
+      \addcontentsline{\tp@caplisttype}{\tp@captype}{\string\numberline{\tp@lo@lbl}\tpListEntry}%
     \fi
     \tp@reset@caption{#1}%
   \fi}
@@ -288,18 +299,25 @@
 % Sub-routine for figures
 %    \begin{macrocode}
 \def\tp@figure@float{%
-  \tp@subflt@width=\hsize\relax
+  \tp@total@flt@width=\hsize\relax
+  \expandafter\@tempdima\tp@use@setting{tpRightSkip}\relax
+  \ifdim\@tempdima>\z@\relax\advance\tp@total@flt@width-\@tempdima\relax\fi
+  \expandafter\@tempdima\tp@use@setting{tpLeftSkip}\relax
+  \ifdim\@tempdima>\z@\relax\advance\tp@total@flt@width-\@tempdima\relax\fi
+  \hskip\@tempdima
   \vbox{%
+    \hsize\tp@total@flt@width
     \expandafter\ifx\csname tp@subflt@cpt@0\endcsname\relax\else
       \tp@make@caption{0}{Top}%
-      \nobreak\par
-      \vskip\tp@use@setting{tpCaptionTopSkip}%
     \fi
     \bgroup
-      \expandafter\tp@subflt@sep=\tp@use@setting{tpSubFloatSep}%
+      \expandafter\tp@subflt@sep=\tp@use@setting{tpSubFloatSep}\relax%
       \@tempdima=\z@\relax
       \ifnum\tp@subflts=\z@\relax
-        \tp@usefloat0%
+        \bgroup
+          \ifx\tp@current@class\relax\else\let\includegraphics\tp@includesubgraphics\fi
+          \csname tp@subflt@fig@0\endcsname\nobreak\par
+          \egroup
       \else
 %    \end{macrocode}
 % 2nd iteration: calculate the ratio between each subfigure's height and the height of the largest subfigure
@@ -307,7 +325,7 @@
         \sh@iterate{\@tempcnta}{\@ne}{\tp@subflts}{%
           \edef\@tempa{\CalcRatio{\tp@subflt@maxheight}{\csname tp@subflt@height@\the\@tempcnta\endcsname}}%
           \ifnum\@tempcnta>\@ne
-            \expandafter\global\expandafter\advance\expandafter\tp@subflt@width\expandafter-\tp@subflt@sep\relax%
+            \advance\tp@total@flt@width-\tp@subflt@sep\relax%
           \fi
           \expandafter\@tempdimc\csname tp@subflt@width@\the\@tempcnta\endcsname\relax
           \@tempdimb=\@tempa\@tempdimc\relax
@@ -320,64 +338,35 @@
 %    \begin{macrocode}
         \sh@iterate{\@tempcnta}{\@ne}{\tp@subflts}{%
           \edef\@tempa{\CalcRatio{\csname tp@subflt@adj@width@\the\@tempcnta\endcsname}{\@tempdima}}%
-          \expandafter\edef\csname tp@subflt@res@width@\the\@tempcnta\endcsname{\dimexpr\@tempa\tp@subflt@width\relax}%
-          \expandafter\ifx\csname tp@subflt@cpt@\the\@tempcnta\endcsname\relax\else\let\tp@has@capt\relax\fi
+          \expandafter\edef\csname tp@subflt@res@width@\the\@tempcnta\endcsname{\dimexpr\@tempa\tp@total@flt@width\relax}%
+          \expandafter\ifx\csname tp@subflt@cpt@\the\@tempcnta\endcsname\relax\else\let\tp@has@subcapt\relax\fi
         }%
-        \ifx\tp@has@capt\relax\tp@create@mp{\tp@usecapt{\the\@tempcnta}}\\\fi%
-        \tp@create@mp{\csname tp@subflt@fig@\the\@tempcnta\endcsname}%
-        \ifx\tp@has@capt\relax \\\tp@create@mp{\tp@usecapb{\the\@tempcnta}}\\\fi%
+        \ifx\tp@has@subcapt\relax\tp@create@mp{\tp@make@caption{\the\@tempcnta}{Top}}{\tp@use@setting{tpCaptionVAlignTop}}\par\fi%
+        \tp@create@mp{\csname tp@subflt@fig@\the\@tempcnta\endcsname}{t}%
+        \ifx\tp@has@subcapt\relax \par\tp@create@mp{\tp@make@caption{\the\@tempcnta}{Below}}{\tp@use@setting{tpCaptionVAlignBottom}}\par\fi%
+        \par
       \fi
     \egroup
     \expandafter\ifx\csname tp@subflt@cpt@0\endcsname\relax\else
-      \nobreak
-      \vskip\tp@use@setting{tpCaptionBelowSkip}%
       \tp@make@caption{0}{Below}%
-      \tp@add@list{0}%
     \fi
   }% /vbox
 }
 %    \end{macrocode}
 % creates a minipage of a fixed width for each part of a sub figure
 %    \begin{macrocode}
-\def\tp@create@mp#1{%
+\def\tp@create@mp#1#2{%
   \sh@iterate{\@tempcnta}{\@ne}{\tp@subflts}{%
-    \ifnum\@tempcnta>\@ne\relax\hskip\tp@subflt@sep\relax\fi
-    \begin{minipage}[t][][t]{\the\csname tp@subflt@res@width@\the\@tempcnta\endcsname}%
+    \ifnum\@tempcnta>\@ne\relax\hfill\fi
+    \begin{minipage}[#2][][b]{\the\csname tp@subflt@res@width@\the\@tempcnta\endcsname}%
       \let\includegraphics\tp@includesubgraphics
-      #1\nobreak\par
+      #1
     \end{minipage}%
   }}
 
 %    \end{macrocode}
 % prints a sub figure without a minipage
 %    \begin{macrocode}
-\def\tp@usefloat#1{{%
-    \tp@usecapt{#1}%
-    \csname tp@subflt@fig@#1\endcsname\nobreak\par
-    \tp@usecapb{#1}%
-}}
-
-\def\tp@usecapt#1{{%
-    \parindent\z@
-    \ifnum\tp@subflts=\z@\relax\else
-      \expandafter\ifx\csname tp@subflt@cpt@#1\endcsname\relax\else
-        \tp@make@caption{#1}{Top}\nobreak%
-        \nobreak\par
-        \vskip\tp@use@setting{tpCaptionTopSkip}%
-      \fi
-    \fi
-}}
-
-\def\tp@usecapb#1{{%
-    \ifnum\tp@subflts=\z@\relax\else
-      \expandafter\ifx\csname tp@subflt@cpt@#1\endcsname\relax\else
-        \nobreak
-        \vskip\tp@use@setting{tpCaptionBelowSkip}%
-        \tp@make@caption{#1}{Below}\nobreak%
-        \tp@add@list{#1}%
-      \fi
-    \fi
-}}
 
 %    \end{macrocode}
 % Mechanism to determine the correct order of caption constituents
@@ -439,11 +428,21 @@
 % prints the caption
 %    \begin{macrocode}
 \def\tp@make@caption#1#2{%
+  \def\@argii{#2}\def\@tempa{Below}%
+  \ifx\@tempa\@argii
+    \vskip\tp@use@setting{tpCaptionBelowSep}%
+  \fi
   \bgroup%
     \expandonce{\tp@use@setting{tpCaptionFormat}}%
-    \tp@caption@order{#1}{#2}%
+    \expandonce{\tp@use@setting{tpCaptionFormat#2}}%
+    \strut\tp@caption@order{#1}{#2}\strut%
     \nobreak\par
   \egroup
+  \ifx\@tempa\@argii
+    \tp@add@list{#1}%
+  \else
+    \vskip\tp@use@setting{tpCaptionTopSep}%
+  \fi
 }
 %    \end{macrocode}
 % Resetting caption parameters
@@ -461,7 +460,8 @@
 %    \begin{macrocode}
 \def\tpSubFloat{%
   \global\advance\tp@subflts\@ne
-}
+  \ignorespaces}
+
 \def\endtpSubFloat{%
   \setbox\tp@subfltbox\hbox{\csname tp@subflt@fig@\the\tp@subflts\endcsname}%
   \expandafter\xdef\csname tp@subflt@width@\the\tp@subflts\endcsname{\the\wd\tp@subfltbox}%
@@ -469,7 +469,7 @@
   \expandafter\xdef\csname tp@subflt@depth@\the\tp@subflts\endcsname{\the\dp\tp@subfltbox}%
   \expandafter\ifdim\csname tp@subflt@height@\the\tp@subflts\endcsname>\tp@subflt@maxheight\relax
     \expandafter\global\expandafter\tp@subflt@maxheight=\csname tp@subflt@height@\the\tp@subflts\endcsname\relax
-  \fi}
+  \fi\ignorespaces}
 
 
 %    \end{macrocode}
@@ -502,8 +502,9 @@
 %
 % Declaring float classes.
 % \begin{description}
-% \item[\#1] scope: \lstinline{figure} or \lstinline{table}
-% \item[\#2] class name
+% \item[\#1] scope: \lstinline{figure} or \lstinline{table}.
+% \item[\#2] class name.  If left empty, \lstinline{default} is used
+%   instead.
 % \item[\#3] properties
 % \end{description}
 %    \begin{macrocode}
@@ -514,7 +515,7 @@
 \gdef\css@table@class@default{}
 
 \def\css@set@class[#1]#2#3{%
-  \def\@argii{#2}\ifx\@argi\@empty\def\@argii{default}\fi%
+  \def\@argii{#2}\ifx\@argii\@empty\def\@argii{default}\fi%
   \expandafter\def\csname css@#1@class@\@argii\endcsname{%
     #3%
   }%
@@ -526,9 +527,13 @@
       \PackageError{transpect-flaots.sty}{Class `#1' not defined!}{Please declare the class `#1'!}%
     \fi
   \fi
-  %\csname css@@class@#1\endcsname
-  %\csname css@\tp@captype @class@#1\endcsname
+  \let\ht@cur@element\tp@captype
+  \csname css@@class@#1\endcsname%
+  \csname css@\tp@captype @class@#1\endcsname%
 }
+
+
+
 
 % %%%%%%%%%%
 % % LEGACY %
