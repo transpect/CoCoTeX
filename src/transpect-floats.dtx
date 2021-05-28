@@ -135,11 +135,11 @@
 \tp@provide@setting{tpIntextSkipAbove}{\z@}
 \tp@provide@setting{tpIntextSkipBelow}{\z@}
  %\tp@provide@setting{tpCaptionSep}{\z@}
-\tp@provide@setting{tpAboveFloatSkip}{\@fptop}
-\tp@provide@setting{tpBelowFloatSkip}{\@fpbot}
+\tp@provide@setting{tpAboveFloatSkip}{\z@}
+\tp@provide@setting{tpBelowFloatSkip}{\z@}
 \tp@provide@setting{tpSubFloatSep}{\tp@subflt@sep}
-\tp@provide@setting{tpLeftSkip}{}
-\tp@provide@setting{tpRightSkip}{}
+\tp@provide@setting{tpLeftSkip}{\z@}
+\tp@provide@setting{tpRightSkip}{\z@}
 %    \end{macrocode}
 % Resetting the subfloats
 %    \begin{macrocode}
@@ -178,6 +178,7 @@
     \tp@reset@caption{0}%
     \def\tp@captype{#2}%
     \def\tp@caplisttype{#3}%
+    \global\let\tp@current@class\relax
     \if!#1!\else
       \cssParseAttributes{#2}{#1}%
       \expandafter\ifx\csname css@#2@attr@class\endcsname\relax\else
@@ -192,12 +193,14 @@
     \else
       \expandafter\let\expandafter\tp@fps\csname css@#2@attr@float-pos\endcsname
     \fi
-    \protected\def\tpFig##1{\ltx@LocalExpandAfter\protected\expandafter\gdef\csname tp@subflt@fig@\the\tp@subflts\endcsname{##1}\ignorespaces}%
-    \protected\def\tpCaption##1{\ltx@LocalExpandAfter\protected\expandafter\gdef\csname tp@subflt@cpt@\the\tp@subflts\endcsname{##1}\ignorespaces}%
-    \protected\def\tpLegend##1{\ltx@LocalExpandAfter\protected\expandafter\gdef\csname tp@subflt@lgd@\the\tp@subflts\endcsname{##1}\ignorespaces}%
-    \protected\def\tpSource##1{\ltx@LocalExpandAfter\protected\expandafter\gdef\csname tp@subflt@src@\the\tp@subflts\endcsname{##1}\ignorespaces}%
-    \protected\def\tpNumber##1{\ltx@LocalExpandAfter\protected\expandafter\gdef\csname tp@subflt@lbl@\the\tp@subflts\endcsname{##1}\ignorespaces}%
-    \protected\def\label##1{\ltx@LocalExpandAfter\protected\expandafter\gdef\csname tp@subflt@ref@\the\tp@subflts\endcsname{##1}\ignorespaces}%
+    \def\tp@bcnthack{\bgroup\ifx\tp@is@subflt\relax\else\tp@subflts=\z@\relax\fi}%
+    \def\tp@ecnthack{\egroup}%
+    \protected\def\tpFig##1{\tp@bcnthack\ltx@LocalExpandAfter\protected\expandafter\gdef\csname tp@subflt@fig@\the\tp@subflts\endcsname{##1}\ignorespaces\tp@ecnthack}%
+    \protected\def\tpCaption##1{\tp@bcnthack\ltx@LocalExpandAfter\protected\expandafter\gdef\csname tp@subflt@cpt@\the\tp@subflts\endcsname{##1}\ignorespaces\tp@ecnthack}%
+    \protected\def\tpLegend##1{\tp@bcnthack\ltx@LocalExpandAfter\protected\expandafter\gdef\csname tp@subflt@lgd@\the\tp@subflts\endcsname{##1}\ignorespaces\tp@ecnthack}%
+    \protected\def\tpSource##1{\tp@bcnthack\ltx@LocalExpandAfter\protected\expandafter\gdef\csname tp@subflt@src@\the\tp@subflts\endcsname{##1}\ignorespaces\tp@ecnthack}%
+    \protected\def\tpNumber##1{\tp@bcnthack\ltx@LocalExpandAfter\protected\expandafter\gdef\csname tp@subflt@lbl@\the\tp@subflts\endcsname{##1}\ignorespaces\tp@ecnthack}%
+    \protected\def\label##1{\tp@bcnthack\ltx@LocalExpandAfter\protected\expandafter\gdef\csname tp@subflt@ref@\the\tp@subflts\endcsname{##1}\ignorespaces\tp@ecnthack}%
     \parindent\z@
     \ifx\tp@fps\@empty
       \expandafter\addvspace\expandafter{\tp@use@setting{tpAboveFloatSkip}}%
@@ -211,6 +214,7 @@
 % 1st iteration: only reading. This step happens when the contents of the float environment are read.
 %    \begin{macrocode}
 \def\endtp@float{%
+  \def\@tempa{h!}\ifx\tp@fps\@tempa\let\tp@fps\@empty\fi
   \ifx\tp@fps\@empty\else
     \def\@tempa{h}\ifx\tp@fps\@tempa\def\tp@fps{ht!}\fi
     \ifx\tp@do@dblfloat\relax
@@ -305,7 +309,7 @@
   \expandafter\@tempdima\tp@use@setting{tpLeftSkip}\relax
   \ifdim\@tempdima>\z@\relax\advance\tp@total@flt@width-\@tempdima\relax\fi
   \hskip\@tempdima
-  \vbox{%
+  \vtop{%
     \hsize\tp@total@flt@width
     \expandafter\ifx\csname tp@subflt@cpt@0\endcsname\relax\else
       \tp@make@caption{0}{Top}%
@@ -314,10 +318,11 @@
       \expandafter\tp@subflt@sep=\tp@use@setting{tpSubFloatSep}\relax%
       \@tempdima=\z@\relax
       \ifnum\tp@subflts=\z@\relax
-        \bgroup
-          \ifx\tp@current@class\relax\else\let\includegraphics\tp@includesubgraphics\fi
-          \csname tp@subflt@fig@0\endcsname\nobreak\par
-          \egroup
+        \ifx\tp@current@class\relax\else\let\includegraphics\tp@includesubgraphics\fi
+        \tp@subflts\@ne
+        \expandafter\def\csname tp@subflt@res@width@1\endcsname{\tp@total@flt@width}%
+        \tp@create@mp{\csname tp@subflt@fig@0\endcsname\nobreak}{t}%
+        \tp@subflts\z@
       \else
 %    \end{macrocode}
 % 2nd iteration: calculate the ratio between each subfigure's height and the height of the largest subfigure
@@ -359,7 +364,7 @@
   \sh@iterate{\@tempcnta}{\@ne}{\tp@subflts}{%
     \ifnum\@tempcnta>\@ne\relax\hfill\fi
     \begin{minipage}[#2][][b]{\the\csname tp@subflt@res@width@\the\@tempcnta\endcsname}%
-      \let\includegraphics\tp@includesubgraphics
+      \ifx\tp@current@class\relax\else\let\includegraphics\tp@includesubgraphics\fi
       #1
     \end{minipage}%
   }}
@@ -459,6 +464,7 @@
 % shell for sub floats
 %    \begin{macrocode}
 \def\tpSubFloat{%
+  \let\tp@is@subflt\relax
   \global\advance\tp@subflts\@ne
   \ignorespaces}
 
