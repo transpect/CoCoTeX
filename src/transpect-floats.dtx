@@ -152,9 +152,9 @@
 % parameter in standard \LaTeX\ environments.
 %    \begin{macrocode}
 \newenvironment{tpFigure}[1][]{\tp@float[#1]{figure}{lof}}{\endtp@float}
-\newenvironment{tpFigure*}[1][]{\tp@float[#1]{figure}{lof}}{\endtp@dblfloat}
+\newenvironment{tpFigure*}[1][]{\let\tp@do@dblfloat\relax\tp@float[#1]{figure}{lof}}{\endtp@dblfloat}
 \newenvironment{tpTable}[1][]{\tp@float[#1]{table}{lot}}{\endtp@float}
-\newenvironment{tpTable*}[1][]{\tp@float[#1]{table}{lot}}{\endtp@dblfloat}
+\newenvironment{tpTable*}[1][]{\let\tp@do@dblfloat\relax\tp@float[#1]{table}{lot}}{\endtp@dblfloat}
 
 
 %    \end{macrocode}
@@ -169,6 +169,8 @@
 % \end{description}
 %    \begin{macrocode}
 \let\ltx@label\label
+\def\tp@str@landscape{landscape}
+\def\tp@str@default{default}
 \AtBeginDocument{\@ifpackageloaded{htmltabs}{\global\let\tp@uses@htmltabs\relax}{}}%
 
 \def\tp@float[#1]#2#3{%
@@ -202,38 +204,46 @@
     \protected\def\tpNumber##1{\tp@bcnthack\ltx@LocalExpandAfter\protected\expandafter\gdef\csname tp@subflt@lbl@\the\tp@subflts\endcsname{##1}\ignorespaces\tp@ecnthack}%
     \protected\def\label##1{\tp@bcnthack\ltx@LocalExpandAfter\protected\expandafter\gdef\csname tp@subflt@ref@\the\tp@subflts\endcsname{##1}\ignorespaces\tp@ecnthack}%
     \parindent\z@
-    \ifx\tp@fps\@empty
-      \expandafter\addvspace\expandafter{\tp@use@setting{tpAboveFloatSkip}}%
+    \ifx\tp@do@dblfloat\relax\linewidth\dimexpr2\columnwidth+\columnsep\relax\fi
+    \expandafter\ifx\csname css@#2@attr@orientation\endcsname\tp@str@landscape
+      \linewidth\textheight
+      \def\tp@fps{p}%
     \else
-      \expandafter\addvspace\expandafter{\tp@use@setting{tpIntextSkipAbove}}%
+      \ifx\tp@fps\@empty
+        \expandafter\addvspace\expandafter{\tp@use@setting{tpAboveFloatSkip}}%
+      \else
+        \expandafter\addvspace\expandafter{\tp@use@setting{tpIntextSkipAbove}}%
+      \fi
     \fi
-    \ifx\tp@uses@htmltabs\relax\let\htOutputTable\relax\fi
+    \ifx\tp@uses@htmltabs\relax
+      \global\setbox\htTableBox\box\voidb@x
+      \let\htOutputTable\relax
+    \fi
   }
 
 %    \end{macrocode}
 % 1st iteration: only reading. This step happens when the contents of the float environment are read.
 %    \begin{macrocode}
+\RequirePackage{rotating}
 \def\endtp@float{%
   \def\@tempa{h!}\ifx\tp@fps\@tempa\let\tp@fps\@empty\fi
   \ifx\tp@fps\@empty\else
     \def\@tempa{h}\ifx\tp@fps\@tempa\def\tp@fps{ht!}\fi
-    \ifx\tp@do@dblfloat\relax
-      \expandafter\@dblfloat\expandafter{\expandafter\tp@captype\expandafter}\expandafter[\tp@fps]%
-    \else
-      \expandafter\@float\expandafter{\expandafter\tp@captype\expandafter}\expandafter[\tp@fps]%
+    \let\tp@b@flt\tp@captype%
+    \expandafter\ifx\csname css@\tp@captype @attr@orientation\endcsname\tp@str@landscape
+      \edef\tp@b@flt{sideways\tp@captype}%
     \fi
+    \ifx\tp@do@dblfloat\relax
+      \expandafter\def\expandafter\tp@b@flt\expandafter{\tp@b@flt*}%
+    \fi
+    \expandafter\expandafter\expandafter\begin\expandafter\expandafter\expandafter{\expandafter\tp@b@flt\expandafter}\expandafter[\tp@fps]%
   \fi
   \csname tp@\tp@captype @float\endcsname
   \ifx\tp@fps\@empty
     \expandafter\vskip\tp@use@setting{tpBelowFloatSkip}\relax%
   \else
     \expandafter\vskip\tp@use@setting{tpIntextSkipBelow}\relax%
-    \ifx\tp@do@dblfloat\relax
-      \end@dblfloat
-      \global\let\tp@do@dblfloat\@undefined
-    \else
-      \end@float
-    \fi
+    \expandafter\end\expandafter{\tp@b@flt}%
   \fi
   \endgroup
   \global\let\tp@current@class\relax
@@ -249,7 +259,9 @@
   \fi
   \ifx\htTableBox\@undefined
   \else
-    \box\htTableBox
+    \ifvoid\htTableBox\else
+      \box\htTableBox
+    \fi
   \fi
   \expandafter\ifx\csname tp@subflt@cpt@0\endcsname\relax\else
     \tp@make@caption{0}{Below}%
@@ -521,7 +533,7 @@
 \gdef\css@table@class@default{}
 
 \def\css@set@class[#1]#2#3{%
-  \def\@argii{#2}\ifx\@argii\@empty\def\@argii{default}\fi%
+  \def\@argii{#2}\ifx\@argii\@empty\let\@argii\tp@str@default\fi%
   \expandafter\def\csname css@#1@class@\@argii\endcsname{%
     #3%
   }%
