@@ -34,29 +34,6 @@
 \hypersetup{bookmarksdepth=-999}
 %    \end{macrocode}
 %
-% \section{Blocks}
-% Blocks are bundled units of heading elements. They provide three
-% hooks: \lstinline{Before<Name><Level>},
-% \lstinline{After<Name><Level>}, and
-% \lstinline{<Name>Format<Level>}. The arguments are \#1:
-% \lstinline{<Name>}, \#2 \lstinline{<Level>}.
-%    \begin{macrocode}
-\def\tpDeclareBlock#1#2{%
-  \tpDeclareHook{Before#1#2}%
-  \tpDeclareHook{#1Format#2}%
-  \tpDeclareHook{After#1#2}%
-}
-%    \end{macrocode}
-% The use-call function for Blocks
-%    \begin{macrocode}
-\def\tp@use@heading@block#1#2{%
-  \expandafter\ifx\csname heading@#1\endcsname\relax\else
-    \tpUseHook{Before#1#2}%
-    {\tpUseHook{#1Format#2}\csname heading@#1\endcsname}%
-    \tpUseHook{After#1#2}%
-  \fi}
-%    \end{macrocode}
-%
 % \section{Facility for declaring heading levels and their layouts}%
 % \begin{description}
 % \item[1] (optional) inherit-from: load all properties from that class, first.
@@ -225,7 +202,7 @@
         \expandafter\global\expandafter\let\csname tp@after@title@#3\endcsname\par
       \fi
     \fi
-    \xdef\heading@level{#2}%
+    \xdef\tp@heading@level{#2}%
     \edef\Hy@toclevel{\csname toclevel@#2\endcsname}%
     \tpHeadingPar
     \tpUseHook{BeforeHeading#3}%
@@ -237,12 +214,12 @@
       \Hy@MakeCurrentHrefAuto{#3}%
       \Hy@raisedlink{\hyper@anchorstart{\@currentHref}\hyper@anchorend}%
     \fi
-    \ifx\tp@label\relax\else
-      \ifx\heading@Number\relax
+    \ifx\tp@heading@label\relax\else
+      \ifx\tp@heading@Number\relax
       \else
-        \let\@currentlabel\heading@Number
-        \let\@currentlabelname\heading@Title
-        \expandafter\ltx@label\expandafter{\tp@label}%
+        \let\@currentlabel\tp@heading@Number
+        \let\@currentlabelname\tp@heading@Title
+        \expandafter\ltx@label\expandafter{\tp@heading@label}%
       \fi
     \fi
     \global\let\label\ltx@label
@@ -257,19 +234,19 @@
     \fi
     \ifx\tp@mark@name\relax
     \else
-      \ifx\heading@Runtitle\relax
-        \ifx\heading@Number\relax
-          \protected@edef\@tp@mark@name{\heading@Title}%
+      \ifx\tp@heading@Runtitle\relax
+        \ifx\tp@heading@Number\relax
+          \protected@edef\@tp@mark@name{\tp@heading@Title}%
         \else
 %    \end{macrocode}
 % note that \lstinline{\chaptermark} and \lstinline{\sectionmark} need
 % to be dealt with in your page style definitions or you might get
 % faulty \lstinline{\thechapter} and \lstinline{\thesection} readings!
 %    \begin{macrocode}
-          \protected@edef\@tp@mark@name{\noexpand\numberline{\heading@Number}\heading@Title}%
+          \protected@edef\@tp@mark@name{\noexpand\numberline{\tp@heading@Number}\tp@heading@Title}%
         \fi
       \else
-        \protected@edef\@tp@mark@name{\heading@Runtitle}%
+        \protected@edef\@tp@mark@name{\tp@heading@Runtitle}%
       \fi
       \expandafter\tp@mark@name\expandafter{\@tp@mark@name}%
     \fi
@@ -280,47 +257,47 @@
       \expandafter\ifx\tp@notoc\relax
         \let\tp@notoc\@empty
       \else
-        \expandafter\ifnum\heading@level>\c@tocdepth\relax\else
-          \ifx\heading@Toctitle\relax
-            \edef\heading@Toctitle{%
+        \expandafter\ifnum\tp@heading@level>\c@tocdepth\relax\else
+          \ifx\tp@heading@Toctitle\relax
+            \edef\tp@heading@Toctitle{%
               \expandafter\ifx\csname tp@toc@no@number@#3\endcsname\@empty\else
-                \ifx\heading@Number\relax\else
-                  \noexpand\protect\noexpand\numberline{\heading@Number}%
+                \ifx\tp@heading@Number\relax\else
+                  \noexpand\protect\noexpand\numberline{\tp@heading@Number}%
                 \fi
               \fi
-              \ifx\heading@Subtitle\relax\else
-                \noexpand\protect\noexpand\tpToCSubTitle{\heading@Subtitle}%
+              \ifx\tp@heading@Subtitle\relax\else
+                \noexpand\protect\noexpand\tpToCSubTitle{\tp@heading@Subtitle}%
               \fi
-              \ifx\heading@Tocauthor\relax
-                \ifx\heading@Author\relax\else
-                  \noexpand\protect\noexpand\tpToCAuthor{\heading@Author}%
+              \ifx\tp@heading@Tocauthor\relax
+                \ifx\tp@heading@Author\relax\else
+                  \noexpand\protect\noexpand\tpToCAuthor{\tp@heading@Author}%
                 \fi
               \else
-                  \noexpand\protect\noexpand\tpToCAuthor{\heading@Tocauthor}%
+                  \noexpand\protect\noexpand\tpToCAuthor{\tp@heading@Tocauthor}%
               \fi
-              \expandonce{\heading@Title}%
+              \expandonce{\tp@heading@Title}%
             }%
           \fi
-          \addcontentsline{toc}{#3}{\heading@Toctitle}\relax
+          \addcontentsline{toc}{#3}{\expandonce{\tp@heading@Toctitle}}\relax
 %    \end{macrocode}
 % Bookmark version of the heading
 %    \begin{macrocode}
-          \edef\heading@BMtitle{%
-            \ifx\heading@Tocauthor\relax
-              \ifx\heading@Author\relax\else
-                \noexpand\protect\noexpand\tpToCAuthor{\heading@Author}%
+          \edef\tp@heading@BMtitle{%
+            \ifx\tp@heading@Tocauthor\relax
+              \ifx\tp@heading@Author\relax\else
+                \noexpand\protect\noexpand\tpToCAuthor{\tp@heading@Author}%
               \fi
             \else
-              \noexpand\protect\noexpand\tpToCAuthor{\heading@Tocauthor}%
+              \noexpand\protect\noexpand\tpToCAuthor{\tp@heading@Tocauthor}%
             \fi
             \expandafter\ifx\csname tp@toc@no@number@#3\endcsname\@empty\else
-              \ifx\heading@Number\relax\else
-                \noexpand\protect\noexpand\Hy@numberline{\heading@Number}%
+              \ifx\tp@heading@Number\relax\else
+                \noexpand\protect\noexpand\Hy@numberline{\tp@heading@Number}%
               \fi
             \fi
-            \expandonce{\heading@Title}%
+            \expandonce{\tp@heading@Title}%
           }%
-          \bookmark[level=#2,dest=\@currentHref]{\heading@BMtitle}%
+          \bookmark[level=#2,dest=\@currentHref]{\expandonce{\tp@heading@BMtitle}}%
         \fi
       \fi
     \fi
@@ -332,16 +309,16 @@
         \expandafter\ifx\csname tp@hide@uthor@#3\endcsname\relax
           \expandafter\ifx\csname tp@author@fter@#3\endcsname\relax
             \expandafter\ifx\csname tp@author@fter@indent@#3\endcsname\relax
-              \tp@use@heading@block{Author}{#3}%
+              \tp@use@block{Author}{#3}%
             \fi
           \fi
         \fi
         \@tempdimb\z@
-        \ifx\heading@Number\relax\else
+        \ifx\tp@heading@Number\relax\else
           \expandafter\ifx\csname tp@hang@number@#3\endcsname\@empty
             \expandafter\@tempdimb\dimexpr\csname tp@hang@fixed@#3\endcsname\relax
             \ifdim\@tempdimb>\z@\relax\else
-              \setbox\z@\hbox{\tpUseHook{TitleFormat#3}\tp@use@heading@block{Number}{#3}\strut}%
+              \setbox\z@\hbox{\tpUseHook{TitleFormat#3}\tp@use@block{Number}{#3}\strut}%
               \@tempdimb\wd\z@
             \fi
           \fi
@@ -350,32 +327,32 @@
           \leftskip\@tempdimb
           \hskip-\@tempdimb
           {\tpUseHook{TitleFormat#3}%
-            \tp@use@heading@block{Number}{#3}%
-            \heading@Title
+            \tp@use@block{Number}{#3}%
+            \tp@heading@Title
             \csname tp@after@title@#3\endcsname
           }%
-          \tp@use@heading@block{Subtitle}{#3}%
+          \tp@use@block{Subtitle}{#3}%
           \expandafter\ifx\csname tp@hide@uthor@#3\endcsname\relax
             \expandafter\ifx\csname tp@author@fter@#3\endcsname\relax\else
-              \tp@use@heading@block{Author}{#3}%
+              \tp@use@block{Author}{#3}%
             \fi
           \fi
         \egroup
         \tpUseHook{AfterTitles#3}%
         \expandafter\ifx\csname tp@hide@uthor@#3\endcsname\relax
           \expandafter\ifx\csname tp@author@fter@indent@#3\endcsname\relax\else
-            \tp@use@heading@block{Author}{#3}%
+            \tp@use@block{Author}{#3}%
           \fi
         \fi
-        \tp@use@heading@block{Quote}{#3}%
-        \tp@use@heading@block{QuoteSource}{#3}%
+        \tp@use@block{Quote}{#3}%
+        \tp@use@block{QuoteSource}{#3}%
 %    \end{macrocode}
 % Since all counters are taken from Word input, we can safely override \lstinline{\the<name>}:
 %    \begin{macrocode}
-        \ifx\heading@Number\relax
+        \ifx\tp@heading@Number\relax
           \expandafter\global\expandafter\let\csname the#3\endcsname\@empty%
         \else
-          \expandafter\xdef\csname the#3\endcsname{\heading@Number}%
+          \expandafter\xdef\csname the#3\endcsname{\tp@heading@Number}%
         \fi
         \tpUseHook{AfterBox#3}%
       \egroup
@@ -488,17 +465,8 @@
 \def\@heading[#1]#2{%
   \bgroup
     \let\\\TitleBreak
-    \global\let\heading@Author\relax
-    \global\let\heading@Title\relax
-    \global\let\heading@Number\relax
-    \global\let\heading@Subtitle\relax
-    \global\let\heading@Toctitle\relax
-    \global\let\heading@Tocauthor\relax
-    \global\let\heading@Runtitle\relax
-    \global\let\heading@Quote\relax
-    \global\let\heading@QuoteSource\relax
     \global\let\ltx@label\label
-    \global\let\tp@label\relax
+    \global\let\tp@heading@label\relax
 %    \end{macrocode}
 % handling of the optional argument
 %    \begin{macrocode}
@@ -511,196 +479,309 @@
 % to \LaTeX's way of counting where part is -1, chapter is 0, section
 % is 1, etc.
 %    \begin{macrocode}
-      \xdef\heading@name{#2}%
-      \def\label##1{\gdef\tp@label{##1}}%
-      \def\author##1{\gdef\heading@Author{##1}}%
-      \long\def\title##1{\long\gdef\heading@Title{##1}}%
-      \long\def\subtitle##1{\long\gdef\heading@Subtitle{##1}}%
-      \long\def\toctitle##1{\long\gdef\heading@Toctitle{##1}}%
-      \long\def\tocauthor##1{\long\gdef\heading@Tocauthor{##1}}%
-      \def\runtitle##1{\gdef\heading@Runtitle{##1}}%
-      \def\number##1{\gdef\heading@Number{##1}}%
-      \long\def\quote##1{\long\gdef\heading@Quote{##1}}%
-      \long\def\quotesource##1{\long\gdef\heading@QuoteSource{##1}}%
+      \xdef\tp@heading@name{#2}%
+      \tpProvideMacro{label}{}{}{tp@heading@label}%
+      \tpProvideMacro{author}{}{}{tp@heading@Author}%
+      \tpProvideMacro{title}{}{}{tp@heading@Title}%
+      \tpProvideMacro{subtitle}{}{}{tp@heading@Subtitle}%
+      \tpProvideMacro{toctitle}{}{}{tp@heading@Toctitle}%
+      \tpProvideMacro{tocauthor}{}{}{tp@heading@Tocauthor}%
+      \tpProvideMacro{runtitle}{}{}{tp@heading@Runtitle}%
+      \tpProvideMacro{number}{}{}{tp@heading@Number}%
+      \tpProvideMacro{quote}{}{}{tp@heading@Quote}%
+      \tpProvideMacro{quotesource}{}{}{tp@heading@Quotesource}%
 }
 %    \end{macrocode}
 % The ending part of the heading environment.
 %    \begin{macrocode}
 \def\endheading{%
     \egroup
-    \expandafter\ifx\csname tpUseHeading\heading@name\endcsname\relax
-      \PackageError{transpect.cls}{Heading level \heading@name\space unknown!}{A Heading with level \heading@name\space is unknown. Use the \string\tpDeclareHeading\space macro to declare heading levels.}%
+    \expandafter\ifx\csname tpUseHeading\tp@heading@name\endcsname\relax
+      \PackageError{transpect.cls}{Heading level \tp@heading@name\space unknown!}{A Heading with level \tp@heading@name\space is unknown. Use the \string\tpDeclareHeading\space macro to declare heading levels.}%
     \fi
-    \expandafter\aftergroup\csname tpUseHeading\heading@name\endcsname
+    \expandafter\aftergroup\csname tpUseHeading\tp@heading@name\endcsname
   \egroup
   \nopagebreak
 }
 %    \end{macrocode}
 %
 % \section{Facility for ToC and ListOf entries}
+%
+% This macro is called for each heading level in
+% \lstinline{\tpDeclareHeading} and initializes the facility to
+% generate the toc entries. \lstinline{#1} is the name of the heading,
+% \lstinline{#2} is the numeric level.
 %    \begin{macrocode}
 \def\tp@init@l@#1#2{%
-  \def\tpToCProperty##1##2{\tpAddToHook{##1#1}{##2}}%
 %    \end{macrocode}
-% Code to format the page number
+% Process user options:
 %    \begin{macrocode}
-  \def\tpToCPageOut##1{\expandafter\gdef\csname tp@toc@pageout@#1\endcsname{##1}}
-  \expandafter\def\csname tp@toc@pageout@#1\endcsname{%
-    \nobreak\hb@xt@\@pnumwidth{\hss\csname tp@toc@pageformat@#1\endcsname \tp@toc@the@page%
-      \kern-\p@\kern\p@}%
-  }%
+  \tp@toc@init@options{#1}{#2}%
+  \ifnum#2>\c@tocdepth
+    \expandafter\let\csname l@#1\endcsname\@gobbletwo
+  \else
 %    \end{macrocode}
-% Code to format the overall alignment of the toc entry
+% Dynamicly define \lstinline{l@<level>} with \lstinline{##1}
+% containing the entire toc-title, and \lstinline{##2} the page number
+% from the aux files:
 %    \begin{macrocode}
-  \def\tpToCAlign##1{\expandafter\gdef\csname tp@toc@alignment@#1\endcsname{##1}}
-  \expandafter\def\csname tp@toc@alignment@#1\endcsname{%
-    \parindent \z@
-    \rightskip \@pnumwidth\@plus1fil\relax
-    \parfillskip -\rightskip
-  }%
-%    \end{macrocode}
-% Code to be inserted before the toc entry for that level
-%    \begin{macrocode}
-  \def\tpToCBefore##1{\expandafter\gdef\csname tp@toc@before@#1\endcsname{##1}}%\vskip 1.0em \@plus\p@
-%    \end{macrocode}
-% Hook to be executed at the end of a contents line, usually an ending paragraph.
-%    \begin{macrocode}
-  \def\tpToCLineEnd##1{\expandafter\def\csname tp@toc@line@end@#1\endcsname{##1}}%
-  \expandafter\def\csname tp@toc@line@end@#1\endcsname{\@par\penalty\@highpenalty}% default
-%    \end{macrocode}
-% Code to be inserted after the toc entry for that level
-%    \begin{macrocode}
-  \def\tpToCAfter##1{\expandafter\def\csname tp@toc@after@#1\endcsname{##1}}%
-%    \end{macrocode}
-% If used, create a hanging indent the width of the heading level's widest number
-%    \begin{macrocode}
-  \def\tpToCHangNumber{\expandafter\global\expandafter\let\csname tp@toc@hangnum@#1\endcsname\@empty}%
-%    \end{macrocode}
-% If greater than 0pt, and no \lstinline{\tpToCHangNumber} is set, use
-% hanging indent of that width, needs to be defined as a dimension. Is
-% used together with \lstinline{\tpToCHangNumber}, that is the minimum
-% amount of the hanging indent, even if the heading level's widest
-% number is narrower than that amount.
-%    \begin{macrocode}
-  \def\tpToCHangFixed##1{\expandafter\xdef\csname tp@toc@hangfixed@#1\endcsname{\dimexpr##1\relax}}%
-  \expandafter\let\csname tp@toc@hangfixed@#1\endcsname\z@
-%    \end{macrocode}
-% Separator between the heading number and the heading title
-%    \begin{macrocode}
-  \def\tpToCNumSep##1{\expandafter\gdef\csname tp@toc@numsep@#1\endcsname{##1}}%
-  \expandafter\def\csname tp@toc@numsep@#1\endcsname{\enskip}%
-%    \end{macrocode}
-% Separator between the heading title and the page number
-%    \begin{macrocode}
-  \def\tpToCPageSep##1{\expandafter\gdef\csname tp@toc@pagesep@#1\endcsname{##1}}%\dotfill
-%    \end{macrocode}
-% Separator between author and whatever comes next.
-%    \begin{macrocode}
-  \def\tpToCAuthorAfter##1{\expandafter\gdef\csname tp@toc@author@after@#1\endcsname{##1}}%;
-  \def\tpToCAuthorBefore##1{\expandafter\gdef\csname tp@toc@author@before@#1\endcsname{##1}}%;
-  \def\tpToCAuthorFormat##1{\expandafter\gdef\csname tp@toc@author@format@#1\endcsname{##1}}%
-%    \end{macrocode}
-% Group for subtitle in toc.
-%    \begin{macrocode}
-  \def\tpToCSubTitleAfter##1{\expandafter\gdef\csname tp@toc@subtitle@after@#1\endcsname{##1}}%;
-  \def\tpToCSubTitleBefore##1{\expandafter\gdef\csname tp@toc@subtitle@before@#1\endcsname{##1}}%;
-  \def\tpToCSubTitleFormat##1{\expandafter\gdef\csname tp@toc@subtitle@format@#1\endcsname{##1}}%
-  \def\tpToCSubTitle{\expandafter\global\expandafter\let\csname tp@toc@subtitle@#1\endcsname\@empty}%
-%    \end{macrocode}
-% If set, Author comes after the toc line
-%    \begin{macrocode}
-  \def\tpToCAuthorAfterHeading{\expandafter\global\expandafter\let\csname tp@toc@author@after@heading@#1\endcsname\@empty}%
-%    \end{macrocode}
-% Format of the page number; extends \lstinline{\toTocFormat<level>}.
-%    \begin{macrocode}
-  \def\tpToCPageFormat##1{\expandafter\gdef\csname tp@toc@pageformat@#1\endcsname{##1}}%
-%    \end{macrocode}
-% Format of the entire toc entry, i.e., number, title, and page.
-%    \begin{macrocode}
-  \def\tpToCFormat##1{\expandafter\gdef\csname tp@toc@format@#1\endcsname{##1}}%\bfseries
-%    \end{macrocode}
-% Use this switch to suppress the output of the page number at all.
-%    \begin{macrocode}
-  \def\tpToCNoPage{\expandafter\global\expandafter\let\csname tp@toc@nopage@#1\endcsname\@empty}%
-%    \end{macrocode}
-% Generically provide \LaTeX's internal toc entry formatting macros:
-%    \begin{macrocode}
-  \expandafter\def\csname l@#1\endcsname##1##2{%
-    \gdef\tp@toc@the@page{##2}%
-    \@tempdima\z@%% Breite der eigenen numberline
-    \@tempdimc\z@%% Breite des linken Einzugs der nächsthöheren ÜS
-    \setbox\@tempboxa\box\voidb@x
-    \csname tp@toc@before@#1\endcsname
-    \begingroup
-      \@tempcnta\numexpr#2-1\relax
-      \@whilenum\@tempcnta>\m@ne\do{%
-        \expandafter\ifx\csname numberlinewidth\the\@tempcnta\endcsname\relax\else
-          \expandafter\advance\expandafter\@tempdimc\csname numberlinewidth\the\@tempcnta\endcsname
-        \fi
-        \advance\@tempcnta\m@ne
-      }%
-      \csname tp@toc@alignment@#1\endcsname
-      \leavevmode
-      \csname tp@toc@format@#1\endcsname
-      \let\tp@toc@author@after@heading\relax
-      \let\tp@toc@subtitle\relax
-      \expandafter\ifx\csname tp@toc@subtitle@#1\endcsname\@empty
-        \def\tpToCSubTitle####1{\gdef\tp@toc@subtitle{\csname tp@toc@subtitle@before@#1\endcsname{\csname tp@toc@subtitle@format@#1\endcsname ####1\csname tp@toc@subtitle@after@#1\endcsname}}}%
-      \else
-        \let\tpToCSubTitle\@gobble
-      \fi
-      \expandafter\ifx\csname tp@toc@author@after@heading@#1\endcsname\@empty
-        \def\tpToCAuthor####1{\gdef\tp@toc@author@after@heading{\csname tp@toc@author@before@#1\endcsname{\csname tp@toc@author@format@#1\endcsname ####1\csname tp@toc@author@after@#1\endcsname}}}%
-      \else
-        \def\tpToCAuthor####1{\csname tp@toc@author@before@#1\endcsname{\csname tp@toc@author@format@#1\endcsname ####1\csname tp@toc@author@after@#1\endcsname}}%
-      \fi
-      \sbox\z@{\def\numberline####1{\global\sbox\@tempboxa{####1\csname tp@toc@numsep@#1\endcsname}}##1}%
-      \expandafter\@tempdima\csname  tp@toc@hangfixed@#1\endcsname\relax
-      \ifvoid\@tempboxa
-      \else
-        \expandafter\ifx\csname tp@toc@hangnum@#1\endcsname\@empty
-          \@tempdima\dimexpr\wd\@tempboxa\relax
-        \fi
-      \fi
-      \edef\@tempa{%
-        \string\expandafter\string\gdef\string\csname\space numberlinewidth#2\string\endcsname{\the\@tempdima}%
-      }%
-      \expandafter\ifx\csname numberlinewidth#2\endcsname\relax
-        \expandafter\xdef\csname numberlinewidth#2\endcsname{\the\@tempdima}%
-        \expandafter\write\expandafter\@auxout\expandafter{\@tempa}%
-      \else
-        \expandafter\ifdim\csname numberlinewidth#2\endcsname<\@tempdima\relax
-          \expandafter\xdef\csname numberlinewidth#2\endcsname{\the\@tempdima}%
-          \expandafter\write\expandafter\@auxout\expandafter{\@tempa}%
-        \else
-          \expandafter\ifdim\csname numberlinewidth#2\endcsname=\@tempdima\relax
-            \expandafter\write\expandafter\@auxout\expandafter{\@tempa}%
-          \else
-            \expandafter\@tempdima\csname numberlinewidth#2\endcsname\relax
-          \fi
-        \fi
-      \fi
-      \def\numberline####1{\hb@xt@\@tempdima{####1\csname tp@toc@numsep@#1\endcsname\ignorespaces}}%
-      \ifvoid\@tempboxa
-        \leftskip \dimexpr\@tempdimc\relax
-      \else
-        \leftskip \dimexpr\@tempdima+\@tempdimc\relax
-        \hskip -\@tempdima
-      \fi
-      ##1%
-      \tp@toc@subtitle
-      \expandafter\ifx\csname tp@toc@nopage@#1\endcsname\relax
-        \nobreak
-        \csname tp@toc@pagesep@#1\endcsname
-        \csname tp@toc@pageout@#1\endcsname
-      \fi
-      \tp@toc@author@after@heading
-      \csname tp@toc@line@end@#1\endcsname
-      %\penalty\@highpenalty
-    \endgroup
-    \csname tp@toc@after@#1\endcsname
-  }%
+    \expandafter\def\csname l@#1\endcsname##1##2{%
+      \bgroup
+        \tp@toc@extract@data{##1}{##2}%
+        \tp@toc@print@entry{#1}%
+      \egroup
+    }%
+  \fi
 }
+%    \end{macrocode}
+% This function parses the information gained from the .toc file. Its
+% arguments resemble the arguments of \lstinline{l@<level>} from the
+% \lstinline{.toc} files, i.e., \lstinline{#1} is the raw entry title,
+% \lstinline{#2} is the page number.
+%    \begin{macrocode}
+\def\tp@toc@extract@data#1#2{%
+  \def\tp@toc@page{#2}% page number from .toc
+  \def\tpToCSubTitle##1{\def\tp@toc@subtitle{##1}}%
+  \def\numberline##1{\def\tp@toc@number{##1}}%
+  \def\tpTocAuthor##1{\def\tp@toc@author{##1}}%
+  \setbox\z@\hbox{#1}%
+  \let\tpTocSubTitle\@gobble
+  \let\numberline\@gobble
+  \let\tpTocAuthor\@gobble
+  \protected@edef\tp@toc@title{#1}%
+}
+
+%    \end{macrocode}
+% This function outputs and formats the toc entry. Its argument is the
+% heading level.
+%    \begin{macrocode}
+\def\tp@toc@print@entry#1{%
+  \csname tp@toc@order@#1\endcsname\@par
+  % ENTRY Level: #1
+  % Author: \ifx\tp@toc@author\@undefined nil\else\meaning\tp@toc@author\fi\\
+  % Number: \ifx\tp@toc@number\@undefined nil\else\meaning\tp@toc@number\fi\\
+  % Title: \ifx\tp@toc@title\@undefined nil\else\meaning\tp@toc@title\fi\\
+  % Subtitle: \ifx\tp@toc@subtitle\@undefined nil\else\meaning\tp@toc@subtitle\fi\\
+  % Page: \ifx\tp@toc@page\@undefined nil\else\meaning\tp@toc@page\fi\@par
+}
+%    \end{macrocode}
+% This function processes the user options for the toc entries of each
+% heading level defined via \lstinline{\tpDeclareHeading}.
+%    \begin{macrocode}
+\def\tp@toc@init@options#1#2{%
+  \def\tpToCOrder##1{\tp@toc@order{#1}{##1}}%
+  \tpToCOrder{author,title,subtitle,page}% default
+  %%
+  \let\tpToCBefore\@gobble
+  \let\tpToCAfter\@gobble
+  \let\tpToCFormat\@gobble
+  \let\tpToCPageSep\@gobble
+  \let\tpToCNumSep\@gobble
+  \let\tpToCNoPage\relax
+  \let\tpToCHangNumber\relax
+  \let\tpToCHangFixed\@gobble
+  \let\tpToCAlign\@gobble
+  \let\tpToCPageOut\@gobble
+  \let\tpToCSubTitle\relax
+  \let\tpToCSubTitleBefore\@gobble
+  \let\tpToCSubTitleAfter\@gobble
+  \let\tpToCSubTitleFormat\@gobble
+}
+%    \end{macrocode}
+% Output order. #1 is the name of the heading, #2 is the component order provided by the user.
+%    \begin{macrocode}
+\def\tp@toc@order#1#2{%
+  \def\tpToCUse##1{\csname tp@use@toc@##1\endcsname{#1}}%
+  \expandafter\gdef\csname tp@toc@order@#1\endcsname{%
+    #2}}
+
+\def\tp@use@toc@author#1{\ifx\tp@toc@author\@undefined\else \tp@toc@author\fi}
+\def\tp@use@toc@title#1{\ifx\tp@toc@title\@undefined\else \tp@toc@title\fi}
+\def\tp@use@toc@subtitle#1{\ifx\tp@toc@subtitle\@undefined\else  \tp@toc@subtitle\fi}
+\def\tp@use@toc@page#1{\ifx\tp@toc@page\@undefined\else \tp@toc@page\fi}
+% %    \end{macrocode}
+% %
+% % \subsection{Organizing the user options}
+% %
+% %    \begin{macrocode}
+% \def\tp@toc@options#1#2{%
+% %    \end{macrocode}
+% % \subsubsection{Output order}
+% %    \begin{macrocode}
+%   \def\tpTocOrder##1{%
+%     \def\tpToCUse####1{\csname tp@toc@use@####1\endcsname{#1}}%
+%     \gdef\tp@toc@order{##1}}%
+%   \tpTocOrder{\tpToCUse{author}\tpToCUse{title}\tpToCUse{subtitle}\tpTOCUse{page}}%
+% %    \end{macrocode}
+% % \subsubsection{Page number format}
+% %    \begin{macrocode}
+%   \def\tpToCPageOut##1{\expandafter\gdef\csname tp@toc@pageout@#1\endcsname{##1}}%
+%   \expandafter\def\csname tp@toc@pageout@#1\endcsname{%
+%     \nobreak\hb@xt@\@pnumwidth{\hss\csname tp@toc@pageformat@#1\endcsname \tp@toc@the@page%
+%       \kern-\p@\kern\p@}%
+%   }%
+% %    \end{macrocode}
+% % \subsection{Overall alignment of the toc entry}
+% %    \begin{macrocode}
+%   \def\tpToCAlign##1{\expandafter\gdef\csname tp@toc@alignment@#1\endcsname{##1}}
+%   \expandafter\def\csname tp@toc@alignment@#1\endcsname{%
+%     \parindent \z@
+%     \rightskip \@pnumwidth\@plus1fil\relax
+%     \parfillskip -\rightskip
+%   }%
+% %    \end{macrocode}
+% % end user options
+% %    \begin{macrocode}
+% }
+% %    \end{macrocode}
+% % 
+% %    \begin{macrocode}
+% \def\tp@init@l@#1#2{%
+%   \def\tpToCProperty##1##2{\tpAddToHook{##1#1}{##2}}%
+%   \tp@toc@options{#1}{#2}%
+% %    \end{macrocode}
+% % Code to be inserted before the toc entry for that level
+% %    \begin{macrocode}
+%   \def\tpToCBefore##1{\expandafter\gdef\csname tp@toc@before@#1\endcsname{##1}}%\vskip 1.0em \@plus\p@
+% %    \end{macrocode}
+% % Hook to be executed at the end of a contents line, usually an ending paragraph.
+% %    \begin{macrocode}
+%   \def\tpToCLineEnd##1{\expandafter\def\csname tp@toc@line@end@#1\endcsname{##1}}%
+%   \expandafter\def\csname tp@toc@line@end@#1\endcsname{\@par\penalty\@highpenalty}% default
+% %    \end{macrocode}
+% % Code to be inserted after the toc entry for that level
+% %    \begin{macrocode}
+%   \def\tpToCAfter##1{\expandafter\def\csname tp@toc@after@#1\endcsname{##1}}%
+% %    \end{macrocode}
+% % If used, create a hanging indent the width of the heading level's widest number
+% %    \begin{macrocode}
+%   \def\tpToCHangNumber{\expandafter\global\expandafter\let\csname tp@toc@hangnum@#1\endcsname\@empty}%
+% %    \end{macrocode}
+% % If greater than 0pt, and no \lstinline{\tpToCHangNumber} is set, use
+% % hanging indent of that width, needs to be defined as a dimension. Is
+% % used together with \lstinline{\tpToCHangNumber}, that is the minimum
+% % amount of the hanging indent, even if the heading level's widest
+% % number is narrower than that amount.
+% %    \begin{macrocode}
+%   \def\tpToCHangFixed##1{\expandafter\xdef\csname tp@toc@hangfixed@#1\endcsname{\dimexpr##1\relax}}%
+%   \expandafter\let\csname tp@toc@hangfixed@#1\endcsname\z@
+% %    \end{macrocode}
+% % Separator between the heading number and the heading title
+% %    \begin{macrocode}
+%   \def\tpToCNumSep##1{\expandafter\gdef\csname tp@toc@numsep@#1\endcsname{##1}}%
+%   \expandafter\def\csname tp@toc@numsep@#1\endcsname{\enskip}%
+% %    \end{macrocode}
+% % Separator between the heading title and the page number
+% %    \begin{macrocode}
+%   \def\tpToCPageSep##1{\expandafter\gdef\csname tp@toc@pagesep@#1\endcsname{##1}}%\dotfill
+% %    \end{macrocode}
+% % Separator between author and whatever comes next.
+% %    \begin{macrocode}
+%   \def\tpToCAuthorAfter##1{\expandafter\gdef\csname tp@toc@author@after@#1\endcsname{##1}}%;
+%   \def\tpToCAuthorBefore##1{\expandafter\gdef\csname tp@toc@author@before@#1\endcsname{##1}}%;
+%   \def\tpToCAuthorFormat##1{\expandafter\gdef\csname tp@toc@author@format@#1\endcsname{##1}}%
+% %    \end{macrocode}
+% % Group for subtitle in toc.
+% %    \begin{macrocode}
+%   \def\tpToCSubTitleAfter##1{\expandafter\gdef\csname tp@toc@subtitle@after@#1\endcsname{##1}}%;
+%   \def\tpToCSubTitleBefore##1{\expandafter\gdef\csname tp@toc@subtitle@before@#1\endcsname{##1}}%;
+%   \def\tpToCSubTitleFormat##1{\expandafter\gdef\csname tp@toc@subtitle@format@#1\endcsname{##1}}%
+%   \def\tpToCSubTitle{\expandafter\global\expandafter\let\csname tp@toc@subtitle@#1\endcsname\@empty}%
+% %    \end{macrocode}
+% % If set, Author comes after the toc line
+% %    \begin{macrocode}
+%   \def\tpToCAuthorAfterHeading{\expandafter\global\expandafter\let\csname tp@toc@author@after@heading@#1\endcsname\@empty}%
+% %    \end{macrocode}
+% % Format of the page number; extends \lstinline{\toTocFormat<level>}.
+% %    \begin{macrocode}
+%   \def\tpToCPageFormat##1{\expandafter\gdef\csname tp@toc@pageformat@#1\endcsname{##1}}%
+% %    \end{macrocode}
+% % Format of the entire toc entry, i.e., number, title, and page.
+% %    \begin{macrocode}
+%   \def\tpToCFormat##1{\expandafter\gdef\csname tp@toc@format@#1\endcsname{##1}}%\bfseries
+% %    \end{macrocode}
+% % Use this switch to suppress the output of the page number at all.
+% %    \begin{macrocode}
+%   \def\tpToCNoPage{\expandafter\global\expandafter\let\csname tp@toc@nopage@#1\endcsname\@empty}%
+% %    \end{macrocode}
+% % Generically provide \LaTeX's internal toc entry formatting macros:
+% %    \begin{macrocode}
+%   \expandafter\def\csname l@#1\endcsname##1##2{%
+%     \gdef\tp@toc@the@page{##2}%
+%     \@tempdima\z@%% Breite der eigenen numberline
+%     \@tempdimc\z@%% Breite des linken Einzugs der nächsthöheren ÜS
+%     \setbox\@tempboxa\box\voidb@x
+%     \csname tp@toc@before@#1\endcsname
+%     \begingroup
+%       \@tempcnta\numexpr#2-1\relax
+%       \@whilenum\@tempcnta>\m@ne\do{%
+%         \expandafter\ifx\csname numberlinewidth\the\@tempcnta\endcsname\relax\else
+%           \expandafter\advance\expandafter\@tempdimc\csname numberlinewidth\the\@tempcnta\endcsname
+%         \fi
+%         \advance\@tempcnta\m@ne
+%       }%
+%       \csname tp@toc@alignment@#1\endcsname
+%       \leavevmode
+%       \csname tp@toc@format@#1\endcsname
+%       \let\tp@toc@author@after@heading\relax
+%       \let\tp@toc@subtitle\relax
+%       \expandafter\ifx\csname tp@toc@subtitle@#1\endcsname\@empty
+%         \def\tpToCSubTitle####1{\gdef\tp@toc@subtitle{\csname tp@toc@subtitle@before@#1\endcsname{\csname tp@toc@subtitle@format@#1\endcsname ####1\csname tp@toc@subtitle@after@#1\endcsname}}}%
+%       \else
+%         \let\tpToCSubTitle\@gobble
+%       \fi
+%       \expandafter\ifx\csname tp@toc@author@after@heading@#1\endcsname\@empty
+%         \def\tpToCAuthor####1{\gdef\tp@toc@author@after@heading{\csname tp@toc@author@before@#1\endcsname{\csname tp@toc@author@format@#1\endcsname ####1\csname tp@toc@author@after@#1\endcsname}}}%
+%       \else
+%         \def\tpToCAuthor####1{\csname tp@toc@author@before@#1\endcsname{\csname tp@toc@author@format@#1\endcsname ####1\csname tp@toc@author@after@#1\endcsname}}%
+%       \fi
+%       \sbox\z@{\def\numberline####1{\global\sbox\@tempboxa{####1\csname tp@toc@numsep@#1\endcsname}}##1}%
+%       \expandafter\@tempdima\csname  tp@toc@hangfixed@#1\endcsname\relax
+%       \ifvoid\@tempboxa
+%       \else
+%         \expandafter\ifx\csname tp@toc@hangnum@#1\endcsname\@empty
+%           \@tempdima\dimexpr\wd\@tempboxa\relax
+%         \fi
+%       \fi
+%       \edef\@tempa{%
+%         \string\expandafter\string\gdef\string\csname\space numberlinewidth#2\string\endcsname{\the\@tempdima}%
+%       }%
+%       \expandafter\ifx\csname numberlinewidth#2\endcsname\relax
+%         \expandafter\xdef\csname numberlinewidth#2\endcsname{\the\@tempdima}%
+%         \expandafter\write\expandafter\@auxout\expandafter{\@tempa}%
+%       \else
+%         \expandafter\ifdim\csname numberlinewidth#2\endcsname<\@tempdima\relax
+%           \expandafter\xdef\csname numberlinewidth#2\endcsname{\the\@tempdima}%
+%           \expandafter\write\expandafter\@auxout\expandafter{\@tempa}%
+%         \else
+%           \expandafter\ifdim\csname numberlinewidth#2\endcsname=\@tempdima\relax
+%             \expandafter\write\expandafter\@auxout\expandafter{\@tempa}%
+%           \else
+%             \expandafter\@tempdima\csname numberlinewidth#2\endcsname\relax
+%           \fi
+%         \fi
+%       \fi
+%       \def\numberline####1{\hb@xt@\@tempdima{####1\csname tp@toc@numsep@#1\endcsname\ignorespaces}}%
+%       \ifvoid\@tempboxa
+%         \leftskip \dimexpr\@tempdimc\relax
+%       \else
+%         \leftskip \dimexpr\@tempdima+\@tempdimc\relax
+%         \hskip -\@tempdima
+%       \fi
+%       ##1%
+%       \tp@toc@subtitle
+%       \expandafter\ifx\csname tp@toc@nopage@#1\endcsname\relax
+%         \nobreak
+%         \csname tp@toc@pagesep@#1\endcsname
+%         \csname tp@toc@pageout@#1\endcsname
+%       \fi
+%       \tp@toc@author@after@heading
+%       \csname tp@toc@line@end@#1\endcsname
+%       %\penalty\@highpenalty
+%     \endgroup
+%     \csname tp@toc@after@#1\endcsname
+%   }%
+% }
 %    \end{macrocode}
 %
 % \section{Defaults}

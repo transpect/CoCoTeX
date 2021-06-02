@@ -1,5 +1,5 @@
 %    \end{macrocode}
-% \chapter{transpect-helpers.dtx}
+% \chapter{transpect-common.dtx}
 % This file provides some basic macros and facilities like macro
 % hooks.
 %
@@ -12,8 +12,8 @@
 %% lualatex  -  texlive > 2019
 %%
 \NeedsTeXFormat{LaTeX2e}[2019/01/01]
-\ProvidesPackage{transpect-helpers}
-    [2020/22/04 0.90 le-tex transpect helpers module]
+\ProvidesPackage{transpect-common}
+    [2020/22/04 0.90 le-tex transpect common module]
 %    \end{macrocode}
 % prefix macro used to execute code after the next \lstinline{\fi}:
 %    \begin{macrocode}
@@ -66,6 +66,37 @@
 }
 \def\tpUseHook#1{\expandafter\ifx\csname tp@hook@#1\endcsname\relax\else\csname tp@hook@#1\endcsname\fi}
 %    \end{macrocode}
+%
+% \section{Blocks}
+% Blocks are bundled units of formatting elements. They provide three
+% hooks: \lstinline{Before<Name><Level>},
+% \lstinline{After<Name><Level>}, and
+% \lstinline{<Name>Format<Level>}. The arguments are \#1:
+% \lstinline{<Name>}, \#2 \lstinline{<Level>}.
+%    \begin{macrocode}
+\def\tpDeclareBlock#1#2{%
+  \tpDeclareHook{Before#1#2}%
+  \tpDeclareHook{#1Format#2}%
+  \tpDeclareHook{After#1#2}%
+}
+%    \end{macrocode}
+% The use-call function for Blocks
+%    \begin{macrocode}
+\def\tp@use@block#1#2{%
+  \expandafter\ifx\csname tp@heading@#1\endcsname\relax\else
+    \tpUseHook{Before#1#2}%
+    {\tpUseHook{#1Format#2}\csname tp@heading@#1\endcsname}%
+    \tpUseHook{After#1#2}%
+  \fi}
+%    \end{macrocode}
+% Defines macros that are only valid within their environment.
+%    \begin{macrocode}
+\def\tpProvideMacro#1#2#3#4{%
+  \ltx@LocalExpandAfter\global\expandafter\let\csname #4\endcsname\relax
+  \expandafter\long\expandafter\protected\expandafter\def\csname #1\endcsname##1{#2\ltx@LocalExpandAfter\long\expandafter\protected\expandafter\gdef\csname #4\endcsname{##1}\ignorespaces#3}
+}
+%    \end{macrocode}
+%
 % \section{Attributes}
 % In this part, we provide some macros to parse enviroment
 % attributes. Curtesy of the \lstinline{htmltabs} package.
