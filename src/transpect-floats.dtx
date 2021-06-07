@@ -213,12 +213,13 @@
     \fi
     \def\tp@bcnthack{\bgroup\ifx\tp@is@subflt\relax\else\tp@subflts=\z@\relax\fi}%
     \def\tp@ecnthack{\egroup}%
-    \tpProvideMacro{tpFig}{\tp@bcnthack}{\tp@ecnthack}{tp@subflt@fig@\the\tp@subflts}%
-    \tpProvideMacro{tpCaption}{\tp@bcnthack}{\tp@ecnthack}{tp@subflt@cpt@\the\tp@subflts}%
-    \tpProvideMacro{tpLegend}{\tp@bcnthack}{\tp@ecnthack}{tp@subflt@lgd@\the\tp@subflts}%
-    \tpProvideMacro{tpSource}{\tp@bcnthack}{\tp@ecnthack}{tp@subflt@src@\the\tp@subflts}%
-    \tpProvideMacro{tpNumber}{\tp@bcnthack}{\tp@ecnthack}{tp@subflt@lbl@\the\tp@subflts}%
-    \tpProvideMacro{tpLabel}{\tp@bcnthack}{\tp@ecnthack}{tp@subflt@ref@\the\tp@subflts}%
+    \tpNamespace{subflt}%
+    \tpProvideMacro{tpFig}{\tp@bcnthack}{\tp@ecnthack}{fig@\the\tp@subflts}%
+    \tpProvideMacro{tpCaption}{\tp@bcnthack}{\tp@ecnthack}{cpt@\the\tp@subflts}%
+    \tpProvideMacro{tpLegend}{\tp@bcnthack}{\tp@ecnthack}{lgd@\the\tp@subflts}%
+    \tpProvideMacro{tpSource}{\tp@bcnthack}{\tp@ecnthack}{src@\the\tp@subflts}%
+    \tpProvideMacro{tpNumber}{\tp@bcnthack}{\tp@ecnthack}{lbl@\the\tp@subflts}%
+    \tpProvideMacro{tpLabel}{\tp@bcnthack}{\tp@ecnthack}{ref@\the\tp@subflts}%
     \parindent\z@
     \ifx\tp@do@dblfloat\relax\linewidth\dimexpr2\columnwidth+\columnsep\relax\fi
     \expandafter\ifx\csname css@#2@attr@orientation\endcsname\tp@str@landscape

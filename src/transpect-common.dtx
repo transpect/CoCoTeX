@@ -57,14 +57,14 @@
 %% In this part we provide the facility to utilize Hooks to patch code into different parts of the package depending on options and loaded packages.
 %    \begin{macrocode}
 \RequirePackage{etoolbox}
-\def\tpDeclareHook#1{\expandafter\global\expandafter\let\csname tp@hook@#1\endcsname\@empty}
+\def\tpDeclareHook#1{\expandafter\global\expandafter\let\csname tp@hook@\tp@namespace @#1\endcsname\@empty}
 \def\tpAddToHook#1#2{%
-  \expandafter\ifx\csname tp@hook@#1\endcsname\relax
+  \expandafter\ifx\csname tp@hook@\tp@namespace @#1\endcsname\relax
     \tpDeclareHook{#1}%
   \fi
-  \csgappto{tp@hook@#1}{#2}%
+  \csgappto{tp@hook@\tp@namespace @#1}{#2}%
 }
-\def\tpUseHook#1{\expandafter\ifx\csname tp@hook@#1\endcsname\relax\else\csname tp@hook@#1\endcsname\fi}
+\def\tpUseHook#1{\expandafter\ifx\csname tp@hook@\tp@namespace @#1\endcsname\relax\else\csname tp@hook@\tp@namespace @#1\endcsname\fi}
 %    \end{macrocode}
 %
 % \section{Blocks}
@@ -82,19 +82,26 @@
 %    \end{macrocode}
 % The use-call function for Blocks
 %    \begin{macrocode}
-\def\tp@use@block#1#2{%
-  \expandafter\ifx\csname tp@heading@#1\endcsname\relax\else
+\def\tpUseBlock#1#2{%
+  \expandafter\ifx\csname tp@\tp@namespace @#1\endcsname\relax\else
     \tpUseHook{Before#1#2}%
-    {\tpUseHook{#1Format#2}\csname tp@heading@#1\endcsname}%
+    {\tpUseHook{#1Format#2}\csname tp@\tp@namespace @#1\endcsname}%
     \tpUseHook{After#1#2}%
   \fi}
 %    \end{macrocode}
 % Defines macros that are only valid within their environment.
+% \begin{description}
+% \item[\#1] is the top-level macro name
+% \item[\#2] is code that is executed \textit{before} assignment of the user's value
+% \item[\#3] is code that is executed \textit{after} assignment of the user's value
+% \item[\#4] is the internal identifier. The macro that is build is 
+% \end{description}
 %    \begin{macrocode}
 \def\tpProvideMacro#1#2#3#4{%
-  \ltx@LocalExpandAfter\global\expandafter\let\csname #4\endcsname\relax
-  \expandafter\long\expandafter\protected\expandafter\def\csname #1\endcsname##1{#2\ltx@LocalExpandAfter\long\expandafter\protected\expandafter\gdef\csname #4\endcsname{##1}\ignorespaces#3}
+  \ltx@LocalExpandAfter\global\expandafter\let\csname tp@\tp@namespace @#4\endcsname\relax
+  \expandafter\long\expandafter\protected\expandafter\def\csname #1\endcsname##1{#2\ltx@LocalExpandAfter\long\expandafter\protected\expandafter\gdef\csname tp@\tp@namespace @#4\endcsname{##1}\ignorespaces#3}
 }
+\def\tpNamespace#1{\def\tp@namespace{#1}}
 %    \end{macrocode}
 %
 % \section{Attributes}

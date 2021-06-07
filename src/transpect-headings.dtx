@@ -44,6 +44,7 @@
 %    \begin{macrocode}
 \def\tpDeclareHeading{\@ifnextchar[{\@tpDeclareHeading}{\@tpDeclareHeading[]}}%]
 \def\@tpDeclareHeading[#1]#2#3#4{%
+  \tpNamespace{heading}%
   \expandafter\gdef\csname tp@decl@#3\endcsname{#4}%
   \global\let\tp@inherit\relax
   \if!#1!\else
@@ -187,10 +188,10 @@
 % Check some default overrides. The \lstinline{tpAfterSkip} hook
 % determines whether a heading is placed inline or as block:
 %    \begin{macrocode}
-    \expandafter\ifx\csname tp@hook@AfterSkip#3\endcsname\@empty
+    \expandafter\ifx\csname tp@hook@heading@AfterSkip#3\endcsname\@empty
       \global\@tempskipa=1sp\relax
     \else
-      \expandafter\expandafter\expandafter\global\expandafter\expandafter\@tempskipa\expandafter=\csname tp@hook@AfterSkip#3\endcsname\relax%
+      \expandafter\expandafter\expandafter\global\expandafter\expandafter\@tempskipa\expandafter=\csname tp@hook@heading@AfterSkip#3\endcsname\relax%
     \fi
 %    \end{macrocode}
 % If \lstinline{\tpAfterTitle} hasn't been overridden by the user, we
@@ -309,7 +310,7 @@
         \expandafter\ifx\csname tp@hide@uthor@#3\endcsname\relax
           \expandafter\ifx\csname tp@author@fter@#3\endcsname\relax
             \expandafter\ifx\csname tp@author@fter@indent@#3\endcsname\relax
-              \tp@use@block{Author}{#3}%
+              \tpUseBlock{Author}{#3}%
             \fi
           \fi
         \fi
@@ -318,7 +319,7 @@
           \expandafter\ifx\csname tp@hang@number@#3\endcsname\@empty
             \expandafter\@tempdimb\dimexpr\csname tp@hang@fixed@#3\endcsname\relax
             \ifdim\@tempdimb>\z@\relax\else
-              \setbox\z@\hbox{\tpUseHook{TitleFormat#3}\tp@use@block{Number}{#3}\strut}%
+              \setbox\z@\hbox{\tpUseHook{TitleFormat#3}\tpUseBlock{Number}{#3}\strut}%
               \@tempdimb\wd\z@
             \fi
           \fi
@@ -327,25 +328,25 @@
           \leftskip\@tempdimb
           \hskip-\@tempdimb
           {\tpUseHook{TitleFormat#3}%
-            \tp@use@block{Number}{#3}%
+            \tpUseBlock{Number}{#3}%
             \tp@heading@Title
             \csname tp@after@title@#3\endcsname
           }%
-          \tp@use@block{Subtitle}{#3}%
+          \tpUseBlock{Subtitle}{#3}%
           \expandafter\ifx\csname tp@hide@uthor@#3\endcsname\relax
             \expandafter\ifx\csname tp@author@fter@#3\endcsname\relax\else
-              \tp@use@block{Author}{#3}%
+              \tpUseBlock{Author}{#3}%
             \fi
           \fi
         \egroup
         \tpUseHook{AfterTitles#3}%
         \expandafter\ifx\csname tp@hide@uthor@#3\endcsname\relax
           \expandafter\ifx\csname tp@author@fter@indent@#3\endcsname\relax\else
-            \tp@use@block{Author}{#3}%
+            \tpUseBlock{Author}{#3}%
           \fi
         \fi
-        \tp@use@block{Quote}{#3}%
-        \tp@use@block{QuoteSource}{#3}%
+        \tpUseBlock{Quote}{#3}%
+        \tpUseBlock{QuoteSource}{#3}%
 %    \end{macrocode}
 % Since all counters are taken from Word input, we can safely override \lstinline{\the<name>}:
 %    \begin{macrocode}
@@ -464,6 +465,7 @@
 
 \def\@heading[#1]#2{%
   \bgroup
+    \tpNamespace{heading}%
     \let\\\TitleBreak
     \global\let\ltx@label\label
     \global\let\tp@heading@label\relax
@@ -473,29 +475,27 @@
     \global\let\tp@notoc\@empty
     \global\let\tp@notocnumber\@empty
     \tp@parse@opt{#1}%
-    \bgroup
 %    \end{macrocode}
 % The mandatory argument contains the section level, this corresponds
 % to \LaTeX's way of counting where part is -1, chapter is 0, section
 % is 1, etc.
 %    \begin{macrocode}
-      \xdef\tp@heading@name{#2}%
-      \tpProvideMacro{label}{}{}{tp@heading@label}%
-      \tpProvideMacro{author}{}{}{tp@heading@Author}%
-      \tpProvideMacro{title}{}{}{tp@heading@Title}%
-      \tpProvideMacro{subtitle}{}{}{tp@heading@Subtitle}%
-      \tpProvideMacro{toctitle}{}{}{tp@heading@Toctitle}%
-      \tpProvideMacro{tocauthor}{}{}{tp@heading@Tocauthor}%
-      \tpProvideMacro{runtitle}{}{}{tp@heading@Runtitle}%
-      \tpProvideMacro{number}{}{}{tp@heading@Number}%
-      \tpProvideMacro{quote}{}{}{tp@heading@Quote}%
-      \tpProvideMacro{quotesource}{}{}{tp@heading@Quotesource}%
-}
+    \xdef\tp@heading@name{#2}%
+    \tpProvideMacro{label}{}{}{label}%
+    \tpProvideMacro{author}{}{}{Author}%
+    \tpProvideMacro{title}{}{}{Title}%
+    \tpProvideMacro{subtitle}{}{}{Subtitle}%
+    \tpProvideMacro{toctitle}{}{}{Toctitle}%
+    \tpProvideMacro{tocauthor}{}{}{Tocauthor}%
+    \tpProvideMacro{runtitle}{}{}{Runtitle}%
+    \tpProvideMacro{number}{}{}{Number}%
+    \tpProvideMacro{quote}{}{}{Quote}%
+    \tpProvideMacro{quotesource}{}{}{Quotesource}%
+  }
 %    \end{macrocode}
 % The ending part of the heading environment.
 %    \begin{macrocode}
 \def\endheading{%
-    \egroup
     \expandafter\ifx\csname tpUseHeading\tp@heading@name\endcsname\relax
       \PackageError{transpect.cls}{Heading level \tp@heading@name\space unknown!}{A Heading with level \tp@heading@name\space is unknown. Use the \string\tpDeclareHeading\space macro to declare heading levels.}%
     \fi
