@@ -255,7 +255,7 @@
 % Entry in table of contents
 %    \begin{macrocode}
     \expandafter\ifx\csname tp@no@toc@#3\endcsname\@empty\else
-      \expandafter\ifx\tp@notoc\relax
+      \expandafter\ifx\csname css@heading@attr@notoc\endcsname\relax
         \let\tp@notoc\@empty
       \else
         \expandafter\ifnum\tp@heading@level>\c@tocdepth\relax\else
@@ -454,15 +454,6 @@
 
 \DeclareRobustCommand{\TitleBreak}{\hfill\break}
 
-\def\tp@parse@opt#1{\@tp@parse@opt#1,,\@nil}
-\def\@tp@parse@opt#1,#2,\@nil{%
-  \expandafter\ifx\csname tp@#1\endcsname\@empty
-    \expandafter\global\expandafter\let\csname tp@#1\endcsname\relax
-  \fi
-  \if!#2!\else
-    \@tp@parse@opt#2,\@nil
-  \fi}
-
 \def\@heading[#1]#2{%
   \bgroup
     \tpNamespace{heading}%
@@ -473,8 +464,7 @@
 % handling of the optional argument
 %    \begin{macrocode}
     \global\let\tp@notoc\@empty
-    \global\let\tp@notocnumber\@empty
-    \tp@parse@opt{#1}%
+    \cssParseAttributes{heading}{#1}%
 %    \end{macrocode}
 % The mandatory argument contains the section level, this corresponds
 % to \LaTeX's way of counting where part is -1, chapter is 0, section

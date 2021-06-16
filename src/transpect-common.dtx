@@ -104,6 +104,55 @@
 \def\tpNamespace#1{\def\tp@namespace{#1}}
 %    \end{macrocode}
 %
+% \section{Class handler}
+%
+% % TODO: in eigene csstex.sty auslagern und dann hier und in htmltabs einbinden
+%
+% Declaring float classes.
+% \begin{description}
+% \item[\#1] scope, e.g, \lstinline{figure} or \lstinline{table} (optional).
+% \item[\#2] class name.  If left empty, \lstinline{default} is used
+%   instead.
+% \item[\#3] parent class (optional)
+% \item[\#4] properties
+% \end{description}
+%    \begin{macrocode}
+\def\CSSDeclareClass{\@ifnextchar [{\@css@set@class}{\@css@set@class[]}}%]
+
+\def\@css@set@class[#1]#2{\@ifnextchar [{\css@set@class[#1]{#2}}{\css@set@class[#1]{#2}[]}}%]
+
+\gdef\css@@class@default{}
+
+\def\css@set@class[#1]#2[#3]#4{%
+  \def\@argii{#2}\ifx\@argii\@empty\let\@argii\tp@str@default\fi%
+  \if!#3!\else
+    \expandafter\def\csname css@#1@class@\@argii @parent\endcsname{#3}%
+  \fi
+  \expandafter\def\csname css@#1@class@\@argii\endcsname{%
+    #4%
+  }%
+}
+%    \end{macrocode}
+% High level macro to cascade the classes and to initialize the
+% resulting properties
+%    \begin{macrocode}
+
+\def\cssUseClass#1{%
+  \expandafter\ifx\csname css@\tp@captype @class@#1\endcsname\relax
+    \expandafter\ifx\csname css@@class@#1\endcsname\relax
+      \PackageError{transpect-flaots.sty}{Class `#1' not defined!}{Please declare the class `#1'!}%
+    \fi
+  \fi
+  \let\ht@cur@element\tp@captype
+  \csname css@@class@#1\endcsname%
+  \expandafter\ifx\csname css@\tp@captype @class@#1@parent\endcsname\relax\else
+    \expandafter\let\expandafter\@tempa\csname css@\tp@captype @class@#1@parent\endcsname
+    \csname css@\tp@captype @class@\@tempa\endcsname
+  \fi
+  \csname css@\tp@captype @class@#1\endcsname%
+}
+%    \end{macrocode}
+%
 % \section{Attributes}
 % In this part, we provide some macros to parse enviroment
 % attributes. Curtesy of the \lstinline{htmltabs} package.
@@ -116,32 +165,44 @@
 % High level wrapper for the attribute parser; \#1 is the parent node of the attribute, \#2 is the attribute chain
 %    \begin{macrocode}
 \gdef\cssParseAttributes#1#2{%
-  \def\css@cur@node{#1}%
-  \if!#2!\else
-    \@css@parse@attributes#2 ="" =""\@nil%
-  \fi
-}
+  \if!#1!\else
+    \if!#2!\else
+      \def\css@cur@node{#1}%
+      \@css@parse@attributes #2,,\@nil
+    \fi\fi}
 %    \end{macrocode}
 % the actual, recursively applying, parser:
 %    \begin{macrocode}
-\gdef\@css@parse@attributes#1="#2" #3=""\@nil{%
-  \edef\@argi{#1}%
-  \edef\@argiii{#3}%
-  \ifx\@argi\@empty\else%
-    \ifx\@argi\space\else%
+\gdef\css@parse@kv#1=#2=#3\@nil{%
+  \ifx!#2!\else
+    \ifx #2==\else
       \expandafter\def\csname css@\css@cur@node @attr@#1\endcsname{#2}%
-      \ifx\@argiii\@empty\else
-        \ifx\@argiii\space\else
-          \def\@tempa{="" }%
-          \ifx\@argiii\@tempa\else%
-            \expandafter\@css@parse@attributes #3=""\@nil%
-          \fi
-        \fi
-      \fi
     \fi
-  \fi
-}%
+  \fi}
+\gdef\@css@parse@attributes #1,#2,\@nil{%
+  \if!#1!\else
+    \css@parse@kv#1==\@nil
+    \if!#2!\else
+      \@css@parse@attributes#2,\@nil
+    \fi\fi}
 \endgroup
+
+%    \end{macrocode}
+% \section{Properties}
+% This high level macro provides the property-value interface for
+% transpect environments.
+%    \begin{macrocode}
+\DeclareRobustCommand{\tpSetProperty}[2]{%
+  \expandafter\protect\expandafter\def\csname tp@\tp@namespace @#1\endcsname{#2}%
+}
+
+\def\tpUseProperty#1{\csname tp@\tp@namespace @#1\endcsname}
+%    \end{macrocode}
+% Add to namespace-specific defaults, \#1 is the namespace, \#2 are the properties.
+%    \begin{macrocode}
+\DeclareRobustCommand{\tpAddToDefault}[2]{%
+  \csgappto{tp@#1@default}{#2}%
+}
 
 \let\hack\@firstofone
 \let\Hack\@firstofone
