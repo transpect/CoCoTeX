@@ -59,20 +59,14 @@
     \renewenvironment{#2*}[1][]{\let\tp@do@dblfloat\relax\tp@float[##1]{#3}{#4}{#2}}{\endtp@dblfloat}%
   \fi
   \let\tp@namespace\tp@float@name
-  \csname tp@float@default\endcsname
+  \tp@cascade@props{#1}{#2}{float}
+  \csname tp@#3@default\endcsname
   \if!#1!\else
-    \expandafter\def\csname tp@float@#2@parent\endcsname{#1}%
-    \@tp@inherit@float{#1}%
+    \expandafter\def\csname tp@#3@#2@parent\endcsname{#1}%
+    \tp@inherit@props{#1}{#3}%
   \fi
   \expandafter\protect\expandafter\gdef\csname tp@float@#2@properties\endcsname{#5}%
   #5}
-%    \end{macrocode}
-% this macro recursivly loads properties from parent environments:
-%    \begin{macrocode}
-\def\@tp@inherit@float#1{%
-  \expandafter\ifx\csname tp@float@#1@parent\endcsname\relax\else\expandafter\@tp@inherit@float\expandafter{\csname tp@float@#1@parent\endcsname}\fi
-  \csname tp@float@#1@properties\endcsname
-}
 %    \end{macrocode}
 % User macros. The optional argument corresponds to the placement
 % parameter in standard \LaTeX\ environments.
