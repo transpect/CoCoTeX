@@ -14,6 +14,7 @@
 \NeedsTeXFormat{LaTeX2e}[2019/01/01]
 \ProvidesPackage{transpect-headings}
     [\filedate \fileversion le-tex transpect headings module]
+\RequirePackage{transpect-common}
 %    \end{macrocode}
 %
 % Headings are handled differently with \lstinline{transpect.cls}
@@ -47,15 +48,15 @@
   \tpNamespace{heading}%
   \expandafter\def\csname heading@#3@name\endcsname{#3}%
   %
-  \expandafter\protect\expandafter\gdef\csname tp@heading@#3@properties\endcsname{#4}%
+  \if!#1!\else\expandafter\protect\expandafter\def\csname tp@heading@#3@parent\endcsname{#1}\fi%
+  \expandafter\protect\expandafter\def\csname tp@heading@#3@properties\endcsname{#4}%
   %
   %
   %
   \expandafter\def\csname tpUseHeading#3\endcsname{%
     \@setpar{\@@par}%
     \tpNamespace{heading}%
-    \tp@cascade@props{#1}{#3}{heading}%
-    \csname tp@heading@#3@properties\endcsname
+    \tpCascadeProps{#3}{heading}%
     \tpUseProperty{heading-par}%
     \tpUseProperty{before-heading}%
     \everypar{}%
@@ -493,44 +494,6 @@
 
 
 
-%    \end{macrocode}
-% Counterpart to \lstinline{\addvspace}: if the value of
-% \lstinline{\minusvspace} is larger than \lstinline{\lastskip},
-% \lstinline{\lastskip} is used. Otherwise, the value of
-% \lstinline{\minusvspace} is used.
-%    \begin{macrocode}
-\def\@xminusvskip{%
-  \ifdim\lastskip<\@tempskipb
-  \else
-    \ifdim\@tempskipb<\z@
-      \ifdim\lastskip<\z@
-      \else
-        \advance\@tempskipb\lastskip
-        \vskip-\lastskip
-        \vskip \@tempskipb
-      \fi
-    \fi
-  \fi}
-\def\minusvspace#1{%
-  \ifvmode
-     \if@minipage\else
-       \ifdim \lastskip =\z@
-%    \end{macrocode}
-% Compatibility to texlive pre 2020:
-%    \begin{macrocode}
-         \ifx\@vspace@calcify\@undefined
-           \vskip #1\relax
-         \else
-           \@vspace@calcify{#1}%
-         \fi
-       \else
-       \setlength\@tempskipb{#1}%
-         \@xminusvskip
-       \fi
-     \fi
-  \else
-    \@noitemerr
-  \fi}
 
 %    \end{macrocode}
 %
@@ -555,7 +518,7 @@
 %    \end{macrocode}
 % handling of the optional argument
 %    \begin{macrocode}
-  \cssParseAttributes{heading}{#1}%
+  \tpParseAttributes{heading}{#1}%
 %    \end{macrocode}
 % The mandatory argument contains the section level, this corresponds
 % to \LaTeX's way of counting where part is -1, chapter is 0, section

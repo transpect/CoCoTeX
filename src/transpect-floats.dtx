@@ -1,7 +1,7 @@
 %    \end{macrocode}
 % \chapter{transpect-floats.dtx}
 % This module provides handlers for floating objects like tables and
-% figires common to all Transpect projects
+% figures common to all Transpect projects
 %
 %    \begin{macrocode}
 %%
@@ -14,6 +14,7 @@
 \NeedsTeXFormat{LaTeX2e}[2018/12/01]
 \ProvidesPackage{transpect-floats}
     [2020/22/04 0.90 le-tex transpect floats module]
+\RequirePackage{transpect-common}
 %    \end{macrocode}
 % for automatic typesetting and float positioning, we use very high tolerances from standard \LaTeX:
 %    \begin{macrocode}
@@ -49,24 +50,21 @@
 \def\tpDeclareFloat{\@ifnextchar[{\@tpDeclareFloat}{\@tpDeclareFloat[]}}%]
 \def\@tpDeclareFloat[#1]#2#3#4#5{%
   \def\tp@float@name{#2}%
-  \expandafter\ifx\csname\tp@float@name\endcsname\relax
-    \PackageInfo{transpect}{Declaring \tp@float@name\space environment}%
+  \expandafter\ifx\csname #2\endcsname\relax
+    \PackageInfo{transpect}{Declaring #2 environment}%
     \newenvironment{#2}[1][]{\tp@float[##1]{#3}{#4}{#2}}{\endtp@float}%
     \newenvironment{#2*}[1][]{\let\tp@do@dblfloat\relax\tp@float[##1]{#3}{#4}{#2}}{\endtp@dblfloat}%
   \else
-    \PackageInfo{transpect}{Re-Declaring \tp@float@name\space environment}%
+    \PackageInfo{transpect}{Re-Declaring #2 environment}%
     \renewenvironment{#2}[1][]{\tp@float[##1]{#3}{#4}{#2}}{\endtp@float}%
     \renewenvironment{#2*}[1][]{\let\tp@do@dblfloat\relax\tp@float[##1]{#3}{#4}{#2}}{\endtp@dblfloat}%
   \fi
-  \let\tp@namespace\tp@float@name
-  \tp@cascade@props{#1}{#2}{float}
-  \csname tp@#3@default\endcsname
   \if!#1!\else
-    \expandafter\def\csname tp@#3@#2@parent\endcsname{#1}%
-    \tp@inherit@props{#1}{#3}%
+    \message{===> #1 is parent of #2}%
+    \expandafter\def\csname tp@float@#2@parent\endcsname{#1}%
   \fi
-  \expandafter\protect\expandafter\gdef\csname tp@float@#2@properties\endcsname{#5}%
-  #5}
+  \expandafter\def\csname tp@float@#2@properties\endcsname{#5}%
+  }
 %    \end{macrocode}
 % User macros. The optional argument corresponds to the placement
 % parameter in standard \LaTeX\ environments.
@@ -133,20 +131,22 @@
     \tp@reset@caption{0}%
     \def\tp@captype{#2}%
     \def\tp@caplisttype{#3}%
+    \let\ht@cur@element\tp@captype
     \global\let\tp@current@class\relax
+    \expandafter\tpCascadeProps\expandafter{#4}{float}%
     \if!#1!\else
-      \cssParseAttributes{#2}{#1}%
-      \expandafter\ifx\csname css@#2@attr@class\endcsname\relax\else
-        \expandafter\global\expandafter\let\expandafter\tp@current@class\csname css@#2@attr@class\endcsname
-        \message{^^Jtranspect-floats.sty: Class of float \tp@captype\space is: `\csname css@#2@attr@class\endcsname'.}%
-        \cssUseClass{default}%
-        \expandafter\cssUseClass\expandafter{\csname css@#2@attr@class\endcsname}%
+      \tpParseAttributes{#2}{#1}%
+      \expandafter\ifx\csname tp@#2@attr@class\endcsname\relax\else
+        \expandafter\global\expandafter\let\expandafter\tp@current@class\csname tp@#2@attr@class\endcsname
+        \message{^^Jtranspect-floats.sty: Class of float \tp@captype\space is: `\csname tp@#2@attr@class\endcsname'.}%
+        \tpUseClass{default}{\tp@captype}%
+        \expandafter\tpUseClass\expandafter{\csname tp@#2@attr@class\endcsname}{\tp@captype}%
       \fi
     \fi
-    \expandafter\ifx\csname css@#2@attr@float-pos\endcsname\relax
+    \expandafter\ifx\csname tp@#2@attr@float-pos\endcsname\relax
       \let\tp@fps\@empty
     \else
-      \expandafter\let\expandafter\tp@fps\csname css@#2@attr@float-pos\endcsname
+      \expandafter\let\expandafter\tp@fps\csname tp@#2@attr@float-pos\endcsname
     \fi
     \def\@tempa{h!}\ifx\tp@fps\@tempa\let\tp@fps\@empty\fi
     \def\tp@bcnthack{\bgroup\ifx\tp@is@subflt\relax\else\tp@subflts=\z@\relax\fi}%
@@ -159,7 +159,7 @@
     \protected\def\label##1{\tp@bcnthack\ltx@LocalExpandAfter\protected\expandafter\gdef\csname tp@subflt@ref@\the\tp@subflts\endcsname{##1}\ignorespaces\tp@ecnthack}%
     \parindent\z@
     \ifx\tp@do@dblfloat\relax\linewidth\dimexpr2\columnwidth+\columnsep\relax\fi
-    \expandafter\ifx\csname css@#2@attr@orientation\endcsname\tp@str@landscape
+    \expandafter\ifx\csname tp@#2@attr@orientation\endcsname\tp@str@landscape
       \linewidth\textheight
       \def\tp@fps{p}%
     \else
@@ -183,7 +183,7 @@
   \ifx\tp@fps\@empty\else
     \def\@tempa{h}\ifx\tp@fps\@tempa\def\tp@fps{ht!}\fi
     \let\tp@b@flt\tp@captype%
-    \expandafter\ifx\csname css@\tp@captype @attr@orientation\endcsname\tp@str@landscape
+    \expandafter\ifx\csname tp@\tp@captype @attr@orientation\endcsname\tp@str@landscape
       \edef\tp@b@flt{sideways\tp@captype}%
     \fi
     \ifx\tp@do@dblfloat\relax
