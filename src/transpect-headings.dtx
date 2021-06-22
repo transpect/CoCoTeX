@@ -57,13 +57,20 @@
     \@setpar{\@@par}%
     \tpNamespace{heading}%
     \tpCascadeProps{#3}{heading}%
+    % \tp@init@l@{#3}{#2}%
+    \xdef\tp@heading@level{#2}%
+    \edef\Hy@toclevel{\csname toclevel@#2\endcsname}%
     \tpUseProperty{heading-par}%
     \tpUseProperty{before-heading}%
     \everypar{}%
+    \tp@create@labels{#3}% label facility
     \tp@number@props
+    % Running headers
+    % ToC entries
+    % Bookmarks
     \tpIfProp{after-skip}{\expandafter\@tempskipa\expandafter=\tpUseProperty{after-skip}\relax}{\@tempskipa=1sp\relax}%
     \def\@svsec{%
-      \tpUseProperty{before-heading-block}
+      \tpUseProperty{before-heading-block}%
       {\tpUseProperty{heading-block}}%
       \tpUseProperty{after-heading-block}%
     }%
@@ -74,6 +81,21 @@
     \fi
     \aftergroup\next%
   }}
+
+\def\tp@create@labels#1{%
+  \ifx\Hy@MakeCurrentHrefAuto\@undefined\else
+    \Hy@MakeCurrentHrefAuto{#1}%
+    \Hy@raisedlink{\hyper@anchorstart{\@currentHref}\hyper@anchorend}%
+  \fi
+  \expandafter\ifx\csname tp@heading@attr@label\endcsname\relax\else
+    \tpIfMacro{Number}{%
+      \edef\@tempa{\expandonce{\tp@heading@Number}}%
+      \let\@currentlabel\@tempa\relax
+      \let\@currentlabelname\tp@heading@Title
+      \expandafter\ltx@label\expandafter{\tp@heading@attr@label}%
+    }{}%
+  \fi
+  \global\let\label\ltx@label}
 
 \tpAddToDefault{heading}{%
   \tpSetProperty{interline-para}{}%
@@ -525,8 +547,7 @@
 % is 1, etc.
 %    \begin{macrocode}
   \edef\tp@heading@name{#2}%
-  \tp@heading@load@props{#2}%
-  \tpProvideMacro{tpLabel}{}{}{Label}%
+  \tp@heading@load@props%
   \tp@provide@hd@macros{Author}%
   \tp@provide@hd@macros{Title}%
   \tp@provide@hd@macros{Subtitle}%
@@ -534,8 +555,8 @@
   \tpProvideMacro{tpQuote}{}{}{Quote}%
   \tpProvideMacro{tpQuoteSource}{}{}{QuoteSource}%
 }
-\def\tp@heading@load@props#1{%
-  \csname tp@heading@#1@properties\endcsname
+\def\tp@heading@load@props{%
+  \csname tp@heading@\tp@heading@name @properties\endcsname
 }
 %    \end{macrocode}
 % The ending part of the heading environment.

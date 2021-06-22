@@ -60,7 +60,6 @@
     \renewenvironment{#2*}[1][]{\let\tp@do@dblfloat\relax\tp@float[##1]{#3}{#4}{#2}}{\endtp@dblfloat}%
   \fi
   \if!#1!\else
-    \message{===> #1 is parent of #2}%
     \expandafter\def\csname tp@float@#2@parent\endcsname{#1}%
   \fi
   \expandafter\def\csname tp@float@#2@properties\endcsname{#5}%

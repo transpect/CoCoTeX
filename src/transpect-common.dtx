@@ -205,7 +205,7 @@
   \expandafter\ifx\csname tp@#2@#1@parent\endcsname\relax\else
     \tp@inherit@props{#1}{#2}%
   \fi
-  \csname tp@float@#2@properties\endcsname
+  \csname tp@#2@#1@properties\endcsname
 }
 %    \end{macrocode}
 % This macro recursivly loads properties from parent environments if they exist. \#1 is the parent (may be empty), \#2 is the macro family.
