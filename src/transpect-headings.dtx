@@ -54,11 +54,12 @@
   %
   %
   \expandafter\def\csname tpUseHeading#3\endcsname{%
+    \if!#1!\else\edef\tp@heading@parent{#1}\fi%
+    \edef\tp@heading@level{#2}%
     \@setpar{\@@par}%
     \tpNamespace{heading}%
     \tpCascadeProps{#3}{heading}%
     % \tp@init@l@{#3}{#2}%
-    \xdef\tp@heading@level{#2}%
     \edef\Hy@toclevel{\csname toclevel@#2\endcsname}%
     \tpUseProperty{heading-par}%
     \tpUseProperty{before-heading}%
@@ -66,6 +67,7 @@
     \tp@create@labels{#3}% label facility
     \tp@number@props
     % Running headers
+    \tp@run@props
     % ToC entries
     % Bookmarks
     \tpIfProp{after-skip}{\expandafter\@tempskipa\expandafter=\tpUseProperty{after-skip}\relax}{\@tempskipa=1sp\relax}%
@@ -103,6 +105,29 @@
     \tpIfProp{interline-para}{\if@noskipsec \leavevmode \fi}{}%
     \@@par\global\@afterindenttrue}%
   \tpSetProperty{before-heading}{}%
+  \tpSetProperty{title-format}{\bfseries}%
+  \tpSetProperty{subtitle-format}{\normalfont}%
+  \tpSetProperty{author-format}{\normalfont}%
+  \tpSetProperty{quote-format}{\raggedleft}%
+  \tpSetProperty{quote-source-format}{}%
+  \tpSetProperty{heading-block}{%
+    \bgroup
+      \tpUseProperty{title-format}%
+      \tpIfMacro{Number}{\tpHangNumber{\tpUseProperty{number-width}}}{}%
+      {\tpUseMacro{Title}}\par%
+      \tpIfMacro{Subtitle}{{\tpUseProperty{subtitle-format}\tpUseMacro{Subtitle}}\par}{}%
+      \tpIfMacro{Author}{{\tpUseProperty{author-format}\tpUseMacro{Author}}\par}{}%
+      \tpIfMacro{Quote}{%
+        \bgroup\tpUseProperty{quote-format}%
+          \tpUseMacro{Quote}\par
+          \tpIfMacro{QuoteSource}{{\tpUseProperty{quote-source-format}--\space\tpUseMacro{Quote}}\par}{}%
+        \egroup}{}%
+    \egroup
+  }%
+  \tpSetProperty{running-heading}{%
+    \tpIfMacro{RunAuthor}{\tpUseMacro{RunAuthor}:\space}{}%
+    \tpUseMacro{RunTitle}%
+  }%
   \tpSetProperty{after-heading-block}{}%
   \tpSetProperty{before-heading-block}{\parindent\z@ \parskip\z@}%
   \tpSetProperty{after-indent}{}%
@@ -111,6 +136,30 @@
   \tpSetProperty{title-format}{\raggedright}%
   \tpSetProperty{number-width}{}
 }
+%    \end{macrocode}
+% This macro prepares the Fields used to compose the running
+% titles. It checks if the user provides running heading specific
+% overrides in the \lstlisting{heading} environment. If not, it uses
+% the non-specific data fields instead, as long as they are not empty.
+%
+% After the Fields are filled, the style specific property
+% running-heading is evaluated and the corresponding
+% \lstlisting{\<heading>mark} macros are written.
+%    \begin{macrocode}
+
+\def\tp@run@props{%
+  \tpIfMacro{RunTitle}{}{\tpIfMacro{Title}{\expandafter\tpRunTitle\expandafter{\tpUseMacro{Title}}}{}}%
+  \tpIfMacro{RunNumber}{}{\tpIfMacro{Number}{\expandafter\tpRunNumber\expandafter{\tpUseMacro{Number}}}{}}%
+  \tpIfMacro{RunAuthor}{}{\tpIfMacro{Author}{\expandafter\tpRunAuthor\expandafter{\tpUseMacro{Author}}}{}}%
+  \tpIfMacro{RunSubTitle}{}{\tpIfMacro{Subtitle}{\expandafter\tpRunSubtitle\expandafter{\tpUseMacro{Subtitle}}}{}}%
+  \expandafter\let\expandafter\tp@mark@name\csname\tp@heading@name mark\endcsname%
+  \ifx\tp@mark@name\relax\ifx\tp@heading@parent\@undefined\else
+      \expandafter\let\expandafter\tp@mark@name\csname\tp@inherit@name mark\endcsname%
+    \fi\fi
+  \ifx\tp@mark@name\relax\else
+    \edef\@tempa{\expandafter\@empty\csname tp@heading@running-heading\endcsname}%
+    \expandafter\tp@mark@name\expandafter{\@tempa}%
+  \fi}
 
 \def\tp@number@props{%
   \sbox\z@{\tpUseProperty{title-format}\tpUseMacro{Number}\tpUseProperty{number-sep}}\tpSetProperty{number-width}{\the\wd\z@}%

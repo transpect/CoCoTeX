@@ -109,7 +109,7 @@
 %    \begin{macrocode}
 \def\tpProvideMacro#1#2#3#4{%
   \ltx@LocalExpandAfter\global\expandafter\let\csname tp@\tp@namespace @#4\endcsname\relax
-  \expandafter\long\expandafter\protected\expandafter\def\csname #1\endcsname##1{#2\ltx@LocalExpandAfter\long\expandafter\protected\expandafter\gdef\csname tp@\tp@namespace @#4\endcsname{##1}\ignorespaces#3}
+  \expandafter\long\expandafter\protected\expandafter\def\csname #1\endcsname##1{#2\expandafter\def\csname tp@\tp@namespace @#4\endcsname{##1}\ignorespaces#3}
 }
 \def\tpNamespace#1{\def\tp@namespace{#1}}
 %    \end{macrocode}
