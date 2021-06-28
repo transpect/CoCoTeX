@@ -50,6 +50,7 @@
   %
   \if!#1!\else\expandafter\protect\expandafter\def\csname tp@heading@#3@parent\endcsname{#1}\fi%
   \expandafter\protect\expandafter\def\csname tp@heading@#3@properties\endcsname{#4}%
+  \tp@init@l@{#2}{#3}%
   %
   %
   %
@@ -59,17 +60,18 @@
     \@setpar{\@@par}%
     \tpNamespace{heading}%
     \tpCascadeProps{#3}{heading}%
-    % \tp@init@l@{#3}{#2}%
-    \edef\Hy@toclevel{\csname toclevel@#2\endcsname}%
+    \def\Hy@toclevel{#2}%
     \tpUseProperty{heading-par}%
     \tpUseProperty{before-heading}%
     \everypar{}%
     \tp@create@labels{#3}% label facility
     \tp@number@props
     % Running headers
-    \tp@run@props
+    \tp@make@run
     % ToC entries
+    \tp@make@toc
     % Bookmarks
+    \tp@make@bookmarks
     \tpIfProp{after-skip}{\expandafter\@tempskipa\expandafter=\tpUseProperty{after-skip}\relax}{\@tempskipa=1sp\relax}%
     \def\@svsec{%
       \tpUseProperty{before-heading-block}%
@@ -134,7 +136,22 @@
   \tpSetProperty{after-skip}{1sp}%
   \tpSetProperty{number-sep}{\space}%
   \tpSetProperty{title-format}{\raggedright}%
-  \tpSetProperty{number-width}{}
+  \tpSetProperty{number-width}{}%
+  %% ToC
+  \tpSetProperty{toc-page-sep}{\dotfill}%
+  \tpSetProperty{toc-number-width}{}%
+  \tpSetProperty{toc-before-entry}{%
+    \parindent \z@
+    \rightskip \@pnumwidth\@plus1fil\relax
+    \parfillskip -\rightskip
+  }%
+  \tpSetProperty{toc-after-entry}{\par}
+  \tpSetProperty{toc-heading}{%
+    \tpIfMacro{TocAuthor}{\tpUseMacro{TocAuthor}:\space}{}%
+    \tpUseMacro{TocTitle}%
+    \tpUseProperty{toc-page-sep}\tpUseMacro{TocPage}%
+  }%
+  \tpSetProperty{bookmark}{\tpIfMacro{TocNumber}{\tpUseMacro{TocNumber}}{}\enskip\tpIfMacro{TocTitle}{\tpUseMacro{TocTitle}}{\tpUseMacro{Title}}}%
 }
 %    \end{macrocode}
 % This macro prepares the Fields used to compose the running
@@ -147,19 +164,86 @@
 % \lstlisting{\<heading>mark} macros are written.
 %    \begin{macrocode}
 
-\def\tp@run@props{%
-  \tpIfMacro{RunTitle}{}{\tpIfMacro{Title}{\expandafter\tpRunTitle\expandafter{\tpUseMacro{Title}}}{}}%
-  \tpIfMacro{RunNumber}{}{\tpIfMacro{Number}{\expandafter\tpRunNumber\expandafter{\tpUseMacro{Number}}}{}}%
-  \tpIfMacro{RunAuthor}{}{\tpIfMacro{Author}{\expandafter\tpRunAuthor\expandafter{\tpUseMacro{Author}}}{}}%
-  \tpIfMacro{RunSubTitle}{}{\tpIfMacro{Subtitle}{\expandafter\tpRunSubtitle\expandafter{\tpUseMacro{Subtitle}}}{}}%
+\def\tp@make@toc{%
+  \tpIfMacro{TocTitle}{}{\tpIfMacro{Title}{\let\tp@heading@TocTitle\tp@heading@Title}{}}%
+  \tpIfMacro{TocNumber}{}{\tpIfMacro{Number}{\let\tp@heading@TocNumber\tp@heading@Number}{}}%
+  \tpIfMacro{TocAuthor}{}{\tpIfMacro{Author}{\let\tp@heading@TocAuthor\tp@heading@Author}{}}%
+  \tpIfMacro{TocSubtitle}{}{\tpIfMacro{Subtitle}{\let\tp@heading@TocSubtitle\tp@heading@Subtitle}{}}%
+  \expandafter\ifx\csname tp@heading@attr@notoc\endcsname\@empty\else
+    \edef\tp@heading@toc@entry{%
+      \tpIfMacro{TocTitle}{\string\tpTocTitle{\expandonce{\tp@heading@TocTitle}}}{}%
+      \tpIfMacro{TocNumber}{\string\tpTocNumber{\expandonce{\tp@heading@TocNumber}}}{}%
+      \tpIfMacro{TocAuthor}{\string\tpTocAuthor{\expandonce{\tp@heading@TocAuthor}}}{}%
+      \tpIfMacro{TocSubtitle}{\string\tpTocSubtitle{\expandonce{\tp@heading@TocSubtitle}}}{}%
+    }%
+    \addcontentsline{toc}{\tp@heading@name}{\expandonce{\tp@heading@toc@entry}}\relax
+  \fi
+}
+%    \end{macrocode}
+% low-level macro to dynamically define \lstinline{l@<level>} macros.
+%    \begin{macrocode}
+\def\tp@init@l@#1#2{%
+  \ifnum #1>\c@tocdepth
+    \expandafter\let\csname l@#2\endcsname\@gobbletwo
+  \else
+    \expandafter\gdef\csname l@#2\endcsname##1##2{%
+      \bgroup
+        \tpNamespace{heading}%
+        \tpCascadeProps{#2}{heading}%
+        \tpProvideMacro{tpTocPage}{}{}{TocPage}%
+        \tpTocPage{##2}%
+        \tpProvideMacro{tpTocTitle}{}{}{TocTitle}%
+        \tpProvideMacro{tpTocSubtitle}{}{}{TocSubtitle}%
+        \tpProvideMacro{tpTocNumber}{}{}{TocNumber}%
+        \tpProvideMacro{tpTocAuthor}{}{}{TocAuthor}%
+        \let\tpTocLink\Hy@tocdestname%
+        \expandonce##1%% expand toc-specific macros from heading
+        \begingroup
+          \tpUseProperty{toc-before-entry}%
+          \tpUseProperty{toc-heading}%
+          \tpUseProperty{toc-after-entry}%
+        \endgroup
+      \egroup
+    }%
+  \fi
+}
+
+
+%    \end{macrocode}
+% Macro to determine number widths. \#1 is the property prefix
+%    \begin{macrocode}
+ % \expandafter\tp@calc@numwidth\expandafter{\tp@heading@level}%
+\def\tp@calc@numwidth#1{%
+  \tpIfPropVal{#1-number-width}{auto-level}
+    {\tp@get@toc@numwidth{}}
+    {\tpIfPropVal{#1-number-width}{auto}
+      {\tp@get@toc@numwidth{}}
+      {\tpIfProp{#1-number-width}
+        {}
+        {}%
+      }%
+    }%
+}%
+
+
+\def\tp@make@run{%
+  \tpIfMacro{RunTitle}{}{\tpIfMacro{Title}{\let\tp@heading@RunTitle\tp@heading@Title}{}}%
+  \tpIfMacro{RunNumber}{}{\tpIfMacro{Number}{\let\tp@heading@RunNumber\tp@heading@Number}{}}%
+  \tpIfMacro{RunAuthor}{}{\tpIfMacro{Author}{\let\tp@heading@RunAuthor\tp@heading@Author}{}}%
+  \tpIfMacro{RunSubTitle}{}{\tpIfMacro{Subtitle}{\let\tp@heading@RunSubtitle\tp@heading@Subtitle}{}}%
   \expandafter\let\expandafter\tp@mark@name\csname\tp@heading@name mark\endcsname%
   \ifx\tp@mark@name\relax\ifx\tp@heading@parent\@undefined\else
       \expandafter\let\expandafter\tp@mark@name\csname\tp@inherit@name mark\endcsname%
     \fi\fi
   \ifx\tp@mark@name\relax\else
-    \edef\@tempa{\expandafter\@empty\csname tp@heading@running-heading\endcsname}%
+    \protected@edef\@tempa{\expandafter\@empty\csname tp@heading@running-heading\endcsname}%
     \expandafter\tp@mark@name\expandafter{\@tempa}%
   \fi}
+
+\def\tp@make@bookmarks{%
+  \protected@edef\@tempa{\expandafter\@empty\csname tp@heading@bookmark\endcsname}%
+  \bookmark[level=\Hy@toclevel,dest=\@currentHref]{\expandonce{\@tempa}}
+}
 
 \def\tp@number@props{%
   \sbox\z@{\tpUseProperty{title-format}\tpUseMacro{Number}\tpUseProperty{number-sep}}\tpSetProperty{number-width}{\the\wd\z@}%
@@ -651,93 +735,93 @@
 % generate the toc entries. \lstinline{#1} is the name of the heading,
 % \lstinline{#2} is the numeric level.
 %    \begin{macrocode}
-\def\tp@init@l@#1#2{%
-%    \end{macrocode}
-% Process user options:
-%    \begin{macrocode}
-  \tp@toc@init@options{#1}{#2}%
-  \ifnum#2>\c@tocdepth
-    \expandafter\let\csname l@#1\endcsname\@gobbletwo
-  \else
-%    \end{macrocode}
-% Dynamicly define \lstinline{l@<level>} with \lstinline{##1}
-% containing the entire toc-title, and \lstinline{##2} the page number
-% from the aux files:
-%    \begin{macrocode}
-    \expandafter\def\csname l@#1\endcsname##1##2{%
-      \bgroup
-        \tp@toc@extract@data{##1}{##2}%
-        \tp@toc@print@entry{#1}%
-      \egroup
-    }%
-  \fi
-}
-%    \end{macrocode}
-% This function parses the information gained from the .toc file. Its
-% arguments resemble the arguments of \lstinline{l@<level>} from the
-% \lstinline{.toc} files, i.e., \lstinline{#1} is the raw entry title,
-% \lstinline{#2} is the page number.
-%    \begin{macrocode}
-\def\tp@toc@extract@data#1#2{%
-  \def\tp@toc@page{#2}% page number from .toc
-  \def\tpToCSubTitle##1{\def\tp@toc@subtitle{##1}}%
-  \def\numberline##1{\def\tp@toc@number{##1}}%
-  \def\tpTocAuthor##1{\def\tp@toc@author{##1}}%
-  \setbox\z@\hbox{#1}%
-  \let\tpTocSubTitle\@gobble
-  \let\numberline\@gobble
-  \let\tpTocAuthor\@gobble
-  \protected@edef\tp@toc@title{#1}%
-}
-
-%    \end{macrocode}
-% This function outputs and formats the toc entry. Its argument is the
-% heading level.
-%    \begin{macrocode}
-\def\tp@toc@print@entry#1{%
-  \csname tp@toc@order@#1\endcsname\@par
-  % ENTRY Level: #1
-  % Author: \ifx\tp@toc@author\@undefined nil\else\meaning\tp@toc@author\fi\\
-  % Number: \ifx\tp@toc@number\@undefined nil\else\meaning\tp@toc@number\fi\\
-  % Title: \ifx\tp@toc@title\@undefined nil\else\meaning\tp@toc@title\fi\\
-  % Subtitle: \ifx\tp@toc@subtitle\@undefined nil\else\meaning\tp@toc@subtitle\fi\\
-  % Page: \ifx\tp@toc@page\@undefined nil\else\meaning\tp@toc@page\fi\@par
-}
-%    \end{macrocode}
-% This function processes the user options for the toc entries of each
-% heading level defined via \lstinline{\tpDeclareHeading}.
-%    \begin{macrocode}
-\def\tp@toc@init@options#1#2{%
-  \def\tpToCOrder##1{\tp@toc@order{#1}{##1}}%
-  \tpToCOrder{author,title,subtitle,page}% default
-  %%
-  \let\tpToCBefore\@gobble
-  \let\tpToCAfter\@gobble
-  \let\tpToCFormat\@gobble
-  \let\tpToCPageSep\@gobble
-  \let\tpToCNumSep\@gobble
-  \let\tpToCNoPage\relax
-  \let\tpToCHangNumber\relax
-  \let\tpToCHangFixed\@gobble
-  \let\tpToCAlign\@gobble
-  \let\tpToCPageOut\@gobble
-  \let\tpToCSubTitle\relax
-  \let\tpToCSubTitleBefore\@gobble
-  \let\tpToCSubTitleAfter\@gobble
-  \let\tpToCSubTitleFormat\@gobble
-}
-%    \end{macrocode}
-% Output order. #1 is the name of the heading, #2 is the component order provided by the user.
-%    \begin{macrocode}
-\def\tp@toc@order#1#2{%
-  \def\tpToCUse##1{\csname tp@use@toc@##1\endcsname{#1}}%
-  \expandafter\gdef\csname tp@toc@order@#1\endcsname{%
-    #2}}
-
-\def\tp@use@toc@author#1{\ifx\tp@toc@author\@undefined\else \tp@toc@author\fi}
-\def\tp@use@toc@title#1{\ifx\tp@toc@title\@undefined\else \tp@toc@title\fi}
-\def\tp@use@toc@subtitle#1{\ifx\tp@toc@subtitle\@undefined\else  \tp@toc@subtitle\fi}
-\def\tp@use@toc@page#1{\ifx\tp@toc@page\@undefined\else \tp@toc@page\fi}
+% \def\tp@init@l@#1#2{%
+% %    \end{macrocode}
+% % Process user options:
+% %    \begin{macrocode}
+%   \tp@toc@init@options{#1}{#2}%
+%   \ifnum#2>\c@tocdepth
+%     \expandafter\let\csname l@#1\endcsname\@gobbletwo
+%   \else
+% %    \end{macrocode}
+% % Dynamicly define \lstinline{l@<level>} with \lstinline{##1}
+% % containing the entire toc-title, and \lstinline{##2} the page number
+% % from the aux files:
+% %    \begin{macrocode}
+%     \expandafter\def\csname l@#1\endcsname##1##2{%
+%       \bgroup
+%         \tp@toc@extract@data{##1}{##2}%
+%         \tp@toc@print@entry{#1}%
+%       \egroup
+%     }%
+%   \fi
+% }
+% %    \end{macrocode}
+% % This function parses the information gained from the .toc file. Its
+% % arguments resemble the arguments of \lstinline{l@<level>} from the
+% % \lstinline{.toc} files, i.e., \lstinline{#1} is the raw entry title,
+% % \lstinline{#2} is the page number.
+% %    \begin{macrocode}
+% \def\tp@toc@extract@data#1#2{%
+%   \def\tp@toc@page{#2}% page number from .toc
+%   \def\tpToCSubTitle##1{\def\tp@toc@subtitle{##1}}%
+%   \def\numberline##1{\def\tp@toc@number{##1}}%
+%   \def\tpTocAuthor##1{\def\tp@toc@author{##1}}%
+%   \setbox\z@\hbox{#1}%
+%   \let\tpTocSubTitle\@gobble
+%   \let\numberline\@gobble
+%   \let\tpTocAuthor\@gobble
+%   \protected@edef\tp@toc@title{#1}%
+% }
+%
+% %    \end{macrocode}
+% % This function outputs and formats the toc entry. Its argument is the
+% % heading level.
+% %    \begin{macrocode}
+% \def\tp@toc@print@entry#1{%
+%   \csname tp@toc@order@#1\endcsname\@par
+%   % ENTRY Level: #1
+%   % Author: \ifx\tp@toc@author\@undefined nil\else\meaning\tp@toc@author\fi\\
+%   % Number: \ifx\tp@toc@number\@undefined nil\else\meaning\tp@toc@number\fi\\
+%   % Title: \ifx\tp@toc@title\@undefined nil\else\meaning\tp@toc@title\fi\\
+%   % Subtitle: \ifx\tp@toc@subtitle\@undefined nil\else\meaning\tp@toc@subtitle\fi\\
+%   % Page: \ifx\tp@toc@page\@undefined nil\else\meaning\tp@toc@page\fi\@par
+% }
+% %    \end{macrocode}
+% % This function processes the user options for the toc entries of each
+% % heading level defined via \lstinline{\tpDeclareHeading}.
+% %    \begin{macrocode}
+% \def\tp@toc@init@options#1#2{%
+%   \def\tpToCOrder##1{\tp@toc@order{#1}{##1}}%
+%   \tpToCOrder{author,title,subtitle,page}% default
+%   %%
+%   \let\tpToCBefore\@gobble
+%   \let\tpToCAfter\@gobble
+%   \let\tpToCFormat\@gobble
+%   \let\tpToCPageSep\@gobble
+%   \let\tpToCNumSep\@gobble
+%   \let\tpToCNoPage\relax
+%   \let\tpToCHangNumber\relax
+%   \let\tpToCHangFixed\@gobble
+%   \let\tpToCAlign\@gobble
+%   \let\tpToCPageOut\@gobble
+%   \let\tpToCSubTitle\relax
+%   \let\tpToCSubTitleBefore\@gobble
+%   \let\tpToCSubTitleAfter\@gobble
+%   \let\tpToCSubTitleFormat\@gobble
+% }
+% %    \end{macrocode}
+% % Output order. #1 is the name of the heading, #2 is the component order provided by the user.
+% %    \begin{macrocode}
+% \def\tp@toc@order#1#2{%
+%   \def\tpToCUse##1{\csname tp@use@toc@##1\endcsname{#1}}%
+%   \expandafter\gdef\csname tp@toc@order@#1\endcsname{%
+%     #2}}
+%
+% \def\tp@use@toc@author#1{\ifx\tp@toc@author\@undefined\else \tp@toc@author\fi}
+% \def\tp@use@toc@title#1{\ifx\tp@toc@title\@undefined\else \tp@toc@title\fi}
+% \def\tp@use@toc@subtitle#1{\ifx\tp@toc@subtitle\@undefined\else  \tp@toc@subtitle\fi}
+% \def\tp@use@toc@page#1{\ifx\tp@toc@page\@undefined\else \tp@toc@page\fi}
 % %    \end{macrocode}
 % %
 % % \subsection{Organizing the user options}
