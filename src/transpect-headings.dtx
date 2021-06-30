@@ -65,13 +65,10 @@
     \tpUseProperty{before-heading}%
     \everypar{}%
     \tp@create@labels{#3}% label facility
-    \tp@number@props
-    % Running headers
-    \tp@make@run
-    % ToC entries
-    \tp@make@toc
-    % Bookmarks
-    \tp@make@bookmarks
+    \tp@number@props% Calculate number width
+    \tp@make@run% Running headers
+    \tp@make@toc% ToC entries
+    \tp@make@bookmarks% Bookmarks
     \tpIfProp{after-skip}{\expandafter\@tempskipa\expandafter=\tpUseProperty{after-skip}\relax}{\@tempskipa=1sp\relax}%
     \def\@svsec{%
       \tpUseProperty{before-heading-block}%
@@ -140,18 +137,24 @@
   %% ToC
   \tpSetProperty{toc-page-sep}{\dotfill}%
   \tpSetProperty{toc-number-width}{}%
+  \tpSetProperty{toc-title-format}{}%
+  \tpSetProperty{toc-number-format}{\tpUseProperty{toc-title-format}}%
+  \tpSetProperty{toc-number-sep}{\enskip}%
   \tpSetProperty{toc-before-entry}{%
     \parindent \z@
     \rightskip \@pnumwidth\@plus1fil\relax
     \parfillskip -\rightskip
   }%
-  \tpSetProperty{toc-after-entry}{\par}
+  \tpSetProperty{toc-after-entry}{\par}%
   \tpSetProperty{toc-heading}{%
     \tpIfMacro{TocAuthor}{\tpUseMacro{TocAuthor}:\space}{}%
-    \tpUseMacro{TocTitle}%
+    {\tpUseProperty{toc-title-format}\tpUseProperty{toc-formatted-number}\tpUseMacro{TocTitle}}%
     \tpUseProperty{toc-page-sep}\tpUseMacro{TocPage}%
   }%
-  \tpSetProperty{bookmark}{\tpIfMacro{TocNumber}{\tpUseMacro{TocNumber}}{}\enskip\tpIfMacro{TocTitle}{\tpUseMacro{TocTitle}}{\tpUseMacro{Title}}}%
+  \tpSetProperty{bookmark}{%
+    \tpIfMacro{TocNumber}{\tpUseMacro{TocNumber}\enskip}{}%
+    \tpIfMacro{TocTitle}{\tpUseMacro{TocTitle}}{\tpUseMacro{Title}}%
+  }%
 }
 %    \end{macrocode}
 % This macro prepares the Fields used to compose the running
@@ -180,7 +183,8 @@
   \fi
 }
 %    \end{macrocode}
-% low-level macro to dynamically define \lstinline{l@<level>} macros.
+% low-level macro to dynamically define \lstinline{l@<level>}
+% macros. \#1 is the heading level, \#2 is the heading name.
 %    \begin{macrocode}
 \def\tp@init@l@#1#2{%
   \ifnum #1>\c@tocdepth
@@ -188,26 +192,54 @@
   \else
     \expandafter\gdef\csname l@#2\endcsname##1##2{%
       \bgroup
-        \tpNamespace{heading}%
-        \tpCascadeProps{#2}{heading}%
-        \tpProvideMacro{tpTocPage}{}{}{TocPage}%
-        \tpTocPage{##2}%
-        \tpProvideMacro{tpTocTitle}{}{}{TocTitle}%
-        \tpProvideMacro{tpTocSubtitle}{}{}{TocSubtitle}%
-        \tpProvideMacro{tpTocNumber}{}{}{TocNumber}%
-        \tpProvideMacro{tpTocAuthor}{}{}{TocAuthor}%
-        \let\tpTocLink\Hy@tocdestname%
-        \expandonce##1%% expand toc-specific macros from heading
+        \tp@toc@extract@data{#1}{#2}{##1}{##2}%
         \begingroup
-          \tpUseProperty{toc-before-entry}%
-          \tpUseProperty{toc-heading}%
-          \tpUseProperty{toc-after-entry}%
+          \tp@toc@print@entry
         \endgroup
       \egroup
     }%
   \fi
 }
-
+%    \end{macrocode}
+% Macro to extract data from the .toc lines. \#1 is the heading level,
+% \#2 is the heading name, \#3 is the content of the toc entry, \#4 is
+% the page number.
+%    \begin{macrocode}
+\def\tp@toc@extract@data#1#2#3#4{%
+  \tpNamespace{heading}%
+  \tpCascadeProps{#2}{heading}%
+  \tpProvideMacro{tpTocPage}{}{}{TocPage}%
+  \tpTocPage{#4}%
+  \tpProvideMacro{tpTocTitle}{}{}{TocTitle}%
+  \tpProvideMacro{tpTocSubtitle}{}{}{TocSubtitle}%
+  \tpProvideMacro{tpTocNumber}{}{}{TocNumber}%
+  \tpProvideMacro{tpTocAuthor}{}{}{TocAuthor}%
+  \let\tpTocLink\Hy@tocdestname%
+  \expandonce#3%% expand toc-specific macros from heading; \expandonce is necessary because of hyperref…
+  \tp@toc@numbers{#1}%
+}
+%    \end{macrocode}
+% Macro to actually print the toc entry.
+%    \begin{macrocode}
+\def\tp@toc@print@entry{%
+  \tpUseProperty{toc-before-entry}%
+  \tpUseProperty{toc-heading}%
+  \tpUseProperty{toc-after-entry}%
+}
+%    \end{macrocode}
+% Macro to process toc heading numbers. \#1 is the heading level
+%    \begin{macrocode}
+\def\tp@toc@numbers#1{%
+  (#1: \tpUseMacro{TocNumber})
+  \tpSetProperty{toc-formatted-number}{}%
+  \tpIfMacro{TocNumber}{%
+    \tpSetProperty{toc-formatted-number}{%
+      \bgroup
+        \tpUseProperty{toc-number-format}%
+        \tpUseMacro{TocNumber}%
+        \tpUseProperty{toc-number-sep}%
+      \egroup}}{}%
+}
 
 %    \end{macrocode}
 % Macro to determine number widths. \#1 is the property prefix
@@ -224,8 +256,9 @@
       }%
     }%
 }%
-
-
+%    \end{macrocode}
+% Facility to create the running title macros
+%    \begin{macrocode}
 \def\tp@make@run{%
   \tpIfMacro{RunTitle}{}{\tpIfMacro{Title}{\let\tp@heading@RunTitle\tp@heading@Title}{}}%
   \tpIfMacro{RunNumber}{}{\tpIfMacro{Number}{\let\tp@heading@RunNumber\tp@heading@Number}{}}%
@@ -239,17 +272,23 @@
     \protected@edef\@tempa{\expandafter\@empty\csname tp@heading@running-heading\endcsname}%
     \expandafter\tp@mark@name\expandafter{\@tempa}%
   \fi}
-
+%    \end{macrocode}
+% This macro creates the pdf bookmarks
+%    \begin{macrocode}
 \def\tp@make@bookmarks{%
   \protected@edef\@tempa{\expandafter\@empty\csname tp@heading@bookmark\endcsname}%
   \bookmark[level=\Hy@toclevel,dest=\@currentHref]{\expandonce{\@tempa}}
 }
-
+%    \end{macrocode}
+% This macro calculates number widths and prepares macros to be used by the user
+%    \begin{macrocode}
 \def\tp@number@props{%
   \sbox\z@{\tpUseProperty{title-format}\tpUseMacro{Number}\tpUseProperty{number-sep}}\tpSetProperty{number-width}{\the\wd\z@}%
   \def\tpHangNumber##1{\leftskip##1\hskip-##1\hbox to##1{\tpUseProperty{title-format}\tpUseMacro{Number}}}%
 }
-
+%    \end{macrocode}
+% Facility to render inline headings
+%    \begin{macrocode}
 \def\tp@inline@heading{%
   \tpIfProp{after-indent}{\global\@afterindenttrue}{\global\@afterindentfalse}%
   \tpIfProp{interline-para}
@@ -274,6 +313,9 @@
     \ignorespaces
   }}
 
+%    \end{macrocode}
+% Facility to render block-type headings
+%    \begin{macrocode}
 \def\tp@block@heading{%
   \@svsec
   \par \nobreak
@@ -283,17 +325,82 @@
     \@afterheading}}
 
 
-%   \expandafter\gdef\csname tp@decl@#3\endcsname{#4}%
-%   \global\let\tp@inherit\relax
-%   \if!#1!\else
-%     \xdef\tp@inherit{#1}%
-%     \expandafter\xdef\csname tp@inherit@#3\expandafter\endcsname{#1}%
-%   \fi
-%   \expandafter\def\csname heading@#3@name\endcsname{#3}%
-%   \def\tpHeadingProperty##1##2{%
-%     \ifx\tp@inherit\relax\else\tpDeclareHook{##1#3}\fi
-%     \tpAddToHook{##1#3}{##2}%
-%   }%
+%    \end{macrocode}
+%
+% \section{The \protect\texttt{heading} environment}
+%
+%    \begin{macrocode}
+%    \end{macrocode}
+% Macro that creates user macros with a three-way distinction between
+% printed data, data sent to toc, and data sent to page styles.
+%    \begin{macrocode}
+\def\tp@provide@hd@macros#1{%
+  \tpProvideMacro{tp#1}{}{}{#1}%
+  \tpProvideMacro{tpToc#1}{}{}{Toc#1}%
+  \tpProvideMacro{tpRun#1}{}{}{Run#1}%
+}
+
+\def\heading{\@ifnextchar [{\@heading}{\@heading[]}}%]
+\DeclareRobustCommand{\TitleBreak}{\hfill\break}
+
+\def\@heading[#1]#2{%
+  \tp@heading@reserve
+%    \end{macrocode}
+% handling of the optional argument
+%    \begin{macrocode}
+  \tpParseAttributes{heading}{#1}%
+%    \end{macrocode}
+% The mandatory argument contains the section level, this corresponds
+% to \LaTeX's way of counting where part is -1, chapter is 0, section
+% is 1, etc.
+%    \begin{macrocode}
+  \edef\tp@heading@name{#2}%
+  \tp@heading@load@props%
+  \tp@provide@hd@macros{Author}%
+  \tp@provide@hd@macros{Title}%
+  \tp@provide@hd@macros{Subtitle}%
+  \tp@provide@hd@macros{Number}%
+  \tpProvideMacro{tpQuote}{}{}{Quote}%
+  \tpProvideMacro{tpQuoteSource}{}{}{QuoteSource}%
+}
+\def\tp@heading@load@props{%
+  \csname tp@heading@\tp@heading@name @properties\endcsname
+}
+%    \end{macrocode}
+% The ending part of the heading environment.
+%    \begin{macrocode}
+\def\endheading{%
+  \expandafter\ifx\csname tpUseHeading\tp@heading@name\endcsname\relax
+    \PackageError{transpect.cls}{Heading level \tp@heading@name\space unknown!}{A Heading with level \tp@heading@name\space is unknown. Use the \string\tpDeclareHeading\space macro to declare heading levels.}%
+  \else
+    \afterfi\csname tpUseHeading\tp@heading@name\endcsname%
+  \fi
+  \tp@heading@reset
+  \nopagebreak
+}
+%    \end{macrocode}
+% We need to re-direct some \LaTeX\space kernel macros and make sure
+% that some other macros have their default values:
+%    \begin{macrocode}
+\def\tp@heading@reserve{%
+  \tpNamespace{heading}%
+  \let\ltx@dbl@backslash\\
+  \let\\\TitleBreak
+  \let\ltx@label\label
+  \let\tp@heading@label\relax
+  \let\tp@notoc\@empty
+}
+%    \end{macrocode}
+% Restoring \LaTeX's default definitions
+%    \begin{macrocode}
+\def\tp@heading@reset{%
+  \let\tp@namespace\relax
+  \let\\\ltx@dbl@backslash
+  \let\label\ltx@label
+  \let\tp@heading@name\relax
+  \let\tp@heading@label\relax
+  \let\tp@notoc\@empty
+}
 % %    \end{macrocode}
 % % \subsection{Block hooks}
 % % Formatting and upper/lower boundaries of the author's names
@@ -644,88 +751,6 @@
 %     \fi
 %     \aftergroup\next%
 %   }}
-
-
-
-
-
-
-%    \end{macrocode}
-%
-% \section{The \protect\texttt{heading} environment}
-%
-%    \begin{macrocode}
-%    \end{macrocode}
-% Macro that creates user macros with a three-way distinction between
-% printed data, data sent to toc, and data sent to page styles.
-%    \begin{macrocode}
-\def\tp@provide@hd@macros#1{%
-  \tpProvideMacro{tp#1}{}{}{#1}%
-  \tpProvideMacro{tpToc#1}{}{}{Toc#1}%
-  \tpProvideMacro{tpRun#1}{}{}{Run#1}%
-}
-
-\def\heading{\@ifnextchar [{\@heading}{\@heading[]}}%]
-\DeclareRobustCommand{\TitleBreak}{\hfill\break}
-
-\def\@heading[#1]#2{%
-  \tp@heading@reserve
-%    \end{macrocode}
-% handling of the optional argument
-%    \begin{macrocode}
-  \tpParseAttributes{heading}{#1}%
-%    \end{macrocode}
-% The mandatory argument contains the section level, this corresponds
-% to \LaTeX's way of counting where part is -1, chapter is 0, section
-% is 1, etc.
-%    \begin{macrocode}
-  \edef\tp@heading@name{#2}%
-  \tp@heading@load@props%
-  \tp@provide@hd@macros{Author}%
-  \tp@provide@hd@macros{Title}%
-  \tp@provide@hd@macros{Subtitle}%
-  \tp@provide@hd@macros{Number}%
-  \tpProvideMacro{tpQuote}{}{}{Quote}%
-  \tpProvideMacro{tpQuoteSource}{}{}{QuoteSource}%
-}
-\def\tp@heading@load@props{%
-  \csname tp@heading@\tp@heading@name @properties\endcsname
-}
-%    \end{macrocode}
-% The ending part of the heading environment.
-%    \begin{macrocode}
-\def\endheading{%
-  \expandafter\ifx\csname tpUseHeading\tp@heading@name\endcsname\relax
-    \PackageError{transpect.cls}{Heading level \tp@heading@name\space unknown!}{A Heading with level \tp@heading@name\space is unknown. Use the \string\tpDeclareHeading\space macro to declare heading levels.}%
-  \else
-    \afterfi\csname tpUseHeading\tp@heading@name\endcsname%
-  \fi
-  \tp@heading@reset
-  \nopagebreak
-}
-%    \end{macrocode}
-% We need to re-direct some \LaTeX\space kernel macros and make sure
-% that some other macros have their default values:
-%    \begin{macrocode}
-\def\tp@heading@reserve{%
-  \tpNamespace{heading}%
-  \let\ltx@dbl@backslash\\
-  \let\\\TitleBreak
-  \let\ltx@label\label
-  \let\tp@heading@label\relax
-  \let\tp@notoc\@empty
-}
-%    \end{macrocode}
-% Restoring \LaTeX's default definitions
-%    \begin{macrocode}
-\def\tp@heading@reset{%
-  \let\tp@namespace\relax
-  \let\\\ltx@dbl@backslash
-  \let\label\ltx@label
-  \let\tp@heading@name\relax
-  \let\tp@heading@label\relax
-  \let\tp@notoc\@empty
-}
 %    \end{macrocode}
 %
 % \section{Facility for ToC and ListOf entries}
