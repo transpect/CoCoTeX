@@ -11,9 +11,9 @@
 %%
 %% lualatex  -  texlive > 2019
 %%
-\NeedsTeXFormat{LaTeX2e}[2019/01/01]
+\NeedsTeXFormat{LaTeX2e}[2018/12/01]
 \ProvidesPackage{transpect-common}
-    [2020/22/04 0.90 le-tex transpect common module]
+    [\filedate \fileversion le-tex transpect common module]
 %    \end{macrocode}
 % prefix macro used to execute code after the next \lstinline{\fi}:
 %    \begin{macrocode}
@@ -44,7 +44,7 @@
 %    \end{macrocode}
 % Temporarily silence a macro that may (or may not) have an optional
 % argument. Use it like this:
-% \lstlisting{\let\yourMacroWithOptArg\@gobbleopt}
+% \lstinline{\let\yourMacroWithOptArg\@gobbleopt}
 %    \begin{macrocode}
 \def\@gobbleopt#1#{\@gobble}
 \def\tpGobble{%
@@ -64,7 +64,9 @@
   \fi}%
 %    \end{macrocode}
 %% \section{Hooks}
-%% In this part we provide the facility to utilize Hooks to patch code into different parts of the package depending on options and loaded packages.
+%% In this part we provide the facility to utilize Hooks to patch code
+%% into different parts of the package depending on options and loaded
+%% packages.
 %    \begin{macrocode}
 \RequirePackage{etoolbox}
 \def\tpDeclareHook#1{\expandafter\global\expandafter\let\csname tp@hook@\tp@namespace @#1\endcsname\@empty}
@@ -180,32 +182,43 @@
 \endgroup
 
 %    \end{macrocode}
-% \section{Properties}
+% \section{Properties}\label{sec:common:props}
 % This high level macro provides the property-value interface for
-% transpect environments.
+% transpect environments. \#1 is the name of the property, \#2 is the value assigned to that property.
 %    \begin{macrocode}
 \DeclareRobustCommand{\tpSetProperty}[2]{\expandafter\long\expandafter\protect\expandafter\def\csname tp@\tp@namespace @#1\endcsname{#2}}
+%    \end{macrocode}
+% This high-level macro is the same as \lstinline{\tpSetProperty}
+% except that it expands the value \#2 before assigning it to the
+% property macro with the name \#1. This can be used to assign the
+% current value of a variable macro, dimension, counter or
+% length to a property.
+%    \begin{macrocode}
+\DeclareRobustCommand{\tpSetValProp}[2]{\def\@tempa{\tpSetProperty{#1}}\expandafter\@tempa\expandafter{#2}}
+%    \end{macrocode}
+% High level command to use a previously set property.
+%    \begin{macrocode}
 \def\tpUseProperty#1{\csname tp@\tp@namespace @#1\endcsname}
 %    \end{macrocode}
-% Check if property \#1 is non-empty.
+% Check if property \#1 is non-empty If so, do \#2, otherwise do \#3.
 %    \begin{macrocode}
 \DeclareRobustCommand{\tpIfProp}[3]{\long\def\@tempa{}%
   \expandafter\ifx\csname tp@\tp@namespace @#1\endcsname\@tempa#3\else#2\fi\ignorespaces}
 %    \end{macrocode}
-% Check if property \#1 is \#2.
+% Check if a property \#1's value is equal to \#2.
+% If so, do \#3, otherwise do \#4.
 %    \begin{macrocode}
 \DeclareRobustCommand{\tpIfPropVal}[4]{\long\def\@tempa{#2}%
-  \expandafter\ifx\csname tp@\tp@namespace @#1\endcsname\@tempa#4\else#3\fi\ignorespaces}
+  \expandafter\ifx\csname tp@\tp@namespace @#1\endcsname\@tempa\relax#3\else#4\fi\ignorespaces}
 %    \end{macrocode}
-% Add to namespace-specific defaults, \#1 is the namespace, \#2 are the properties.
+% Add to namespace-specific defaults; \#1 is the namespace, \#2 is a block of property assignments.
 %    \begin{macrocode}
-\DeclareRobustCommand{\tpAddToDefault}[2]{%
-  \csgappto{tp@#1@default}{#2}%
-}
+\DeclareRobustCommand{\tpAddToDefault}[2]{\csgappto{tp@#1@default}{#2}}
 %    \end{macrocode}
-% This macro recursivly loads an environment's properties, the
-% properties of parent environments, and default properties. \#1 is
-% the top-most environment name, \#2 is the macro family.
+% This macro recursivly loads a namespace's properties, the properties
+% of parent namespaces, and the default properties (in reverse
+% order). \#1 is the top-most environment name, \#2 is the macro
+% family.
 %    \begin{macrocode}
 \def\tpCascadeProps#1#2{%
   \csname tp@#2@default\endcsname
@@ -215,7 +228,9 @@
   \csname tp@#2@#1@properties\endcsname
 }
 %    \end{macrocode}
-% This macro recursivly loads properties from parent environments if they exist. \#1 is the parent (may be empty), \#2 is the macro family.
+% This low-level macro recursivly loads properties from parent
+% environments, if they exist. \#1 is the parent (may be empty), \#2 is
+% the macro family.
 %    \begin{macrocode}
 \def\tp@inherit@props#1#2{%
   \edef\@tempa{\csname tp@#2@#1@parent\endcsname}%
@@ -225,9 +240,24 @@
   \csname tp@#2@#1@properties\endcsname
 }
 %    \end{macrocode}
-% CSS-like classes, technically nothing but property lists
+% \section{Classes}
+% CSS-like classes, technically nothing but property lists.
+%
+% The top-level macro \lstinline|\tpDeclareClass[#1]{#2}[#3]{#4}| has
+% four arguments, two of which are optional. \#2 is the name of the
+% class. If this argument is empty, the special class name
+% \lstinline{default} is used. \#4 is the declaration block of the
+% class. This argument usually containsa set of property assignments
+% using the \lstinline|\tpSetProperty{<prop>}{<val>}| macro, see
+% Sect.~\ref{sec:common:props}. The first optional argument \#1 is the
+% classe's namespace. Using namespaces, you can have classes of the
+% same name for different environments, e.g., a \lstinline{default}
+% class for each float and heading environments. The second optional
+% argument \#3 is the parent class. Properties from that class are
+% loaded automatically prior to the loading of the current class. This
+% applies recursively allowing for a cascading of property values,
+% like in CSS.
 %    \begin{macrocode}
-
 \long\def\tpDeclareClass{\@ifnextchar [{\@tp@set@class}{\@tp@set@class[default]}}%]
 \long\def\@tp@set@class[#1]#2{\@ifnextchar [{\tp@set@class[#1]{#2}}{\tp@set@class[#1]{#2}[]}}%]
 \long\gdef\tp@default@class@default{}
@@ -238,6 +268,12 @@
   \fi
   \expandafter\long\expandafter\def\csname tp@#1@class@\@argii\endcsname{#4}%
 }
+%    \end{macrocode}
+% High level macro to expand and “activate” a class's properties,
+% those of its recursive ancestor classes, and the default class
+% respecting the currently active namespace. \#1 is the class name,
+% \#2 is the namespace.
+%    \begin{macrocode}
 \def\tpUseClass#1#2{%
   \expandafter\ifx\csname tp@#2@class@#1\endcsname\relax
     \expandafter\ifx\csname tp@default@class@#1\endcsname\relax

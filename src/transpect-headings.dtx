@@ -11,7 +11,7 @@
 %%
 %% lualatex  -  texlive >= 2019
 %%
-\NeedsTeXFormat{LaTeX2e}[2019/01/01]
+\NeedsTeXFormat{LaTeX2e}[2018/12/01]
 \ProvidesPackage{transpect-headings}
     [\filedate \fileversion le-tex transpect headings module]
 \RequirePackage{transpect-common}
@@ -44,6 +44,7 @@
 % \end{description}
 %    \begin{macrocode}
 \long\def\tpDeclareHeading{\@ifnextchar[{\@tpDeclareHeading}{\@tpDeclareHeading[]}}%]
+
 \long\def\@tpDeclareHeading[#1]#2#3#4{%
   \tpNamespace{heading}%
   \expandafter\def\csname heading@#3@name\endcsname{#3}%
@@ -51,6 +52,7 @@
   \if!#1!\else\expandafter\protect\expandafter\def\csname tp@heading@#3@parent\endcsname{#1}\fi%
   \expandafter\protect\expandafter\def\csname tp@heading@#3@properties\endcsname{#4}%
   \tp@init@l@{#2}{#3}%
+  \tp@restore@init{tp-heading-number-#2-maxwd}%
   %
   %
   %
@@ -134,12 +136,15 @@
   \tpSetProperty{number-sep}{\space}%
   \tpSetProperty{title-format}{\raggedright}%
   \tpSetProperty{number-width}{}%
+  \tpSetProperty{number-indent}{level}%
   %% ToC
   \tpSetProperty{toc-page-sep}{\dotfill}%
   \tpSetProperty{toc-number-width}{}%
   \tpSetProperty{toc-title-format}{}%
   \tpSetProperty{toc-number-format}{\tpUseProperty{toc-title-format}}%
   \tpSetProperty{toc-number-sep}{\enskip}%
+  \tpSetProperty{toc-number-indent}{level}%
+  \tpSetProperty{toc-number-hang}{}%
   \tpSetProperty{toc-before-entry}{%
     \parindent \z@
     \rightskip \@pnumwidth\@plus1fil\relax
@@ -148,7 +153,8 @@
   \tpSetProperty{toc-after-entry}{\par}%
   \tpSetProperty{toc-heading}{%
     \tpIfMacro{TocAuthor}{\tpUseMacro{TocAuthor}:\space}{}%
-    {\tpUseProperty{toc-title-format}\tpUseProperty{toc-formatted-number}\tpUseMacro{TocTitle}}%
+    \tpHangNumber%
+    \tpUseMacro{TocTitle}%
     \tpUseProperty{toc-page-sep}\tpUseMacro{TocPage}%
   }%
   \tpSetProperty{bookmark}{%
@@ -159,12 +165,12 @@
 %    \end{macrocode}
 % This macro prepares the Fields used to compose the running
 % titles. It checks if the user provides running heading specific
-% overrides in the \lstlisting{heading} environment. If not, it uses
+% overrides in the \lstinline{heading} environment. If not, it uses
 % the non-specific data fields instead, as long as they are not empty.
 %
 % After the Fields are filled, the style specific property
 % running-heading is evaluated and the corresponding
-% \lstlisting{\<heading>mark} macros are written.
+% \lstinline{\<heading>mark} macros are written.
 %    \begin{macrocode}
 
 \def\tp@make@toc{%
@@ -190,12 +196,12 @@
   \ifnum #1>\c@tocdepth
     \expandafter\let\csname l@#2\endcsname\@gobbletwo
   \else
+    \tp@restore@init{tp-heading-toc-number-#1-maxwd}%
+    \tp@restore@init{tp-heading-toc-number-#1-indent}%
     \expandafter\gdef\csname l@#2\endcsname##1##2{%
       \bgroup
         \tp@toc@extract@data{#1}{#2}{##1}{##2}%
-        \begingroup
-          \tp@toc@print@entry
-        \endgroup
+        \tp@toc@print@entry
       \egroup
     }%
   \fi
@@ -215,22 +221,24 @@
   \tpProvideMacro{tpTocNumber}{}{}{TocNumber}%
   \tpProvideMacro{tpTocAuthor}{}{}{TocAuthor}%
   \let\tpTocLink\Hy@tocdestname%
-  \expandonce#3%% expand toc-specific macros from heading; \expandonce is necessary because of hyperref…
+  \expandonce#3%% expand toc-specific macros from heading; \expandonce is necessary because of hyperref...
   \tp@toc@numbers{#1}%
 }
 %    \end{macrocode}
 % Macro to actually print the toc entry.
 %    \begin{macrocode}
 \def\tp@toc@print@entry{%
-  \tpUseProperty{toc-before-entry}%
-  \tpUseProperty{toc-heading}%
-  \tpUseProperty{toc-after-entry}%
+  \bgroup
+    \tpUseProperty{toc-before-entry}%
+    \leftskip\tpUseProperty{toc-number-indent}%
+    \tpUseProperty{toc-heading}%
+    \tpUseProperty{toc-after-entry}%
+  \egroup
 }
 %    \end{macrocode}
 % Macro to process toc heading numbers. \#1 is the heading level
 %    \begin{macrocode}
 \def\tp@toc@numbers#1{%
-  (#1: \tpUseMacro{TocNumber})
   \tpSetProperty{toc-formatted-number}{}%
   \tpIfMacro{TocNumber}{%
     \tpSetProperty{toc-formatted-number}{%
@@ -238,24 +246,70 @@
         \tpUseProperty{toc-number-format}%
         \tpUseMacro{TocNumber}%
         \tpUseProperty{toc-number-sep}%
-      \egroup}}{}%
+      \egroup}%
+    \tp@store@toc@num@wd{#1}%
+  }{}%
 }
 
+\def\tp@store@toc@num@wd#1{%
+  \sbox\z@{\tpUseProperty{toc-formatted-number}}%
+  \tp@store@maxwd{toc-number-#1-maxwd}{\the\wd\z@}%
+  \tpSetValProp{toc-number-width-level-max}{\csname tp-heading-toc-number-#1-maxwd\endcsname}%
+  \tp@store@maxwd{toc-number-maxwd}{\the\wd\z@}%
+  \tpSetValProp{toc-number-width-max}{\csname tp-heading-toc-number-maxwd\endcsname}%
+  \tpSetValProp{toc-number-width}{\the\wd\z@}%
+  \@tempcnta\numexpr#1-1\relax
+  \expandafter\ifx\csname tp-heading-toc-number-\the\@tempcnta-indent\endcsname\relax
+    \@tempdima\the\wd\z@
+  \else
+    \expandafter\ifx\csname tp-heading-toc-number-#1-maxwd\endcsname\relax
+      \@tempdima\dimexpr \csname tp-heading-toc-number-\the\@tempcnta-indent\endcsname\relax
+    \else
+      \@tempdima\dimexpr \csname tp-heading-toc-number-\the\@tempcnta-indent\endcsname+\csname tp-heading-toc-number-#1-maxwd\endcsname\relax
+    \fi
+  \fi
+  \tp@store@maxwd{toc-number-#1-indent}{\the\@tempdima}%
+  \tp@get@indent{toc-number}{#1}%
+  \def\tpHangNumber{%
+    \hskip-\tpUseProperty{toc-number-hang}\hbox to\tpUseProperty{toc-number-hang}{\tpUseProperty{toc-formatted-number}\hss}%
+  }%
+}
 %    \end{macrocode}
-% Macro to determine number widths. \#1 is the property prefix
+% This low-level macro takes the csname of an unprefixed dimension and
+% stores its value in the aux files iff the previous value of that
+% csname is lower than the current value.
 %    \begin{macrocode}
- % \expandafter\tp@calc@numwidth\expandafter{\tp@heading@level}%
-\def\tp@calc@numwidth#1{%
-  \tpIfPropVal{#1-number-width}{auto-level}
-    {\tp@get@toc@numwidth{}}
-    {\tpIfPropVal{#1-number-width}{auto}
-      {\tp@get@toc@numwidth{}}
-      {\tpIfProp{#1-number-width}
-        {}
-        {}%
-      }%
-    }%
-}%
+\def\tp@store@maxwd#1#2{%
+  \expandafter\ifx\csname tp-\tp@namespace-#1\endcsname\relax
+    \immediate\write\@auxout{\string\expandafter\string\gdef\string\csname\space tp-\tp@namespace-#1\string\endcsname{#2}}
+    \expandafter\xdef\csname tp-\tp@namespace-#1\endcsname{#2}%
+  \else
+    \expandafter\ifdim\csname tp-\tp@namespace-#1\endcsname<#2\relax
+      \immediate\write\@auxout{\string\expandafter\string\gdef\string\csname\space tp-\tp@namespace-#1\string\endcsname{#2}}%
+      \expandafter\xdef\csname tp-\tp@namespace-#1\endcsname{#2}%
+    \fi
+  \fi}
+
+%    \end{macrocode}
+% Macro to determine indentation. \#1 is the property prefix, \#2 is the heading level.
+%    \begin{macrocode}
+
+\def\tp@get@indent#1#2{%
+  \tpIfPropVal{#1-indent}{level}
+    {\expandafter\let\expandafter\tp@prev@indent\csname tp-\tp@namespace-#1-#2-indent\endcsname
+     \ifx\tp@prev@indent\relax\let\tp@prev@indent\z@\fi
+     \tpSetValProp{#1-indent}{\tp@prev@indent}%
+     \tpSetValProp{#1-hang}{\csname tp-\tp@namespace-#1-#2-maxwd\endcsname}}
+    {\tpIfPropVal{#1-indent}{global}
+      {\tpSetValProp{#1-indent}{\csname tp-\tp@namespace-maxwd\endcsname}
+       \tpSetValProp{#1-hang}{\csname tp-\tp@namespace-maxwd\endcsname}}
+      {\tpIfProp{#1-indent}
+        {\tpIfProp{#1-hang}{}{\tpSetValProp{#1-hang}{\tpUseProperty{#1-width}}}}
+        {\tpSetValProp{#1-indent}{\tpUseProperty{#1-width}}%
+         \tpSetValProp{#1-hang}{\tpUseProperty{#1-width}}}%
+      }}%
+  }%
+
 %    \end{macrocode}
 % Facility to create the running title macros
 %    \begin{macrocode}
@@ -283,9 +337,32 @@
 % This macro calculates number widths and prepares macros to be used by the user
 %    \begin{macrocode}
 \def\tp@number@props{%
-  \sbox\z@{\tpUseProperty{title-format}\tpUseMacro{Number}\tpUseProperty{number-sep}}\tpSetProperty{number-width}{\the\wd\z@}%
-  \def\tpHangNumber##1{\leftskip##1\hskip-##1\hbox to##1{\tpUseProperty{title-format}\tpUseMacro{Number}}}%
+  %% get title number
+  \sbox\z@{\tpUseProperty{title-format}\tpUseMacro{Number}\tpUseProperty{number-sep}}%
+  %% store title number width
+  \tp@store@maxwd{number-\tp@heading@level-maxwd}{\the\wd\z@}%
+  \tpSetValProp{number-width-level-max}{\csname tp-heading-number-\tp@heading@level-maxwd\endcsname}%
+  \tp@store@maxwd{number-maxwd}{\the\wd\z@}%
+  \tpSetValProp{number-width-max}{\csname tp-heading-number-\tp@heading@level-maxwd\endcsname}%
+  \tpSetValProp{number-width}{\the\wd\z@}%
+  \tp@get@indent{number}{\tp@heading@level}%
+  \def\tpHangNumber##1{\leftskip##1\hskip-##1\hbox to##1{\tpUseProperty{title-format}\tpUseMacro{Number}\hss}}%
 }
+%    \end{macrocode}
+% This macro looks if \#1 has already been defined (e.g., in an
+% earlier tex run) and stores that inital value back in the aux files
+% for the following runs. Useful if you want to store only the highest
+% value of a parameter, like the maximum width of a heading number of
+% a certain level.
+%    \begin{macrocode}
+\def\tp@restore@init#1{%
+  \AtBeginDocument{\expandafter\ifx\csname #1\endcsname\relax\else
+      \immediate\write\@auxout{\string\expandafter\string\gdef\string\csname\space #1\string\endcsname{\csname #1\endcsname}}%
+    \fi}}
+\tp@restore@init{tp-heading-toc-number-maxwd}
+\tp@restore@init{tp-heading-number-maxwd}
+
+
 %    \end{macrocode}
 % Facility to render inline headings
 %    \begin{macrocode}
@@ -401,6 +478,9 @@
   \let\tp@heading@label\relax
   \let\tp@notoc\@empty
 }
+
+
+
 % %    \end{macrocode}
 % % \subsection{Block hooks}
 % % Formatting and upper/lower boundaries of the author's names
@@ -836,7 +916,7 @@
 %   \let\tpToCSubTitleFormat\@gobble
 % }
 % %    \end{macrocode}
-% % Output order. #1 is the name of the heading, #2 is the component order provided by the user.
+% % Output order. \#1 is the name of the heading, \#2 is the component order provided by the user.
 % %    \begin{macrocode}
 % \def\tp@toc@order#1#2{%
 %   \def\tpToCUse##1{\csname tp@use@toc@##1\endcsname{#1}}%
