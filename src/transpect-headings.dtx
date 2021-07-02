@@ -67,14 +67,16 @@
     \tpUseProperty{before-heading}%
     \everypar{}%
     \tp@create@labels{#3}% label facility
-    \tp@number@props% Calculate number width
+    \tp@format@number{}{}{\tp@heading@level}% Calculate number width
     \tp@make@run% Running headers
     \tp@make@toc% ToC entries
     \tp@make@bookmarks% Bookmarks
     \tpIfProp{after-skip}{\expandafter\@tempskipa\expandafter=\tpUseProperty{after-skip}\relax}{\@tempskipa=1sp\relax}%
     \def\@svsec{%
       \tpUseProperty{before-heading-block}%
-      {\tpUseProperty{heading-block}}%
+      \leftskip\tpUseProperty{margin-left}%
+      \rightskip\tpUseProperty{margin-right}%
+      {\hskip\tpUseProperty{indent}\tpUseProperty{heading-block}}%
       \tpUseProperty{after-heading-block}%
     }%
     \ifdim\@tempskipa <\z@\relax
@@ -84,6 +86,16 @@
     \fi
     \aftergroup\next%
   }}
+
+\def\tp@prop@dimen#1#2{%
+  \tpIfProp{#1}
+    {\tpIfPropVal{#1}{auto-global}
+      {\tpSetProperty{#1}{#2}}
+      {\tpIfPropVal{#1}{auto}
+        {\tpSetProperty{#1}{#2}}
+        {}}}
+    {\tpSetProperty{#1}{#2}}%
+}
 
 \def\tp@create@labels#1{%
   \ifx\Hy@MakeCurrentHrefAuto\@undefined\else
@@ -104,7 +116,7 @@
   \tpSetProperty{interline-para}{}%
   \tpSetProperty{heading-par}{%
     \tpIfProp{interline-para}{\if@noskipsec \leavevmode \fi}{}%
-    \@@par\global\@afterindenttrue}%
+    \par\global\@afterindenttrue}%
   \tpSetProperty{before-heading}{}%
   \tpSetProperty{title-format}{\bfseries}%
   \tpSetProperty{subtitle-format}{\normalfont}%
@@ -114,7 +126,7 @@
   \tpSetProperty{heading-block}{%
     \bgroup
       \tpUseProperty{title-format}%
-      \tpIfMacro{Number}{\tpHangNumber{\tpUseProperty{number-width}}}{}%
+      \tpIfMacro{Number}{\tpUseProperty{hang-number}}{}%
       {\tpUseMacro{Title}}\par%
       \tpIfMacro{Subtitle}{{\tpUseProperty{subtitle-format}\tpUseMacro{Subtitle}}\par}{}%
       \tpIfMacro{Author}{{\tpUseProperty{author-format}\tpUseMacro{Author}}\par}{}%
@@ -125,40 +137,55 @@
         \egroup}{}%
     \egroup
   }%
+  \tpSetProperty{after-heading-block}{}%
+  \tpSetProperty{before-heading-block}{\parindent\z@ \parskip\z@}%
+  \tpSetProperty{after-indent}{}%
+  \tpSetProperty{margin-left}{}%
+  \tpSetProperty{margin-right}{\@flushglue}%
+  \tpSetProperty{after-skip}{1sp}%
+  \tpSetProperty{indent}{auto}%
+  \tpSetProperty{number-width}{}%
+  \tpSetProperty{number-sep}{\space}%
+  \tpSetProperty{number-align}{left}%
+  %% running header
+  \tpSetProperty{running-level}{}% override level for running title, name
   \tpSetProperty{running-heading}{%
     \tpIfMacro{RunAuthor}{\tpUseMacro{RunAuthor}:\space}{}%
     \tpUseMacro{RunTitle}%
   }%
-  \tpSetProperty{after-heading-block}{}%
-  \tpSetProperty{before-heading-block}{\parindent\z@ \parskip\z@}%
-  \tpSetProperty{after-indent}{}%
-  \tpSetProperty{after-skip}{1sp}%
-  \tpSetProperty{number-sep}{\space}%
-  \tpSetProperty{title-format}{\raggedright}%
-  \tpSetProperty{number-width}{}%
-  \tpSetProperty{number-indent}{level}%
   %% ToC
-  \tpSetProperty{toc-page-sep}{\dotfill}%
-  \tpSetProperty{toc-number-width}{}%
-  \tpSetProperty{toc-title-format}{}%
-  \tpSetProperty{toc-number-format}{\tpUseProperty{toc-title-format}}%
-  \tpSetProperty{toc-number-sep}{\enskip}%
-  \tpSetProperty{toc-number-indent}{level}%
-  \tpSetProperty{toc-number-hang}{}%
-  \tpSetProperty{toc-before-entry}{%
+  \tpSetProperty{toc-page-sep}{\dotfill}% between toc-title and page
+  \tpSetProperty{toc-number-width}{}% current width of number
+  \tpSetProperty{toc-number-align}{left}% alignment of number within hbox when hanging
+  \tpSetProperty{toc-title-format}{}% format of title
+  \tpSetProperty{toc-number-format}{\tpUseProperty{toc-title-format}}% format of number
+  \tpSetProperty{toc-number-sep}{\enskip}% thing between numebr and toc-title
+  \tpSetProperty{toc-margin-top}{\z@}% left indent of the whole entry
+  \tpSetProperty{toc-margin-bottom}{\z@}% right margin of the whole entry
+  \tpSetProperty{toc-margin-left}{auto}% left indent of the whole entry
+  \tpSetProperty{toc-margin-right}{\@pnumwidth}% right margin of the whole entry
+  \tpSetProperty{toc-level}{}% override heading level for ToC, name!
+  \tpSetProperty{toc-indent}{auto}% offset of the first line of the entry. auto: hang indent by max-number-width for the level
+  \tpSetProperty{toc-before-entry}{% stuff before anything is output; used to setup margins, alignment, line-breaking rules, etc.
+    \addvspace{\tpUseProperty{toc-margin-top}}%
     \parindent \z@
-    \rightskip \@pnumwidth\@plus1fil\relax
+    \let\\\@centercr
+    \hyphenpenalty=\@M
+    \rightskip \tpUseProperty{toc-margin-right} \@plus 1fil\relax
     \parfillskip -\rightskip
+    \leftskip\tpUseProperty{toc-margin-left}%
   }%
-  \tpSetProperty{toc-after-entry}{\par}%
-  \tpSetProperty{toc-heading}{%
+  \tpSetProperty{toc-after-entry}{\par\addvspace{\tpUseProperty{toc-margin-bottom}}}% Thing at the end of the entry, after the page number
+  \tpSetProperty{toc-heading}{% Order and formatting of the entry itself
+    \tpUseProperty{toc-hang-number}%
     \tpIfMacro{TocAuthor}{\tpUseMacro{TocAuthor}:\space}{}%
-    \tpHangNumber%
     \tpUseMacro{TocTitle}%
     \tpUseProperty{toc-page-sep}\tpUseMacro{TocPage}%
   }%
+  %% PDF-Bookmarks
+  \tpSetProperty{bookmark-level}{}% override heading level for PDF bookmarks, numeric!
   \tpSetProperty{bookmark}{%
-    \tpIfMacro{TocNumber}{\tpUseMacro{TocNumber}\enskip}{}%
+    \tpIfMacro{TocNumber}{\tpUseMacro{TocNumber}\space}{}%
     \tpIfMacro{TocTitle}{\tpUseMacro{TocTitle}}{\tpUseMacro{Title}}%
   }%
 }
@@ -185,6 +212,7 @@
       \tpIfMacro{TocAuthor}{\string\tpTocAuthor{\expandonce{\tp@heading@TocAuthor}}}{}%
       \tpIfMacro{TocSubtitle}{\string\tpTocSubtitle{\expandonce{\tp@heading@TocSubtitle}}}{}%
     }%
+    \tpIfProp{toc-level}{\edef\tp@heading@name{\tpUseProperty{toc-level}}}{}%
     \addcontentsline{toc}{\tp@heading@name}{\expandonce{\tp@heading@toc@entry}}\relax
   \fi
 }
@@ -222,7 +250,7 @@
   \tpProvideMacro{tpTocAuthor}{}{}{TocAuthor}%
   \let\tpTocLink\Hy@tocdestname%
   \expandonce#3%% expand toc-specific macros from heading; \expandonce is necessary because of hyperref...
-  \tp@toc@numbers{#1}%
+  \tp@format@number{toc-}{Toc}{#1}%
 }
 %    \end{macrocode}
 % Macro to actually print the toc entry.
@@ -230,7 +258,7 @@
 \def\tp@toc@print@entry{%
   \bgroup
     \tpUseProperty{toc-before-entry}%
-    \leftskip\tpUseProperty{toc-number-indent}%
+    \hskip\tpUseProperty{toc-indent}%
     \tpUseProperty{toc-heading}%
     \tpUseProperty{toc-after-entry}%
   \egroup
@@ -238,46 +266,21 @@
 %    \end{macrocode}
 % Macro to process toc heading numbers. \#1 is the heading level
 %    \begin{macrocode}
-\def\tp@toc@numbers#1{%
-  \tpSetProperty{toc-formatted-number}{}%
-  \tpIfMacro{TocNumber}{%
-    \tpSetProperty{toc-formatted-number}{%
-      \bgroup
-        \tpUseProperty{toc-number-format}%
-        \tpUseMacro{TocNumber}%
-        \tpUseProperty{toc-number-sep}%
-      \egroup}%
-    \tp@store@toc@num@wd{#1}%
-  }{}%
-}
 
-\def\tp@store@toc@num@wd#1{%
-  \sbox\z@{\tpUseProperty{toc-formatted-number}}%
-  \tp@store@maxwd{toc-number-#1-maxwd}{\the\wd\z@}%
-  \tpSetValProp{toc-number-width-level-max}{\csname tp-heading-toc-number-#1-maxwd\endcsname}%
-  \tp@store@maxwd{toc-number-maxwd}{\the\wd\z@}%
-  \tpSetValProp{toc-number-width-max}{\csname tp-heading-toc-number-maxwd\endcsname}%
-  \tpSetValProp{toc-number-width}{\the\wd\z@}%
-  \@tempcnta\numexpr#1-1\relax
-  \expandafter\ifx\csname tp-heading-toc-number-\the\@tempcnta-indent\endcsname\relax
-    \@tempdima\the\wd\z@
-  \else
-    \expandafter\ifx\csname tp-heading-toc-number-#1-maxwd\endcsname\relax
-      \@tempdima\dimexpr \csname tp-heading-toc-number-\the\@tempcnta-indent\endcsname\relax
-    \else
-      \@tempdima\dimexpr \csname tp-heading-toc-number-\the\@tempcnta-indent\endcsname+\csname tp-heading-toc-number-#1-maxwd\endcsname\relax
-    \fi
-  \fi
-  \tp@store@maxwd{toc-number-#1-indent}{\the\@tempdima}%
-  \tp@get@indent{toc-number}{#1}%
-  \def\tpHangNumber{%
-    \hskip-\tpUseProperty{toc-number-hang}\hbox to\tpUseProperty{toc-number-hang}{\tpUseProperty{toc-formatted-number}\hss}%
-  }%
-}
+\def\tp@set@hang#1{%
+  \tpSetProperty{#1hang-number}{\tpUseProperty{#1formatted-number}}
+  \tpIfProp{#1indent}
+    {\ifdim\tpUseProperty{#1indent}<\z@
+        \tpSetProperty{#1hang-number}{%
+          \hbox to -\tpUseProperty{#1indent}{%
+            \tpIfPropVal{#1number-align}{left}{}{\hss}%
+            \tpUseProperty{#1formatted-number}%
+            \tpIfPropVal{#1number-align}{right}{}{\hss}}}%
+      \fi}{}}
 %    \end{macrocode}
 % This low-level macro takes the csname of an unprefixed dimension and
 % stores its value in the aux files iff the previous value of that
-% csname is lower than the current value.
+% conrol structure is lower than the current value.
 %    \begin{macrocode}
 \def\tp@store@maxwd#1#2{%
   \expandafter\ifx\csname tp-\tp@namespace-#1\endcsname\relax
@@ -293,22 +296,49 @@
 %    \end{macrocode}
 % Macro to determine indentation. \#1 is the property prefix, \#2 is the heading level.
 %    \begin{macrocode}
-
+\def\tp@det@prev@indent#1#2{%
+  \@tempcnta\numexpr#2-1\relax
+  \ifdim\tpUseProperty{#1indent}<\z@\relax
+    \@tempdimb=-\tpUseProperty{#1indent}\relax
+  \else
+    \@tempdimb=\tpUseProperty{#1indent}\relax
+  \fi
+  \expandafter\ifx\csname tp-\tp@namespace-#1\the\@tempcnta-indent\endcsname\relax
+    \@tempdima=\@tempdimb\relax%
+  \else
+    \@tempdima\dimexpr \csname tp-\tp@namespace-#1\the\@tempcnta-indent\endcsname+\@tempdimb\relax
+  \fi
+  \tp@store@maxwd{#1#2-indent}{\the\@tempdima}%
+  \tpSetProperty{#1margin-left}{\csname tp-\tp@namespace-#1#2-indent\endcsname}%
+}
+%    \end{macrocode}
+% Macro to determine indentation. \#1 is the property prefix, \#2 is the heading level.
+%    \begin{macrocode}
 \def\tp@get@indent#1#2{%
-  \tpIfPropVal{#1-indent}{level}
-    {\expandafter\let\expandafter\tp@prev@indent\csname tp-\tp@namespace-#1-#2-indent\endcsname
-     \ifx\tp@prev@indent\relax\let\tp@prev@indent\z@\fi
-     \tpSetValProp{#1-indent}{\tp@prev@indent}%
-     \tpSetValProp{#1-hang}{\csname tp-\tp@namespace-#1-#2-maxwd\endcsname}}
-    {\tpIfPropVal{#1-indent}{global}
-      {\tpSetValProp{#1-indent}{\csname tp-\tp@namespace-maxwd\endcsname}
-       \tpSetValProp{#1-hang}{\csname tp-\tp@namespace-maxwd\endcsname}}
-      {\tpIfProp{#1-indent}
-        {\tpIfProp{#1-hang}{}{\tpSetValProp{#1-hang}{\tpUseProperty{#1-width}}}}
-        {\tpSetValProp{#1-indent}{\tpUseProperty{#1-width}}%
-         \tpSetValProp{#1-hang}{\tpUseProperty{#1-width}}}%
-      }}%
-  }%
+  \expandafter\let\expandafter\tp@tmp@numwd\csname tp-\tp@namespace-#1number-#2-maxwd\endcsname\relax
+  \tpIfPropVal{#1margin-left}{auto-global}
+    {\tpSetProperty{#1indent}{-\csname tp-\tp@namespace-#1number-maxwd\endcsname}%
+     \tpSetProperty{#1margin-left}{\csname tp-\tp@namespace-#1number-maxwd\endcsname}}
+    {\tpIfPropVal{#1margin-left}{auto}
+       {\tpIfPropVal{#1indent}{auto}
+          {\tpSetProperty{#1indent}{-\tp@tmp@numwd}}
+          {\tpIfProp{#1indent}
+             {}
+             {\tpSetProperty{#1indent}{\z@}}}%
+        \tp@det@prev@indent{#1}{#2}}
+       {\tpIfProp{#1margin-left}
+          {\tpIfPropVal{#1indent}{auto}
+            {\tpSetProperty{#1indent}{-\tp@tmp@numwd}}
+            {\tpIfProp{#1indent}
+               {}
+               {\tpSetProperty{#1indent}{\z@}}}}
+         {\tpIfPropVal{#1indent}{auto}
+            {\tpSetProperty{#1margin-left}{\tp@tmp@numwd}%
+             \tpSetProperty{#1indent}{-\tp@tmp@numwd}}
+            {\tpIfProp{#1indent}
+               {\tpSetProperty{#1margin-left}{\z@}}
+               {\tpSetProperty{#1indent}{\z@}%
+                \tpSetProperty{#1margin-left}{\z@}}}}}}}%
 
 %    \end{macrocode}
 % Facility to create the running title macros
@@ -318,7 +348,9 @@
   \tpIfMacro{RunNumber}{}{\tpIfMacro{Number}{\let\tp@heading@RunNumber\tp@heading@Number}{}}%
   \tpIfMacro{RunAuthor}{}{\tpIfMacro{Author}{\let\tp@heading@RunAuthor\tp@heading@Author}{}}%
   \tpIfMacro{RunSubTitle}{}{\tpIfMacro{Subtitle}{\let\tp@heading@RunSubtitle\tp@heading@Subtitle}{}}%
-  \expandafter\let\expandafter\tp@mark@name\csname\tp@heading@name mark\endcsname%
+  \tpIfProp{running-level}
+    {\expandafter\let\expandafter\tp@mark@name\csname\tpUseProperty{running-level}mark\endcsname}
+    {\expandafter\let\expandafter\tp@mark@name\csname\tp@heading@name mark\endcsname}%
   \ifx\tp@mark@name\relax\ifx\tp@heading@parent\@undefined\else
       \expandafter\let\expandafter\tp@mark@name\csname\tp@inherit@name mark\endcsname%
     \fi\fi
@@ -331,22 +363,36 @@
 %    \begin{macrocode}
 \def\tp@make@bookmarks{%
   \protected@edef\@tempa{\expandafter\@empty\csname tp@heading@bookmark\endcsname}%
+  \tpIfProp{bookmark-level}{\edef\Hy@toclevel{\tpUseProperty{bookmark-level}}}{}%
   \bookmark[level=\Hy@toclevel,dest=\@currentHref]{\expandonce{\@tempa}}
 }
 %    \end{macrocode}
 % This macro calculates number widths and prepares macros to be used by the user
 %    \begin{macrocode}
-\def\tp@number@props{%
-  %% get title number
-  \sbox\z@{\tpUseProperty{title-format}\tpUseMacro{Number}\tpUseProperty{number-sep}}%
-  %% store title number width
-  \tp@store@maxwd{number-\tp@heading@level-maxwd}{\the\wd\z@}%
-  \tpSetValProp{number-width-level-max}{\csname tp-heading-number-\tp@heading@level-maxwd\endcsname}%
-  \tp@store@maxwd{number-maxwd}{\the\wd\z@}%
-  \tpSetValProp{number-width-max}{\csname tp-heading-number-\tp@heading@level-maxwd\endcsname}%
-  \tpSetValProp{number-width}{\the\wd\z@}%
-  \tp@get@indent{number}{\tp@heading@level}%
-  \def\tpHangNumber##1{\leftskip##1\hskip-##1\hbox to##1{\tpUseProperty{title-format}\tpUseMacro{Number}\hss}}%
+
+\def\tp@format@number#1#2#3{%
+  \tpSetProperty{#1formatted-number}{}%
+  \tpIfMacro{#2Number}{%
+    \tpSetProperty{#1formatted-number}{%
+      \bgroup
+        \tpUseProperty{#1title-format}%
+        \tpUseProperty{#1number-format}%
+        \tpUseMacro{#2Number}%
+        \tpUseProperty{#1number-sep}%
+      \egroup}%
+    \sbox\z@{\tpUseProperty{#1formatted-number}}%
+    \tp@store@maxwd{#1number-#3-maxwd}{\the\wd\z@}%
+    \tpSetValProp{#1number-width-level-max}{\csname tp-heading-#1number-#3-maxwd\endcsname}%
+    \tp@store@maxwd{#1number-maxwd}{\the\wd\z@}%
+    \tpSetValProp{#1number-width-max}{\csname tp-heading-#1number-#3-maxwd\endcsname}%
+    \tpSetValProp{#1number-width}{\the\wd\z@}%
+    \tp@get@indent{#1}{#3}%
+    \tp@set@hang{#1}%
+  }{%
+    \tp@prop@dimen{#1margin-left}{\z@}%
+    \tp@prop@dimen{#1margin-right}{\@flushglue}%
+    \tp@prop@dimen{#1indent}{\z@}%
+  }%
 }
 %    \end{macrocode}
 % This macro looks if \#1 has already been defined (e.g., in an
