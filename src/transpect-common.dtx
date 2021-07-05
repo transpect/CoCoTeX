@@ -42,8 +42,8 @@
 %    \begin{macrocode}
 \def\CalcRatio#1#2{\strip@pt\dimexpr\number\numexpr\number\dimexpr#1\relax*65536/\number\dimexpr#2\relax\relax sp}
 %    \end{macrocode}
-% Temporarily silence a macro that may (or may not) have an optional
-% argument. Use it like this:
+% Temporarily silence a macro with a mandatory argument that may or
+% may not have an optional argument. Use it like this:
 % \lstinline{\let\yourMacroWithOptArg\@gobbleopt}
 %    \begin{macrocode}
 \def\@gobbleopt#1#{\@gobble}
@@ -52,15 +52,15 @@
   \let\label\@gobble%
   \let\index\@gobbleopt}%
 %    \end{macrocode}
-%% traverse step-wise through counter \#1, start at number \#2 until and including number \#3 and do at every loop \#4 (from \lstinline{forloop.sty}):
+% traverse step-wise through counter \#1, start at number \#2 until and including number \#3 and do at every loop \#4 (from \lstinline{forloop.sty}):
 %    \begin{macrocode}
-\long\def\sh@iterate#1#2#3#4{%
+\long\def\tp@iterate#1#2#3#4{%
   \advance#1\@ne\relax
   #1=#2\relax%
   \expandafter\ifnum#1>#3\relax%
   \else
     #4%
-    \sh@iterate{#1}{\the#1}{#3}{#4}%
+    \tp@iterate{#1}{\the#1}{#3}{#4}%
   \fi}%
 %    \end{macrocode}
 %% \section{Hooks}
@@ -79,29 +79,8 @@
 \def\tpUseHook#1{\expandafter\ifx\csname tp@hook@\tp@namespace @#1\endcsname\relax\else\csname tp@hook@\tp@namespace @#1\endcsname\fi}
 %    \end{macrocode}
 %
-% \section{Blocks}
-% Blocks are bundled units of formatting elements. They provide three
-% hooks: \lstinline{Before<Name><Level>},
-% \lstinline{After<Name><Level>}, and
-% \lstinline{<Name>Format<Level>}. The arguments are \#1:
-% \lstinline{<Name>}, \#2 \lstinline{<Level>}.
-%    \begin{macrocode}
-\def\tpDeclareBlock#1#2{%
-  \tpDeclareHook{Before#1#2}%
-  \tpDeclareHook{#1Format#2}%
-  \tpDeclareHook{After#1#2}%
-}
-%    \end{macrocode}
-% The use-call function for Blocks
-%    \begin{macrocode}
-\def\tpUseBlock#1#2{%
-  \expandafter\ifx\csname tp@\tp@namespace @#1\endcsname\relax\else
-    \tpUseHook{Before#1#2}%
-    {\tpUseHook{#1Format#2}\csname tp@\tp@namespace @#1\endcsname}%
-    \tpUseHook{After#1#2}%
-  \fi}
-%    \end{macrocode}
-% Defines macros that are only valid within their environment.
+% \section{Macros}
+% Defines Macros that are only valid within their Namespace.
 % \begin{description}
 % \item[\#1] is the top-level macro name
 % \item[\#2] is code that is executed \textit{before} assignment of the user's value
@@ -123,25 +102,6 @@
 %    \begin{macrocode}
 \long\def\tpIfMacro#1#2#3{\expandafter\ifx\csname tp@\tp@namespace @#1\endcsname\relax#3\else#2\fi}
 
-%    \end{macrocode}
-%
-% \section{Class handler}
-%
-% % TODO: in eigene csstex.sty auslagern und dann hier sowie in htmltabs.sty einbinden
-%
-% Declaring float classes.
-% \begin{description}
-% \item[\#1] scope, e.g, \lstinline{figure} or \lstinline{table} (optional).
-% \item[\#2] class name.  If left empty, \lstinline{default} is used
-%   instead.
-% \item[\#3] parent class (optional)
-% \item[\#4] properties
-% \end{description}
-%    \begin{macrocode}
-%    \end{macrocode}
-% High level macro to cascade the classes and to initialize the
-% resulting properties. \#1 is the class name, \#2 is the scope
-%    \begin{macrocode}
 %    \end{macrocode}
 %
 % \section{Attributes}
@@ -184,7 +144,7 @@
 %    \end{macrocode}
 % \section{Properties}\label{sec:common:props}
 % This high level macro provides the property-value interface for
-% transpect environments. \#1 is the name of the property, \#2 is the value assigned to that property.
+% transpect namespaces. \#1 is the name of the property, \#2 is the value assigned to that property.
 %    \begin{macrocode}
 \DeclareRobustCommand{\tpSetProperty}[2]{\expandafter\long\expandafter\protect\expandafter\def\csname tp@\tp@namespace @#1\endcsname{#2}}
 %    \end{macrocode}
@@ -217,8 +177,7 @@
 %    \end{macrocode}
 % This macro recursivly loads a namespace's properties, the properties
 % of parent namespaces, and the default properties (in reverse
-% order). \#1 is the top-most environment name, \#2 is the macro
-% family.
+% order). \#1 is the macro family, \#2 is the namespace.
 %    \begin{macrocode}
 \def\tpCascadeProps#1#2{%
   \csname tp@#2@default\endcsname
@@ -229,7 +188,7 @@
 }
 %    \end{macrocode}
 % This low-level macro recursivly loads properties from parent
-% environments, if they exist. \#1 is the parent (may be empty), \#2 is
+% namespaces, if they exist. \#1 is the parent (may be empty), \#2 is
 % the macro family.
 %    \begin{macrocode}
 \def\tp@inherit@props#1#2{%
@@ -251,8 +210,8 @@
 % using the \lstinline|\tpSetProperty{<prop>}{<val>}| macro, see
 % Sect.~\ref{sec:common:props}. The first optional argument \#1 is the
 % classe's namespace. Using namespaces, you can have classes of the
-% same name for different environments, e.g., a \lstinline{default}
-% class for each float and heading environments. The second optional
+% same name for different namespaces, e.g., a \lstinline{default}
+% class for each float and heading namespaces. The second optional
 % argument \#3 is the parent class. Properties from that class are
 % loaded automatically prior to the loading of the current class. This
 % applies recursively allowing for a cascading of property values,
