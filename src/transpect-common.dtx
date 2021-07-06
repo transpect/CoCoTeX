@@ -79,16 +79,16 @@
 \def\tpUseHook#1{\expandafter\ifx\csname tp@hook@\tp@namespace @#1\endcsname\relax\else\csname tp@hook@\tp@namespace @#1\endcsname\fi}
 %    \end{macrocode}
 %
-% \section{Macros}
-% Defines Macros that are only valid within their Namespace.
+% \section{Components}
+% Defines component macros that are only valid within their Namespace.
 % \begin{description}
-% \item[\#1] is the top-level macro name
+% \item[\#1] is the top-level component name
 % \item[\#2] is code that is executed \textit{before} assignment of the user's value
 % \item[\#3] is code that is executed \textit{after} assignment of the user's value
 % \item[\#4] is the internal identifier. The macro that is build is \lstinline{\csname tp@<current namespace>@<id>\endcsname}
 % \end{description}
 %    \begin{macrocode}
-\def\tpProvideMacro#1#2#3#4{%
+\def\tpProvideComp#1#2#3#4{%
   \ltx@LocalExpandAfter\global\expandafter\let\csname tp@\tp@namespace @#4\endcsname\relax
   \expandafter\long\expandafter\def\csname #1\endcsname##1{#2\expandafter\long\expandafter\def\csname tp@\tp@namespace @#4\endcsname{##1}\ignorespaces#3}
 }
@@ -96,11 +96,11 @@
 %    \end{macrocode}
 % High level command to use Data field \#1.
 %    \begin{macrocode}
-\def\tpUseMacro#1{\csname tp@\tp@namespace @#1\endcsname\relax}
+\def\tpUseComp#1{\csname tp@\tp@namespace @#1\endcsname\relax}
 %    \end{macrocode}
-% High level macro that executes \#2 if Macro \#1 is non-empty, and \#3 if it is empty.
+% High level macro that executes \#2 if the Component macro \#1 is non-empty, and \#3 if it is empty.
 %    \begin{macrocode}
-\long\def\tpIfMacro#1#2#3{\expandafter\ifx\csname tp@\tp@namespace @#1\endcsname\relax#3\else#2\fi}
+\long\def\tpIfComp#1#2#3{\expandafter\ifx\csname tp@\tp@namespace @#1\endcsname\relax#3\else#2\fi}
 
 %    \end{macrocode}
 %
@@ -177,7 +177,7 @@
 %    \end{macrocode}
 % This macro recursivly loads a namespace's properties, the properties
 % of parent namespaces, and the default properties (in reverse
-% order). \#1 is the macro family, \#2 is the namespace.
+% order). \#1 is the current namespace, \#2 is the top-level namespace.
 %    \begin{macrocode}
 \def\tpCascadeProps#1#2{%
   \csname tp@#2@default\endcsname

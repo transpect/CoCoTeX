@@ -103,7 +103,7 @@
     \Hy@raisedlink{\hyper@anchorstart{\@currentHref}\hyper@anchorend}%
   \fi
   \expandafter\ifx\csname tp@heading@attr@label\endcsname\relax\else
-    \tpIfMacro{Number}{%
+    \tpIfComp{Number}{%
       \edef\@tempa{\expandonce{\tp@heading@Number}}%
       \let\@currentlabel\@tempa\relax
       \let\@currentlabelname\tp@heading@Title
@@ -126,14 +126,14 @@
   \tpSetProperty{heading-block}{%
     \bgroup
       \tpUseProperty{title-format}%
-      \tpIfMacro{Number}{\tpUseProperty{hang-number}}{}%
-      {\tpUseMacro{Title}}\par%
-      \tpIfMacro{Subtitle}{{\tpUseProperty{subtitle-format}\tpUseMacro{Subtitle}}\par}{}%
-      \tpIfMacro{Author}{{\tpUseProperty{author-format}\tpUseMacro{Author}}\par}{}%
-      \tpIfMacro{Quote}{%
+      \tpIfComp{Number}{\tpUseProperty{hang-number}}{}%
+      {\tpUseComp{Title}}\par%
+      \tpIfComp{Subtitle}{{\tpUseProperty{subtitle-format}\tpUseComp{Subtitle}}\par}{}%
+      \tpIfComp{Author}{{\tpUseProperty{author-format}\tpUseComp{Author}}\par}{}%
+      \tpIfComp{Quote}{%
         \bgroup\tpUseProperty{quote-format}%
-          \tpUseMacro{Quote}\par
-          \tpIfMacro{QuoteSource}{{\tpUseProperty{quote-source-format}--\space\tpUseMacro{Quote}}\par}{}%
+          \tpUseComp{Quote}\par
+          \tpIfComp{QuoteSource}{{\tpUseProperty{quote-source-format}--\space\tpUseComp{Quote}}\par}{}%
         \egroup}{}%
     \egroup
   }%
@@ -150,8 +150,8 @@
   %% running header
   \tpSetProperty{running-level}{}% override level for running title, name
   \tpSetProperty{running-heading}{%
-    \tpIfMacro{RunAuthor}{\tpUseMacro{RunAuthor}:\space}{}%
-    \tpUseMacro{RunTitle}%
+    \tpIfComp{RunAuthor}{\tpUseComp{RunAuthor}:\space}{}%
+    \tpUseComp{RunTitle}%
   }%
   %% ToC
   \tpSetProperty{toc-page-sep}{\dotfill}% between toc-title and page
@@ -178,15 +178,15 @@
   \tpSetProperty{toc-after-entry}{\par\addvspace{\tpUseProperty{toc-margin-bottom}}}% Thing at the end of the entry, after the page number
   \tpSetProperty{toc-heading}{% Order and formatting of the entry itself
     \tpUseProperty{toc-hang-number}%
-    \tpIfMacro{TocAuthor}{\tpUseMacro{TocAuthor}:\space}{}%
-    \tpUseMacro{TocTitle}%
-    \tpUseProperty{toc-page-sep}\tpUseMacro{TocPage}%
+    \tpIfComp{TocAuthor}{\tpUseComp{TocAuthor}:\space}{}%
+    \tpUseComp{TocTitle}%
+    \tpUseProperty{toc-page-sep}\tpUseComp{TocPage}%
   }%
   %% PDF-Bookmarks
   \tpSetProperty{bookmark-level}{}% override heading level for PDF bookmarks, numeric!
   \tpSetProperty{bookmark}{%
-    \tpIfMacro{TocNumber}{\tpUseMacro{TocNumber}\space}{}%
-    \tpIfMacro{TocTitle}{\tpUseMacro{TocTitle}}{\tpUseMacro{Title}}%
+    \tpIfComp{TocNumber}{\tpUseComp{TocNumber}\space}{}%
+    \tpIfComp{TocTitle}{\tpUseComp{TocTitle}}{\tpUseComp{Title}}%
   }%
 }
 %    \end{macrocode}
@@ -201,16 +201,16 @@
 %    \begin{macrocode}
 
 \def\tp@make@toc{%
-  \tpIfMacro{TocTitle}{}{\tpIfMacro{Title}{\let\tp@heading@TocTitle\tp@heading@Title}{}}%
-  \tpIfMacro{TocNumber}{}{\tpIfMacro{Number}{\let\tp@heading@TocNumber\tp@heading@Number}{}}%
-  \tpIfMacro{TocAuthor}{}{\tpIfMacro{Author}{\let\tp@heading@TocAuthor\tp@heading@Author}{}}%
-  \tpIfMacro{TocSubtitle}{}{\tpIfMacro{Subtitle}{\let\tp@heading@TocSubtitle\tp@heading@Subtitle}{}}%
+  \tpIfComp{TocTitle}{}{\tpIfComp{Title}{\let\tp@heading@TocTitle\tp@heading@Title}{}}%
+  \tpIfComp{TocNumber}{}{\tpIfComp{Number}{\let\tp@heading@TocNumber\tp@heading@Number}{}}%
+  \tpIfComp{TocAuthor}{}{\tpIfComp{Author}{\let\tp@heading@TocAuthor\tp@heading@Author}{}}%
+  \tpIfComp{TocSubtitle}{}{\tpIfComp{Subtitle}{\let\tp@heading@TocSubtitle\tp@heading@Subtitle}{}}%
   \expandafter\ifx\csname tp@heading@attr@notoc\endcsname\@empty\else
     \edef\tp@heading@toc@entry{%
-      \tpIfMacro{TocTitle}{\string\tpTocTitle{\expandonce{\tp@heading@TocTitle}}}{}%
-      \tpIfMacro{TocNumber}{\string\tpTocNumber{\expandonce{\tp@heading@TocNumber}}}{}%
-      \tpIfMacro{TocAuthor}{\string\tpTocAuthor{\expandonce{\tp@heading@TocAuthor}}}{}%
-      \tpIfMacro{TocSubtitle}{\string\tpTocSubtitle{\expandonce{\tp@heading@TocSubtitle}}}{}%
+      \tpIfComp{TocTitle}{\string\tpTocTitle{\expandonce{\tp@heading@TocTitle}}}{}%
+      \tpIfComp{TocNumber}{\string\tpTocNumber{\expandonce{\tp@heading@TocNumber}}}{}%
+      \tpIfComp{TocAuthor}{\string\tpTocAuthor{\expandonce{\tp@heading@TocAuthor}}}{}%
+      \tpIfComp{TocSubtitle}{\string\tpTocSubtitle{\expandonce{\tp@heading@TocSubtitle}}}{}%
     }%
     \tpIfProp{toc-level}{\edef\tp@heading@name{\tpUseProperty{toc-level}}}{}%
     \addcontentsline{toc}{\tp@heading@name}{\expandonce{\tp@heading@toc@entry}}\relax
@@ -242,12 +242,12 @@
 \def\tp@toc@extract@data#1#2#3#4{%
   \tpNamespace{heading}%
   \tpCascadeProps{#2}{heading}%
-  \tpProvideMacro{tpTocPage}{}{}{TocPage}%
+  \tpProvideComp{tpTocPage}{}{}{TocPage}%
   \tpTocPage{#4}%
-  \tpProvideMacro{tpTocTitle}{}{}{TocTitle}%
-  \tpProvideMacro{tpTocSubtitle}{}{}{TocSubtitle}%
-  \tpProvideMacro{tpTocNumber}{}{}{TocNumber}%
-  \tpProvideMacro{tpTocAuthor}{}{}{TocAuthor}%
+  \tpProvideComp{tpTocTitle}{}{}{TocTitle}%
+  \tpProvideComp{tpTocSubtitle}{}{}{TocSubtitle}%
+  \tpProvideComp{tpTocNumber}{}{}{TocNumber}%
+  \tpProvideComp{tpTocAuthor}{}{}{TocAuthor}%
   \let\tpTocLink\Hy@tocdestname%
   \expandonce#3%% expand toc-specific macros from heading; \expandonce is necessary because of hyperref...
   \tp@format@number{toc-}{Toc}{#1}%
@@ -344,10 +344,10 @@
 % Facility to create the running title macros
 %    \begin{macrocode}
 \def\tp@make@run{%
-  \tpIfMacro{RunTitle}{}{\tpIfMacro{Title}{\let\tp@heading@RunTitle\tp@heading@Title}{}}%
-  \tpIfMacro{RunNumber}{}{\tpIfMacro{Number}{\let\tp@heading@RunNumber\tp@heading@Number}{}}%
-  \tpIfMacro{RunAuthor}{}{\tpIfMacro{Author}{\let\tp@heading@RunAuthor\tp@heading@Author}{}}%
-  \tpIfMacro{RunSubTitle}{}{\tpIfMacro{Subtitle}{\let\tp@heading@RunSubtitle\tp@heading@Subtitle}{}}%
+  \tpIfComp{RunTitle}{}{\tpIfComp{Title}{\let\tp@heading@RunTitle\tp@heading@Title}{}}%
+  \tpIfComp{RunNumber}{}{\tpIfComp{Number}{\let\tp@heading@RunNumber\tp@heading@Number}{}}%
+  \tpIfComp{RunAuthor}{}{\tpIfComp{Author}{\let\tp@heading@RunAuthor\tp@heading@Author}{}}%
+  \tpIfComp{RunSubTitle}{}{\tpIfComp{Subtitle}{\let\tp@heading@RunSubtitle\tp@heading@Subtitle}{}}%
   \tpIfProp{running-level}
     {\expandafter\let\expandafter\tp@mark@name\csname\tpUseProperty{running-level}mark\endcsname}
     {\expandafter\let\expandafter\tp@mark@name\csname\tp@heading@name mark\endcsname}%
@@ -372,12 +372,12 @@
 
 \def\tp@format@number#1#2#3{%
   \tpSetProperty{#1formatted-number}{}%
-  \tpIfMacro{#2Number}{%
+  \tpIfComp{#2Number}{%
     \tpSetProperty{#1formatted-number}{%
       \bgroup
         \tpUseProperty{#1title-format}%
         \tpUseProperty{#1number-format}%
-        \tpUseMacro{#2Number}%
+        \tpUseComp{#2Number}%
         \tpUseProperty{#1number-sep}%
       \egroup}%
     \sbox\z@{\tpUseProperty{#1formatted-number}}%
@@ -458,9 +458,9 @@
 % printed data, data sent to toc, and data sent to page styles.
 %    \begin{macrocode}
 \def\tp@provide@hd@macros#1{%
-  \tpProvideMacro{tp#1}{}{}{#1}%
-  \tpProvideMacro{tpToc#1}{}{}{Toc#1}%
-  \tpProvideMacro{tpRun#1}{}{}{Run#1}%
+  \tpProvideComp{tp#1}{}{}{#1}%
+  \tpProvideComp{tpToc#1}{}{}{Toc#1}%
+  \tpProvideComp{tpRun#1}{}{}{Run#1}%
 }
 
 \def\heading{\@ifnextchar [{\@heading}{\@heading[]}}%]
@@ -483,8 +483,8 @@
   \tp@provide@hd@macros{Title}%
   \tp@provide@hd@macros{Subtitle}%
   \tp@provide@hd@macros{Number}%
-  \tpProvideMacro{tpQuote}{}{}{Quote}%
-  \tpProvideMacro{tpQuoteSource}{}{}{QuoteSource}%
+  \tpProvideComp{tpQuote}{}{}{Quote}%
+  \tpProvideComp{tpQuoteSource}{}{}{QuoteSource}%
 }
 \def\tp@heading@load@props{%
   \csname tp@heading@\tp@heading@name @properties\endcsname
