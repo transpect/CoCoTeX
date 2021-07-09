@@ -114,6 +114,7 @@
 
 \tpAddToDefault{heading}{%
   \tpSetProperty{interline-para}{}%
+  \tpSetProperty{interline-para-sep}{\space}
   \tpSetProperty{heading-par}{%
     \tpIfProp{interline-para}{\if@noskipsec \leavevmode \fi}{}%
     \par\global\@afterindenttrue}%
@@ -416,7 +417,7 @@
   \tpIfProp{after-indent}{\global\@afterindenttrue}{\global\@afterindentfalse}%
   \tpIfProp{interline-para}
     {\global\setbox\@tempboxa\hbox{\@svsec}}
-    {\global\setbox\@tempboxa\hbox{\ifvoid\@tempboxa\else\unhbox\@tempboxa\tpInterlineParaSep\fi\@svsec}}%
+    {\global\setbox\@tempboxa\hbox{\ifvoid\@tempboxa\else\unhbox\@tempboxa\tpUseProperty{interline-para-sep}\fi\@svsec}}%
   \@nobreakfalse
   \global\@noskipsectrue
   \gdef\next{%
