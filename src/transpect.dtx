@@ -45,9 +45,8 @@
 \DeclareOptionX{book}{\global\collectionfalse\global\@articlefalse}
 \DeclareOptionX{article}{\global\collectionfalse\global\@articletrue}
 \DeclareOptionX{collection}{\global\collectiontrue\global\@articlefalse}
-\DeclareOption*{\PassOptionsToClass{\CurrentOption}{article}}
-\DeclareOption*{\PassOptionsToClass{\CurrentOption}{book}}
-
+\DeclareOptionX*{\PassOptionsToClass{\CurrentOption}{article}}
+\DeclareOptionX*{\PassOptionsToClass{\CurrentOption}{book}}
 \ProcessOptionsX
 %    \end{macrocode}
 % All transpect derived classes base on \LaTeX's default class \lstinline{book} or \lstinline{article}:

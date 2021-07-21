@@ -52,6 +52,7 @@
   \if!#1!\else\expandafter\protect\expandafter\def\csname tp@heading@#3@parent\endcsname{#1}\fi%
   \expandafter\protect\expandafter\def\csname tp@heading@#3@properties\endcsname{#4}%
   \tp@init@l@{#2}{#3}%
+  \tp@init@cnt{#2}{#3}%
   \tp@restore@init{tp-heading-number-#2-maxwd}%
   %
   %
@@ -63,6 +64,7 @@
     \tpNamespace{heading}%
     \tpCascadeProps{#3}{heading}%
     \def\Hy@toclevel{#2}%
+    \tp@auto@number{#2}{#3}%
     \tpUseProperty{heading-par}%
     \tpUseProperty{before-heading}%
     \everypar{}%
@@ -71,12 +73,12 @@
     \tp@make@run% Running headers
     \tp@make@toc% ToC entries
     \tp@make@bookmarks% Bookmarks
-    \tpIfProp{after-skip}{\expandafter\@tempskipa\expandafter=\tpUseProperty{after-skip}\relax}{\@tempskipa=1sp\relax}%
+    \tpIfProp{after-skip}{\expandafter\global\expandafter\@tempskipa\expandafter=\tpUseProperty{after-skip}\relax}{\global\@tempskipa=1sp\relax}%
     \def\@svsec{%
       \tpUseProperty{before-heading-block}%
       \leftskip\tpUseProperty{margin-left}%
       \rightskip\tpUseProperty{margin-right}%
-      {\hskip\tpUseProperty{indent}\tpUseProperty{heading-block}}%
+      {\tpUseProperty{heading-block}}%
       \tpUseProperty{after-heading-block}%
     }%
     \ifdim\@tempskipa <\z@\relax
@@ -95,6 +97,33 @@
         {\tpSetProperty{#1}{#2}}
         {}}}
     {\tpSetProperty{#1}{#2}}%
+}
+
+%    \end{macrocode}
+% Initialite the counters for automatic numbering if they don't exist, yet.
+%    \begin{macrocode}
+\def\tp@init@cnt#1#2{%
+  \tpIfPropVal{numbering}{auto}
+    {\expandafter\ifx\csname c@#2\endcsname\relax \expandafter\newcount\csname c@#2\endcsname \fi
+     \global\csname c@#2\endcsname=\z@
+    }{}%
+}
+%    \end{macrocode}
+% Advance the heading counter if the \lstinline{numbering} Property is
+% set to \texttt{auto} and the current heading is not overridden by
+% the \lstinline{Number} Component.
+%    \begin{macrocode}
+\def\tp@auto@number#1#2{%#1 level #2 name
+  \tpIfPropVal{numbering}{auto}
+    {%
+     \expandafter\ifx\csname tp@heading@attr@nonumber\endcsname\@empty
+     \else
+       \tpIfComp{Number}
+         {}%
+         {\expandafter\global\expandafter\advance\csname c@#2\endcsname\@ne
+          \edef\@tempa{\csname the#2\endcsname}%
+          \expandafter\tpNumber\expandafter{\@tempa}}
+     \fi}{}
 }
 
 \def\tp@create@labels#1{%
@@ -127,7 +156,10 @@
   \tpSetProperty{heading-block}{%
     \bgroup
       \tpUseProperty{title-format}%
-      \tpIfComp{Number}{\tpUseProperty{hang-number}}{}%
+      \tpIfComp{Number}{%
+        \hskip\tpUseProperty{indent}%
+        \tpUseProperty{hang-number}%
+      }{}%
       {\tpUseComp{Title}}\par%
       \tpIfComp{Subtitle}{{\tpUseProperty{subtitle-format}\tpUseComp{Subtitle}}\par}{}%
       \tpIfComp{Author}{{\tpUseProperty{author-format}\tpUseComp{Author}}\par}{}%
@@ -148,6 +180,7 @@
   \tpSetProperty{number-width}{}%
   \tpSetProperty{number-sep}{\space}%
   \tpSetProperty{number-align}{left}%
+  \tpSetProperty{numbering}{auto}%
   %% running header
   \tpSetProperty{running-level}{}% override level for running title, name
   \tpSetProperty{running-heading}{%
@@ -178,7 +211,10 @@
   }%
   \tpSetProperty{toc-after-entry}{\par\addvspace{\tpUseProperty{toc-margin-bottom}}}% Thing at the end of the entry, after the page number
   \tpSetProperty{toc-heading}{% Order and formatting of the entry itself
-    \tpUseProperty{toc-hang-number}%
+    \tpUseProperty{toc-title-format}%
+    \tpIfComp{TocNumber}{%
+      \hskip\tpUseProperty{toc-indent}%
+      \tpUseProperty{toc-hang-number}}{}%
     \tpIfComp{TocAuthor}{\tpUseComp{TocAuthor}:\space}{}%
     \tpUseComp{TocTitle}%
     \tpUseProperty{toc-page-sep}\tpUseComp{TocPage}%
@@ -201,11 +237,20 @@
 % \lstinline{\<heading>mark} macros are written.
 %    \begin{macrocode}
 
+\def\tp@toc@check@empty#1{%
+  \tpIfComp{Toc#1}
+    {\tpIfCompEmpty{Toc#1}
+      {\expandafter\global\expandafter\let\csname tp@heading@Toc#1\endcsname\relax}
+      {}}
+    {\tpIfComp{#1}
+      {\expandafter\expandafter\expandafter\let\expandafter\csname tp@heading@Toc#1\expandafter\endcsname\csname tp@heading@#1\endcsname}
+      {}}}
+
 \def\tp@make@toc{%
-  \tpIfComp{TocTitle}{}{\tpIfComp{Title}{\let\tp@heading@TocTitle\tp@heading@Title}{}}%
-  \tpIfComp{TocNumber}{}{\tpIfComp{Number}{\let\tp@heading@TocNumber\tp@heading@Number}{}}%
-  \tpIfComp{TocAuthor}{}{\tpIfComp{Author}{\let\tp@heading@TocAuthor\tp@heading@Author}{}}%
-  \tpIfComp{TocSubtitle}{}{\tpIfComp{Subtitle}{\let\tp@heading@TocSubtitle\tp@heading@Subtitle}{}}%
+  \tp@toc@check@empty{Title}%
+  \tp@toc@check@empty{Number}%
+  \tp@toc@check@empty{Subtitle}%
+  \tp@toc@check@empty{Author}%
   \expandafter\ifx\csname tp@heading@attr@notoc\endcsname\@empty\else
     \edef\tp@heading@toc@entry{%
       \tpIfComp{TocTitle}{\string\tpTocTitle{\expandonce{\tp@heading@TocTitle}}}{}%
@@ -259,7 +304,7 @@
 \def\tp@toc@print@entry{%
   \bgroup
     \tpUseProperty{toc-before-entry}%
-    \hskip\tpUseProperty{toc-indent}%
+    %\hskip\tpUseProperty{toc-indent}%
     \tpUseProperty{toc-heading}%
     \tpUseProperty{toc-after-entry}%
   \egroup
