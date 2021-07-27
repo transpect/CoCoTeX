@@ -68,7 +68,7 @@
     \tpUseProperty{heading-par}%
     \tpUseProperty{before-heading}%
     \everypar{}%
-    \tp@create@labels{#3}% label facility
+    \tp@hdg@create@labels{#3}% label facility
     \tp@format@number{}{}{\tp@heading@level}% Calculate number width
     \tp@make@run% Running headers
     \tp@make@toc% ToC entries
@@ -126,7 +126,7 @@
      \fi}{}
 }
 
-\def\tp@create@labels#1{%
+\def\tp@hdg@create@labels#1{%
   \ifx\Hy@MakeCurrentHrefAuto\@undefined\else
     \Hy@MakeCurrentHrefAuto{#1}%
     \Hy@raisedlink{\hyper@anchorstart{\@currentHref}\hyper@anchorend}%

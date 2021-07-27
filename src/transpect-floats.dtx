@@ -95,6 +95,7 @@
   \tpSetProperty{sub-float-sep}{\tp@subflt@sep}
   \tpSetProperty{left-skip}{\z@}
   \tpSetProperty{right-skip}{\z@}
+  \tpSetProperty{number}{auto}
 }
 
 \tpDeclareFloat{tpFigure}{figure}{lof}{%
@@ -119,7 +120,8 @@
 %    \begin{macrocode}
 \let\ltx@label\label
 \def\tp@str@landscape{landscape}
-\def\tp@str@default{default}
+\newbox\tp@floatbox
+
 \AtBeginDocument{\@ifpackageloaded{htmltabs}{\global\let\tp@uses@htmltabs\relax}{}}%
 
 \def\tp@float[#1]#2#3#4{%
@@ -168,9 +170,13 @@
         \expandafter\addvspace\expandafter{\tpUseProperty{above-float-skip}}%
       \fi
     \fi
-    \ifx\tp@uses@htmltabs\relax
-      \global\setbox\htTableBox\box\voidb@x
-      \let\htOutputTable\relax
+    \ifx\tp@captype\tp@str@table
+      \ifx\tp@uses@htmltabs\relax
+        \global\setbox\htTableBox\box\voidb@x
+        \let\htOutputTable\relax
+      \else
+        \tp@reserve@tabular
+      \fi
     \fi
   }
 
@@ -190,6 +196,7 @@
     \fi
     \expandafter\expandafter\expandafter\begin\expandafter\expandafter\expandafter{\expandafter\tp@b@flt\expandafter}\expandafter[\tp@fps]%
   \fi
+  \tp@flt@create@labels%
   \csname tp@\tp@captype @float\endcsname
   \par
   \ifx\tp@fps\@empty
@@ -211,6 +218,7 @@
     \tp@make@caption{0}{above}%
   \fi
   \ifx\htTableBox\@undefined
+    \unvbox\tp@floatbox
   \else
     \ifvoid\htTableBox\else
       \box\htTableBox
@@ -219,6 +227,19 @@
   \expandafter\ifx\csname tp@\tp@namespace @cpt-0\endcsname\relax\else
     \tp@make@caption{0}{below}%
   \fi}
+
+\def\tp@reserve@tabular{%
+  \@tp@reserve@tab{}%
+  \@tp@reserve@tab{x}%
+  \@tp@reserve@tab{y}%
+}
+
+\def\@tp@reserve@tab#1{%
+  \expandafter\expandafter\expandafter\let\expandafter\csname orig@tabular#1\expandafter\endcsname\csname tabular#1\endcsname
+  \expandafter\expandafter\expandafter\let\expandafter\csname orig@endtabular#1\expandafter\endcsname\csname endtabular#1\endcsname
+  \expandafter\def\csname tabular#1\endcsname{\setbox\tp@floatbox\vbox\bgroup\csname orig@tabular#1\endcsname}%
+  \expandafter\def\csname endtabular#1\endcsname{\csname orig@endtabular#1\endcsname\egroup}%
+}
 
 %    \end{macrocode}
 % This mid-level command is used to override the content which is
@@ -243,7 +264,6 @@
     \fi
     \tp@reset@caption{#1}%
   \fi}
-
 %    \end{macrocode}
 % This is a rundimentary implementation of hyperref's anchor mechanism
 % to make labels work:
@@ -339,10 +359,6 @@
   }}
 
 %    \end{macrocode}
-% prints a sub figure without a minipage
-%    \begin{macrocode}
-
-%    \end{macrocode}
 % Mechanism to determine the correct order of caption constituents
 %    \begin{macrocode}
 \def\tp@flt@use@label#1{%
@@ -428,6 +444,24 @@
   \ltx@LocalExpandAfter\global\expandafter\let\csname tp@\tp@namespace @lgd-#1\endcsname\relax%
   \ltx@LocalExpandAfter\global\expandafter\let\csname tp@\tp@namespace @ref-#1\endcsname\relax%
   }
+
+\def\tp@flt@create@labels{%
+  \tpIfPropVal{number}{auto}
+    {\ifnum\tp@subflts=\z@\relax
+       \expandafter\advance\csname c@\tp@captype\endcsname\@ne\relax
+       \tp@set@label{0}%
+     \else
+        \tp@iterate{\@tempcnta}{\@ne}{\tp@subflts}{%
+          \expandafter\advance\csname c@\tp@captype\endcsname\@ne\relax
+          \tp@set@label{\the\@tempcnta}%
+        }
+     \fi}
+    {}}
+
+\def\tp@set@label#1{%
+  \expandafter\expandafter\expandafter\edef\expandafter\csname tp@\tp@namespace @lbl-#1\expandafter\endcsname\expandafter{\csname the\tp@captype\endcsname}%
+}
+
 %    \end{macrocode}
 % shell for sub floats
 %    \begin{macrocode}
