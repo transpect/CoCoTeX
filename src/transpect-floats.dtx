@@ -118,11 +118,13 @@
 % \item[class] class\\
 % \end{description}
 %    \begin{macrocode}
-\let\ltx@label\label
 \def\tp@str@landscape{landscape}
 \newbox\tp@floatbox
 
-\AtBeginDocument{\@ifpackageloaded{htmltabs}{\global\let\tp@uses@htmltabs\relax}{}}%
+\AtBeginDocument{%
+  \global\let\ltx@label\label
+  \@ifpackageloaded{htmltabs}{\global\let\tp@uses@htmltabs\relax}{}%
+}%
 
 \def\tp@float[#1]#2#3#4{%
   \savenotes
@@ -277,6 +279,7 @@
     \expandafter\hyper@@anchor\expandafter{%
       \@currentHref
     }{\relax}%
+    \let\@currentlabel\tp@lo@lbl
     \expandafter\ltx@label\expandafter{\tp@lo@ref}%
   \fi}
 
@@ -446,17 +449,19 @@
   }
 
 \def\tp@flt@create@labels{%
-  \tpIfPropVal{number}{auto}
-    {\ifnum\tp@subflts=\z@\relax
-       \expandafter\advance\csname c@\tp@captype\endcsname\@ne\relax
-       \tp@set@label{0}%
+  \tpIfPropVal{number}{auto}{%
+    \ifnum\tp@subflts=\z@\relax
+       \tpIfComp{lbl-0}
+         {}%
+         {\expandafter\advance\csname c@\tp@captype\endcsname\@ne\relax
+          \tp@set@label{0}}%
      \else
-        \tp@iterate{\@tempcnta}{\@ne}{\tp@subflts}{%
-          \expandafter\advance\csname c@\tp@captype\endcsname\@ne\relax
-          \tp@set@label{\the\@tempcnta}%
-        }
-     \fi}
-    {}}
+       \tp@iterate{\@tempcnta}{\@ne}{\tp@subflts}{%
+         \tpIfComp{lbl-\the\@tempcnta}
+           {}%
+           {\expandafter\advance\csname c@\tp@captype\endcsname\@ne\relax
+            \tp@set@label{\the\@tempcnta}}}
+     \fi}{}}
 
 \def\tp@set@label#1{%
   \expandafter\expandafter\expandafter\edef\expandafter\csname tp@\tp@namespace @lbl-#1\expandafter\endcsname\expandafter{\csname the\tp@captype\endcsname}%

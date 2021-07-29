@@ -203,7 +203,7 @@
   \tpNamespace{heading}%
   \tpCascadeProps{#2}{heading}%
   \tpProvideComp{tpTocPage}{}{}{TocPage}%
-  \tpTocPage{#4}%
+  \tpTocPage{\tpUseProperty{toc-page-format}#4}%
   \tpProvideComp{tpTocTitle}{}{}{TocTitle}%
   \tpProvideComp{tpTocSubtitle}{}{}{TocSubtitle}%
   \tpProvideComp{tpTocNumber}{}{}{TocNumber}%
@@ -217,7 +217,6 @@
 \def\tp@toc@print@entry{%
   \bgroup
     \tpUseProperty{toc-before-entry}%
-    %\hskip\tpUseProperty{toc-indent}%
     \tpUseProperty{toc-heading}%
     \tpUseProperty{toc-after-entry}%
   \egroup}
@@ -229,6 +228,7 @@
   \tpIfProp{#1indent}
     {\ifdim\tpUseProperty{#1indent}<\z@
         \tpSetProperty{#1hang-number}{%
+          \hskip\tpUseProperty{#1indent}%
           \hbox to -\tpUseProperty{#1indent}{%
             \tpIfPropVal{#1number-align}{left}{}{\hss}%
             \tpUseProperty{#1formatted-number}%
@@ -333,17 +333,20 @@
         \tpUseProperty{#1number-sep}%
       \egroup}%
     \sbox\z@{\tpUseProperty{#1formatted-number}}%
-    \tp@store@maxwd{#1number-#3-maxwd}{\the\wd\z@}%
-    \tpSetValProp{#1number-width-level-max}{\csname tp-heading-#1number-#3-maxwd\endcsname}%
-    \tp@store@maxwd{#1number-maxwd}{\the\wd\z@}%
-    \tpSetValProp{#1number-width-max}{\csname tp-heading-#1number-#3-maxwd\endcsname}%
-    \tpSetValProp{#1number-width}{\the\wd\z@}%
-    \tp@get@indent{#1}{#3}%
-    \tp@set@hang{#1}%
   }{%
-    \tp@prop@dimen{#1margin-left}{\z@}%
-    \tp@prop@dimen{#1margin-right}{\@flushglue}%
-    \tp@prop@dimen{#1indent}{\z@}}}
+    \sbox\z@{}%
+  }%
+  \tp@store@maxwd{#1number-#3-maxwd}{\the\wd\z@}%
+  \tpSetValProp{#1number-width-level-max}{\csname tp-heading-#1number-#3-maxwd\endcsname}%
+  \tp@store@maxwd{#1number-maxwd}{\the\wd\z@}%
+  \tpSetValProp{#1number-width-max}{\csname tp-heading-#1number-#3-maxwd\endcsname}%
+  \tpSetValProp{#1number-width}{\the\wd\z@}%
+  \tp@get@indent{#1}{#3}%
+  \tp@set@hang{#1}%
+  % \tp@prop@dimen{#1margin-left}{\z@}%
+  % \tp@prop@dimen{#1margin-right}{\@flushglue}%
+  % \tp@prop@dimen{#1indent}{\z@}%
+}
 %    \end{macrocode}
 % This macro looks if \#1 has already been defined (e.g., in an
 % earlier tex run) and stores that inital value back in the aux files
@@ -479,23 +482,21 @@
   \tpSetProperty{author-format}{\normalfont}%
   \tpSetProperty{quote-format}{\raggedleft}%
   \tpSetProperty{quote-source-format}{}%
-  \tpSetProperty{heading-block}{%
-    \bgroup
-      \tpUseProperty{title-format}%
-      \tpIfComp{Number}{%
-        \hskip\tpUseProperty{indent}%
-        \tpUseProperty{hang-number}%
-      }{}%
-      {\tpUseComp{Title}}\par%
-      \tpIfComp{Subtitle}{{\tpUseProperty{subtitle-format}\tpUseComp{Subtitle}}\par}{}%
-      \tpIfComp{Author}{{\tpUseProperty{author-format}\tpUseComp{Author}}\par}{}%
-      \tpIfComp{Quote}{%
-        \bgroup\tpUseProperty{quote-format}%
-          \tpUseComp{Quote}\par
-          \tpIfComp{QuoteSource}{{\tpUseProperty{quote-source-format}--\space\tpUseComp{Quote}}\par}{}%
-        \egroup}{}%
-    \egroup
-  }%
+  \tpSetProperty{heading-block}
+    {\bgroup
+       \tpUseProperty{title-format}%
+       \tpIfComp{Number}
+         {\tpUseProperty{hang-number}}
+         {\leftskip0pt}%
+       {\tpUseComp{Title}}\par%
+       \tpIfComp{Subtitle}{{\tpUseProperty{subtitle-format}\tpUseComp{Subtitle}}\par}{}%
+       \tpIfComp{Author}{{\tpUseProperty{author-format}\tpUseComp{Author}}\par}{}%
+       \tpIfComp{Quote}{%
+         \bgroup\tpUseProperty{quote-format}%
+           \tpUseComp{Quote}\par
+           \tpIfComp{QuoteSource}{{\tpUseProperty{quote-source-format}--\space\tpUseComp{Quote}}\par}{}%
+         \egroup}{}%
+    \egroup}%
   \tpSetProperty{after-heading-block}{}%
   \tpSetProperty{before-heading-block}{\parindent\z@ \parskip\z@}%
   \tpSetProperty{after-indent}{}%
@@ -515,6 +516,7 @@
   }%
   %% ToC
   \tpSetProperty{toc-page-sep}{\dotfill}% between toc-title and page
+  \tpSetProperty{toc-page-format}{}%
   \tpSetProperty{toc-number-width}{}% current width of number
   \tpSetProperty{toc-number-align}{left}% alignment of number within hbox when hanging
   \tpSetProperty{toc-title-format}{}% format of title
@@ -538,9 +540,9 @@
   \tpSetProperty{toc-after-entry}{\par\addvspace{\tpUseProperty{toc-margin-bottom}}}% Thing at the end of the entry, after the page number
   \tpSetProperty{toc-heading}{% Order and formatting of the entry itself
     \tpUseProperty{toc-title-format}%
-    \tpIfComp{TocNumber}{%
-      \hskip\tpUseProperty{toc-indent}%
-      \tpUseProperty{toc-hang-number}}{}%
+    \tpIfComp{TocNumber}
+      {\tpUseProperty{toc-hang-number}}
+      {\leftskip0pt}%
     \tpIfComp{TocAuthor}{\tpUseComp{TocAuthor}:\space}{}%
     \tpUseComp{TocTitle}%
     \tpUseProperty{toc-page-sep}\tpUseComp{TocPage}%
