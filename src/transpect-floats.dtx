@@ -95,7 +95,7 @@
   \tpSetProperty{sub-float-sep}{\tp@subflt@sep}
   \tpSetProperty{left-skip}{\z@}
   \tpSetProperty{right-skip}{\z@}
-  \tpSetProperty{number}{auto}
+  \tpSetProperty{numbering}{auto}
 }
 
 \tpDeclareFloat{tpFigure}{figure}{lof}{%
@@ -154,6 +154,7 @@
     \def\@tempa{h!}\ifx\tp@fps\@tempa\let\tp@fps\@empty\fi
     \def\tp@bcnthack{\bgroup\ifx\tp@is@subflt\relax\else\tp@subflts=\z@\relax\fi\expandafter\global}%
     \def\tp@ecnthack{\egroup}%
+    \tpProvideComp{tpContent}{\tp@bcnthack}{\tp@ecnthack}{content-\the\tp@subflts}%
     \tpProvideComp{tpFig}{\tp@bcnthack}{\tp@ecnthack}{fig-\the\tp@subflts}%
     \tpProvideComp{tpCaption}{\tp@bcnthack}{\tp@ecnthack}{cpt-\the\tp@subflts}%
     \tpProvideComp{tpLegend}{\tp@bcnthack}{\tp@ecnthack}{ldg-\the\tp@subflts}%
@@ -199,7 +200,11 @@
     \expandafter\expandafter\expandafter\begin\expandafter\expandafter\expandafter{\expandafter\tp@b@flt\expandafter}\expandafter[\tp@fps]%
   \fi
   \tp@flt@create@labels%
-  \csname tp@\tp@captype @float\endcsname
+  \expandafter\ifx\csname tp@\tp@captype @float\endcsname\relax
+    \tp@generic@float{0}%
+  \else
+    \csname tp@\tp@captype @float\endcsname
+  \fi
   \par
   \ifx\tp@fps\@empty
     \expandafter\vskip\tpUseProperty{intext-skip-below}%
@@ -241,6 +246,18 @@
   \expandafter\expandafter\expandafter\let\expandafter\csname orig@endtabular#1\expandafter\endcsname\csname endtabular#1\endcsname
   \expandafter\def\csname tabular#1\endcsname{\setbox\tp@floatbox\vbox\bgroup\csname orig@tabular#1\endcsname}%
   \expandafter\def\csname endtabular#1\endcsname{\csname orig@endtabular#1\endcsname\egroup}%
+}
+
+\def\tp@generic@float#1{%
+  \expandafter\ifx\csname tp@\tp@namespace @cpt-#1\endcsname\relax
+  \else
+    \tp@make@caption{#1}{above}%
+  \fi
+  \tpUseComp{content-#1}%
+  \expandafter\ifx\csname tp@\tp@namespace @cpt-#1\endcsname\relax
+  \else
+    \tp@make@caption{#1}{below}%
+  \fi
 }
 
 %    \end{macrocode}
@@ -449,7 +466,7 @@
   }
 
 \def\tp@flt@create@labels{%
-  \tpIfPropVal{number}{auto}{%
+  \tpIfPropVal{numbering}{auto}{%
     \ifnum\tp@subflts=\z@\relax
        \tpIfComp{lbl-0}
          {}%
