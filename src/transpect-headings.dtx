@@ -209,8 +209,22 @@
   \tpProvideComp{tpTocNumber}{}{}{TocNumber}%
   \tpProvideComp{tpTocAuthor}{}{}{TocAuthor}%
   \let\tpTocLink\Hy@tocdestname%
-  \expandonce#3%% expand toc-specific macros from heading; \expandonce is necessary because of hyperref...
-  \tp@format@number{toc-}{Toc}{#1}}
+  \tp@expand@l@contents{#3}%% expand toc-specific macros from heading; \expandonce is necessary because of hyperref...
+  \tp@format@number{toc-}{Toc}{#1}
+}
+%    \end{macrocode}
+% This macro expands the content of the l@<level> macro and contains
+% some code to catch and handle standard \LaTeX\ headings.
+%    \begin{macrocode}
+\def\tp@expand@l@contents#1{%
+  \sbox\z@{\def\numberline##1{\gdef\tp@heading@TocNumber{##1}}\expandonce#1}%
+  \ifdim\wd\z@>\z@
+    \let\numberline\@gobble%
+    \expandafter\tpTocTitle\expandafter{\expandonce#1}%
+  \else
+    \expandonce#1%
+  \fi}
+
 %    \end{macrocode}
 % Macro to actually print the toc entry.
 %    \begin{macrocode}
