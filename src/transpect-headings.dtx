@@ -70,9 +70,6 @@
     \everypar{}%
     \tp@hdg@create@labels{#3}% label facility
     \tp@format@number{}{}{\tp@heading@level}% Calculate number width
-    \tp@make@run% Running headers
-    \tp@make@toc% ToC entries
-    \tp@make@bookmarks% Bookmarks
     \tpIfProp{after-skip}{\expandafter\global\expandafter\@tempskipa\expandafter=\tpUseProperty{after-skip}\relax}{\global\@tempskipa=1sp\relax}%
     \def\@svsec{%
       \tpUseProperty{before-heading-block}%
@@ -80,6 +77,9 @@
       \rightskip\tpUseProperty{margin-right}%
       {\tpUseProperty{heading-block}}%
       \tpUseProperty{after-heading-block}%
+      \tp@make@toc% ToC entries
+      \tp@make@bookmarks% Bookmarks
+      \tp@make@run% Running headers
     }%
     \ifdim\@tempskipa <\z@\relax
       \tp@inline@heading
