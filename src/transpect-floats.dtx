@@ -35,6 +35,9 @@
 \newbox  \tp@floatbox
 \newbox  \tp@subfltbox
 \newcount\tpSubFloatCnt       \tpSubFloatCnt=\z@\relax
+\newcount\tp@subfloat@row     \tp@subfloat@row\z@
+\newcount\tp@subfloat@col     \tp@subfloat@col\z@
+
 \newdimen\tp@subflt@maxheight \tp@subflt@maxheight=\z@\relax
 \newdimen\tp@subflt@sep       \tp@subflt@sep=\fboxsep\relax
 \newdimen\tp@total@flt@width  \tp@total@flt@width=\textwidth\relax
@@ -73,12 +76,19 @@
 
 \def\tp@reset@defaults#1#2{%
   \global\tpSubFloatCnt=\z@
+  \global\let\tp@has@capt@top\@undefined
+  \global\let\tp@has@capt@bottom\@undefined
+  \global\let\tp@has@subcapt@top\@undefined
+  \global\let\tp@has@subcapt@bottom\@undefined
+  \global\tp@subfloat@row=\z@
+  \global\tp@subfloat@col=\z@
   \global\tp@subflt@maxheight=\z@\relax
   \tp@reset@components{0}%
   \def\tp@captype{#1}%
   \def\tp@caplisttype{#2}%
   \let\ht@cur@element\tp@captype
   \global\let\tp@current@class\relax
+  \global\let\tp@subfloat@parent=f\relax
 }
 %    \end{macrocode}
 % Handles the optional argument of float environments. \#1 is the
@@ -106,33 +116,36 @@
   \fi
   \def\@tempa{h!}\ifx\tp@fps\@tempa\let\tp@fps\@empty\fi
   \ifx\tp@do@dblfloat\relax\linewidth\dimexpr2\columnwidth+\columnsep\relax\fi
-  \expandafter\ifx\csname tp@#2@attr@orientation\endcsname\tp@str@landscape
+  \expandafter\ifx\csname tp@#1@attr@orientation\endcsname\tp@str@landscape\relax
     \linewidth\textheight
     \def\tp@fps{p}%
   \else
     \tp@set@top@sep
   \fi}
 
-\tp@set@flt@pos{%
+\def\tp@set@flt@pos{%
   \ifx\tp@fps\@empty
     \let\tp@b@float\relax
     \let\tp@e@float\relax
   \else
     \def\@tempa{h}\ifx\tp@fps\@tempa\def\tp@fps{ht!}\fi
-    \let\tp@b@flt\tp@captype%
-    \expandafter\ifx\csname tp@\tp@captype @attr@orientation\endcsname\tp@str@landscape
-      \ifx\tp@b@flt\tp@str@table
-        \edef\tp@b@flt{sidewaystable}%
+    \let\tp@b@float\tp@captype%
+    \expandafter\ifx\csname tp@\tp@captype @attr@orientation\endcsname\tp@str@landscape\relax
+      \ifx\tp@b@float\tp@str@table
+        \edef\@tp@b@float{sidewaystable}%
       \else
-        \edef\tp@b@flt{sidewaysfigure}%
+        \edef\@tp@b@float{sidewaysfigure}%
       \fi
-    \fi
-    \ifx\tp@do@dblfloat\relax
-      \edef\tp@b@float{\noexpand\@xdblfloat {\tp@captype}[\tp@fps]}
-      \let\tp@e@float\end@dblfloat
+      \edef\tp@b@float{\noexpand\begin{\@tp@b@float\ifx\tp@do@dblfloat\relax*\fi}}
+      \edef\tp@e@float{\noexpand\end{\@tp@b@float\ifx\tp@do@dblfloat\relax*\fi}}
     \else
-      \edef\tp@b@float{\noexpand\@xfloat {\tp@captype}[\tp@fps]}
-      \let\tp@e@float\end@float
+      \ifx\tp@do@dblfloat\relax
+        \edef\tp@b@float{\noexpand\@xdblfloat {\tp@captype}[\tp@fps]}
+        \let\tp@e@float\end@dblfloat
+      \else
+        \edef\tp@b@float{\noexpand\@xfloat {\tp@captype}[\tp@fps]}
+        \let\tp@e@float\end@float
+      \fi
     \fi
   \fi}
 
@@ -162,59 +175,76 @@
 % for the user defined property overrides. The second macro registers
 % the actual, sub-float dependent Components.
 %    \begin{macrocode}
-\def\tpMakeComp#1#2#3{%
+\def\tpMakeFltComp#1#2#3{%
   \tpProvideComp{#1}
-    {\tpBCntHack}
+    {\bgroup\ifx\tp@is@subflt\relax\else\tpSubFloatCnt=\z@\relax\fi\expandafter\global}
     {\def\@tempa{{@tp@reset@components}}%
      \edef\@tempb{%
        \noexpand\ltx@LocalExpandAfter\noexpand\global\noexpand\expandafter\noexpand\let
          \noexpand\csname tp@\noexpand\tp@namespace @#2-\the\tpSubFloatCnt\noexpand\endcsname
          \noexpand\relax}%
      \expandafter\expandafter\expandafter\csgappto\expandafter\@tempa\expandafter{\@tempb}%
-     \tpECntHack}
+     \egroup}
     {#2-\the\tpSubFloatCnt}%
   \expandafter\long\expandafter\def\csname tp@\tp@namespace @#3\endcsname{\csname tp@\tp@namespace @#2-\the\tpSubFloatCnt\endcsname}%
   \csgappto{@tp@reset@components}{\csname tp@\tp@namespace @#3\endcsname}%
 }
 
 \def\tp@set@caption@comps{%
-  \def\tpBCntHack{\bgroup\ifx\tp@is@subflt\relax\else\tpSubFloatCnt=\z@\relax\fi\expandafter\global}%
-  \def\tpECntHack{\egroup}%
-  \tpMakeComp{tpCaption}{caption-\the\tpSubFloatCnt}{Caption}%
-  \tpMakeComp{tpLegend}{legend-\the\tpSubFloatCnt}{Legend}%
-  \tpMakeComp{tpSource}{source-\the\tpSubFloatCnt}{Source}%
-  \tpMakeComp{tpNumber}{number-\the\tpSubFloatCnt}{Number}%
-  \tpMakeComp{label}{label-\the\tpSubFloatCnt}{Label}%
+  \tpMakeFltComp{tpCaption}{caption}{Caption}%
+  \tpMakeFltComp{tpLegend}{legend}{Legend}%
+  \tpMakeFltComp{tpSource}{source}{Source}%
+  \tpMakeFltComp{tpNumber}{number}{Number}%
+  \tpMakeFltComp{label}{label}{Label}%
 }
 
 %    \end{macrocode}
 % \section{Caption mechanism}
 %    \begin{macrocode}
 
+\def\tp@iterate@mp#1#2{%
+  \@tempcnta=\z@\relax
+  \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
+    \ifnum\@tempcnta>\@ne\relax\hfill\fi
+    \tp@create@mp{#1}{#2}{\csname tp@\tp@namespace @res@width-\the\@tempcnta\endcsname}%
+  }}
+
+
+%    \end{macrocode}
+% creates a minipage of a fixed width for each part of a sub figure
+%    \begin{macrocode}
+\def\tp@create@mp#1#2#3{%
+    \begin{minipage}[#2][][t]{#3}%
+      \ifx\tp@current@class\relax\else
+        \let\includegraphics\tp@includesubgraphics
+      \fi
+      #1%
+    \end{minipage}%
+}
 
 %    \end{macrocode}
 % prints the caption
 %    \begin{macrocode}
 \def\tp@make@caption#1#2{%
-  \tpIfComp{Caption}{%
+  \bgroup
+    \tpSubFloatCnt#1\relax
     \def\@argii{#2}%
+    % \ifnum\tpSubFloatCnt=\z@\hsize\tp@total@flt@width\fi
+    \tpUseProperty{caption-format}%
+    \tpUseProperty{caption-format-#2}%
     \ifx\@argii\tp@str@bottom
+      \vskip\dimexpr-\topsep-\baselineskip\relax
       \expandafter\vskip\tpUseProperty{caption-sep-bottom}%
     \fi
-    \vtop\bgroup%
-      \hsize\tp@total@flt@width
-      \leavevmode
-      \expandonce{\tpUseProperty{caption-format}}%
-      \expandonce{\tpUseProperty{caption-format-#2}}%
-      \strut\tpUseProperty{caption-#2}\strut%
-      \par\nobreak
-    \egroup
-    \ifx\@tempa\@argii
+    \leavevmode%
+    \strut\tpUseProperty{caption-#2}\strut%
+    \par\nobreak
+    \ifx\@argii\tp@str@bottom
       %% \tp@add@list{#1}% TODO
     \else
-      \expandafter\vskip\tpUseProperty{caption-sep-top}%
+      \vskip\tpUseProperty{caption-sep-top}%
     \fi
-  }{}
+  \egroup
 }
 
 %    \end{macrocode}
@@ -228,7 +258,7 @@
   \ifdim\tp@flt@marg@r>\z@\relax\advance\tp@total@flt@width-\tp@flt@marg@r\relax\fi
   \expandafter\tp@flt@marg@l\tpUseProperty{margin-left}\relax
   \ifdim\tp@flt@marg@l>\z@\relax\advance\tp@total@flt@width-\tp@flt@marg@l\relax\fi
-  \hsize\tp@total@flt@width}
+  }
 
 %    \end{macrocode}
 % High level macro to (re-)declare a new tpFloat
@@ -251,8 +281,20 @@
   \if!#1!\else
     \expandafter\def\csname tp@float@#2@parent\endcsname{#1}%
   \fi
-  \expandafter\def\csname tp@float@#2@properties\endcsname{#5}%
+  \expandafter\ifx\csname tp@float@#2@properties\endcsname\relax%
+    \expandafter\def\csname tp@float@#2@properties\endcsname{#5}%
+  \else
+    \expandafter\expandafter\expandafter\def\expandafter\expandafter\expandafter\@tempa\expandafter\expandafter\expandafter{\csname tp@float@#2@properties\endcsname}%
+    \expandafter\expandafter\expandafter\def\expandafter\csname tp@float@#2@properties\expandafter\endcsname\expandafter{\@tempa #5}%
+  \fi
   }
+%    \end{macrocode}
+% In order to account for sub-floats, we need to re-define some of the transpect-common Component conditionals:
+%    \begin{macrocode}
+\long\def\tp@flt@cond{%
+  \long\def\tpIfComp##1##2##3{\expandafter\let\expandafter\@tempa\csname tp@\tp@namespace @##1\endcsname\expandafter\expandafter\expandafter\ifx\@tempa\relax##3\else##2\fi}%
+  \long\def\tpIfCompEmpty##1##2##3{\expandafter\let\expandafter\@tempa\csname tp@\tp@namespace @##1\endcsname\expandafter\expandafter\expandafter\ifx\@tempa\relax##2\else##3\fi}%
+}
 
 %    \end{macrocode}
 % Mid-level Macro that provides the common floating {\LaTeX}
@@ -264,6 +306,7 @@
   \begingroup
     \tpNamespace{#4}%
     \tp@reset@defaults{#2}{#3}%
+    \tp@flt@cond
     \expandafter\tpCascadeProps\expandafter{#4}{float}%
     \tp@get@flt@attr{#1}{#2}%
     \tp@set@caption@comps
@@ -275,31 +318,112 @@
 \def\endtp@float{%
     \tp@set@flt@pos
     \tp@b@float
-    \tp@flt@create@labels%
-    \tp@flt@process
+    \tp@test@caption{0}{capt}{top}%
+    \tp@test@caption{0}{capt}{bottom}%
+    %\tp@flt@create@labels%
+    \tp@flt@compose
     \tp@set@bot@sep
     \tp@e@float
   \endgroup
   \global\let\tp@current@class\relax
   \spewnotes}
+%    \end{macrocode}
+% Test if the current (sub)float has any top or bottom captions that
+% needed printed
+%    \begin{macrocode}
 
-
+\def\tp@test@caption#1#2#3{%
+  \setbox\@tempboxa\hbox{\tpSubFloatCnt#1\tpUseProperty{caption-#3}}%
+  \ifdim\wd\@tempboxa>\z@
+    \expandafter\let\csname tp@has@#2@#3\endcsname\relax
+  \fi
+}
 
 %    \end{macrocode}
-% Processes the Components of the float environment.
+% Calculate the ratio between each subfloat's height and the height of the largest subfloat
+%    \begin{macrocode}
+\def\tp@flt@calc@sameheight{%
+  \@tempdima=\z@\relax
+  \@tempcnta=\z@\relax
+  \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
+    \edef\@tempa{\CalcRatio{\tp@subflt@maxheight}{\csname tp@\tp@namespace @height-\the\@tempcnta\endcsname}}%
+    \ifnum\@tempcnta>\@ne
+      \advance\tp@total@flt@width-\tp@subflt@sep\relax%
+    \fi
+    \expandafter\@tempdimc\csname tp@\tp@namespace @width-\the\@tempcnta\endcsname\relax
+    \@tempdimb=\@tempa\@tempdimc\relax
+    \expandafter\edef\csname  tp@\tp@namespace @adj@width-\the\@tempcnta\endcsname{\the\@tempdimb}%
+    \advance\@tempdima\@tempdimb
+  }%
+  \@tempcnta=\z@\relax
+  \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
+    \edef\@tempa{\CalcRatio{\csname tp@\tp@namespace @adj@width-\the\@tempcnta\endcsname}{\@tempdima}}%
+    \expandafter\edef\csname tp@\tp@namespace @res@width-\the\@tempcnta\endcsname{\dimexpr\@tempa\tp@total@flt@width\relax}%
+    \tp@test@caption{\the\@tempcnta}{subcapt}{top}%
+    \tp@test@caption{\the\@tempcnta}{subcapt}{bottom}%
+  }%
+}
+
+%    \end{macrocode}
+% Process the contents of a subfloat
+%    \begin{macrocode}
+\def\tp@flt@process@sameheight{%
+  \tp@flt@calc@sameheight
+  \hskip\tp@flt@marg@l
+  \vbox{%
+    \tpUseProperty{subfloat-block}%
+  }%
+}
+
+\def\tp@flt@process@sub{%
+  \hskip\tp@flt@marg@l
+  \tpUseProperty{subfloat-block}%
+}
+
+%    \end{macrocode}
+% Process the contents of a float environment
 %    \begin{macrocode}
 \def\tp@flt@process{%
-  \advance\leftskip\tp@flt@marg@l
-  \leavevmode
-  \expandafter\ifx\csname tp@\tp@captype @attr@sidecap\endcsname\relax
-    \tp@flt@caption{0}{top}%
-  \else
-    %% TODO: Sidecap handler
+  \bgroup
+    \ifnum\tpSubFloatCnt=\z@\relax
+      \hskip\tp@flt@marg@l%
+      \tpUseProperty{float-block}%
+    \else
+      \expandafter\tp@subflt@sep=\tpUseProperty{sub-float-sep}\relax%
+      \tpIfProp{subfloat-same-height}
+        {\tp@flt@process@sameheight}
+        {\tp@flt@process@sub}%
+    \fi
+  \egroup
+}
+
+%    \end{macrocode}
+% Composes the float.
+%    \begin{macrocode}
+\def\tp@make@full@caption#1{%
+  \hskip\tp@flt@marg@l
+  \tp@create@mp{\tp@make@caption{0}{#1}}{t}{\tp@total@flt@width}%
+}
+
+\def\tp@flt@compose{%
+  \hsize\tp@total@flt@width
+  \ifx\tp@has@capt@top\relax
+    \expandafter\ifx\csname tp@\tp@captype @attr@sidecap\endcsname\relax\relax
+      \tp@make@full@caption{top}%
+    \else
+      %% TODO: Sidecap handler: Besser nach \tp@flt@process ?
+    \fi
   \fi
-  \tpUseProperty{float-block}%
-  \expandafter\ifx\csname tp@\tp@captype @attr@sidecap\endcsname\relax
-    \tp@flt@caption{0}{bottom}%
-  \fi}
+  \ifhmode\@@par\fi
+  \tp@flt@process
+  \ifhmode\@@par\fi
+  \ifx\tp@has@capt@bottom\relax
+    \expandafter\ifx\csname tp@\tp@captype @attr@sidecap\endcsname\relax
+      \tp@make@full@caption{bottom}%
+    \fi
+  \fi
+  \ifhmode\@@par\fi
+}
 
 
 %    \end{macrocode}
@@ -307,26 +431,71 @@
 %    \begin{macrocode}
 \def\tpSubFloat{%
   \ifx\tp@is@subflt\relax
-    \PackageError{transpect-floats.sty}{Nested SubFloats detected!}{You cannot nest a tpSubFloat environment into another tpSubFloat environment!}%
+    \PackageError{transpect-floats.sty}{Nested tpSubFloats detected!}{You cannot nest a `tpSubFloat' environment into another `tpSubFloat' environment! Use the `tpSubFloatRow' and `tpSubFloatCol' environments to create more complex structures, instead.}%
   \else
     \let\tp@is@subflt\relax
     \global\advance\tpSubFloatCnt\@ne
     \ignorespaces
   \fi}
 
+\def\tp@flt@create@natural{\tpUseComp{Content}}
+
 \def\endtpSubFloat{%
-  \setbox\tp@subfltbox\hbox{\tpUseComp{Content}}%
+  \setbox\tp@subfltbox\hbox{\tp@flt@create@natural}%\tpUseComp{Content}
   \expandafter\xdef\csname tp@\tp@namespace @width-\the\tpSubFloatCnt\endcsname{\the\wd\tp@subfltbox}%
   \expandafter\xdef\csname tp@\tp@namespace @height-\the\tpSubFloatCnt\endcsname{\the\ht\tp@subfltbox}%
   \expandafter\xdef\csname tp@\tp@namespace @depth-\the\tpSubFloatCnt\endcsname{\the\dp\tp@subfltbox}%
-  \expandafter\ifdim\csname tp@\tp@namespace @height-\the\tpSubFloatCnt\endcsname>\tp@subflt@maxheight\relax
-    \expandafter\global\expandafter\tp@subflt@maxheight=\csname tp@\tp@namespace @height-\the\tpSubFloatCnt\endcsname\relax
+  \expandafter\xdef\csname tp@\tp@namespace @col-\the\tpSubFloatCnt\endcsname{\the\tp@subfloat@col}%
+  \expandafter\xdef\csname tp@\tp@namespace @row-\the\tpSubFloatCnt\endcsname{\the\tp@subfloat@row}%
+  \@tempdima=\dimexpr\the\ht\tp@subfltbox+\the\dp\tp@subfltbox\relax
+  \@tempdimb=\dimexpr\the\wd\tp@subfltbox\relax
+  \ifx\tp@subfloat@parent r\relax
+    \expandafter\expandafter\expandafter\edef\expandafter\csname tp@flt@max@row@width@\the\tp@subfloat@row\expandafter\endcsname\expandafter
+      {\dimexpr\csname tp@flt@max@row@width@\the\tp@subfloat@row\endcsname+\the\wd\tp@subfltbox\relax}%
+    \expandafter\expandafter\expandafter\ifdim\expandafter\@tempdima>\csname tp@flt@max@row@height@\the\tp@subfloat@row\endcsname\relax
+      \expandafter\edef\csname tp@flt@max@row@height@\the\tp@subfloat@row\endcsname{\the\@tempdima}%
+    \fi
+  \else
+    \ifx\tp@subfloat@parent c\relax
+      \expandafter\expandafter\expandafter\edef\expandafter\csname tp@flt@max@col@height@\the\tp@subfloat@col\expandafter\endcsname\expandafter
+        {\dimexpr\csname tp@flt@max@col@height@\the\tp@subfloat@col\endcsname+\the\ht\tp@subfltbox+\the\dp\tp@subfltbox\relax}%
+      \expandafter\expandafter\expandafter\ifdim\expandafter\@tempdimb>\csname tp@flt@max@col@width@\the\tp@subfloat@col\endcsname\relax
+        \expandafter\edef\csname tp@flt@max@col@width@\the\tp@subfloat@col\endcsname{\the\@tempdimb}%
+      \fi
+    \else
+      \ifx\tp@subfloat@parent f\relax
+        \ifdim\@tempdima>\tp@subflt@maxheight\relax
+          \global\tp@subflt@maxheight=\@tempdima\relax
+        \fi
+      \fi
+    \fi
   \fi
   \ignorespaces
-  \setbox\tp@subfltbox\box\@voidbox
+  \setbox\tp@subfltbox\box\voidb@x
   \let\tp@is@subflt\@undefined
 }
 
+
+\def\tpSubFloatRow{%
+  \advance\tp@subfloat@row\@ne
+  \let\tp@subfloat@prev@parent\tp@subfloat@parent
+  \let\tp@subfloat@parent=r\relax
+  \expandafter\def\csname tp@flt@max@row@height@\the\tp@subfloat@row\endcsname{\z@}%
+  \expandafter\def\csname tp@flt@max@row@width@\the\tp@subfloat@row\endcsname{\z@}%
+}
+\def\endtpSubFloatRow{%
+  \let\tp@subfloat@parent\tp@subfloat@prev@parent
+}
+
+\def\tpSubFloatCol{%
+  \advance\tp@subfloat@col\@ne
+  \let\tp@subfloat@prev@parent\tp@subfloat@parent
+  \let\tp@subfloat@parent=c\relax
+  \expandafter\let\csname tp@flt@max@col@width@\the\tp@subfloat@col\endcsname=\z@\relax
+}
+\def\endtpSubFloatCol{%
+  \let\tp@subfloat@parent\tp@subfloat@prev@parent
+}
 
 
 %    \end{macrocode}
@@ -334,8 +503,27 @@
 %
 %    \begin{macrocode}
 
-\def\tpFigureHandler{\tpMakeComp{tpFig}{figure-\the\tpSubFloatCnt}{Content}}
 
+\def\tpFigureHandler{\tpMakeFltComp{tpFig}{figure}{Content}}
+
+\def\tpFigureFloat{%
+  \ifx\tp@current@class\relax\else
+    \let\includegraphics\tp@includesubgraphics
+  \fi
+  \tp@create@mp{\csname tp@\tp@namespace @figure-0\endcsname\nobreak}{t}{\the\tp@total@flt@width}%
+}
+
+\def\tpFigureSubFloat{%
+  \ifx\tp@has@subcapt@top\relax
+    \tp@iterate@mp{\tp@make@caption{\the\@tempcnta}{top}}{\tpUseProperty{caption-valign-top}}%
+    \par\nobreak
+  \fi%
+  \tp@iterate@mp{\csname tp@\tp@namespace @figure-\the\@tempcnta\endcsname}{t}%
+  \ifx\tp@has@subcapt@bottom\relax
+    \par\nobreak
+    \tp@iterate@mp{\tp@make@caption{\the\@tempcnta}{bottom}}{\tpUseProperty{caption-valign-bottom}}%%
+  \fi
+}
 
 \def\tp@includesubgraphics{\@ifnextchar [\@tp@includesubgraphics{\@tp@includesubgraphics[]}}%]
 \def\@tp@includesubgraphics[#1]#2{%
@@ -355,7 +543,7 @@
 %    \begin{macrocode}
 
 \def\tp@reserve@tabular{%
-  \@tp@reserve@tab{}%
+  %\@tp@reserve@tab{}% TODO: tabularx(und y) nutzen tabular, es kann also nicht (pauschal) überdefiniert werden…
   \@tp@reserve@tab{x}%
   \@tp@reserve@tab{y}%
 }
@@ -363,24 +551,25 @@
 \def\@tp@reserve@tab#1{%
   \expandafter\expandafter\expandafter\let\expandafter\csname orig@tabular#1\expandafter\endcsname\csname tabular#1\endcsname
   \expandafter\expandafter\expandafter\let\expandafter\csname orig@endtabular#1\expandafter\endcsname\csname endtabular#1\endcsname
-  \expandafter\def\csname tabular#1\endcsname{\setbox\tp@floatbox\vbox\bgroup\csname orig@tabular#1\endcsname}%
+  \expandafter\def\csname tabular#1\endcsname{\global\setbox\tp@floatbox\vbox\bgroup\csname orig@tabular#1\endcsname}%
   \expandafter\def\csname endtabular#1\endcsname{\csname orig@endtabular#1\endcsname\egroup}%
 }
 
 \def\tpTableHandler{%
-  \tpMakeComp{tpContent}{content-\the\tpSubFloatCnt}{Content}%
+  \tpMakeFltComp{tpContent}{content}{Content}%
+  \tp@reserve@tabular
   \ifx\tp@uses@htmltabs\relax
     \global\setbox\htTableBox\box\voidb@x
     \let\htOutputTable\relax
-  \else
-    \tp@reserve@tabular
   \fi}
 
 \def\tpTableFloat{%
   \ifx\htTableBox\@undefined
     \tpContent{\unvbox\tp@floatbox}%
   \else
-    \ifvoid\htTableBox\else
+    \ifvoid\htTableBox
+      \tpContent{\unvbox\tp@floatbox}%
+    \else
       \tpContent{\box\htTableBox}%
     \fi
   \fi
@@ -398,7 +587,7 @@
 
 \def\tpGenericFloat{\tpUseComp{Content}}
 
-\def\tpGenericHandler{\tpMakeComp{tpContent}{content-\the\tpSubFloatCnt}{Content}}
+\def\tpGenericHandler{\tpMakeFltComp{tpContent}{content}{Content}}
 
 
 %    \end{macrocode}
@@ -416,12 +605,7 @@
   \tpSetProperty{caption-source-font}{}
   \tpSetProperty{caption-legend-sep}{}
   \tpSetProperty{caption-legend-font}{}
-  \tpSetProperty{caption-format}{}
-  \tpSetProperty{caption-format-bottom}{}
-  \tpSetProperty{caption-format-top}{}
   \tpSetProperty{caption-font}{}
-  \tpSetProperty{caption-order-top}{}
-  \tpSetProperty{caption-order-bottom}{}
   % new and/or still used:
   \tpSetProperty{caption-valign-top}{t}%% vertical alignment of top sub-captions
   \tpSetProperty{caption-valign-bottom}{t}%% vertical alignment of bottom sub-captions
@@ -437,6 +621,8 @@
   \tpSetProperty{before-float}{\parindent\z@}%% executed before content is evaluated
   \tpSetProperty{content-handler}{\tpGenericHandler}% Alias for the caption type specific content handler
   \tpSetProperty{float-block}{\tpGenericFloat}% Alias for the caption type specific content printer
+  \tpSetProperty{subfloat-block}{\tpGenericFloat}% Alias for the caption type specific content printer for sub-floats
+  \tpSetProperty{subfloat-same-height}{}% if true, the subfloat must/can be adjusted to the same heights
   \tpSetProperty{caption-format}{}% style applied to top and bottom captions
   \tpSetProperty{caption-top}{%
     \tpIfComp{Number}{\tpUseComp{Number}\tpUseProperty{label-sep}}{}%
@@ -452,8 +638,10 @@
 }
 
 \tpDeclareFloat{tpFigure}{figure}{lof}{%
+  \tpSetProperty{subfloat-same-height}{true}% if true, the subfloat must/can be adjusted to the same heights
   \tpSetProperty{content-handler}{\tpFigureHandler}%
   \tpSetProperty{float-block}{\tpFigureFloat}
+  \tpSetProperty{subfloat-block}{\tpFigureSubFloat}
 }
 
 \tpDeclareFloat{tpTable}{table}{lot}{%
@@ -461,6 +649,7 @@
   % new and/or still used
   \tpSetProperty{content-handler}{\tpTableHandler}
   \tpSetProperty{float-block}{\tpTableFloat}
+  \tpSetProperty{subfloat-block}{\tpTableFloat}
 }
 
  % %    \end{macrocode}
@@ -566,63 +755,7 @@
  %   \global\let\tp@current@class\relax
  %   \spewnotes}
 
-\def\tpFigureFloat{%
-  % \tp@total@flt@width=\hsize\relax
-  % \expandafter\@tempdima\tpUseProperty{right-skip}\relax
-  % \ifdim\@tempdima>\z@\relax\advance\tp@total@flt@width-\@tempdima\relax\fi
-  % \expandafter\@tempdima\tpUseProperty{left-skip}\relax
-  % \ifdim\@tempdima>\z@\relax\advance\tp@total@flt@width-\@tempdima\relax\fi
-  % \hskip\@tempdima
-  \vtop{%
-    % \hsize\tp@total@flt@width
-    % \expandafter\ifx\csname tp@\tp@namespace @caption-0\endcsname\relax\else
-    %   \tp@make@caption{0}{top}%
-    % \fi
-    \bgroup
-      \expandafter\tp@subflt@sep=\tpUseProperty{sub-float-sep}\relax%
-      \@tempdima=\z@\relax
-      \ifnum\tpSubFloatCnt=\z@\relax
-        \ifx\tp@current@class\relax\else
-          \let\includegraphics\tp@includesubgraphics
-        \fi
-        \tpSubFloatCnt\@ne
-        \expandafter\def\csname tp@\tp@namespace @res@width-1\endcsname{\tp@total@flt@width}%
-        \tp@create@mp{\csname tp@\tp@namespace @figure-0\endcsname\nobreak}{t}%
-        \tpSubFloatCnt\z@
-      \else
-%    \end{macrocode}
-% 2nd iteration: calculate the ratio between each subfigure's height and the height of the largest subfigure
-%    \begin{macrocode}
-        \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
-          \edef\@tempa{\CalcRatio{\tp@subflt@maxheight}{\csname tp@\tp@namespace @height-\the\@tempcnta\endcsname}}%
-          \ifnum\@tempcnta>\@ne
-            \advance\tp@total@flt@width-\tp@subflt@sep\relax%
-          \fi
-          \expandafter\@tempdimc\csname tp@\tp@namespace @width-\the\@tempcnta\endcsname\relax
-          \@tempdimb=\@tempa\@tempdimc\relax
-          \expandafter\edef\csname  tp@\tp@namespace @adj@width-\the\@tempcnta\endcsname{\the\@tempdimb}%
-          \advance\@tempdima\@tempdimb
-        }% /tp@iterate
-        \@tempcnta\z@
-%    \end{macrocode}
-% 3rd iteration: Calculate width ratio of all adjusted subfigures against total width of all figures plus separators and print:
-%    \begin{macrocode}
-        \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
-          \edef\@tempa{\CalcRatio{\csname tp@\tp@namespace @adj@width-\the\@tempcnta\endcsname}{\@tempdima}}%
-          \expandafter\edef\csname tp@\tp@namespace @res@width-\the\@tempcnta\endcsname{\dimexpr\@tempa\tp@total@flt@width\relax}%
-          \expandafter\ifx\csname tp@\tp@namespace @caption-\the\@tempcnta\endcsname\relax\else\let\tp@has@subcapt\relax\fi
-        }%
-        \ifx\tp@has@subcapt\relax\tp@create@mp{\tp@make@caption{\the\@tempcnta}{top}}{\tpUseProperty{caption-valign-top}}\par\fi%
-        \tp@create@mp{\csname tp@\tp@namespace @figure-\the\@tempcnta\endcsname}{t}%
-        \ifx\tp@has@subcapt\relax \par\tp@create@mp{\tp@make@caption{\the\@tempcnta}{bottom}}{\tpUseProperty{caption-valign-bottom}}\par\fi%
-        \par
-      \fi
-    \egroup
-    % \expandafter\ifx\csname tp@\tp@namespace @caption-0\endcsname\relax\else
-    %   \tp@make@caption{0}{bottom}%
-    % \fi
-  }% /vbox
-}
+
 
 
 
@@ -666,74 +799,6 @@
     \expandafter\ltx@label\expandafter{\tp@lo@ref}%
   \fi}
 
-%    \end{macrocode}
-% creates a minipage of a fixed width for each part of a sub figure
-%    \begin{macrocode}
-\def\tp@create@mp#1#2{%
-  \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
-    \ifnum\@tempcnta>\@ne\relax\hfill\fi
-    \begin{minipage}[#2][][b]{\the\csname tp@\tp@namespace @res@width-\the\@tempcnta\endcsname}%
-      \ifx\tp@current@class\relax\else
-        \let\includegraphics\tp@includesubgraphics
-      \fi
-      #1
-    \end{minipage}%
-  }}
-
-%    \end{macrocode}
-% Mechanism to determine the correct order of caption constituents
-%    \begin{macrocode}
-\def\tp@flt@use@label#1{%
-  \tpIfComp{number-#1}{%
-    \bgroup
-      \expandonce{\tpUseProperty{caption-label-font}}%
-      \tpUseComp{number-#1}%
-    \egroup
-    \tpUseProperty{caption-label-sep}%
-  }{}}
-\def\tp@flt@use@legend#1{%
-  \tpIfComp{legend-#1}{%
-    \tpUseProperty{caption-legend-sep}%
-    \bgroup
-      \expandonce{\tpUseProperty{caption-legend-font}}%
-      \expandonce{\tpUseComp{legend-#1}}%
-    \egroup
-  }{}}
-\def\tp@flt@use@source#1{%
-  \tpIfComp{source-#1}{%
-    \tpUseProperty{caption-source-sep}%
-    \bgroup
-      \expandonce{\tpUseProperty{caption-source-font}}%
-      \expandonce{\tpUseComp{source-#1}}%
-    \egroup
-  }{}}
-
-\def\tp@flt@use@caption#1{%
-  \tpIfComp{caption-#1}{%
-    \bgroup
-      \expandonce{\tpUseProperty{caption-font}}%
-      \expandonce{\tpUseComp{caption-#1}}%
-    \egroup}{}}
-
-%    \end{macrocode}
-% split comma separated list of constituents given by
-% \lstinline{\tpCaptionOrderTop} and
-% \lstinline{\tpCaptionOrderBottom}, respectively
-%    \begin{macrocode}
-\def\tp@traverse@cap@order #1,#2,\@nil#3{%
-  \if!#1!\else
-    \expandafter\ifx\csname tp@flt@use@#1\endcsname\relax\else%
-      \csname tp@flt@use@#1\endcsname{#3}%
-    \fi
-    \if!#2!\else
-      \tp@traverse@cap@order#2,\@nil{#3}%
-    \fi
-  \fi
-}
-\def\tp@caption@order#1#2{%
-  \edef\@tp@cap@odr{\tpUseProperty{caption-order-#2}}%
-  \expandafter\tp@traverse@cap@order\@tp@cap@odr,,\@nil{#1}%
-}
 %    \end{macrocode}
 % Resetting caption parameters
 %    \begin{macrocode}
