@@ -374,16 +374,22 @@
     \fi}}
 \tp@restore@init{tp-heading-toc-number-maxwd}
 \tp@restore@init{tp-heading-number-maxwd}
-
-
 %    \end{macrocode}
 % Facility to render inline headings
+%
+% In rare cases, it may occur that an element after a paragraph that
+% is preceeded by an inline heading, and which contains something that
+% fills the temporary \lstinline{\@tempboxa} (like
+% \lstinline{\@hangfrom}), looses the contents of that latter
+% \lstinline{\@tempboxa}. Therefore, we use our own temporary box,
+% just to be safe.
 %    \begin{macrocode}
+\newbox\tp@inline@heading@box
 \def\tp@inline@heading{%
   \tpIfProp{after-indent}{\global\@afterindenttrue}{\global\@afterindentfalse}%
   \tpIfProp{interline-para}
-    {\global\setbox\@tempboxa\hbox{\@svsec}}
-    {\global\setbox\@tempboxa\hbox{\ifvoid\@tempboxa\else\unhbox\@tempboxa\tpUseProperty{interline-para-sep}\fi\@svsec}}%
+    {\global\setbox\tp@inline@heading@box\hbox{\@svsec}}
+    {\global\setbox\tp@inline@heading@box\hbox{\ifvoid\tp@inline@heading@box\else\unhbox\tp@inline@heading@box\tpUseProperty{interline-para-sep}\fi\@svsec}}%
   \@nobreakfalse
   \global\@noskipsectrue
   \gdef\next{%
@@ -392,12 +398,12 @@
         \global\@noskipsecfalse
         {\setbox\z@\lastbox}%
         \clubpenalty\@M
-        \begingroup \unhbox\@tempboxa \endgroup
+        \begingroup \unhbox\tp@inline@heading@box \endgroup
         \unskip
         \hskip -\@tempskipa
       \else
         \clubpenalty \@clubpenalty
-        \global\setbox\@tempboxa\box\voidb@x
+        \global\setbox\tp@inline@heading@box\box\voidb@x
         \everypar{}%
       \fi}%
     \ignorespaces}}
