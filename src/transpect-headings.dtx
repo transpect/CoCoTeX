@@ -89,16 +89,6 @@
     \aftergroup\next%
   }}
 
-\def\tp@prop@dimen#1#2{%
-  \tpIfProp{#1}
-    {\tpIfPropVal{#1}{auto-global}
-      {\tpSetProperty{#1}{#2}}
-      {\tpIfPropVal{#1}{auto}
-        {\tpSetProperty{#1}{#2}}
-        {}}}
-    {\tpSetProperty{#1}{#2}}%
-}
-
 %    \end{macrocode}
 % Initialite the counters for automatic numbering if they don't exist, yet.
 %    \begin{macrocode}
@@ -141,7 +131,9 @@
   \fi
   \global\let\label\ltx@label}
 %    \end{macrocode}
-% This macro prepares the Fields used to compose the running
+%
+% \subsection{Table of Contents}
+% This macro prepares the Components used to compose the running
 % titles. It checks if the user provides running heading specific
 % overrides in the \lstinline{heading} environment. If not, it uses
 % the non-specific data fields instead, as long as they are not empty.
@@ -235,7 +227,9 @@
     \tpUseProperty{toc-after-entry}%
   \egroup}
 %    \end{macrocode}
-% Macro to process toc heading numbers. \#1 is the heading level
+% \subsection{Macro to determine indentation}
+%
+% Macro to process heading numbers. \#1 is the heading level
 %    \begin{macrocode}
 \def\tp@set@hang#1{%
   \tpSetProperty{#1hang-number}{\tpUseProperty{#1formatted-number}}
@@ -249,22 +243,7 @@
             \tpIfPropVal{#1number-align}{right}{}{\hss}}}%
       \fi}{}}
 %    \end{macrocode}
-% This low-level macro takes the csname of an unprefixed dimension and
-% stores its value in the aux files iff the previous value of that
-% conrol structure is lower than the current value.
-%    \begin{macrocode}
-\def\tp@store@maxwd#1#2{%
-  \expandafter\ifx\csname tp-\tp@namespace-#1\endcsname\relax
-    \immediate\write\@auxout{\string\expandafter\string\gdef\string\csname\space tp-\tp@namespace-#1\string\endcsname{#2}}
-    \expandafter\xdef\csname tp-\tp@namespace-#1\endcsname{#2}%
-  \else
-    \expandafter\ifdim\csname tp-\tp@namespace-#1\endcsname<#2\relax
-      \immediate\write\@auxout{\string\expandafter\string\gdef\string\csname\space tp-\tp@namespace-#1\string\endcsname{#2}}%
-      \expandafter\xdef\csname tp-\tp@namespace-#1\endcsname{#2}%
-    \fi
-  \fi}
-%    \end{macrocode}
-% Macro to determine indentation. \#1 is the property prefix, \#2 is the heading level.
+% \#1 is the property prefix, \#2 is the heading level.
 %    \begin{macrocode}
 \def\tp@det@prev@indent#1#2{%
   \@tempcnta\numexpr#2-1\relax
@@ -281,7 +260,23 @@
   \tp@store@maxwd{#1#2-indent}{\the\@tempdima}%
   \tpSetProperty{#1margin-left}{\csname tp-\tp@namespace-#1#2-indent\endcsname}}
 %    \end{macrocode}
-% Macro to determine indentation. \#1 is the property prefix, \#2 is the heading level.
+% This low-level macro takes the csname of an unprefixed dimension and
+% stores its value in the aux files iff the previous value of that
+% conrol structure is lower than the current value.
+%    \begin{macrocode}
+\def\tp@store@maxwd#1#2{%
+  \expandafter\ifx\csname tp-\tp@namespace-#1\endcsname\relax
+    \immediate\write\@auxout{\string\expandafter\string\gdef\string\csname\space tp-\tp@namespace-#1\string\endcsname{#2}}
+    \expandafter\xdef\csname tp-\tp@namespace-#1\endcsname{#2}%
+  \else
+    \expandafter\ifdim\csname tp-\tp@namespace-#1\endcsname<#2\relax
+      \immediate\write\@auxout{\string\expandafter\string\gdef\string\csname\space tp-\tp@namespace-#1\string\endcsname{#2}}%
+      \expandafter\xdef\csname tp-\tp@namespace-#1\endcsname{#2}%
+    \fi
+  \fi}
+%    \end{macrocode}
+% Eventually, write the actually used values for margin-left and
+% indent into the headings's Property list.
 %    \begin{macrocode}
 \def\tp@get@indent#1#2{%
   \expandafter\let\expandafter\tp@tmp@numwd\csname tp-\tp@namespace-#1number-#2-maxwd\endcsname\relax
@@ -309,7 +304,10 @@
                {\tpSetProperty{#1indent}{\z@}%
                 \tpSetProperty{#1margin-left}{\z@}}}}}}}
 %    \end{macrocode}
-% Facility to create the running title macros
+%
+%\subsection{Facility to create the running title macros}
+%
+%
 %    \begin{macrocode}
 \def\tp@make@run{%
   \tpIfComp{RunTitle}{}{\tpIfComp{Title}{\let\tp@heading@RunTitle\tp@heading@Title}{}}%
@@ -327,7 +325,7 @@
     \expandafter\tp@mark@name\expandafter{\@tempa}%
   \fi}
 %    \end{macrocode}
-% This macro creates the pdf bookmarks
+% \subsection{Facility to create PDF bookmarks}
 %    \begin{macrocode}
 \def\tp@make@bookmarks{%
   \protected@edef\@tempa{\expandafter\@empty\csname tp@heading@bookmark\endcsname}%
@@ -357,9 +355,6 @@
   \tpSetValProp{#1number-width}{\the\wd\z@}%
   \tp@get@indent{#1}{#3}%
   \tp@set@hang{#1}%
-  % \tp@prop@dimen{#1margin-left}{\z@}%
-  % \tp@prop@dimen{#1margin-right}{\@flushglue}%
-  % \tp@prop@dimen{#1indent}{\z@}%
 }
 %    \end{macrocode}
 % This macro looks if \#1 has already been defined (e.g., in an
@@ -375,14 +370,12 @@
 \tp@restore@init{tp-heading-toc-number-maxwd}
 \tp@restore@init{tp-heading-number-maxwd}
 %    \end{macrocode}
-% Facility to render inline headings
 %
-% In rare cases, it may occur that an element after a paragraph that
-% is preceeded by an inline heading, and which contains something that
-% fills the temporary \lstinline{\@tempboxa} (like
-% \lstinline{\@hangfrom}), looses the contents of that latter
-% \lstinline{\@tempboxa}. Therefore, we use our own temporary box,
-% just to be safe.
+%\subsection{Facility to render inline headings}
+%
+%
+% Inline headings are stored in a temporary box and expanded after the
+% next (non-heading) paragraph is opened.
 %    \begin{macrocode}
 \newbox\tp@inline@heading@box
 \def\tp@inline@heading{%
@@ -408,7 +401,10 @@
       \fi}%
     \ignorespaces}}
 %    \end{macrocode}
-% Facility to render block-type headings
+%
+%\subsection{Facility to render block-type headings}
+%
+%
 %    \begin{macrocode}
 \def\tp@block@heading{%
   \@svsec
