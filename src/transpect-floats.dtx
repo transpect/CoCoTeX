@@ -162,7 +162,7 @@
 \def\tp@set@bot@sep{%
   \expandafter\ifx\csname tp@\tp@captype @attr@orientation\endcsname\tp@str@landscape\else
     \ifx\tp@fps\@empty
-      \expandafter\vskip\tpUseProperty{intext-skip-bottom}%
+      \expandafter\addvspace\expandafter{\tpUseProperty{intext-skip-bottom}}%
     \else
       \expandafter\addvspace\expandafter{\tpUseProperty{float-skip-bottom}}%
     \fi
@@ -240,7 +240,6 @@
     \strut\tpUseProperty{caption-#2}\strut%
     \par\nobreak
     \ifx\@argii\tp@str@bottom
-      %% \tp@add@list{#1}% TODO
     \else
       \vskip\tpUseProperty{caption-sep-top}%
     \fi
@@ -286,14 +285,46 @@
   \else
     \expandafter\expandafter\expandafter\def\expandafter\expandafter\expandafter\@tempa\expandafter\expandafter\expandafter{\csname tp@float@#2@properties\endcsname}%
     \expandafter\expandafter\expandafter\def\expandafter\csname tp@float@#2@properties\expandafter\endcsname\expandafter{\@tempa #5}%
-  \fi
-  }
+  \fi}
 %    \end{macrocode}
 % In order to account for sub-floats, we need to re-define some of the transpect-common Component conditionals:
 %    \begin{macrocode}
 \long\def\tp@flt@cond{%
   \long\def\tpIfComp##1##2##3{\expandafter\let\expandafter\@tempa\csname tp@\tp@namespace @##1\endcsname\expandafter\expandafter\expandafter\ifx\@tempa\relax##3\else##2\fi}%
   \long\def\tpIfCompEmpty##1##2##3{\expandafter\let\expandafter\@tempa\csname tp@\tp@namespace @##1\endcsname\expandafter\expandafter\expandafter\ifx\@tempa\relax##2\else##3\fi}%
+}
+%    \end{macrocode}
+% Faculity to create auto-numbered counters
+%    \begin{macrocode}
+\def\tp@flt@create@counters{%
+  \expandafter\ifx\csname tp@\tp@captype @attr@nonumber\endcsname\relax
+    \tpIfPropVal{numbering}{auto}{%
+      \tpIfComp{number-0}
+        {}%
+        {\expandafter\global\expandafter\advance\csname c@\tp@captype\endcsname\@ne\relax
+         \tp@set@label{0}}%
+      \ifnum\tpSubFloatCnt=\z@\relax\else
+        \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
+          \tpIfComp{number-\the\@tempcnta}
+            {}%
+            {%
+             \expandafter\ifx\csname tp@\tp@captype @attr@subfloat\endcsname\relax
+               \expandafter\global\expandafter\advance\csname c@\tp@captype\endcsname\@ne\relax
+               \tp@set@label{\the\@tempcnta}%
+             \else
+               \tp@set@sublabel{\the\@tempcnta}%
+             \fi
+            }}%
+      \fi}{}%
+  \fi}
+
+\def\tp@set@label#1{%
+  \expandafter\expandafter\expandafter\edef\expandafter\csname tp@\tp@namespace @number-#1\expandafter\endcsname\expandafter{\csname the\tp@captype\endcsname}%
+}
+\def\tp@set@sublabel#1{%
+  \tpSetValProp{float-number}{\csname tp@\tp@namespace @number-0\endcsname}%
+  \tpSetValProp{sub-number}{\expandonce{\tpUseProperty{sub-number-format}}\relax\csname @\tpUseProperty{sub-number-style}\endcsname{#1}}%
+  \expandafter\expandafter\expandafter\edef\expandafter\csname tp@\tp@namespace @number-#1\expandafter\endcsname\expandafter{\tpUseProperty{sub-number-block}}%
 }
 
 %    \end{macrocode}
@@ -320,7 +351,7 @@
     \tp@b@float
     \tp@test@caption{0}{capt}{top}%
     \tp@test@caption{0}{capt}{bottom}%
-    %\tp@flt@create@labels%
+    \tp@flt@create@counters%
     \tp@flt@compose
     \tp@set@bot@sep
     \tp@e@float
@@ -333,11 +364,11 @@
 %    \begin{macrocode}
 
 \def\tp@test@caption#1#2#3{%
-  \setbox\@tempboxa\hbox{\tpSubFloatCnt#1\tpUseProperty{caption-#3}}%
-  \ifdim\wd\@tempboxa>\z@
+  \setbox\tp@tempboxa\hbox{\tpSubFloatCnt#1\tpUseProperty{caption-#3}}%
+  \setbox\tp@tempboxb\hbox{\tpSubFloatCnt\m@ne\tpUseProperty{caption-#3}}%
+  \ifdim\wd\tp@tempboxa>\wd\tp@tempboxb\relax
     \expandafter\let\csname tp@has@#2@#3\endcsname\relax
-  \fi
-}
+  \fi}
 
 %    \end{macrocode}
 % Calculate the ratio between each subfloat's height and the height of the largest subfloat
@@ -394,6 +425,7 @@
         {\tp@flt@process@sameheight}
         {\tp@flt@process@sub}%
     \fi
+    \tp@add@list% TODO
   \egroup
 }
 
@@ -422,8 +454,8 @@
       \tp@make@full@caption{bottom}%
     \fi
   \fi
-  \ifhmode\@@par\fi
-}
+  \tp@make@anchors%
+  \ifhmode\@@par\fi}
 
 
 %    \end{macrocode}
@@ -515,13 +547,13 @@
 
 \def\tpFigureSubFloat{%
   \ifx\tp@has@subcapt@top\relax
-    \tp@iterate@mp{\tp@make@caption{\the\@tempcnta}{top}}{\tpUseProperty{caption-valign-top}}%
+    \tp@iterate@mp{\tp@make@caption{\the\@tempcnta}{top}}{\tpUseProperty{sub-caption-valign-top}}%
     \par\nobreak
   \fi%
   \tp@iterate@mp{\csname tp@\tp@namespace @figure-\the\@tempcnta\endcsname}{t}%
   \ifx\tp@has@subcapt@bottom\relax
     \par\nobreak
-    \tp@iterate@mp{\tp@make@caption{\the\@tempcnta}{bottom}}{\tpUseProperty{caption-valign-bottom}}%%
+    \tp@iterate@mp{\tp@make@caption{\the\@tempcnta}{bottom}}{\tpUseProperty{sub-caption-valign-bottom}}%%
   \fi
 }
 
@@ -598,17 +630,6 @@
 % properties of the respective environments.
 %    \begin{macrocode}
 \tpAddToDefault{float}{%
-  %% Deprecated:
-  \tpSetProperty{caption-label-sep}{}
-  \tpSetProperty{caption-label-font}{}
-  \tpSetProperty{caption-source-sep}{}
-  \tpSetProperty{caption-source-font}{}
-  \tpSetProperty{caption-legend-sep}{}
-  \tpSetProperty{caption-legend-font}{}
-  \tpSetProperty{caption-font}{}
-  % new and/or still used:
-  \tpSetProperty{caption-valign-top}{t}%% vertical alignment of top sub-captions
-  \tpSetProperty{caption-valign-bottom}{t}%% vertical alignment of bottom sub-captions
   \tpSetProperty{intext-skip-top}{\z@}%% non-float sep top
   \tpSetProperty{intext-skip-bottom}{\z@}%% non-float sep bottom
   \tpSetProperty{float-skip-top}{\z@}%% float sep top
@@ -617,24 +638,34 @@
   \tpSetProperty{margin-left}{\z@}%% left margin
   \tpSetProperty{margin-right}{\z@}%% right margin
   \tpSetProperty{numbering}{auto}%% automatic numbering for missing Number component
-  \tpSetProperty{label-sep}{\enskip}% Separator between label and caption
+  \tpSetProperty{number-sep}{\enskip}% Separator between label and caption
   \tpSetProperty{before-float}{\parindent\z@}%% executed before content is evaluated
   \tpSetProperty{content-handler}{\tpGenericHandler}% Alias for the caption type specific content handler
   \tpSetProperty{float-block}{\tpGenericFloat}% Alias for the caption type specific content printer
+  \tpSetProperty{number-format}{\bfseries}% Format of number, additional to caption-format
+  \tpSetProperty{source-format}{}% Format of source, additional to caption-format
+  \tpSetProperty{legend-format}{}% Format of legend, additional to caption-format
   \tpSetProperty{subfloat-block}{\tpGenericFloat}% Alias for the caption type specific content printer for sub-floats
   \tpSetProperty{subfloat-same-height}{}% if true, the subfloat must/can be adjusted to the same heights
-  \tpSetProperty{caption-format}{}% style applied to top and bottom captions
   \tpSetProperty{caption-top}{%
-    \tpIfComp{Number}{\tpUseComp{Number}\tpUseProperty{label-sep}}{}%
+    \tpIfComp{Number}{\tpUseComp{Number}\tpUseProperty{number-sep}}{}%
     \tpUseComp{Caption}%
   }%
-  \tpSetProperty{caption-format-top}{}%% style applied to top captions
-  \tpSetProperty{caption-sep-top}{\z@}%% vertical space between top caption and content
   \tpSetProperty{caption-bottom}{\tpUseComp{Legend}\\\tpUseComp{Source}}%
+  \tpSetProperty{caption-format}{}% style applied to top and bottom captions
+  \tpSetProperty{caption-format-top}{}%% style applied to top captions
   \tpSetProperty{caption-format-bottom}{}%% style applied to bottom captions
+  \tpSetProperty{caption-sep-top}{\z@}%% vertical space between top caption and content
   \tpSetProperty{caption-sep-bottom}{\z@}%% vertical space between content and bottom caption
-  \tpSetProperty{sub-caption-top}{}%
-  \tpSetProperty{sub-caption-bottom}{}%
+  \tpSetProperty{sub-caption-top}{}% in case, sub-float captions diverge from main caption TODO
+  \tpSetProperty{sub-caption-bottom}{}% in case, sub-float captions diverge from main caption TODO
+  \tpSetProperty{sub-caption-valign-top}{t}%% vertical alignment of top sub-captions
+  \tpSetProperty{sub-caption-valign-bottom}{t}%% vertical alignment of bottom sub-captions
+  \tpSetProperty{sub-number-sep}{\,}%% when sub-captions, this is placed between the float counter and the sub-float counter
+  \tpSetProperty{sub-number-style}{alph}%% counting style of subcaption counters
+  \tpSetProperty{sub-number-format}{\bfseries}%% format of subcaption counters
+  \tpSetProperty{sub-number-block}{\tpUseProperty{float-number}\tpUseProperty{sub-number-sep}\tpUseProperty{sub-number})}%% Format of sub numbers
+  \tpSetProperty{list-of-block}{\tpUseComp{Caption}}% list-of-float appearance
 }
 
 \tpDeclareFloat{tpFigure}{figure}{lof}{%
@@ -645,8 +676,7 @@
 }
 
 \tpDeclareFloat{tpTable}{table}{lot}{%
-  \tpSetProperty{caption-valign-top}{b}
-  % new and/or still used
+  \tpSetProperty{sub-caption-valign-top}{b}
   \tpSetProperty{content-handler}{\tpTableHandler}
   \tpSetProperty{float-block}{\tpTableFloat}
   \tpSetProperty{subfloat-block}{\tpTableFloat}
@@ -758,69 +788,40 @@
 
 
 
-
-%    \end{macrocode}
-% This mid-level command is used to override the content which is
-% written into the \lstinline{listof*} list.
-%    \begin{macrocode}
-\def\tpListEntry{\tp@lo@cpt\space\tp@lo@src}
 %    \end{macrocode}
 % This macro adds the entry for the float to the corresponding list.
 %    \begin{macrocode}
-\def\tp@add@list#1{%
-  \expandafter\expandafter\expandafter\def\expandafter\expandafter\expandafter\tp@lo@cpt\expandafter\expandafter\expandafter{\csname tp@\tp@namespace @caption-#1\endcsname}%
-  \expandafter\expandafter\expandafter\def\expandafter\expandafter\expandafter\tp@lo@src\expandafter\expandafter\expandafter{\csname tp@\tp@namespace @source-#1\endcsname}%
-  \expandafter\expandafter\expandafter\def\expandafter\expandafter\expandafter\tp@lo@lbl\expandafter\expandafter\expandafter{\csname tp@\tp@namespace @number-#1\endcsname}%
-  \expandafter\expandafter\expandafter\def\expandafter\expandafter\expandafter\tp@lo@ref\expandafter\expandafter\expandafter{\csname tp@\tp@namespace @label-#1\endcsname}%
-  \expandafter\ifx\tp@lo@src\relax\def\tp@lo@src{}\fi
-  \expandafter\ifx\tp@lo@cpt\relax\else
-    \expandafter\ifx\tp@lo@lbl\relax
-      \addcontentsline{\tp@caplisttype}{\tp@captype}{\tpListEntry}%
-    \else
-      \tp@make@anchor%
-      \addcontentsline{\tp@caplisttype}{\tp@captype}{\string\numberline{\tp@lo@lbl}\tpListEntry}%
-    \fi
-    %\tp@reset@components{#1}%
-  \fi}
+\def\tp@add@list{%
+  %\edef\@tempa{\noexpand\numberline{\tpUseComp{Number}}\tpUseComp{list-of-block}}%
+  %\message{\meaning\@tempa}\STOPP
+ %  \addcontentsline{\tp@caplisttype}{\tp@captype}{\@tempa}%
+}
 %    \end{macrocode}
 % This is a rundimentary implementation of hyperref's anchor mechanism
 % to make labels work:
 %    \begin{macrocode}
-\def\tp@make@anchor{%
-  \expandafter\ifx\tp@lo@ref\relax\else
-    \let\@currentlabel\tp@lo@lbl
-    \expandafter\H@refstepcounter\expandafter{\tp@captype}%
-    \expandafter\hyper@makecurrent\expandafter{\tp@captype}%
-    \let\Hy@tempa\Hy@float@caption
-    \expandafter\hyper@@anchor\expandafter{%
-      \@currentHref
-    }{\relax}%
-    \let\@currentlabel\tp@lo@lbl
-    \expandafter\ltx@label\expandafter{\tp@lo@ref}%
-  \fi}
+\def\tp@make@anchors{\tp@iterate{\@tempcnta}{\z@}{\tpSubFloatCnt}{\tp@make@anchor{\the\@tempcnta}}}
+\def\tp@make@anchor#1{%
+  \bgroup
+    \tpSubFloatCnt#1\relax
+    \tpIfComp{Label}{%
+      \expandafter\let\expandafter\@currentlabel\csname tp@\tp@namespace @number-\the\tpSubFloatCnt\endcsname
+      \expandafter\H@refstepcounter\expandafter{\tp@captype}%
+      \expandafter\hyper@makecurrent\expandafter{\tp@captype}%
+      \let\Hy@tempa\Hy@float@caption
+      \expandafter\hyper@@anchor\expandafter{%
+        \@currentHref
+      }{\relax}%
+      \expandafter\let\expandafter\@currentlabel\csname tp@\tp@namespace @number-\the\tpSubFloatCnt\endcsname
+      \edef\@tempa{\tpUseComp{Label}}%
+      \expandafter\ltx@label\expandafter{\@tempa}%
+    }{}%
+  \egroup}
 
 %    \end{macrocode}
 % Resetting caption parameters
 %    \begin{macrocode}
 
-\def\tp@flt@create@labels{%
-  \tpIfPropVal{numbering}{auto}{%
-    \ifnum\tpSubFloatCnt=\z@\relax
-       \tpIfComp{number-0}
-         {}%
-         {\expandafter\advance\csname c@\tp@captype\endcsname\@ne\relax
-          \tp@set@label{0}}%
-     \else
-       \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
-         \tpIfComp{number-\the\@tempcnta}
-           {}%
-           {\expandafter\advance\csname c@\tp@captype\endcsname\@ne\relax
-            \tp@set@label{\the\@tempcnta}}}
-     \fi}{}}
-
-\def\tp@set@label#1{%
-  \expandafter\expandafter\expandafter\edef\expandafter\csname tp@\tp@namespace @number-#1\expandafter\endcsname\expandafter{\csname the\tp@captype\endcsname}%
-}
 
 %    \end{macrocode}
 % LEGACY: Hooks to change the text font of a standard \LaTeX\ tabular

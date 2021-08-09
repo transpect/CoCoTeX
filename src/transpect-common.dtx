@@ -42,6 +42,12 @@
 %    \begin{macrocode}
 \def\CalcRatio#1#2{\strip@pt\dimexpr\number\numexpr\number\dimexpr#1\relax*65536/\number\dimexpr#2\relax\relax sp}
 %    \end{macrocode}
+% Some temporary boxes that won't interfere with LaTeX's temporary
+% boxes.
+%    \begin{macrocode}
+\newbox\tp@tempboxa
+\newbox\tp@tempboxb
+%    \end{macrocode}
 % Temporarily silence a macro with a mandatory argument that may or
 % may not have an optional argument. Use it like this:
 % \lstinline{\let\yourMacroWithOptArg\@gobbleopt}
@@ -90,13 +96,12 @@
 %    \begin{macrocode}
 \def\tpProvideComp#1#2#3#4{%
   \ltx@LocalExpandAfter\global\expandafter\let\csname tp@\tp@namespace @#4\endcsname\relax
-  \expandafter\long\expandafter\def\csname #1\endcsname##1{#2\expandafter\long\expandafter\def\csname tp@\tp@namespace @#4\endcsname{##1}\ignorespaces#3}
-}
+  \expandafter\long\expandafter\def\csname #1\endcsname##1{#2\expandafter\long\expandafter\def\csname tp@\tp@namespace @#4\endcsname{##1}\ignorespaces#3}}
 \def\tpNamespace#1{\def\tp@namespace{#1}}
 %    \end{macrocode}
 % High level command to use Data field \#1.
 %    \begin{macrocode}
-\def\tpUseComp#1{\csname tp@\tp@namespace @#1\endcsname\relax}
+\def\tpUseComp#1{\csname tp@\tp@namespace @#1\endcsname}
 %    \end{macrocode}
 % High level macro that executes \#2 if the Component macro \#1 is non-empty, and \#3 if it is empty.
 %    \begin{macrocode}
