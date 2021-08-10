@@ -664,7 +664,7 @@
   \tpSetProperty{sub-number-sep}{\,}%% when sub-captions, this is placed between the float counter and the sub-float counter
   \tpSetProperty{sub-number-style}{alph}%% counting style of subcaption counters
   \tpSetProperty{sub-number-format}{\bfseries}%% format of subcaption counters
-  \tpSetProperty{sub-number-block}{\tpUseProperty{float-number}\tpUseProperty{sub-number-sep}\tpUseProperty{sub-number})}%% Format of sub numbers
+  \tpSetProperty{sub-number-block}{\tpUseProperty{float-number}\tpUseProperty{sub-number-sep}(\tpUseProperty{sub-number})}%% Format of sub numbers
   \tpSetProperty{list-of-block}{\tpUseComp{Caption}}% list-of-float appearance
 }
 
