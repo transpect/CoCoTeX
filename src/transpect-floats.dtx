@@ -92,7 +92,7 @@
 }
 %    \end{macrocode}
 % Handles the optional argument of float environments. \#1 is the
-% content of the optional argument, #2 is the caption family.
+% content of the optional argument, \#2 is the caption family.
 %    \begin{macrocode}
 \def\tp@get@flt@attr#1#2{%
   \if!#1!\else
@@ -260,7 +260,7 @@
   }
 
 %    \end{macrocode}
-% High level macro to (re-)declare a new tpFloat
+% High level macro to (re-)declare a new \lstinline{tpFloat}
 % environment. \lstinline{#1}: inherit from, \lstinline{#2}:
 % environment name, \lstinline{#3}: caption name, \lstinline{#4}:
 % listof, \lstinline{#5} parameters.
@@ -575,7 +575,7 @@
 %    \begin{macrocode}
 
 \def\tp@reserve@tabular{%
-  %\@tp@reserve@tab{}% TODO: tabularx(und y) nutzen tabular, es kann also nicht (pauschal) überdefiniert werden…
+  %\@tp@reserve@tab{}% TODO: tabularx(and y) use tabular, so we can't re-define it
   \@tp@reserve@tab{x}%
   \@tp@reserve@tab{y}%
 }
@@ -671,15 +671,15 @@
 \tpDeclareFloat{tpFigure}{figure}{lof}{%
   \tpSetProperty{subfloat-same-height}{true}% if true, the subfloat must/can be adjusted to the same heights
   \tpSetProperty{content-handler}{\tpFigureHandler}%
-  \tpSetProperty{float-block}{\tpFigureFloat}
-  \tpSetProperty{subfloat-block}{\tpFigureSubFloat}
+  \tpSetProperty{float-block}{\tpFigureFloat}%
+  \tpSetProperty{subfloat-block}{\tpFigureSubFloat}%
 }
 
 \tpDeclareFloat{tpTable}{table}{lot}{%
-  \tpSetProperty{sub-caption-valign-top}{b}
-  \tpSetProperty{content-handler}{\tpTableHandler}
-  \tpSetProperty{float-block}{\tpTableFloat}
-  \tpSetProperty{subfloat-block}{\tpTableFloat}
+  \tpSetProperty{sub-caption-valign-top}{b}%
+  \tpSetProperty{content-handler}{\tpTableHandler}%
+  \tpSetProperty{float-block}{\tpTableFloat}%
+  \tpSetProperty{subfloat-block}{\tpTableFloat}%
 }
 
  % %    \end{macrocode}
