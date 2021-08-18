@@ -143,10 +143,10 @@
 % \lstinline{\<heading>mark} macros are written.
 %    \begin{macrocode}
 \def\tp@make@toc{%
-  \tp@toc@check@empty{Title}%
-  \tp@toc@check@empty{Number}%
-  \tp@toc@check@empty{Subtitle}%
-  \tp@toc@check@empty{Author}%
+  \tp@check@empty{Title}{Toc}%
+  \tp@check@empty{Number}{Toc}%
+  \tp@check@empty{Subtitle}{Toc}%
+  \tp@check@empty{Author}{Toc}%
   \expandafter\ifx\csname tp@heading@attr@notoc\endcsname\@empty\else
     \edef\tp@heading@toc@entry{%
       \tpIfComp{TocTitle}{\string\tpTocTitle{\expandonce{\tp@heading@TocTitle}}}{}%
@@ -159,15 +159,15 @@
   \fi}
 %    \end{macrocode}
 % This macro handles the distinction between empty and un-used
-% ToC components.
+% components.
 %    \begin{macrocode}
-\def\tp@toc@check@empty#1{%
-  \tpIfComp{Toc#1}
-    {\tpIfCompEmpty{Toc#1}
-      {\expandafter\global\expandafter\let\csname tp@heading@Toc#1\endcsname\relax}
+\def\tp@check@empty#1#2{%
+  \tpIfComp{#2#1}
+    {\tpIfCompEmpty{#2#1}
+      {\expandafter\global\expandafter\let\csname tp@heading@#2#1\endcsname\relax}
       {}}
     {\tpIfComp{#1}
-      {\expandafter\expandafter\expandafter\let\expandafter\csname tp@heading@Toc#1\expandafter\endcsname\csname tp@heading@#1\endcsname}
+      {\expandafter\expandafter\expandafter\let\expandafter\csname tp@heading@#2#1\expandafter\endcsname\csname tp@heading@#1\endcsname}
       {}}}
 %    \end{macrocode}
 % low-level macro to dynamically define \lstinline{l@<level>}
@@ -310,10 +310,10 @@
 %
 %    \begin{macrocode}
 \def\tp@make@run{%
-  \tpIfComp{RunTitle}{}{\tpIfComp{Title}{\let\tp@heading@RunTitle\tp@heading@Title}{}}%
-  \tpIfComp{RunNumber}{}{\tpIfComp{Number}{\let\tp@heading@RunNumber\tp@heading@Number}{}}%
-  \tpIfComp{RunAuthor}{}{\tpIfComp{Author}{\let\tp@heading@RunAuthor\tp@heading@Author}{}}%
-  \tpIfComp{RunSubTitle}{}{\tpIfComp{Subtitle}{\let\tp@heading@RunSubtitle\tp@heading@Subtitle}{}}%
+  \tp@check@empty{Title}{Run}%
+  \tp@check@empty{Number}{Run}%
+  \tp@check@empty{Author}{Run}%
+  \tp@check@empty{Subtitle}{Run}%
   \tpIfProp{running-level}
     {\expandafter\let\expandafter\tp@mark@name\csname\tpUseProperty{running-level}mark\endcsname}
     {\expandafter\let\expandafter\tp@mark@name\csname\tp@heading@name mark\endcsname}%
