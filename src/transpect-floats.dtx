@@ -14,11 +14,15 @@
 \NeedsTeXFormat{LaTeX2e}[2018/12/01]
 \ProvidesPackage{transpect-floats}
     [\filedate \fileversion le-tex transpect floats module]
+\DeclareOptionX{nofigs}{\global\let\tp@nofigs\relax}
+\ProcessOptionsX
 %    \end{macrocode}
 % Hard requirements:
 %    \begin{macrocode}
 \RequirePackage{transpect-common}
 \RequirePackage{rotating}
+\RequirePackage{grffile}
+
 %    \end{macrocode}
 % for automatic typesetting and float positioning, we use very high tolerances from standard \LaTeX:
 %    \begin{macrocode}
@@ -56,6 +60,9 @@
 %    \begin{macrocode}
 \AtBeginDocument{%
   \global\let\ltx@label\label
+  \ifx\tp@nofigs\relax
+    \renewcommand\includegraphics[2][]{}%
+  \fi
   \global\let\ltx@includegraphics\includegraphics
   \@ifpackageloaded{htmltabs}{\global\let\tp@uses@htmltabs\relax}{}%
 }%
