@@ -76,11 +76,12 @@
 %    \begin{macrocode}
 \RequirePackage{etoolbox}
 \def\tpDeclareHook#1{\expandafter\global\expandafter\let\csname tp@hook@\tp@namespace @#1\endcsname\@empty}
-\def\tpAddToHook#1#2{%
+\def\tpAddToHook{\@ifnextchar [{\tp@add@to@hook}{\tp@add@to@hook[\tp@namespace]}}%]
+\def\tp@add@to@hook[#1]#2#3{%
   \expandafter\ifx\csname tp@hook@\tp@namespace @#1\endcsname\relax
-    \tpDeclareHook{#1}%
+    \tpDeclareHook{#1@#2}%
   \fi
-  \csgappto{tp@hook@\tp@namespace @#1}{#2}%
+  \csgappto{tp@hook@#1@#2}{#3}%
 }
 \def\tpUseHook#1{\expandafter\ifx\csname tp@hook@\tp@namespace @#1\endcsname\relax\else\csname tp@hook@\tp@namespace @#1\endcsname\fi}
 %    \end{macrocode}
@@ -154,13 +155,20 @@
 %    \begin{macrocode}
 \DeclareRobustCommand{\tpSetProperty}[2]{\expandafter\long\expandafter\protect\expandafter\def\csname tp@\tp@namespace @#1\endcsname{#2}}
 %    \end{macrocode}
-% This high-level macro is the same as \lstinline{\tpSetProperty}
-% except that it expands the value \#2 before assigning it to the
-% property macro with the name \#1. This can be used to assign the
-% current value of a variable macro, dimension, counter or
+% This high-level macro is a variant of \lstinline{\tpSetProperty}
+% except that it expands the value \#2 \textit{once} before assigning
+% it to the property macro with the name \#1. This can be used to
+% assign the current value of a variable macro, dimension, counter or
 % length to a property.
 %    \begin{macrocode}
 \DeclareRobustCommand{\tpSetValProp}[2]{\def\@tempa{\tpSetProperty{#1}}\expandafter\@tempa\expandafter{#2}}
+% This is another variant of \lstinline{\tpSetProperty} that
+% \textit{fully expands} it's value in \#2 before the Property is
+% stored. Use this if you need to use conditionals to determine the
+% actual values of Properties that otherwise expect fixed named or
+% dimensional values.
+%    \begin{macrocode}
+\DeclareRobustCommand{\tpSetPropertyX}[2]{\expandafter\long\expandafter\protect\expandafter\edef\csname tp@\tp@namespace @#1\endcsname{#2}}
 %    \end{macrocode}
 % High level command to use a previously set property.
 %    \begin{macrocode}

@@ -75,7 +75,7 @@
 \newcount\realchap \realchap\z@
 \ifx\endnotes@with@chapters\relax
   \AtBeginDocument{%
-    \tpAddToHook{BeforeHeadingchapter}{%
+    \tpAddToHook[heading]{before-hook-chapter}{%
       \ifnum\c@endnote>\z@\relax
         \expandafter\global\expandafter\let\csname enotes@in@\the\realchap\endcsname\@empty
       \fi
@@ -85,7 +85,9 @@
         \noexpand\expandafter\noexpand\ifx\noexpand\csname enotes@in@\the\realchap\noexpand\endcsname\noexpand\@empty
           \bgroup
             \leftskip\z@
-            \protect\section*{\heading@Title}%
+            \noexpand\begin{heading}[notoc]{section}
+              \noexpand\tpTitle{\tpUseComp{TocTitle}}
+            \noexpand\end{heading}
           \egroup
         \noexpand\fi}%
     }%
@@ -94,7 +96,7 @@
 
 \ifx\reset@notes@per@chapter\relax
   \AtBeginDocument{%
-    \tpAddToHook{BeforeHeadingchapter}{%
+    \tpAddToHook[heading]{before-hook-chapter}{%
       \global\c@footnote\z@
       \global\c@endnote\z@
     }%
