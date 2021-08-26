@@ -52,7 +52,7 @@
   \if!#1!\else\expandafter\protect\expandafter\def\csname tp@heading@#3@parent\endcsname{#1}\fi%
   \expandafter\protect\expandafter\def\csname tp@heading@#3@properties\endcsname{#4}%
   \tp@init@hooks{#3}%
-  \tp@init@l@{#2}{#3}%
+  \tp@init@l@{toc}{#2}{#3}%
   \tp@init@cnt{#2}{#3}%
   \tp@restore@init{tp-heading-number-#2-maxwd}%
   %
@@ -152,10 +152,10 @@
 % \lstinline{\<heading>mark} macros are written.
 %    \begin{macrocode}
 \def\tp@make@toc{%
-  \tp@check@empty{Title}{Toc}%
-  \tp@check@empty{Number}{Toc}%
-  \tp@check@empty{Subtitle}{Toc}%
-  \tp@check@empty{Author}{Toc}%
+  \tp@check@empty{heading}{Title}{Toc}%
+  \tp@check@empty{heading}{Number}{Toc}%
+  \tp@check@empty{heading}{Subtitle}{Toc}%
+  \tp@check@empty{heading}{Author}{Toc}%
   \expandafter\ifx\csname tp@heading@attr@notoc\endcsname\@empty\else
     \edef\tp@heading@toc@entry{%
       \tpIfComp{TocTitle}{\string\tpTocTitle{\expandonce{\tp@heading@TocTitle}}}{}%
@@ -165,35 +165,6 @@
     }%
     \tpIfProp{toc-level}{\edef\tp@heading@name{\tpUseProperty{toc-level}}}{}%
     \addcontentsline{toc}{\tp@heading@name}{\expandonce{\tp@heading@toc@entry}}\relax
-  \fi}
-%    \end{macrocode}
-% This macro handles the distinction between empty and un-used
-% components.
-%    \begin{macrocode}
-\def\tp@check@empty#1#2{%
-  \tpIfComp{#2#1}
-    {\tpIfCompEmpty{#2#1}
-      {\expandafter\global\expandafter\let\csname tp@heading@#2#1\endcsname\relax}
-      {}}
-    {\tpIfComp{#1}
-      {\expandafter\expandafter\expandafter\let\expandafter\csname tp@heading@#2#1\expandafter\endcsname\csname tp@heading@#1\endcsname}
-      {}}}
-%    \end{macrocode}
-% low-level macro to dynamically define \lstinline{l@<level>}
-% macros. \#1 is the heading level, \#2 is the heading name.
-%    \begin{macrocode}
-\def\tp@init@l@#1#2{%
-  \ifnum #1>\c@tocdepth
-    \expandafter\let\csname l@#2\endcsname\@gobbletwo
-  \else
-    \tp@restore@init{tp-heading-toc-number-#1-maxwd}%
-    \tp@restore@init{tp-heading-toc-number-#1-indent}%
-    \expandafter\gdef\csname l@#2\endcsname##1##2{%
-      \bgroup
-        \tp@toc@extract@data{#1}{#2}{##1}{##2}%
-        \tp@toc@print@entry{#2}%
-      \egroup
-    }%
   \fi}
 %    \end{macrocode}
 % Macro to extract data from the .toc lines. \#1 is the heading level,
@@ -210,21 +181,9 @@
   \tpProvideComp{tpTocNumber}{}{}{TocNumber}%
   \tpProvideComp{tpTocAuthor}{}{}{TocAuthor}%
   \let\tpTocLink\Hy@tocdestname%
-  \tp@expand@l@contents{#3}%% expand toc-specific macros from heading; \expandonce is necessary because of hyperref...
-  \tp@format@number{toc-}{Toc}{#1}
+  \tp@expand@l@contents{#3}{heading}{Toc}{Title}%%
+  \tp@format@number{toc-}{Toc}{#1}%
 }
-%    \end{macrocode}
-% This macro expands the content of the l@<level> macro and contains
-% some code to catch and handle standard \LaTeX\ headings.
-%    \begin{macrocode}
-\def\tp@expand@l@contents#1{%
-  \sbox\z@{\def\numberline##1{\gdef\tp@heading@TocNumber{##1}}\expandonce#1}%
-  \ifdim\wd\z@>\z@
-    \let\numberline\@gobble%
-    \expandafter\tpTocTitle\expandafter{\expandonce#1}%
-  \else
-    \expandonce#1%
-  \fi}
 
 %    \end{macrocode}
 % Macro to actually print the toc entry.
@@ -325,10 +284,10 @@
 %
 %    \begin{macrocode}
 \def\tp@make@run{%
-  \tp@check@empty{Title}{Run}%
-  \tp@check@empty{Number}{Run}%
-  \tp@check@empty{Author}{Run}%
-  \tp@check@empty{Subtitle}{Run}%
+  \tp@check@empty{heading}{Title}{Run}%
+  \tp@check@empty{heading}{Number}{Run}%
+  \tp@check@empty{heading}{Author}{Run}%
+  \tp@check@empty{heading}{Subtitle}{Run}%
   \tpIfProp{running-level}
     {\expandafter\let\expandafter\tp@mark@name\csname\tpUseProperty{running-level}mark\endcsname}
     {\expandafter\let\expandafter\tp@mark@name\csname\tp@heading@name mark\endcsname}%
@@ -372,17 +331,6 @@
   \tp@get@indent{#1}{#3}%
   \tp@set@hang{#1}%
 }
-%    \end{macrocode}
-% This macro looks if \#1 has already been defined (e.g., in an
-% earlier tex run) and stores that inital value back in the aux files
-% for the following runs. Useful if you want to store only the highest
-% value of a parameter, like the maximum width of a heading number of
-% a certain level.
-%    \begin{macrocode}
-\def\tp@restore@init#1{%
-  \AtBeginDocument{\expandafter\ifx\csname #1\endcsname\relax\else
-      \immediate\write\@auxout{\string\expandafter\string\gdef\string\csname\space #1\string\endcsname{\csname #1\endcsname}}%
-    \fi}}
 \tp@restore@init{tp-heading-toc-number-maxwd}
 \tp@restore@init{tp-heading-number-maxwd}
 %    \end{macrocode}

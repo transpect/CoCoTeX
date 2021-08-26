@@ -108,7 +108,19 @@
 %    \begin{macrocode}
 \long\def\tpIfComp#1#2#3{\expandafter\ifx\csname tp@\tp@namespace @#1\endcsname\relax#3\else#2\fi}
 \long\def\tpIfCompEmpty#1#2#3{\long\def\@tempa{}\expandafter\ifx\csname tp@\tp@namespace @#1\endcsname\@tempa#2\else#3\fi}
-
+%    \end{macrocode}
+% This macro handles the distinction between empty and un-used
+% components. \#1 is the namespace, \#2 is the name of the Component,
+% \#3 is the Component prefix.
+%    \begin{macrocode}
+\def\tp@check@empty#1#2#3{%
+  \tpIfComp{#3#2}
+    {\tpIfCompEmpty{#3#2}
+      {\expandafter\global\expandafter\let\csname tp@#1@#3#2\endcsname\relax}
+      {}}
+    {\tpIfComp{#2}
+      {\expandafter\expandafter\expandafter\let\expandafter\csname tp@#1@#3#2\expandafter\endcsname\csname tp@#1@#2\endcsname}
+      {}}}
 %    \end{macrocode}
 %
 % \section{Attributes}
@@ -320,3 +332,71 @@
 \let\Hack\@firstofone
 \let\hackfor\@gobble
 \let\Hackfor\@gobble
+
+
+%    \end{macrocode}
+%
+% \section{Macros used in several modules}
+%
+% This macro looks if \#1 has already been defined (e.g., in an
+% earlier tex run) and stores that inital value back in the aux files
+% for the following runs. Useful if you want to store only the highest
+% value of a parameter, like the maximum width of a heading number of
+% a certain level.
+%    \begin{macrocode}
+\def\tp@restore@init#1{%
+  \AtBeginDocument{\expandafter\ifx\csname #1\endcsname\relax\else
+      \immediate\write\@auxout{\string\expandafter\string\gdef\string\csname\space #1\string\endcsname{\csname #1\endcsname}}%
+    \fi}}
+%    \end{macrocode}
+%
+% \subsection{Content lists}
+%
+% This part contains macros to ``simplify'' the generation of content
+% lists like the table of contents or list of figures/tables, etc.
+%
+% This low-level macro is used to dynamically define
+% \lstinline{l@<level>} macros. \#1 is the list file ending, \#2
+% numeric level, \#3 is the level's name.
+%    \begin{macrocode}
+\def\tp@init@l@#1#2#3{%
+  \expandafter\ifx\csname c@#1depth\endcsname\relax
+    \expandafter\global\expandafter\newcount\csname c@#1depth\endcsname
+    \expandafter\global\csname c@#1depth\endcsname=0\relax
+  \fi
+  \tp@restore@init{tp-\tp@namespace-#1-number-#2-maxwd}%
+  \tp@restore@init{tp-\tp@namespace-#1-number-#2-indent}%
+  \expandafter\ifx\csname tp@#1@extract@data\endcsname\relax
+    \expandafter\let\csname tp@#1@extract@data\endcsname\tp@extract@generic
+  \fi
+  \expandafter\ifx\csname tp@#1@print@entry\endcsname\relax
+    \expandafter\let\csname tp@#1@print@entry\endcsname\tp@print@generic
+  \fi
+  \expandafter\gdef\csname l@#3\endcsname##1##2{%
+    \expandafter\ifnum \csname c@#1depth\endcsname<#2\relax
+    \else
+      \bgroup
+        \csname tp@#1@extract@data\endcsname{#2}{#3}{##1}{##2}%
+        \csname tp@#1@print@entry\endcsname{#3}%
+      \egroup
+    \fi}}
+
+\def\tp@extract@generic#1#2#3#4{%
+}
+\def\tp@print@generic#1{%
+}
+
+%    \end{macrocode}
+% This macro expands the content of the l@<level> macro and contains
+% some code to catch and handle standard \LaTeX\ headings. \#1 is the
+% content of the l@-macro, \#2 is the namespace, and \#3 is the
+% Component prefix.
+%    \begin{macrocode}
+\def\tp@expand@l@contents#1#2#3#4{%
+  \sbox\z@{\def\numberline##1{\expandafter\gdef\csname tp@#2@#3Number\endcsname{##1}}\expandonce#1}%
+  \ifdim\wd\z@>\z@
+    \let\numberline\@gobble%
+    \expandafter\expandafter\expandafter\csname tp#3#4\endcsname\expandafter{\expandonce#1}%
+  \else
+    \expandonce#1%
+  \fi}

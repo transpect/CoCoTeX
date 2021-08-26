@@ -180,7 +180,10 @@
 % Declarations for caption related Components in float
 % environments. The first function provides an easily accessible alias
 % for the user defined property overrides. The second macro registers
-% the actual, sub-float dependent Components.
+% the actual, sub-float dependent Components. \#1 is the overt name of
+% the Component, \#2 is the internal name of the component, and \#3 is
+% the accessor name to be used with \lstinline{\tpUseComp} and the
+% conditionals.
 %    \begin{macrocode}
 \def\tpMakeFltComp#1#2#3{%
   \tpProvideComp{#1}
@@ -197,11 +200,15 @@
   \csgappto{@tp@reset@components}{\csname tp@\tp@namespace @#3\endcsname}%
 }
 
+\def\tpMakeFltCompL#1#2{%
+  \tpMakeFltComp{tp#1}{#2}{#1}%
+  \tpMakeFltComp{tpListof#1}{list-of-#2}{Listof#1}}
+
 \def\tp@set@caption@comps{%
-  \tpMakeFltComp{tpCaption}{caption}{Caption}%
-  \tpMakeFltComp{tpLegend}{legend}{Legend}%
-  \tpMakeFltComp{tpSource}{source}{Source}%
-  \tpMakeFltComp{tpNumber}{number}{Number}%
+  \tpMakeFltCompL{Caption}{caption}%
+  \tpMakeFltCompL{Legend}{legend}%
+  \tpMakeFltCompL{Source}{source}%
+  \tpMakeFltCompL{Number}{number}%
   \tpMakeFltComp{label}{label}{Label}%
 }
 
@@ -248,7 +255,7 @@
     \par\nobreak
     \ifx\@argii\tp@str@bottom
     \else
-      \vskip\tpUseProperty{caption-sep-top}%
+      \vspace*{\tpUseProperty{caption-sep-top}}%
     \fi
   \egroup
 }
@@ -270,7 +277,7 @@
 % High level macro to (re-)declare a new \lstinline{tpFloat}
 % environment. \lstinline{#1}: inherit from, \lstinline{#2}:
 % environment name, \lstinline{#3}: caption name, \lstinline{#4}:
-% listof, \lstinline{#5} parameters.
+% list-of, \lstinline{#5} parameters.
 %    \begin{macrocode}
 \def\tpDeclareFloat{\@ifnextchar[{\@tpDeclareFloat}{\@tpDeclareFloat[]}}%]
 \def\@tpDeclareFloat[#1]#2#3#4#5{%
@@ -290,15 +297,90 @@
   \expandafter\ifx\csname tp@float@#2@properties\endcsname\relax%
     \expandafter\def\csname tp@float@#2@properties\endcsname{#5}%
   \else
-    \expandafter\expandafter\expandafter\def\expandafter\expandafter\expandafter\@tempa\expandafter\expandafter\expandafter{\csname tp@float@#2@properties\endcsname}%
-    \expandafter\expandafter\expandafter\def\expandafter\csname tp@float@#2@properties\expandafter\endcsname\expandafter{\@tempa #5}%
-  \fi}
+    \expandafter\expandafter\expandafter\def
+    \expandafter\expandafter\expandafter\@tempa
+    \expandafter\expandafter\expandafter{\csname tp@float@#2@properties\endcsname}%
+    \expandafter\expandafter\expandafter\def
+    \expandafter\csname tp@float@#2@properties\expandafter\endcsname
+    \expandafter{\@tempa #5}%
+  \fi
+  \tp@flt@generate@listof@handlers{#4}{#3}{#2}%
+  \tp@init@l@{#4}{0}{#3}% Generate listof-Entries for first level floats
+  \tp@init@l@{#4}{1}{sub#3}% Generate listof-Entries for sub floats
+}
+%    \end{macrocode}
+% Generate handlers for listof-entries. \#1 is the file ending, \#2 is the caption name, \#3 is the namespace (env name)
+%    \begin{macrocode}
+\def\tp@flt@generate@listof@handlers#1#2#3{%
+%    \end{macrocode}
+% The first macro that is dynamicly defined, is the Component
+% collector. \#\#1 is a numeric level that represents the order of the
+% listof-entries; \#\#2 is the caption type; \#\#3 is the
+% content of the \lstinline{l@<level>} macro; and \#\#4 is the page
+% number associated with that entry.
+%    \begin{macrocode}
+  \expandafter\gdef\csname tp@#1@extract@data\endcsname##1##2##3##4{%
+    \tpNamespace{#3}%
+    \tpCascadeProps{#3}{float}%
+    \tpProvideComp{tpListofCaption}{}{}{ListofCaption}%
+    \tpProvideComp{tpListofLegend}{}{}{ListofLegend}%
+    \tpProvideComp{tpListofSource}{}{}{ListofSource}%
+    \tpProvideComp{tpListofNumber}{}{}{ListofNumber}%
+    \tpProvideComp{tpListofPage}{}{}{ListofPage}%
+    \tpListofPage{\tpUseProperty{list-of-page-format}##4}%
+    %\let\tpTocLink\Hy@tocdestname%
+    \tp@expand@l@contents{##3}{#2}{Listof}{Caption}%%
+    \tp@format@number{list-of-}{Listof}{##1}%
+  }%
+%    \end{macrocode}
+% The second dynamically defined macro is the entry renderer. It
+% applies the Listof properties and selects the components to be
+% printed. \#\#1 is the caption name of the float.
+%    \begin{macrocode}
+  \expandafter\gdef\csname tp@#1@print@entry\endcsname##1{%
+    \bgroup
+      \tpUseHook{list-of-before-hook-##1}%
+      \tpUseProperty{list-of-before-entry}%
+      \tpUseProperty{list-of-block}%
+      \tpUseHook{list-of-after-hook-##1}%
+      \tpUseProperty{list-of-after-entry}%
+    \egroup}%
+%    \end{macrocode}
+% The last macro to be defined here is the listof writer. This macro
+% is responsible to write the entry into TeX's auxiliary file
+% system. \#\#1 is the name of the ``level'' for the entry.
+%    \begin{macrocode}
+  \expandafter\gdef\csname tp@make@listof@#2\endcsname##1{%
+    \tp@flt@check@empty{Number}{number}%
+    \tp@flt@check@empty{Caption}{caption}%
+    \tp@flt@check@empty{Legend}{legend}%
+    \tp@flt@check@empty{Source}{source}%
+    \expandafter\ifx\csname tp@#2@attr@nolist\endcsname\@empty\else
+      \let\@tp@listof@entry\relax
+      \tpIfComp{ListofCaption}{\csgappto{@tp@listof@entry}{\string\tpListofCaption{\tpUseComp{ListofCaption}}}}{}%
+      \tpIfComp{ListofNumber}{\csgappto{@tp@listof@entry}{\string\tpListofNumber{\tpUseComp{ListofNumber}}}}{}%
+      \tpIfComp{ListofLegend}{\csgappto{@tp@listof@entry}{\string\tpListofLegend{\tpUseComp{ListofLegend}}}}{}%
+      \tpIfComp{ListofSource}{\csgappto{@tp@listof@entry}{\string\tpListofSource{\tpUseComp{ListofSource}}}}{}%
+      \protected@edef\tp@listof@entry{\@tp@listof@entry}%
+      \addcontentsline{#1}{\tp@captype}{\expandonce{\tp@listof@entry}}\relax
+    \fi
+  }%
+}
+
+\def\tp@flt@check@empty#1#2{%
+  \tpIfComp{Listof#1}
+    {}
+    {\tpIfComp{#1}
+      {\expandafter\expandafter\expandafter\let\expandafter\csname tp@\tp@namespace @list-of-#2-\the\tpSubFloatCnt\expandafter\endcsname\csname tp@\tp@namespace @#2-\the\tpSubFloatCnt\endcsname}
+      {\csname Listof#1\endcsname{}}}}
+
+
 %    \end{macrocode}
 % In order to account for sub-floats, we need to re-define some of the transpect-common Component conditionals:
 %    \begin{macrocode}
 \long\def\tp@flt@cond{%
-  \long\def\tpIfComp##1##2##3{\expandafter\let\expandafter\@tempa\csname tp@\tp@namespace @##1\endcsname\expandafter\expandafter\expandafter\ifx\@tempa\relax##3\else##2\fi}%
-  \long\def\tpIfCompEmpty##1##2##3{\expandafter\let\expandafter\@tempa\csname tp@\tp@namespace @##1\endcsname\expandafter\expandafter\expandafter\ifx\@tempa\relax##2\else##3\fi}%
+  \long\def\tpIfComp##1##2##3{\expandafter\let\expandafter\@tempa\csname tp@\tp@namespace @##1\endcsname\relax\expandafter\expandafter\expandafter\ifx\@tempa\relax##3\else##2\fi}%
+  \long\def\tpIfCompEmpty##1##2##3{\expandafter\let\expandafter\@tempa\csname tp@\tp@namespace @##1\endcsname\relax\expandafter\expandafter\expandafter\ifx\@tempa\relax##2\else##3\fi}%
 }
 %    \end{macrocode}
 % Faculity to create auto-numbered counters
@@ -421,6 +503,7 @@
 %    \end{macrocode}
 % Process the contents of a float environment
 %    \begin{macrocode}
+
 \def\tp@flt@process{%
   \bgroup
     \ifnum\tpSubFloatCnt=\z@\relax
@@ -432,12 +515,12 @@
         {\tp@flt@process@sameheight}
         {\tp@flt@process@sub}%
     \fi
-    \tp@add@list% TODO
   \egroup
 }
 
+
 %    \end{macrocode}
-% Composes the float.
+% Composes the caption.
 %    \begin{macrocode}
 \def\tp@make@full@caption#1{%
   \hskip\tp@flt@marg@l
@@ -453,15 +536,20 @@
       %% TODO: Sidecap handler: Besser nach \tp@flt@process ?
     \fi
   \fi
-  \ifhmode\@@par\fi
+  \ifhmode\@@par\nobreak\fi
   \tp@flt@process
-  \ifhmode\@@par\fi
+  \ifhmode\@@par\nobreak\fi
   \ifx\tp@has@capt@bottom\relax
     \expandafter\ifx\csname tp@\tp@captype @attr@sidecap\endcsname\relax
       \tp@make@full@caption{bottom}%
     \fi
   \fi
   \tp@make@anchors%
+  \ifx\tp@is@subflt\relax
+    \csname tp@make@listof@\tp@captype\endcsname{sub\tp@captype}%
+  \else
+    \csname tp@make@listof@\tp@captype\endcsname{\tp@captype}%
+  \fi
   \ifhmode\@@par\fi}
 
 
@@ -672,7 +760,28 @@
   \tpSetProperty{sub-number-style}{alph}%% counting style of subcaption counters
   \tpSetProperty{sub-number-format}{\bfseries}%% format of subcaption counters
   \tpSetProperty{sub-number-block}{\tpUseProperty{float-number}\tpUseProperty{sub-number-sep}(\tpUseProperty{sub-number})}%% Format of sub numbers
-  \tpSetProperty{list-of-block}{\tpUseComp{Caption}}% list-of-float appearance
+  %% List-of entries
+  \tpSetProperty{list-of-page-sep}{\dotfill}
+  \tpSetProperty{list-of-margin-right}{\@pnumwidth}
+  \tpSetProperty{list-of-indent}{auto}% list-of-float appearance
+  \tpSetProperty{list-of-margin-left}{auto}
+  \tpSetProperty{list-of-block}{
+    \tpUseProperty{list-of-caption-format}%
+    \tpIfComp{ListofNumber}
+      {\tpUseComp{list-of-hang-number}}
+      {\leftskip0pt}%
+    \tpUseComp{ListofCaption}%
+    \tpUseProperty{list-of-page-sep}\tpUseComp{ListofPage}%
+  }% list-of-float appearance
+  \tpSetProperty{list-of-before-entry}{%
+    \parindent \z@
+    \let\\\@centercr
+    \hyphenpenalty=\@M
+    \rightskip \tpUseProperty{list-of-margin-right} \@plus 1fil\relax
+    \parfillskip -\rightskip
+    \leftskip\tpUseProperty{list-of-margin-left}%
+  }% list-of-float appearance
+  \tpSetProperty{list-of-after-entry}{\par}% list-of-float appearance
 }
 
 \tpDeclareFloat{tpFigure}{figure}{lof}{%
@@ -794,15 +903,6 @@
 
 
 
-
-%    \end{macrocode}
-% This macro adds the entry for the float to the corresponding list.
-%    \begin{macrocode}
-\def\tp@add@list{%
-  %\edef\@tempa{\noexpand\numberline{\tpUseComp{Number}}\tpUseComp{list-of-block}}%
-  %\message{\meaning\@tempa}\STOPP
- %  \addcontentsline{\tp@caplisttype}{\tp@captype}{\@tempa}%
-}
 %    \end{macrocode}
 % This is a rundimentary implementation of hyperref's anchor mechanism
 % to make labels work:
