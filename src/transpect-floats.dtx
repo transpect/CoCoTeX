@@ -396,8 +396,7 @@
         \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
           \tpIfComp{number-\the\@tempcnta}
             {}%
-            {%
-             \expandafter\ifx\csname tp@\tp@captype @attr@subfloat\endcsname\relax
+            {\expandafter\ifx\csname tp@\tp@captype @attr@subfloat\endcsname\relax
                \expandafter\global\expandafter\advance\csname c@\tp@captype\endcsname\@ne\relax
                \tp@set@label{\the\@tempcnta}%
              \else
@@ -546,9 +545,13 @@
   \fi
   \tp@make@anchors%
   \ifx\tp@is@subflt\relax
-    \csname tp@make@listof@\tp@captype\endcsname{sub\tp@captype}%
+    \expandafter\ifx\csname tp@\tp@captype @attr@subfloat\endcsname\relax
+      \csname tp@make@listof@\tp@captype\endcsname{\tp@captype}% subfloats are counted separately
+    \else
+      \csname tp@make@listof@\tp@captype\endcsname{sub\tp@captype}% real subfloats
+    \fi
   \else
-    \csname tp@make@listof@\tp@captype\endcsname{\tp@captype}%
+    \csname tp@make@listof@\tp@captype\endcsname{\tp@captype}% single float
   \fi
   \ifhmode\@@par\fi}
 
@@ -764,8 +767,9 @@
   \tpSetProperty{list-of-page-sep}{\dotfill}
   \tpSetProperty{list-of-margin-right}{\@pnumwidth}
   \tpSetProperty{list-of-indent}{auto}% list-of-float appearance
+  \tpSetProperty{list-of-parfillskip}{-\rightskip}
   \tpSetProperty{list-of-margin-left}{auto}
-  \tpSetProperty{list-of-block}{
+  \tpSetProperty{list-of-block}{%
     \tpUseProperty{list-of-caption-format}%
     \tpIfComp{ListofNumber}
       {\tpUseComp{list-of-hang-number}}
@@ -774,12 +778,14 @@
     \tpUseProperty{list-of-page-sep}\tpUseComp{ListofPage}%
   }% list-of-float appearance
   \tpSetProperty{list-of-before-entry}{%
-    \parindent \z@
-    \let\\\@centercr
-    \hyphenpenalty=\@M
-    \rightskip \tpUseProperty{list-of-margin-right} \@plus 1fil\relax
-    \parfillskip -\rightskip
-    \leftskip\tpUseProperty{list-of-margin-left}%
+    \tpGobble
+    \leftskip\tpUseProperty{list-of-margin-left}\relax%
+    \rightskip \tpUseProperty{list-of-margin-right}\relax
+    \parfillskip \tpUseProperty{list-of-parfillskip}\relax
+    \parindent\tpUseProperty{list-of-indent}\@afterindenttrue
+    \interlinepenalty\@M
+    \leavevmode
+    \null\nobreak
   }% list-of-float appearance
   \tpSetProperty{list-of-after-entry}{\par}% list-of-float appearance
 }
