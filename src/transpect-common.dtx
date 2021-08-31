@@ -208,7 +208,7 @@
 \def\tpCascadeProps#1#2{%
   \csname tp@#2@default\endcsname
   \expandafter\ifx\csname tp@#2@#1@parent\endcsname\relax\else
-    \tp@inherit@props{#1}{#2}%
+    \expandafter\tp@inherit@props\expandafter{\csname tp@#2@#1@parent\endcsname}{#2}%
   \fi
   \csname tp@#2@#1@properties\endcsname
 }
@@ -218,8 +218,8 @@
 % the macro family.
 %    \begin{macrocode}
 \def\tp@inherit@props#1#2{%
-  \edef\@tempa{\csname tp@#2@#1@parent\endcsname}%
-  \expandafter\ifx\csname tp@#2@\@tempa @parent\endcsname\relax\else
+  \expandafter\ifx\csname tp@#2@#1@parent\endcsname\relax\else
+    \edef\@tempa{\csname tp@#2@#1@parent\endcsname}%
     \expandafter\tp@inherit@props\expandafter{\@tempa}{#2}%
   \fi
   \csname tp@#2@#1@properties\endcsname
