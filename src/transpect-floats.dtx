@@ -571,7 +571,11 @@
 \def\tp@flt@create@natural{\tpUseComp{Content}}
 
 \def\endtpSubFloat{%
-  \setbox\tp@subfltbox\hbox{\tp@flt@create@natural}%\tpUseComp{Content}
+  \ifx\tp@nofigs\relax
+    \setbox\tp@subfltbox\hbox{\rule{1pt}{1pt}}
+  \else
+    \setbox\tp@subfltbox\hbox{\tp@flt@create@natural}%\tpUseComp{Content}
+  \fi
   \expandafter\xdef\csname tp@\tp@namespace @width-\the\tpSubFloatCnt\endcsname{\the\wd\tp@subfltbox}%
   \expandafter\xdef\csname tp@\tp@namespace @height-\the\tpSubFloatCnt\endcsname{\the\ht\tp@subfltbox}%
   \expandafter\xdef\csname tp@\tp@namespace @depth-\the\tpSubFloatCnt\endcsname{\the\dp\tp@subfltbox}%
