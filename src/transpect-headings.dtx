@@ -288,6 +288,7 @@
   \tp@check@empty{heading}{Number}{Run}%
   \tp@check@empty{heading}{Author}{Run}%
   \tp@check@empty{heading}{Subtitle}{Run}%
+  \tpUseProperty{running-extra}%
   \tpIfProp{running-level}
     {\expandafter\let\expandafter\tp@mark@name\csname\tpUseProperty{running-level}mark\endcsname}
     {\expandafter\let\expandafter\tp@mark@name\csname\tp@heading@name mark\endcsname}%
