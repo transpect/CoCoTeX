@@ -77,11 +77,14 @@
       \tpUseProperty{before-heading-block}%
       \leftskip\tpUseProperty{margin-left}%
       \rightskip\tpUseProperty{margin-right}%
-      {\tpUseProperty{heading-block}}%
-      \tpUseProperty{after-heading-block}%
+      \bgroup
+        \tpUseProperty{heading-block}%
+        \tpIfProp{extended}{\tpUseProperty{extended-heading}}{}%
+      \egroup%
       \tp@make@toc% ToC entries
       \tp@make@bookmarks% Bookmarks
       \tp@make@run% Running headers
+      \tpUseProperty{after-heading-block}%
     }%
     \ifdim\@tempskipa <\z@\relax
       \tp@inline@heading
@@ -292,8 +295,8 @@
   \tpIfProp{running-level}
     {\expandafter\let\expandafter\tp@mark@name\csname\tpUseProperty{running-level}mark\endcsname}
     {\expandafter\let\expandafter\tp@mark@name\csname\tp@heading@name mark\endcsname}%
-  \ifx\tp@mark@name\relax\ifx\tp@heading@parent\@undefined\else
-      \expandafter\let\expandafter\tp@mark@name\csname\tp@inherit@name mark\endcsname%
+    \ifx\tp@mark@name\relax\ifx\tp@heading@parent\@undefined\else
+      \expandafter\let\expandafter\tp@mark@name\csname\tp@heading@parent mark\endcsname%
     \fi\fi
   \ifx\tp@mark@name\relax\else
     \protected@edef\@tempa{\expandafter\@empty\csname tp@heading@running-heading\endcsname}%
@@ -401,13 +404,31 @@
   \tp@provide@hd@macros{Title}%
   \tp@provide@hd@macros{Subtitle}%
   \tp@provide@hd@macros{Number}%
-  \tpProvideComp{tpAbstract}{}{}{Abstract}%
-  \tpProvideComp{tpAbstractTitle}{}{}{AbstractTitle}%
-  \tpProvideComp{tpKeywords}{}{}{Keywords}%
-  \tpProvideComp{tpKeywordsTitle}{}{}{KeywordsTitle}%
+  \tpIfProp{extended}{%
+    \tp@extended@ht@macros
+  }{}%
   \tpProvideComp{tpQuote}{}{}{Quote}%
   \tpProvideComp{tpQuoteSource}{}{}{QuoteSource}}
 \def\tp@heading@load@props{\csname tp@heading@\tp@heading@name @properties\endcsname}
+%    \end{macrocode}
+% This sub-routine provides some extended markup for certain headings
+% levels, mostly used for compilations of contributions by different
+% authors like collections, proceedings, or journals.
+%    \begin{macrocode}
+\def\tp@extended@ht@macros{%
+  \tp@provide@ext@hd@macros{Abstract}%
+  \tp@provide@ext@hd@macros{Keywords}%
+  \tp@provide@ext@hd@macros{DOI}%
+}
+%    \end{macrocode}
+% Provides component macros to encode meta data. Each macro consists
+% of two parts: one that carries the content, and one that allows to
+% override the Title.
+%    \begin{macrocode}
+\def\tp@provide@ext@hd@macros#1{%
+  \tpProvideComp{tp#1}{}{}{#1}%
+  \tpProvideComp{tp#1Title}{}{}{#1Title}%
+}
 %    \end{macrocode}
 % Macro that creates user macros with a three-way distinction between
 % printed data, data sent to toc, and data sent to page styles.
@@ -467,20 +488,32 @@
   \tpSetProperty{quote-format}{\raggedleft}%
   \tpSetProperty{quote-source-format}{}%
   \tpSetProperty{heading-block}
-    {\bgroup
-       \tpUseProperty{title-format}%
-       \tpIfComp{Number}
-         {\tpUseProperty{hang-number}}
-         {\leftskip0pt}%
-       {\tpUseComp{Title}}\par%
-       \tpIfComp{Subtitle}{{\tpUseProperty{subtitle-format}\tpUseComp{Subtitle}}\par}{}%
-       \tpIfComp{Author}{{\tpUseProperty{author-format}\tpUseComp{Author}}\par}{}%
-       \tpIfComp{Quote}{%
-         \bgroup\tpUseProperty{quote-format}%
-           \tpUseComp{Quote}\par
-           \tpIfComp{QuoteSource}{{\tpUseProperty{quote-source-format}--\space\tpUseComp{Quote}}\par}{}%
-         \egroup}{}%
-    \egroup}%
+    {\tpUseProperty{title-format}%
+     \tpIfComp{Number}
+       {\tpUseProperty{hang-number}}
+       {\leftskip0pt}%
+     {\tpUseComp{Title}}\par%
+     \tpIfComp{Subtitle}{{\tpUseProperty{subtitle-format}\tpUseComp{Subtitle}}\par}{}%
+     \tpIfComp{Author}{{\tpUseProperty{author-format}\tpUseComp{Author}}\par}{}%
+     \tpIfComp{Quote}{%
+       \bgroup
+         \tpUseProperty{quote-format}%
+         \tpUseComp{Quote}\par
+         \tpIfComp{QuoteSource}{{\tpUseProperty{quote-source-format}--\space\tpUseComp{Quote}}\par}{}%
+       \egroup}{}%
+    }%
+  \tpSetProperty{extended-heading}{%
+    \tpIfComp{Abstract}
+      {\par\vskip\baselineskip
+       {\bfseries\tpIfComp{AbstractTitle}{\tpUseComp{AbstractTitle}}{Abstract}}\par
+       {\itshape\small\tpUseComp{Abstract}}\par}
+      {}%
+    \tpIfComp{Keywords}
+      {\par\vskip\baselineskip
+       {\bfseries\tpIfComp{KeywordsTtitle}{\tpUseComp{KeywordsTitle}}{Keywords}}\par
+       {\itshape\small\tpUseComp{Keywords}\par}}
+     {}%
+   }%
   \tpSetProperty{after-heading-block}{}%
   \tpSetProperty{before-heading-block}{\parindent\z@ \parskip\z@}%
   \tpSetProperty{after-indent}{}%
