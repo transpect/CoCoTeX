@@ -444,10 +444,9 @@
   \expandafter\ifx\csname tpUseHeading\tp@heading@name\endcsname\relax
     \PackageError{transpect.cls}{Heading level \tp@heading@name\space unknown!}{A Heading with level \tp@heading@name\space is unknown. Use the \string\tpDeclareHeading\space macro to declare heading levels.}%
   \else
-    \afterfi\csname tpUseHeading\tp@heading@name\endcsname%
+    \csname tpUseHeading\tp@heading@name\endcsname%
   \fi
   \tp@heading@reset
-  \nopagebreak
 }
 %    \end{macrocode}
 % We need to re-direct some \LaTeX\space kernel macros and make sure
@@ -480,7 +479,9 @@
   \tpSetProperty{interline-para-sep}{\space}
   \tpSetProperty{heading-par}{%
     \tpIfProp{interline-para}{\if@noskipsec \leavevmode \fi}{}%
-    \par\global\@afterindenttrue}%
+    \par
+    \global\@afterindenttrue
+  }%
   \tpSetProperty{before-heading}{}%
   \tpSetProperty{title-format}{\bfseries}%
   \tpSetProperty{subtitle-format}{\normalfont}%
