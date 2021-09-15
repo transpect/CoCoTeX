@@ -704,7 +704,7 @@
     \ifvoid\htTableBox
       \tpContent{\unvbox\tp@floatbox}%
     \else
-      \tpContent{\box\htTableBox}%
+      \tpContent{\unvbox\htTableBox}%
     \fi
   \fi
   \tpUseComp{Content}%
