@@ -61,10 +61,10 @@
 \ifx\use@script@armenian\relax
   \message{^^J  [transpect-script Loaded Script: Armenian]^^J}
   \def\NotoArmenianPath{./fonts/Noto/Armenian/}
-  \babelfont{armenian}%
+  \newfontfamily\fallbackfont@armenian{NotoSansArmenian-Regular.ttf}%
     [BoldFont = NotoSansArmenian-Bold.ttf,%
      Path = \NotoArmenianPath,%
-     WordSpace = 1.25]{NotoSansArmenian-Regular.ttf}
+     WordSpace = 1.25]
   \DeclareTextFontCommand\armenian{\fallbackfont@armenian}
 \fi
 %    \end{macrocode}
