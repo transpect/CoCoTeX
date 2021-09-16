@@ -161,10 +161,10 @@
   \tp@check@empty{heading}{Author}{Toc}%
   \expandafter\ifx\csname tp@heading@attr@notoc\endcsname\@empty\else
     \edef\tp@heading@toc@entry{%
-      \tpIfComp{TocTitle}{\string\tpTocTitle{\expandonce{\tp@heading@TocTitle}}}{}%
-      \tpIfComp{TocNumber}{\string\tpTocNumber{\expandonce{\tp@heading@TocNumber}}}{}%
-      \tpIfComp{TocAuthor}{\string\tpTocAuthor{\expandonce{\tp@heading@TocAuthor}}}{}%
-      \tpIfComp{TocSubtitle}{\string\tpTocSubtitle{\expandonce{\tp@heading@TocSubtitle}}}{}%
+      \tpIfComp{TocTitle}{\string\tpTocTitle{\string\ignorespaces\space\expandonce{\tp@heading@TocTitle}}}{}%
+      \tpIfComp{TocNumber}{\string\tpTocNumber{\string\ignorespaces\space\expandonce{\tp@heading@TocNumber}}}{}%
+      \tpIfComp{TocAuthor}{\string\tpTocAuthor{\string\ignorespaces\space\expandonce{\tp@heading@TocAuthor}}}{}%
+      \tpIfComp{TocSubtitle}{\string\tpTocSubtitle{\string\ignorespaces\space\expandonce{\tp@heading@TocSubtitle}}}{}%
     }%
     \tpIfProp{toc-level}{\edef\tp@heading@name{\tpUseProperty{toc-level}}}{}%
     \addcontentsline{toc}{\tp@heading@name}{\expandonce{\tp@heading@toc@entry}}\relax
