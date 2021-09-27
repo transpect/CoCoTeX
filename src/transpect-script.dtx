@@ -78,7 +78,20 @@
     Path=\NotoCJKPath,%
     BoldFont = NotoSansCJKsc-Bold.otf,%
     WordSpace = 1.25]{NotoSansMonoCJKsc-Regular.otf}
-  \DeclareTextFontCommand\chin{\selectlanguage{chinese}}
+  \DeclareTextFontCommand\chin{\foreignlanguage{chinese}}
+\fi
+%    \end{macrocode}
+% \subsection{Support for Japanese script}
+%    \begin{macrocode}
+\ifx\use@script@japanese\relax
+  \def\NotoJPPath{./fonts/Noto/Japanese/}
+  \message{^^J  [transpect-script Loaded Script: Japanese]^^J}
+  \babelprovide{japanese}
+  \babelfont[japanese]{rm}[%
+    Path=\NotoJPPath,%
+    BoldFont = NotoSansJP-Bold.otf,%
+    WordSpace = 1.25]{NotoSansJP-Regular.otf}
+  \DeclareTextFontCommand\japanese{\foreignlanguage{japanese}}
 \fi
 %    \end{macrocode}
 % \subsection{Support for Hebrew script}
@@ -100,7 +113,7 @@
     BoldFont = NotoSansHebrew-Bold.ttf,%
     Contextuals=Alternate%
     ]{NotoSansHebrew-Regular.ttf}
-  \DeclareTextFontCommand\hebrew{\selectlanguage{hebrew}}
+  \DeclareTextFontCommand\hebrew{\foreignlanguage{hebrew}}
 \fi
 %    \end{macrocode}
 % \subsection{Support for Arabic script}
@@ -113,5 +126,5 @@
   \babelfont[arabic]{rm}[BoldFont = NotoNaskhArabic-Bold.ttf,%
     Path = \NotoArabPath,%
     ]{NotoNaskhArabic-Regular.ttf}%
-  \DeclareTextFontCommand\arab{\selectlanguage{arabic}}
+  \DeclareTextFontCommand\arab{\foreignlanguage{arabic}}
 \fi
