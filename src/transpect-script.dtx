@@ -27,7 +27,7 @@
 \RequirePackage{fontspec}
 \RequirePackage{babel}
 \def\parse@script#1,#2,\relax{%
-  \expandafter\let\csname use@script@#1\endcsname\relax%
+  \tp@script@callback{#1}%
   \edef\@argii{#2}%
   \let\next\relax
   \ifx\@argii\@empty\else
@@ -35,6 +35,7 @@
   \fi\next}
 
 \ifx\usescript\relax\else
+  \def\tp@script@callback#1{\expandafter\global\expandafter\let\csname use@script@#1\endcsname\@empty}%
   \expandafter\parse@script\usescript,,\relax
 \fi
 
@@ -46,19 +47,70 @@
 %
 %    \begin{macrocode}
 
-\newfontfamily\fallbackfont{NotoSans-Regular.ttf}%
+\newfontfamily\fallbackfont{NotoSerif-Regular.ttf}%
+[BoldFont = NotoSerif-Bold.ttf,%
+ ItalicFont = NotoSerif-Italic.ttf,%
+ BoldItalicFont = NotoSerif-BoldItalic.ttf,%
+ Path = ./fonts/Noto/,%
+ WordSpace = 1.25]
+\newfontfamily\sffallbackfont{NotoSans-Regular.ttf}%
 [BoldFont = NotoSans-Bold.ttf,%
  ItalicFont = NotoSans-Italic.ttf,%
  BoldItalicFont = NotoSans-BoldItalic.ttf,%
  Path = ./fonts/Noto/,%
  WordSpace = 1.25]
 \DeclareTextFontCommand\textfallback{\fallbackfont}
+\DeclareTextFontCommand\textsffallback{\sffallbackfont}
+%    \end{macrocode}
+% \section{Generic Fonts Declaration Mechanism}
+% \begin{description}
+% \item[\#1] language
+% \item[\#2] argument(s) passed to \lstinline{\babelprovide{rm}}
+% \item[\#3] argument(s) passed to \lstinline{\babelprovide{sf}}
+% \end{description}
+%    \begin{macrocode}
+
+
+\def\tpDeclareBabelFont#1#2#3{%
+  \expandafter\ifx\csname use@script@#1\endcsname\@empty
+    \babelprovide{#1}%
+    \message{^^J  [transpect-script Loaded Script: #1]^^J}%
+    %%
+    \expandafter\gdef\csname tp@babel@rm@font@#1\endcsname{#2}%
+    \expandafter\gdef\csname tp@babel@sf@font@#1\endcsname{#3}%
+    \if!#2!\else
+      \def\tp@tempa{\babelfont[#1]{rm}}%
+      \expandafter\expandafter\expandafter\tp@tempa\csname tp@babel@rm@font@#1\endcsname
+    \fi
+    \if!#3!\else
+      \def\tp@tempa{\babelfont[#1]{sf}}%
+      \expandafter\expandafter\expandafter\tp@tempa\csname tp@babel@sf@font@#1\endcsname
+    \fi
+  \fi
+}
+%    \end{macrocode}
+% Top level macro to declare a font alias.
+% \begin{description}
+% \item[\#1] font family alias
+% \item[\#2] font family fallback
+% \end{description}
+%    \begin{macrocode}
+
+\def\tpBabelAlias#1#2{%
+  \def\tp@script@callback##1{%
+    \expandafter\ifx\csname tp@babel@#2@font@##1\endcsname\relax
+      \PackageError{transpect-script.sty}{\expandafter\string\csname #2family\endcsname\space for Language `##1' was not declared!}{You attempted to declare an alias towards a font family that has not been declared for the language `##1', yet.}%
+    \else
+      \def\tp@tempa{\babelfont[##1]{#1}}%
+      \expandafter\expandafter\expandafter\tp@tempa\csname tp@babel@#2@font@##1\endcsname
+    \fi}%
+  \expandafter\parse@script\usescript,,\relax}
 
 %    \end{macrocode}
 % \section{Predefined script systems}
 % \subsection{Support for Armenian script}
 %    \begin{macrocode}
-\ifx\use@script@armenian\relax
+\ifx\use@script@armenian\@empty
   \message{^^J  [transpect-script Loaded Script: Armenian]^^J}
   \def\NotoArmenianPath{./fonts/Noto/Armenian/}
   \newfontfamily\fallbackfont@armenian{NotoSansArmenian-Regular.ttf}%
@@ -70,61 +122,52 @@
 %    \end{macrocode}
 % \subsection{Support for Chinese script}
 %    \begin{macrocode}
-\ifx\use@script@chinese\relax
-  \def\NotoCJKPath{./fonts/Noto/Chinese/}
-  \message{^^J  [transpect-script Loaded Script: Chinese]^^J}
-  \babelprovide{chinese}
-  \babelfont[chinese]{rm}[%
-    Path=\NotoCJKPath,%
-    BoldFont = NotoSansCJKsc-Bold.otf,%
-    WordSpace = 1.25]{NotoSansMonoCJKsc-Regular.otf}
-  \DeclareTextFontCommand\chin{\foreignlanguage{chinese}}
-\fi
+\tpDeclareBabelFont{chinese}{[%
+    Path=./fonts/Noto/Chinese/,
+    BoldFont = NotoSerifSC-Bold.otf,%
+    WordSpace = 1.25]{NotoSerifSC-Regular.otf}}
+  {[%
+    Path=./fonts/Noto/Chinese/,
+    BoldFont = NotoSansSC-Bold.otf,%
+    WordSpace = 1.25]{NotoSansSC-Regular.otf}%
+  }
+
 %    \end{macrocode}
 % \subsection{Support for Japanese script}
 %    \begin{macrocode}
-\ifx\use@script@japanese\relax
-  \def\NotoJPPath{./fonts/Noto/Japanese/}
-  \message{^^J  [transpect-script Loaded Script: Japanese]^^J}
-  \babelprovide{japanese}
-  \babelfont[japanese]{rm}[%
-    Path=\NotoJPPath,%
+\tpDeclareBabelFont{japanese}{[%
+    Path=./fonts/Noto/Japanese/,
+    BoldFont = NotoSerifJP-Bold.otf,%
+    WordSpace = 1.25]{NotoSerifJP-Regular.otf}
+  }{[%
+    Path=./fonts/Noto/Japanese/,
     BoldFont = NotoSansJP-Bold.otf,%
     WordSpace = 1.25]{NotoSansJP-Regular.otf}
-  \DeclareTextFontCommand\japanese{\foreignlanguage{japanese}}
-\fi
+  }
 %    \end{macrocode}
 % \subsection{Support for Hebrew script}
 %    \begin{macrocode}
-\ifx\use@script@hebrew\relax
-  \message{^^J  [transpect-script Loaded Script: Hebrew]^^J}
-  \def\NotoHebrewPath{./fonts/Noto/Hebrew/}
-  \babelprovide{hebrew}%
-  \babelfont[hebrew]{rm}[%
+\tpDeclareBabelFont{hebrew}{[%
     Scale=MatchUppercase,%
+    Path=./fonts/Noto/Hebrew/,%
     Ligatures=TeX,%
-    BoldFont = NotoSerifHebrew-Bold.ttf,%
-    Path=\NotoHebrewPath Serif/,%
-    Contextuals=Alternate]{NotoSerifHebrew-Regular.ttf}
-  \babelfont[hebrew]{sf}[%
-    Scale=MatchUppercase,
-    Ligatures=TeX,
-    Path=\NotoHebrewPath Sans/,%
-    BoldFont = NotoSansHebrew-Bold.ttf,%
-    Contextuals=Alternate%
-    ]{NotoSansHebrew-Regular.ttf}
-  \DeclareTextFontCommand\hebrew{\foreignlanguage{hebrew}}
-\fi
+    BoldFont = NotoSerifHebrew-Bold.ttf]{NotoSerifHebrew-Regular.ttf}%
+}{[%
+    Scale=MatchUppercase,%
+    Path=./fonts/Noto/Hebrew/,%
+    Ligatures=TeX,%
+    BoldFont = NotoSansHebrew-Bold.ttf]{NotoSansHebrew-Regular.ttf}%
+}
+
 %    \end{macrocode}
 % \subsection{Support for Arabic script}
 %    \begin{macrocode}
-
-\ifx\use@script@arabic\relax
-  \message{^^J  [transpect-script Loaded Script: Arabic]^^J}
-  \babelprovide{arabic}%
-  \def\NotoArabPath{./fonts/NotoSans/Arabic/}
-  \babelfont[arabic]{rm}[BoldFont = NotoNaskhArabic-Bold.ttf,%
-    Path = \NotoArabPath,%
-    ]{NotoNaskhArabic-Regular.ttf}%
-  \DeclareTextFontCommand\arab{\foreignlanguage{arabic}}
-\fi
+\tpDeclareBabelFont{arabic}{[%
+    BoldFont = NotoNaskhArabic-Bold.ttf,%
+    Path = ./fonts/Noto/Arabic/%
+    ]{NotoNaskhArabic-Regular.ttf}}
+  {[%
+    BoldFont = NotoSansArabic-Bold.ttf,%
+    Path = ./fonts/Noto/Arabic/%
+    ]{NotoSansArabic-Regular.ttf}%
+  }

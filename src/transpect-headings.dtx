@@ -70,7 +70,6 @@
     \tpUseHook{before-hook-\tp@heading@name}%
     \tpUseProperty{before-heading}%
     \everypar{}%
-    \tp@hdg@create@labels{#3}% label facility
     \tp@format@number{}{}{\tp@heading@level}% Calculate number width
     \tpIfProp{after-skip}{\expandafter\global\expandafter\@tempskipa\expandafter=\tpUseProperty{after-skip}\relax}{\global\@tempskipa=1sp\relax}%
     \def\@svsec{%
@@ -81,6 +80,7 @@
         \tpUseProperty{heading-block}%
         \tpIfProp{extended}{\tpUseProperty{extended-heading}}{}%
       \egroup%
+      \tp@hdg@create@labels{#3}% label facility
       \tp@make@toc% ToC entries
       \tp@make@bookmarks% Bookmarks
       \tp@make@run% Running headers
@@ -561,7 +561,7 @@
     \tpUseProperty{toc-title-format}%
     \tpIfComp{TocNumber}
       {\tpUseProperty{toc-hang-number}}
-      {\leftskip0pt}%
+      {\leftskip0pt\leavevmode}%
     \tpIfComp{TocAuthor}{\tpUseComp{TocAuthor}:\space}{}%
     \tpUseComp{TocTitle}%
     \tpUseProperty{toc-page-sep}\tpUseComp{TocPage}%
