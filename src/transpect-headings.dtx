@@ -138,10 +138,10 @@
       \edef\@tempa{\expandonce{\tp@heading@Number}}%
       \let\@currentlabel\@tempa\relax
       \let\@currentlabelname\tp@heading@Title
-      \expandafter\ltx@label\expandafter{\tp@heading@attr@label}%
+      \expandafter\tpltx@label\expandafter{\tp@heading@attr@label}%
     }{}%
   \fi
-  \global\let\label\ltx@label}
+  \global\let\label\tpltx@label}
 %    \end{macrocode}
 %
 % \subsection{Table of Contents}
@@ -461,9 +461,9 @@
 %    \begin{macrocode}
 \def\tp@heading@reserve{%
   \tpNamespace{heading}%
-  \let\ltx@dbl@backslash\\
+  \let\tpltx@dbl@backslash\\
   \let\\\TitleBreak
-  \let\ltx@label\label
+  \let\tpltx@label\label
   \let\tp@heading@label\relax
   \let\tp@notoc\@empty}
 %    \end{macrocode}
@@ -471,8 +471,8 @@
 %    \begin{macrocode}
 \def\tp@heading@reset{%
   \let\tp@namespace\relax
-  \let\\\ltx@dbl@backslash
-  \let\label\ltx@label
+  \let\\\tpltx@dbl@backslash
+  \let\label\tpltx@label
   \let\tp@heading@name\relax
   \let\tp@heading@label\relax
   \let\tp@notoc\@empty}

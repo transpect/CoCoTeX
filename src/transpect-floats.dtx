@@ -22,6 +22,7 @@
 \RequirePackage{transpect-common}
 \RequirePackage{rotating}
 \RequirePackage{grffile}
+\RequirePackage[Export]{adjustbox}
 
 %    \end{macrocode}
 % for automatic typesetting and float positioning, we use very high tolerances from standard \LaTeX:
@@ -59,11 +60,11 @@
 % Storing the final definition of \lstinline{\label}:
 %    \begin{macrocode}
 \AtBeginDocument{%
-  \global\let\ltx@label\label
+  \global\let\tpltx@label\label
   \ifx\tp@nofigs\relax
     \renewcommand\includegraphics[2][]{}%
   \fi
-  \global\let\ltx@includegraphics\includegraphics
+  \global\let\tpltx@includegraphics\includegraphics
   \@ifpackageloaded{htmltabs}{\global\let\tp@uses@htmltabs\relax}{}%
 }%
 
@@ -228,12 +229,10 @@
 % creates a minipage of a fixed width for each part of a sub figure
 %    \begin{macrocode}
 \def\tp@create@mp#1#2#3{%
-    \begin{minipage}[#2][][t]{#3}%
-      \ifx\tp@current@class\relax\else
-        \let\includegraphics\tp@includesubgraphics
-      \fi
-      #1%
-    \end{minipage}%
+  \begin{minipage}[#2][][t]{#3}%
+    \let\includegraphics\tp@includesubgraphics
+    #1%
+  \end{minipage}%
 }
 
 %    \end{macrocode}
@@ -361,8 +360,10 @@
       \tpIfComp{ListofNumber}{\csgappto{@tp@listof@entry}{\string\tpListofNumber{\tpUseComp{ListofNumber}}}}{}%
       \tpIfComp{ListofLegend}{\csgappto{@tp@listof@entry}{\string\tpListofLegend{\tpUseComp{ListofLegend}}}}{}%
       \tpIfComp{ListofSource}{\csgappto{@tp@listof@entry}{\string\tpListofSource{\tpUseComp{ListofSource}}}}{}%
-      \protected@edef\tp@listof@entry{\@tp@listof@entry}%
-      \addcontentsline{#1}{\tp@captype}{\expandonce{\tp@listof@entry}}\relax
+      \ifx\@tp@listof@entry\relax\else
+        \protected@edef\tp@listof@entry{\@tp@listof@entry}%
+        \addcontentsline{#1}{\tp@captype}{\expandonce{\tp@listof@entry}}\relax
+      \fi
     \fi
   }%
 }
@@ -411,7 +412,13 @@
 }
 \def\tp@set@sublabel#1{%
   \tpSetValProp{float-number}{\csname tp@\tp@namespace @number-0\endcsname}%
-  \tpSetValProp{sub-number}{\expandonce{\tpUseProperty{sub-number-format}}\relax\csname @\tpUseProperty{sub-number-style}\endcsname{#1}}%
+  \tpSetValProp{sub-number}{%
+    \begingroup
+      \expandonce{\tpUseProperty{sub-number-format}}%
+      \relax\tpUseProperty{sub-number-before}%
+      \csname @\tpUseProperty{sub-number-style}\endcsname{#1}%
+      \tpUseProperty{sub-number-after}%
+    \endgroup}%
   \expandafter\expandafter\expandafter\edef\expandafter\csname tp@\tp@namespace @number-#1\expandafter\endcsname\expandafter{\tpUseProperty{sub-number-block}}%
 }
 
@@ -452,8 +459,8 @@
 %    \begin{macrocode}
 
 \def\tp@test@caption#1#2#3{%
-  \setbox\tp@tempboxa\hbox{\tpSubFloatCnt#1\tpUseProperty{caption-#3}}%
-  \setbox\tp@tempboxb\hbox{\tpSubFloatCnt\m@ne\tpUseProperty{caption-#3}}%
+  \setbox\tp@tempboxa\hbox{\tpSubFloatCnt#1\relax\tpUseProperty{caption-#3}\relax}%
+  \setbox\tp@tempboxb\hbox{\tpSubFloatCnt\m@ne\relax\tpUseProperty{caption-#3}\relax}%
   \ifdim\wd\tp@tempboxa>\wd\tp@tempboxb\relax
     \expandafter\let\csname tp@has@#2@#3\endcsname\relax
   \fi}
@@ -637,13 +644,10 @@
 %
 %    \begin{macrocode}
 
-
 \def\tpFigureHandler{\tpMakeFltComp{tpFig}{figure}{Content}}
 
 \def\tpFigureFloat{%
-  \ifx\tp@current@class\relax\else
-    \let\includegraphics\tp@includesubgraphics
-  \fi
+  \let\includegraphics\tp@includesubgraphics
   \tp@create@mp{\csname tp@\tp@namespace @figure-0\endcsname\nobreak}{t}{\the\tp@total@flt@width}%
 }
 
@@ -661,11 +665,15 @@
 
 \def\tp@includesubgraphics{\@ifnextchar [\@tp@includesubgraphics{\@tp@includesubgraphics[]}}%]
 \def\@tp@includesubgraphics[#1]#2{%
-  \def\@igopts{width=\hsize}%
+  \ifx\tp@current@class\relax
+    \def\@igopts{max width=\hsize,max height=\vsize}%
+  \else
+    \def\@igopts{width=\hsize}%
+  \fi
   \if!#1!\else
     \def\@igopts{#1,width=\hsize}%
   \fi
-  \expandafter\ltx@includegraphics\expandafter[\@igopts]{#2}%
+  \expandafter\tpltx@includegraphics\expandafter[\@igopts]{#2}%
 }
 
 
@@ -765,8 +773,10 @@
   \tpSetProperty{sub-caption-valign-bottom}{t}%% vertical alignment of bottom sub-captions
   \tpSetProperty{sub-number-sep}{\,}%% when sub-captions, this is placed between the float counter and the sub-float counter
   \tpSetProperty{sub-number-style}{alph}%% counting style of subcaption counters
-  \tpSetProperty{sub-number-format}{\bfseries}%% format of subcaption counters
-  \tpSetProperty{sub-number-block}{\tpUseProperty{float-number}\tpUseProperty{sub-number-sep}(\tpUseProperty{sub-number})}%% Format of sub numbers
+  \tpSetProperty{sub-number-format}{}%% format of subcaption counters
+  \tpSetProperty{sub-number-before}{(}% stuff that is put immediately before the sub counter
+  \tpSetProperty{sub-number-after}{)}% stuff that is put immediately after the sub counter
+  \tpSetProperty{sub-number-block}{\tpUseProperty{float-number}\tpUseProperty{sub-number-sep}\tpUseProperty{sub-number}}%% Format of sub numbers
   %% List-of entries
   \tpSetProperty{list-of-page-sep}{\dotfill}
   \tpSetProperty{list-of-margin-right}{\@pnumwidth}
@@ -931,7 +941,7 @@
       }{\relax}%
       \expandafter\let\expandafter\@currentlabel\csname tp@\tp@namespace @number-\the\tpSubFloatCnt\endcsname
       \edef\@tempa{\tpUseComp{Label}}%
-      \expandafter\ltx@label\expandafter{\@tempa}%
+      \expandafter\tpltx@label\expandafter{\@tempa}%
     }{}%
   \egroup}
 
