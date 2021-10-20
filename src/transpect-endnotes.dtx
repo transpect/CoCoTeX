@@ -23,6 +23,8 @@
 % package options:
 % \begin{itemize}
 % \item \lstinline{endnotes} activates endnotes.
+% \item \lstinline{ennotoc} prevents chapter headings in the Notes
+%   section from creating toc entries.
 % \item \lstinline{resetnotesperchapter} resets foot- and endnotes at
 %   the start of each chapter level heading. If omitted (default)
 %   foot- or endnotes are numbered throughout the whole document
@@ -33,6 +35,7 @@
 % \end{itemize}
 %    \begin{macrocode}
 \DeclareOption{endnotes}{\global\endnotestrue}
+\DeclareOption{ennotoc}{\global\let\tp@ennotoc\relax}
 \DeclareOption{resetnotesperchapter}{\global\let\reset@notes@per@chapter\relax}
 \DeclareOption{endnoteswithchapters}{\global\endnotestrue\global\let\endnotes@with@chapters\relax}
 \ProcessOptions
@@ -50,7 +53,7 @@
   \let\footnote=\endnote
   \def\enotesize{\normalsize}%
   \def\enoteformat{\leavevmode\hskip-2em\hb@xt@2em{\@theenmark\hss}}%
-  \def\enoteheading{%
+  \gdef\enoteheading{%
     \leftskip2em
   }%
   \def\printnotes{%
@@ -84,8 +87,8 @@
       \addtoendnotes{%
         \noexpand\expandafter\noexpand\ifx\noexpand\csname enotes@in@\the\realchap\noexpand\endcsname\noexpand\@empty
           \bgroup
-            \leftskip\z@
-            \noexpand\begin{heading}[notoc]{section}
+            \noexpand\leftskip\noexpand\z@
+            \noexpand\begin{heading}\ifx\tp@ennotoc\relax[notoc]\fi{section}
               \noexpand\tpTitle{\tpUseComp{TocTitle}}
             \noexpand\end{heading}
           \egroup

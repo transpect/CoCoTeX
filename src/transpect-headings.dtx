@@ -67,6 +67,9 @@
     \def\Hy@toclevel{#2}%
     \tp@auto@number{#2}{#3}%
     \tpUseProperty{heading-par}%
+    \ifx\tp@heading@parent\@undefined\else
+      \tpUseHook{before-hook-\tp@heading@parent}%
+    \fi
     \tpUseHook{before-hook-\tp@heading@name}%
     \tpUseProperty{before-heading}%
     \everypar{}%
