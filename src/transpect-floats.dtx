@@ -33,7 +33,9 @@
 \def\totalnumber{8}
 \def\topnumber{8}
 \def\bottomnumber{8}
-\def\floatpagefraction{.95}
+\def\floatpagefraction{0.9}
+\@fptop\z@
+\@fpbot\@flushglue
 %    \end{macrocode}
 % some reserved registers
 %    \begin{macrocode}
@@ -123,6 +125,7 @@
     \expandafter\let\expandafter\tp@fps\csname tp@#1@attr@float-pos\endcsname
   \fi
   \def\@tempa{h!}\ifx\tp@fps\@tempa\let\tp@fps\@empty\fi
+  \def\@tempa{h}\ifx\tp@fps\@tempa\def\tp@fps{htbp}\fi
   \ifx\tp@do@dblfloat\relax\linewidth\dimexpr2\columnwidth+\columnsep\relax\fi
   \expandafter\ifx\csname tp@#1@attr@orientation\endcsname\tp@str@landscape\relax
     \linewidth\textheight
