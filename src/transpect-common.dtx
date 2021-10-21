@@ -95,9 +95,9 @@
 % \item[\#4] is the internal identifier. The macro that is build is \lstinline{\csname tp@<current namespace>@<id>\endcsname}
 % \end{description}
 %    \begin{macrocode}
-\def\tpProvideComp#1#2#3#4{%
+\DeclareRobustCommand{\tpProvideComp}[4]{%
   \ltx@LocalExpandAfter\global\expandafter\let\csname tp@\tp@namespace @#4\endcsname\relax
-  \expandafter\long\expandafter\def\csname #1\endcsname##1{#2\expandafter\long\expandafter\def\csname tp@\tp@namespace @#4\endcsname{##1}\ignorespaces#3}}
+  \expandafter\long\expandafter\protected\expandafter\def\csname #1\endcsname##1{#2\expandafter\long\expandafter\protected\expandafter\def\csname tp@\tp@namespace @#4\endcsname{##1}\ignorespaces#3}}
 \def\tpNamespace#1{\def\tp@namespace{#1}}
 %    \end{macrocode}
 % High level command to use Data field \#1.

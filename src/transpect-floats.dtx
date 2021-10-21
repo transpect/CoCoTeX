@@ -462,8 +462,8 @@
 %    \begin{macrocode}
 
 \def\tp@test@caption#1#2#3{%
-  \setbox\tp@tempboxa\hbox{\tpSubFloatCnt#1\relax\tpUseProperty{caption-#3}\relax}%
-  \setbox\tp@tempboxb\hbox{\tpSubFloatCnt\m@ne\relax\tpUseProperty{caption-#3}\relax}%
+  \setbox\tp@tempboxa\hbox{\let\footnote\@gobbleopt\tpSubFloatCnt#1\relax\tpUseProperty{caption-#3}\relax}%
+  \setbox\tp@tempboxb\hbox{\let\footnote\@gobbleopt\tpSubFloatCnt\m@ne\relax\tpUseProperty{caption-#3}\relax}%
   \ifdim\wd\tp@tempboxa>\wd\tp@tempboxb\relax
     \expandafter\let\csname tp@has@#2@#3\endcsname\relax
   \fi}
