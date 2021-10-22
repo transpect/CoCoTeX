@@ -14,6 +14,7 @@
 \NeedsTeXFormat{LaTeX2e}[2018/12/01]
 \ProvidesPackage{transpect-common}
     [\filedate \fileversion le-tex transpect common module]
+\RequirePackage{iftex}
 %    \end{macrocode}
 % prefix macro used to execute code after the next \lstinline{\fi}:
 %    \begin{macrocode}
@@ -95,9 +96,9 @@
 % \item[\#4] is the internal identifier. The macro that is build is \lstinline{\csname tp@<current namespace>@<id>\endcsname}
 % \end{description}
 %    \begin{macrocode}
-\DeclareRobustCommand{\tpProvideComp}[4]{%
+\def\tpProvideComp#1#2#3#4{%
   \ltx@LocalExpandAfter\global\expandafter\let\csname tp@\tp@namespace @#4\endcsname\relax
-  \expandafter\long\expandafter\protected\expandafter\def\csname #1\endcsname##1{#2\expandafter\long\expandafter\protected\expandafter\def\csname tp@\tp@namespace @#4\endcsname{##1}\ignorespaces#3}}
+  \expandafter\long\expandafter\def\csname #1\endcsname##1{#2\expandafter\long\expandafter\def\csname tp@\tp@namespace @#4\endcsname{##1}\ignorespaces#3}}
 \def\tpNamespace#1{\def\tp@namespace{#1}}
 %    \end{macrocode}
 % High level command to use Data field \#1.
@@ -346,9 +347,10 @@
 % value of a parameter, like the maximum width of a heading number of
 % a certain level.
 %    \begin{macrocode}
-\def\tp@restore@init#1{%
-  \AtBeginDocument{\expandafter\ifx\csname #1\endcsname\relax\else
-      \immediate\write\@auxout{\string\expandafter\string\gdef\string\csname\space #1\string\endcsname{\csname #1\endcsname}}%
+\def\tp@restore@init#1#2{%
+  \AtBeginDocument{%
+    \expandafter\ifx\csname tp-#1-#2\endcsname\relax\else
+      \immediate\write\@auxout{\string\expandafter\string\gdef\string\csname\space tp-#1-#2\string\endcsname{\csname tp-#1-#2\endcsname}}%
     \fi}}
 %    \end{macrocode}
 %
@@ -361,33 +363,36 @@
 % \lstinline{l@<level>} macros. \#1 is the list file ending, \#2
 % numeric level, \#3 is the level's name.
 %    \begin{macrocode}
-\def\tp@init@l@#1#2#3{%
-  \expandafter\ifx\csname c@#1depth\endcsname\relax
-    \expandafter\global\expandafter\newcount\csname c@#1depth\endcsname
-    \expandafter\global\csname c@#1depth\endcsname=0\relax
+\def\tp@init@l@{\@ifnextchar[\@tp@init@l@{\@tp@init@l@[]}}%]
+\def\@tp@init@l@[#1]#2#3#4{%
+  \expandafter\ifx\csname c@#2depth\endcsname\relax
+    \expandafter\global\expandafter\newcount\csname c@#2depth\endcsname
+    \expandafter\global\csname c@#2depth\endcsname=0\relax
   \fi
-  \tp@restore@init{tp-\tp@namespace-#1-number-#2-maxwd}%
-  \tp@restore@init{tp-\tp@namespace-#1-number-#2-indent}%
-  \expandafter\ifx\csname tp@#1@extract@data\endcsname\relax
-    \expandafter\let\csname tp@#1@extract@data\endcsname\tp@extract@generic
+  \expandafter\tp@restore@init\expandafter{\tp@namespace}{#1\if!#1!#2\fi-number-#3-maxwd}%
+  \expandafter\tp@restore@init\expandafter{\tp@namespace}{#1\if!#1!#2\fi-number-#3-indent}%
+  \expandafter\ifx\csname tp@#2@extract@data\endcsname\relax
+    \expandafter\let\csname tp@#2@extract@data\endcsname\tp@extract@generic
   \fi
-  \expandafter\ifx\csname tp@#1@print@entry\endcsname\relax
-    \expandafter\let\csname tp@#1@print@entry\endcsname\tp@print@generic
+  \expandafter\ifx\csname tp@#2@print@entry\endcsname\relax
+    \expandafter\let\csname tp@#2@print@entry\endcsname\tp@print@generic
   \fi
-  \expandafter\gdef\csname l@#3\endcsname##1##2{%
-    \expandafter\ifnum \csname c@#1depth\endcsname<#2\relax
+  \expandafter\long\expandafter\gdef\csname l@#4\endcsname##1##2{%
+    \ifLuaTeX\suppresslongerror=1\fi
+    \expandafter\ifnum \csname c@#2depth\endcsname<#3\relax
     \else
       \bgroup
-        \csname tp@#1@extract@data\endcsname{#2}{#3}{##1}{##2}%
-        \csname tp@#1@print@entry\endcsname{#3}%
+        \csname tp@#2@extract@data\endcsname{#3}{#4}{##1}{##2}%
+        \csname tp@#2@print@entry\endcsname{#4}%
       \egroup
-    \fi}}
+    \fi
+    \ifLuaTeX\suppresslongerror=0\fi
+  }}
 
 \def\tp@extract@generic#1#2#3#4{%
 }
 \def\tp@print@generic#1{%
 }
-
 %    \end{macrocode}
 % This macro expands the content of the l@<level> macro and contains
 % some code to catch and handle standard \LaTeX\ headings. \#1 is the
@@ -402,3 +407,109 @@
   \else
     \expandonce#1%
   \fi}
+%    \end{macrocode}
+% This macro calculates number widths and prepares macros to be used by the user
+%    \begin{macrocode}
+\def\tp@format@number#1#2#3{%
+  \tpSetProperty{#1formatted-number}{}%
+  \tpIfComp{#2Number}{%
+    \tpSetProperty{#1formatted-number}{%
+      \bgroup
+        \tpUseProperty{#1title-format}%
+        \tpUseProperty{#1number-format}%
+        \tpUseComp{#2Number}%
+        \tpUseProperty{#1number-sep}%
+      \egroup}%
+    \sbox\z@{\tpUseProperty{#1formatted-number}}%
+  }{%
+    \sbox\z@{}%
+  }%
+  \tp@store@maxwd{#1number-#3-maxwd}{\the\wd\z@}%
+  \tpSetValProp{#1number-width-level-max}{\csname tp-heading-#1number-#3-maxwd\endcsname}%
+  \tp@store@maxwd{#1number-maxwd}{\the\wd\z@}%
+  \tpSetValProp{#1number-width-max}{\csname tp-heading-#1number-#3-maxwd\endcsname}%
+  \tpSetValProp{#1number-width}{\the\wd\z@}%
+  \tp@get@indent{#1}{#3}%
+  \tp@set@hang{#1}%
+}
+%    \end{macrocode}
+% \subsection{Macro to determine indentation}
+%
+% Macro to process heading numbers. \#1 is the heading level
+%    \begin{macrocode}
+\def\tp@set@hang#1{%
+  \tpSetProperty{#1hang-number}{\tpUseProperty{#1formatted-number}}
+  \tpIfProp{#1indent}
+    {\ifdim\tpUseProperty{#1indent}<\z@
+        \tpSetProperty{#1hang-number}{%
+          \hskip\tpUseProperty{#1indent}%
+          \hbox to -\tpUseProperty{#1indent}{%
+            \tpIfPropVal{#1number-align}{left}{}{\hss}%
+            \tpUseProperty{#1formatted-number}%
+            \tpIfPropVal{#1number-align}{right}{}{\hss}}}%
+      \fi}{}}
+%    \end{macrocode}
+% \#1 is the property prefix, \#2 is the list level.
+%    \begin{macrocode}
+\def\tp@det@prev@indent#1#2{%
+  \@tempcnta\numexpr#2-1\relax
+  \ifdim\tpUseProperty{#1indent}<\z@\relax
+    \@tempdimb=-\tpUseProperty{#1indent}\relax
+  \else
+    \@tempdimb=\tpUseProperty{#1indent}\relax
+  \fi
+  \expandafter\ifx\csname tp-\tp@namespace-#1\the\@tempcnta-indent\endcsname\relax
+    \@tempdima=\@tempdimb\relax%
+  \else
+    \@tempdima\dimexpr \csname tp-\tp@namespace-#1\the\@tempcnta-indent\endcsname+\@tempdimb\relax
+  \fi
+  \tp@store@maxwd{#1#2-indent}{\the\@tempdima}%
+  \tpSetProperty{#1margin-left}{\csname tp-\tp@namespace-#1#2-indent\endcsname}}
+%    \end{macrocode}
+% This low-level macro takes the csname of an unprefixed dimension and
+% stores its value in the aux files iff the previous value of that
+% conrol structure is lower than the current value.
+%    \begin{macrocode}
+\def\tp@store@maxwd#1#2{%
+  \expandafter\ifx\csname tp-\tp@namespace-#1\endcsname\relax
+    \immediate\write\@auxout{\string\expandafter\string\gdef\string\csname\space tp-\tp@namespace-#1\string\endcsname{#2}}
+    \expandafter\xdef\csname tp-\tp@namespace-#1\endcsname{#2}%
+  \else
+    \expandafter\ifdim\csname tp-\tp@namespace-#1\endcsname<#2\relax
+      \immediate\write\@auxout{\string\expandafter\string\gdef\string\csname\space tp-\tp@namespace-#1\string\endcsname{#2}}%
+      \expandafter\xdef\csname tp-\tp@namespace-#1\endcsname{#2}%
+    \fi
+  \fi}
+%    \end{macrocode}
+% Eventually, write the actually used values for margin-left and
+% indent into the headings's Property list.
+%    \begin{macrocode}
+\def\tp@get@indent#1#2{%
+  \tpSetPropertyX{int-#1margin-left}{\tpUseProperty{#1margin-left}}%
+  \tpSetPropertyX{int-#1indent}{\tpUseProperty{#1indent}}%
+  \expandafter\let\expandafter\tp@tmp@numwd\csname tp-\tp@namespace-#1number-#2-maxwd\endcsname\relax
+  \tpIfPropVal{int-#1margin-left}{auto-global}
+    {\tpSetProperty{#1indent}{-\csname tp-\tp@namespace-#1number-maxwd\endcsname}%
+     \tpSetProperty{#1margin-left}{\csname tp-\tp@namespace-#1number-maxwd\endcsname}}
+    {\tpIfPropVal{int-#1margin-left}{auto}
+       {\tpIfPropVal{int-#1indent}{auto}
+          {\tpSetProperty{#1indent}{-\tp@tmp@numwd}}
+          {\tpIfProp{int-#1indent}
+             {\tpSetPropertyX{#1indent}{\tpUseProperty{int-#1indent}}}
+             {\tpSetProperty{#1indent}{\z@}}}%
+        \tp@det@prev@indent{#1}{#2}}
+       {\tpIfProp{int-#1margin-left}
+          {\tpIfPropVal{int-#1indent}{auto}
+            {\tpSetProperty{#1indent}{-\tp@tmp@numwd}}
+            {\tpIfProp{int-#1indent}
+               {\tpSetPropertyX{#1indent}{\tpUseProperty{int-#1indent}}}
+               {\tpSetProperty{#1indent}{\z@}}}}
+         {\tpIfPropVal{int-#1indent}{auto}
+            {\tpSetProperty{#1margin-left}{\tp@tmp@numwd}%
+             \tpSetProperty{#1indent}{-\tp@tmp@numwd}}
+            {\tpIfProp{int-#1indent}
+               {\tpSetPropertyX{#1indent}{\tpUseProperty{int-#1indent}}%
+                \tpSetProperty{#1margin-left}{\z@}}
+               {\tpSetProperty{#1indent}{\z@}%
+                \tpSetProperty{#1margin-left}{\z@}}}}}}
+    }

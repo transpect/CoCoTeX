@@ -54,7 +54,7 @@
   \tp@init@hooks{#3}%
   \tp@init@l@{toc}{#2}{#3}%
   \tp@init@cnt{#2}{#3}%
-  \tp@restore@init{tp-heading-number-#2-maxwd}%
+  \tp@restore@init{heading}{number-#2-maxwd}%
   %
   %
   %
@@ -203,87 +203,6 @@
     \tpUseProperty{toc-after-entry}%
   \egroup}
 %    \end{macrocode}
-% \subsection{Macro to determine indentation}
-%
-% Macro to process heading numbers. \#1 is the heading level
-%    \begin{macrocode}
-\def\tp@set@hang#1{%
-  \tpSetProperty{#1hang-number}{\tpUseProperty{#1formatted-number}}
-  \tpIfProp{#1indent}
-    {\ifdim\tpUseProperty{#1indent}<\z@
-        \tpSetProperty{#1hang-number}{%
-          \hskip\tpUseProperty{#1indent}%
-          \hbox to -\tpUseProperty{#1indent}{%
-            \tpIfPropVal{#1number-align}{left}{}{\hss}%
-            \tpUseProperty{#1formatted-number}%
-            \tpIfPropVal{#1number-align}{right}{}{\hss}}}%
-      \fi}{}}
-%    \end{macrocode}
-% \#1 is the property prefix, \#2 is the heading level.
-%    \begin{macrocode}
-\def\tp@det@prev@indent#1#2{%
-  \@tempcnta\numexpr#2-1\relax
-  \ifdim\tpUseProperty{#1indent}<\z@\relax
-    \@tempdimb=-\tpUseProperty{#1indent}\relax
-  \else
-    \@tempdimb=\tpUseProperty{#1indent}\relax
-  \fi
-  \expandafter\ifx\csname tp-\tp@namespace-#1\the\@tempcnta-indent\endcsname\relax
-    \@tempdima=\@tempdimb\relax%
-  \else
-    \@tempdima\dimexpr \csname tp-\tp@namespace-#1\the\@tempcnta-indent\endcsname+\@tempdimb\relax
-  \fi
-  \tp@store@maxwd{#1#2-indent}{\the\@tempdima}%
-  \tpSetProperty{#1margin-left}{\csname tp-\tp@namespace-#1#2-indent\endcsname}}
-%    \end{macrocode}
-% This low-level macro takes the csname of an unprefixed dimension and
-% stores its value in the aux files iff the previous value of that
-% conrol structure is lower than the current value.
-%    \begin{macrocode}
-\def\tp@store@maxwd#1#2{%
-  \expandafter\ifx\csname tp-\tp@namespace-#1\endcsname\relax
-    \immediate\write\@auxout{\string\expandafter\string\gdef\string\csname\space tp-\tp@namespace-#1\string\endcsname{#2}}
-    \expandafter\xdef\csname tp-\tp@namespace-#1\endcsname{#2}%
-  \else
-    \expandafter\ifdim\csname tp-\tp@namespace-#1\endcsname<#2\relax
-      \immediate\write\@auxout{\string\expandafter\string\gdef\string\csname\space tp-\tp@namespace-#1\string\endcsname{#2}}%
-      \expandafter\xdef\csname tp-\tp@namespace-#1\endcsname{#2}%
-    \fi
-  \fi}
-%    \end{macrocode}
-% Eventually, write the actually used values for margin-left and
-% indent into the headings's Property list.
-%    \begin{macrocode}
-\def\tp@get@indent#1#2{%
-  \tpSetPropertyX{int-#1margin-left}{\tpUseProperty{#1margin-left}}%
-  \tpSetPropertyX{int-#1indent}{\tpUseProperty{#1indent}}%
-  \expandafter\let\expandafter\tp@tmp@numwd\csname tp-\tp@namespace-#1number-#2-maxwd\endcsname\relax
-  \tpIfPropVal{int-#1margin-left}{auto-global}
-    {\tpSetProperty{#1indent}{-\csname tp-\tp@namespace-#1number-maxwd\endcsname}%
-     \tpSetProperty{#1margin-left}{\csname tp-\tp@namespace-#1number-maxwd\endcsname}}
-    {\tpIfPropVal{int-#1margin-left}{auto}
-       {\tpIfPropVal{int-#1indent}{auto}
-          {\tpSetProperty{#1indent}{-\tp@tmp@numwd}}
-          {\tpIfProp{int-#1indent}
-             {\tpSetPropertyX{#1indent}{\tpUseProperty{int-#1indent}}}
-             {\tpSetProperty{#1indent}{\z@}}}%
-        \tp@det@prev@indent{#1}{#2}}
-       {\tpIfProp{int-#1margin-left}
-          {\tpIfPropVal{int-#1indent}{auto}
-            {\tpSetProperty{#1indent}{-\tp@tmp@numwd}}
-            {\tpIfProp{int-#1indent}
-               {\tpSetPropertyX{#1indent}{\tpUseProperty{int-#1indent}}}
-               {\tpSetProperty{#1indent}{\z@}}}}
-         {\tpIfPropVal{int-#1indent}{auto}
-            {\tpSetProperty{#1margin-left}{\tp@tmp@numwd}%
-             \tpSetProperty{#1indent}{-\tp@tmp@numwd}}
-            {\tpIfProp{int-#1indent}
-               {\tpSetPropertyX{#1indent}{\tpUseProperty{int-#1indent}}%
-                \tpSetProperty{#1margin-left}{\z@}}
-               {\tpSetProperty{#1indent}{\z@}%
-                \tpSetProperty{#1margin-left}{\z@}}}}}}
-    }
-%    \end{macrocode}
 %
 %\subsection{Facility to create the running title macros}
 %
@@ -317,33 +236,8 @@
   \protected@edef\@tempa{\expandafter\@empty\csname tp@heading@bookmark\endcsname}%
   \bookmark[level=\Hy@toclevel,dest=\@currentHref]{\expandonce{\@tempa}}%
 }
-%    \end{macrocode}
-% This macro calculates number widths and prepares macros to be used by the user
-%    \begin{macrocode}
-\def\tp@format@number#1#2#3{%
-  \tpSetProperty{#1formatted-number}{}%
-  \tpIfComp{#2Number}{%
-    \tpSetProperty{#1formatted-number}{%
-      \bgroup
-        \tpUseProperty{#1title-format}%
-        \tpUseProperty{#1number-format}%
-        \tpUseComp{#2Number}%
-        \tpUseProperty{#1number-sep}%
-      \egroup}%
-    \sbox\z@{\tpUseProperty{#1formatted-number}}%
-  }{%
-    \sbox\z@{}%
-  }%
-  \tp@store@maxwd{#1number-#3-maxwd}{\the\wd\z@}%
-  \tpSetValProp{#1number-width-level-max}{\csname tp-heading-#1number-#3-maxwd\endcsname}%
-  \tp@store@maxwd{#1number-maxwd}{\the\wd\z@}%
-  \tpSetValProp{#1number-width-max}{\csname tp-heading-#1number-#3-maxwd\endcsname}%
-  \tpSetValProp{#1number-width}{\the\wd\z@}%
-  \tp@get@indent{#1}{#3}%
-  \tp@set@hang{#1}%
-}
-\tp@restore@init{tp-heading-toc-number-maxwd}
-\tp@restore@init{tp-heading-number-maxwd}
+\tp@restore@init{heading}{toc-number-maxwd}
+\tp@restore@init{heading}{number-maxwd}
 %    \end{macrocode}
 %
 %\subsection{Facility to render inline headings}

@@ -125,7 +125,6 @@
     \expandafter\let\expandafter\tp@fps\csname tp@#1@attr@float-pos\endcsname
   \fi
   \def\@tempa{h!}\ifx\tp@fps\@tempa\let\tp@fps\@empty\fi
-  \def\@tempa{h}\ifx\tp@fps\@tempa\def\tp@fps{htbp}\fi
   \ifx\tp@do@dblfloat\relax\linewidth\dimexpr2\columnwidth+\columnsep\relax\fi
   \expandafter\ifx\csname tp@#1@attr@orientation\endcsname\tp@str@landscape\relax
     \linewidth\textheight
@@ -307,8 +306,13 @@
     \expandafter{\@tempa #5}%
   \fi
   \tp@flt@generate@listof@handlers{#4}{#3}{#2}%
-  \tp@init@l@{#4}{0}{#3}% Generate listof-Entries for first level floats
-  \tp@init@l@{#4}{1}{sub#3}% Generate listof-Entries for sub floats
+  \bgroup
+    \def\tp@namespace{#2}%
+    \tp@init@l@[list-of]{#4}{0}{#3}% Generate listof-Entries for first level floats
+    \tp@restore@init{#4}{number-0-maxwd}%
+    \tp@init@l@[list-of]{#4}{1}{sub#3}% Generate listof-Entries for sub floats
+    \tp@restore@init{#4}{number-1-maxwd}%
+  \egroup
 }
 %    \end{macrocode}
 % Generate handlers for listof-entries. \#1 is the file ending, \#2 is the caption name, \#3 is the namespace (env name)
@@ -431,7 +435,6 @@
 %    \begin{macrocode}
 
 \def\tp@float[#1]#2#3#4{%
-  \savenotes
   \begingroup
     \tpNamespace{#4}%
     \tp@reset@defaults{#2}{#3}%
@@ -442,10 +445,11 @@
     \tpUseProperty{content-handler}%
     \tpUseProperty{before-float}%
     \tp@flt@set@hsize
+    \tp@set@flt@pos
+    \ifx\tp@fps\@empty\else\savenotes\fi
 }
 
 \def\endtp@float{%
-    \tp@set@flt@pos
     \tp@b@float
     \tp@test@caption{0}{capt}{top}%
     \tp@test@caption{0}{capt}{bottom}%
@@ -453,9 +457,10 @@
     \tp@flt@compose
     \tp@set@bot@sep
     \tp@e@float
+    \ifx\tp@fps\@empty\else\spewnotes\fi
   \endgroup
   \global\let\tp@current@class\relax
-  \spewnotes}
+}
 %    \end{macrocode}
 % Test if the current (sub)float has any top or bottom captions that
 % needed printed
@@ -715,7 +720,7 @@
     \ifvoid\htTableBox
       \tpContent{\unvbox\tp@floatbox}%
     \else
-      \tpContent{\unvbox\htTableBox}%
+      \unvbox\htTableBox%
     \fi
   \fi
   \tpUseComp{Content}%
@@ -781,11 +786,13 @@
   \tpSetProperty{sub-number-after}{)}% stuff that is put immediately after the sub counter
   \tpSetProperty{sub-number-block}{\tpUseProperty{float-number}\tpUseProperty{sub-number-sep}\tpUseProperty{sub-number}}%% Format of sub numbers
   %% List-of entries
-  \tpSetProperty{list-of-page-sep}{\dotfill}
-  \tpSetProperty{list-of-margin-right}{\@pnumwidth}
+  \tpSetProperty{list-of-page-sep}{\dotfill}%
+  \tpSetProperty{list-of-number-sep}{\enskip}%
+  \tpSetProperty{list-of-number-align}{left}%
+  \tpSetProperty{list-of-parfillskip}{-\rightskip}%
+  \tpSetProperty{list-of-margin-right}{\@pnumwidth}%
+  \tpSetProperty{list-of-margin-left}{auto}%
   \tpSetProperty{list-of-indent}{auto}% list-of-float appearance
-  \tpSetProperty{list-of-parfillskip}{-\rightskip}
-  \tpSetProperty{list-of-margin-left}{auto}
   \tpSetProperty{list-of-block}{%
     \tpUseProperty{list-of-caption-format}%
     \tpIfComp{ListofNumber}
@@ -799,7 +806,8 @@
     \leftskip\tpUseProperty{list-of-margin-left}\relax%
     \rightskip \tpUseProperty{list-of-margin-right}\relax
     \parfillskip \tpUseProperty{list-of-parfillskip}\relax
-    \parindent\tpUseProperty{list-of-indent}\@afterindenttrue
+    \parindent\z@
+    \@afterindenttrue
     \interlinepenalty\@M
     \leavevmode
     \null\nobreak
