@@ -231,10 +231,12 @@
 % creates a minipage of a fixed width for each part of a sub figure
 %    \begin{macrocode}
 \def\tp@create@mp#1#2#3{%
-  \begin{minipage}[#2][][t]{#3}%
+  \ifx\tp@fps\@empty\savenotes\fi
+    \begin{minipage}[#2][][t]{#3}%
     \let\includegraphics\tp@includesubgraphics
     #1%
   \end{minipage}%
+  \ifx\tp@fps\@empty\spewnotes\fi
 }
 
 %    \end{macrocode}
