@@ -47,12 +47,16 @@
 % Handling of endnotes:
 %    \begin{macrocode}
 \newif\if@enotesopen
+\AtBeginDocument{\edef\tpfn@parindent{\the\parindent}}
 \ifendnotes
   \RequirePackage{endnotes}
   \@ifpackageloaded{transpect-headings}{\let\tp@useTeXHeading\relax}{}
   \let\footnote=\endnote
   \def\enotesize{\normalsize}%
-  \def\enoteformat{\leavevmode\hskip-2em\hb@xt@2em{\@theenmark\hss}}%
+  \def\enoteformat{%
+    \leavevmode
+    \hskip-2em\hb@xt@2em{\@theenmark\hss}%
+    \expandafter\parindent\tpfn@parindent\relax}%
   \gdef\enoteheading{%
     \leftskip2em
   }%
@@ -65,7 +69,7 @@
     \if@enotesopen
       \global\c@endnote\z@%
       \bgroup
-      \parindent\z@
+      %\parindent\z@
       \parskip\z@
       \theendnotes
       \egroup
@@ -105,3 +109,28 @@
     }%
   }%
 \fi
+
+%    \end{macrocode}
+% Here we make a small adjustment to the \lstinline{\fn@fntext} macro
+% from the \lstinline{footnote} package by making it \lstinline{\long}
+% and therefore allowing \lstinline{\par} inside it's argument.
+%    \begin{macrocode}
+\long\def\fn@fntext#1{%
+  \ifx\ifmeasuring@\@@undefined%
+    \expandafter\@secondoftwo\else\expandafter\@iden%
+  \fi%
+  {\ifmeasuring@\expandafter\@gobble\else\expandafter\@iden\fi}%
+  {%
+    \global\setbox\fn@notes\vbox{%
+      \unvbox\fn@notes%
+      \fn@startnote%
+      \@makefntext{%
+        \rule\z@\footnotesep%
+        \ignorespaces%
+        #1%
+        \@finalstrut\strutbox%
+      }%
+      \fn@endnote%
+    }%
+  }%
+}
