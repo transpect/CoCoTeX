@@ -33,28 +33,43 @@
 \DeclareOptionX{resetnotesperchapter}{\PassOptionsToPackage{\CurrentOption}{transpect-endnotes}}
 \DeclareOptionX{endnotesperchapter}{\PassOptionsToPackage{\CurrentOption}{transpect-endnotes}}
 %    \end{macrocode}
-% The options \lstinline{book} (default, included only for legacy
-% reasons) and \lstinline{collection} are used to switch between
-% single and multiple contributors documents. The latter is used when
-% the document's components (i.\,e., chapters) are contributed to
-% different authors like journals, collections, or
-% proceedings. \lstinline{book} is used where the whole document has
-% the same author(s).
+% The option \lstinline{pubtype} (short for ``publication type'') has
+% possible three values: \lstinline{mono}, \lstinline{collection}, and
+% \lstinline{article}. \lstinline{mono} (also the default when no
+% \lstinline{pubtype} is given) and \lstinline{collection} are used to
+% switch between single and multiple contributor documents. Both types
+% implicitly load the {\LaTeX} standard class \lstinline{book}.
+%
+% \lstinline{collection} is used when the document's components
+% (i.\,e., chapters) are contributed by different authors like
+% journals, collections, or proceedings. \lstinline{mono} stands for
+% monographs, i.e., whole books that are written by the same
+% author(s).
+%
+% The publicaten type \lstinline{article} is intended for single
+% articles within a journal and load the {\LaTeX} standard class
+% \lstinline{article}.
 %    \begin{macrocode}
 \newif\ifcollection \collectionfalse
-\newif\if@article \@articlefalse
-\DeclareOptionX{book}{\global\collectionfalse\global\@articlefalse}
-\DeclareOptionX{article}{\global\collectionfalse\global\@articletrue}
-\DeclareOptionX{collection}{\global\collectiontrue\global\@articlefalse}
+\newif\ifarticle   \articlefalse
+\define@choicekey{transpect.cls}{pubtype}[\tp@pubtype\nr]{collection,article,mono}{%
+  \ifcase\nr\relax% collection
+    \global\collectiontrue
+  \or%
+    \global\articletrue
+  \else% mono
+  \fi
+}
 \DeclareOptionX*{\PassOptionsToClass{\CurrentOption}{article}}
 \DeclareOptionX*{\PassOptionsToClass{\CurrentOption}{book}}
 \DeclareOptionX{usescript}{\PassOptionsToPackage{\CurrentOption}{transpect-script}}
 \DeclareOptionX{nofigs}{\PassOptionsToPackage{\CurrentOption}{transpect-floats}}
 \ProcessOptionsX
 %    \end{macrocode}
-% All transpect derived classes base on \LaTeX's default class \lstinline{book} or \lstinline{article}:
+% All publication types supported by transpect-tex are based on one of
+% \LaTeX's default classes \lstinline{book} or \lstinline{article}:
 %    \begin{macrocode}
-\if@article
+\ifarticle
   \LoadClass[10pt,a4paper]{article}
 \else
   \LoadClass[10pt,a4paper]{book}
@@ -91,7 +106,7 @@
 %    \end{macrocode}
 % re-defined to make front- and backmatter components distinguish-able
 %    \begin{macrocode}
-\if@article\else
+\ifarticle\else
   \newif\if@frontmatter  \@frontmatterfalse
   \renewcommand\frontmatter{%
     \cleardoublepage
