@@ -105,9 +105,12 @@
 %    \begin{macrocode}
 \def\tpUseComp#1{\csname tp@\tp@namespace @#1\endcsname}
 %    \end{macrocode}
-% High level macro that executes \#2 if the Component macro \#1 is non-empty, and \#3 if it is empty.
+% High level macro that executes \#2 if the Component macro \#1 is given in its Namespace (empty or non-empty), and \#3 if it is not given (i.e., not existant).
 %    \begin{macrocode}
 \long\def\tpIfComp#1#2#3{\expandafter\ifx\csname tp@\tp@namespace @#1\endcsname\relax#3\else#2\fi}
+%    \end{macrocode}
+% High level macro that executes \#2 if the Component macro \#1 is empty (or \lstinline|{}|) within its Namespace, and \#3 if it is either not existant or non-empty.
+%    \begin{macrocode}
 \long\def\tpIfCompEmpty#1#2#3{\long\def\@tempa{}\expandafter\ifx\csname tp@\tp@namespace @#1\endcsname\@tempa#2\else#3\fi}
 %    \end{macrocode}
 % This macro handles the distinction between empty and un-used

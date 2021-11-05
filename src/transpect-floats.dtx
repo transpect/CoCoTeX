@@ -389,9 +389,13 @@
 % In order to account for sub-floats, we need to re-define some of the transpect-common Component conditionals:
 %    \begin{macrocode}
 \long\def\tp@flt@cond{%
-  \long\def\tpIfComp##1##2##3{\expandafter\let\expandafter\@tempa\csname tp@\tp@namespace @##1\endcsname\relax\expandafter\expandafter\expandafter\ifx\@tempa\relax##3\else##2\fi}%
-  \long\def\tpIfCompEmpty##1##2##3{\expandafter\let\expandafter\@tempa\csname tp@\tp@namespace @##1\endcsname\relax\expandafter\expandafter\expandafter\ifx\@tempa\relax##2\else##3\fi}%
-}
+  \long\def\tpIfComp##1##2##3{%
+    \expandafter\let\expandafter\@tempa\csname tp@\tp@namespace @##1\endcsname\relax
+    \expandafter\expandafter\expandafter\ifx\@tempa\relax##3\else##2\fi}%
+  \long\def\tpIfCompEmpty##1##2##3{%
+    \long\def\@tempa{}%
+    \expandafter\let\expandafter\@tempb\csname tp@\tp@namespace @##1\endcsname\relax
+    \expandafter\expandafter\expandafter\ifx\@tempb\@tempa ##2\else ##3\fi}}
 %    \end{macrocode}
 % Faculity to create auto-numbered counters
 %    \begin{macrocode}
