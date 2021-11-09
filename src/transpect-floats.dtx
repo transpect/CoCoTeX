@@ -126,7 +126,7 @@
   \fi
   \def\@tempa{h!}\ifx\tp@fps\@tempa\let\tp@fps\@empty\fi
   \ifx\tp@do@dblfloat\relax
-    \def\tp@fps{htpb!}% 11514
+    \ifx\tp@fps\@empty\def\tp@fps{htpb!}\fi% 11514
     \linewidth\dimexpr2\columnwidth+\columnsep\relax
   \fi
   \expandafter\ifx\csname tp@#1@attr@orientation\endcsname\tp@str@landscape\relax
