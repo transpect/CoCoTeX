@@ -125,7 +125,10 @@
     \expandafter\let\expandafter\tp@fps\csname tp@#1@attr@float-pos\endcsname
   \fi
   \def\@tempa{h!}\ifx\tp@fps\@tempa\let\tp@fps\@empty\fi
-  \ifx\tp@do@dblfloat\relax\linewidth\dimexpr2\columnwidth+\columnsep\relax\fi
+  \ifx\tp@do@dblfloat\relax
+    \def\tp@fps{htpb!}% 11514
+    \linewidth\dimexpr2\columnwidth+\columnsep\relax
+  \fi
   \expandafter\ifx\csname tp@#1@attr@orientation\endcsname\tp@str@landscape\relax
     \linewidth\textheight
     \def\tp@fps{p}%
@@ -150,6 +153,7 @@
       \edef\tp@e@float{\noexpand\end{\@tp@b@float\ifx\tp@do@dblfloat\relax*\fi}}
     \else
       \ifx\tp@do@dblfloat\relax
+        \ifx
         \edef\tp@b@float{\noexpand\@xdblfloat {\tp@captype}[\tp@fps]}
         \let\tp@e@float\end@dblfloat
       \else
