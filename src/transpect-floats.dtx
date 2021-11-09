@@ -141,7 +141,7 @@
     \let\tp@b@float\relax
     \let\tp@e@float\relax
   \else
-    \def\@tempa{h}\ifx\tp@fps\@tempa\def\tp@fps{ht!}\fi
+    \def\@tempa{h}\ifx\tp@fps\@tempa\def\tp@fps{htpb}\fi
     \let\tp@b@float\tp@captype%
     \expandafter\ifx\csname tp@\tp@captype @attr@orientation\endcsname\tp@str@landscape\relax
       \ifx\tp@b@float\tp@str@table
