@@ -516,3 +516,20 @@
                {\tpSetProperty{#1indent}{\z@}%
                 \tpSetProperty{#1margin-left}{\z@}}}}}}
     }
+%    \end{macrocode}
+% \section{Miscellanieous}
+%
+% Macro to have a vertical skip between two paragraphs and no indent
+% in the second paragraph. The amount of space can be adjusted with
+% the optional argument. It this optional argument is missing,
+% \lstinline{\tpnewparskip} is inserted, which defaults to
+% \lstinline{1\baselineskip}.
+%    \begin{macrocode}
+\newdimen\tpnewparskip \AtBeginDocument{\ifdim\tpnewparskip=\z@\relax \tpnewparskip=1\baselineskip\relax\fi}
+\def\tpNewPar{\@ifnextchar[{\@tpnewpar}{\@tpnewpar[\the\tpnewparskip]}}%]
+\def\@tpnewpar[#1]{%
+  \ifhmode\par\fi
+  \message{1: `#1'}%
+  \vskip#1\relax
+  \@afterheading
+}
