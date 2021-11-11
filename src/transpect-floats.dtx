@@ -718,6 +718,7 @@
   \tpMakeFltComp{tpContent}{content}{Content}%
   \tp@reserve@tabular
   \ifx\tp@uses@htmltabs\relax
+    \ifx\tp@fps\@empty\else\htAddStyle{break-table:false;}\fi
     \global\setbox\htTableBox\box\voidb@x
     \let\htOutputTable\relax
   \fi}
