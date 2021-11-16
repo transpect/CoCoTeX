@@ -13,6 +13,163 @@
 \NeedsTeXFormat{LaTeX2e}[2018/12/01]
 \ProvidesPackage{transpect-title}
     [\filedate \fileversion le-tex transpect title module]
+\DeclareOptionX{newtitle}{\global\let\tp@newtitle\relax}%% TEMP
+\ProcessOptionsX%% TEMP
+
+\newif\ifdocopydisclaimer  \docopydisclaimertrue%% TEMP
+\newif\ifprintpublinfo     \printpublinfotrue%% TEMP
+
+
+\ifx\tp@newtitle\relax%% TEMP
+\def\tpMeta{%
+  \tpNamespace{titlepage}%
+  \tp@title@simple@comps
+  \tp@title@names{comp}%
+}
+\def\endtpMeta{%
+  \tp@title@names{eval}%
+  \AtBeginDocument{\tp@maketitle}%
+  \let\tp@namespace\@empty
+}
+
+\def\tp@prov@num@comp#1#2#3{%
+  \tpProvideComp{#2}{\expandafter\global}{}{\expandafter\the\csname #1-Cnt\endcsname-#3}%
+}
+
+\def\tp@title@name@comp#1{%
+  \tpProvideComp{tp#1s}{\expandafter\global}{}{#1s}%
+  \let\tp@prev@namepsace\tp@namespace
+  \expandafter\newcount\csname #1-Cnt\endcsname%
+  \expandafter\def\csname tp#1\endcsname{%
+    \expandafter\global\expandafter\advance\csname #1-Cnt\endcsname\@ne
+    \def\tp@namespace{#1}%
+    \tp@prov@num@comp{#1}{tpNameSimple}{simple-name}%
+    \tp@prov@num@comp{#1}{tpSurName}{sur-name}%
+    \tp@prov@num@comp{#1}{tpFirstName}{first-name}%
+    \tp@prov@num@comp{#1}{tpMidName}{mid-name}%
+    \tp@prov@num@comp{#1}{tpAffilID}{affil-id}%
+    \tp@prov@num@comp{#1}{tpBio}{bio}%
+  }%
+  \expandafter\def\csname endtp#1\endcsname{}%
+  \let\tp@namespace\tp@prev@namepsace
+  %%
+}
+
+\def\tp@title@name@eval#1{%
+  \tpNamespace{titlepage}%
+  \expandafter\ifnum\csname #1-Cnt\endcsname=\@ne
+    \edef\@tempa{\csname tp@#1@1-simple-name\endcsname}%
+  \else
+    \expandafter\ifnum\csname #1-Cnt\endcsname=\tw@
+      \edef\@tempa{\csname tp@#1@1-simple-name\endcsname\space and \csname tp@#1@2-simple-name\endcsname}%
+    \else
+      \def\@tempa{}%
+      \tp@iterate{\@tempcnta}{\@ne}{\expandafter\the\csname #1-Cnt\endcsname}{%
+        \edef\@tempb{\csname tp@#1@\the\@tempcnta-simple-name\endcsname}%
+        \ifnum\@tempcnta=\expandafter\the\csname #1-Cnt\endcsname\relax
+          \expandafter\edef\expandafter\@tempa\expandafter{\@tempa, \@tempb}%
+        \else
+          \expandafter\edef\expandafter\@tempa\expandafter{\@tempa\space and \@tempb}%
+        \fi
+      }%
+    \fi
+  \fi
+  \expandafter\csname tp#1s\expandafter\endcsname\expandafter{\@tempa}%
+}%
+
+\def\tp@title@names#1{%
+  \csname tp@title@name@#1\endcsname{Author}%
+  \csname tp@title@name@#1\endcsname{Editor}%
+  \csname tp@title@name@#1\endcsname{SeriesEditor}%
+}
+
+
+\def\tp@title@simple@comps{%
+  %% Titles
+  \tpProvideComp{tpTitle}{\expandafter\global}{}{Title}%
+  \tpProvideComp{tpSubtitle}{\expandafter\global}{}{Subtitle}%
+  %% Series
+  \tpProvideComp{tpSeries}{\expandafter\global}{}{Series}%
+  \tpProvideComp{tpSubSeries}{\expandafter\global}{}{SubSeries}%
+  \tpProvideComp{tpVolume}{\expandafter\global}{}{Volume}%
+  \tpProvideComp{tpNumber}{\expandafter\global}{}{Number}%
+  %% Publisher
+  \tpProvideComp{tpPublisher}{\expandafter\global}{}{Publisher}%
+  \tpProvideComp{tpPubPlace}{\expandafter\global}{}{PublPlace}%
+  \tpProvideComp{tpPubLogo}{\expandafter\global}{}{PubLogo}%
+  \tpProvideComp{tpWeb}{\expandafter\global}{}{PubWeb}%
+  %% Pubication Meta
+  \tpProvideComp{tpEdition}{\expandafter\global}{}{Edition}%
+  \tpProvideComp{tpYear}{\expandafter\global}{}{Year}%
+  \tpProvideComp{tpISBN}{\expandafter\global}{}{ISBN}%
+  \tpProvideComp{tpISSN}{\expandafter\global}{}{ISSN}%
+  \tpProvideComp{tpEISBN}{\expandafter\global}{}{EISBN}%
+  \tpProvideComp{tpEpubISBN}{\expandafter\global}{}{EpubISBN}%
+  \tpProvideComp{tpDOI}{\expandafter\global}{}{DOI}%
+  %% Imprint Meta
+  \tpProvideComp{tpBiblio}{\expandafter\global}{}{Biblio}%
+  \tpProvideComp{tpPrint}{\expandafter\global}{}{Print}%
+  \tpProvideComp{tpLectorate}{\expandafter\global}{}{Lectorate}%
+  \tpProvideComp{tpTranslator}{\expandafter\global}{}{Translator}%
+  \tpProvideComp{tpCoverDesign}{\expandafter\global}{}{CoverDesign}%
+  \tpProvideComp{tpCoverImage}{\expandafter\global}{}{CoverImage}%
+  \tpProvideComp{tpTypesetter}{\expandafter\global}{}{Typesetter}%
+  \tpProvideComp{tpQA}{}{}{QA}%
+  \tpProvideComp{tpConversion}{\expandafter\global}{}{Conversion}%
+  \tpProvideComp{tpEnvDisclaimer}{\expandafter\global}{}{EnvDisclaimer}%
+  %% Licencing
+  \tpProvideComp{tpLicenceText}{\expandafter\global}{}{LicenceText}%
+  \tpProvideComp{tpLicenceLogo}{\expandafter\global}{}{LicenceLogo}%
+  \tpProvideComp{tpCopyright}{\expandafter\global}{}{Copyright}%
+  \tpProvideComp{tpCopyrightDisclaimer}{\expandafter\global}{}{CopyrightDisclaimer}%
+}
+
+\def\tp@maketitle{%
+  \tpNamespace{titlepage}%
+  \csname tp@titlepage\endcsname
+  \ifarticle
+    \gdef\maketitle{%
+      \tpUseProperty{article-title}%
+    }%
+  \else
+    \gdef\maketitle{%
+      \tpUseProperty{before-titlepage}%
+      \tpUseProperty{titlepage-i}%
+      \tpUseProperty{titlepage-ii}%
+      \tpUseProperty{titlepage-iii}%
+      \tpUseProperty{titlepage-iv}%
+      \tpUseProperty{after-titlepage}%
+    }%
+  \fi
+}
+
+\def\tpDeclareTitlepage#1{%
+  \gdef\tp@titlepage{%
+    \tpNamespace{titlepage}%
+    \tp@titlepage@default
+    #1
+  }%
+}
+
+\def\tp@titlepage@default{%
+  \tpSetProperty{article-title}{}%
+  \tpSetProperty{before-titlepage}{\pagestyle{empty}}%
+  \tpSetProperty{after-titlepage}{\pagestyle{headings}}%
+  \tpSetProperty{titlepage-i}{\null\clearpage}%
+  \tpSetProperty{titlepage-ii}{\null\clearpage}%
+  \tpSetProperty{titlepage-iii}{%
+    \tpUseComp{Editors}%
+    \vfill
+    \clearpage
+  }%
+  \tpSetProperty{titlepage-iv}{\null\clearpage}%
+}
+
+\tpDeclareTitlepage{}
+\else%% TEMP
+%%%%%%%%%%
+% LEGACY %
+%%%%%%%%%%
 %    \end{macrocode}
 % Localized labels for meta data in the imprint:
 %    \begin{macrocode}
@@ -46,8 +203,7 @@
 \expandafter\addto\expandafter\captionsUSenglish\expandafter{\@tempa}
 
 \def\@tempa{%
-  \def\lectoratename{Lektorat: }
-  \def\translatorname{Übersetzer: }%
+  \def\lectoratename{Lektorat: } \def\translatorname{Übersetzer: }%
   \def\qualificationname{Qualifikationsnachweis: }%
   \def\coverdesignname{Umschlaggestaltung: }%
   \def\coverimagename{Umschlagabbildung: }%
@@ -59,74 +215,64 @@
   \def\eisbnname{PDF-ISBN}%
   \def\epubisbnname{EPUB-ISBN}%
   \def\editorabbrevname{(Hg.)}%
-  \def\conversionname{Konvertierung: }
-  \def\volname{Band}%
+  \def\conversionname{Konvertierung: } \def\volname{Band}%
   \def\keywordsname{Schlagworte: }%
   \def\discussionname{Besprechung: }%
-  \def\copyrightDisclaimername{Alle Rechte vorbehalten. Die Verwertung der Texte
-  und Bilder ist ohne Zustimmung des Verlages urheberrechtswidrig und
-  strafbar. Das gilt auch für Vervielfältigungen, Übersetzungen,
-  Mikroverfilmungen und für die Verarbeitung mit elektronischen
-  Systemen.}%
+  \def\copyrightDisclaimername{Alle Rechte vorbehalten. Die Verwertung der Texte und Bilder ist ohne Zustimmung des Verlages urheberrechtswidrig und strafbar. Das gilt auch für Vervielfältigungen, Übersetzungen, Mikroverfilmungen und für die Verarbeitung mit elektronischen Systemen.}%
   \def\biblioinfoname{{\sffamily\bfseries Bibliografische Information der Deutschen Nationalbibliothek}\\
     Die Deutsche Nationalbibliothek verzeichnet diese Publikation in der Deutschen Nationalbibliografie; detaillierte bibliografische Daten sind im Internet über \url{http://dnb.d-nb.de} abrufbar.}%
   \def\cctextname{Dieses Werk ist lizenziert unter der Creative Commons Attribution-NonCommercial-NoDerivs 4.0 Lizenz (BY-NC-ND). Diese Lizenz erlaubt die private Nutzung, gestattet aber keine Bearbeitung und keine kommerzielle Nutzung. Weitere Informationen finden Sie unter \url{https://creativecommons.org/licenses/by-nc-nd/4.0/deed.de}\\
-Um Genehmigungen für Adaptionen, Übersetzungen, Derivate oder Wiederverwendung zu kommerziellen Zwecken einzuholen, wenden Sie sich bitte an \@publweb\\
-Die Bedingungen der Creative-Commons-Lizenz gelten nur für Originalmaterial. Die Wiederverwendung von Material aus anderen Quellen (gekennzeichnet mit Quellenangabe) wie z.B. Schaubilder, Abbildungen, Fotos und Textauszüge erfordert ggf. weitere Nutzungsgenehmigungen durch den jeweiligen Rechteinhaber.}
-}
-\expandafter\addto\expandafter\captionsgerman\expandafter{\@tempa}
-\expandafter\addto\expandafter\captionsngerman\expandafter{\@tempa}
+    Um Genehmigungen für Adaptionen, Übersetzungen, Derivate oder Wiederverwendung zu kommerziellen Zwecken einzuholen, wenden Sie sich bitte an \@publweb\\
+    Die Bedingungen der Creative-Commons-Lizenz gelten nur für Originalmaterial. Die Wiederverwendung von Material aus anderen Quellen (gekennzeichnet mit Quellenangabe) wie z.B. Schaubilder, Abbildungen, Fotos und Textauszüge erfordert ggf. weitere Nutzungsgenehmigungen durch den jeweiligen Rechteinhaber.}  } \expandafter\addto\expandafter\captionsgerman\expandafter{\@tempa} \expandafter\addto\expandafter\captionsngerman\expandafter{\@tempa}
 
 \def\the@authorinfos{}
 \let\authormark\@empty
 \def\authorinfo#1#2{\expandafter\def\expandafter\the@authorinfos\expandafter{\the@authorinfos{\bfseries #1} #2\par}}
-\def\edition#1{\def\@edition{#1}}                 \edition{}%
+ \def\edition#1{\def\@edition{#1}}                 \edition{}%
 \def\editor#1{\def\@editor{#1}}                   \editor{}%
-\def\series#1{\def\@series{#1}}                   \series{}%
+ \def\series#1{\def\@series{#1}}                   \series{}%
 \def\serieseditor#1{\def\@serieseditor{#1}}       \serieseditor{}%
-\def\volume#1{\def\@volume{#1}}                   \volume{}%
-\def\subtitle#1{\def\@subtitle{#1}}               \subtitle{}%
-\def\logo#1{\let\@logo\@empty\if!#1!\else\def\@logo{\includegraphics{#1}}\fi} \logo{}
+ \def\volume#1{\def\@volume{#1}}                   \volume{}%
+ \def\subtitle#1{\def\@subtitle{#1}}               \subtitle{}%
+ \def\logo#1{\let\@logo\@empty\if!#1!\else\def\@logo{\includegraphics{#1}}\fi} \logo{}
 \def\thanks#1{\def\@thanks{#1}}                   \thanks{}
-\def\biblioInfo#1{%
+ \def\biblioInfo#1{%
   \def\@biblioInfo{\biblioinfoname}%
   \if!#1!\else\def\@biblioInfo{#1}\fi}            \biblioInfo{}
-\def\publ#1{\def\@publ{#1}}                       \publ{}
-\def\publyear#1{\def\@publyear{#1}}               \publyear{}
-\def\place#1{\def\@place{#1}}                     \place{}
+ \def\publ#1{\def\@publ{#1}}                       \publ{}
+ \def\publyear#1{\def\@publyear{#1}}               \publyear{}
+ \def\place#1{\def\@place{#1}}                     \place{}
 \long\def\editorial#1{\long\def\@editorial{#1}}  \editorial{}
-\newif\ifdocopydisclaimer                         \docopydisclaimertrue
 
-\def\copyrightDisclaimer#1{\def\@copyrightDiscl{#1}}
-\copyrightDisclaimer{\copyrightDisclaimername}
-\newif\ifprintpublinfo \printpublinfotrue
-\def\environmentDisclaimer#1{\def\@envdiscl{#1}} \environmentDisclaimer{Gedruckt auf alterungsbeständigem Papier mit chlorfrei gebleichtem Zellstoff.}
-\def\publweb#1{\def\@publweb{#1}}                \publweb{}
+ \def\copyrightDisclaimer#1{\def\@copyrightDiscl{#1}}
+ \copyrightDisclaimer{\copyrightDisclaimername}
+ \def\environmentDisclaimer#1{\def\@envdiscl{#1}} \environmentDisclaimer{Gedruckt auf alterungsbeständigem Papier mit chlorfrei gebleichtem Zellstoff.}
+ \def\publweb#1{\def\@publweb{#1}}                \publweb{}
 \def\publgesamt#1{\def\@publgesamt{#1}}          \publgesamt{}
 \def\dedication#1{\def\@dedication{#1}}          \dedication{}
-\def\lectorate#1{\def\@lectorate{#1}}            \lectorate{}
-\def\translator#1{\def\@translator{#1}}          \translator{}
+ \def\lectorate#1{\def\@lectorate{#1}}            \lectorate{}
+ \def\translator#1{\def\@translator{#1}}          \translator{}
 \def\qualification#1{\def\@qualification{#1}}    \qualification{}
 \def\appraiser#1{\def\@appraiser{#1}}            \appraiser{}
-\def\coverDesign#1{\def\@coverdesign{#1}}        \coverDesign{}
-\def\coverImage#1{\def\@coverimage{#1}}          \coverImage{}
-\def\QandA#1{\def\@QandA{#1}}                    \QandA{}
-\def\typesetter#1{\def\@typesetter{#1}}          \typesetter{}
-\def\print#1{\def\@print{#1}}                    \print{}
-\def\isbn#1{\def\@isbn{#1}}                      \isbn{}
-\def\eisbn#1{\def\@eisbn{#1}}                    \eisbn{}
-\def\epubisbn#1{\def\@epubisbn{#1}}              \epubisbn{}
-\def\doi#1{\def\@doi{#1}}                        \doi{}
-\def\conversion#1{\def\@conversion{#1}}          \conversion{}
+ \def\coverDesign#1{\def\@coverdesign{#1}}        \coverDesign{}
+ \def\coverImage#1{\def\@coverimage{#1}}          \coverImage{}
+ \def\QandA#1{\def\@QandA{#1}}                    \QandA{}
+ \def\typesetter#1{\def\@typesetter{#1}}          \typesetter{}
+ \def\print#1{\def\@print{#1}}                    \print{}
+ \def\isbn#1{\def\@isbn{#1}}                      \isbn{}
+ \def\eisbn#1{\def\@eisbn{#1}}                    \eisbn{}
+ \def\epubisbn#1{\def\@epubisbn{#1}}              \epubisbn{}
+ \def\doi#1{\def\@doi{#1}}                        \doi{}
+ \def\conversion#1{\def\@conversion{#1}}          \conversion{}
 \def\shorttext#1{\def\@shorttext{#1}}            \shorttext{}
 \def\keywords#1{\def\@keywords{#1}}              \keywords{}
 \def\discussion#1{\def\@discussion{#1}}          \discussion{}
-\def\ccimage#1{\def\@ccimage{#1}}                \ccimage{}
-\def\cctext#1{\def\cctextname{#1}}               \AtBeginDocument{\cctext{\cctextname}}
+ \def\ccimage#1{\def\@ccimage{#1}}                \ccimage{}
+ \def\cctext#1{\def\cctextname{#1}}               \AtBeginDocument{\cctext{\cctextname}}
 \def\grantlogo#1{\def\@grantlogo{#1}}            \grantlogo{}
 \def\granttext#1{\def\@granttext{#1}}            \granttext{}
 
-\def\maketitle{%
+ \def\maketitle{%
   \bgroup
     %% Seite i
     \parindent\z@
@@ -216,4 +362,6 @@ Die Bedingungen der Creative-Commons-Lizenz gelten nur für Originalmaterial. Di
   \global\let\@subtitle\@empty
   \global\let\@author\@undefined
   \clearpage}
+ 
 \global\let\@author\@empty
+\fi%% TEMP

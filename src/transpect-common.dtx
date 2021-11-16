@@ -16,6 +16,17 @@
     [\filedate \fileversion le-tex transpect common module]
 \RequirePackage{iftex}
 %    \end{macrocode}
+%
+% \section{Common low level macros}
+% Contains common macros used in the transpect-tex modules and that
+% are intended for macro and stylesheet programming.
+% \subsection{Common Variables}
+%    \begin{macrocode}
+%
+\def\tp@str@default{default}
+\def\tp@str@table{table}
+\def\tp@str@figure{figure}
+%    \end{macrocode}
 % prefix macro used to execute code after the next \lstinline{\fi}:
 %    \begin{macrocode}
 \def\afterfi#1\fi{\fi#1}
@@ -98,7 +109,10 @@
 %    \begin{macrocode}
 \def\tpProvideComp#1#2#3#4{%
   \ltx@LocalExpandAfter\global\expandafter\let\csname tp@\tp@namespace @#4\endcsname\relax
-  \expandafter\long\expandafter\def\csname #1\endcsname##1{#2\expandafter\long\expandafter\def\csname tp@\tp@namespace @#4\endcsname{##1}\ignorespaces#3}}
+  \expandafter\long\expandafter\def\csname #1\endcsname##1{%
+    %\message{^^J==> defining: tp@\tp@namespace @#4}%
+    #2\expandafter\long\expandafter\def\csname tp@\tp@namespace @#4\endcsname{##1}\ignorespaces#3}%
+}
 \def\tpNamespace#1{\def\tp@namespace{#1}}
 %    \end{macrocode}
 % High level command to use Data field \#1.
@@ -276,16 +290,6 @@
     \expandafter\tpUseClass\expandafter{\csname tp@#2@class@#1@parent\endcsname}{#2}%
   \fi
   \csname tp@#2@class@#1\endcsname}
-
-%    \end{macrocode}
-%
-% \section{Misc}
-% \subsection{Common Variables}
-%    \begin{macrocode}
-%
-\def\tp@str@default{default}
-\def\tp@str@table{table}
-\def\tp@str@figure{figure}
 %    \end{macrocode}
 %
 % \subsection{minusvspace}
@@ -517,19 +521,26 @@
                 \tpSetProperty{#1margin-left}{\z@}}}}}}
     }
 %    \end{macrocode}
-% \section{Miscellanieous}
+% \subsection{Label generation and selection}
 %
-% Macro to have a vertical skip between two paragraphs and no indent
-% in the second paragraph. The amount of space can be adjusted with
-% the optional argument. It this optional argument is missing,
-% \lstinline{\tpnewparskip} is inserted, which defaults to
-% \lstinline{1\baselineskip}.
+% \#1 is the language, \#2 is the internal reference name, and \#3 is the language specific label.
 %    \begin{macrocode}
-\newdimen\tpnewparskip \AtBeginDocument{\ifdim\tpnewparskip=\z@\relax \tpnewparskip=1\baselineskip\relax\fi}
-\def\tpNewPar{\@ifnextchar[{\@tpnewpar}{\@tpnewpar[\the\tpnewparskip]}}%]
-\def\@tpnewpar[#1]{%
-  \ifhmode\par\fi
-  \message{1: `#1'}%
-  \vskip#1\relax
-  \@afterheading
-}
+\def\tp@str@german{german}
+\def\tp@str@english{english}
+
+\def\tpSetBabelLabel#1#2#3{%
+  \def\@lang{#1}%
+  \expandafter\def\expandafter\@tempa\expandafter{\expandafter\def\csname #2name\endcsname{#3}}%
+  \ifx\@lang\tp@str@german
+    \expandafter\addto\expandafter\captionsgerman\expandafter{\@tempa}%
+    \expandafter\addto\expandafter\captionsngerman\expandafter{\@tempa}%
+  \else
+    \ifx\@lang\tp@str@english
+      \expandafter\addto\expandafter\captionsbritish\expandafter{\@tempa}%
+      \expandafter\addto\expandafter\captionsUKenglish\expandafter{\@tempa}%
+      \expandafter\addto\expandafter\captionsenglish\expandafter{\@tempa}%
+      \expandafter\addto\expandafter\captionsamerican\expandafter{\@tempa}%
+      \expandafter\addto\expandafter\captionsUSenglish\expandafter{\@tempa}%
+    \else
+    \fi
+  \fi}

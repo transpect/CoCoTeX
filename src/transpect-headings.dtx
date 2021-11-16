@@ -476,80 +476,22 @@
     \tpUseComp{BMTitle}%
   }%
 }
-
+%    \end{macrocode}
+% \section{Miscellaneous}
+%
+% \subsection{Alternative paragraph separation}
+%
+% Macro to have a vertical skip between two paragraphs and no indent
+% in the second paragraph. The amount of space can be adjusted with
+% the optional argument. It this optional argument is missing,
+% \lstinline{\tpnewparskip} is inserted, which defaults to
+% \lstinline{1\baselineskip}.
 %    \begin{macrocode}
-% \def\partmark#1{}%
-% \tpDeclareHeading{-1}{part}{%
-%   \tpHeadingProperty{BlockFormat}{\centering
-%     \markboth{}{}%
-%     \thispagestyle{empty}%
-%   }%
-%   \tpHeadingProperty{BeforeHeading}{\cleardoublepage\null\vskip10mm}%
-%   \tpHeadingProperty{AfterHeading}{\vfill}%
-%   \tpHeadingProperty{AuthorFormat}{\itshape}%
-%   \tpHeadingProperty{AfterAuthor}{\@@par\vskip2\baselineskip}%
-%   \tpHeadingProperty{TitleFormat}{\Huge}%
-%   \tpHeadingProperty{BeforeSubtitle}{\@@par\vskip\baselineskip}%
-%   \tpHeadingProperty{SubtitleFormat}{\leavevmode\vskip\baselineskip\large\bfseries}%
-%   \tpHeadingProperty{AfterNumber}{:\@@par}%
-%   \tpToCBefore{\vskip2\baselineskip}%
-%   \tpToCFormat{\bfseries}%
-%   \tpToCPageSep{\hfill}%
-% }
-% \tpDeclareHeading{0}{chapter}{%
-%   \tpHeadingProperty{BlockFormat}{\centering
-%     \markboth{}{}%
-%     \thispagestyle{empty}%
-%   }%
-%   \tpHeadingProperty{BeforeHeading}{\cleardoublepage\null\vskip10mm}%
-%   \tpHeadingProperty{AfterSkip}{3\baselineskip}%
-%   \tpHeadingProperty{AuthorFormat}{\itshape}%
-%   \tpHeadingProperty{AfterAuthor}{\@@par\vskip\baselineskip}%
-%   \tpHeadingProperty{TitleFormat}{\LARGE}%
-%   \tpHeadingProperty{SubtitleFormat}{\leavevmode\vskip\baselineskip\Large\bfseries}%
-%   \tpHeadingProperty{BeforeSubtitle}{\@@par\vskip.5\baselineskip}%
-%   \tpHeadingProperty{BeforeQuote}{\strut\@@par\vskip\baselineskip\hfil\hbox\bgroup\centering\vbox\bgroup\hsize.5\textwidth\centering}%
-%   \tpHeadingProperty{AfterQuote}{\egroup\egroup}%
-%   \tpHeadingProperty{AfterNumber}{:\enskip}%
-%   \tpToCBefore{\vskip1\baselineskip}%
-%   \tpToCFormat{\bfseries}%
-%   \tpToCPageSep{\bfseries\dotfill}%
-%   %% 
-%   \tpHeadingProperty{AfterNumber}{:\enskip}%
-% }
-% \tpDeclareHeading{1}{section}{%
-%   \tpAuthorAfter
-%   \tpHangNumber
-%   %\tpHangFixed{12mm}%
-%   \tpHeadingProperty{BeforeHeading}{\vskip2\baselineskip}%
-%   \tpHeadingProperty{AfterSkip}{1\baselineskip}%
-%   \tpHeadingProperty{BeforeSubtitle}{ -- }%
-%   \tpHeadingProperty{BeforeAuthor}{\@@par}%
-%   \tpHeadingProperty{AuthorFormat}{\itshape}%
-%   \tpHeadingProperty{AfterAuthor}{\@@par}%
-%   \tpHeadingProperty{TitleFormat}{\Large}%
-%   \tpHeadingProperty{SubtitleFormat}{\Large}%
-%   \tpHeadingProperty{BeforeQuote}{\@@par\vskip.5\baselineskip}%
-%   \tpHeadingProperty{AfterNumber}{:\enskip}%
-%   % \tpHeadingProperty{AfterQuote}{\@@par\vskip.5\baselineskip}%
-% }
-% \tpDeclareHeading{2}{subsection}{%
-%   \tpHeadingProperty{BeforeHeading}{\vskip1.5\baselineskip}%
-%   \tpHeadingProperty{AfterSkip}{0.5\baselineskip}%
-%   \tpHeadingProperty{BeforeSubtitle}{ -- }%
-%   \tpHeadingProperty{AfterAuthor}{\@@par}%
-%   \tpHeadingProperty{TitleFormat}{\large}%
-%   \tpHeadingProperty{SubtitleFormat}{}%
-%   \tpHeadingProperty{BeforeQuote}{\@@par\vskip.5\baselineskip}%
-%   \tpHeadingProperty{AfterNumber}{:\enskip}%
-% }
-% \tpDeclareHeading{3}{subsubsection}{}
-% \tpDeclareHeading{4}{paragraph}{%
-%   \tpHeadingProperty{BeforeHeading}{\vskip1\baselineskip \@minus5bp}%
-%   \tpHeadingProperty{AfterSkip}{-.5em}%
-%   \tpHeadingProperty{BeforeSubtitle}{ -- }%
-%   \tpHeadingProperty{AfterAuthor}{\@@par}%
-%   \tpHeadingProperty{TitleFormat}{\normalsize\bfseries}%
-%   \tpHeadingProperty{SubtitleFormat}{}%
-%   \tpHeadingProperty{AfterNumber}{:\enskip}%
-% }
+\newdimen\tpnewparskip \AtBeginDocument{\ifdim\tpnewparskip=\z@\relax \tpnewparskip=1\baselineskip\relax\fi}
+\def\tpNewPar{\@ifnextchar[{\@tpnewpar}{\@tpnewpar[\the\tpnewparskip]}}%]
+\def\@tpnewpar[#1]{%
+  \ifhmode\par\fi
+  \message{1: `#1'}%
+  \vskip#1\relax
+  \@afterheading
+}

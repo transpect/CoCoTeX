@@ -54,9 +54,10 @@
   \let\footnote=\endnote
   \def\enotesize{\normalsize}%
   \def\enoteformat{%
+    \noindent
     \leavevmode
     \hskip-2em\hb@xt@2em{\@theenmark\hss}%
-    \expandafter\parindent\tpfn@parindent\relax}%
+    \expandafter\parindent\tpfn@parindent\relax\expandafter}%
   \gdef\enoteheading{%
     \leftskip2em
   }%

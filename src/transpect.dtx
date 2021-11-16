@@ -24,6 +24,8 @@
 % Passing options down to the \LaTeX\space standard packages
 %    \begin{macrocode}
 \PassOptionsToPackage{cmyk}{xcolor}
+\DeclareOptionX{main}{\PassOptionsToPackage{\CurrentOption}{babel}}
+\DeclareOptionX{newtitle}{\PassOptionsToPackage{\CurrentOption}{transpect-title}}%% Temporär!
 \PassOptionsToPackage{shorthands=off}{babel}
 %    \end{macrocode}
 % Passing options down to the \lstinline{transpect-endnotes} package
@@ -131,21 +133,28 @@
 \usepackage{graphicx}
 \usepackage{soul}
 %    \end{macrocode}
+% Inclusion of the script module which also loads the babel package
+%    \begin{macrocode}
+\RequirePackage{transpect-script}
+%    \end{macrocode}
 % In the \lstinline{transpect-headings.sty}, we include the
 % \lstinline{bookmark} package, which within calls the
 % \lstinline{hyperref} package.
 %    \begin{macrocode}
 \PassOptionsToPackage{breaklinks,linktocpage,pdfborder={0 0 0},pdfencoding=auto,bookmarksnumbered=true}{hyperref}
 \RequirePackage{transpect-headings}
+%    \end{macrocode}
+% Inclusion of the float module
+%    \begin{macrocode}
 \RequirePackage{transpect-floats}
 %    \end{macrocode}
-% Inclusion of transpect-endnotes
+% Inclusion of the title page module
+%    \begin{macrocode}
+\RequirePackage{transpect-title}
+%    \end{macrocode}
+% Inclusion of the end-/footnotes module
 %    \begin{macrocode}
 \RequirePackage{transpect-endnotes}
-%    \end{macrocode}
-% Inclusion of transpect-title
-%    \begin{macrocode}
- % \RequirePackage{transpect-title}
 %    \end{macrocode}
 % Fallback, in case, \lstinline{transpect-headings.sty} is not loaded for
 % some reason.
