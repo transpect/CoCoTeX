@@ -23,6 +23,8 @@
 \RequirePackage{rotating}
 \RequirePackage{grffile}
 \RequirePackage[Export]{adjustbox}
+\usepackage{stfloats}
+\setcounter{dblbotnumber}{5}
 
 %    \end{macrocode}
 % for automatic typesetting and float positioning, we use very high tolerances from standard \LaTeX:
@@ -141,7 +143,7 @@
     \let\tp@b@float\relax
     \let\tp@e@float\relax
   \else
-    \def\@tempa{h}\ifx\tp@fps\@tempa\def\tp@fps{htpb}\fi
+    \def\@tempa{h}\ifx\tp@fps\@tempa\def\tp@fps{hbt!}\fi
     \let\tp@b@float\tp@captype%
     \expandafter\ifx\csname tp@\tp@captype @attr@orientation\endcsname\tp@str@landscape\relax
       \ifx\tp@b@float\tp@str@table
