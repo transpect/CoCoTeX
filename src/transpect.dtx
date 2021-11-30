@@ -135,7 +135,11 @@
 %    \end{macrocode}
 % Inclusion of the script module which also loads the babel package
 %    \begin{macrocode}
+\ifLuaTeX
 \RequirePackage{transpect-script}
+\else
+\RequirePackage{babel}
+\fi
 %    \end{macrocode}
 % In the \lstinline{transpect-headings.sty}, we include the
 % \lstinline{bookmark} package, which within calls the

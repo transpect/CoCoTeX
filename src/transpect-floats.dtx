@@ -46,6 +46,7 @@
 \newcount\tpSubFloatCnt       \tpSubFloatCnt=\z@\relax
 \newcount\tp@subfloat@row     \tp@subfloat@row\z@
 \newcount\tp@subfloat@col     \tp@subfloat@col\z@
+\newcount\tp@int@flt@cnt \tp@int@flt@cnt\z@
 
 \newdimen\tp@subflt@maxheight \tp@subflt@maxheight=\z@\relax
 \newdimen\tp@subflt@sep       \tp@subflt@sep=\fboxsep\relax
@@ -947,25 +948,26 @@
 
 
 %    \end{macrocode}
-% This is a rundimentary implementation of hyperref's anchor mechanism
-% to make labels work:
+% This is an implementation of hyperref's anchor mechanism to make
+% labels work. If no explicit label is given, the mechanism generates
+% one, unique to each (sub)float.
 %    \begin{macrocode}
 \def\tp@make@anchors{\tp@iterate{\@tempcnta}{\z@}{\tpSubFloatCnt}{\tp@make@anchor{\the\@tempcnta}}}
 \def\tp@make@anchor#1{%
   \bgroup
+    \global\advance\tp@int@flt@cnt\@ne
     \tpSubFloatCnt#1\relax
-    \tpIfComp{Label}{%
-      \expandafter\let\expandafter\@currentlabel\csname tp@\tp@namespace @number-\the\tpSubFloatCnt\endcsname
-      \expandafter\H@refstepcounter\expandafter{\tp@captype}%
-      \expandafter\hyper@makecurrent\expandafter{\tp@captype}%
-      \let\Hy@tempa\Hy@float@caption
-      \expandafter\hyper@@anchor\expandafter{%
-        \@currentHref
-      }{\relax}%
-      \expandafter\let\expandafter\@currentlabel\csname tp@\tp@namespace @number-\the\tpSubFloatCnt\endcsname
-      \edef\@tempa{\tpUseComp{Label}}%
-      \expandafter\tpltx@label\expandafter{\@tempa}%
-    }{}%
+    \tpIfComp{Label}
+      {\expandafter\let\expandafter\@currentlabel\csname tp@\tp@namespace @number-\the\tpSubFloatCnt\endcsname}
+      {\edef\@currentlabel{tp-\tp@namespace-number-\the\tp@int@flt@cnt}}%
+    \expandafter\H@refstepcounter\expandafter{\tp@captype}%
+    \expandafter\hyper@makecurrent\expandafter{\tp@captype}%
+    \let\Hy@tempa\Hy@float@caption
+    \expandafter\hyper@@anchor\expandafter{\@currentHref}{\relax}%
+    \tpIfComp{Label}
+      {\expandafter\let\expandafter\@currentlabel\csname tp@\tp@namespace @number-\the\tpSubFloatCnt\endcsname
+       \edef\@tempa{\tpUseComp{Label}}%
+       \expandafter\tpltx@label\expandafter{\@tempa}}{\relax}%
   \egroup}
 
 %    \end{macrocode}
