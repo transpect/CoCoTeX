@@ -130,3 +130,82 @@
 %
 % \clearpage
 %
+% \chapter*{Introduction}
+%
+% \section*{Loading order and contents of transpect.cls}
+%
+% \begin{enumerate}
+% \item load base cls (article or book)
+% \item load transpect specific cls
+% \item load transpect-modules and their dependencies
+%   \begin{enumerate}
+%   \item transpect-scripts, iff option \lstinline{usescript} is used, standalone \lstinline{babel} otherwise
+%   \item transpect-common\footnote{is a hard dependency in both the headings- and floats modules and required immediately after each the module's option processing.}
+%   \item transpect-headings
+%   \item transpect-floats
+%   \item transpect-title
+%   \item transpect-endnotes
+%   \end{enumerate}
+% \item load packages index and hyperref
+% \item load publisher specific styles
+% \end{enumerate}
+%
+% \section*{Flow of macro definitions and their expansions in modules that use the Property and Component mechanism}
+%
+% Modules, that utilize the Property and Component mechanisms, define
+% a \textit{Declare macro}. This Declare macro is basicly a
+% constructor for a new \LaTeX\ environment which should share some
+% common \textit{Properties} and \textit{Components} with other
+% environments that are defined with the same Declare macro. Modules,
+% therefore, constitute what in other programming languages may be
+% referred to as \textit{Namespaces}.
+%
+% The purpose of the Declare macro is
+% \begin{enumerate}
+% \item to define a \LaTeX\ environment to be used in tex documents,
+% \item to define the Component macros available and allowed within that environment
+% \item to define the available Properties used to determine the appearance of the environment's content in the final render.
+% \item to define the processing of the information specific to each instance of the environment.
+% \end{enumerate}
+%
+% Within the body of the Declare macro's definition, a Use macro is
+% defined which determines the Namespace-specific processing of an
+% environment's contents. This macro is (usually) expanded at the
+% \lstinline{\end} of the declared environment. The Use macro is where
+% the actual processing of an environment's contents takes
+% place. Since it is part of the body of the Declare macro, each
+% environment declared with this Declare macro defines it's own Use
+% macro.
+%
+% The Declare macro usually has at least two arguments: one argument
+% to give a \textit{name} to the soon-to-be-defined environment, and a
+% second one to define the Properties \textit{specific} to that
+% environment \textit{on top of} the Namespace's default
+% Properties. Some environments may also have a Parent which causes
+% Properties cascade across different inter-dependend environments.
+%
+% Within the tex-document, whenever an environment is used, the flow
+% is as follows:
+% \begin{enumerate}
+% \item \textit{store} the contents of all Components used within the
+%   environment in internal, locally defined, tex macros
+% \item expand the property lists:
+%   \begin{enumerate}
+%   \item expand the Default Properties of the Namespace
+%   \item If necessary, expand the specific Properties of the parent
+%     environment (overwriting the default properties of the same name). This step may
+%     occur recursively for each of the parent's own parents.
+%   \item expand the Specific Properties of the Environment itself.
+%   \end{enumerate}
+% \item Expand the Use-Macro
+%   \begin{itemize}
+%   \item Process the components, depending on contents, presence, or
+%     absence of Components alter other Componentsor trigger property
+%     manipulatons, etc.
+%   \item Calculate the final states of variable properties (in
+%     dependency on the available components, other properties or
+%     global parameters)
+%   \item Print the overall result of those calculations.
+%   \end{itemize}
+% \end{enumerate}
+%
