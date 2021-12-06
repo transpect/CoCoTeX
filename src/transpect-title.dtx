@@ -21,6 +21,21 @@
 
 
 \ifx\tp@newtitle\relax%% TEMP
+
+%    \end{macrocode}
+% Declarator for the tpMaketitle macro.
+%    \begin{macrocode}
+\long\def\tpDeclareTitlepage#1{%
+  \gdef\tp@titlepage{%
+    \tpNamespace{titlepage}%
+    \tp@titlepage@default
+    #1%
+  }%
+}
+
+%    \end{macrocode}
+% The tpMeta environment
+%    \begin{macrocode}
 \def\tpMeta{%
   \tpNamespace{titlepage}%
   \tp@title@simple@comps
@@ -32,140 +47,313 @@
   \let\tp@namespace\@empty
 }
 
+%    \end{macrocode}
+% Shortcut for numbered Components
+%    \begin{macrocode}
 \def\tp@prov@num@comp#1#2#3{%
   \tpProvideComp{#2}{\expandafter\global}{}{\expandafter\the\csname #1-Cnt\endcsname-#3}%
 }
-
+%    \end{macrocode}
+% Shortcut for name Components
+%    \begin{macrocode}
 \def\tp@title@name@comp#1{%
-  \tpProvideComp{tp#1s}{\expandafter\global}{}{#1s}%
-  \let\tp@prev@namepsace\tp@namespace
+  \tpProvideComp{tp#1String}{\expandafter\global}{}{#1String}%
+  \let\tp@prev@namespace\tp@namespace
   \expandafter\newcount\csname #1-Cnt\endcsname%
-  \expandafter\def\csname tp#1\endcsname{%
-    \expandafter\global\expandafter\advance\csname #1-Cnt\endcsname\@ne
+  \expandafter\def\csname tp#1\endcsname{\@ifnextchar [{\csname @tp#1\endcsname}{\csname @tp#1\endcsname[]}}%]
+  \expandafter\def\csname @tp#1\endcsname[##1]{%
     \def\tp@namespace{#1}%
+    \expandafter\global\expandafter\advance\csname #1-Cnt\endcsname\@ne
+    \if!##1!\else\expandafter\gdef\csname tp@title@#1-\expandafter\the\csname #1-Cnt\endcsname @attrs\endcsname{##1}\fi
     \tp@prov@num@comp{#1}{tpNameSimple}{simple-name}%
     \tp@prov@num@comp{#1}{tpSurName}{sur-name}%
     \tp@prov@num@comp{#1}{tpFirstName}{first-name}%
     \tp@prov@num@comp{#1}{tpMidName}{mid-name}%
     \tp@prov@num@comp{#1}{tpAffilID}{affil-id}%
+    \tp@prov@num@comp{#1}{tpMail}{mail}%
     \tp@prov@num@comp{#1}{tpBio}{bio}%
   }%
   \expandafter\def\csname endtp#1\endcsname{}%
-  \let\tp@namespace\tp@prev@namepsace
+  \let\tp@namespace\tp@prev@namespace
   %%
 }
 
+%    \end{macrocode}
+% Evaluator for the Corresponding Author
+%    \begin{macrocode}
+\def\tp@title@eval@corresp#1#2{%
+  \expandafter\ifx\csname tp@#1-#2@attr@corresp\endcsname\relax\else\tpUseProperty{corresp-mark}\fi}
+
+%    \end{macrocode}
+% This macro eventually evaluates the name family's attributes
+%    \begin{macrocode}
+\def\tp@eval@name@attrs#1{%
+  \tp@iterate{\@tempcnta}{\@ne}{\expandafter\the\csname #1-Cnt\endcsname}{%
+    \expandafter\ifx\csname tp@title@#1-\the\@tempcnta @attrs\endcsname\relax\else
+      \tpParseAttributes{#1-\the\@tempcnta }{\csname tp@title@#1-\the\@tempcnta @attrs\endcsname}%
+    \fi
+  }}
+
+%    \end{macrocode}
+% Evaluator for the name lists
+%    \begin{macrocode}
 \def\tp@title@name@eval#1{%
   \tpNamespace{titlepage}%
+  \expandafter\xdef\csname tp@titlepage@#1-count\endcsname{\the\csname #1-Cnt\endcsname}%
+  \tp@eval@name@attrs{#1}%
+  %% single Name
   \expandafter\ifnum\csname #1-Cnt\endcsname=\@ne
-    \edef\@tempa{\csname tp@#1@1-simple-name\endcsname}%
+    \edef\@tempa{\csname tp@#1@1-simple-name\endcsname\tp@title@eval@corresp{#1}{1}}%
   \else
+    %% Two names
     \expandafter\ifnum\csname #1-Cnt\endcsname=\tw@
-      \edef\@tempa{\csname tp@#1@1-simple-name\endcsname\space and \csname tp@#1@2-simple-name\endcsname}%
+      \edef\@tempa{\csname tp@#1@1-simple-name\endcsname\tp@title@eval@corresp{#1}{1}\tpUseProperty{name-and}\csname tp@#1@2-simple-name\endcsname\tp@title@eval@corresp{#1}{2}}%
     \else
+      %% More than two names
       \def\@tempa{}%
       \tp@iterate{\@tempcnta}{\@ne}{\expandafter\the\csname #1-Cnt\endcsname}{%
-        \edef\@tempb{\csname tp@#1@\the\@tempcnta-simple-name\endcsname}%
-        \ifnum\@tempcnta=\expandafter\the\csname #1-Cnt\endcsname\relax
-          \expandafter\edef\expandafter\@tempa\expandafter{\@tempa, \@tempb}%
+        \edef\@tempb{\csname tp@#1@\the\@tempcnta-simple-name\endcsname\tp@title@eval@corresp{#1}{\the\@tempcnta}}%
+        \ifnum\@tempcnta=\@ne\relax
+          \let\@tempa\@tempb
         \else
-          \expandafter\edef\expandafter\@tempa\expandafter{\@tempa\space and \@tempb}%
+          \ifnum\@tempcnta=\expandafter\the\csname #1-Cnt\endcsname\relax
+            \expandafter\edef\expandafter\@tempa\expandafter{\@tempa\tpUseProperty{name-and}\@tempb}%
+          \else
+            \expandafter\edef\expandafter\@tempa\expandafter{\@tempa\tpUseProperty{name-sep}\@tempb}%
+          \fi
         \fi
       }%
     \fi
   \fi
-  \expandafter\csname tp#1s\expandafter\endcsname\expandafter{\@tempa}%
+  \expandafter\csname tp#1String\expandafter\endcsname\expandafter{\@tempa}%
 }%
 
+%    \end{macrocode}
+% Provides the Name Components
+%    \begin{macrocode}
 \def\tp@title@names#1{%
   \csname tp@title@name@#1\endcsname{Author}%
   \csname tp@title@name@#1\endcsname{Editor}%
   \csname tp@title@name@#1\endcsname{SeriesEditor}%
 }
 
+%    \end{macrocode}
+% Shortcut for simple value components
+%    \begin{macrocode}
+\def\tp@title@macro#1{\tpProvideComp{tp#1}{\expandafter\global}{}{#1}}
 
+%    \end{macrocode}
+% Declaration of simple value Components
+%    \begin{macrocode}
 \def\tp@title@simple@comps{%
+  %% Cover
+  \tp@title@macro{Cover}%       Path to Cover Image(!)
   %% Titles
-  \tpProvideComp{tpTitle}{\expandafter\global}{}{Title}%
-  \tpProvideComp{tpSubtitle}{\expandafter\global}{}{Subtitle}%
+  \tp@title@macro{Title}%       Main Title
+  \tp@title@macro{ShortTitle}% Shortened Main Title
+  \tp@title@macro{Subtitle}%   Sub Title
   %% Series
-  \tpProvideComp{tpSeries}{\expandafter\global}{}{Series}%
-  \tpProvideComp{tpSubSeries}{\expandafter\global}{}{SubSeries}%
-  \tpProvideComp{tpVolume}{\expandafter\global}{}{Volume}%
-  \tpProvideComp{tpNumber}{\expandafter\global}{}{Number}%
+  \tp@title@macro{Series}%     Series Title
+  \tp@title@macro{SubSeries}% Series Subtitle
+  \tp@title@macro{Volume}%     Series Volume
+  \tp@title@macro{Number}%     Series Number
   %% Publisher
-  \tpProvideComp{tpPublisher}{\expandafter\global}{}{Publisher}%
-  \tpProvideComp{tpPubPlace}{\expandafter\global}{}{PublPlace}%
-  \tpProvideComp{tpPubLogo}{\expandafter\global}{}{PubLogo}%
-  \tpProvideComp{tpWeb}{\expandafter\global}{}{PubWeb}%
+  \tp@title@macro{Publisher}% Publisher Name
+  \tp@title@macro{PubDivision}% Publishing Division
+  \tp@title@macro{PubDivInfo}% Publishing Division Info
+  \tp@title@macro{PubPlace}%  Publisher Location
+  \tp@title@macro{PubLogo}%   Publisher Logo
+  \tp@title@macro{PubNote}%   Additional publisher notes
+  \tp@title@macro{PubWeb}%    Publisher URL
   %% Pubication Meta
-  \tpProvideComp{tpEdition}{\expandafter\global}{}{Edition}%
-  \tpProvideComp{tpYear}{\expandafter\global}{}{Year}%
-  \tpProvideComp{tpISBN}{\expandafter\global}{}{ISBN}%
-  \tpProvideComp{tpISSN}{\expandafter\global}{}{ISSN}%
-  \tpProvideComp{tpEISBN}{\expandafter\global}{}{EISBN}%
-  \tpProvideComp{tpEpubISBN}{\expandafter\global}{}{EpubISBN}%
-  \tpProvideComp{tpDOI}{\expandafter\global}{}{DOI}%
+  \tp@title@macro{Edition}%   Edition
+  \tp@title@macro{Year}%       Publication Year
+  \tp@title@macro{ISBN}%       ISBN
+  \tp@title@macro{ISSN}%       ISSN
+  \tp@title@macro{EpubPreText}%   Text between ISBN and eISBN
+  \tp@title@macro{EISBN}%      Ebook-ISBN
+  \tp@title@macro{EpubISBN}%  Epub-ISBN
+  \tp@title@macro{DOI}%        DOI
   %% Imprint Meta
-  \tpProvideComp{tpBiblio}{\expandafter\global}{}{Biblio}%
-  \tpProvideComp{tpPrint}{\expandafter\global}{}{Print}%
-  \tpProvideComp{tpLectorate}{\expandafter\global}{}{Lectorate}%
-  \tpProvideComp{tpTranslator}{\expandafter\global}{}{Translator}%
-  \tpProvideComp{tpCoverDesign}{\expandafter\global}{}{CoverDesign}%
-  \tpProvideComp{tpCoverImage}{\expandafter\global}{}{CoverImage}%
-  \tpProvideComp{tpTypesetter}{\expandafter\global}{}{Typesetter}%
-  \tpProvideComp{tpQA}{}{}{QA}%
-  \tpProvideComp{tpConversion}{\expandafter\global}{}{Conversion}%
-  \tpProvideComp{tpEnvDisclaimer}{\expandafter\global}{}{EnvDisclaimer}%
+  \tp@title@macro{Biblio}%    Bibliographical Information
+  \tp@title@macro{Print}%     Printer
+  \tp@title@macro{PrintNote}%     Print Note
+  \tp@title@macro{Lectorate}% Lector
+  \tp@title@macro{Translator}% Translator
+  \tp@title@macro{CoverDesign}% Cover Designer
+  \tp@title@macro{CoverImage}%  Cover Image Creator
+  \tp@title@macro{Typesetter}%  Typesetting company
+  \tp@title@macro{QA}%            Quality Assurance
+  \tp@title@macro{Conversion}% Data Converison
+  \tp@title@macro{EnvDisclaimer}% Environmental Disclaimer
   %% Licencing
-  \tpProvideComp{tpLicenceText}{\expandafter\global}{}{LicenceText}%
-  \tpProvideComp{tpLicenceLogo}{\expandafter\global}{}{LicenceLogo}%
-  \tpProvideComp{tpCopyright}{\expandafter\global}{}{Copyright}%
-  \tpProvideComp{tpCopyrightDisclaimer}{\expandafter\global}{}{CopyrightDisclaimer}%
+  \tp@title@macro{LicenceText}%   License Description
+  \tp@title@macro{LicenceLogo}%   License Logo
+  \tp@title@macro{Copyright}%     Copyright Description
+  \tp@title@macro{CopyrightDisclaimer}% Copyright Disclaimer
 }
 
+%    \end{macrocode}
+% Collect the meta information and construct the tpMaketitle macro
+%    \begin{macrocode}
 \def\tp@maketitle{%
   \tpNamespace{titlepage}%
   \csname tp@titlepage\endcsname
   \ifarticle
-    \gdef\maketitle{%
+    \gdef\tpMaketitle{%
       \tpUseProperty{article-title}%
     }%
   \else
-    \gdef\maketitle{%
-      \tpUseProperty{before-titlepage}%
-      \tpUseProperty{titlepage-i}%
-      \tpUseProperty{titlepage-ii}%
-      \tpUseProperty{titlepage-iii}%
-      \tpUseProperty{titlepage-iv}%
-      \tpUseProperty{after-titlepage}%
-    }%
+    \gdef\tpMaketitle{%
+      \bgroup
+        \tpUseProperty{before-titlepage}%
+        \tpIfComp{Cover}{%
+          \tpUseProperty{coverpage}%
+        }{}%
+        \null
+        \tpUseProperty{before-titlepage-roman}%
+        \tpUseProperty{titlepage-roman}%
+        \tpUseProperty{after-titlepage}%
+      \egroup
+      }%
   \fi
 }
 
-\def\tpDeclareTitlepage#1{%
-  \gdef\tp@titlepage{%
-    \tpNamespace{titlepage}%
-    \tp@titlepage@default
-    #1
-  }%
-}
-
+%    \end{macrocode}
+% Default properties for tpMaketitle
+%    \begin{macrocode}
 \def\tp@titlepage@default{%
   \tpSetProperty{article-title}{}%
-  \tpSetProperty{before-titlepage}{\pagestyle{empty}}%
+  % Title page hooks
+  \tpSetProperty{before-titlepage}{%
+    \pagestyle{empty}%
+    \parindent\z@
+    \parskip\z@
+    \raggedright
+  }%
   \tpSetProperty{after-titlepage}{\pagestyle{headings}}%
-  \tpSetProperty{titlepage-i}{\null\clearpage}%
-  \tpSetProperty{titlepage-ii}{\null\clearpage}%
+  % Pages of title
+  %% Cover page
+  \tpSetProperty{coverpage}{%
+    \bgroup
+      \def\thepage{\@alph\c@page}%
+      \smash{\rlap{%
+          \raise\dimexpr\topsep+\headheight+\headsep+\topmargin+\topskip-\paperheight\relax
+          \vtop{%
+            \hskip\dimexpr-\oddsidemargin\relax
+            \includegraphics[width=\paperwidth,height=\paperheight]{\tpUseComp{Cover}}%
+          }}}%
+      \cleardoublepage
+    \egroup
+  }%
+  \tpSetProperty{titlepage-roman}{%
+    \tpUseProperty{titlepage-i}%
+    \clearpage\null
+    \tpUseProperty{titlepage-ii}%
+    \clearpage\null
+    \tpUseProperty{titlepage-iii}%
+    \clearpage\null
+    \tpUseProperty{titlepage-iv}%
+    \clearpage
+  }%
+  %% before the roman part of the title pages but after cover page
+  \tpSetProperty{before-titlepage-roman}{%
+    \setcounter{page}{1}%
+    \def\thepage{\roman{page}}%
+  }%
+  \tpSetProperty{titlepage-i}{%
+    \ifcollection
+      \tpUseProperty{editor-string}%
+    \else
+      \tpUseComp{AuthorString}%
+    \fi%
+    \vskip\baselineskip
+    \tpUseComp{Title}
+  }%
+  \tpSetProperty{titlepage-ii}{%
+  }%
   \tpSetProperty{titlepage-iii}{%
-    \tpUseComp{Editors}%
+    \ifcollection
+      \tpUseProperty{editor-string}%
+    \else
+      \tpUseComp{AuthorString}%
+    \fi%
+    \par
+    \tpUseComp{Title}
+    \par
+    \tpUseComp{Subtitle}
     \vfill
     \clearpage
   }%
-  \tpSetProperty{titlepage-iv}{\null\clearpage}%
+  \tpSetProperty{titlepage-iv}{%
+    \null\vfill
+    \bgroup
+      \tpUseProperty{imprint-format}%
+      \tpUseComp{Biblio}%
+      \par\vskip\baselineskip
+      \tpUseProperty{imprint}\par%
+    \egroup
+    \clearpage
+  }%
+  %% Imprint
+  \tpSetProperty{imprint-format}{\footnotesize\hsize.6\textwidth}%
+  \tpSetProperty{imprint-sep}{\ifhmode\par\fi\addvspace{\baselineskip}}%
+  \tpSetProperty{imprint}{%
+    \tpUseProperty{publisher}%
+    \tpIfComp{Qualification}{\tpUseComp{Qualification}\par}{}%
+    \tpIfComp{Conversion}{\tpUseComp{Conversion}\par}{}%
+    \tpIfComp{CoverDesign}{\tpUseComp{CoverDesign}\par}{}%
+    \tpIfComp{CoverImage}{\tpUseComp{CoverImage}\par}{}%
+    \tpIfComp{Lectorate}{\tpUseComp{Lectorate}\par}{}%
+    \tpIfComp{QA}{\tpUseComp{QA}\par}{}%
+    \tpIfComp{Translator}{\tpUseComp{Translator}\par}{}%
+    \tpIfComp{Appraiser}{\tpUseComp{Appraiser}\par}{}%
+    \tpIfComp{Discussion}{\tpUseComp{Discussion}\par}{}%
+    \tpIfComp{Typesetter}{\tpUseComp{Typesetter}\par}{}%
+    \tpIfComp{Print}{\tpUseComp{Print}\par}{}%
+    \tpIfComp{DOI}{\tpUseComp{DOI}\par}{}%
+    \tpIfComp{Keywords}{\tpUseComp{Keywords}\par}{}%
+    \tpUseProperty{imprint-sep}%
+    \tpUseComp{ISBN}\par%
+    \tpUseComp{EpubPreText}\par%
+    \tpUseComp{EISBN}\par%
+    \tpUseComp{EpubISBN}\par%
+    \tpUseProperty{imprint-sep}%
+    \tpUseProperty{EnvDisclaimer}%
+  }%
+  \tpSetProperty{copyright}{%
+    \tpIfComp{Copyright}
+      {\tpUseComp{Copyright}}
+      {\textcopyright\space\tpUseComp{Year}\space\tpUseComp{Publisher},\space\tpUseComp{PubPlace}}%
+    }
+  \tpSetProperty{publisher}{%
+    \tpUseComp{PubDivInfo}\\%
+    \tpUseProperty{copyright}\\%
+    \tpUseComp{PubNote}\\%
+    \tpUseComp{PubWeb}%
+  }%
+  % name Separators
+  \tpSetProperty{editor-suffix-sgl}{\space(Hg.)}%
+  \tpSetProperty{editor-suffix-pl}{\space(Hgs.)}%
+  \tpSetProperty{editor-string}{%
+    \tpUseComp{EditorString}%
+    \ifnum\tpUseProperty{Editor-count}=\@ne
+      \tpUseProperty{editor-suffix-sgl}%
+    \else
+      \tpUseProperty{editor-suffix-pl}%
+    \fi}
+  \tpSetProperty{name-and}{\space and\space}%
+  \tpSetProperty{name-etal}{\space et~al.}%
+  \tpSetProperty{name-sep}{,\space}%
+  \tpSetProperty{corresp-mark}{*}%
 }
 
+%    \end{macrocode}
+% Default titlepage Declarator
+%    \begin{macrocode}
 \tpDeclareTitlepage{}
+
+
 \else%% TEMP
 %%%%%%%%%%
 % LEGACY %
