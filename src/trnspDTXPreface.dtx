@@ -12,6 +12,9 @@
 \ReplaceClass{article}{book}
 \BeforePackage{doc}{\let\oldmaketitle\maketitle}
 \documentclass[a4paper]{ltxdoc}
+  \makeatletter
+  \let\tp@fileversion\fileversion
+  \let\tp@filedate\filedate
   \frenchspacing
   \parindent0pt
   \parskip\medskipamount
@@ -110,7 +113,7 @@
 \emergencystretch=2em
 \marginparsep10mm
 \RequirePackage{framed}
-\FrameRule.5\p@
+\FrameRule.5bp
 \FrameSep2mm
 \newskip\@leftskip \@leftskip\z@skip
 \def\endMakeFramed{%
@@ -236,49 +239,24 @@
 \def\thechapter{File~\arabic{chapter}}
 \def\ps@headings{%
   \let\@oddfoot\@empty\let\@evenfoot\@empty
-  \def\@evenhead{\hskip-\pageskip\hbox to \pageskip{\hfill\bfseries\thepage\enskip}\htbar\enskip\leftmark\hfil}%
-  \def\@oddhead{\hfill{\rightmark}\enskip\htbar\rlap{\hbox to \pageskip{\enskip\bfseries\thepage\hfill}}}%
+  \def\@evenhead{\hskip-\pageskip\hbox to \pageskip{\hfill\bfseries\thepage\enskip}\htbar\enskip{\sffamily\leftmark}\hfil}%
+  \def\@oddhead{\hfill{\sffamily\rightmark}\enskip\htbar\rlap{\hbox to \pageskip{\enskip\bfseries\thepage\hfill}}}%
   \let\@mkboth\markboth
-  \def\chaptermark##1{%
-    \markboth {%
-      \ifnum \c@secnumdepth >\m@ne
-        \if@mainmatter
-          \thechapter\enskip
-        \fi
-      \fi
-      ##1}{}}%
-  \def\sectionmark##1{%
-    \markright {%
-      \ifnum \c@secnumdepth >\z@
-        \if@mainmatter
-          \thesection\enskip
-        \fi
-      \fi
-      ##1}}}
+  \def\chaptermark##1{\markboth
+    {\ifnum \c@secnumdepth >\m@ne\if@mainmatter{\bfseries\thechapter}\enskip\fi\fi##1}
+    {\ifnum \c@secnumdepth >\m@ne\if@mainmatter{\bfseries\thechapter}\enskip\fi\fi##1}}%
+  \def\sectionmark##1{\markright{\ifnum \c@secnumdepth >\z@\if@mainmatter{\bfseries\thechapter:\thesection}\enskip\fi\fi##1}}}
 
 \def\ps@chapfirst{%
   \let\@oddfoot\@empty\let\@evenfoot\@empty
   \let\@evenhead\@empty%
-  \def\@oddhead{\hfill{\rightmark}\enskip\htbar\rlap{\hbox to \pageskip{\enskip\bfseries\thepage\hfill}}}%
-  \let\@mkboth\markboth
-  \def\chaptermark##1{%
-    \markboth {%
-      \ifnum \c@secnumdepth >\m@ne
-        \if@mainmatter
-          \thechapter\enskip
-        \fi
-      \fi
-      ##1}{}}%
-  \def\sectionmark##1{%
-    \markright {%
-      \ifnum \c@secnumdepth >\z@
-        \thesection\enskip
-      \fi
-      ##1}}}
+  \def\@oddhead{\hfill\htbar\rlap{\hbox to \pageskip{\enskip\bfseries\thepage\hfill}}}%
+}
 
 \pagestyle{headings}
 \def\@chapter[#1]#2{%
   \thispagestyle{chapfirst}%
+  \setcounter{lstnumber}{25}%
   \ifnum \c@secnumdepth >\m@ne
     \if@mainmatter
       \refstepcounter{chapter}%
@@ -294,18 +272,18 @@
   \@afterheading}
 
 \def\@makechapterhead#1{%
-  \vspace*{50bp}%
   {\parindent \z@ \raggedright \normalfont
     \ifnum \c@secnumdepth >\m@ne
       \if@mainmatter
-        \huge\bfseries\thechapter
+        \LARGE\bfseries\thechapter
         \par\nobreak
-        \vskip 20\p@
       \fi
     \fi
     \interlinepenalty\@M
     \Huge \bfseries #1\par\nobreak
-    \vskip 40\p@
+    \vskip 12bp
+    \strut\raise\ht\strutbox\vbox{\vrule\@width\textwidth\@height2bp}%
+    \vskip 16bp
   }}
 
 \renewcommand*\l@chapter[2]{%
@@ -410,7 +388,7 @@
 \patchcmd{\lsthk@TextStyle}{\let\lst@DefEsc\@empty}{}{}{\errmessage{failed to patch}}
 \global\let\lst@doendpe\@empty
 \usepackage{multicol}
-
+\def\printdate#1-#2-#3§{#3/#2/#1}
 \renewcommand\tableofcontents{%
   {\let\noclearpage\relax
    \chapter*{Table of contents}%
@@ -418,7 +396,8 @@
    \parskip\z@
    \@starttoc{toc}}%
 }
-
+\def\subtitle#1{\def\@subtitle{#1}}
+\def\authormail#1{\def\@authormail{#1}}
 \def\maketitle{%
   \frontmatter
   \vskip2\baselineskip
@@ -429,12 +408,12 @@
     \par
     \vskip\baselineskip
     {\Large\mybfseries\sffamily
-      \@subtitle
-    }
-    \vskip2\baselineskip
-    {\large Version~\@fileversion}\par
-    (\@filedate)\par
-    \vskip3\baselineskip
+      \hfill\vbox{\hsize.5\textwidth\@subtitle\par}}%
+    \par\vskip2\baselineskip
+    {\large\sffamily Version~\tp@fileversion}\par
+    (\sffamily\expandafter\printdate\tp@filedate§)\par
+    \vfill
+    {\large\sffamily\@author\par\href{mailto:\@authormail}{\@authormail}\par}%
   \egroup
   \thispagestyle{empty}
   \tableofcontents
@@ -467,16 +446,12 @@
 %
 % \GetFileInfo{transpect.dtx}
 %
-% \title{The \filename\space Package\,\thanks{This package was
-% created by le-tex publishing services,
-% Leipzig.\hfil\break\hspace*{1.8em}This file has version
-% \fileversion.}}%
-% \author{Lupino}%
+% \title{The \filename\space Package}%
+% \author{Lupino}\authormail{lupino@le-tex.de}%
+% \subtitle{A modular package suite for automatic, flexible typesetting}
 % \date{\filedate}%
 % \frontmatter
-% \let\maketitle\oldmaketitle
 % \maketitle
-% \tableofcontents
 % \clearpage
 %
 % \chapter{Introduction}
