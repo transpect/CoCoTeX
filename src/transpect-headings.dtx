@@ -1,7 +1,10 @@
-%    \end{macrocode}
 % \chapter{transpect-headings.dtx}
 % This module provides handlers for headings like parts, chapters,
 % sections, or inline headings common to all Transpect projects.
+%
+%    \begin{macrocode}[gobble=1]
+%<*headings>
+%    \end{macrocode}
 %
 %    \begin{macrocode}
 %%
@@ -36,11 +39,11 @@
 %    \end{macrocode}
 %
 % \section{Facility for declaring heading levels and their layouts}%
-% \begin{description}
-% \item[1] (optional) inherit-from: load all properties from that heading level, first.
-% \item[2] level: used for toc entries. -1 for part, 0 for chapter, 1 for section, etc.
-% \item[3] name: part, chapter, section, etc, to be used in toc, head lines, bookmarks, etc.
-% \item[4] Property definitions and switches
+% \begin{description}[2em]
+% \item[\#1] (optional) inherit-from: load all properties from that heading level, first.
+% \item[\#2] level: used for toc entries. -1 for part, 0 for chapter, 1 for section, etc.
+% \item[\#3] name: part, chapter, section, etc, to be used in toc, head lines, bookmarks, etc.
+% \item[\#4] Property definitions and switches
 % \end{description}
 %    \begin{macrocode}
 \long\def\tpDeclareHeading{\@ifnextchar[{\@tpDeclareHeading}{\@tpDeclareHeading[]}}%]
@@ -495,3 +498,7 @@
   \vskip#1\relax
   \@afterheading
 }
+%    \end{macrocode}
+%    \begin{macrocode}[gobble=1]
+%</headings>
+%    \end{macrocode}

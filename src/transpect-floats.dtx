@@ -1,8 +1,10 @@
-%    \end{macrocode}
 % \chapter{transpect-floats.dtx}
 % This module provides handlers for floating objects like tables and
 % figures common to all Transpect projects
 %
+%    \begin{macrocode}[gobble=1]
+%<*floats>
+%    \end{macrocode}
 %    \begin{macrocode}
 %%
 %% module for le-tex transpect.cls that extends floating objects.
@@ -969,12 +971,6 @@
        \edef\@tempa{\tpUseComp{Label}}%
        \expandafter\tpltx@label\expandafter{\@tempa}}{\relax}%
   \egroup}
-
-%    \end{macrocode}
-% Resetting caption parameters
-%    \begin{macrocode}
-
-
 %    \end{macrocode}
 % LEGACY: Hooks to change the text font of a standard \LaTeX\ tabular
 %    \begin{macrocode}
@@ -997,3 +993,6 @@
   \endarray
   $\egroup}%$
 \expandafter\let\csname endtabular*\endcsname=\endtabular
+%    \begin{macrocode}[gobble=1]
+%</floats>
+%    \end{macrocode}

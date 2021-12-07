@@ -1,9 +1,11 @@
-%    \end{macrocode}
 % \chapter{transpect-script.dtx}
 % This package is used to handle non-latin based script systems like
 % Japanese, Chinese, Armenian and the like. Since it requires babel to
 % be loaded first, it is not loaded automaticly with transpect.cls but
 % has to be incorporated via the publisher's specific styles.
+%    \begin{macrocode}[gobble=1]
+%<*script>
+%    \end{macrocode}
 %
 %    \begin{macrocode}
 %% module for le-tex transpect.cls that handles script switching.
@@ -181,3 +183,7 @@
     Path = ./fonts/Noto/Arabic/%
     ]{NotoSansArabic-Regular.ttf}%
   }
+%    \end{macrocode}
+%    \begin{macrocode}[gobble=1]
+%</script>
+%    \end{macrocode}
