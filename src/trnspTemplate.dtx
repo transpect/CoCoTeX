@@ -1,53 +1,25 @@
 \def\fileversion{0.116}%
 \def\filedate{2021-11-30}%
 %% INCLUDE-DOC
-%<*class>
+% One more driver function
+%    \begin{macrocode}[gobble=1]
+%<*driver>
+%    \end{macrocode}
+% If we want to run the splitted development dtx locally, this macro prevents undefined control sequence errors and actually includes the dtx chunks.
 %    \begin{macrocode}
-
-\message{le-tex transpect package version \fileversion\space (\filedate)^^J}
-
 \def\includeDTX#1{\input src/#1.dtx}
-
+%    \end{macrocode}
+% End driver function
+%    \begin{macrocode}[gobble=1]
+%</driver>
+%    \end{macrocode}
 \includeDTX{transpect}
-%    \end{macrocode}
-%</class>
-%<*common>
-%    \begin{macrocode}
 \includeDTX{transpect-common}
-%    \end{macrocode}
-%</common>
-%<*headings>
-%    \begin{macrocode}
 \includeDTX{transpect-headings}
-%    \end{macrocode}
-%</headings>
-%<*endnotes>
-%    \begin{macrocode}
 \includeDTX{transpect-endnotes}
-%    \end{macrocode}
-%</endnotes>
-%<*script>
-%    \begin{macrocode}
 \includeDTX{transpect-script}
-%    \end{macrocode}
-%</script>
-%<*title>
-%    \begin{macrocode}
 \includeDTX{transpect-title}
-%    \end{macrocode}
-%</title>
-%<*floats>
-%    \begin{macrocode}
 \includeDTX{transpect-floats}
-
-%    \end{macrocode}
-%
-%</floats>
-%<*lists>
-%    \begin{macrocode}
 \includeDTX{transpect-lists}
-%    \end{macrocode}
-%
-%</lists>
 %\Finale
 % \endinput

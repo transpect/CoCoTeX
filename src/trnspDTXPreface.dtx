@@ -246,7 +246,7 @@
     {\ifnum \c@secnumdepth >\m@ne\if@mainmatter{\bfseries\thechapter}\enskip\fi\fi##1}
     {\ifnum \c@secnumdepth >\m@ne\if@mainmatter{\bfseries\thechapter}\enskip\fi\fi##1}}%
   \def\sectionmark##1{\markright{\ifnum \c@secnumdepth >\z@\if@mainmatter{\bfseries\thechapter:\thesection}\enskip\fi\fi##1}}}
-
+\def\includeDTX#1{\input src/#1.dtx}
 \def\ps@chapfirst{%
   \let\@oddfoot\@empty\let\@evenfoot\@empty
   \let\@evenhead\@empty%
@@ -256,7 +256,7 @@
 \pagestyle{headings}
 \def\@chapter[#1]#2{%
   \thispagestyle{chapfirst}%
-  \setcounter{lstnumber}{25}%
+  \setcounter{lstnumber}{24}%
   \ifnum \c@secnumdepth >\m@ne
     \if@mainmatter
       \refstepcounter{chapter}%

@@ -1,7 +1,9 @@
-%    \end{macrocode}
 % \chapter{transpect-lists.dtx}
 % This module provides handlers for lists like glossaries and descriptions.
 %
+%    \begin{macrocode}[gobble=1]
+%<*lists>
+%    \end{macrocode}
 %    \begin{macrocode}
 %%
 %% module for le-tex transpect.cls that handles lists.
@@ -112,3 +114,7 @@
     \@endpetrue
     \everypar{{\setbox\z@\lastbox}\everypar{}\@endpefalse}%
     \global\let\@doendpe\orig@doendpe}}
+%    \end{macrocode}
+%    \begin{macrocode}[gobble=1]
+%</lists>
+%    \end{macrocode}
