@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 % \chapter{transpect-lists.dtx}
 %    \begin{macrocode}[gobble=1]
 %<*lists>
@@ -9,3 +10,119 @@
 %    \begin{macrocode}[gobble=1]
 %</lists>
 %    \end{macrocode}
+=======
+%    \end{macrocode}
+% \chapter{transpect-lists.dtx}
+% This module provides handlers for lists like glossaries and descriptions.
+%
+%    \begin{macrocode}
+%%
+%% module for le-tex transpect.cls that handles lists.
+%%
+%% Maintainer: marcus.hottenroth@le-tex.de
+%%
+%% lualatex  -  texlive >= 2019
+%%
+\NeedsTeXFormat{LaTeX2e}[2018/12/01]
+\ProvidesPackage{transpect-lists}
+    [\filedate \fileversion le-tex transpect lists module]
+\RequirePackage{transpect-common}
+\usepackage{enumerate}
+\ifx\labelitemfont\@undefined\let\labelitemfont\relax\fi
+\renewcommand\labelitemi  {\labelitemfont \textendash}
+\setlength\leftmargini{\parindent}%
+
+\def\@listi{%
+  \leftmargin\leftmargini
+  \parsep \z@
+  \listparindent\parindent
+  \topsep .5\baselineskip
+  \itemsep\z@}
+%\let\@listI\@listi
+
+\def\@listii {\leftmargin\leftmarginii
+              \labelwidth\leftmarginii
+              \advance\labelwidth-\labelsep
+              \topsep    \z@
+              \parsep    \z@
+              \itemsep   \parsep}
+\def\@listiii{\leftmargin\leftmarginiii
+              \labelwidth\leftmarginiii
+              \advance\labelwidth-\labelsep
+              \topsep    \z@
+              \parsep    \z@
+              \partopsep \z@
+              \itemsep   \topsep}
+
+\def\@@enum@[#1]{%
+  \@enLab{}\let\@enThe\@enQmark
+  \@enloop#1\@enum@
+  \ifx\@enThe\@enQmark\@warning{The counter will not be printed.%
+   ^^J\space\@spaces\@spaces\@spaces The label is: \the\@enLab}\fi
+  \expandafter\edef\csname label\@enumctr\endcsname{\the\@enLab}%
+  \expandafter\let\csname the\@enumctr\endcsname\@enThe
+  \csname c@\@enumctr\endcsname7
+  \@enum@}
+
+\def\@enum@{%
+  \list{\csname label\@enumctr\endcsname}%
+  {%
+    \usecounter{\@enumctr}%
+    \labelsep\z@
+    \labelwidth\leftmargin
+    \def\makelabel##1{\hb@xt@\leftmargin{##1\hss}}}}
+
+\def\itemize{%
+  \ifnum \@itemdepth >\thr@@\@toodeep\else
+    \advance\@itemdepth\@ne
+    \edef\@itemitem{labelitem\romannumeral\the\@itemdepth}%
+    \expandafter
+    \list
+      \csname\@itemitem\endcsname
+      {\labelsep\z@
+       \itemindent\z@
+       \labelwidth\leftmargin
+       \def\makelabel##1{\hb@xt@\leftmargin{##1\hss}}}%
+  \fi}
+
+\let\orig@doendpe\@doendpe
+\def\endenumerate{\endlist
+  \gdef\@doendpe{%
+    \@endpetrue
+    \everypar{{\setbox\z@\lastbox}\everypar{}\@endpefalse}%
+    \global\let\@doendpe\orig@doendpe}}
+
+\def\enditemize{\endlist
+  \gdef\@doendpe{%
+    \@endpetrue
+    \everypar{{\setbox\z@\lastbox}\everypar{}\@endpefalse}%
+    \global\let\@doendpe\orig@doendpe}}
+
+\renewenvironment{description}[1][]{%
+  \small
+  \settowidth\@tempdima{#1}%
+  \ifdim\@tempdima=\z@\relax
+    \@tempdima\parindent
+  \fi
+  \list{}%
+       {\labelwidth\@tempdima
+        \leftmargin\dimexpr\@tempdima+\labelsep\relax
+        \topsep .5\baselineskip
+        \itemsep\z@
+        \partopsep\z@
+        \parsep\z@
+        \itemindent\z@
+        \def\makelabel##1{%
+          \sbox\z@{##1}%
+          \ifdim\wd\z@>\labelwidth
+            \unhbox\z@
+          \else
+            \hb@xt@\labelwidth{\unhbox\z@\hss}%
+          \fi
+        }}
+}{\endlist
+\gdef\@doendpe{%
+    \@endpetrue
+    \everypar{{\setbox\z@\lastbox}\everypar{}\@endpefalse}%
+    \global\let\@doendpe\orig@doendpe}}
+>>>>>>> Stashed changes
