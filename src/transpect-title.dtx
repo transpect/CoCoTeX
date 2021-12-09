@@ -59,7 +59,7 @@
 % Shortcut for name Components
 %    \begin{macrocode}
 \def\tp@title@name@comp#1{%
-  \tpProvideComp{tp#1String}{\expandafter\global}{}{#1String}%
+  \tpProvideComp{tp#1NameList}{\expandafter\global}{}{#1NameList}%
   \let\tp@prev@namespace\tp@namespace
   \expandafter\newcount\csname #1-Cnt\endcsname%
   \expandafter\def\csname tp#1\endcsname{\@ifnextchar [{\csname @tp#1\endcsname}{\csname @tp#1\endcsname[]}}%]
@@ -67,7 +67,7 @@
     \def\tp@namespace{#1}%
     \expandafter\global\expandafter\advance\csname #1-Cnt\endcsname\@ne
     \if!##1!\else\expandafter\gdef\csname tp@title@#1-\expandafter\the\csname #1-Cnt\endcsname @attrs\endcsname{##1}\fi
-    \tp@prov@num@comp{#1}{tpNameSimple}{simple-name}%
+    \tp@prov@num@comp{#1}{tpFullName}{full-name}%
     \tp@prov@num@comp{#1}{tpSurName}{sur-name}%
     \tp@prov@num@comp{#1}{tpFirstName}{first-name}%
     \tp@prov@num@comp{#1}{tpMidName}{mid-name}%
@@ -105,16 +105,16 @@
   \tp@eval@name@attrs{#1}%
   %% single Name
   \expandafter\ifnum\csname #1-Cnt\endcsname=\@ne
-    \edef\@tempa{\csname tp@#1@1-simple-name\endcsname\tp@title@eval@corresp{#1}{1}}%
+    \edef\@tempa{\csname tp@#1@1-full-name\endcsname\tp@title@eval@corresp{#1}{1}}%
   \else
     %% Two names
     \expandafter\ifnum\csname #1-Cnt\endcsname=\tw@
-      \edef\@tempa{\csname tp@#1@1-simple-name\endcsname\tp@title@eval@corresp{#1}{1}\tpUseProperty{name-and}\csname tp@#1@2-simple-name\endcsname\tp@title@eval@corresp{#1}{2}}%
+      \edef\@tempa{\csname tp@#1@1-full-name\endcsname\tp@title@eval@corresp{#1}{1}\tpUseProperty{name-and}\csname tp@#1@2-full-name\endcsname\tp@title@eval@corresp{#1}{2}}%
     \else
       %% More than two names
       \def\@tempa{}%
       \tp@iterate{\@tempcnta}{\@ne}{\expandafter\the\csname #1-Cnt\endcsname}{%
-        \edef\@tempb{\csname tp@#1@\the\@tempcnta-simple-name\endcsname\tp@title@eval@corresp{#1}{\the\@tempcnta}}%
+        \edef\@tempb{\csname tp@#1@\the\@tempcnta-full-name\endcsname\tp@title@eval@corresp{#1}{\the\@tempcnta}}%
         \ifnum\@tempcnta=\@ne\relax
           \let\@tempa\@tempb
         \else
@@ -127,7 +127,7 @@
       }%
     \fi
   \fi
-  \expandafter\csname tp#1String\expandafter\endcsname\expandafter{\@tempa}%
+  \tpIfComp{#1NameList}{}{\expandafter\csname tp#1NameList\expandafter\endcsname\expandafter{\@tempa}}%
 }%
 
 %    \end{macrocode}
@@ -267,7 +267,7 @@
     \ifcollection
       \tpUseProperty{editor-string}%
     \else
-      \tpUseComp{AuthorString}%
+      \tpUseComp{AuthorNameList}%
     \fi%
     \vskip\baselineskip
     \tpUseComp{Title}
@@ -278,12 +278,11 @@
     \ifcollection
       \tpUseProperty{editor-string}%
     \else
-      \tpUseComp{AuthorString}%
+      \tpUseComp{AuthorNameList}%
     \fi%
     \par
-    \tpUseComp{Title}
-    \par
-    \tpUseComp{Subtitle}
+    \tpUseComp{Title}\par
+    \tpGetComp{Subtitle}%
     \vfill
     \clearpage
   }%
@@ -291,9 +290,9 @@
     \null\vfill
     \bgroup
       \tpUseProperty{imprint-format}%
-      \tpUseComp{Biblio}%
-      \par\vskip\baselineskip
-      \tpUseProperty{imprint}\par%
+      \tpGetComp{Biblio}%
+      \tpUseProperty{imprint-sep}%
+      \tpUseProperty{imprint}%
     \egroup
     \clearpage
   }%
@@ -302,26 +301,26 @@
   \tpSetProperty{imprint-sep}{\ifhmode\par\fi\addvspace{\baselineskip}}%
   \tpSetProperty{imprint}{%
     \tpUseProperty{publisher}%
-    \tpIfComp{Qualification}{\tpUseComp{Qualification}\par}{}%
-    \tpIfComp{Conversion}{\tpUseComp{Conversion}\par}{}%
-    \tpIfComp{CoverDesign}{\tpUseComp{CoverDesign}\par}{}%
-    \tpIfComp{CoverImage}{\tpUseComp{CoverImage}\par}{}%
-    \tpIfComp{Lectorate}{\tpUseComp{Lectorate}\par}{}%
-    \tpIfComp{QA}{\tpUseComp{QA}\par}{}%
-    \tpIfComp{Translator}{\tpUseComp{Translator}\par}{}%
-    \tpIfComp{Appraiser}{\tpUseComp{Appraiser}\par}{}%
-    \tpIfComp{Discussion}{\tpUseComp{Discussion}\par}{}%
-    \tpIfComp{Typesetter}{\tpUseComp{Typesetter}\par}{}%
-    \tpIfComp{Print}{\tpUseComp{Print}\par}{}%
-    \tpIfComp{DOI}{\tpUseComp{DOI}\par}{}%
-    \tpIfComp{Keywords}{\tpUseComp{Keywords}\par}{}%
+    \tpGetComp{Qualification}%%
+    \tpGetComp{Conversion}%%
+    \tpGetComp{CoverDesign}%%
+    \tpGetComp{CoverImage}%%
+    \tpGetComp{Lectorate}%%
+    \tpGetComp{QA}%%
+    \tpGetComp{Translator}%%
+    \tpGetComp{Appraiser}%%
+    \tpGetComp{Discussion}%%
+    \tpGetComp{Typesetter}%%
+    \tpGetComp{Print}%%
+    \tpGetComp{DOI}%%
+    \tpGetComp{Keywords}%%
     \tpUseProperty{imprint-sep}%
-    \tpUseComp{ISBN}\par%
-    \tpUseComp{EpubPreText}\par%
-    \tpUseComp{EISBN}\par%
-    \tpUseComp{EpubISBN}\par%
+    \tpGetComp{ISBN}%
+    \tpGetComp{EpubPreText}%
+    \tpGetComp{EISBN}%
+    \tpGetComp{EpubISBN}%
     \tpUseProperty{imprint-sep}%
-    \tpUseProperty{EnvDisclaimer}%
+    \tpGetComp{EnvDisclaimer}%
   }%
   \tpSetProperty{copyright}{%
     \tpIfComp{Copyright}
@@ -335,10 +334,10 @@
     \tpUseComp{PubWeb}%
   }%
   % name Separators
-  \tpSetProperty{editor-suffix-sgl}{\space(Hg.)}%
-  \tpSetProperty{editor-suffix-pl}{\space(Hgs.)}%
+  \tpSetProperty{editor-suffix-sgl}{\space(Ed.)}%
+  \tpSetProperty{editor-suffix-pl}{\space(Eds.)}%
   \tpSetProperty{editor-string}{%
-    \tpUseComp{EditorString}%
+    \tpUseComp{EditorNameList}%
     \ifnum\tpUseProperty{Editor-count}=\@ne
       \tpUseProperty{editor-suffix-sgl}%
     \else

@@ -131,6 +131,10 @@
 %    \begin{macrocode}
 \def\tpUseComp#1{\csname tp@\tp@namespace @#1\endcsname}
 %    \end{macrocode}
+% High level command to print Data field \#1 in a paragraph if the Component is not empty or \lstinline{\relax}.
+%    \begin{macrocode}
+\def\tpGetComp#1{\tpIfComp{#1}{\tpUseComp{#1}\par}{}}
+%    \end{macrocode}
 % High level macro that executes \#2 if the Component macro \#1 is given in its Namespace (empty or non-empty), and \#3 if it is not given (i.e., not existant).
 %    \begin{macrocode}
 \long\def\tpIfComp#1#2#3{\expandafter\ifx\csname tp@\tp@namespace @#1\endcsname\relax#3\else#2\fi}
