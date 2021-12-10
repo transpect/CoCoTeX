@@ -91,13 +91,14 @@
       \fi
       \global\advance\realchap\@ne
       \global\c@endnote\z@
+      \def\tp@par@title{\tpIfComp{TocTitle}{\tpUseComp{TocTitle}}{\tpUseComp{Title}}}%
       \addtoendnotes{%
         \noexpand\expandafter\noexpand\ifx\noexpand\csname enotes@in@\the\realchap\noexpand\endcsname\noexpand\@empty
           \bgroup
             \noexpand\leftskip\noexpand\z@
-            \noexpand\begin{heading}\ifx\tp@ennotoc\relax[notoc]\fi{section}
-              \noexpand\tpTitle{\tpUseComp{TocTitle}}
-            \noexpand\end{heading}
+            \noexpand\begin{heading}\ifx\tp@ennotoc\relax[notoc]\fi{section}%
+              \noexpand\tpTitle{\tp@par@title}%
+            \noexpand\end{heading}%
           \egroup
         \noexpand\fi}%
     }%
