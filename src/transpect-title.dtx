@@ -20,11 +20,11 @@
 
 \newif\ifdocopydisclaimer  \docopydisclaimertrue%% TEMP
 \newif\ifprintpublinfo     \printpublinfotrue%% TEMP
-
-
 \ifx\tp@newtitle\relax%% TEMP
 
 %    \end{macrocode}
+% \section{Top-Level Interface}
+%
 % Declarator for the tpMaketitle macro.
 %    \begin{macrocode}
 \long\def\tpDeclareTitlepage#1{%
@@ -34,6 +34,10 @@
     #1%
   }%
 }
+%    \end{macrocode}
+% Default titlepage Declarator
+%    \begin{macrocode}
+\tpDeclareTitlepage{}
 
 %    \end{macrocode}
 % The tpMeta environment
@@ -41,43 +45,109 @@
 \def\tpMeta{%
   \tpNamespace{titlepage}%
   \tp@title@simple@comps
+  \tp@title@fundings@comp
   \tp@title@names{comp}%
 }
 \def\endtpMeta{%
   \tp@title@names{eval}%
+  \tp@title@fundings@eval
   \AtBeginDocument{\tp@maketitle}%
   \let\tp@namespace\@empty
 }
+%    \end{macrocode}
+% \section{Intermediate Level Interfaces}
+%
+% Collect the meta information and construct the tpMaketitle macro
+%    \begin{macrocode}
+\def\tp@maketitle{%
+  \tpNamespace{titlepage}%
+  \csname tp@titlepage\endcsname
+  \ifarticle
+    \gdef\tpMaketitle{%
+      \tpUseProperty{article-title}%
+    }%
+  \else
+    \gdef\tpMaketitle{%
+      \let\tp@cnt@grp\@empty
+      \bgroup
+        \tpUseProperty{before-titlepage}%
+        \tpIfComp{Cover}{%
+          \tpUseProperty{coverpage}%
+        }{}%
+        \null
+        \tpUseProperty{before-titlepage-roman}%
+        \tpUseProperty{titlepage-roman}%
+        \tpUseProperty{after-titlepage}%
+      \egroup
+      }%
+  \fi
+}
 
 %    \end{macrocode}
+% \section{Low Level Interfaces}
 % Shortcut for numbered Components
 %    \begin{macrocode}
-\def\tp@prov@num@comp#1#2#3{%
-  \tpProvideComp{#2}{\expandafter\global}{}{\expandafter\the\csname #1-Cnt\endcsname-#3}%
+\def\tp@prov@num@comp#1#2{%
+  \tpProvideCountedComp{tp#1}{\tp@cnt@grp-#2}{#1}
+    {\csname \tp@cnt@grp-Cnt\endcsname}
+    {}{\expandafter\global}%
 }
 %    \end{macrocode}
-% Shortcut for name Components
+% Shortcut for counted Components
 %    \begin{macrocode}
-\def\tp@title@name@comp#1{%
-  \tpProvideComp{tp#1NameList}{\expandafter\global}{}{#1NameList}%
-  \let\tp@prev@namespace\tp@namespace
+\def\tp@title@counted@comp#1#2#3{%
+  %\let\tp@prev@namespace\tp@namespace
   \expandafter\newcount\csname #1-Cnt\endcsname%
+  \expandafter\gdef\csname tp@title@#1@format@name\endcsname{#2}%
   \expandafter\def\csname tp#1\endcsname{\@ifnextchar [{\csname @tp#1\endcsname}{\csname @tp#1\endcsname[]}}%]
   \expandafter\def\csname @tp#1\endcsname[##1]{%
-    \def\tp@namespace{#1}%
+    \def\tp@cnt@grp{#1}%
     \expandafter\global\expandafter\advance\csname #1-Cnt\endcsname\@ne
     \if!##1!\else\expandafter\gdef\csname tp@title@#1-\expandafter\the\csname #1-Cnt\endcsname @attrs\endcsname{##1}\fi
-    \tp@prov@num@comp{#1}{tpFullName}{full-name}%
-    \tp@prov@num@comp{#1}{tpSurName}{sur-name}%
-    \tp@prov@num@comp{#1}{tpFirstName}{first-name}%
-    \tp@prov@num@comp{#1}{tpMidName}{mid-name}%
-    \tp@prov@num@comp{#1}{tpAffilID}{affil-id}%
-    \tp@prov@num@comp{#1}{tpMail}{mail}%
-    \tp@prov@num@comp{#1}{tpBio}{bio}%
+    #3
   }%
   \expandafter\def\csname endtp#1\endcsname{}%
-  \let\tp@namespace\tp@prev@namespace
+  %\let\tp@namespace\tp@prev@namespace
   %%
+}
+%    \end{macrocode}
+%
+% \section{Component handlers}
+% \subsection{Funds, Grants, and Supporters}
+% Grants component group. This is a {\LaTeX} environment within
+% \lstinline{tpMeta} which allows to set up multiple funding, grant, or
+% supporter callouts.
+%    \begin{macrocode}
+\def\tp@title@fundings@comp{%
+  \tpProvideComp{tpFundingBlock}{\expandafter\global}{}{FundingBlock}%
+  \tp@title@counted@comp{Funding}{fund-format}{%
+    \tp@prov@num@comp{FundName}{name}%
+    \tp@prov@num@comp{FundLogo}{logo}%
+  }%
+}
+
+\def\tp@title@fundings@eval{%
+  %\edef\@tempa{\noexpand\def\noexpand\tp@cnt@grp{Funding}}%
+  \def\tp@namespace{titlepage}
+  \tp@iterate@cnts{Funding}%
+  \tpIfComp{FundingBlock}{}{\expandafter\csname tpFundingBlock\expandafter\endcsname\expandafter{\@tempa}}%
+}
+
+% \subsection{Name lists}
+%    \end{macrocode}
+% Shortcut to declare Name Components
+%    \begin{macrocode}
+\def\tp@title@name@comp#1#2{%
+  \tpProvideComp{tp#1NameList}{\expandafter\global}{}{#1NameList}%
+  \tp@title@counted@comp{#1}{#2-format}{%
+    \tp@prov@num@comp{FullName}{full-name}%
+    \tp@prov@num@comp{SurName}{sur-name}%
+    \tp@prov@num@comp{FirstName}{first-name}%
+    \tp@prov@num@comp{MidName}{mid-name}%
+    \tp@prov@num@comp{AffilID}{affil-id}%
+    \tp@prov@num@comp{Mail}{mail}%
+    \tp@prov@num@comp{Bio}{bio}%
+  }
 }
 
 %    \end{macrocode}
@@ -96,50 +166,82 @@
     \fi
   }}
 
+\def\tp@iterate@cnts#1{%
+  \edef\@tempa{\noexpand\def\noexpand\tp@cnt@grp{#1}}%
+  \expandafter\@tempcntb\csname #1-Cnt\endcsname
+  \tp@iterate{\@tempcnta}{\@ne}{\@tempcntb}{%
+    \edef\@tempb{%
+      \noexpand\csname #1-Cnt\endcsname=\the\@tempcnta
+      \noexpand\tpUseProperty{\csname tp@title@#1@format@name\endcsname}}%
+    \expandafter\expandafter\expandafter\def
+    \expandafter\expandafter\expandafter\@tempa
+    \expandafter\expandafter\expandafter{\expandafter\@tempa\@tempb}%
+  }%
+}
+
 %    \end{macrocode}
 % Evaluator for the name lists
 %    \begin{macrocode}
-\def\tp@title@name@eval#1{%
+\def\tp@title@name@eval#1#2{%
   \tpNamespace{titlepage}%
   \expandafter\xdef\csname tp@titlepage@#1-count\endcsname{\the\csname #1-Cnt\endcsname}%
   \tp@eval@name@attrs{#1}%
+  \tp@iterate@cnts{#1}%
   %% single Name
-  \expandafter\ifnum\csname #1-Cnt\endcsname=\@ne
-    \edef\@tempa{\csname tp@#1@1-full-name\endcsname\tp@title@eval@corresp{#1}{1}}%
-  \else
-    %% Two names
-    \expandafter\ifnum\csname #1-Cnt\endcsname=\tw@
-      \edef\@tempa{\csname tp@#1@1-full-name\endcsname\tp@title@eval@corresp{#1}{1}\tpUseProperty{name-and}\csname tp@#1@2-full-name\endcsname\tp@title@eval@corresp{#1}{2}}%
-    \else
-      %% More than two names
-      \def\@tempa{}%
-      \tp@iterate{\@tempcnta}{\@ne}{\expandafter\the\csname #1-Cnt\endcsname}{%
-        \edef\@tempb{\csname tp@#1@\the\@tempcnta-full-name\endcsname\tp@title@eval@corresp{#1}{\the\@tempcnta}}%
-        \ifnum\@tempcnta=\@ne\relax
-          \let\@tempa\@tempb
-        \else
-          \ifnum\@tempcnta=\expandafter\the\csname #1-Cnt\endcsname\relax
-            \expandafter\edef\expandafter\@tempa\expandafter{\@tempa\tpUseProperty{name-and}\@tempb}%
-          \else
-            \expandafter\edef\expandafter\@tempa\expandafter{\@tempa\tpUseProperty{name-sep}\@tempb}%
-          \fi
-        \fi
-      }%
-    \fi
-  \fi
+  % \expandafter\ifnum\@tempcntb=\@ne
+  %   \edef\@tempb{\csname tp@#1@full-name-1\endcsname\tp@title@eval@corresp{#1}{1}}%
+  % \else
+  %   %% two or more names
+  %   \tp@iterate{\@tempcnta}{\@ne}{\@tempcntb}{%
+  %     \csname #1-Cnt\endcsname\@tempcnta
+  %     \edef\@tempb{%
+  %       \tpUseComp{FullName}%
+  %       \tp@title@eval@corresp{#1}{\the\@tempcnta}}%
+  %     \ifnum\@tempcnta=\@ne\relax
+  %       \let\@tempa\@tempb
+  %     \else
+  %       \ifnum\@tempcnta=\expandafter\the\csname #1-Cnt\endcsname\relax
+  %         \expandafter\edef\expandafter\@tempa\expandafter{\@tempa\tpUseProperty{name-and}\@tempb}%
+  %       \else
+  %         \expandafter\edef\expandafter\@tempa\expandafter{\@tempa\tpUseProperty{name-sep}\@tempb}%
+  %       \fi
+  %     \fi
+  %   }%
+  % \fi
   \tpIfComp{#1NameList}{}{\expandafter\csname tp#1NameList\expandafter\endcsname\expandafter{\@tempa}}%
+  \tp@create@editor@string{#1}%
+  }%
+
+%    \end{macrocode}
+% This macro combines the editor names with the editor suffix.
+%    \begin{macrocode}
+\def\tp@create@editor@string#1{%
+  \def\@tempa{Author}\def\@argi{#1}%
+  \ifx\@tempa\@argi\else
+    \tpIfComp{#1String}{}{%
+      \csname tp#1String\endcsname{%
+        \tpUseComp{#1NameList}%
+        \ifnum\tpUseProperty{Editor-count}=\@ne
+          \tpUseProperty{editor-suffix-sgl}%
+        \else
+          \tpUseProperty{editor-suffix-pl}%
+        \fi
+      }
+    }%
+  \fi
 }%
 
 %    \end{macrocode}
 % Provides the Name Components
 %    \begin{macrocode}
 \def\tp@title@names#1{%
-  \csname tp@title@name@#1\endcsname{Author}%
-  \csname tp@title@name@#1\endcsname{Editor}%
-  \csname tp@title@name@#1\endcsname{SeriesEditor}%
+  \csname tp@title@name@#1\endcsname{Author}{author}%
+  \csname tp@title@name@#1\endcsname{Editor}{editor}%
+  \csname tp@title@name@#1\endcsname{SeriesEditor}{serieseditor}%
 }
 
 %    \end{macrocode}
+% \subsection{Simple Component Declarations}
 % Shortcut for simple value components
 %    \begin{macrocode}
 \def\tp@title@macro#1{\tpProvideComp{tp#1}{\expandafter\global}{}{#1}}
@@ -159,6 +261,8 @@
   \tp@title@macro{SubSeries}% Series Subtitle
   \tp@title@macro{Volume}%     Series Volume
   \tp@title@macro{Number}%     Series Number
+  \tp@title@macro{EditorString}% Editor Text Line
+  \tp@title@macro{SeriesEditorString}% Series Editor Text Line
   %% Publisher
   \tp@title@macro{Publisher}% Publisher Name
   \tp@title@macro{PubDivision}% Publishing Division
@@ -176,6 +280,9 @@
   \tp@title@macro{EISBN}%      Ebook-ISBN
   \tp@title@macro{EpubISBN}%  Epub-ISBN
   \tp@title@macro{DOI}%        DOI
+  %% Funding
+  \tp@title@macro{FundingPreText}% Text before the Funding list
+  \tp@title@macro{FundingPostText}% Text after the Funding list
   %% Imprint Meta
   \tp@title@macro{Biblio}%    Bibliographical Information
   \tp@title@macro{Print}%     Printer
@@ -196,32 +303,7 @@
 }
 
 %    \end{macrocode}
-% Collect the meta information and construct the tpMaketitle macro
-%    \begin{macrocode}
-\def\tp@maketitle{%
-  \tpNamespace{titlepage}%
-  \csname tp@titlepage\endcsname
-  \ifarticle
-    \gdef\tpMaketitle{%
-      \tpUseProperty{article-title}%
-    }%
-  \else
-    \gdef\tpMaketitle{%
-      \bgroup
-        \tpUseProperty{before-titlepage}%
-        \tpIfComp{Cover}{%
-          \tpUseProperty{coverpage}%
-        }{}%
-        \null
-        \tpUseProperty{before-titlepage-roman}%
-        \tpUseProperty{titlepage-roman}%
-        \tpUseProperty{after-titlepage}%
-      \egroup
-      }%
-  \fi
-}
-
-%    \end{macrocode}
+% \section{Default Settings}
 % Default properties for tpMaketitle
 %    \begin{macrocode}
 \def\tp@titlepage@default{%
@@ -258,6 +340,11 @@
     \tpUseProperty{titlepage-iv}%
     \clearpage
   }%
+  \tpSetProperty{fund-format}{% Format of a single fund/grant/sponsor
+    \vbox{%
+      \hsize40mm
+      \tpUseComp{FundName}\dotfill\par
+      \tpUseComp{FundLogo}\dotfill\par}}%
   %% before the roman part of the title pages but after cover page
   \tpSetProperty{before-titlepage-roman}{%
     \setcounter{page}{1}%
@@ -265,7 +352,7 @@
   }%
   \tpSetProperty{titlepage-i}{%
     \ifcollection
-      \tpUseProperty{editor-string}%
+      \tpUseComp{EditorString}%
     \else
       \tpUseComp{AuthorNameList}%
     \fi%
@@ -276,7 +363,7 @@
   }%
   \tpSetProperty{titlepage-iii}{%
     \ifcollection
-      \tpUseProperty{editor-string}%
+      \tpUseComp{EditorString}%
     \else
       \tpUseComp{AuthorNameList}%
     \fi%
@@ -287,7 +374,11 @@
     \clearpage
   }%
   \tpSetProperty{titlepage-iv}{%
-    \null\vfill
+    \null
+    \tpGetComp{FundingPreText}
+    \tpGetComp{FundingBlock}%
+    \tpGetComp{FundingPostText}
+    \vfill
     \bgroup
       \tpUseProperty{imprint-format}%
       \tpGetComp{Biblio}%
@@ -333,26 +424,23 @@
     \tpUseComp{PubNote}\\%
     \tpUseComp{PubWeb}%
   }%
+  % Name Formats
+  \tpSetProperty{name-format}{%
+    \tpIfComp{FullName}
+    {\tpUseComp{FullName}}
+    {\tpUseComp{FirstName}\space\tpUseComp{SurName}}
+  }
+  \tpSetProperty{editor-format}{\tpUseProperty{name-format}}% Override for single editor names
+  \tpSetProperty{author-name}{\tpUseProperty{name-format}}% Override for single author names
+  \tpSetProperty{series-editor-name}{\tpUseProperty{name-format}}% Override for single series editor names
   % name Separators
   \tpSetProperty{editor-suffix-sgl}{\space(Ed.)}%
   \tpSetProperty{editor-suffix-pl}{\space(Eds.)}%
-  \tpSetProperty{editor-string}{%
-    \tpUseComp{EditorNameList}%
-    \ifnum\tpUseProperty{Editor-count}=\@ne
-      \tpUseProperty{editor-suffix-sgl}%
-    \else
-      \tpUseProperty{editor-suffix-pl}%
-    \fi}
   \tpSetProperty{name-and}{\space and\space}%
   \tpSetProperty{name-etal}{\space et~al.}%
   \tpSetProperty{name-sep}{,\space}%
   \tpSetProperty{corresp-mark}{*}%
 }
-
-%    \end{macrocode}
-% Default titlepage Declarator
-%    \begin{macrocode}
-\tpDeclareTitlepage{}
 
 
 \else%% TEMP

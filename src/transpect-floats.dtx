@@ -188,27 +188,11 @@
 
 
 %    \end{macrocode}
-% Declarations for caption related Components in float
-% environments. The first function provides an easily accessible alias
-% for the user defined property overrides. The second macro registers
-% the actual, sub-float dependent Components. \#1 is the overt name of
-% the Component, \#2 is the internal name of the component, and \#3 is
-% the accessor name to be used with \lstinline{\tpUseComp} and the
-% conditionals.
+% Declarations for caption related Components in float environments.
 %    \begin{macrocode}
+
 \def\tpMakeFltComp#1#2#3{%
-  \tpProvideComp{#1}
-    {\bgroup\ifx\tp@is@subflt\relax\else\tpSubFloatCnt=\z@\relax\fi\expandafter\global}
-    {\def\@tempa{{@tp@reset@components}}%
-     \edef\@tempb{%
-       \noexpand\ltx@LocalExpandAfter\noexpand\global\noexpand\expandafter\noexpand\let
-         \noexpand\csname tp@\noexpand\tp@namespace @#2-\the\tpSubFloatCnt\noexpand\endcsname
-         \noexpand\relax}%
-     \expandafter\expandafter\expandafter\csgappto\expandafter\@tempa\expandafter{\@tempb}%
-     \egroup}
-    {#2-\the\tpSubFloatCnt}%
-  \expandafter\long\expandafter\def\csname tp@\tp@namespace @#3\endcsname{\csname tp@\tp@namespace @#2-\the\tpSubFloatCnt\endcsname}%
-  \csgappto{@tp@reset@components}{\csname tp@\tp@namespace @#3\endcsname}%
+  \tpProvideCountedComp{#1}{#2}{#3}{\tpSubFloatCnt}{\ifx\tp@is@subflt\relax\else\the\tpSubFloatCnt=\z@\relax\fi}{}%
 }
 
 \def\tpMakeFltCompL#1#2{%
