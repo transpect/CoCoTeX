@@ -121,11 +121,11 @@
     \tp@prov@num@comp{FundLogo}{logo}%
   }%
 }
-\def\tp@title@fundings@eval{%
-  \def\tp@namespace{titlepage}
-  \tp@iterate@cnts{Funding}{fund-format}%
-  \tpIfComp{FundingBlock}{}{\expandafter\csname tpFundingBlock\expandafter\endcsname\expandafter{\tp@iterate@res}}%
-}
+\def\tp@title@fundings@eval{{%
+    \def\tp@namespace{titlepage}%
+    \tp@iterate@cnts{Funding}{fund-format}%
+    \tpIfComp{FundingBlock}{}{\expandafter\csname tpFundingBlock\expandafter\endcsname\expandafter{\tp@iterate@res}}%
+}}
 
 %    \end{macrocode}
 % \subsection{Name lists}
@@ -172,6 +172,7 @@
 \def\tp@iterate@cnts#1#2{%
   \edef\tp@iterate@res{%
     \noexpand\def\noexpand\tpTotalCount{\the\csname #1-Cnt\endcsname}%
+    \noexpand\tp@flt@cond 
     \noexpand\def\noexpand\tp@cnt@grp{#1}}%
   \expandafter\@tempcntb\csname #1-Cnt\endcsname
   \tp@iterate{\@tempcnta}{\@ne}{\@tempcntb}{%
@@ -190,15 +191,15 @@
 %    \end{macrocode}
 % Evaluator for the name lists
 %    \begin{macrocode}
-\def\tp@title@name@eval#1#2{%
-  \tpNamespace{titlepage}%
-  \tp@eval@name@attrs{#1}%
-  \tp@iterate@cnts{#1}{\csname tp@title@#1@meta@name\endcsname}%
-  \tpIfComp{#1MetaBlock}{}{\expandafter\csname tp#1MetaBlock\expandafter\endcsname\expandafter{\tp@iterate@res}}%
-  \tp@iterate@cnts{#1}{\csname tp@title@#1@format@name\endcsname}%
-  \tpIfComp{#1NameList}{}{\expandafter\csname tp#1NameList\expandafter\endcsname\expandafter{\tp@iterate@res}}%
-  \tp@create@editor@string{#1}%
-  }%
+\def\tp@title@name@eval#1#2{{%
+    \tpNamespace{titlepage}%
+    \tp@eval@name@attrs{#1}%
+    \tp@iterate@cnts{#1}{\csname tp@title@#1@meta@name\endcsname}%
+    \tpIfComp{#1MetaBlock}{}{\expandafter\csname tp#1MetaBlock\expandafter\endcsname\expandafter{\tp@iterate@res}}%
+    \tp@iterate@cnts{#1}{\csname tp@title@#1@format@name\endcsname}%
+    \tpIfComp{#1NameList}{}{\expandafter\csname tp#1NameList\expandafter\endcsname\expandafter{\tp@iterate@res}}%
+    \tp@create@editor@string{#1}%
+  }}%
 
 %    \end{macrocode}
 % This macro combines the editor names with the editor suffix.
@@ -256,7 +257,9 @@
   \tp@title@macro{PubNote}%   Additional publisher notes
   \tp@title@macro{PubWeb}%    Publisher URL
   %% Pubication Meta
+  \tp@title@macro{Dedication}%   Dedication
   \tp@title@macro{EditionNote}%   Edition Note
+  \tp@title@macro{Editorial}% Editorial
   \tp@title@macro{Edition}%   Edition
   \tp@title@macro{Year}%       Publication Year
   \tp@title@macro{ISBN}%       ISBN
@@ -270,6 +273,7 @@
   \tp@title@macro{FundingPostText}% Text after the Funding list
   %% Imprint Meta
   \tp@title@macro{Biblio}%    Bibliographical Information
+  \tp@title@macro{BiblioTitle}% Heading Bibliographical Information
   \tp@title@macro{Print}%     Printer
   \tp@title@macro{PrintNote}%     Print Note
   \tp@title@macro{Lectorate}% Lector
@@ -379,6 +383,7 @@
     \tpUseComp{Title}%
   }%
   \tpSetProperty{titlepage-ii}{%
+    \tpGerComp{Editorial}%
     \null
     \vfill
     \tpUseProperty{bio-block}%
@@ -400,18 +405,20 @@
   }%
   \tpSetProperty{titlepage-iv}{%
     \null
+    \tpGetComp{Dedication}%   Dedication
+    \tpUseProperty{imprint-format}%
     \tpUseProperty{funding-block}%
     \vfill
     \bgroup
       \tpUseProperty{imprint-format}%
-      \tpGetComp{Biblio}%
+      \tpIfComp{Biblio}{{\bfseries\tpGetComp{BiblioTitle}}\tpGetComp{Biblio}}{}%
       \tpUseProperty{imprint-sep}%
       \tpUseProperty{imprint}%
     \egroup
     \clearpage
   }%
   %% Imprint
-  \tpSetProperty{imprint-format}{\footnotesize\hsize.6\textwidth}%
+  \tpSetProperty{imprint-format}{\footnotesize}%
   \tpSetProperty{imprint-sep}{\ifhmode\par\fi\addvspace{\baselineskip}}%
   \tpSetProperty{imprint}{%
     \tpUseProperty{publisher}%
@@ -436,6 +443,10 @@
     \tpUseProperty{imprint-sep}%
     \tpGetComp{EnvDisclaimer}%
   }%
+  \tpSetProperty{licence}{%
+    \tpIfComp{LicenceLogo}{\includegrapgics{\tpUseComp{LicenceLogo}}\par}{}%
+    \tpGetComp{LicenceText}%
+  }
   \tpSetProperty{copyright}{%
     \tpIfComp{Copyright}
       {\tpUseComp{Copyright}\par}
