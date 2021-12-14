@@ -51,9 +51,15 @@
 \def\endtpMeta{%
   \tp@title@names{eval}%
   \tp@title@fundings@eval
+  \tp@title@set@pdfmeta
   \AtBeginDocument{\tp@maketitle}%
   \let\tp@namespace\@empty
 }
+
+\def\tp@title@set@pdfmeta{%
+  \expandafter\title\expandafter{\tpUseComp{tpTitle}}%
+}
+
 %    \end{macrocode}
 % \section{Intermediate Level Interfaces}
 %
@@ -96,7 +102,6 @@
 % Shortcut for counted Components
 %    \begin{macrocode}
 \def\tp@title@counted@comp#1#2#3{%
-  %\let\tp@prev@namespace\tp@namespace
   \expandafter\newcount\csname #1-Cnt\endcsname%
   \expandafter\gdef\csname tp@title@#1@format@name\endcsname{#2}%
   \expandafter\def\csname tp#1\endcsname{\@ifnextchar [{\csname @tp#1\endcsname}{\csname @tp#1\endcsname[]}}%]
@@ -107,8 +112,6 @@
     #3
   }%
   \expandafter\def\csname endtp#1\endcsname{}%
-  %\let\tp@namespace\tp@prev@namespace
-  %%
 }
 %    \end{macrocode}
 %
@@ -147,7 +150,7 @@
     \tp@prov@num@comp{AffilID}{affil-id}%
     \tp@prov@num@comp{Mail}{mail}%
     \tp@prov@num@comp{Bio}{bio}%
-  }
+  }%
 }
 
 %    \end{macrocode}
@@ -166,12 +169,18 @@
     \fi
   }}
 
+\newcount\tpCurCount
 \def\tp@iterate@cnts#1{%
-  \edef\@tempa{\noexpand\def\noexpand\tp@cnt@grp{#1}}%
+  \edef\@tempa{%
+    \noexpand\def\noexpand\tpTotalCount{\the\csname #1-Cnt\endcsname}%
+    \noexpand\def\noexpand\tp@cnt@grp{#1}}%
   \expandafter\@tempcntb\csname #1-Cnt\endcsname
   \tp@iterate{\@tempcnta}{\@ne}{\@tempcntb}{%
     \edef\@tempb{%
+      %% internal counter for macro grabbing
       \noexpand\csname #1-Cnt\endcsname=\the\@tempcnta
+      %% top-level counter for user interaction
+      \noexpand\tpCurCount=\the\@tempcnta
       \noexpand\tpUseProperty{\csname tp@title@#1@format@name\endcsname}}%
     \expandafter\expandafter\expandafter\def
     \expandafter\expandafter\expandafter\@tempa
@@ -184,30 +193,8 @@
 %    \begin{macrocode}
 \def\tp@title@name@eval#1#2{%
   \tpNamespace{titlepage}%
-  \expandafter\xdef\csname tp@titlepage@#1-count\endcsname{\the\csname #1-Cnt\endcsname}%
   \tp@eval@name@attrs{#1}%
   \tp@iterate@cnts{#1}%
-  %% single Name
-  % \expandafter\ifnum\@tempcntb=\@ne
-  %   \edef\@tempb{\csname tp@#1@full-name-1\endcsname\tp@title@eval@corresp{#1}{1}}%
-  % \else
-  %   %% two or more names
-  %   \tp@iterate{\@tempcnta}{\@ne}{\@tempcntb}{%
-  %     \csname #1-Cnt\endcsname\@tempcnta
-  %     \edef\@tempb{%
-  %       \tpUseComp{FullName}%
-  %       \tp@title@eval@corresp{#1}{\the\@tempcnta}}%
-  %     \ifnum\@tempcnta=\@ne\relax
-  %       \let\@tempa\@tempb
-  %     \else
-  %       \ifnum\@tempcnta=\expandafter\the\csname #1-Cnt\endcsname\relax
-  %         \expandafter\edef\expandafter\@tempa\expandafter{\@tempa\tpUseProperty{name-and}\@tempb}%
-  %       \else
-  %         \expandafter\edef\expandafter\@tempa\expandafter{\@tempa\tpUseProperty{name-sep}\@tempb}%
-  %       \fi
-  %     \fi
-  %   }%
-  % \fi
   \tpIfComp{#1NameList}{}{\expandafter\csname tp#1NameList\expandafter\endcsname\expandafter{\@tempa}}%
   \tp@create@editor@string{#1}%
   }%
@@ -221,12 +208,8 @@
     \tpIfComp{#1String}{}{%
       \csname tp#1String\endcsname{%
         \tpUseComp{#1NameList}%
-        \ifnum\tpUseProperty{Editor-count}=\@ne
-          \tpUseProperty{editor-suffix-sgl}%
-        \else
-          \tpUseProperty{editor-suffix-pl}%
-        \fi
-      }
+        \tpUseProperty{editor-suffix}%
+      }%
     }%
   \fi
 }%
@@ -272,6 +255,7 @@
   \tp@title@macro{PubNote}%   Additional publisher notes
   \tp@title@macro{PubWeb}%    Publisher URL
   %% Pubication Meta
+  \tp@title@macro{EditionNote}%   Edition Note
   \tp@title@macro{Edition}%   Edition
   \tp@title@macro{Year}%       Publication Year
   \tp@title@macro{ISBN}%       ISBN
@@ -340,11 +324,45 @@
     \tpUseProperty{titlepage-iv}%
     \clearpage
   }%
+  %% Funding
+  \tpSetProperty{funding-columns}{2}
+  \tpSetProperty{funding-format}{}%
+%    \end{macrocode}
+% Fallback for the width in case someone sets up a fixed value for a fund's width.
+%    \begin{macrocode}
+  \tpSetProperty{fund-width}{.5\textwidth}
+  \tpSetProperty{fund-vertical-sep}{\baselineskip}%
+  \tpSetProperty{fund-sep}{%
+    \CalcModulo{\tpCurCount}{\tpUseProperty{funding-columns}}%
+    \ifnum\the\tpModulo=\z@
+      \par
+      \ifnum\tpCurCount<\tpTotalCount\relax
+        \vskip\tpUseProperty{fund-vertical-sep}%
+      \fi
+    \else
+      \hfill
+    \fi}
   \tpSetProperty{fund-format}{% Format of a single fund/grant/sponsor
-    \vbox{%
-      \hsize40mm
-      \tpUseComp{FundName}\dotfill\par
-      \tpUseComp{FundLogo}\dotfill\par}}%
+    \strut\vtop{%
+      \hsize\tpUseProperty{fund-width}%
+      \tpIfComp{FundName}{\tpUseComp{FundName}\\[1ex]}{}%
+      \includegraphics[width=\tpUseProperty{fund-width}]{\tpUseComp{FundLogo}}}%
+    \tpUseProperty{fund-sep}%
+  }%
+  \tpSetProperty{funding-sep}{4mm}%
+  \tpSetProperty{funding-block}{%
+    \bgroup
+%    \end{macrocode}
+% We set \lstinline{fund-width} here so that the value is calculated only once and only the result is stored in the \lstinline{fund-width} Property.
+%    \begin{macrocode}
+      \tpSetPropertyX{fund-width}{\dimexpr(\textwidth/\tpUseProperty{funding-columns})-(\tpUseProperty{funding-sep}/\tpUseProperty{funding-columns})\relax}
+      \tpUseProperty{funding-format}%
+      \tpGetComp{FundingPreText}%
+      \tpGetComp{FundingBlock}%
+      \tpGetComp{FundingPostText}%
+      \par
+    \egroup
+  }
   %% before the roman part of the title pages but after cover page
   \tpSetProperty{before-titlepage-roman}{%
     \setcounter{page}{1}%
@@ -357,7 +375,7 @@
       \tpUseComp{AuthorNameList}%
     \fi%
     \vskip\baselineskip
-    \tpUseComp{Title}
+    \tpUseComp{Title}%
   }%
   \tpSetProperty{titlepage-ii}{%
   }%
@@ -370,14 +388,15 @@
     \par
     \tpUseComp{Title}\par
     \tpGetComp{Subtitle}%
+    \vskip\baselineskip
+    \tpGetComp{Edition}%
+    \tpGetComp{EditionNote}%
     \vfill
     \clearpage
   }%
   \tpSetProperty{titlepage-iv}{%
     \null
-    \tpGetComp{FundingPreText}
-    \tpGetComp{FundingBlock}%
-    \tpGetComp{FundingPostText}
+    \tpUseProperty{funding-block}%
     \vfill
     \bgroup
       \tpUseProperty{imprint-format}%
@@ -415,31 +434,50 @@
   }%
   \tpSetProperty{copyright}{%
     \tpIfComp{Copyright}
-      {\tpUseComp{Copyright}}
-      {\textcopyright\space\tpUseComp{Year}\space\tpUseComp{Publisher},\space\tpUseComp{PubPlace}}%
+      {\tpUseComp{Copyright}\par}
+      {\textcopyright\space\tpUseComp{Year}\space\tpUseComp{Publisher},\space\tpUseComp{PubPlace}\par}%
     }
   \tpSetProperty{publisher}{%
-    \tpUseComp{PubDivInfo}\\%
-    \tpUseProperty{copyright}\\%
-    \tpUseComp{PubNote}\\%
-    \tpUseComp{PubWeb}%
+    \tpGetComp{PubDivInfo}%
+    \tpUseProperty{copyright}%
+    \tpGetComp{PubNote}%
+    \tpGetComp{PubWeb}%
   }%
   % Name Formats
   \tpSetProperty{name-format}{%
     \tpIfComp{FullName}
-    {\tpUseComp{FullName}}
-    {\tpUseComp{FirstName}\space\tpUseComp{SurName}}
+      {\tpUseComp{FullName}}
+      {\tpUseComp{FirstName}\space\tpUseComp{SurName}}%
+    \tpUseProperty{counted-name-sep}%
   }
   \tpSetProperty{editor-format}{\tpUseProperty{name-format}}% Override for single editor names
-  \tpSetProperty{author-name}{\tpUseProperty{name-format}}% Override for single author names
-  \tpSetProperty{series-editor-name}{\tpUseProperty{name-format}}% Override for single series editor names
+  \tpSetProperty{author-format}{\tpUseProperty{name-format}}% Override for single author names
+  \tpSetProperty{series-editor-format}{\tpUseProperty{name-format}}% Override for single series editor names
   % name Separators
   \tpSetProperty{editor-suffix-sgl}{\space(Ed.)}%
   \tpSetProperty{editor-suffix-pl}{\space(Eds.)}%
+  \tpSetProperty{editor-suffix}{%
+    \ifnum\tpTotalCount=\@ne\relax
+      \tpUseProperty{editor-suffix-sgl}%
+    \else
+      \tpUseProperty{editor-suffix-pl}%
+    \fi
+  }%
   \tpSetProperty{name-and}{\space and\space}%
   \tpSetProperty{name-etal}{\space et~al.}%
   \tpSetProperty{name-sep}{,\space}%
   \tpSetProperty{corresp-mark}{*}%
+  \tpSetProperty{counted-name-sep}{%
+    \ifnum\tpTotalCount>1\relax
+      \ifnum\tpCurCount<\tpTotalCount\relax
+        \ifnum\tpCurCount<\numexpr\tpTotalCount-1\relax
+          \tpUseProperty{name-sep}%
+        \else
+          \tpUseProperty{name-and}%
+        \fi
+      \fi
+    \fi
+  }%
 }
 
 

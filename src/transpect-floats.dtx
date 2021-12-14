@@ -192,7 +192,7 @@
 %    \begin{macrocode}
 
 \def\tpMakeFltComp#1#2#3{%
-  \tpProvideCountedComp{#1}{#2}{#3}{\tpSubFloatCnt}{\ifx\tp@is@subflt\relax\else\the\tpSubFloatCnt=\z@\relax\fi}{}%
+  \tpProvideCountedComp{#1}{#2}{#3}{\tpSubFloatCnt}{\ifx\tp@is@subflt\relax\else\tpSubFloatCnt=\z@\relax\fi}{}%
 }
 
 \def\tpMakeFltCompL#1#2{%

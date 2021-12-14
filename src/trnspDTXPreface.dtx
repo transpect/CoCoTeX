@@ -40,8 +40,7 @@
   \RequirePackage[utf8]{inputenc}
   \RequirePackage{xcolor}
   \RequirePackage{graphicx}
-  \RequirePackage{lmodern}
-  \RequirePackage{courier}
+  \usepackage{newtxtext,newtxmath}
   \RequirePackage[breaklinks,pdfborder={0 0 0}]{hyperref}
 \definecolor{spot}{cmyk}{0,0.82,0.59,0.18}
 \definecolor{mblue}{cmyk}{0,0.82,0.59,0.18}
@@ -98,7 +97,6 @@
   \@mainmatterfalse
   \def\thesection{\@arabic\the\c@section}
   \pagenumbering{roman}}
-\usepackage{times}
 \usepackage{footnote}
 \hoffset-1in
 \voffset-1in
@@ -196,7 +194,7 @@
     \let\makelabel\descriptionlabel}}
 {\endlist}
 \renewcommand*\descriptionlabel[1]{%
-  \setbox\z@\hbox{\normalfont\ttfamily#1}%
+  \setbox\z@\hbox{\normalfont\myttfamily\small#1}%
   \hskip\labelsep
   \ifdim\wd\z@>\labelwidth
     {\normalfont\ttfamily #1\enskip}%
