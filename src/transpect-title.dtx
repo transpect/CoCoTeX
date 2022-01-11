@@ -84,7 +84,7 @@
 
 %    \end{macrocode}
 % \section{Low Level Interfaces}
-% Shortcut for numbered Components TODO: Mode to transpect-common
+% Shortcut for numbered Components TODO: Move to transpect-common
 %    \begin{macrocode}
 \def\tp@prov@num@comp#1#2{%
   \tpProvideCountedComp{tp#1}{\tp@cnt@grp-#2}{#1}
@@ -257,6 +257,8 @@
   \tp@title@macro{PubWeb}%    Publisher URL
   %% Pubication Meta
   \tp@title@macro{Dedication}%   Dedication
+  \tp@title@macro{Acknowledgements}%   Acknowledgements
+  \tp@title@macro{Statement}%   Acknowledgements
   \tp@title@macro{EditionNote}%   Edition Note
   \tp@title@macro{Editorial}% Editorial
   \tp@title@macro{Edition}%   Edition
@@ -281,11 +283,14 @@
   \tp@title@macro{CoverImage}%  Cover Image Creator
   \tp@title@macro{Typesetter}%  Typesetting company
   \tp@title@macro{QA}%            Quality Assurance
+  \tp@title@macro{UsedFont}%    Used Font(s)
   \tp@title@macro{Conversion}% Data Converison
   \tp@title@macro{EnvDisclaimer}% Environmental Disclaimer
   %% Licencing
   \tp@title@macro{LicenceText}%   License Description
   \tp@title@macro{LicenceLogo}%   License Logo
+  \tp@title@macro{LicenceLink}%   License Link
+  \tp@title@macro{LicenceName}%   License Name
   \tp@title@macro{Copyright}%     Copyright Description
   \tp@title@macro{CopyrightDisclaimer}% Copyright Disclaimer
 }
@@ -395,6 +400,7 @@
     \par
     \tpUseComp{Title}\par
     \tpGetComp{Subtitle}%
+    \tpGetComp{Statement}%
     \vskip\baselineskip
     \tpGetComp{Edition}%
     \tpGetComp{EditionNote}%
@@ -403,6 +409,7 @@
   }%
   \tpSetProperty{titlepage-iv}{%
     \tpGetComp{Dedication}%   Dedication
+    \tpGetComp{Acknowledgements}%   Dedication
     \tpUseProperty{imprint-format}%
     \tpUseProperty{funding-block}%
     \vfill
@@ -430,6 +437,7 @@
     \tpGetComp{Discussion}%%
     \tpGetComp{Typesetter}%%
     \tpGetComp{Print}%%
+    \tpGetComp{UsedFont}%%
     \tpGetComp{DOI}%%
     \tpGetComp{Keywords}%%
     \tpUseProperty{imprint-sep}%

@@ -22,11 +22,11 @@
 %    \begin{macrocode}
 \RequirePackage{kvoptions-patch}
 \RequirePackage{xkeyval}
+\PassOptionsToPackage{cmyk}{xcolor}
 \RequirePackage{transpect-common}
 %    \end{macrocode}
 % Passing options down to the \LaTeX\space standard packages
 %    \begin{macrocode}
-\PassOptionsToPackage{cmyk}{xcolor}
 \DeclareOptionX{main}{\PassOptionsToPackage{\CurrentOption}{babel}}
 \PassOptionsToPackage{shorthands=off}{babel}
 %    \end{macrocode}
@@ -128,11 +128,6 @@
     \@mainmatterfalse
     \@frontmatterfalse}
 \fi
-%    \end{macrocode}
-% hard requirements for all transpect derivates:
-%    \begin{macrocode}
-\usepackage{xcolor}
-\usepackage{graphicx}
 \usepackage{soul}
 %    \end{macrocode}
 % Inclusion of the script module which also loads the babel package

@@ -62,6 +62,16 @@
       \everypar{}%
     \fi}}
 %    \end{macrocode}
+% hard requirements for all transpect derivates:
+%    \begin{macrocode}
+\usepackage{xcolor}
+%    \end{macrocode}
+% Including the \lstinline{graphicx} package and catching case-insensitive
+% graphics file's endings from Word:
+%    \begin{macrocode}
+\usepackage{graphicx}
+\DeclareGraphicsRule{.EPS}{eps}{.EPS}{}
+%    \end{macrocode}
 % This macro is used to calculate the ratio between two integers.
 %    \begin{macrocode}
 \def\CalcRatio#1#2{\strip@pt\dimexpr\number\numexpr\number\dimexpr#1\relax*65536/\number\dimexpr#2\relax\relax sp}
