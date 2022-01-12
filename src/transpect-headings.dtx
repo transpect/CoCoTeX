@@ -87,8 +87,8 @@
         \tpIfProp{extended}{\tpUseProperty{extended-heading}}{}%
       \egroup%
       \tp@hdg@create@labels{#3}% label facility
-      \tp@make@toc% ToC entries
-      \tp@make@bookmarks% Bookmarks
+      \tpIfPropVal{no-toc}{true}{}{\tp@make@toc}% ToC entries
+      \tpIfPropVal{no-BM}{true}{}{\tp@make@bookmarks}% Bookmarks
       \tp@make@run% Running headers
       \tpUseProperty{after-heading-block}%
     }%
@@ -112,8 +112,10 @@
 %    \begin{macrocode}
 \def\tp@init@cnt#1#2{%
   \tpIfPropVal{numbering}{auto}
-    {\expandafter\ifx\csname c@#2\endcsname\relax \expandafter\newcount\csname c@#2\endcsname \fi
-     \global\csname c@#2\endcsname=\z@
+    {\expandafter\ifx\csname c@#2\endcsname \relax
+        \expandafter\newcount\csname c@#2\endcsname
+      \fi
+      \global\csname c@#2\endcsname=\z@
     }{}%
 }
 %    \end{macrocode}
@@ -128,7 +130,7 @@
      \else
        \tpIfComp{Number}
          {}%
-         {\expandafter\global\expandafter\advance\csname c@#2\endcsname\@ne
+         {\expandafter\global\expandafter\advance\csname c@#2\endcsname by \@ne\relax
           \edef\@tempa{\csname the#2\endcsname}%
           \expandafter\tpNumber\expandafter{\@tempa}}
      \fi}{}
@@ -235,9 +237,11 @@
   \tp@check@empty[Toc]{heading}{Number}{BM}%
   \tp@check@empty[Toc]{heading}{Author}{BM}%
   \tp@check@empty[Toc]{heading}{Subtitle}{BM}%
-  \tpIfProp{bookmark-level}{\edef\Hy@toclevel{\tpUseProperty{bookmark-level}}}{}%
-  \protected@edef\@tempa{\expandafter\@empty\csname tp@heading@bookmark\endcsname}%
-  \bookmark[level=\Hy@toclevel,dest=\@currentHref]{\expandonce{\@tempa}}%
+  \expandafter\ifx\csname tp@heading@attr@noBM\endcsname\@empty\else
+    \tpIfProp{bookmark-level}{\edef\Hy@toclevel{\tpUseProperty{bookmark-level}}}{}%
+    \protected@edef\@tempa{\expandafter\@empty\csname tp@heading@bookmark\endcsname}%
+    \bookmark[level=\Hy@toclevel,dest=\@currentHref]{\expandonce{\@tempa}}%
+  \fi
 }
 \tp@restore@init{heading}{toc-number-maxwd}
 \tp@restore@init{heading}{number-maxwd}
@@ -365,7 +369,7 @@
   \let\\\TitleBreak
   \let\tpltx@label\label
   \let\tp@heading@label\relax
-  \let\tp@notoc\@empty}
+  }
 %    \end{macrocode}
 % Restoring \LaTeX's default definitions
 %    \begin{macrocode}
@@ -375,7 +379,7 @@
   \let\label\tpltx@label
   \let\tp@heading@name\relax
   \let\tp@heading@label\relax
-  \let\tp@notoc\@empty}
+  }
 
 %    \end{macrocode}
 % \section{Defaults}
@@ -440,6 +444,8 @@
     \tpUseComp{RunTitle}%
   }%
   %% ToC
+  \tpSetProperty{no-toc}{false}% toc entries are generally disabled iff true
+  \tpSetProperty{no-BM}{false}% bookmark entries are generally disabled, iff true
   \tpSetProperty{toc-page-sep}{\dotfill}% between toc-title and page
   \tpSetProperty{toc-page-format}{}%
   \tpSetProperty{toc-number-width}{}% current width of number
