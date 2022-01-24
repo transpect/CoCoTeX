@@ -137,8 +137,6 @@
   \expandafter\ifx\csname tp@#1@attr@orientation\endcsname\tp@str@landscape\relax
     \linewidth\textheight
     \def\tp@fps{p}%
-  \else
-    \tp@set@top@sep
   \fi}
 
 \def\tp@set@flt@pos{%
@@ -178,7 +176,8 @@
   \fi}
 
 \def\tp@set@bot@sep{%
-  \expandafter\ifx\csname tp@\tp@captype @attr@orientation\endcsname\tp@str@landscape\else
+  \expandafter\ifx\csname tp@\tp@captype @attr@orientation\endcsname\tp@str@landscape
+  \else
     \ifx\tp@fps\@empty
       \expandafter\addvspace\expandafter{\tpUseProperty{intext-skip-bottom}}%
     \else
@@ -449,6 +448,7 @@
 
 \def\endtp@float{%
     \tp@b@float
+    \tp@set@top@sep
     \tp@test@caption{0}{capt}{top}%
     \tp@test@caption{0}{capt}{bottom}%
     \tp@flt@create@counters%

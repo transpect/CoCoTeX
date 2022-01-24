@@ -466,7 +466,9 @@
     \expandonce#1%
   \fi}
 %    \end{macrocode}
-% This macro calculates number widths and prepares macros to be used by the user
+% This macro calculates number widths and prepares macros to be used
+% by the user. \#1 is the internal Property prefix, \#2 is the
+% user-level Component prefix, \#3 is the numerical list level.
 %    \begin{macrocode}
 \def\tp@format@number#1#2#3{%
   \tpSetProperty{#1formatted-number}{}%
@@ -493,10 +495,11 @@
 %    \end{macrocode}
 % \subsection{Macro to determine indentation}
 %
-% Macro to process heading numbers. \#1 is the heading level
+% Macro to determine and set the hanging indent of a counter. \#1 is
+% the internal Property prefix.
 %    \begin{macrocode}
 \def\tp@set@hang#1{%
-  \tpSetProperty{#1hang-number}{\tpUseProperty{#1formatted-number}}
+  \tpSetProperty{#1hang-number}{\tpUseProperty{#1formatted-number}}%
   \tpIfProp{#1indent}
     {\ifdim\tpUseProperty{#1indent}<\z@
         \tpSetProperty{#1hang-number}{%
@@ -507,7 +510,9 @@
             \tpIfPropVal{#1number-align}{right}{}{\hss}}}%
       \fi}{}}
 %    \end{macrocode}
-% \#1 is the property prefix, \#2 is the list level.
+% Macro that determins the indent of the next higher level of the
+% list. ``Higher'' meaning hierarchical, i.e. the index is lower. \#1
+% is the Property prefix, \#2 is the numerical list level.
 %    \begin{macrocode}
 \def\tp@det@prev@indent#1#2{%
   \@tempcnta\numexpr#2-1\relax
@@ -527,6 +532,8 @@
 % This low-level macro takes the csname of an unprefixed dimension and
 % stores its value in the aux files iff the previous value of that
 % conrol structure is lower than the current value.
+%
+% \#1 is the internal name of the property sans \lstinline{tp-}, \#2 is 
 %    \begin{macrocode}
 \def\tp@store@maxwd#1#2{%
   \expandafter\ifx\csname tp-\tp@namespace-#1\endcsname\relax
@@ -540,7 +547,8 @@
   \fi}
 %    \end{macrocode}
 % Eventually, write the actually used values for margin-left and
-% indent into the headings's Property list.
+% indent into the headings's Property list. \#1 is the internal
+% property prefix, \#2 is the numerical list level.
 %    \begin{macrocode}
 \def\tp@get@indent#1#2{%
   \tpSetPropertyX{int-#1margin-left}{\tpUseProperty{#1margin-left}}%
@@ -569,7 +577,7 @@
                {\tpSetPropertyX{#1indent}{\tpUseProperty{int-#1indent}}%
                 \tpSetProperty{#1margin-left}{\z@}}
                {\tpSetProperty{#1indent}{\z@}%
-                \tpSetProperty{#1margin-left}{\z@}}}}}}
+                \tpSetProperty{#1margin-left}{\z@}}}}}}%
     }
 %    \end{macrocode}
 % \subsection{Label generation and selection}
