@@ -142,10 +142,11 @@
 %    \end{macrocode}
 % This macro registers the actual, counter dependent Components. \#1
 % is the overt name of the Component, \#2 is the internal name of the
-% component, and \#3 is the accessor name to be used with
+% component, \#3 is the accessor name to be used with
 % \lstinline{\tpUseComp} and the conditionals, \#4 is the counter
-% register, and \#5 is some custom code passed tp the second argument
-% of \lstinline{\tpProvideComp}.
+% register, \#5 is some custom code passed to the second argument of
+% \lstinline{\tpProvideComp}, and \#6 is a modifier to the internal
+% macro definition.
 %    \begin{macrocode}
 \def\tpProvideCountedComp#1#2#3#4#5#6{%
   \tpProvideComp{#1}

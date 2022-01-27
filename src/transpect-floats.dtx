@@ -37,7 +37,7 @@
 \def\totalnumber{8}
 \def\topnumber{8}
 \def\bottomnumber{8}
-\def\floatpagefraction{0.9}
+\def\floatpagefraction{0.8}
 \@fptop\z@
 \@fpbot\@flushglue
 %    \end{macrocode}
@@ -53,6 +53,8 @@
 \newdimen\tp@subflt@maxheight \tp@subflt@maxheight=\z@\relax
 \newdimen\tp@subflt@sep       \tp@subflt@sep=\fboxsep\relax
 \newdimen\tp@total@flt@width  \tp@total@flt@width=\textwidth\relax
+\newdimen\tp@total@flt@height \tp@total@flt@height=\textwidth\relax
+\newdimen\tp@total@flt@depth  \tp@total@flt@depth=\textwidth\relax
 
 \newdimen\tp@flt@marg@r       \tp@flt@marg@r=\z@\relax
 \newdimen\tp@flt@marg@l       \tp@flt@marg@l=\z@\relax
@@ -95,6 +97,7 @@
   \global\let\tp@has@capt@bottom\@undefined
   \global\let\tp@has@subcapt@top\@undefined
   \global\let\tp@has@subcapt@bottom\@undefined
+  \global\let\tp@@savecontentsline\@empty
   \global\tp@subfloat@row=\z@
   \global\tp@subfloat@col=\z@
   \global\tp@subflt@maxheight=\z@\relax
@@ -130,6 +133,7 @@
     \expandafter\let\expandafter\tp@fps\csname tp@#1@attr@float-pos\endcsname
   \fi
   \def\@tempa{h!}\ifx\tp@fps\@tempa\let\tp@fps\@empty\fi
+  \def\@tempa{h}\ifx\tp@fps\@tempa\def\tp@fps{htbp!}\fi
   \ifx\tp@do@dblfloat\relax
     \ifx\tp@fps\@empty\def\tp@fps{htpb!}\fi% 11514
     \linewidth\dimexpr2\columnwidth+\columnsep\relax
@@ -138,33 +142,61 @@
     \linewidth\textheight
     \def\tp@fps{p}%
   \fi}
+%    \end{macrocode}
+% In order to cathc the actual dimensions of the float box, we need to
+% hook into \LaTeX's \lstinline{\@endfloatbox} macro:
+%    \begin{macrocode}
+\AtBeginDocument{%
+  \let\ltx@endfloatbox\@endfloatbox
+\def \@endfloatbox{%
+  \ltx@endfloatbox
+  \global\tp@total@flt@height=\ht\@currbox\relax%
+  \global\tp@total@flt@depth=\dp\@currbox\relax%
+}}
 
 \def\tp@set@flt@pos{%
   \ifx\tp@fps\@empty
     \let\tp@b@float\relax
     \let\tp@e@float\relax
   \else
-    \def\@tempa{h}\ifx\tp@fps\@tempa\def\tp@fps{hbt!}\fi
     \let\tp@b@float\tp@captype%
     \expandafter\ifx\csname tp@\tp@captype @attr@orientation\endcsname\tp@str@landscape\relax
-      \ifx\tp@b@float\tp@str@table
-        \edef\@tp@b@float{sidewaystable}%
-      \else
-        \edef\@tp@b@float{sidewaysfigure}%
-      \fi
+      \edef\@tp@b@float{sideways\tp@b@float}%
       \edef\tp@b@float{\noexpand\begin{\@tp@b@float\ifx\tp@do@dblfloat\relax*\fi}}
       \edef\tp@e@float{\noexpand\end{\@tp@b@float\ifx\tp@do@dblfloat\relax*\fi}}
     \else
-      \ifx\tp@do@dblfloat\relax
-        \edef\tp@b@float{\noexpand\@xdblfloat {\tp@captype}[\tp@fps]}
-        \let\tp@e@float\end@dblfloat
-      \else
-        \edef\tp@b@float{\noexpand\@xfloat {\tp@captype}[\tp@fps]}
-        \let\tp@e@float\end@float
-      \fi
+      \edef\tp@flt@env{\ifx\tp@do@dblfloat\relax dbl\fi}
+      \edef\tp@b@float{\expandafter\noexpand\csname @x\tp@flt@env float\endcsname {\tp@captype}[\tp@fps]}
+      \edef\tp@e@float{\expandafter\noexpand\csname end@\tp@flt@env float\endcsname}
     \fi
   \fi}
-
+%    \end{macrocode}
+% debug output
+%    \begin{macrocode}
+\def\tp@flt@debug#1{%
+  \expandafter\ifx\csname tp@#1@attr@debug\endcsname\relax\else
+    \message{^^Jtranspect-float debug:^^J
+        Textheight:\space\the\textheight^^J
+        Type:\space\space\space\space\space\space\space\tp@namespace^^J
+\ifx\tp@captype\tp@str@figure
+        Path: \space\space\space\space\space\space\@tp@fig@path^^J
+\fi
+        Class:\space\space\space\space\space\space\tp@current@class^^J
+        Floatpos:\space\space\space\tp@fps^^J
+        Environ:\space\space\space\space\expandafter\noexpand\tp@b@float...\expandafter\noexpand\tp@e@float^^J
+        Subfloat:\space\space\space               \the\tpSubFloatCnt^^J
+\ifnum\tpSubFloatCnt=\z@
+        Width:\space\space\space\space\space\space\the\tp@total@flt@width^^J
+        Height:\space\space\space\space\space\the\tp@total@flt@height^^J
+        Depth:\space\space\space\space\space\space\the\tp@total@flt@depth^^J
+\else
+        Width:\space\space\space\space\space\space\expandafter\meaning\csname tp@\tp@namespace @width-\the\tpSubFloatCnt\endcsname^^J
+        Height:\space\space\space\space\space     \expandafter\meaning\csname tp@\tp@namespace @height-\the\tpSubFloatCnt\endcsname^^J
+        Depth:\space\space\space\space\space\space\expandafter\meaning\csname tp@\tp@namespace @depth-\the\tpSubFloatCnt\endcsname^^J
+\fi
+}%
+  \fi
+}
 %    \end{macrocode}
 % depending on the float position, apply the top separator
 %    \begin{macrocode}
@@ -219,7 +251,10 @@
 
 
 %    \end{macrocode}
-% creates a minipage of a fixed width for each part of a sub figure
+% creates a minipage of a fixed width for each part of a sub
+% figure. \#1 is the source of the sub figure, \#2 is the vertical
+% alignment of the figure within the minipage, and \#3 is the
+% projected overall width of the minipage.
 %    \begin{macrocode}
 \def\tp@create@mp#1#2#3{%
   \ifx\tp@fps\@empty\savenotes\fi
@@ -241,8 +276,11 @@
     \tpUseProperty{caption-format}%
     \tpUseProperty{caption-format-#2}%
     \ifx\@argii\tp@str@bottom
-      \vskip\dimexpr-\topsep-\baselineskip\relax
-      \expandafter\vskip\tpUseProperty{caption-sep-bottom}%
+      \expandafter\@tempskipa\tpUseProperty{caption-sep-bottom}\relax%
+      \ifnum\ifx\tp@is@subflt\relax\@ne\else\ifx\tp@has@subcapt@bottom\relax\z@\else\@ne\fi\fi=\@ne\relax
+        \advance\@tempskipa-\topskip\relax
+      \fi
+      \vskip\@tempskipa\relax
     \fi
     \leavevmode%
     \strut\tpUseProperty{caption-#2}\strut%
@@ -362,13 +400,21 @@
       \tpIfComp{ListofSource}{\csgappto{@tp@listof@entry}{\string\tpListofSource{\tpUseComp{ListofSource}}}}{}%
       \ifx\@tp@listof@entry\relax\else
         \protected@edef\tp@listof@entry{\@tp@listof@entry}%
-        \addcontentsline{#1}{\tp@captype}{\expandonce{\tp@listof@entry}}\relax
+        \ifx\tp@is@subflt\relax
+          \tp@savecontentsline{#1}{\tp@captype}{\expandonce{\tp@listof@entry}}%
+        \else
+          \addcontentsline{#1}{\tp@captype}{\expandonce{\tp@listof@entry}}%
+          \tp@@savecontentsline
+        \fi
       \fi
     \fi
   }%
 }
 
+\def\tp@savecontentsline#1#2#3{\protected@xdef\tp@@savecontentsline{\expandonce{\tp@@savecontentsline}\noexpand\addcontentsline{#1}{#2}{#3}\relax}}
+
 \def\tp@flt@check@empty#1#2{%
+  \ifx\tp@is@subflt\relax\else\tpSubFloatCnt\z@\fi
   \tpIfComp{Listof#1}
     {}
     {\tpIfComp{#1}
@@ -455,6 +501,7 @@
     \tp@flt@compose
     \tp@set@bot@sep
     \tp@e@float
+    \tp@flt@debug{\tp@captype}%
     \ifx\tp@fps\@empty\else\spewnotes\fi
   \endgroup
   \global\let\tp@current@class\relax
@@ -468,7 +515,7 @@
   \setbox\tp@tempboxa\hbox{\let\footnote\@gobbleopt\tpSubFloatCnt#1\relax\tpUseProperty{caption-#3}\relax}%
   \setbox\tp@tempboxb\hbox{\let\footnote\@gobbleopt\tpSubFloatCnt\m@ne\relax\tpUseProperty{caption-#3}\relax}%
   \ifdim\wd\tp@tempboxa>\wd\tp@tempboxb\relax
-    \expandafter\let\csname tp@has@#2@#3\endcsname\relax
+    \expandafter\global\expandafter\let\csname tp@has@#2@#3\endcsname\relax
   \fi}
 
 %    \end{macrocode}
@@ -522,10 +569,12 @@
       \hskip\tp@flt@marg@l%
       \tpUseProperty{float-block}%
     \else
+      \let\tp@is@subflt\relax
       \expandafter\tp@subflt@sep=\tpUseProperty{sub-float-sep}\relax%
       \tpIfProp{subfloat-same-height}
         {\tp@flt@process@sameheight}
         {\tp@flt@process@sub}%
+      \let\tp@is@subflt\@undefined
     \fi
   \egroup
 }
@@ -557,15 +606,7 @@
     \fi
   \fi
   \tp@make@anchors%
-  \ifx\tp@is@subflt\relax
-    \expandafter\ifx\csname tp@\tp@captype @attr@subfloat\endcsname\relax
-      \csname tp@make@listof@\tp@captype\endcsname{\tp@captype}% subfloats are counted separately
-    \else
-      \csname tp@make@listof@\tp@captype\endcsname{sub\tp@captype}% real subfloats
-    \fi
-  \else
-    \csname tp@make@listof@\tp@captype\endcsname{\tp@captype}% single float
-  \fi
+  \csname tp@make@listof@\tp@captype\endcsname{\tp@captype}% single float
   \ifhmode\@@par\fi}
 
 
@@ -618,6 +659,11 @@
     \fi
   \fi
   \ignorespaces
+  \expandafter\ifx\csname tp@\tp@captype @attr@subfloat\endcsname\relax
+    \csname tp@make@listof@\tp@captype\endcsname{\tp@captype}% subfloats are counted separately
+  \else
+    \csname tp@make@listof@\tp@captype\endcsname{sub\tp@captype}% real subfloats
+  \fi
   \setbox\tp@subfltbox\box\voidb@x
   \let\tp@is@subflt\@undefined
 }
@@ -679,6 +725,7 @@
   \if!#1!\else
     \def\@igopts{#1,width=\hsize}%
   \fi
+  \gdef\@tp@fig@path{#2}%
   \expandafter\tpltx@includegraphics\expandafter[\@igopts]{#2}%
 }
 
