@@ -27,7 +27,6 @@
 \RequirePackage[Export]{adjustbox}
 \usepackage{stfloats}
 \setcounter{dblbotnumber}{5}
-
 %    \end{macrocode}
 % for automatic typesetting and float positioning, we use very high tolerances from standard \LaTeX:
 %    \begin{macrocode}
@@ -278,7 +277,7 @@
     \ifx\@argii\tp@str@bottom
       \expandafter\@tempskipa\tpUseProperty{caption-sep-bottom}\relax%
       \ifnum\ifx\tp@is@subflt\relax\@ne\else\ifx\tp@has@subcapt@bottom\relax\z@\else\@ne\fi\fi=\@ne\relax
-        \advance\@tempskipa-\topskip\relax
+        \advance\@tempskipa-\tpUseProperty{float-v-offset}\relax
       \fi
       \vskip\@tempskipa\relax
     \fi
@@ -287,7 +286,9 @@
     \par\nobreak
     \ifx\@argii\tp@str@bottom
     \else
-      \vspace*{\tpUseProperty{caption-sep-top}}%
+      \@tempskipa\tpUseProperty{float-v-offset}\relax%
+      \advance\@tempskipa\tpUseProperty{caption-sep-top}%
+      \vspace*{\@tempskipa}%
     \fi
   \egroup
 }
@@ -578,16 +579,16 @@
     \fi
   \egroup
 }
-
-
 %    \end{macrocode}
-% Composes the caption.
+% Composes the full caption.
 %    \begin{macrocode}
 \def\tp@make@full@caption#1{%
   \hskip\tp@flt@marg@l
   \tp@create@mp{\tp@make@caption{0}{#1}}{t}{\tp@total@flt@width}%
 }
-
+%    \end{macrocode}
+% This macro finally composes the entire float object.
+%    \begin{macrocode}
 \def\tp@flt@compose{%
   \hsize\tp@total@flt@width
   \ifx\tp@has@capt@top\relax
@@ -597,7 +598,7 @@
       %% TODO: Sidecap handler: Besser nach \tp@flt@process ?
     \fi
   \fi
-  \ifhmode\@@par\nobreak\fi
+  %\ifhmode\@@par\nobreak\fi
   \tp@flt@process
   \ifhmode\@@par\nobreak\fi
   \ifx\tp@has@capt@bottom\relax
@@ -626,7 +627,7 @@
 
 \def\endtpSubFloat{%
   \ifx\tp@nofigs\relax
-    \setbox\tp@subfltbox\hbox{\rule{1pt}{1pt}}
+    \setbox\tp@subfltbox\hbox{\rule{0pt}{1pt}\rule{1pt}{0pt}}%
   \else
     \setbox\tp@subfltbox\hbox{\tp@flt@create@natural}%\tpUseComp{Content}
   \fi
@@ -694,21 +695,35 @@
 %    \end{macrocode}
 % \section{Handlers for figures}
 %
+% The \lstinline{\tpFigureHandler} tells the float module the name,
+% main namespace, and main content container of figure floats.
 %    \begin{macrocode}
-
 \def\tpFigureHandler{\tpMakeFltComp{tpFig}{figure}{Content}}
-
+%    \end{macrocode}
+% The \lstinline{\tpFigureFloat} macro tells the module how figures
+% are to be rendered.
+%    \begin{macrocode}
 \def\tpFigureFloat{%
   \let\includegraphics\tp@includesubgraphics
-  \tp@create@mp{\csname tp@\tp@namespace @figure-0\endcsname\nobreak}{t}{\the\tp@total@flt@width}%
+  \tp@create@mp{%
+    \vskip-\tpUseProperty{float-v-offset}%
+    \csname tp@\tp@namespace @figure-0\endcsname
+    \nobreak}{t}{\the\tp@total@flt@width}%
 }
-
+%    \end{macrocode}
+% The \lstinline{\tpFigureSubFloat} macro tells the module how
+% subfloats of figure floats are to be rendered.
+%    \begin{macrocode}
 \def\tpFigureSubFloat{%
   \ifx\tp@has@subcapt@top\relax
+    \vskip-\tpUseProperty{sub-float-v-offset}\relax
     \tp@iterate@mp{\tp@make@caption{\the\@tempcnta}{top}}{\tpUseProperty{sub-caption-valign-top}}%
     \par\nobreak
   \fi%
-  \tp@iterate@mp{\csname tp@\tp@namespace @figure-\the\@tempcnta\endcsname}{t}%
+  \tp@iterate@mp{%
+    \vskip-\tpUseProperty{sub-float-v-offset}\relax
+    \csname tp@\tp@namespace @figure-\the\@tempcnta\endcsname
+  }{b}%
   \ifx\tp@has@subcapt@bottom\relax
     \par\nobreak
     \tp@iterate@mp{\tp@make@caption{\the\@tempcnta}{bottom}}{\tpUseProperty{sub-caption-valign-bottom}}%%
@@ -799,6 +814,8 @@
   \tpSetProperty{intext-skip-bottom}{\z@}%% non-float sep bottom
   \tpSetProperty{float-skip-top}{\z@}%% float sep top
   \tpSetProperty{float-skip-bottom}{\z@}%% float sep bottom
+  \tpSetProperty{float-v-offset}{\topskip}% vertical offset for floats with no depth
+  \tpSetProperty{sub-float-v-offset}{\topskip}% vertical offset for sub-floats with no depth
   \tpSetProperty{sub-float-sep}{\tp@subflt@sep}%% space between sub-floats
   \tpSetProperty{margin-left}{\z@}%% left margin
   \tpSetProperty{margin-right}{\z@}%% right margin
@@ -875,112 +892,6 @@
   \tpSetProperty{float-block}{\tpTableFloat}%
   \tpSetProperty{subfloat-block}{\tpTableFloat}%
 }
-
- % %    \end{macrocode}
- % % Internal macros for generalized floating environments. They provide
- % % the macros used to compose floats to make sure they are used only
- % % within the \lstinline{tp@float}-derived environments.
- % %
- % % \#1: options, xml attribute syntax (\lstinline{attr="value"}),
- % % \begin{description}
- % % \item[float-pos] \LaTeX's float position, e.g. \lstinline{h}, \lstinline{t}, etc.\\
- % % \item[class] class\\
- % % \end{description}
- % %    \begin{macrocode}
-
-
- % \def\tp@float[#1]#2#3#4{%
- %   \savenotes
- %   \begingroup
- %     \tpNamespace{#4}%
- %     \tp@reset@subflts
- %     \tp@reset@components{0}%
- %     \def\tp@captype{#2}%
- %     \def\tp@caplisttype{#3}%
- %     \let\ht@cur@element\tp@captype
- %     \global\let\tp@current@class\relax
- %     \expandafter\tpCascadeProps\expandafter{#4}{float}%
- %     \if!#1!\else
- %       \tpParseAttributes{#2}{#1}%
- %       \expandafter\ifx\csname tp@#2@attr@class\endcsname\relax\else
- %         \expandafter\global\expandafter\let\expandafter\tp@current@class\csname tp@#2@attr@class\endcsname
- %         \message{^^Jtranspect-floats.sty: Class of float \tp@captype\space is: `\csname tp@#2@attr@class\endcsname'.}%
- %         \tpUseClass{default}{\tp@captype}%
- %         \expandafter\tpUseClass\expandafter{\csname tp@#2@attr@class\endcsname}{\tp@captype}%
- %       \fi
- %     \fi
- %     \expandafter\ifx\csname tp@#2@attr@float-pos\endcsname\relax
- %       \let\tp@fps\@empty
- %     \else
- %       \expandafter\let\expandafter\tp@fps\csname tp@#2@attr@float-pos\endcsname
- %     \fi
- %     \def\@tempa{h!}\ifx\tp@fps\@tempa\let\tp@fps\@empty\fi
- %     \def\tp@bcnthack{\bgroup\ifx\tp@is@subflt\relax\else\tp@subflts=\z@\relax\fi\expandafter\global}%
- %     \def\tp@ecnthack{\egroup}%
- %     \tpProvideComp{tpContent}{\tp@bcnthack}{\tp@ecnthack}{content-\the\tp@subflts}%
- %     \tpProvideComp{tpFig}{\tp@bcnthack}{\tp@ecnthack}{figure-\the\tp@subflts}%
- %     \tpProvideComp{tpCaption}{\tp@bcnthack}{\tp@ecnthack}{caption-\the\tp@subflts}%
- %     \tpProvideComp{tpLegend}{\tp@bcnthack}{\tp@ecnthack}{legend-\the\tp@subflts}%
- %     \tpProvideComp{tpSource}{\tp@bcnthack}{\tp@ecnthack}{source-\the\tp@subflts}%
- %     \tpProvideComp{tpNumber}{\tp@bcnthack}{\tp@ecnthack}{number-\the\tp@subflts}%
- %     \tpProvideComp{label}{\tp@bcnthack}{\tp@ecnthack}{label-\the\tp@subflts}%
- %     \parindent\z@
- %     \ifx\tp@do@dblfloat\relax\linewidth\dimexpr2\columnwidth+\columnsep\relax\fi
- %     \expandafter\ifx\csname tp@#2@attr@orientation\endcsname\tp@str@landscape
- %       \linewidth\textheight
- %       \def\tp@fps{p}%
- %     \else
- %       \ifx\tp@fps\@empty
- %         \expandafter\addvspace\expandafter{\tpUseProperty{intext-skip-top}}%
- %       \else
- %         \expandafter\addvspace\expandafter{\tpUseProperty{top-float-skip}}%
- %       \fi
- %     \fi
- %     \ifx\tp@captype\tp@str@table
- %       \ifx\tp@uses@htmltabs\relax
- %         \global\setbox\htTableBox\box\voidb@x
- %         \let\htOutputTable\relax
- %       \else
- %         \tp@reserve@tabular
- %       \fi
- %     \fi
- %   }
-
- % %    \end{macrocode}
- % % 1st iteration: only reading. This step happens when the contents of the float environment are read.
- % %    \begin{macrocode}
- % \RequirePackage{rotating}
- % \def\endtp@float{%
- %   \ifx\tp@fps\@empty\else
- %     \def\@tempa{h}\ifx\tp@fps\@tempa\def\tp@fps{ht!}\fi
- %     \let\tp@b@flt\tp@captype%
- %     \expandafter\ifx\csname tp@\tp@captype @attr@orientation\endcsname\tp@str@landscape
- %       \edef\tp@b@flt{sideways\tp@captype}%
- %     \fi
- %     \ifx\tp@do@dblfloat\relax
- %       \expandafter\def\expandafter\tp@b@flt\expandafter{\tp@b@flt*}%
- %     \fi
- %     \expandafter\expandafter\expandafter\begin\expandafter\expandafter\expandafter{\expandafter\tp@b@flt\expandafter}\expandafter[\tp@fps]%
- %   \fi
- %   \tp@flt@create@labels%
- %   \expandafter\ifx\csname tp@\tp@captype @float\endcsname\relax
- %     \tp@generic@float{0}%
- %   \else
- %     \csname tp@\tp@captype @float\endcsname
- %   \fi
- %   \par
- %   \ifx\tp@fps\@empty
- %     \expandafter\vskip\tpUseProperty{intext-skip-bottom}%
- %   \else
- %     \expandafter\addvspace\expandafter{\tpUseProperty{below-float-skip}}%
- %     \expandafter\end\expandafter{\tp@b@flt}%
- %   \fi
- %   \endgroup
- %   \global\let\tp@current@class\relax
- %   \spewnotes}
-
-
-
 %    \end{macrocode}
 % This is an implementation of hyperref's anchor mechanism to make
 % labels work. If no explicit label is given, the mechanism generates
