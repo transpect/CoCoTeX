@@ -171,6 +171,7 @@
 \def\tp@iterate@cnts#1#2{%
   \edef\tp@iterate@res{%
     \noexpand\def\noexpand\tpTotalCount{\the\csname #1-Cnt\endcsname}%
+    \noexpand\bgroup
     \noexpand\tp@flt@cond
     \noexpand\def\noexpand\tp@cnt@grp{#1}}%
   \expandafter\@tempcntb\csname #1-Cnt\endcsname
@@ -185,6 +186,7 @@
     \expandafter\expandafter\expandafter\tp@iterate@res
     \expandafter\expandafter\expandafter{\expandafter\tp@iterate@res\@tempb}%
   }%
+  \expandafter\def\expandafter\tp@iterate@res\expandafter{\tp@iterate@res\noexpand\egroup}%
 }
 
 %    \end{macrocode}
