@@ -261,7 +261,7 @@
     \let\includegraphics\tp@includesubgraphics
     #1%
   \end{minipage}%
-  \ifx\tp@fps\@empty\spewnotes\fi
+  \ifx\tp@fps\@empty\spewnotes\fi\nopagebreak
 }
 
 %    \end{macrocode}
@@ -784,8 +784,9 @@
       \tpContent{\unvbox\htTableBox}%
     \fi
   \fi
-  \ifx\tp@fps\@empty\par\vskip-\ht\strutbox\fi%
+  \vskip-\tpUseProperty{float-v-offset}%
   \tpUseComp{Content}%
+  \vskip\tpUseProperty{float-v-offset}%
 }
 
 
