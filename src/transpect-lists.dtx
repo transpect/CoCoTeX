@@ -89,7 +89,15 @@
 
 \renewenvironment{description}[1][]{%
   \small
-  \settowidth\@tempdima{#1}%
+  \settowidth\@tempdima{%
+    \directlua{%
+      local s = ""
+      i_max = math.floor(0.8 * string.len("#1"))
+      for i = 1, i_max do
+        s = s.."n"
+      end
+      tex.sprint(s)}%
+    }
   \ifdim\@tempdima=\z@\relax
     \@tempdima\parindent
   \fi
