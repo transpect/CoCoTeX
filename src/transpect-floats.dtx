@@ -239,28 +239,44 @@
 
 %    \end{macrocode}
 % \section{Caption mechanism}
+%
+% This sub-routine cycles through the subfloats and creates boxes for
+% each component. \#1 is the content, \#2 is the vertical alignment
+% within the box, \#3 is the height of the row.
 %    \begin{macrocode}
 
-\def\tp@iterate@mp#1#2{%
+\def\tp@iterate@mp#1#2#3{%
   \@tempcnta=\z@\relax
   \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
     \ifnum\@tempcnta>\@ne\relax\hfill\fi
-    \tp@create@mp{#1}{#2}{\csname tp@\tp@namespace @res@width-\the\@tempcnta\endcsname}%
+    \tp@flt@create@block{#1}{#2}{\csname tp@\tp@namespace @res@width-\the\@tempcnta\endcsname}{#3}%
   }}
 
-
 %    \end{macrocode}
-% creates a minipage of a fixed width for each part of a sub
-% figure. \#1 is the source of the sub figure, \#2 is the vertical
-% alignment of the figure within the minipage, and \#3 is the
-% projected overall width of the minipage.
+% creates a vbox of a fixed width and height for each component
+% (block) of a subfloat. \#1 is the source of the subfloat component
+% (block), \#2 is the vertical alignment of the figure within the
+% vbox, and \#3 is the projected overall width of the vbox, \#4 its height.
 %    \begin{macrocode}
-\def\tp@create@mp#1#2#3{%
+\def\tp@flt@create@block#1#2#3#4{%
   \ifx\tp@fps\@empty\savenotes\fi
-  \begin{minipage}[#2][][t]{#3}%
+  \leavevmode
+  \ifdim#4>\z@\relax
+    \def\@tempa{\vbox to #4}%
+  \else
+    \def\@tempa{\vbox}%
+  \fi
+  \edef\@argii{#2}% ???
+  \@tempa{%
+    \hsize=#3\relax
+    \leavevmode
+    \ifx\@argii\tp@str@top\else\vss\fi
     \let\includegraphics\tp@includesubgraphics
-    #1%
-  \end{minipage}%
+    \strut#1\strut%
+    \ifx\@argii\tp@str@bottom\else\vss\fi
+  }%
+  % \smash{\llap{\tiny\strut(#2,\the\dimexpr\ht\@tempboxa\relax+\the\dimexpr\dp\@tempboxa\relax, \the\dimexpr#4\relax)\vrule \@height\ht\@tempboxa\@depth\dp\@tempboxa\@width 1bp\relax\hskip1bp}}%
+  % \box\@tempboxa
   \ifx\tp@fps\@empty\spewnotes\fi\nopagebreak
 }
 
@@ -271,23 +287,18 @@
   \bgroup
     \tpSubFloatCnt#1\relax
     \def\@argii{#2}%
-    % \ifnum\tpSubFloatCnt=\z@\hsize\tp@total@flt@width\fi
     \tpUseProperty{caption-format}%
     \tpUseProperty{caption-format-#2}%
     \ifx\@argii\tp@str@bottom
       \expandafter\@tempskipa\tpUseProperty{caption-sep-bottom}\relax%
-      \ifnum\ifx\tp@is@subflt\relax\@ne\else\ifx\tp@has@subcapt@bottom\relax\z@\else\@ne\fi\fi=\@ne\relax
-        \advance\@tempskipa-\tpUseProperty{float-v-offset}\relax
-      \fi
+      \advance\@tempskipa\dimexpr-\topskip\relax
       \vskip\@tempskipa\relax
     \fi
     \leavevmode%
     \strut\tpUseProperty{caption-#2}\strut%
-    \par\nobreak
     \ifx\@argii\tp@str@bottom
     \else
-      \@tempskipa\tpUseProperty{float-v-offset}\relax%
-      \advance\@tempskipa\tpUseProperty{caption-sep-top}%
+      \expandafter\@tempskipa\tpUseProperty{caption-sep-top}%
       \vspace*{\@tempskipa}%
     \fi
   \egroup
@@ -445,6 +456,7 @@
         {\expandafter\global\expandafter\advance\csname c@\tp@captype\endcsname\@ne\relax
          \tp@set@label{0}}%
       \ifnum\tpSubFloatCnt=\z@\relax\else
+        \@tempcnta\z@
         \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
           \tpIfComp{number-\the\@tempcnta}
             {}%
@@ -513,8 +525,8 @@
 %    \begin{macrocode}
 
 \def\tp@test@caption#1#2#3{%
-  \setbox\tp@tempboxa\hbox{\let\footnote\@gobbleopt\tpSubFloatCnt#1\relax\tpUseProperty{caption-#3}\relax}%
-  \setbox\tp@tempboxb\hbox{\let\footnote\@gobbleopt\tpSubFloatCnt\m@ne\relax\tpUseProperty{caption-#3}\relax}%
+  \setbox\tp@tempboxa\hbox{\tpGobble\tpSubFloatCnt#1\relax\tpUseProperty{caption-#3}\relax}%
+  \setbox\tp@tempboxb\hbox{\tpGobble\tpSubFloatCnt\m@ne\relax\tpUseProperty{caption-#3}\relax}%
   \ifdim\wd\tp@tempboxa>\wd\tp@tempboxb\relax
     \expandafter\global\expandafter\let\csname tp@has@#2@#3\endcsname\relax
   \fi}
@@ -536,12 +548,18 @@
     \advance\@tempdima\@tempdimb
   }%
   \@tempcnta=\z@\relax
+  \@tempdimb=\z@\relax
+  \@tempdimc=\z@\relax
   \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
     \edef\@tempa{\CalcRatio{\csname tp@\tp@namespace @adj@width-\the\@tempcnta\endcsname}{\@tempdima}}%
     \expandafter\edef\csname tp@\tp@namespace @res@width-\the\@tempcnta\endcsname{\dimexpr\@tempa\tp@total@flt@width\relax}%
+    \@tempdimc\dimexpr\csname tp@\tp@namespace @height-\the\@tempcnta\endcsname\relax
+    \@tempdimc\dimexpr\@tempa\@tempdimc\relax
+    \ifdim\@tempa\@tempdimb<\@tempdimc\@tempdimb\@tempdimc\relax\fi
     \tp@test@caption{\the\@tempcnta}{subcapt}{top}%
     \tp@test@caption{\the\@tempcnta}{subcapt}{bottom}%
   }%
+  \expandafter\edef\csname tp@\tp@namespace @res@height\endcsname{\the\@tempdimb}%
 }
 
 %    \end{macrocode}
@@ -584,7 +602,7 @@
 %    \begin{macrocode}
 \def\tp@make@full@caption#1{%
   \hskip\tp@flt@marg@l
-  \tp@create@mp{\tp@make@caption{0}{#1}}{t}{\tp@total@flt@width}%
+  \tp@flt@create@block{\tp@make@caption{0}{#1}}{top}{\tp@total@flt@width}{\z@}%
 }
 %    \end{macrocode}
 % This macro finally composes the entire float object.
@@ -705,10 +723,10 @@
 %    \begin{macrocode}
 \def\tpFigureFloat{%
   \let\includegraphics\tp@includesubgraphics
-  \tp@create@mp{%
-    \vskip-\tpUseProperty{float-v-offset}%
+  \tp@flt@create@block{%
+    % \vskip-\tpUseProperty{float-v-offset}%
     \csname tp@\tp@namespace @figure-0\endcsname
-    \nobreak}{t}{\the\tp@total@flt@width}%
+    \nobreak}{top}{\the\tp@total@flt@width}{\z@}%
 }
 %    \end{macrocode}
 % The \lstinline{\tpFigureSubFloat} macro tells the module how
@@ -716,20 +734,32 @@
 %    \begin{macrocode}
 \def\tpFigureSubFloat{%
   \ifx\tp@has@subcapt@top\relax
-    \vskip-\tpUseProperty{sub-float-v-offset}\relax
-    \tp@iterate@mp{\tp@make@caption{\the\@tempcnta}{top}}{\tpUseProperty{sub-caption-valign-top}}%
+    % \vskip-\tpUseProperty{sub-float-v-offset}\relax
+    \tp@flt@calc@row@ht{\tp@make@caption{\the\@tempcnta}{top}}%
+    \tp@iterate@mp{\tp@make@caption{\the\@tempcnta}{top}}{\tpUseProperty{sub-caption-valign-top}}{\tp@flt@curr@row@height}%
     \par\nobreak
   \fi%
-  \tp@iterate@mp{%
-    \vskip-\tpUseProperty{sub-float-v-offset}\relax
-    \csname tp@\tp@namespace @figure-\the\@tempcnta\endcsname
-  }{b}%
+  \tp@iterate@mp{\csname tp@\tp@namespace @figure-\the\@tempcnta\endcsname}{bottom}{\csname tp@\tp@namespace @res@height\endcsname}%
   \ifx\tp@has@subcapt@bottom\relax
     \par\nobreak
-    \tp@iterate@mp{\tp@make@caption{\the\@tempcnta}{bottom}}{\tpUseProperty{sub-caption-valign-bottom}}%%
+    \tp@flt@calc@row@ht{\tp@make@caption{\the\@tempcnta}{bottom}}%
+    \tp@iterate@mp{\tp@make@caption{\the\@tempcnta}{bottom}}{\tpUseProperty{sub-caption-valign-bottom}}{\tp@flt@curr@row@height}%%
   \fi
 }
-
+\def\tp@flt@calc@row@ht#1{%
+  \@tempcnta\z@
+  \@tempdima\z@
+  \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
+    \setbox\z@\vbox{%
+      \expandafter\hsize\dimexpr\csname tp@\tp@namespace @res@width-\the\@tempcnta\endcsname\relax
+      \leavevmode
+      \tpGobble
+      \strut#1\strut
+      \par}%
+    \ifdim\ht\z@>\@tempdima \@tempdima\ht\z@\relax\fi
+  }%
+  \edef\tp@flt@curr@row@height{\the\@tempdima}%
+}
 \def\tp@includesubgraphics{\@ifnextchar [\@tp@includesubgraphics{\@tp@includesubgraphics[]}}%]
 \def\@tp@includesubgraphics[#1]#2{%
   \ifx\tp@current@class\relax
@@ -784,9 +814,9 @@
       \tpContent{\unvbox\htTableBox}%
     \fi
   \fi
-  \vskip-\tpUseProperty{float-v-offset}%
+  % \vskip-\tpUseProperty{float-v-offset}%
   \tpUseComp{Content}%
-  \vskip\tpUseProperty{float-v-offset}%
+  % \vskip\tpUseProperty{float-v-offset}%
 }
 
 
@@ -834,7 +864,11 @@
     \tpIfComp{Number}{\tpUseComp{Number}\tpUseProperty{number-sep}}{}%
     \tpUseComp{Caption}%
   }%
-  \tpSetProperty{caption-bottom}{\tpUseComp{Legend}\\\tpUseComp{Source}}%
+  \tpSetProperty{caption-bottom}{%
+    \tpIfComp{Legend}{\tpUseComp{Legend}}{}%
+    \tpIfComp{Source}{%
+      \tpIfComp{Legend}{\par}{}%
+      \tpUseComp{Source}}{}}%
   \tpSetProperty{caption-format}{}% style applied to top and bottom captions
   \tpSetProperty{caption-format-top}{}%% style applied to top captions
   \tpSetProperty{caption-format-bottom}{}%% style applied to bottom captions
@@ -842,8 +876,8 @@
   \tpSetProperty{caption-sep-bottom}{\z@}%% vertical space between content and bottom caption
   \tpSetProperty{sub-caption-top}{}% in case, sub-float captions diverge from main caption TODO
   \tpSetProperty{sub-caption-bottom}{}% in case, sub-float captions diverge from main caption TODO
-  \tpSetProperty{sub-caption-valign-top}{t}%% vertical alignment of top sub-captions
-  \tpSetProperty{sub-caption-valign-bottom}{t}%% vertical alignment of bottom sub-captions
+  \tpSetProperty{sub-caption-valign-top}{top}%% vertical alignment of top sub-captions
+  \tpSetProperty{sub-caption-valign-bottom}{top}%% vertical alignment of bottom sub-captions
   \tpSetProperty{sub-number-sep}{\,}%% when sub-captions, this is placed between the float counter and the sub-float counter
   \tpSetProperty{sub-number-style}{alph}%% counting style of subcaption counters
   \tpSetProperty{sub-number-format}{}%% format of subcaption counters
@@ -888,7 +922,7 @@
 }
 
 \tpDeclareFloat{tpTable}{table}{lot}{%
-  \tpSetProperty{sub-caption-valign-top}{b}%
+  \tpSetProperty{sub-caption-valign-top}{bottom}%
   \tpSetProperty{content-handler}{\tpTableHandler}%
   \tpSetProperty{float-block}{\tpTableFloat}%
   \tpSetProperty{subfloat-block}{\tpTableFloat}%
@@ -898,7 +932,7 @@
 % labels work. If no explicit label is given, the mechanism generates
 % one, unique to each (sub)float.
 %    \begin{macrocode}
-\def\tp@make@anchors{\tp@iterate{\@tempcnta}{\z@}{\tpSubFloatCnt}{\tp@make@anchor{\the\@tempcnta}}}
+\def\tp@make@anchors{\@tempcnta\z@\tp@iterate{\@tempcnta}{\z@}{\tpSubFloatCnt}{\tp@make@anchor{\the\@tempcnta}}}
 \def\tp@make@anchor#1{%
   \bgroup
     \global\advance\tp@int@flt@cnt\@ne
