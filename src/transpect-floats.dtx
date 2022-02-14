@@ -73,7 +73,15 @@
     \renewcommand\includegraphics[2][]{}%
   \fi
   \global\let\tpltx@includegraphics\includegraphics
-  \@ifpackageloaded{htmltabs}{\global\let\tp@uses@htmltabs\relax}{}%
+  \@ifpackageloaded{htmltabs}
+    {\global\let\tp@uses@htmltabs\relax
+     \def\ht@adjust@linewidth{%
+       \advance\ht@h@offset\leftskip
+       \advance\ht@h@offset\@totalleftmargin
+       %\advance\linewidth-\leftskip
+       \advance\linewidth-\rightskip
+     }%
+   }{}%
 }%
 
 %    \end{macrocode}
