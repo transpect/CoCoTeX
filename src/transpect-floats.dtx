@@ -342,6 +342,7 @@
 % system. \#\#1 is the name of the ``level'' for the entry.
 %    \begin{macrocode}
   \expandafter\gdef\csname tp@make@listof@#2\endcsname##1{%
+    \tpGobble
     \tp@flt@check@empty{Number}{number}%
     \tp@flt@check@empty{Caption}{caption}%
     \tp@flt@check@empty{Legend}{legend}%
@@ -440,7 +441,7 @@
     \expandafter\tpCascadeProps\expandafter{#4}{float}%
     \tp@get@flt@attr{#1}{#2}%
     \tp@set@caption@comps
-    \tpUseProperty{content-handler}%
+    \tpUseProperty{float-handler}%
     \tpUseProperty{before-float}%
     \tp@flt@set@hsize
     \tp@set@flt@pos
@@ -509,15 +510,22 @@
 %    \begin{macrocode}
 
 \def\tp@flt@process{%
+  \tp@make@outer@caption{top}%
   \ifnum\tpSubFloatCnt=\z@\relax
-    \tpUseProperty{float-block}%
+    \tpUseProperty{float-render}%
   \else
-    \tp@flt@calc@sameheight
     \let\tp@is@subflt\relax
+    \tp@flt@calc@sameheight
     \expandafter\tp@subflt@sep=\tpUseProperty{sub-float-sep}\relax%
-    \tpUseProperty{subfloat-block}%
+    \ifx\tp@has@subcapt@top\@empty\tp@flt@calc@row@ht{top}\fi%
+    \ifx\tp@has@subcapt@bottom\@empty\tp@flt@calc@row@ht{bottom}\fi%
+    \def\tp@prefix{sub}%
+    \tpUseProperty{subfloat-render}%
+    \let\tp@prefix\@empty
     \let\tp@is@subflt\@undefined
-  \fi}
+  \fi
+  \tp@make@outer@caption{bottom}%
+}
 
 %    \end{macrocode}
 % This macro finally composes the entire float object.
@@ -528,6 +536,8 @@
     \leavevmode
     \tp@flt@process
     \par
+    \tp@make@anchors%
+    \csname tp@make@listof@\tp@captype\endcsname{\tp@captype}% single float
   \egroup}
 
 % \def\tp@flt@compose{%
@@ -564,18 +574,15 @@
 % Determins the spacing inserted \textbf{above the caption}.
 %    \begin{macrocode}
 \def\tp@capt@top@offset{%
-  \ifx\@argii\tp@str@top
-    \ifx\tp@has@capt@bottom\@empty\ifnum\tpSubFloatCnt=\z@\else
-        %% darf nur passieren, wenn es capt-top gibt und subcapt-top gerendert wird!
-        \vskip\dimexpr-\topskip\relax
-      \fi\fi
+  \ifx\@argi\tp@str@top
   \else
     \par\nopagebreak
-    \expandafter\@tempskipa\tpUseProperty{\tp@prefix caption-sep-top}%
+    \expandafter\@tempskipa\tpUseProperty{\tp@prefix caption-sep-top}\relax%
+    \advance\@tempskipa\dimexpr-\topskip+\dp\strutbox\relax
     \ifx\tp@has@subcapt@bottom\@empty
       \ifnum\tpSubFloatCnt=\z@
-        %% darf nur passieren, wenn es subcapt-bot gibt und capt-bot gerendert wird!
-        \advance\@tempskipa\dimexpr-\dp\strutbox\relax
+        %% subcapt-bot exists and capt-bot is rendered
+        \advance\@tempskipa\dimexpr\dp\strutbox\relax
         \expandafter\advance\expandafter\@tempskipa\tpUseProperty{subcaption-add-sep-top}\relax%
       \fi
     \fi
@@ -587,26 +594,51 @@
 % Determins the spacing inserted \textbf{below the caption}.
 %    \begin{macrocode}
 \def\tp@capt@bottom@offset{%
-  \ifx\@argii\tp@str@top
-    \@tempskipa\dimexpr-\baselineskip\relax
+  \ifx\@argi\tp@str@top
+    \@tempskipa\z@
     \expandafter\advance\expandafter\@tempskipa\tpUseProperty{\tp@prefix caption-sep-bottom}%
+    %
     \ifnum\tpSubFloatCnt=\z@
       \ifx\tp@has@subcapt@top\@empty
-        \expandafter\advance\expandafter\@tempskipa-\dimexpr\baselineskip-\topskip\relax
+        %% subcapt-top exists and capt-top is rendered
+        \advance\@tempskipa\dimexpr\ht\strutbox-\topskip-\p@\relax
         \expandafter\advance\expandafter\@tempskipa-\tpUseProperty{subcaption-add-sep-bottom}\relax%
+      \else
+        \advance\@tempskipa\dimexpr-\dp\strutbox\relax
       \fi
-    \else
-      \advance\@tempskipa\dp\strutbox
     \fi
     \vskip\@tempskipa
-    %\nobreak\par
-    \vrule\@width\hsize\@height\z@\@depth\z@
     \par\nopagebreak
   \else
     \ifnum\tpSubFloatCnt>\z@
-      \vskip\topskip
+      \vskip\dp\strutbox
     \fi
   \fi}
+
+%    \end{macrocode}
+% prints the caption. \#1 is the
+% placement (top, bottom), \#2 is the vertical alignment (top, middle,
+% bottom).
+%    \begin{macrocode}
+\long\def\tp@make@caption#1#2{%
+  \edef\@argi{#1}\edef\@argii{#2}%
+  \tp@capt@top@offset
+  \ifnum\tpSubFloatCnt=\z@
+    \def\next{\vbox}%
+  \else
+    \expandafter\tp@tempskipa\csname tp@flt@capt@row@height@#1\endcsname\relax
+    \expandafter\advance\expandafter\tp@tempskipa\dimexpr-\baselineskip+\topskip\relax
+    \def\next{\vbox to \tp@tempskipa}%
+  \fi
+  \next\bgroup%
+    \ifx\@argii\tp@str@top\else\vss\fi
+    \tpUseProperty{\tp@prefix caption-format}%
+    \tpUseProperty{\tp@prefix caption-format-#1}%
+    \tp@topstrut\tpUseProperty{caption-#1}\strut%
+    \ifx\@argii\tp@str@bottom\else\vss\fi%
+  \egroup%
+  \tp@capt@bottom@offset
+}
 
 %    \end{macrocode}
 % Shell for the outer captions, \#1 is the placement (top, bottom)
@@ -614,36 +646,14 @@
 \def\tp@make@outer@caption#1{%
   \expandafter\ifx\csname tp@has@capt@#1\endcsname\@empty
     \bgroup
+      \savenotes
       \nopagebreak
-      \tp@make@caption{\z@}{#1}{top}%
+      \tpSubFloatCnt\z@
+      \tp@make@caption{#1}{top}%
+      \spewnotes
     \egroup
+    \nopagebreak
   \fi}
-
-%    \end{macrocode}
-% prints the caption. \#1 is the subfigure counter value, \#2 is the
-% placement (top, bottom), \#3 is the vertical alignment (top, middle,
-% bottom).
-%    \begin{macrocode}
-\long\def\tp@make@caption#1#2#3{%
-  \edef\@argii{#2}\edef\@argiii{#3}%
-  \tpSubFloatCnt#1\relax
-  \tp@capt@top@offset
-  \ifnum\tpSubFloatCnt=\z@
-    \def\next{\vbox}%
-  \else
-    \expandafter\tp@tempskipa\csname tp@flt@capt@row@height@#2\endcsname\relax
-    \expandafter\advance\expandafter\tp@tempskipa\dimexpr-\baselineskip+\topskip\relax
-    \def\next{\vbox to \tp@tempskipa}%
-  \fi
-  \next\bgroup%
-    \ifx\@argiii\tp@str@top\else\vss\fi
-    \tpUseProperty{\tp@prefix caption-format}%
-    \tpUseProperty{\tp@prefix caption-format-#2}%
-    \strut\tpUseProperty{caption-#2}\strut%
-    \ifx\@argiii\tp@str@bottom\else\vss\fi%
-  \egroup%
-  \tp@capt@bottom@offset
-}
 
 %    \end{macrocode}
 % shell for sub floats
@@ -660,11 +670,7 @@
 \def\tp@flt@create@natural{\tpUseComp{Content}}
 
 \def\endtpSubFloat{%
-  \ifx\tp@nofigs\relax
-    \setbox\tp@subfltbox\hbox{\rule{0pt}{1pt}\rule{1pt}{0pt}}%
-  \else
-    \setbox\tp@subfltbox\hbox{\tp@flt@create@natural}%\tpUseComp{Content}
-  \fi
+  \tpUseProperty{subfloat-handler}%
   \expandafter\xdef\csname tp@\tp@namespace @width-\the\tpSubFloatCnt\endcsname{\the\wd\tp@subfltbox}%
   \expandafter\xdef\csname tp@\tp@namespace @height-\the\tpSubFloatCnt\endcsname{\the\ht\tp@subfltbox}%
   \expandafter\xdef\csname tp@\tp@namespace @depth-\the\tpSubFloatCnt\endcsname{\the\dp\tp@subfltbox}%
@@ -725,55 +731,30 @@
   \let\tp@subfloat@parent\tp@subfloat@prev@parent
 }
 
-
-%    \end{macrocode}
-% \section{Handlers for figures}
-%
-% The \lstinline{\tpFigureHandler} tells the float module the name,
-% main namespace, and main content container of figure floats.
-%    \begin{macrocode}
-\def\tpFigureHandler{\tpMakeFltComp{tpFig}{figure}{Content}}
-%    \end{macrocode}
-% The \lstinline{\tpFigureFloat} macro tells the module how figures
-% are to be rendered.
-%    \begin{macrocode}
-\def\tpFigureFloat{\tpRenderFloat{0}}%
 %    \end{macrocode}
 % Iterates through the single sub-floats and renders them in a nice row. \#1 is the subfloat counter.
 %    \begin{macrocode}
 \long\def\tp@render@sub@floats#1{%
   \leavevmode
-  \ifnum#1>\@ne\hfill\fi
+  \savenotes
+  \ifnum#1>\@ne\hskip\tp@subflt@sep\fi
   \vtop\bgroup
-    \expandafter\hsize\csname tp@\tp@namespace @res@width-\the\@tempcnta\endcsname\relax
+    \expandafter\hsize\csname tp@\tp@namespace @res@width-#1\endcsname\relax
+    \let\includegraphics\tp@includesubgraphics
     \tpRenderFloat{#1}%
   \egroup
+  \spewnotes
 }
 
 \long\def\tpRenderFloat#1{%
+  \tpSubFloatCnt=#1\relax
   \expandafter\ifx\csname tp@has@\tp@prefix capt@top\endcsname\@empty
-    \tp@make@caption{#1}{top}{\tpUseProperty{\tp@prefix caption-valign-top}}%
+    \tp@make@caption{top}{\tpUseProperty{\tp@prefix caption-valign-top}}%
   \fi
-  \let\includegraphics\tp@includesubgraphics
-  \bgroup\strut\csname tp@\tp@namespace @figure-#1\endcsname\strut\par\egroup
+  \bgroup\strut\tpUseComp{Content}\strut\par\egroup%
   \expandafter\ifx\csname tp@has@\tp@prefix capt@bottom\endcsname\@empty
-    \tp@make@caption{#1}{bottom}{\tpUseProperty{\tp@prefix caption-valign-bottom}}%
+    \tp@make@caption{bottom}{\tpUseProperty{\tp@prefix caption-valign-bottom}}%
   \fi
-}
-%    \end{macrocode}
-% The \lstinline{\tpFigureSubFloat} macro tells the module how
-% subfloats of figure floats are to be rendered.
-%    \begin{macrocode}
-\def\tpFigureSubFloat{%
-  \tp@make@outer@caption{top}%
-  \ifx\tp@has@subcapt@top\@empty\tp@flt@calc@row@ht{top}\fi%
-  \ifx\tp@has@subcapt@bottom\@empty\tp@flt@calc@row@ht{bottom}\fi%
-  \def\tp@prefix{sub}%
-  \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
-    \tp@render@sub@floats{\the\@tempcnta}%
-  }%
-  \let\tp@prefix\@empty
-  \tp@make@outer@caption{bottom}%
 }
 %    \end{macrocode}
 % Calculate the heights of all captions in the same row. \#1 determins
@@ -810,12 +791,54 @@
   \gdef\@tp@fig@path{#2}%
   \expandafter\tpltx@includegraphics\expandafter[\@igopts]{#2}%
 }
-
-
 %    \end{macrocode}
 %
-%\section{Handlers for tables}
+% \section{Handlers for different float types}
 %
+% \subsection{Handlers for generic floats}
+%
+%    \begin{macrocode}
+\def\tpGenericRender{\tpUseComp{Content}}
+\def\tpGenericHandler{\tpMakeFltComp{tpContent}{content}{Content}}
+\def\tpSubGenericHandler{}
+%    \end{macrocode}
+%
+%
+% \subsection{Handlers for figures}
+%
+% The \lstinline{\tpFigureHandler} tells the float module the name,
+% main namespace, and main content container of figure floats.
+%    \begin{macrocode}
+\def\tpFigureHandler{\tpMakeFltComp{tpFig}{figure}{Content}}
+\def\tpSubFigureHandler{%
+  \ifx\tp@nofigs\relax
+    \setbox\tp@subfltbox\hbox{\rule{0pt}{1pt}\rule{1pt}{0pt}}%
+  \else
+    \setbox\tp@subfltbox\hbox{\tpGobble\tp@flt@create@natural}%
+  \fi
+
+}
+
+%    \end{macrocode}
+% The \lstinline{\tpFigureRender} macro tells the module how figures
+% are to be rendered.
+%    \begin{macrocode}
+\def\tpFigureRender{%
+  \bgroup\strut\tpUseComp{Content}\strut\egroup%
+}%
+%    \end{macrocode}
+% The \lstinline{\tpSubFigureRender} macro tells the module how
+% subfloats of figure floats are to be rendered.
+%    \begin{macrocode}
+\def\tpSubFigureRender{%
+  \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
+    \tp@render@sub@floats{\the\@tempcnta}%
+  }%
+}
+%    \end{macrocode}
+%
+%
+%\subsection{Handlers for tables}
 %
 %    \begin{macrocode}
 
@@ -841,31 +864,33 @@
     \let\htOutputTable\relax
   \fi}
 
-\def\tpTableFloat{%
-  \ifx\htTableBox\@undefined
-    \tpContent{\unvbox\tp@floatbox}%
-  \else
-    \ifvoid\htTableBox
-      \tpContent{\unvbox\tp@floatbox}%
-    \else
-      \tpContent{\unvbox\htTableBox}%
-    \fi
-  \fi
+\def\tpGetTableContent{%
+  \ifx\htTableBox\@undefined\else
+    \ifvoid\htTableBox\else
+      \let\tp@floatbox\htTableBox%
+    \fi\fi}
+
+\def\tpSubTableHandler{%
+  \PackageError{transpect-floats.sty}{tpSubFloat does not support tables (yet)!}{You cannot use a tabular within the `tpSubFloat'!}
+  % \tpGetTableContent
+  % \setbox\tp@subfltbox\hbox{\tpGobble\copy\tp@floatbox}%
+  \tpGetTableContent
+  \setbox\tp@subfltbox\hbox{\strut\quad}%
+}
+
+\def\tpTableRender{%
+  \tpGetTableContent
+  \tpContent{\unvbox\tp@floatbox}%
   \tpUseComp{Content}%
 }
 
-
-
-%    \end{macrocode}
-%
-% \section{Handlers for generic floats}
-%
-%
-%    \begin{macrocode}
-
-\def\tpGenericFloat{\tpUseComp{Content}}
-
-\def\tpGenericHandler{\tpMakeFltComp{tpContent}{content}{Content}}
+\def\tpSubTableRender{%
+  \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
+    \tpGetTableContent
+    \tpContent{\unvbox\tp@floatbox}%
+    \tp@render@sub@floats{\the\@tempcnta}%
+  }%
+}
 
 
 %    \end{macrocode}
@@ -884,9 +909,10 @@
   \tpSetProperty{margin-left}{\z@}%% left margin
   \tpSetProperty{margin-right}{\z@}%% right margin
   \tpSetProperty{before-float}{\parindent\z@}%% executed before content is evaluated
-  \tpSetProperty{content-handler}{\tpGenericHandler}% Alias for the caption type specific content handler
-  \tpSetProperty{float-block}{\tpGenericFloat}% Alias for the caption type specific content printer
-  \tpSetProperty{subfloat-block}{\tpGenericFloat}% Alias for the caption type specific content printer for sub-floats
+  \tpSetProperty{float-handler}{\tpGenericHandler}% Alias for the caption type specific content handler
+  \tpSetProperty{subfloat-handler}{\tpSubGenericHandler}% Alias for the caption type specific content handler
+  \tpSetProperty{float-render}{\tpGenericRender}% Alias for the caption type specific content printer
+  \tpSetProperty{subfloat-render}{\tpGenericRender}% Alias for the caption type specific content printer for sub-floats
   \tpSetProperty{subfloat-same-height}{}% if true, the subfloat must/can be adjusted to the same heights
   %% captions
   \tpSetProperty{caption-format}{}% style applied to top and bottom captions
@@ -959,16 +985,18 @@
 
 \tpDeclareFloat{tpFigure}{figure}{lof}{%
   \tpSetProperty{subfloat-same-height}{true}% if true, the subfloat must/can be adjusted to the same heights
-  \tpSetProperty{content-handler}{\tpFigureHandler}%
-  \tpSetProperty{float-block}{\tpFigureFloat}%
-  \tpSetProperty{subfloat-block}{\tpFigureSubFloat}%
+  \tpSetProperty{float-handler}{\tpFigureHandler}%
+  \tpSetProperty{subfloat-handler}{\tpSubFigureHandler}%
+  \tpSetProperty{float-render}{\tpFigureRender}%
+  \tpSetProperty{subfloat-render}{\tpSubFigureRender}%
 }
 
 \tpDeclareFloat{tpTable}{table}{lot}{%
   \tpSetProperty{sub-caption-valign-top}{bottom}%
-  \tpSetProperty{content-handler}{\tpTableHandler}%
-  \tpSetProperty{float-block}{\tpTableFloat}%
-  \tpSetProperty{subfloat-block}{\tpTableFloat}%
+  \tpSetProperty{float-handler}{\tpTableHandler}%
+  \tpSetProperty{subfloat-handler}{\tpSubTableHandler}%
+  \tpSetProperty{float-render}{\tpTableRender}%
+  \tpSetProperty{subfloat-render}{\tpSubTableRender}%
 }
 %    \end{macrocode}
 % This is an implementation of hyperref's anchor mechanism to make

@@ -42,6 +42,7 @@
 % prefix macro used to execute code after the next \lstinline{\fi}:
 %    \begin{macrocode}
 \def\afterfi#1\fi{\fi#1}
+\def\tp@topstrut{\vrule\@width\z@\@height\topskip\@depth\dimexpr\baselineskip-\topskip\relax}
 %    \end{macrocode}
 % \lstinline{\afterbox} prevents indentation and additional spacing after
 % environments. Intended to be used in combination with
@@ -93,11 +94,11 @@
 \long\def\@gobbleopt{\@ifnextchar[\@@gobbleopt{\@@gobbleopt[]}}%]
 \long\def\@@gobbleopt[#1]#2{}%
 \def\tpGobble{%
-  \let\footnote\@gobbleopt
-  \let\index\@gobbleopt
+  \renewcommand\footnote[2][\the\c@footnote]{\def\@thefnmark{##1}\@makefnmark}%
+  \renewcommand\index[2][]{}%
+  \renewcommand\marginpar[2][]{}%
+  \renewcommand\glossary[2][]{}%
   \let\label\@gobble
-  \let\marginpar\@gobbleopt
-  \let\glossary\@gobbleopt
 }%
 %    \end{macrocode}
 % traverse step-wise through counter \#1, start at number \#2 until and including number \#3 and do at every loop \#4 (from \lstinline{forloop.sty}):
