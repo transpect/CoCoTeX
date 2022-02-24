@@ -53,6 +53,7 @@
 \newdimen\tp@subflt@maxheight \tp@subflt@maxheight=\z@\relax
 \newdimen\tp@subflt@sep       \tp@subflt@sep=\fboxsep\relax
 \newdimen\tp@total@flt@width  \tp@total@flt@width=\textwidth\relax
+\newdimen\tp@calc@flt@width   \tp@calc@flt@width=\tp@total@flt@width\relax
 \newdimen\tp@total@flt@height \tp@total@flt@height=\textwidth\relax
 \newdimen\tp@total@flt@depth  \tp@total@flt@depth=\textwidth\relax
 
@@ -253,11 +254,12 @@
 % the \lstinline{margin-left} properties.
 %    \begin{macrocode}
 \def\tp@flt@set@hsize{%
+  \expandafter\tp@subflt@sep\tpUseProperty{sub-float-sep}\relax%
   \tp@total@flt@width=\hsize\relax
+  \expandafter\tp@flt@marg@l\tpUseProperty{margin-left}\relax
   \expandafter\tp@flt@marg@r\tpUseProperty{margin-right}\relax
   \ifdim\tp@flt@marg@r>\z@\relax\advance\tp@total@flt@width-\tp@flt@marg@r\relax\fi
-  \expandafter\tp@flt@marg@l\tpUseProperty{margin-left}\relax
-  \ifdim\tp@flt@marg@l>\z@\relax\advance\tp@total@flt@width-\tp@flt@marg@l\relax\fi
+  %\ifdim\tp@flt@marg@l>\z@\relax\advance\tp@total@flt@width-\tp@flt@marg@l\relax\fi
   }
 
 %    \end{macrocode}
@@ -467,13 +469,20 @@
 % Test if the current (sub)float has any top or bottom captions that
 % needed printed
 %    \begin{macrocode}
+\def\tp@test@subcapt{%
+  \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
+    \tp@test@caption{\the\@tempcnta}{subcapt}{top}%
+    \tp@test@caption{\the\@tempcnta}{subcapt}{bottom}%
+  }%
+}
 
 \def\tp@test@caption#1#2#3{%
   \setbox\tp@tempboxa\hbox{\tpGobble\tpSubFloatCnt#1\relax\tpUseProperty{caption-#3}\relax}%
   \setbox\tp@tempboxb\hbox{\tpGobble\tpSubFloatCnt\m@ne\relax\tpUseProperty{caption-#3}\relax}%
   \ifdim\wd\tp@tempboxa>\wd\tp@tempboxb\relax
     \expandafter\global\expandafter\let\csname tp@has@#2@#3\endcsname\@empty
-  \fi}
+  \fi
+}
 
 %    \end{macrocode}
 % Calculate the ratio between each subfloat's height and the height of the largest subfloat
@@ -481,10 +490,12 @@
 \def\tp@flt@calc@sameheight{%
   \@tempdima=\z@\relax
   \@tempcnta=\z@\relax
+  \tp@calc@flt@width=\tp@total@flt@width\relax
+  \advance\tp@calc@flt@width-\tp@flt@marg@l\relax
   \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
     \edef\@tempa{\CalcRatio{\tp@subflt@maxheight}{\csname tp@\tp@namespace @height-\the\@tempcnta\endcsname}}%
     \ifnum\@tempcnta>\@ne
-      \advance\tp@total@flt@width-\tp@subflt@sep\relax%
+      \advance\tp@calc@flt@width-\tp@subflt@sep\relax%
     \fi
     \expandafter\@tempdimc\csname tp@\tp@namespace @width-\the\@tempcnta\endcsname\relax
     \@tempdimb=\@tempa\@tempdimc\relax
@@ -496,12 +507,10 @@
   \@tempdimc=\z@\relax
   \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
     \edef\@tempa{\CalcRatio{\csname tp@\tp@namespace @adj@width-\the\@tempcnta\endcsname}{\@tempdima}}%
-    \expandafter\edef\csname tp@\tp@namespace @res@width-\the\@tempcnta\endcsname{\dimexpr\@tempa\tp@total@flt@width\relax}%
+    \expandafter\edef\csname tp@\tp@namespace @res@width-\the\@tempcnta\endcsname{\dimexpr\@tempa\tp@calc@flt@width\relax}%
     \@tempdimc\dimexpr\csname tp@\tp@namespace @height-\the\@tempcnta\endcsname\relax
     \@tempdimc\dimexpr\@tempa\@tempdimc\relax
     \ifdim\@tempa\@tempdimb<\@tempdimc\@tempdimb\@tempdimc\relax\fi
-    \tp@test@caption{\the\@tempcnta}{subcapt}{top}%
-    \tp@test@caption{\the\@tempcnta}{subcapt}{bottom}%
   }%
   \expandafter\edef\csname tp@\tp@namespace @res@height\endcsname{\the\@tempdimb}%
 }
@@ -511,13 +520,16 @@
 %    \begin{macrocode}
 
 \def\tp@flt@process{%
+  \tp@test@subcapt
   \tp@make@outer@caption{top}%
+  \ifhmode\else\leavevmode\fi\hskip\tp@flt@marg@l
   \ifnum\tpSubFloatCnt=\z@\relax
-    \tpUseProperty{float-render}%
+    \bgroup\advance\hsize-\tp@flt@marg@l
+      \tpUseProperty{float-render}%
+    \egroup
   \else
     \let\tp@is@subflt\relax
     \tp@flt@calc@sameheight
-    \expandafter\tp@subflt@sep=\tpUseProperty{sub-float-sep}\relax%
     \ifx\tp@has@subcapt@top\@empty\tp@flt@calc@row@ht{top}\fi%
     \ifx\tp@has@subcapt@bottom\@empty\tp@flt@calc@row@ht{bottom}\fi%
     \def\tp@prefix{sub}%
@@ -536,32 +548,10 @@
     \hsize\tp@total@flt@width
     \leavevmode
     \tp@flt@process
-    \par
     \tp@make@anchors%
     \csname tp@make@listof@\tp@captype\endcsname{\tp@captype}% single float
+    \par
   \egroup}
-
-% \def\tp@flt@compose{%
-%   \hsize\tp@total@flt@width
-%   \ifx\tp@has@capt@top\relax
-%     \expandafter\ifx\csname tp@\tp@captype @attr@sidecap\endcsname\relax\relax
-%       \tp@make@full@caption{top}%
-%       \nopagebreak\par
-%     \else
-%       %% TODO: Sidecap handler: Besser nach \tp@flt@process ?
-%     \fi
-%   \fi
-%   \tp@flt@process
-%   \ifhmode\nopagebreak\par\fi
-%   \ifx\tp@has@capt@bottom\relax
-%     \expandafter\ifx\csname tp@\tp@captype @attr@sidecap\endcsname\relax
-%       \tp@make@full@caption{bottom}%
-%     \fi
-%   \fi
-%   \tp@make@anchors%
-%   \csname tp@make@listof@\tp@captype\endcsname{\tp@captype}% single float
-%   \ifhmode\par\fi}
-
 
 %    \end{macrocode}
 % \section{Caption mechanism}
@@ -572,19 +562,19 @@
 %    \begin{macrocode}
 
 %    \end{macrocode}
-% Determins the spacing inserted \textbf{above the caption}.
+% Determins the spacing inserted \textbf{above the lower captions}.
 %    \begin{macrocode}
 \def\tp@capt@top@offset{%
   \ifx\@argi\tp@str@top
   \else
     \par\nopagebreak
-    \expandafter\@tempskipa\tpUseProperty{\tp@prefix caption-sep-top}\relax%
+    \expandafter\@tempskipa\tpUseProperty{\tp@prefix caption-sep-bottom}\relax%
     \advance\@tempskipa\dimexpr-\topskip+\dp\strutbox\relax
     \ifx\tp@has@subcapt@bottom\@empty
       \ifnum\tpSubFloatCnt=\z@
         %% subcapt-bot exists and capt-bot is rendered
         \advance\@tempskipa\dimexpr\dp\strutbox\relax
-        \expandafter\advance\expandafter\@tempskipa\tpUseProperty{subcaption-add-sep-top}\relax%
+        \expandafter\advance\expandafter\@tempskipa\tpUseProperty{subcaption-add-sep-bottom}\relax%
       \fi
     \fi
     \vskip\@tempskipa
@@ -592,18 +582,18 @@
   \fi}
 
 %    \end{macrocode}
-% Determins the spacing inserted \textbf{below the caption}.
+% Determins the spacing inserted \textbf{below the upper captions}.
 %    \begin{macrocode}
 \def\tp@capt@bottom@offset{%
   \ifx\@argi\tp@str@top
     \@tempskipa\z@
-    \expandafter\advance\expandafter\@tempskipa\tpUseProperty{\tp@prefix caption-sep-bottom}%
+    \expandafter\advance\expandafter\@tempskipa\tpUseProperty{\tp@prefix caption-sep-top}%
     %
     \ifnum\tpSubFloatCnt=\z@
       \ifx\tp@has@subcapt@top\@empty
         %% subcapt-top exists and capt-top is rendered
         \advance\@tempskipa\dimexpr\ht\strutbox-\topskip-\p@\relax
-        \expandafter\advance\expandafter\@tempskipa-\tpUseProperty{subcaption-add-sep-bottom}\relax%
+        \expandafter\advance\expandafter\@tempskipa\tpUseProperty{subcaption-add-sep-top}\relax%
       \else
         \advance\@tempskipa\dimexpr-\dp\strutbox\relax
       \fi
@@ -619,19 +609,19 @@
 %    \end{macrocode}
 % prints the caption. \#1 is the
 % placement (top, bottom), \#2 is the vertical alignment (top, middle,
-% bottom).
+% bottom), \#3 is the left margin.
 %    \begin{macrocode}
 \long\def\tp@make@caption#1#2{%
   \edef\@argi{#1}\edef\@argii{#2}%
   \tp@capt@top@offset
   \ifnum\tpSubFloatCnt=\z@
-    \def\next{\vbox}%
+    \def\next{\hskip\tp@flt@marg@l\vbox\bgroup\advance\hsize-\tp@flt@marg@l}%
   \else
     \expandafter\tp@tempskipa\csname tp@flt@capt@row@height@#1\endcsname\relax
     \expandafter\advance\expandafter\tp@tempskipa\dimexpr-\baselineskip+\topskip\relax
-    \def\next{\vbox to \tp@tempskipa}%
+    \def\next{\vbox to \tp@tempskipa\bgroup}%
   \fi
-  \next\bgroup%
+  \next%
     \ifx\@argii\tp@str@top\else\vss\fi
     \tpUseProperty{\tp@prefix caption-format}%
     \tpUseProperty{\tp@prefix caption-format-#1}%
@@ -738,16 +728,16 @@
 \long\def\tp@render@sub@floats#1{%
   \leavevmode
   \savenotes
-  \ifnum#1>\@ne\hskip\tp@subflt@sep\fi
+  \ifnum#1>\@ne\hfill\fi
   \vtop\bgroup
     \expandafter\hsize\csname tp@\tp@namespace @res@width-#1\endcsname\relax
     \let\includegraphics\tp@includesubgraphics
-    \tpRenderFloat{#1}%
+    \tpRenderSubFloat{#1}%
   \egroup
   \spewnotes
 }
 
-\long\def\tpRenderFloat#1{%
+\long\def\tpRenderSubFloat#1{%
   \tpSubFloatCnt=#1\relax
   \expandafter\ifx\csname tp@has@\tp@prefix capt@top\endcsname\@empty
     \tp@make@caption{top}{\tpUseProperty{\tp@prefix caption-valign-top}}%
@@ -825,7 +815,10 @@
 % are to be rendered.
 %    \begin{macrocode}
 \def\tpFigureRender{%
-  \bgroup\strut\tpUseComp{Content}\strut\egroup%
+  \bgroup
+    \let\includegraphics\tp@includesubgraphics
+    \strut\tpUseComp{Content}\strut
+  \egroup%
 }%
 %    \end{macrocode}
 % The \lstinline{\tpSubFigureRender} macro tells the module how
@@ -875,14 +868,22 @@
   \PackageError{transpect-floats.sty}{tpSubFloat does not support tables (yet)!}{You cannot use a tabular within the `tpSubFloat'!}
   % \tpGetTableContent
   % \setbox\tp@subfltbox\hbox{\tpGobble\copy\tp@floatbox}%
-  \tpGetTableContent
-  \setbox\tp@subfltbox\hbox{\strut\quad}%
+  % \tpGetTableContent
+  % \setbox\tp@subfltbox\hbox{\strut\quad}%
 }
 
 \def\tpTableRender{%
   \tpGetTableContent
   \tpContent{\unvbox\tp@floatbox}%
-  \tpUseComp{Content}%
+  \par\nopagebreak
+  \ifx\tp@has@capt@top\relax
+    \vskip-\topskip
+  \else
+    \vskip-\baselineskip
+  \fi
+  \tpUseComp{Content}\strut
+  \par
+  \vskip-\baselineskip%
 }
 
 \def\tpSubTableRender{%
@@ -938,8 +939,8 @@
   \tpSetProperty{subcaption-format-bottom}{\tpUseProperty{caption-format-bottom}}%% style applied to bottom captions
   \tpSetProperty{subcaption-add-sep-top}{\z@}%% additional vertical space between top caption and top sub-caption
   \tpSetProperty{subcaption-add-sep-bottom}{\z@}%% additional vertical space between bottom sub-caption and bottom caption
-  \tpSetProperty{subcaption-sep-top}{\tpUseProperty{caption-sep-top}}%% vertical space between top caption and content
-  \tpSetProperty{subcaption-sep-bottom}{\tpUseProperty{caption-sep-bottom}}%% vertical space between content and bottom caption
+  \tpSetProperty{subcaption-sep-top}{\tpUseProperty{caption-sep-top}}%% vertical space between top sub-caption and content
+  \tpSetProperty{subcaption-sep-bottom}{\tpUseProperty{caption-sep-bottom}}%% vertical space between content and bottom sub-caption
   \tpSetProperty{subcaption-top}{\tpUseProperty{caption-top}}% in case, sub-float captions diverge from main caption
   \tpSetProperty{subcaption-bottom}{\tpUseProperty{caption-bottom}}% in case, sub-float captions diverge from main caption
   \tpSetProperty{subcaption-valign-top}{top}%% vertical alignment of neighboring top-placed sub-captions
@@ -1012,6 +1013,7 @@
     \tpIfComp{Label}
       {\expandafter\let\expandafter\@currentlabel\csname tp@\tp@namespace @number-\the\tpSubFloatCnt\endcsname}
       {\edef\@currentlabel{tp-\tp@namespace-number-\the\tp@int@flt@cnt}}%
+    \advance\csname c@\tp@captype\endcsname\m@ne
     \expandafter\H@refstepcounter\expandafter{\tp@captype}%
     \expandafter\hyper@makecurrent\expandafter{\tp@captype}%
     \let\Hy@tempa\Hy@float@caption
