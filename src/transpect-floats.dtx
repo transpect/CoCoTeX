@@ -437,6 +437,7 @@
 %    \begin{macrocode}
 
 \def\tp@float[#1]#2#3#4{%
+  \par
   \begingroup
     \tpNamespace{#4}%
     \tp@reset@defaults{#2}{#3}%
@@ -521,8 +522,8 @@
 
 \def\tp@flt@process{%
   \tp@test@subcapt
+  \ifx\tp@has@capt@top\@empty\leavevmode\fi
   \tp@make@outer@caption{top}%
-  \ifhmode\else\leavevmode\fi\hskip\tp@flt@marg@l
   \ifnum\tpSubFloatCnt=\z@\relax
     \bgroup\advance\hsize-\tp@flt@marg@l
       \tpUseProperty{float-render}%
@@ -546,7 +547,6 @@
 \def\tp@flt@compose{%
   \bgroup
     \hsize\tp@total@flt@width
-    \leavevmode
     \tp@flt@process
     \tp@make@anchors%
     \csname tp@make@listof@\tp@captype\endcsname{\tp@captype}% single float
@@ -562,7 +562,7 @@
 %    \begin{macrocode}
 
 %    \end{macrocode}
-% Determins the spacing inserted \textbf{above the lower captions}.
+% Determins the spacing inserted \textbf{above both captions}.
 %    \begin{macrocode}
 \def\tp@capt@top@offset{%
   \ifx\@argi\tp@str@top
@@ -582,7 +582,7 @@
   \fi}
 
 %    \end{macrocode}
-% Determins the spacing inserted \textbf{below the upper captions}.
+% Determins the spacing inserted \textbf{below the captions}.
 %    \begin{macrocode}
 \def\tp@capt@bottom@offset{%
   \ifx\@argi\tp@str@top
@@ -635,6 +635,7 @@
 % Shell for the outer captions, \#1 is the placement (top, bottom)
 %    \begin{macrocode}
 \def\tp@make@outer@caption#1{%
+  \def\@argi{#1}%
   \expandafter\ifx\csname tp@has@capt@#1\endcsname\@empty
     \bgroup
       \savenotes
@@ -643,8 +644,9 @@
       \tp@make@caption{#1}{top}%
       \spewnotes
     \egroup
-    \nopagebreak
-  \fi}
+    \ifx\@argi\tp@str@top\nopagebreak\fi
+  \fi
+}
 
 %    \end{macrocode}
 % shell for sub floats
@@ -817,6 +819,7 @@
 \def\tpFigureRender{%
   \bgroup
     \let\includegraphics\tp@includesubgraphics
+    \hskip\tp@flt@marg@l
     \strut\tpUseComp{Content}\strut
   \egroup%
 }%
@@ -825,6 +828,7 @@
 % subfloats of figure floats are to be rendered.
 %    \begin{macrocode}
 \def\tpSubFigureRender{%
+  \hskip\tp@flt@marg@l
   \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
     \tp@render@sub@floats{\the\@tempcnta}%
   }%
@@ -854,6 +858,7 @@
   \tp@reserve@tabular
   \ifx\tp@uses@htmltabs\relax
     \ifx\tp@fps\@empty\else\htAddStyle{break-table:false;}\fi
+    \htAddStyle{margin-left:\tp@flt@marg@l}%
     \global\setbox\htTableBox\box\voidb@x
     \let\htOutputTable\relax
   \fi}
@@ -875,15 +880,9 @@
 \def\tpTableRender{%
   \tpGetTableContent
   \tpContent{\unvbox\tp@floatbox}%
+  \tpUseComp{Content}%
   \par\nopagebreak
-  \ifx\tp@has@capt@top\relax
-    \vskip-\topskip
-  \else
-    \vskip-\baselineskip
-  \fi
-  \tpUseComp{Content}\strut
-  \par
-  \vskip-\baselineskip%
+  \vskip\dp\strutbox
 }
 
 \def\tpSubTableRender{%
@@ -903,8 +902,8 @@
 % properties of the respective environments.
 %    \begin{macrocode}
 \tpAddToDefault{float}{%
-  \tpSetProperty{intext-skip-top}{\z@}%% non-float sep top
-  \tpSetProperty{intext-skip-bottom}{\z@}%% non-float sep bottom
+  \tpSetProperty{intext-skip-top}{\intextsep}%% non-float sep top
+  \tpSetProperty{intext-skip-bottom}{\intextsep}%% non-float sep bottom
   \tpSetProperty{float-skip-top}{\z@}%% float sep top
   \tpSetProperty{float-skip-bottom}{\z@}%% float sep bottom
   \tpSetProperty{sub-float-sep}{\tp@subflt@sep}%% space between sub-floats
