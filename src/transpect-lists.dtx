@@ -110,11 +110,7 @@
     \itemindent\z@
     \def\makelabel##1{%
       \sbox\z@{##1}%
-      \ifdim\maxLabelWidth>0pt%
-        \ifdim\maxLabelWidth<\wd\z@\relax
-          \global\maxLabelWidth=\wd\z@\relax
-        \fi
-      \else
+      \ifdim\maxLabelWidth<\wd\z@\relax
         \global\maxLabelWidth=\wd\z@\relax
       \fi
       \hb@xt@\labelwidth{\unhbox\z@\hss}%
