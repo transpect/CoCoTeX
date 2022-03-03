@@ -17,6 +17,14 @@
     [\filedate \fileversion le-tex transpect lists module]
 \RequirePackage{transpect-common}
 \usepackage{enumerate}
+
+% Counter for the description lists.
+\newcount\descriptionlist
+\global\newdimen\maxLabelWidth
+% Macro for saving the maximum label widths associated with the respective list;
+% 0pt as fallback value, if there is no *.aux file yet.
+\def\getMaxLabelWidth{\global\maxLabelWidth=0pt}
+
 \ifx\labelitemfont\@undefined\let\labelitemfont\relax\fi
 \renewcommand\labelitemi  {\labelitemfont \textendash}
 \setlength\leftmargini{\parindent}%
@@ -35,6 +43,7 @@
               \topsep    \z@
               \parsep    \z@
               \itemsep   \parsep}
+              
 \def\@listiii{\leftmargin\leftmarginiii
               \labelwidth\leftmarginiii
               \advance\labelwidth-\labelsep
@@ -89,27 +98,31 @@
 
 \renewenvironment{description}[1][]{%
   \small
-  \settowidth\@tempdima{#1}%
-  \ifdim\@tempdima=\z@\relax
-    \@tempdima\parindent
-  \fi
+  % Read and set maximum label width for this list from the *.aux file.
+  \getMaxLabelWidth
   \list{}%
-       {\labelwidth\@tempdima
-        \leftmargin\dimexpr\@tempdima+\labelsep\relax
-        \topsep .5\baselineskip
-        \itemsep\z@
-        \partopsep\z@
-        \parsep\z@
-        \itemindent\z@
-        \def\makelabel##1{%
-          \sbox\z@{##1}%
-          \ifdim\wd\z@>\labelwidth
-            \unhbox\z@
-          \else
-            \hb@xt@\labelwidth{\unhbox\z@\hss}%
-          \fi
-        }}
+   {\labelwidth\maxLabelWidth
+    \leftmargin\dimexpr\maxLabelWidth+\labelsep\relax
+    \topsep .5\baselineskip
+    \itemsep\z@
+    \partopsep\z@
+    \parsep\z@
+    \itemindent\z@
+    \def\makelabel##1{%
+      \sbox\z@{##1}%
+      \ifdim\maxLabelWidth>0pt%
+        \ifdim\maxLabelWidth<\wd\z@\relax
+          \global\maxLabelWidth=\wd\z@\relax
+        \fi
+      \else
+        \global\maxLabelWidth=\wd\z@\relax
+      \fi
+      \hb@xt@\labelwidth{\unhbox\z@\hss}%
+    }%
+   }
 }{\endlist
+\immediate\write\@auxout{\string\g@addto@macro\string\getMaxLabelWidth{\string\ifnum\string\the\descriptionlist=\the\descriptionlist\relax\string\global\string\maxLabelWidth=\the\maxLabelWidth\string\fi}}
+\global\advance\descriptionlist by 1
 \gdef\@doendpe{%
     \@endpetrue
     \everypar{{\setbox\z@\lastbox}\everypar{}\@endpefalse}%
