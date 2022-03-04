@@ -19,11 +19,11 @@
 \usepackage{enumerate}
 
 % Counter for the description lists.
-\newcount\descriptionlist
-\global\newdimen\maxLabelWidth
+\newcount\tp@descriptionlist
+\global\newdimen\tp@maxLabelWidth
 % Macro for saving the maximum label widths associated with the respective list;
 % 0pt as fallback value, if there is no *.aux file yet.
-\def\getMaxLabelWidth{\global\maxLabelWidth=0pt}
+\def\tp@getMaxLabelWidth{\global\tp@maxLabelWidth=0pt}
 
 \ifx\labelitemfont\@undefined\let\labelitemfont\relax\fi
 \renewcommand\labelitemi  {\labelitemfont \textendash}
@@ -99,10 +99,10 @@
 \renewenvironment{description}[1][]{%
   \small
   % Read and set maximum label width for this list from the *.aux file.
-  \getMaxLabelWidth
+  \tp@getMaxLabelWidth
   \list{}%
-   {\labelwidth\maxLabelWidth
-    \leftmargin\dimexpr\maxLabelWidth+\labelsep\relax
+   {\labelwidth\tp@maxLabelWidth
+    \leftmargin\dimexpr\tp@maxLabelWidth+\labelsep\relax
     \topsep .5\baselineskip
     \itemsep\z@
     \partopsep\z@
@@ -110,15 +110,15 @@
     \itemindent\z@
     \def\makelabel##1{%
       \sbox\z@{##1}%
-      \ifdim\maxLabelWidth<\wd\z@\relax
-        \global\maxLabelWidth=\wd\z@\relax
+      \ifdim\tp@maxLabelWidth<\wd\z@\relax
+        \global\tp@maxLabelWidth=\wd\z@\relax
       \fi
       \hb@xt@\labelwidth{\unhbox\z@\hss}%
     }%
    }
 }{\endlist
-\immediate\write\@auxout{\string\g@addto@macro\string\getMaxLabelWidth{\string\ifnum\string\the\descriptionlist=\the\descriptionlist\relax\string\global\string\maxLabelWidth=\the\maxLabelWidth\string\fi}}
-\global\advance\descriptionlist by 1
+\immediate\write\@auxout{\string\g@addto@macro\string\tp@getMaxLabelWidth{\string\ifnum\string\the\tp@descriptionlist=\the\tp@descriptionlist\relax\string\global\string\tp@maxLabelWidth=\the\tp@maxLabelWidth\string\fi}}
+\global\advance\tp@descriptionlist by 1
 \gdef\@doendpe{%
     \@endpetrue
     \everypar{{\setbox\z@\lastbox}\everypar{}\@endpefalse}%
