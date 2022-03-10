@@ -59,6 +59,8 @@
 
 \newdimen\tp@flt@marg@r       \tp@flt@marg@r=\z@\relax
 \newdimen\tp@flt@marg@l       \tp@flt@marg@l=\z@\relax
+\newdimen\tp@flt@marg@i       \tp@flt@marg@i=\z@\relax
+\newdimen\tp@flt@marg@o       \tp@flt@marg@o=\z@\relax
 
 \def\tp@str@landscape{landscape}
 \def\tp@str@figure{figure}
@@ -258,9 +260,23 @@
   \tp@total@flt@width=\hsize\relax
   \expandafter\tp@flt@marg@l\tpUseProperty{margin-left}\relax
   \expandafter\tp@flt@marg@r\tpUseProperty{margin-right}\relax
-  \ifdim\tp@flt@marg@r>\z@\relax\advance\tp@total@flt@width-\tp@flt@marg@r\relax\fi
+  \expandafter\tp@flt@marg@i\tpUseProperty{margin-inner}\relax
+  \expandafter\tp@flt@marg@o\tpUseProperty{margin-outer}\relax
   %\ifdim\tp@flt@marg@l>\z@\relax\advance\tp@total@flt@width-\tp@flt@marg@l\relax\fi
+  \tp@flt@set@margins
+  \advance\tp@total@flt@width-\tp@flt@marg@r\relax
+  %\advance\tp@total@flt@width-\tp@flt@marg@l\relax
   }
+
+\def\tp@flt@set@margins{%
+  \ifodd\c@page
+    \advance\tp@flt@marg@l\tp@flt@marg@i
+    \advance\tp@flt@marg@r\tp@flt@marg@o
+  \else
+    \advance\tp@flt@marg@l\tp@flt@marg@o
+    \advance\tp@flt@marg@r\tp@flt@marg@i
+  \fi
+}
 
 %    \end{macrocode}
 % High level macro to (re-)declare a new \lstinline{tpFloat}
@@ -445,9 +461,9 @@
     \expandafter\tpCascadeProps\expandafter{#4}{float}%
     \tp@get@flt@attr{#1}{#2}%
     \tp@set@caption@comps
+    \tp@flt@set@hsize
     \tpUseProperty{float-handler}%
     \tpUseProperty{before-float}%
-    \tp@flt@set@hsize
     \tp@set@flt@pos
     \ifx\tp@fps\@empty\else\savenotes\fi
 }
@@ -615,7 +631,9 @@
   \edef\@argi{#1}\edef\@argii{#2}%
   \tp@capt@top@offset
   \ifnum\tpSubFloatCnt=\z@
-    \def\next{\hskip\tp@flt@marg@l\vbox\bgroup\advance\hsize-\tp@flt@marg@l}%
+    \def\next{%
+      \hskip\tp@flt@marg@l
+      \vbox\bgroup\advance\hsize-\tp@flt@marg@l}%
   \else
     \expandafter\tp@tempskipa\csname tp@flt@capt@row@height@#1\endcsname\relax
     \expandafter\advance\expandafter\tp@tempskipa\dimexpr-\baselineskip+\topskip\relax
@@ -907,6 +925,8 @@
   \tpSetProperty{float-skip-top}{\z@}%% float sep top
   \tpSetProperty{float-skip-bottom}{\z@}%% float sep bottom
   \tpSetProperty{sub-float-sep}{\tp@subflt@sep}%% space between sub-floats
+  \tpSetProperty{margin-inner}{\z@}%% left margin on odd pages/right margin on even pages
+  \tpSetProperty{margin-outer}{\z@}%% right margin on odd pages/left margin on even pages
   \tpSetProperty{margin-left}{\z@}%% left margin
   \tpSetProperty{margin-right}{\z@}%% right margin
   \tpSetProperty{before-float}{\parindent\z@}%% executed before content is evaluated
