@@ -20,10 +20,12 @@
 
 % Counter for the description lists.
 \newcount\tp@descriptionlist
-\global\newdimen\tp@maxLabelWidth
 % Macro for saving the maximum label widths associated with the respective list;
 % 0pt as fallback value, if there is no *.aux file yet.
-\def\tp@getMaxLabelWidth{\global\tp@maxLabelWidth=0pt}
+\def\tp@getMaxLabelWidth{%
+  \global\newdimen\tp@maxLabelWidth%
+  \global\tp@maxLabelWidth=0pt%
+}
 
 \ifx\labelitemfont\@undefined\let\labelitemfont\relax\fi
 \renewcommand\labelitemi  {\labelitemfont \textendash}
@@ -33,9 +35,9 @@
   \leftmargin\leftmargini
   \parsep \z@
   \listparindent\parindent
-  \topsep .5\baselineskip
+  \topsep .5\baselineskip % Hier Properties nutzen!
   \itemsep\z@}
-%\let\@listI\@listi
+\let\@listI\@listi
 
 \def\@listii {\leftmargin\leftmarginii
               \labelwidth\leftmarginii
@@ -51,7 +53,7 @@
               \parsep    \z@
               \partopsep \z@
               \itemsep   \topsep}
-
+              
 \def\@@enum@[#1]{%
   \@enLab{}\let\@enThe\@enQmark
   \@enloop#1\@enum@
@@ -61,7 +63,7 @@
   \expandafter\let\csname the\@enumctr\endcsname\@enThe
   \csname c@\@enumctr\endcsname7
   \@enum@}
-
+  
 \def\@enum@{%
   \list{\csname label\@enumctr\endcsname}%
   {%
@@ -115,9 +117,9 @@
       \fi
       \hb@xt@\labelwidth{\unhbox\z@\hss}%
     }%
-   }
+   }%
 }{\endlist
-\immediate\write\@auxout{\string\g@addto@macro\string\tp@getMaxLabelWidth{\string\ifnum\string\the\tp@descriptionlist=\the\tp@descriptionlist\relax\string\global\string\tp@maxLabelWidth=\the\tp@maxLabelWidth\string\fi}}
+\immediate\write\@auxout{\string\g@addto@macro\string\tp@getMaxLabelWidth{\string\ifnum\string\the\tp@descriptionlist=\the\tp@descriptionlist\relax\string\global\string\tp@maxLabelWidth=\the\tp@maxLabelWidth\string\fi}}%
 \global\advance\tp@descriptionlist by 1
 \gdef\@doendpe{%
     \@endpetrue
