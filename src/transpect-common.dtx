@@ -401,6 +401,61 @@
 \let\hackfor\@gobble
 \let\Hackfor\@gobble
 
+%    \end{macrocode}
+% \subsection{Determine actual page number}
+%
+% Largely adapted from the \lstinline{marginnote} package.
+%
+% Counting absolute page numbers may be misleading when the
+% transpect-title module is loaded and the cover page is not followed
+% by an empty page. Therefore, we save the default page counter from
+% {\LaTeX} to evaluate it independently from the actual manner of
+% counting.
+%    \begin{macrocode}
+\def\the@tp@thispage{}%
+\newcount\tp@abspage \tp@abspage\z@ \def\thetp@abspage{\the\tp@abspage}
+\newif\if@tp@odd \@tp@oddtrue
+\AtBeginDocument{%
+  \global\tp@abspage=\c@page\relax%
+  \g@addto@macro\@outputpage{\global\tp@abspage\c@page}%
+}
+%    \end{macrocode}
+% We split this into two parts. The first one is run before the
+% floating object is placed. It will store the page according to the
+% placement in the tex source code.
+%    \begin{macrocode}
+\def\tp@test@page{%
+  \expandafter\ifx\csname the@tp@thispage\endcsname\@empty
+    \gdef\the@tp@atthispage{1}%
+  \else
+    \expandafter\ifnum \the@tp@thispage=\tp@abspage%
+      \begingroup
+        \@tempcnta\the@tp@atthispage\relax
+        \advance\@tempcnta\@ne\relax
+        \xdef\the@tp@atthispage{\the\@tempcnta}%
+      \endgroup
+    \else
+      \gdef\@tp@atthispage{1}%
+    \fi
+  \fi
+  \xdef\the@tp@thispage{\the\tp@abspage}%
+  \let\@tp@currpage\relax
+  \expandafter\ifx\csname \tp@namespace-\the@tp@thispage-\the@tp@atthispage\endcsname\relax
+    \ifodd\tp@abspage\relax\@tp@oddtrue\else\@tp@oddfalse\fi
+  \else
+    \edef\@tp@currpage{\expandafter\expandafter\expandafter\@firstofone\csname \tp@namespace-\the@tp@thispage-\the@tp@atthispage\endcsname}%
+    \ifodd\@tp@currpage\relax\@tp@oddtrue\else\@tp@oddfalse\fi
+  \fi
+}
+%    \end{macrocode}
+% the second macro writes the actual position of the floating object
+% into the aux files. This macro has to be placed inside the float
+% environment/macro.
+%    \begin{macrocode}
+\def\tp@save@page{%
+  \protected@write\@auxout{\def\the@tp@namespace{\tp@namespace}\let\thetp@abspage\relax}{%
+    \string\expandafter\string\gdef\string\csname\space \tp@namespace-\the@tp@thispage-\the@tp@atthispage\string\endcsname{\thetp@abspage}}%
+}
 
 %    \end{macrocode}
 %

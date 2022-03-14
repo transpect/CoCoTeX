@@ -262,14 +262,15 @@
   \expandafter\tp@flt@marg@r\tpUseProperty{margin-right}\relax
   \expandafter\tp@flt@marg@i\tpUseProperty{margin-inner}\relax
   \expandafter\tp@flt@marg@o\tpUseProperty{margin-outer}\relax
-  %\ifdim\tp@flt@marg@l>\z@\relax\advance\tp@total@flt@width-\tp@flt@marg@l\relax\fi
   \tp@flt@set@margins
   \advance\tp@total@flt@width-\tp@flt@marg@r\relax
-  %\advance\tp@total@flt@width-\tp@flt@marg@l\relax
   }
-
+%    \end{macrocode}
+% inner and outer margins are realised via the left and right margins.
+%    \begin{macrocode}
 \def\tp@flt@set@margins{%
-  \ifodd\c@page
+  \tp@test@page
+  \if@tp@odd
     \advance\tp@flt@marg@l\tp@flt@marg@i
     \advance\tp@flt@marg@r\tp@flt@marg@o
   \else
@@ -451,7 +452,6 @@
 % Mid-level Macro that provides the common floating {\LaTeX}
 % environment.
 %    \begin{macrocode}
-
 \def\tp@float[#1]#2#3#4{%
   \par
   \begingroup
@@ -475,6 +475,7 @@
     \tp@test@caption{0}{capt}{bottom}%
     \tp@flt@create@counters%
     \tp@flt@compose
+    \tp@save@page
     \tp@set@bot@sep
     \tp@e@float
     \tp@flt@debug{\tp@captype}%
