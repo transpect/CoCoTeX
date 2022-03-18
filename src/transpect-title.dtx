@@ -39,11 +39,13 @@
 \def\tpMeta{%
   \tpNamespace{titlepage}%
   \tp@title@simple@comps
+  \tp@title@generic@comp
   \tp@title@fundings@comp
   \tp@title@names{comp}%
 }
 \def\endtpMeta{%
   \tp@title@names{eval}%
+  \tp@title@generic@eval
   \tp@title@fundings@eval
   \tp@title@set@pdfmeta
   \AtBeginDocument{\tp@maketitle}%
@@ -108,6 +110,23 @@
 %    \end{macrocode}
 %
 % \section{Component handlers}
+% \subsection{Generic Blocks}
+%
+%
+%    \begin{macrocode}
+\def\tp@title@generic@comp{%
+  \tpProvideComp{tpGenericMetaBlock}{\expandafter\global}{}{GenericMetaBlock}%
+  \tp@title@counted@comp{GenericMeta}{%
+    \tp@prov@num@comp{Heading}{heading}%
+    \tp@prov@num@comp{Content}{content}%
+  }}
+\def\tp@title@generic@eval{{%
+  \def\tp@namespace{titlepage}%
+  \tp@iterate@cnts{GenericMeta}{generic-meta-format}%
+  \tpIfComp{GenericMetaBlock}{}{\expandafter\csname tpGenericMetaBlock\expandafter\endcsname\expandafter{\tp@iterate@res}}%
+}}
+%    \end{macrocode}
+%
 % \subsection{Funds, Grants, and Supporters}
 % Grants component group. This is a {\LaTeX} environment within
 % \lstinline{tpMeta} which allows to set up multiple funding, grant, or
@@ -336,6 +355,13 @@
     \tpUseProperty{titlepage-iv}%
     \clearpage
   }%
+  %% Generic meta blocks
+  \tpSetProperty{generic-meta-heading-format}{\large}% format of the heading of a generic meta block
+  \tpSetProperty{generic-meta-format}{% Format of a single generic meta-block
+    \tpIfComp{Heading}{{\tpUseProperty{generic-meta-heading-format}\tpUseComp{Heading}\par}\vskip\baselineskip}{}%
+    \tpUseComp{Content}%
+    \par%
+  }%
   %% Funding
   \tpSetProperty{funding-columns}{2}
   \tpSetProperty{funding-format}{}%
@@ -392,6 +418,7 @@
   \tpSetProperty{titlepage-ii}{%
     \tpGetComp{Editorial}%
     \tpGetComp{SeriesNote}%
+    \tpGetComp{GenericMetaBlock}%
     \vfill
     \tpUseProperty{bio-block}%
   }%
