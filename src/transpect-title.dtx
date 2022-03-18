@@ -245,6 +245,7 @@
   %% Series
   \tp@title@macro{Series}%     Series Title
   \tp@title@macro{SubSeries}% Series Subtitle
+  \tp@title@macro{SeriesNote}%Series Notes
   \tp@title@macro{Volume}%     Series Volume
   \tp@title@macro{Number}%     Series Number
   \tp@title@macro{EditorString}% Editor Text Line
@@ -390,6 +391,7 @@
   }%
   \tpSetProperty{titlepage-ii}{%
     \tpGetComp{Editorial}%
+    \tpGetComp{SeriesNote}%
     \vfill
     \tpUseProperty{bio-block}%
   }%
