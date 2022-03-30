@@ -22,8 +22,8 @@
 \newcount\tp@descriptionlist
 % Macro for saving the maximum label widths associated with the respective list;
 % 0pt as fallback value, if there is no *.aux file yet.
+\global\newdimen\tp@maxLabelWidth%
 \def\tp@getMaxLabelWidth{%
-  \global\newdimen\tp@maxLabelWidth%
   \global\tp@maxLabelWidth=0pt%
 }
 
