@@ -876,8 +876,10 @@
   \tpMakeFltComp{tpContent}{content}{Content}%
   \tp@reserve@tabular
   \ifx\tp@uses@htmltabs\relax
-    \ifx\tp@fps\@empty\else\htAddStyle{break-table:false;}\fi
-    \htAddStyle{margin-left:\tp@flt@marg@l}%
+    \let\tp@addstyle\@empty
+    \ifx\tp@fps\@empty\else\def\tp@addstyle{;break-table:false;}\fi
+    \edef\tp@tempa{margin-left:\tp@flt@marg@l\tp@addstyle}%
+    \expandafter\htAddStyle\expandafter{\tp@tempa}%
     \global\setbox\htTableBox\box\voidb@x
     \let\htOutputTable\relax
   \fi}
