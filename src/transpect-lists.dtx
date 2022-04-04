@@ -136,9 +136,13 @@
 \tpAddToDefault{list}{%
   \tpSetProperty{after-skip}{\z@}
   \tpSetProperty{before-skip}{\z@}
-  \tpSetProperty{label-width}{0mm}
-  \tpSetProperty{label-sep}{10mm}
-  \tpSetProperty{label-char}{—}
+  % Label width is internally increased to width of label character.
+  \tpSetProperty{label-char}{}
+  \tpSetProperty{label-delimiter}{.}
+  \tpSetProperty{label-sep}{0\p@}
+  \tpSetProperty{label-width}{0\p@}
+  \tpSetProperty{left-margin}{0\p@}
+  \tpSetProperty{item-indent}{0\p@}
 }
 
 
@@ -168,7 +172,7 @@
     \fi
     \tpUseHook{before-hook-\tp@list@name}% <—— Probably not needed for lists.
     %\tpUseProperty{before-list}%
-    \everypar{}% <—— Check if this macro is needed here.
+    %\everypar{}% <—— Check if this macro is needed here.
     %\tp@format@number{}{}{\tp@heading@level}% Calculate number width
     %\expandafter\ifx\csname tp@\tp@namespace @after-skip\endcsname\relax%
     %  Kein Afterskip.
@@ -222,19 +226,45 @@
 \DeclareRobustCommand{\TitleBreak}{\hfill\break}
 \def\@list[#1]#2{%
   %\tp@heading@reserve
+  \newbox\tp@labelbox
   \tpParseAttributes{list}{#1}%
   \edef\tp@list@name{#2}%
   \tpCascadeProps{#2}{list}%
+  \tpIfProp{label-char}{%
+    \setbox\tp@labelbox = \hbox{\tpUseProperty{label-char}\tpUseProperty{label-delimiter}}
+    \ifdim\wd\tp@labelbox > \tpUseProperty{label-width}\relax
+      \tpSetProperty{label-width}{\wd\tp@labelbox}
+    \fi%
+  }{}
   \list{%
-    \hbox to \tpUseProperty{label-width}{\tpUseProperty{label-char}}%
+    \if#1\empty%
+      Content!
+    \else%
+      \hbox to \tpUseProperty{label-width}{\tpUseProperty{label-char}\tpUseProperty{label-delimiter}\hss}%
+    \fi%
   }{%
     \labelwidth\tpUseProperty{label-width}
-    \labelsep\tpUseProperty{label-sep}
-    \leftmargin0mm%
+    \labelsep\dimexpr\tpUseProperty{label-sep}+\tpUseProperty{item-indent}\relax
+    \leftmargin\dimexpr\tpUseProperty{left-margin}+\tpUseProperty{label-width}+\tpUseProperty{label-sep}\relax%
     \topsep0mm
     \partopsep0mm
-  }%
-  
+    \itemindent\tpUseProperty{item-indent}
+    \def\makelabel##1{%
+      \wlog{Label: ##1}
+      \setbox0 = \hbox{##1}
+      %\ifdim\wd0>0\z@\relax
+        \wlog{Width greater zero.}
+        \setbox\tp@labelbox = \hbox{##1\tpUseProperty{label-delimiter}}%
+        \ifdim\wd\tp@labelbox > \tpUseProperty{label-width}\relax%
+          \hbox to \dimexpr\wd\tp@labelbox+\tpUseProperty{label-sep}\relax{\unhbox\tp@labelbox\hss}%
+        \else%
+          \hbox to \dimexpr\tpUseProperty{label-width}+\tpUseProperty{label-sep}\relax{\unhbox\tp@labelbox\hss}%
+        \fi%
+      %\else%
+      %  \hbox to \tpUseProperty{label-width}{\tpUseProperty{label-char}\tpUseProperty{label-delimiter}\hss}%
+     % \fi%
+    }%
+  }%  
 }
 
 \def\tp@list@load@props{\csname tp@list@\tp@list@name @properties\endcsname}
@@ -263,7 +293,8 @@
   \gdef\@doendpe{%
     \@endpetrue
     \everypar{{\setbox\z@\lastbox}\everypar{}\@endpefalse}%
-    \global\let\@doendpe\orig@doendpe}
+    \global\let\@doendpe\orig@doendpe%
+  }
   %\tp@heading@reset
 }
     
