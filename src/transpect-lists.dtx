@@ -138,7 +138,7 @@
   \tpSetProperty{before-skip}{\z@}
   % Label width is internally increased to width of label character.
   \tpSetProperty{label-char}{}
-  \tpSetProperty{label-delimiter}{.}
+  \tpSetProperty{label-delimiter}{}
   \tpSetProperty{label-sep}{0\p@}
   \tpSetProperty{label-width}{0\p@}
   \tpSetProperty{left-margin}{0\p@}
@@ -237,9 +237,7 @@
     \fi%
   }{}
   \list{%
-    \ifx\empty#1\empty
-      empty
-    \fi
+    % Label. Bei Descriptions aus [] übernommen, sonst leer.%
   }{%
     \labelwidth\tpUseProperty{label-width}
     \labelsep\dimexpr\tpUseProperty{label-sep}+\tpUseProperty{item-indent}\relax
@@ -248,19 +246,24 @@
     \partopsep0mm
     \itemindent\tpUseProperty{item-indent}
     \def\makelabel##1{%
-      \wlog{Label: ##1}
-      \setbox0 = \hbox{\expandafter##1}
+      ##1
+      \wlog{Labelbreite: \expandafter \csname tp-label-width\endcsname}
+      %\wlog{Label: ##1}
+      %\setbox0 = \hbox{##1}
+      %% \ifx\empty#1\empty
+      %%  \tpUseProperty{label-char}\tpUseProperty{label-delimiter}%
+      %%\fi
       %\ifdim\wd0>0\z@\relax
-        \wlog{Width greater zero.}
-        \setbox\tp@labelbox = \hbox{##1\tpUseProperty{label-delimiter}}%
-        \ifdim\wd\tp@labelbox > \tpUseProperty{label-width}\relax%
-          \hbox to \dimexpr\wd\tp@labelbox+\tpUseProperty{label-sep}\relax{\unhbox\tp@labelbox\hss}%
-        \else%
-          \hbox to \dimexpr\tpUseProperty{label-width}+\tpUseProperty{label-sep}\relax{\unhbox\tp@labelbox\hss}%
-        \fi%
+      %  \wlog{Width greater zero.}
+      %  \setbox\tp@labelbox = \hbox{##1\tpUseProperty{label-delimiter}}%
+      %  \ifdim\wd\tp@labelbox > \tpUseProperty{label-width}\relax%
+      %    \hbox to \dimexpr\wd\tp@labelbox+\tpUseProperty{label-sep}\relax{\unhbox\tp@labelbox\hss}%
+      %  \else%
+      %    \hbox to \dimexpr\tpUseProperty{label-width}+\tpUseProperty{label-sep}\relax{\unhbox\tp@labelbox\hss}%
+      %  \fi%
       %\else%
-      %  \hbox to \tpUseProperty{label-width}{\tpUseProperty{label-char}\tpUseProperty{label-delimiter}\hss}%
-     % \fi%
+      %  \hbox to \dimexpr\tpUseProperty{label-width}+\tpUseProperty{label-sep}\relax{\tpUseProperty{label-char}\tpUseProperty{label-delimiter}\hss}%
+      %\fi%
     }%
   }%  
 }
