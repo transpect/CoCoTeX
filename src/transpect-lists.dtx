@@ -237,11 +237,9 @@
     \fi%
   }{}
   \list{%
-    \if#1\empty%
-      Content!
-    \else%
-      \hbox to \tpUseProperty{label-width}{\tpUseProperty{label-char}\tpUseProperty{label-delimiter}\hss}%
-    \fi%
+    \ifx\empty#1\empty
+      empty
+    \fi
   }{%
     \labelwidth\tpUseProperty{label-width}
     \labelsep\dimexpr\tpUseProperty{label-sep}+\tpUseProperty{item-indent}\relax
@@ -251,7 +249,7 @@
     \itemindent\tpUseProperty{item-indent}
     \def\makelabel##1{%
       \wlog{Label: ##1}
-      \setbox0 = \hbox{##1}
+      \setbox0 = \hbox{\expandafter##1}
       %\ifdim\wd0>0\z@\relax
         \wlog{Width greater zero.}
         \setbox\tp@labelbox = \hbox{##1\tpUseProperty{label-delimiter}}%
