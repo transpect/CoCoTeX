@@ -253,11 +253,12 @@
 % Inline headings are stored in a temporary box and expanded after the
 % next (non-heading) paragraph is opened.
 %    \begin{macrocode}
+\newbox\tp@inlinesecbox
 \def\tp@inline@heading{%
   \tpIfProp{after-indent}{\global\@afterindenttrue}{\global\@afterindentfalse}%
   \tpIfProp{interline-para}
-    {\global\setbox\tp@tempboxa\hbox{\@svsec}}
-    {\global\setbox\tp@tempboxa\hbox{\ifvoid\tp@tempboxa\else\unhbox\tp@tempboxa\tpUseProperty{interline-para-sep}\fi\@svsec}}%
+    {\global\setbox\tp@inlinesecbox\hbox{\ifvoid\tp@inlinesecbox\else\unhbox\tp@inlinesecbox\tpUseProperty{interline-para-sep}\fi\@svsec}}%
+    {\global\setbox\tp@inlinesecbox\hbox{\@svsec}}
   \@nobreakfalse
   \global\@noskipsectrue
   \gdef\next{%
@@ -266,12 +267,12 @@
         \global\@noskipsecfalse
         {\setbox\z@\lastbox}%
         \clubpenalty\@M
-        \begingroup \unhbox\tp@tempboxa \endgroup
+        \begingroup \unhbox\tp@inlinesecbox \endgroup
         \unskip
         \hskip -\@tempskipa
       \else
         \clubpenalty \@clubpenalty
-        \global\setbox\tp@tempboxa\box\voidb@x
+        \global\setbox\tp@inlinesecbox\box\voidb@x
         \everypar{}%
       \fi}%
     \ignorespaces}}
