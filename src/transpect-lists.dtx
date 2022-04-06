@@ -133,14 +133,37 @@
 
 % Copied from the transpect-headings.sty module.
 % Inheritance mechanism known from headings also applies here.
+
+\def\tp@ifstring#1#2{%
+  \edef\@tempa{#1}%
+  \edef\@tempb{#2}%
+  \ifx\@tempa\@tempb\relax%
+}
+
+% Convert a number to a lowercase letter.
+\def\tp@numToLCLetter#1{%
+  \count255=\lccode`a%
+  \advance\count255 by -1%
+  \advance\count255 by #1%
+  \char\count255%
+}
+
+% Convert a number to an uppercase letter.
+\def\tp@numToUCLetter#1{%
+  \count255=\uccode`A%
+  \advance\count255 by -1%
+  \advance\count255 by #1%
+  \char\count255%
+}
+
 \tpAddToDefault{list}{%
   \tpSetProperty{after-skip}{\z@}
   \tpSetProperty{before-skip}{\z@}
-  % Label width is internally increased to width of label character.
-  \tpSetProperty{label-char}{}
+  \tpSetProperty{label-char}{} % Only applies with label-type »char« (or empty/fallback).
   \tpSetProperty{label-delimiter}{}
   \tpSetProperty{label-sep}{0\p@}
-  \tpSetProperty{label-width}{0\p@}
+  \tpSetProperty{label-type}{char} % Label types: char (use label-char; default), number, Alpha, alpha, Roman, roman.
+  \tpSetProperty{label-width}{0\p@} % Label width is internally increased to width of label character.
   \tpSetProperty{left-margin}{0\p@}
   \tpSetProperty{item-indent}{0\p@}
 }
@@ -153,7 +176,7 @@
   %
   \if!#1!\else\expandafter\protect\expandafter\def\csname tp@list@#3@parent\endcsname{#1}\fi%
   \expandafter\protect\expandafter\def\csname tp@list@#2@properties\endcsname{#3}%
-  \tp@init@hooks{#2}%
+  %\tp@init@hooks{#2}%
   %\tp@restore@init{heading}{number-#2-maxwd}%
   %
   %
@@ -162,108 +185,72 @@
   \expandafter\def\csname tpUseList#2\endcsname{%
   
     \if!#1!\else\edef\tp@list@parent{#1}\fi%
-    %\edef\tp@list@level{#2}% <—— Probably not needed for lists.
-    %\@setpar{\@@par}% <—— Probably not needed for lists.
     \tpNamespace{list}%
-    % Load the namespace defaults defined in \tpAddToDefault, the parent properties (if any), and the specific list properties.
-    \tpCascadeProps{#2}{list}%
-    \ifx\tp@list@parent\@undefined\else% <—— Probably not needed for lists.
-      \tpUseHook{before-hook-\tp@list@parent}%
-    \fi
-    \tpUseHook{before-hook-\tp@list@name}% <—— Probably not needed for lists.
-    %\tpUseProperty{before-list}%
-    %\everypar{}% <—— Check if this macro is needed here.
-    %\tp@format@number{}{}{\tp@heading@level}% Calculate number width
-    %\expandafter\ifx\csname tp@\tp@namespace @after-skip\endcsname\relax%
-    %  Kein Afterskip.
-    %\else
-    %  Afterskip vorhanden.
-    %  \expandafter\meaning\csname tp@list@after-skip \endcsname
-    %\fi
-    %
-    %\expandafter\ifx\csname tp@\tp@namespace @label-width\endcsname\relax%
-    %  Keine Labelwidth gesetzt.
-    %\else
-    %  Labelwidth gesetzt.
-    %  \tpUseProperty{label-width} Text nach hskip.
-    %  \expandafter\meaning\csname tp@list@label-width \endcsname
-    %\fi
-    %\tpIfProp{after-skip}{Afterskip vorhanden!}{Kein Afterskip}
-    %\tpIfProp{label-width}{\labelwidth\tpUseProperty{label-width} Labelwidth vorhanden! \hskip\tpUseProperty{label-width} Text nach hskip.}{Keine Labelwidth.}
-    
-    %\tpIfProp{label-width}{Labelwidth gesetzt!}{Keine Labelwidth gesetzt.}
-    %\bgroup
-    %  \def\hang{\handindent\parindent}
-    %  \def\item{\par\hang\textindent}
-    %  \def\textindent#1{\indent\llap{#1\enspace}\ignorespaces}
-    %  #3%
-    %\egroup
-    %\def\@svsec{%
-    %  \tpUseProperty{before-heading-block}%
-    %  %\leftskip\tpUseProperty{margin-left}%
-    %  %\rightskip\tpUseProperty{margin-right}%
-    %  %\bgroup
-    %  %  \tpUseProperty{heading-block}%
-    %  %  \tpIfProp{extended}{\tpUseProperty{extended-heading}}{}%
-    %  %\egroup%
-    %  %\tp@hdg@create@labels{#3}% label facility
-    %  %\tpIfPropVal{no-toc}{true}{}{\tp@make@toc}% ToC entries
-    %  %\tpIfPropVal{no-BM}{true}{}{\tp@make@bookmarks}% Bookmarks
-    %  %\tp@make@run% Running headers
-    %  \tpUseProperty{after-heading-block}%
-    %}%
-    %\ifdim\@tempskipa <\z@\relax
-    %  \tp@inline@heading
-    %\else
-    %  \tp@block@heading
-    %\fi
+    \tpCascadeProps{#2}{list} % Load the namespace defaults defined in \tpAddToDefault, the parent properties (if any), and the specific list properties.
+    %\ifx\tp@list@parent\@undefined\else% <—— Probably not needed for lists.
+    %  \tpUseHook{before-hook-\tp@list@parent}%
+    %\fi%
+    %\tpUseHook{before-hook-\tp@list@name}% <—— Probably not needed for lists.
     \aftergroup\next%
   }
 }
 
 
 \def\tpList{\@ifnextchar [{\@list}{\@list[]}}%]
-\DeclareRobustCommand{\TitleBreak}{\hfill\break}
+
+\def\endtpList{%
+  \endlist
+  \expandafter\ifx\csname tpUseList\tp@list@name\endcsname\relax
+    \PackageError{transpect.cls}{List \tp@list@name\space unknown!}{A list with name \tp@list@name\space is unknown. Use the \string\tpDeclareList\space macro to declare list types.}%
+  \else
+    \csname tpUseList\tp@list@name\endcsname%
+  \fi
+  \gdef\@doendpe{%
+    \@endpetrue
+    \everypar{{\setbox\z@\lastbox}\everypar{}\@endpefalse}%
+    \global\let\@doendpe\orig@doendpe%
+  }
+}
+
+
+
 \def\@list[#1]#2{%
+  \def\listType{char}
+  \edef\listTypeSet{\tpUseProperty{label-type}}
+  \newcount\counterTest
+  \counterTest=0
   %\tp@heading@reserve
   \newbox\tp@labelbox
   \tpParseAttributes{list}{#1}%
   \edef\tp@list@name{#2}%
   \tpCascadeProps{#2}{list}%
   \tpIfProp{label-char}{%
-    \setbox\tp@labelbox = \hbox{\tpUseProperty{label-char}\tpUseProperty{label-delimiter}}
-    \ifdim\wd\tp@labelbox > \tpUseProperty{label-width}\relax
-      \tpSetProperty{label-width}{\wd\tp@labelbox}
+    \setbox\tp@labelbox = \hbox{\tpUseProperty{label-char}\tpUseProperty{label-delimiter}}%
+    \ifdim\wd\tp@labelbox > \tpUseProperty{label-width}\relax%
+      \tpSetProperty{label-width}{\the\wd\tp@labelbox}%
     \fi%
-  }{}
+  }{}%
   \list{%
-    % Label. Bei Descriptions aus [] übernommen, sonst leer.%
+    % Label. Uses [] in description items. Empty otherwise.%
   }{%
-    \labelwidth\tpUseProperty{label-width}
-    \labelsep\dimexpr\tpUseProperty{label-sep}+\tpUseProperty{item-indent}\relax
+    \labelwidth\tpUseProperty{label-width}%
+    \labelsep\dimexpr\tpUseProperty{label-sep}+\tpUseProperty{item-indent}\relax%
     \leftmargin\dimexpr\tpUseProperty{left-margin}+\tpUseProperty{label-width}+\tpUseProperty{label-sep}\relax%
-    \topsep0mm
-    \partopsep0mm
-    \itemindent\tpUseProperty{item-indent}
+    \topsep0mm%
+    \partopsep0mm%
+    \itemindent\tpUseProperty{item-indent}%
     \def\makelabel##1{%
-      ##1
-      \wlog{Labelbreite: \expandafter \csname tp-label-width\endcsname}
-      %\wlog{Label: ##1}
-      %\setbox0 = \hbox{##1}
-      %% \ifx\empty#1\empty
-      %%  \tpUseProperty{label-char}\tpUseProperty{label-delimiter}%
-      %%\fi
-      %\ifdim\wd0>0\z@\relax
-      %  \wlog{Width greater zero.}
-      %  \setbox\tp@labelbox = \hbox{##1\tpUseProperty{label-delimiter}}%
-      %  \ifdim\wd\tp@labelbox > \tpUseProperty{label-width}\relax%
-      %    \hbox to \dimexpr\wd\tp@labelbox+\tpUseProperty{label-sep}\relax{\unhbox\tp@labelbox\hss}%
-      %  \else%
-      %    \hbox to \dimexpr\tpUseProperty{label-width}+\tpUseProperty{label-sep}\relax{\unhbox\tp@labelbox\hss}%
-      %  \fi%
-      %\else%
-      %  \hbox to \dimexpr\tpUseProperty{label-width}+\tpUseProperty{label-sep}\relax{\tpUseProperty{label-char}\tpUseProperty{label-delimiter}\hss}%
-      %\fi%
+      \advance\counterTest by 1%
+      \tpIfPropVal{label-type}{char}{%
+        \wlog{Character labels!}%
+      }{%
+        {\wlog{Unknown label type.}}%
+      }%
+      \ifx\empty##1\empty%
+        \hbox to \dimexpr\tpUseProperty{label-width}\relax{\tpUseProperty{label-char}\tpUseProperty{label-delimiter}\hss}%
+      \else%
+        \hbox to \dimexpr\tpUseProperty{label-width}\relax{##1\hss}%
+      \fi%
     }%
   }%  
 }
@@ -284,21 +271,7 @@
 %  \tpProvideComp{tpRun#1}{}{}{Run#1}% running overrides
 %  \tpProvideComp{tpBM#1}{}{}{BM#1}% bookmark overrides
 %}
-\def\endtpList{%
-  \endlist
-  \expandafter\ifx\csname tpUseList\tp@list@name\endcsname\relax
-    \PackageError{transpect.cls}{List \tp@list@name\space unknown!}{A list with name \tp@list@name\space is unknown. Use the \string\tpDeclareList\space macro to declare list types.}%
-  \else
-    \csname tpUseList\tp@list@name\endcsname%
-  \fi
-  \gdef\@doendpe{%
-    \@endpetrue
-    \everypar{{\setbox\z@\lastbox}\everypar{}\@endpefalse}%
-    \global\let\@doendpe\orig@doendpe%
-  }
-  %\tp@heading@reset
-}
-    
+  
     
     
 %    \end{macrocode}
