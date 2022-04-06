@@ -108,16 +108,9 @@
   \tpDeclareHook{before-hook-#1}%
 }
 %    \end{macrocode}
-% Initialite the counters for automatic numbering if they don't exist, yet.
+% Initialises the counters for automatic numbering if they don't exist yet.
 %    \begin{macrocode}
-\def\tp@init@cnt#1#2{%
-  \tpIfPropVal{numbering}{auto}
-    {\expandafter\ifx\csname c@#2\endcsname \relax
-        \expandafter\newcount\csname c@#2\endcsname
-      \fi
-      \global\csname c@#2\endcsname=\z@
-    }{}%
-}
+\def\tp@init@cnt#1#2{\tpIfPropVal{numbering}{auto}{\@definecounter{#2}}{}}
 %    \end{macrocode}
 % Advance the heading counter if the \lstinline{numbering} Property is
 % set to \texttt{auto} and the current heading is not overridden by
@@ -130,9 +123,11 @@
      \else
        \tpIfComp{Number}
          {}%
-         {\expandafter\global\expandafter\advance\csname c@#2\endcsname by \@ne\relax
-          \edef\@tempa{\csname the#2\endcsname}%
-          \expandafter\tpNumber\expandafter{\@tempa}}
+         {\ifnum #1>\c@secnumdepth\relax\else
+            \refstepcounter{#1}%
+            \edef\@tempa{\csname the#2\endcsname}%
+            \expandafter\tpNumber\expandafter{\@tempa}%
+          \fi}%
      \fi}{}
 }
 
