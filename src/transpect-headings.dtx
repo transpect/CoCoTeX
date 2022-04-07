@@ -124,7 +124,7 @@
        \tpIfComp{Number}
          {}%
          {\ifnum #1>\c@secnumdepth\relax\else
-            \refstepcounter{#1}%
+            \refstepcounter{#2}%
             \edef\@tempa{\csname the#2\endcsname}%
             \expandafter\tpNumber\expandafter{\@tempa}%
           \fi}%

@@ -159,7 +159,7 @@
 \tpAddToDefault{list}{%
   \tpSetProperty{after-skip}{\z@}
   \tpSetProperty{before-skip}{\z@}
-  \tpSetProperty{label-char}{} % Only applies with label-type »char« (or empty/fallback).
+  \tpSetProperty{label-char}{} % Only applies with label-type »char« (or empty).
   \tpSetProperty{label-delimiter}{}
   \tpSetProperty{label-sep}{0\p@}
   \tpSetProperty{label-type}{char} % Label types: char (use label-char; default), number, Alpha, alpha, Roman, roman.
@@ -183,15 +183,9 @@
   %
   % Define the macro for list with name/class #2.
   \expandafter\def\csname tpUseList#2\endcsname{%
-  
     \if!#1!\else\edef\tp@list@parent{#1}\fi%
     \tpNamespace{list}%
     \tpCascadeProps{#2}{list} % Load the namespace defaults defined in \tpAddToDefault, the parent properties (if any), and the specific list properties.
-    %\ifx\tp@list@parent\@undefined\else% <—— Probably not needed for lists.
-    %  \tpUseHook{before-hook-\tp@list@parent}%
-    %\fi%
-    %\tpUseHook{before-hook-\tp@list@name}% <—— Probably not needed for lists.
-    \aftergroup\next%
   }
 }
 
@@ -204,6 +198,7 @@
     \PackageError{transpect.cls}{List \tp@list@name\space unknown!}{A list with name \tp@list@name\space is unknown. Use the \string\tpDeclareList\space macro to declare list types.}%
   \else
     \csname tpUseList\tp@list@name\endcsname%
+    \vskip\tpUseProperty{after-skip}
   \fi
   \gdef\@doendpe{%
     \@endpetrue
@@ -213,23 +208,47 @@
 }
 
 
-
 \def\@list[#1]#2{%
-  \def\listType{char}
-  \edef\listTypeSet{\tpUseProperty{label-type}}
-  \newcount\counterTest
-  \counterTest=0
-  %\tp@heading@reserve
-  \newbox\tp@labelbox
-  \tpParseAttributes{list}{#1}%
+  \newbox\tp@labelbox%
+  \global\newcount\tp@itemNumber%
+  % Load the properties
+  %\tpParseAttributes{list}{#1}%
   \edef\tp@list@name{#2}%
   \tpCascadeProps{#2}{list}%
-  \tpIfProp{label-char}{%
-    \setbox\tp@labelbox = \hbox{\tpUseProperty{label-char}\tpUseProperty{label-delimiter}}%
-    \ifdim\wd\tp@labelbox > \tpUseProperty{label-width}\relax%
-      \tpSetProperty{label-width}{\the\wd\tp@labelbox}%
-    \fi%
+  
+  \vskip\tpUseProperty{before-skip}
+  
+  \tpIfPropVal{label-type}{char}{%
+    \tp@itemNumber=-1
+  }{%    
+    \tp@itemNumber=\z@% 
+  }%
+  \tpIfPropVal{label-type}{number}{%
+    \tpSetProperty{label-char}{888}%
+    \edef\tp@convertNumber##1{##1}
   }{}%
+  \tpIfPropVal{label-type}{Alpha}{%
+    \tpSetProperty{label-char}{M}%
+    \edef\tp@convertNumber##1{\tp@numToUCLetter{##1}}
+  }{}%
+  \tpIfPropVal{label-type}{alpha}{%
+    \tpSetProperty{label-char}{m}%
+    \edef\tp@convertNumber##1{\tp@numToLCLetter{##1}}
+  }{}%
+  \tpIfPropVal{label-type}{Roman}{%
+    \tpSetProperty{label-char}{XXX}%
+    \newcommand\tp@convertNumber[1]{\MakeUppercase{\romannumeral##1}}
+  }{}%
+  \tpIfPropVal{label-type}{roman}{%
+    \tpSetProperty{label-char}{xxx}%
+    \newcommand\tp@convertNumber[1]{\romannumeral##1\relax}
+  }{}%
+  % Set the label width based on the potentially longest label string.
+  \setbox\tp@labelbox = \hbox{\tpUseProperty{label-char}\tpUseProperty{label-delimiter}}%
+  \ifdim\wd\tp@labelbox > \tpUseProperty{label-width}\relax%
+    \tpSetProperty{label-width}{\the\wd\tp@labelbox}%
+  \fi%
+  
   \list{%
     % Label. Uses [] in description items. Empty otherwise.%
   }{%
@@ -240,12 +259,10 @@
     \partopsep0mm%
     \itemindent\tpUseProperty{item-indent}%
     \def\makelabel##1{%
-      \advance\counterTest by 1%
-      \tpIfPropVal{label-type}{char}{%
-        \wlog{Character labels!}%
-      }{%
-        {\wlog{Unknown label type.}}%
-      }%
+      \ifnum\tp@itemNumber > -1\relax%
+        \global\advance\tp@itemNumber by \@ne\relax%
+        \tpSetProperty{label-char}{\tp@convertNumber{\the\tp@itemNumber}}%
+      \fi
       \ifx\empty##1\empty%
         \hbox to \dimexpr\tpUseProperty{label-width}\relax{\tpUseProperty{label-char}\tpUseProperty{label-delimiter}\hss}%
       \else%
