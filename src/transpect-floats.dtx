@@ -913,7 +913,13 @@
     \tp@render@sub@floats{\the\@tempcnta}%
   }%
 }
-
+%    \end{macrocode}
+% \subsection{Helpers}
+%
+% \lstinline{\tpFloatBarrier} can be used to force all pending floats
+% to be printed at the next shipout.
+%    \begin{macrocode}
+\def\tpFloatBarrier{\AtBeginShipoutNext{\clearpage}}
 
 %    \end{macrocode}
 %
