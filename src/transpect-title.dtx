@@ -32,7 +32,6 @@
 % Default titlepage Declarator
 %    \begin{macrocode}
 \tpDeclareTitlepage{}
-
 %    \end{macrocode}
 % The tpMeta environment
 %    \begin{macrocode}
@@ -51,11 +50,29 @@
   \AtBeginDocument{\tp@maketitle}%
   \let\tp@namespace\@empty
 }
-
+%    \end{macrocode}
+% \section{PDF Meta Data}
+% This macro sets the metadata that are written directly into the pdf
+% file, as well as meta data used later in the book.
+%    \begin{macrocode}
 \def\tp@title@set@pdfmeta{%
-  \expandafter\title\expandafter{\tpUseComp{tpTitle}}%
+  \tp@title@process@bkt
+  \tp@title@process@bka
 }
-
+%    \end{macrocode}
+% Processes the title
+%    \begin{macrocode}
+\def\tp@title@process@bkt{%
+  \expandafter\title\expandafter{\tpUseComp{tpTitle}}%
+  \xdef\tpRunBookTitle{\tpUseProperty{run-book-title}}%
+}
+%    \end{macrocode}
+% Processes the names written into the meta data
+%    \begin{macrocode}
+\def\tp@title@process@bka{%
+  \xdef\tpRunBookName{\tpUseProperty{run-book-name}}%
+  \expandafter\author\expandafter{\tpRunBookName}%
+}
 %    \end{macrocode}
 % \section{Intermediate Level Interfaces}
 %
@@ -83,7 +100,6 @@
       }%
   \fi
 }
-
 %    \end{macrocode}
 % \section{Low Level Interfaces}
 % Shortcut for numbered Components TODO: Move to transpect-common
@@ -144,7 +160,6 @@
     \tp@iterate@cnts{Funding}{fund-format}%
     \tpIfComp{FundingBlock}{}{\expandafter\csname tpFundingBlock\expandafter\endcsname\expandafter{\tp@iterate@res}}%
 }}
-
 %    \end{macrocode}
 % \subsection{Name lists}
 % Shortcut to declare Name Components
@@ -153,7 +168,6 @@
   \tpProvideComp{tp#1#2}{\expandafter\global}{}{#1#2}%
   \expandafter\gdef\csname tp@title@#1@#3@name\endcsname{#4}%
 }
-
 \def\tp@title@name@comp#1#2{%
   \tp@provide@comp@block{#1}{NameList}{format}{#2-format}
   \tp@provide@comp@block{#1}{MetaBlock}{meta}{#2-meta-format}
@@ -167,13 +181,11 @@
     \tp@prov@num@comp{Bio}{bio}%
   }%
 }
-
 %    \end{macrocode}
 % Evaluator for the Corresponding Author
 %    \begin{macrocode}
 \def\tp@title@eval@corresp#1#2{%
   \expandafter\ifx\csname tp@#1-#2@attr@corresp\endcsname\relax\else\tpUseProperty{corresp-mark}\fi}
-
 %    \end{macrocode}
 % This macro eventually evaluates the name family's attributes
 %    \begin{macrocode}
@@ -207,7 +219,6 @@
   }%
   \expandafter\def\expandafter\tp@iterate@res\expandafter{\tp@iterate@res\noexpand\egroup}%
 }
-
 %    \end{macrocode}
 % Evaluator for the name lists
 %    \begin{macrocode}
@@ -218,24 +229,7 @@
     \tpIfComp{#1MetaBlock}{}{\expandafter\csname tp#1MetaBlock\expandafter\endcsname\expandafter{\tp@iterate@res}}%
     \tp@iterate@cnts{#1}{\csname tp@title@#1@format@name\endcsname}%
     \tpIfComp{#1NameList}{}{\expandafter\csname tp#1NameList\expandafter\endcsname\expandafter{\tp@iterate@res}}%
-    \tp@create@editor@string{#1}%
   }}%
-
-%    \end{macrocode}
-% This macro combines the editor names with the editor suffix.
-%    \begin{macrocode}
-\def\tp@create@editor@string#1{%
-  \def\@tempa{Author}\def\@argi{#1}%
-  \ifx\@tempa\@argi\else
-    \tpIfComp{#1String}{}{%
-      \csname tp#1String\endcsname{%
-        \tpUseComp{#1NameList}%
-        \tpUseProperty{editor-suffix}%
-      }%
-    }%
-  \fi
-}%
-
 %    \end{macrocode}
 % Provides the Name Components
 %    \begin{macrocode}
@@ -244,13 +238,11 @@
   \csname tp@title@name@#1\endcsname{Editor}{editor}%
   \csname tp@title@name@#1\endcsname{SeriesEditor}{serieseditor}%
 }
-
 %    \end{macrocode}
 % \subsection{Simple Component Declarations}
 % Shortcut for simple value components
 %    \begin{macrocode}
 \def\tp@title@macro#1{\tpProvideComp{tp#1}{\expandafter\global}{}{#1}}
-
 %    \end{macrocode}
 % Declaration of simple value Components
 %    \begin{macrocode}
@@ -259,7 +251,8 @@
   \tp@title@macro{Cover}%       Path to Cover Image(!)
   %% Titles
   \tp@title@macro{Title}%       Main Title
-  \tp@title@macro{ShortTitle}% Shortened Main Title
+  \tp@title@macro{ShortTitle}% Shortened main title
+  \tp@title@macro{RunTitle}% Shortened main title override for headers
   \tp@title@macro{Subtitle}%   Sub Title
   %% Series
   \tp@title@macro{Series}%     Series Title
@@ -267,8 +260,8 @@
   \tp@title@macro{SeriesNote}%Series Notes
   \tp@title@macro{Volume}%     Series Volume
   \tp@title@macro{Number}%     Series Number
-  \tp@title@macro{EditorString}% Editor Text Line
-  \tp@title@macro{SeriesEditorString}% Series Editor Text Line
+  \tp@title@macro{EditorNameList}% Editor Text Line
+  \tp@title@macro{SeriesEditorNameList}% Series Editor Text Line
   %% Publisher
   \tp@title@macro{Publisher}% Publisher Name
   \tp@title@macro{PubDivision}% Publishing Division
@@ -316,7 +309,6 @@
   \tp@title@macro{Copyright}%     Copyright Description
   \tp@title@macro{CopyrightDisclaimer}% Copyright Disclaimer
 }
-
 %    \end{macrocode}
 % \section{Default Settings}
 % Default properties for tpMaketitle
@@ -408,7 +400,7 @@
   }%
   \tpSetProperty{titlepage-i}{%
     \ifcollection
-      \tpUseComp{EditorString}%
+      \tpUseProperty{editor-string}%
     \else
       \tpUseComp{AuthorNameList}%
     \fi%
@@ -424,7 +416,7 @@
   }%
   \tpSetProperty{titlepage-iii}{%
     \ifcollection
-      \tpUseComp{EditorString}%
+      \tpUseProperty{editor-string}%
     \else
       \tpUseComp{AuthorNameList}%
     \fi%
@@ -515,6 +507,7 @@
   \tpSetProperty{editor-suffix-sgl}{\space(Ed.)}%
   \tpSetProperty{editor-suffix-pl}{\space(Eds.)}%
   \tpSetProperty{editor-suffix}{%
+    \space
     \ifnum\tpTotalCount=\@ne\relax
       \tpUseProperty{editor-suffix-sgl}%
     \else
@@ -537,10 +530,34 @@
       \fi
     \fi
   }%
+  \tpSetProperty{editor-string}{%
+    \tpUseComp{EditorNameList}\tpUseProperty{editor-suffix}%
+  }%
+  \tpSetProperty{series-editor-string}{%
+    \tpUseComp{SeriesEditorNameList}%
+  }%
+  % Bio
   \tpSetProperty{bio-block}{%
     \tpGetComp{AuthorMetaBlock}%
     \tpGetComp{EditorMetaBlock}%
     \tpGetComp{SeriesEditorMetaBlock}%
+  }%
+  % Running headers
+  \tpSetProperty{run-book-title}{%
+    \tpIfComp{RunTitle}
+      {\tpUseComp{RunTitle}}
+      {\tpIfComp{ShortTitle}
+        {\tpUseComp{ShortTitle}}
+        {}}%
+  }%
+  \tpSetProperty{run-book-name}{%
+    \tpIfComp{RunNames}
+      {\tpUseComp{RunNames}}
+      {\ifcollection
+         \tpUseProperty{editor-string}%
+       \else
+         \tpUseComp{AuthorNameList}%
+       \fi}%
   }%
 }
 \let\tpBookTitle\title
