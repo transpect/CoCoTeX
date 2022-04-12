@@ -548,15 +548,19 @@
       {\tpUseComp{RunTitle}}
       {\tpIfComp{ShortTitle}
         {\tpUseComp{ShortTitle}}
-        {}}%
+        {\tpIfComp{Title}{\tpUseComp{Title}}{No title given!}}}%
   }%
   \tpSetProperty{run-book-name}{%
     \tpIfComp{RunNames}
       {\tpUseComp{RunNames}}
       {\ifcollection
-         \tpUseProperty{editor-string}%
+         \tpIfComp{EditorNameList}
+           {\tpUseProperty{editor-string}}
+           {no editor defined!}%
        \else
-         \tpUseComp{AuthorNameList}%
+         \tpIfComp{AuthorNameList}
+           {\tpUseComp{AuthorNameList}}
+           {no author defined!}%
        \fi}%
   }%
 }
