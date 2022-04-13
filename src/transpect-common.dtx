@@ -479,9 +479,26 @@
 % This part contains macros to ``simplify'' the generation of content
 % lists like the table of contents or list of figures/tables, etc.
 %
+% Entries in the list-files (e.\,g., \lstinline{\jobname.toc},
+% \lstinline{\jobname.lof}, etc.) usually contain
+% \lstinline{\contentsline} macros that expand to
+% \lstinline{l@<level>}.  Whenever a level of components that are to
+% be written in content lists is declared, the package automatically
+% generates a \lstinline{\l@<level>} macro for this level of entries.
+% The content-baring argument of \lstinline{\contentsline} (or
+% \lstinline{l@<level>}, resp.) contains Components.
+%
+% Once a list file is read, those \lstinline{l@<level>} macros are
+% expanded in two steps. Each entry constitutes a Namespace on its
+% own, it therefore has a Namespace and can have multiple
+% Components. The first step is the extraction phase, where the
+% entry's Namespace is declared, the corresponding properties are
+% initialised, and its Components are extracted
+%
 % This low-level macro is used to dynamically define
-% \lstinline{l@<level>} macros. \#1 is the list file ending, \#2
-% numeric level, \#3 is the level's name.
+% \lstinline{l@<level>} macros. Optional \#1 is an override for
+% counters that have to be restored, \#2 is the list file ending, \#3
+% numeric level, \#4 is the level's name.
 %    \begin{macrocode}
 \def\tp@init@l@{\@ifnextchar[\@tp@init@l@{\@tp@init@l@[]}}%]
 \def\@tp@init@l@[#1]#2#3#4{%
@@ -502,6 +519,7 @@
     \expandafter\ifnum \csname c@#2depth\endcsname<#3\relax
     \else
       \bgroup
+        \long\def\tpTocLink####1{\hyper@linkstart{link}{\Hy@tocdestname}{####1}\hyper@linkend}%
         \csname tp@#2@extract@data\endcsname{#3}{#4}{##1}{##2}%
         \csname tp@#2@print@entry\endcsname{#4}%
       \egroup
@@ -520,12 +538,12 @@
 % Component prefix.
 %    \begin{macrocode}
 \def\tp@expand@l@contents#1#2#3#4{%
-  \sbox\z@{\def\numberline##1{\expandafter\gdef\csname tp@#2@#3Number\endcsname{##1}}\expandonce#1}%
+  \sbox\z@{\def\numberline##1{\expandafter\gdef\csname tp@#2@#3Number\endcsname{##1}}#1}%
   \ifdim\wd\z@>\z@
     \let\numberline\@gobble%
-    \expandafter\expandafter\expandafter\csname tp#3#4\endcsname\expandafter{\expandonce#1}%
+    \expandafter\xdef\csname tp@#2@#3#4\endcsname{#1}%
   \else
-    \expandonce#1%
+    #1%
   \fi}
 %    \end{macrocode}
 % This macro calculates number widths and prepares macros to be used

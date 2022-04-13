@@ -133,7 +133,7 @@
 
 \def\tp@hdg@create@labels#1{%
   \ifx\Hy@MakeCurrentHrefAuto\@undefined\else
-    \Hy@MakeCurrentHrefAuto{#1}%
+    \Hy@MakeCurrentHrefAuto{tp.#1}%
     \Hy@raisedlink{\hyper@anchorstart{\@currentHref}\hyper@anchorend}%
   \fi
   \expandafter\ifx\csname tp@heading@attr@label\endcsname\relax\else
@@ -186,7 +186,6 @@
   \tpProvideComp{tpTocSubtitle}{}{}{TocSubtitle}%
   \tpProvideComp{tpTocNumber}{}{}{TocNumber}%
   \tpProvideComp{tpTocAuthor}{}{}{TocAuthor}%
-  \let\tpTocLink\Hy@tocdestname%
   \tp@expand@l@contents{#3}{heading}{Toc}{Title}%%
   \tp@format@number{toc-}{Toc}{#1}%
 }
@@ -453,6 +452,7 @@
   \tpSetProperty{toc-margin-bottom}{\z@}% right margin of the whole entry
   \tpSetProperty{toc-margin-left}{auto}% left indent of the whole entry
   \tpSetProperty{toc-margin-right}{\@pnumwidth}% right margin of the whole entry
+  \tpSetProperty{toc-link}{none}% should toc entries be linked? values: none,title,page,all
   \tpSetProperty{toc-level}{}% override heading level for ToC, name!
   \tpSetProperty{toc-indent}{auto}% offset of the first line of the entry. auto: hang indent by max-number-width for the level
   \tpSetProperty{toc-before-entry}{% stuff before anything is output; used to setup margins, alignment, line-breaking rules, etc.
@@ -496,7 +496,6 @@
 \def\tpNewPar{\@ifnextchar[{\@tpnewpar}{\@tpnewpar[\the\tpnewparskip]}}%]
 \def\@tpnewpar[#1]{%
   \ifhmode\par\fi
-  \message{1: `#1'}%
   \vskip#1\relax
   \@afterheading
 }
