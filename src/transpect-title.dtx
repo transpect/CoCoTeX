@@ -88,12 +88,14 @@
   \csname tp@titlepage\endcsname
   \ifarticle
     \gdef\tpMaketitle{%
+      \csname tp@titlepage\endcsname
       \tpUseProperty{article-title}%
     }%
   \else
     \gdef\tpMaketitle{%
       \let\tp@cnt@grp\@empty
       \bgroup
+        \csname tp@titlepage\endcsname
         \tpUseProperty{before-titlepage}%
         \tpIfComp{Cover}{%
           \tpUseProperty{coverpage}%
