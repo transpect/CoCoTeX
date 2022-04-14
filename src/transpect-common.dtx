@@ -141,7 +141,6 @@
 \def\tpProvideComp#1#2#3#4{%
   \ltx@LocalExpandAfter\global\expandafter\let\csname tp@\tp@namespace @#4\endcsname\relax
   \expandafter\long\expandafter\def\csname #1\endcsname##1{%
-    %\message{^^J==> defining: tp@\tp@namespace @#4}%
     #2\expandafter\long\expandafter\def\csname tp@\tp@namespace @#4\endcsname{##1}\ignorespaces#3}%
 }
 \def\tpNamespace#1{\def\tp@namespace{#1}}

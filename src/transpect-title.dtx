@@ -46,8 +46,8 @@
   \tp@title@names{eval}%
   \tp@title@generic@eval
   \tp@title@fundings@eval
+  \tp@maketitle
   \tp@title@set@pdfmeta
-  \AtBeginDocument{\tp@maketitle}%
   \let\tp@namespace\@empty
 }
 %    \end{macrocode}
@@ -56,22 +56,28 @@
 % file, as well as meta data used later in the book.
 %    \begin{macrocode}
 \def\tp@title@set@pdfmeta{%
+  \def\tp@write@pdf@meta##1##2{\edef\x{\noexpand\hypersetup{##1={##2}}}\x}%
   \tp@title@process@bkt
-  \tp@title@process@bka
+  %\tp@title@process@bka
 }
 %    \end{macrocode}
 % Processes the title
 %    \begin{macrocode}
 \def\tp@title@process@bkt{%
-  \expandafter\title\expandafter{\tpUseComp{tpTitle}}%
-  \xdef\tpRunBookTitle{\tpUseProperty{run-book-title}}%
+  \expandafter\title\expandafter{\tpUseComp{Title}}%
+  \tp@write@pdf@meta{pdftitle}{\tpUseComp{Title}}%
+  \edef\tp@run@book@title{\tpUseProperty{run-book-title}}%
+  \expandafter\gdef\expandafter\tpRunBookTitle\expandafter{\tp@run@book@title}%
 }
 %    \end{macrocode}
 % Processes the names written into the meta data
 %    \begin{macrocode}
 \def\tp@title@process@bka{%
-  \xdef\tpRunBookName{\tpUseProperty{run-book-name}}%
+  \protected@edef\tpRunBookName{\unexpanded\expandafter{\csname tp@titlepage@run-book-name\endcsname}}%
+  \message{\meaning\tpRunBookName}\STOPP
+  %\expandafter\def\expandafter\tpRunBookName\expandafter{\tpUseProperty{run-book-name}}%
   \expandafter\author\expandafter{\tpRunBookName}%
+  %\tp@write@pdf@meta{pdfauthor}{\tpRunBookName}%
 }
 %    \end{macrocode}
 % \section{Intermediate Level Interfaces}
@@ -79,7 +85,6 @@
 % Collect the meta information and construct the tpMaketitle macro
 %    \begin{macrocode}
 \def\tp@maketitle{%
-  \tpNamespace{titlepage}%
   \csname tp@titlepage\endcsname
   \ifarticle
     \gdef\tpMaketitle{%
@@ -205,8 +210,7 @@
     \noexpand\bgroup
     \noexpand\tp@flt@cond
     \noexpand\def\noexpand\tp@cnt@grp{#1}}%
-  \expandafter\@tempcntb\csname #1-Cnt\endcsname
-  \tp@iterate{\@tempcnta}{\@ne}{\@tempcntb}{%
+  \tp@iterate{\@tempcnta}{\@ne}{\csname #1-Cnt\endcsname}{%
     \edef\@tempb{%
       %% internal counter for macro grabbing
       \noexpand\csname #1-Cnt\endcsname=\the\@tempcnta
