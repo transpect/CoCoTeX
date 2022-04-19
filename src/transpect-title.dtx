@@ -43,10 +43,10 @@
   \tp@title@names{comp}%
 }
 \def\endtpMeta{%
+  \tp@maketitle
   \tp@title@names{eval}%
   \tp@title@generic@eval
   \tp@title@fundings@eval
-  \tp@maketitle
   \tp@title@set@pdfmeta
   \let\tp@namespace\@empty
 }
@@ -58,7 +58,8 @@
 \def\tp@title@set@pdfmeta{%
   \def\tp@write@pdf@meta##1##2{\edef\x{\noexpand\hypersetup{##1={##2}}}\x}%
   \tp@title@process@bkt
-  %\tp@title@process@bka
+  \tp@title@process@bka
+  \tp@title@process@bkc
 }
 %    \end{macrocode}
 % Processes the title
@@ -73,11 +74,16 @@
 % Processes the names written into the meta data
 %    \begin{macrocode}
 \def\tp@title@process@bka{%
-  \protected@edef\tpRunBookName{\unexpanded\expandafter{\csname tp@titlepage@run-book-name\endcsname}}%
-  \message{\meaning\tpRunBookName}\STOPP
-  %\expandafter\def\expandafter\tpRunBookName\expandafter{\tpUseProperty{run-book-name}}%
+  \edef\tpRunBookName{\tpUseProperty{run-book-name}}%
   \expandafter\author\expandafter{\tpRunBookName}%
-  %\tp@write@pdf@meta{pdfauthor}{\tpRunBookName}%
+  \tp@write@pdf@meta{pdfauthor}{\tpRunBookName}%
+}
+%    \end{macrocode}
+% sets the metadata for the pdf creator
+%    \begin{macrocode}
+\def\tp@title@process@bkc{%
+  \tp@write@pdf@meta{pdfcreator}{\tpIfComp{PDFCreator}{\tpUseComp{PDFCreator}}{\tpUseComp{Publisher}\tpIfComp{PubPlace}{, \tpUseComp{PubPlace}}{}}}%
+  \tp@write@pdf@meta{pdfproducer}{\tpUseComp{PDFProducer}}%
 }
 %    \end{macrocode}
 % \section{Intermediate Level Interfaces}
@@ -203,27 +209,27 @@
     \fi
   }}
 %    \end{macrocode}
-% Iterates over the Components of sub-namespace \#1 and applies the property \#2 to each component. TODO: transfer to transpect-common
+% Iterates over the Components of sub-namespace \#1 and applies the
+% property \#2 to each component. The result is stored in
+% \lstinline{\tp@iterate@res}.  TODO: transfer to transpect-common
 %    \begin{macrocode}
 \newcount\tpCurCount
 \def\tp@iterate@cnts#1#2{%
-  \edef\tp@iterate@res{%
-    \noexpand\def\noexpand\tpTotalCount{\the\csname #1-Cnt\endcsname}%
-    \noexpand\bgroup
-    \noexpand\tp@flt@cond
-    \noexpand\def\noexpand\tp@cnt@grp{#1}}%
-  \tp@iterate{\@tempcnta}{\@ne}{\csname #1-Cnt\endcsname}{%
-    \edef\@tempb{%
-      %% internal counter for macro grabbing
-      \noexpand\csname #1-Cnt\endcsname=\the\@tempcnta
-      %% top-level counter for user interaction
-      \noexpand\tpCurCount=\the\@tempcnta
-      \noexpand\tpUseProperty{#2}}%
-    \expandafter\expandafter\expandafter\def
-    \expandafter\expandafter\expandafter\tp@iterate@res
-    \expandafter\expandafter\expandafter{\expandafter\tp@iterate@res\@tempb}%
-  }%
-  \expandafter\def\expandafter\tp@iterate@res\expandafter{\tp@iterate@res\noexpand\egroup}%
+  \begingroup
+    \global\let\tp@iterate@res\relax
+    \edef\tpTotalCount{\the\csname #1-Cnt\endcsname}%
+    \tp@iterate{\@tempcnta}{\@ne}{\tpTotalCount}{%
+      \bgroup
+        \tpToggleCountedCond
+        \def\tp@cnt@grp{#1}%
+        \csname #1-Cnt\endcsname=\the\@tempcnta
+        \tpCurCount=\the\@tempcnta
+        \protected@edef\@tempb{\csname tp@\tp@namespace @#2\endcsname}%
+        \def\@tempc{\csgappto{tp@iterate@res}}%
+        \expandafter\@tempc\expandafter{\@tempb}%
+      \egroup
+    }%
+  \endgroup
 }
 %    \end{macrocode}
 % Evaluator for the name lists
@@ -232,9 +238,9 @@
     \tpNamespace{titlepage}%
     \tp@eval@name@attrs{#1}%
     \tp@iterate@cnts{#1}{\csname tp@title@#1@meta@name\endcsname}%
-    \tpIfComp{#1MetaBlock}{}{\expandafter\csname tp#1MetaBlock\expandafter\endcsname\expandafter{\tp@iterate@res}}%
+    \tpIfComp{#1MetaBlock}{}{\csname tp#1MetaBlock\expandafter\endcsname\expandafter{\tp@iterate@res}}%
     \tp@iterate@cnts{#1}{\csname tp@title@#1@format@name\endcsname}%
-    \tpIfComp{#1NameList}{}{\expandafter\csname tp#1NameList\expandafter\endcsname\expandafter{\tp@iterate@res}}%
+    \tpIfComp{#1NameList}{}{\csname tp#1NameList\expandafter\endcsname\expandafter{\tp@iterate@res}}%
   }}%
 %    \end{macrocode}
 % Provides the Name Components
@@ -248,7 +254,11 @@
 % \subsection{Simple Component Declarations}
 % Shortcut for simple value components
 %    \begin{macrocode}
-\def\tp@title@macro#1{\tpProvideComp{tp#1}{\expandafter\global}{}{#1}}
+\def\tp@title@macro{\@ifnextchar[\@tp@title@macro{\@tp@title@macro[]}}%]
+\def\@tp@title@macro[#1]#2{%
+  \tpProvideComp{tp#2}{\expandafter\global}{}{#2}%
+  \if!#1!\else\csname tp#2\endcsname{#1}\fi%
+}
 %    \end{macrocode}
 % Declaration of simple value Components
 %    \begin{macrocode}
@@ -277,6 +287,8 @@
   \tp@title@macro{PubNote}%   Additional publisher notes
   \tp@title@macro{PubWeb}%    Publisher URL
   %% Pubication Meta
+  \tp@title@macro{PDFCreator}%   PDF creator for pdf metadata
+  \tp@title@macro[le-tex transpect]{PDFProducer}%   PDF producer for pdf metadata
   \tp@title@macro{Dedication}%   Dedication
   \tp@title@macro{Acknowledgements}%   Acknowledgements
   \tp@title@macro{Statement}%   Acknowledgements
@@ -494,12 +506,13 @@
   }%
   % Name Formats
   \tpSetProperty{name-meta-format}{%
-    \tpUseComp{FullName}:\space%
-    \tpUseComp{Bio}\par%
-    \tpUseProperty{counted-meta-sep}%
+    \tpIfComp{Bio}
+      {\tpUseComp{FullName}:\space%
+       \tpUseComp{Bio}\par%
+       \tpUseProperty{counted-meta-sep}}{}%
   }
   \tpSetProperty{name-format}{%
-    \tpIfComp{FullName}{}{\tpFullName{\tpUseComp{FirstName}\space\tpUseComp{SurName}}}%
+    \tpIfComp{FullName}{}{\tpSetComp{FullName}{\tpUseComp{FirstName}\space\tpUseComp{SurName}}}%
     \tpUseComp{FullName}%
     \tpUseProperty{counted-name-sep}%
   }

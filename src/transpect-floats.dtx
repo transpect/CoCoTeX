@@ -395,18 +395,6 @@
       {\expandafter\expandafter\expandafter\let\expandafter\csname tp@\tp@namespace @list-of-#2-\the\tpSubFloatCnt\expandafter\endcsname\csname tp@\tp@namespace @#2-\the\tpSubFloatCnt\endcsname}
       {\csname Listof#1\endcsname{}}}}
 
-
-%    \end{macrocode}
-% In order to account for sub-floats, we need to re-define some of the transpect-common Component conditionals:
-%    \begin{macrocode}
-\long\def\tp@flt@cond{%
-  \long\def\tpIfComp##1##2##3{%
-    \expandafter\let\expandafter\@tempa\csname tp@\tp@namespace @##1\endcsname\relax
-    \expandafter\expandafter\expandafter\ifx\@tempa\relax##3\else##2\fi}%
-  \long\def\tpIfCompEmpty##1##2##3{%
-    \long\def\@tempa{}%
-    \expandafter\let\expandafter\@tempb\csname tp@\tp@namespace @##1\endcsname\relax
-    \expandafter\expandafter\expandafter\ifx\@tempb\@tempa ##2\else ##3\fi}}
 %    \end{macrocode}
 % Faculity to create auto-numbered counters
 %    \begin{macrocode}
@@ -456,7 +444,7 @@
   \begingroup
     \tpNamespace{#4}%
     \tp@reset@defaults{#2}{#3}%
-    \tp@flt@cond
+    \tpToggleCountedCond
     \expandafter\tpCascadeProps\expandafter{#4}{float}%
     \tp@get@flt@attr{#1}{#2}%
     \tp@set@caption@comps
