@@ -48,7 +48,7 @@
 \newcount\tpSubFloatCnt       \tpSubFloatCnt=\z@\relax
 \newcount\tp@subfloat@row     \tp@subfloat@row\z@
 \newcount\tp@subfloat@col     \tp@subfloat@col\z@
-\newcount\tp@int@flt@cnt \tp@int@flt@cnt\z@
+\newcount\tp@int@flt@cnt      \tp@int@flt@cnt\z@
 
 \newdimen\tp@subflt@maxheight \tp@subflt@maxheight=\z@\relax
 \newdimen\tp@subflt@sep       \tp@subflt@sep=\fboxsep\relax
@@ -442,6 +442,7 @@
 \def\tp@float[#1]#2#3#4{%
   \par
   \begingroup
+    \global\advance\tp@int@flt@cnt\@ne
     \tpNamespace{#4}%
     \tp@reset@defaults{#2}{#3}%
     \tpToggleCountedCond
@@ -643,6 +644,12 @@
 \def\tp@make@outer@caption#1{%
   \def\@argi{#1}%
   \expandafter\ifx\csname tp@has@capt@#1\endcsname\@empty
+    \setbox\z@\vbox{%
+      \tpGobble
+      \tpSubFloatCnt\z@
+      \tp@make@caption{#1}{top}%
+    }%
+    \immediate\write\@auxout{\string\expandafter\string\gdef\string\csname\space htTab\the\tp@int@flt@cnt Cap#1\string\endcsname{\the\dimexpr \ht\z@+\dp\z@\relax}}%
     \bgroup
       \savenotes
       \nopagebreak
@@ -864,6 +871,9 @@
   \tp@reserve@tabular
   \ifx\tp@uses@htmltabs\relax
     \let\tp@addstyle\@empty
+    \expandafter\ifx\csname htTab\the\tp@int@flt@cnt Captop\endcsname\relax\else
+      \htInitSkip\csname htTab\the\tp@int@flt@cnt Captop\endcsname
+    \fi
     \ifx\tp@fps\@empty\else\def\tp@addstyle{;break-table:false;}\fi
     \edef\tp@tempa{margin-left:\tp@flt@marg@l\tp@addstyle}%
     \expandafter\htAddStyle\expandafter{\tp@tempa}%
@@ -1023,7 +1033,6 @@
 \def\tp@make@anchors{\@tempcnta\z@\tp@iterate{\@tempcnta}{\z@}{\tpSubFloatCnt}{\tp@make@anchor{\the\@tempcnta}}}
 \def\tp@make@anchor#1{%
   \bgroup
-    \global\advance\tp@int@flt@cnt\@ne
     \tpSubFloatCnt#1\relax
     \tpIfComp{Label}
       {\expandafter\let\expandafter\@currentlabel\csname tp@\tp@namespace @number-\the\tpSubFloatCnt\endcsname}
