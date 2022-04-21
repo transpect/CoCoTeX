@@ -57,6 +57,9 @@
 \newdimen\tp@total@flt@height \tp@total@flt@height=\textwidth\relax
 \newdimen\tp@total@flt@depth  \tp@total@flt@depth=\textwidth\relax
 
+\newdimen\tp@flt@sep@top      \tp@flt@sep@top=\z@\relax
+\newdimen\tp@flt@sep@bottom   \tp@flt@sep@bottom=\z@\relax
+
 \newdimen\tp@flt@marg@r       \tp@flt@marg@r=\z@\relax
 \newdimen\tp@flt@marg@l       \tp@flt@marg@l=\z@\relax
 \newdimen\tp@flt@marg@i       \tp@flt@marg@i=\z@\relax
@@ -210,26 +213,28 @@
   \fi
 }
 %    \end{macrocode}
-% depending on the float position, apply the top separator
+% depending on the float positions, determine the top and bottom skips
 %    \begin{macrocode}
-\def\tp@set@top@sep{%
+\def\tp@get@seps{%
   \ifx\tp@fps\@empty
-    \expandafter\addvspace\expandafter{\tpUseProperty{intext-skip-top}}%
+    \expandafter\tp@flt@sep@top\dimexpr\tpUseProperty{intext-skip-top}\relax%
   \else
-    \expandafter\addvspace\expandafter{\tpUseProperty{float-skip-top}}%
-  \fi}
-
-\def\tp@set@bot@sep{%
+    \expandafter\tp@flt@sep@top\dimexpr\tpUseProperty{float-skip-top}\relax%
+  \fi
   \expandafter\ifx\csname tp@\tp@captype @attr@orientation\endcsname\tp@str@landscape
   \else
     \ifx\tp@fps\@empty
-      \expandafter\addvspace\expandafter{\tpUseProperty{intext-skip-bottom}}%
+      \expandafter\tp@flt@sep@bottom\dimexpr\tpUseProperty{intext-skip-bottom}\relax%
     \else
-      \expandafter\addvspace\expandafter{\tpUseProperty{float-skip-bottom}}%
+      \expandafter\tp@flt@sep@bottom\dimexpr\tpUseProperty{float-skip-bottom}\relax%
     \fi
-  \fi}
-
-
+  \fi
+}
+%    \end{macrocode}
+% Hooks to apply top and bottom skips
+%    \begin{macrocode}
+\def\tp@set@top@sep{\addvspace{\tp@flt@sep@top}}
+\def\tp@set@bot@sep{\addvspace{\tp@flt@sep@bottom}}
 %    \end{macrocode}
 % Declarations for caption related Components in float environments.
 %    \begin{macrocode}
@@ -450,9 +455,10 @@
     \tp@get@flt@attr{#1}{#2}%
     \tp@set@caption@comps
     \tp@flt@set@hsize
+    \tp@get@seps
+    \tp@set@flt@pos
     \tpUseProperty{float-handler}%
     \tpUseProperty{before-float}%
-    \tp@set@flt@pos
     \ifx\tp@fps\@empty\else\savenotes\fi
 }
 
@@ -649,7 +655,7 @@
       \tpSubFloatCnt\z@
       \tp@make@caption{#1}{top}%
     }%
-    \immediate\write\@auxout{\string\expandafter\string\gdef\string\csname\space htTab\the\tp@int@flt@cnt Cap#1\string\endcsname{\the\dimexpr \ht\z@+\dp\z@\relax}}%
+    \immediate\write\@auxout{\string\expandafter\string\gdef\string\csname\space tpFloat\the\tp@int@flt@cnt Cap#1\string\endcsname{\the\dimexpr \ht\z@+\dp\z@\relax}}%
     \bgroup
       \savenotes
       \nopagebreak
@@ -871,8 +877,13 @@
   \tp@reserve@tabular
   \ifx\tp@uses@htmltabs\relax
     \let\tp@addstyle\@empty
-    \expandafter\ifx\csname htTab\the\tp@int@flt@cnt Captop\endcsname\relax\else
-      \htInitSkip\csname htTab\the\tp@int@flt@cnt Captop\endcsname
+    \expandafter\ifx\csname tpFloat\the\tp@int@flt@cnt Captop\endcsname\relax\else
+      \htInitSkip\csname tpFloat\the\tp@int@flt@cnt Captop\endcsname
+      \advance\htInitSkip\tp@flt@sep@top%
+    \fi
+    \expandafter\ifx\csname tpFloat\the\tp@int@flt@cnt Capbottom\endcsname\relax\else
+      \htAddToBottom\csname tpFloat\the\tp@int@flt@cnt Capbottom\endcsname
+      \advance\htAddToBottom\tp@flt@sep@bottom%
     \fi
     \ifx\tp@fps\@empty\else\def\tp@addstyle{;break-table:false;}\fi
     \edef\tp@tempa{margin-left:\tp@flt@marg@l\tp@addstyle}%
