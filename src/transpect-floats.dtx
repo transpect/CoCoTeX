@@ -169,7 +169,7 @@
   \global\tp@total@flt@depth=\dp\@currbox\relax%
 }}
 
-\def\tp@set@flt@pos{%
+\def\tp@set@flt@env{%
   \ifx\tp@fps\@empty
     \let\tp@b@float\relax
     \let\tp@e@float\relax
@@ -456,9 +456,9 @@
     \tp@set@caption@comps
     \tp@flt@set@hsize
     \tp@get@seps
-    \tp@set@flt@pos
     \tpUseProperty{float-handler}%
     \tpUseProperty{before-float}%
+    \tp@set@flt@env
     \ifx\tp@fps\@empty\else\savenotes\fi
 }
 
@@ -877,15 +877,18 @@
   \tp@reserve@tabular
   \ifx\tp@uses@htmltabs\relax
     \let\tp@addstyle\@empty
-    \expandafter\ifx\csname tpFloat\the\tp@int@flt@cnt Captop\endcsname\relax\else
-      \htInitSkip\csname tpFloat\the\tp@int@flt@cnt Captop\endcsname
-      \advance\htInitSkip\tp@flt@sep@top%
+    \ifx\tp@fps\@empty
+      \expandafter\ifx\csname tpFloat\the\tp@int@flt@cnt Captop\endcsname\relax\else
+        \htInitSkip\csname tpFloat\the\tp@int@flt@cnt Captop\endcsname
+        \advance\htInitSkip\tp@flt@sep@top%
+      \fi
+      \expandafter\ifx\csname tpFloat\the\tp@int@flt@cnt Capbottom\endcsname\relax\else
+        \htAddToBottom\csname tpFloat\the\tp@int@flt@cnt Capbottom\endcsname
+        \advance\htAddToBottom\tp@flt@sep@bottom%
+      \fi
+    \else
+      \def\tp@addstyle{;break-table:false;}%
     \fi
-    \expandafter\ifx\csname tpFloat\the\tp@int@flt@cnt Capbottom\endcsname\relax\else
-      \htAddToBottom\csname tpFloat\the\tp@int@flt@cnt Capbottom\endcsname
-      \advance\htAddToBottom\tp@flt@sep@bottom%
-    \fi
-    \ifx\tp@fps\@empty\else\def\tp@addstyle{;break-table:false;}\fi
     \edef\tp@tempa{margin-left:\tp@flt@marg@l\tp@addstyle}%
     \expandafter\htAddStyle\expandafter{\tp@tempa}%
     \global\setbox\htTableBox\box\voidb@x
