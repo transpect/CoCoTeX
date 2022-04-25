@@ -121,7 +121,7 @@
    }%
 }{\endlist
 \immediate\write\@auxout{\string\g@addto@macro\string\tp@getMaxLabelWidth{\string\ifnum\string\the\tp@descriptionlist=\the\tp@descriptionlist\relax\string\global\string\tp@maxLabelWidth=\the\tp@maxLabelWidth\string\fi}}%
-\global\advance\tp@descriptionlist by 1
+\global\advance\tp@descriptionlist by \@ne
 \gdef\@doendpe{%
     \@endpetrue
     \everypar{{\setbox\z@\lastbox}\everypar{}\@endpefalse}%
@@ -142,7 +142,7 @@
 % Convert a number to a lowercase letter.
 \def\tp@numToLCLetter#1{%
   \count255=\the\lccode`a%
-  \advance\count255 by -1%
+  \advance\count255 by -\@ne%
   \advance\count255 by #1%
   \char\count255%
 }
@@ -150,7 +150,7 @@
 % Convert a number to an uppercase letter.
 \def\tp@numToUCLetter#1{%
   \count255=\uccode`A%
-  \advance\count255 by -1%
+  \advance\count255 by -\@ne%
   \advance\count255 by #1%
   \char\count255%
 }
@@ -160,7 +160,7 @@
   \tpSetProperty{before-skip}{\z@}
   \tpSetProperty{item-indent}{0\p@}
   \tpSetProperty{label-char}{} % Only applies with label-type »char« (or empty).
-  \tpSetProperty{label-prefix-delimiter}{} % The character/string between the prefix and the label. Usually used for numbered lists.
+  \tpSetProperty{label-prefix-delimiter}{} % The character/string between the prefix and the label. Used for numbered lists.
   \tpSetProperty{label-sep}{0\p@}
   \tpSetProperty{label-suffix}{}
   \tpSetProperty{label-type}{char} % Label types: char (use label-char; default), number, Alpha, alpha, Roman, roman.
@@ -232,7 +232,7 @@
   \tpCascadeProps{#2}{list} % Load the properties.
   % If the list has the keyword »inherit« and is enumerated, set its prefix according to the latest item label in the parent list.
   \tp@ifstring{#1}{inherit}%
-    \tpIfPropVal{label-type}{char}{}{\global\edef\tp@inheritedPrefixAbove{\csname tp@inheritablePrefix\the\numexpr\the\tp@currListDepth-1\relax \endcsname}}%
+    \tpIfPropVal{label-type}{char}{}{\gdef\tp@inheritedPrefixAbove{\csname tp@inheritablePrefix\the\numexpr\the\tp@currListDepth-1\relax \endcsname}}%
   \fi
   
   \vskip\tpUseProperty{before-skip}
@@ -282,14 +282,12 @@
         \tpSetProperty{label-char}{\tp@convertNumber{\the\csname tp@itemNumber\the\tp@currListDepth\endcsname}}%
       }
       \ifx\empty##1\empty%
-        % Has to be set again to get the correct prefixes after nested list has ended.
-        \def\tp@inheritedPrefixAbove{\csname tp@inheritablePrefix\the\numexpr\the\tp@currListDepth-1\relax \endcsname}%
         % Checking this condition is not necessary by all means, but prevents inheriting and accumulating characters if »inherit« option is set in the TeX document.
         \tpIfPropVal{label-type}{char}{}{%
           \global\expandafter\edef\csname tp@inheritablePrefix\the\tp@currListDepth\endcsname{\tp@inheritedPrefixAbove\tpUseProperty{label-prefix-delimiter}\tpUseProperty{label-char}}%
         }
+        % Measure the actual full label width.
         \hbox to \tpUseProperty{label-width}{\tp@inheritedPrefixAbove\tpUseProperty{label-prefix-delimiter}\tpUseProperty{label-char}\tpUseProperty{label-suffix}\hss}%
-        % Calculate the actual full label width, define a macro for this width, and write it to the aux file.
         \setbox\tp@labelbox = \hbox{\tp@inheritedPrefixAbove\tpUseProperty{label-prefix-delimiter}\tpUseProperty{label-char}\tpUseProperty{label-suffix}}%
       \else
         \hbox to \tpUseProperty{label-width}{##1\hss}%
@@ -307,7 +305,7 @@
         \fi
       \fi
     }%
-  }%  
+  }%
 }
 
 \def\tp@list@load@props{\csname tp@list@\tp@list@name @properties\endcsname}
