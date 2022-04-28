@@ -47,7 +47,7 @@
   \tp@title@names{eval}%
   \tp@title@generic@eval
   \tp@title@fundings@eval
-  %\tp@title@set@pdfmeta
+  \tp@title@set@pdfmeta
   \let\tp@namespace\@empty
 }
 %    \end{macrocode}
@@ -57,9 +57,9 @@
 %    \begin{macrocode}
 \def\tp@title@set@pdfmeta{%
   \def\tp@write@pdf@meta##1##2{\protected\def\@tempa{##2}\edef\x{\noexpand\hypersetup{##1={\expandonce{\@tempa}}}}\x}%
-  %\tp@title@process@bkt
-  %\tp@title@process@bka
-  %\tp@title@process@bkc
+  \tp@title@process@bkt
+  \tp@title@process@bka
+  \tp@title@process@bkc
 }
 %    \end{macrocode}
 % Processes the title
@@ -151,9 +151,9 @@
   }}
 \def\tp@title@generic@eval{{%
   \def\tp@namespace{titlepage}%
-  \tp@iterate@cnts{GenericMeta}{generic-meta-format}%
-  \tpIfComp{GenericMetaBlock}{}{\expandafter\csname tpGenericMetaBlock\expandafter\endcsname\expandafter{\tp@iterate@res}}%
-  %\tp@title@apply@cnt{GenericMeta}{generic-meta-format}{GenericMetaBlock}
+  %\tp@iterate@cnts{GenericMeta}{generic-meta-format}%
+  %\tpIfComp{GenericMetaBlock}{}{\expandafter\csname tpGenericMetaBlock\expandafter\endcsname\expandafter{\tp@iterate@res}}%
+  \tp@compose@cnt{GenericMeta}{generic-meta-format}{GenericMetaBlock}
 }}
 %    \end{macrocode}
 %
@@ -171,9 +171,9 @@
 }
 \def\tp@title@fundings@eval{{%
     \def\tp@namespace{titlepage}%
-    \tp@iterate@cnts{Funding}{fund-format}%
-    \tpIfComp{FundingBlock}{}{\expandafter\csname tpFundingBlock\expandafter\endcsname\expandafter{\tp@iterate@res}}%
-    %\tp@title@apply@cnt{Funding}{fund-format}{FundingBlock}%
+    %\tp@iterate@cnts{Funding}{fund-format}%
+    %\tpIfComp{FundingBlock}{}{\expandafter\csname tpFundingBlock\expandafter\endcsname\expandafter{\tp@iterate@res}}%
+    \tp@compose@cnt{Funding}{fund-format}{FundingBlock}%
 }}
 %    \end{macrocode}
 % \subsection{Name lists}
@@ -211,86 +211,67 @@
     \fi
   }}
 %    \end{macrocode}
-% Iterates over the Components of sub-namespace \#1 and applies the
-% property \#2 to each component. The result is stored in
-% \lstinline{\tp@iterate@res}.  TODO: transfer to transpect-common
+% The following two macros iterate over the Components of
+% sub-namespace \#1 and apply each component to the property \#2. The
+% result is stored in Component \#3 (without the
+% \lstinline{tp}-prefix!), unless that Component is already set.
+%
+% While the first macro only writes the property \textit{definition}
+% into the component, the second fully expands the macros inside the
+% property and stores the result in Component \#3.
+%
+% Use the former to print and the latter to further process the
+% respective results.
+%
+% TODO: transfer to transpect-common
 %    \begin{macrocode}
-
- % \def\tp@title@apply@cnt#1#2#3{%
- %  \tpIfComp{#1}{}{%
- %    \def\tp@namespace{titlepage}%
- %    \begingroup
- %      \global\let\tp@iterate@res\relax
- %      \def\tp@add@to@iterate##1{%
- %        \expandafter\ifx\csname tp@\tp@namespace @##1\endcsname\relax\else
- %          \edef\@tempb{\csname tp@\tp@namespace @##1\endcsname}%
- %          \def\@tempc{\csgappto{tp@iterate@res}}%
- %          \expandafter\@tempc\expandafter{\@tempb}%
- %        \fi
- %      }%
- %      \tp@add@to@iterate{#2-prefix}%
- %      \edef\tpTotalCount{\the\csname #1-Cnt\endcsname}%
- %      \tp@iterate{\@tempcnta}{\@ne}{\tpTotalCount}{%
- %        \bgroup
- %          \tpToggleCountedCond
- %          \csname #1-Cnt\endcsname=\the\@tempcnta
- %          \def\tp@cnt@grp{#1}%
- %          \protected@edef\@tempb{%
- %            \begingroup
- %              \noexpand\csname #1-Cnt\endcsname=\the\@tempcnta\relax
- %              \noexpand\tpCurCount=\the\@tempcnta\relax%
- %            \csname tp@\tp@namespace @#2\endcsname
- %            \endgroup%
- %          }%
- %          \def\@tempc{\csgappto{tp@iterate@res}}%
- %          \expandafter\@tempc\expandafter{\@tempb}%
- %        \egroup
- %      }%
- %      \tp@add@to@iterate{#2-suffix}%
- %    \endgroup
- %    \ifx\tp@iterate@res\relax\else\csname tp#3\expandafter\endcsname\expandafter{\tp@iterate@res}\fi
- %  }}
-
-
 \newcount\tpCurCount
-\def\tp@iterate@cnts#1#2{%
-  \edef\tp@iterate@res{%
-    \noexpand\def\noexpand\tpTotalCount{\the\csname #1-Cnt\endcsname}%
-    \noexpand\bgroup
-    \noexpand\tpToggleCountedCond
-    \noexpand\def\noexpand\tp@cnt@grp{#1}}%
-  \expandafter\@tempcntb\csname #1-Cnt\endcsname
-  \tp@iterate{\@tempcnta}{\@ne}{\@tempcntb}{%
-    \edef\@tempb{%
-      %% internal counter for macro grabbing
-      \noexpand\csname #1-Cnt\endcsname=\the\@tempcnta
-      %% top-level counter for user interaction
-      \noexpand\tpCurCount=\the\@tempcnta
-      \noexpand\tpUseProperty{#2}}%
-    \expandafter\expandafter\expandafter\def
-    \expandafter\expandafter\expandafter\tp@iterate@res
-    \expandafter\expandafter\expandafter{\expandafter\tp@iterate@res\@tempb}%
-  }%
-  \expandafter\def\expandafter\tp@iterate@res\expandafter{\tp@iterate@res\noexpand\egroup}%
+\def\tp@compose@cnt#1#2#3{%
+  \tpIfComp{#3}{}
+    {\edef\tp@iterate@res{%
+       \noexpand\def\noexpand\tpTotalCount{\the\csname #1-Cnt\endcsname}%
+       \noexpand\bgroup
+         \noexpand\tpToggleCountedCond
+         \noexpand\def\noexpand\tp@cnt@grp{#1}}%
+       \expandafter\@tempcntb\csname #1-Cnt\endcsname
+       \tp@iterate{\@tempcnta}{\@ne}{\@tempcntb}{%
+         \edef\@tempb{%
+           %% internal counter for macro grabbing
+           \noexpand\csname #1-Cnt\endcsname=\the\@tempcnta
+           %% top-level counter for user interaction
+           \noexpand\tpCurCount=\the\@tempcnta
+           \noexpand\tpUseProperty{#2}}%
+         \expandafter\expandafter\expandafter\def
+         \expandafter\expandafter\expandafter\tp@iterate@res
+         \expandafter\expandafter\expandafter{\expandafter\tp@iterate@res\@tempb}%
+       }%
+       \expandafter\def\expandafter\tp@iterate@res\expandafter{\tp@iterate@res\noexpand\egroup}%
+     \expandafter\csname tp#3\expandafter\endcsname\expandafter{\tp@iterate@res}}%
 }
-
- % \def\tp@iterate@cnts#1#2{%
- %   \begingroup
- %     \global\let\tp@iterate@res\relax
- %     \edef\tpTotalCount{\the\csname #1-Cnt\endcsname}%
- %     \tp@iterate{\@tempcnta}{\@ne}{\tpTotalCount}{%
- %       \bgroup
- %         \tpToggleCountedCond
- %         \def\tp@cnt@grp{#1}%
- %         \csname #1-Cnt\endcsname=\the\@tempcnta
- %         \tpCurCount=\the\@tempcnta
- %         \protected@edef\@tempb{\csname tp@\tp@namespace @#2\endcsname}%
- %         \def\@tempc{\csgappto{tp@iterate@res}}%
- %         \expandafter\@tempc\expandafter{\@tempb}%
- %       \egroup
- %     }%
- %   \endgroup
- % }
+%    \end{macrocode}
+% This is an alternative version of above's macro and fully expands
+% the property before it is stored inside the Component \#3.
+%    \begin{macrocode}
+\def\tp@apply@cnts#1#2#3{%
+  \tpIfComp{#3}{}
+    {%\begingroup
+       \global\let\tp@iterate@res\relax
+       \edef\tpTotalCount{\the\csname #1-Cnt\endcsname}%
+       \tp@iterate{\@tempcnta}{\@ne}{\tpTotalCount}{%
+         \bgroup
+           \tpToggleCountedCond
+           \def\tp@cnt@grp{#1}%
+           \csname #1-Cnt\endcsname=\the\@tempcnta
+           \tpCurCount=\the\@tempcnta
+           \protected@edef\@tempb{\csname tp@\tp@namespace @#2\endcsname}%
+           \def\@tempc{\csgappto{tp@iterate@res}}%
+           \expandafter\@tempc\expandafter{\@tempb}%
+         \egroup
+       }%
+     %\endgroup
+     \expandafter\csname tp#3\expandafter\endcsname\expandafter{\tp@iterate@res}%
+   }%
+}
 
 %    \end{macrocode}
 % Evaluator for the name lists
@@ -298,41 +279,22 @@
 \def\tp@title@name@eval#1#2{{%
     \tpNamespace{titlepage}%
     \tp@eval@name@attrs{#1}%
-    \tp@iterate@cnts{#1}{\csname tp@title@#1@meta@name\endcsname}%
-    \tpIfComp{#1MetaBlock}{}{\expandafter\csname tp#1MetaBlock\expandafter\endcsname\expandafter{\tp@iterate@res}}%
-    \tp@iterate@cnts{#1}{\csname tp@title@#1@format@name\endcsname}%
-    \tpIfComp{#1NameList}{}{\expandafter\csname tp#1NameList\expandafter\endcsname\expandafter{\tp@iterate@res}}%
+    %\tp@iterate@cnts{#1}{\csname tp@title@#1@meta@name\endcsname}%
+    %\tpIfComp{#1MetaBlock}{}{\expandafter\csname tp#1MetaBlock\expandafter\endcsname\expandafter{\tp@iterate@res}}%
+    \tp@compose@cnt{#1}{\csname tp@title@#1@meta@name\endcsname}{#1MetaBlock}
+    \tp@apply@cnts{#1}{\csname tp@title@#1@format@name\endcsname}{#1NameList}%
     \tp@create@editor@string{#1}%
   }}%
+
 \def\tp@create@editor@string#1{%
   \def\@tempa{Author}\def\@argi{#1}%
   \ifx\@tempa\@argi\else
-    \tpIfComp{#1String}{}{%
-      \csname tp#1String\endcsname{%
-        \tpUseComp{#1NameList}%
-        \tpUseProperty{editor-suffix}%
-      }%
+    \expandafter\xdef\csname tp@\tp@namespace @#1NameList\endcsname{%
+      \tpUseComp{#1NameList}%
+      \tpUseProperty{editor-suffix}%
     }%
   \fi
 }%
-
- % \def\tp@title@name@eval#1#2{{%
- %    \tpNamespace{titlepage}%
- %    \tp@eval@name@attrs{#1}%
- %    \tp@iterate@cnts{#1}{\csname tp@title@#1@meta@name\endcsname}%
- %    \tpIfComp{#1MetaBlock}{}{\csname tp#1MetaBlock\expandafter\endcsname\expandafter{\tp@iterate@res}}%
- %    \tp@iterate@cnts{#1}{\csname tp@title@#1@format@name\endcsname}%
- %    \tpIfComp{#1NameList}{}{\csname tp#1NameList\expandafter\endcsname\expandafter{\tp@iterate@res}}%
- %  }}%
-
- % \def\tp@title@name@eval#1#2{{%
- %    \tpNamespace{titlepage}%
- %    \tp@eval@name@attrs{#1}%
- %    \tp@title@apply@cnt{#1}{\csname tp@title@#1@meta@name\endcsname}{#1MetaBlock}%
- %    \tp@title@apply@cnt{#1}{\csname tp@title@#1@format@name\endcsname}{#1NameList}%
- %  }}%
-
-
 
 %    \end{macrocode}
 % Provides the Name Components
@@ -340,7 +302,7 @@
 \def\tp@title@names#1{%
   \csname tp@title@name@#1\endcsname{Author}{author}%
   \csname tp@title@name@#1\endcsname{Editor}{editor}%
-  \csname tp@title@name@#1\endcsname{SeriesEditor}{serieseditor}%
+  \csname tp@title@name@#1\endcsname{SeriesEditor}{series-editor}%
 }
 %    \end{macrocode}
 % \subsection{Simple Component Declarations}
@@ -510,7 +472,7 @@
   }%
   \tpSetProperty{titlepage-i}{%
     \ifcollection
-      \tpUseProperty{EditorString}%
+      \tpUseProperty{editor-string}%
     \else
       \tpUseComp{AuthorNameList}%
     \fi%
@@ -526,7 +488,7 @@
   }%
   \tpSetProperty{titlepage-iii}{%
     \ifcollection
-      \tpUseProperty{EditorString}%
+      \tpUseProperty{editor-string}%
     \else
       \tpUseComp{AuthorNameList}%
     \fi%
@@ -612,8 +574,8 @@
   \tpSetProperty{author-meta-format}{\tpUseProperty{name-meta-format}}% Override for single author meta info
   \tpSetProperty{editor-format}{\tpUseProperty{name-format}}% Override for single editor names
   \tpSetProperty{editor-meta-format}{\tpUseProperty{name-meta-format}}% Override for single editor meta info
-  \tpSetProperty{serieseditor-format}{\tpUseProperty{name-format}}% Override for single series editor names
-  \tpSetProperty{serieseditor-meta-format}{\tpUseProperty{name-meta-format}}% Override for single series editor meta info
+  \tpSetProperty{series-editor-format}{\tpUseProperty{name-format}}% Override for single series editor names
+  \tpSetProperty{series-editor-meta-format}{\tpUseProperty{name-meta-format}}% Override for single series editor meta info
   % name Separators
   \tpSetProperty{editor-suffix-sgl}{\space(Ed.)}%
   \tpSetProperty{editor-suffix-pl}{\space(Eds.)}%
@@ -640,12 +602,6 @@
         \fi
       \fi
     \fi
-  }%
-  \tpSetProperty{EditorString}{%
-    \tpUseComp{EditorNameList}\tpUseProperty{editor-suffix}%
-  }%
-  \tpSetProperty{SeriesEditorString}{%
-    \tpUseComp{SeriesEditorNameList}%
   }%
   % Bio
   \tpSetProperty{bio-block}{%
