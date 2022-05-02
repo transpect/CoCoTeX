@@ -289,10 +289,12 @@
 \def\tp@create@editor@string#1{%
   \def\@tempa{Author}\def\@argi{#1}%
   \ifx\@tempa\@argi\else
-    \expandafter\xdef\csname tp@\tp@namespace @#1NameList\endcsname{%
-      \tpUseComp{#1NameList}%
-      \tpUseProperty{editor-suffix}%
-    }%
+    \expandafter\ifx\csname tp@\tp@namespace @#1NameList\endcsname\relax\else
+      \expandafter\xdef\csname tp@\tp@namespace @#1NameList\endcsname{%
+        \tpUseComp{#1NameList}%
+        \tpUseProperty{editor-suffix}%
+      }%
+    \fi
   \fi
 }%
 
