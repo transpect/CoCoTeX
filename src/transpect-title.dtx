@@ -167,12 +167,11 @@
   \tp@title@counted@comp{Funding}{%
     \tp@prov@num@comp{FundName}{name}%
     \tp@prov@num@comp{FundLogo}{logo}%
+    \tp@prov@num@comp{FundID}{id}%
   }%
 }
 \def\tp@title@fundings@eval{{%
     \def\tp@namespace{titlepage}%
-    %\tp@iterate@cnts{Funding}{fund-format}%
-    %\tpIfComp{FundingBlock}{}{\expandafter\csname tpFundingBlock\expandafter\endcsname\expandafter{\tp@iterate@res}}%
     \tp@compose@cnt{Funding}{fund-format}{FundingBlock}%
 }}
 %    \end{macrocode}
@@ -191,6 +190,8 @@
     \tp@prov@num@comp{SurName}{sur-name}%
     \tp@prov@num@comp{FirstName}{first-name}%
     \tp@prov@num@comp{MidName}{mid-name}%
+    \tp@prov@num@comp{PersonPrefix}{person-prefix}%
+    \tp@prov@num@comp{PersonID}{person-id}%
     \tp@prov@num@comp{AffilID}{affil-id}%
     \tp@prov@num@comp{Mail}{mail}%
     \tp@prov@num@comp{Bio}{bio}%
@@ -354,9 +355,11 @@
   \tp@title@macro{Year}%       Publication Year
   \tp@title@macro{ISBN}%       ISBN
   \tp@title@macro{ISSN}%       ISSN
+  \tp@title@macro{EISSN}%      Ebook-ISSN
   \tp@title@macro{EpubPreText}%   Text between ISBN and eISBN
   \tp@title@macro{EISBN}%      Ebook-ISBN
   \tp@title@macro{EpubISBN}%  Epub-ISBN
+  \tp@title@macro{ElibPDF}%   ???
   \tp@title@macro{DOI}%        DOI
   %% Funding
   \tp@title@macro{FundingPreText}% Text before the Funding list
