@@ -161,7 +161,7 @@
   \tpSetProperty{item-indent}{0\p@}
   \tpSetProperty{label-char}{} % Only applies with label-type »char« (or empty).
   \tpSetProperty{label-prefix-delimiter}{} % The character/string between the prefix and the label. Used for numbered lists.
-  \tpSetProperty{label-sep}{0\p@}
+  \tpSetProperty{label-sep}{5mm}
   \tpSetProperty{label-suffix}{}
   \tpSetProperty{label-type}{char} % Label types: char (use label-char; default), number, Alpha, alpha, Roman, roman.
   \tpSetProperty{label-width}{0\p@} % Label width is internally increased to width of label character.
@@ -184,7 +184,7 @@
   }
 }
 
-\def\tpList{\@ifnextchar [{\@list}{\@list[]}}%]
+\def\tpList{\@ifnextchar [{\tp@list}{\tp@list[]}}%]
 
 \def\endtpList{%
   \endlist%
@@ -215,7 +215,7 @@
 
 \global\newcount\tp@listNumber \global\tp@listNumber=-\@ne
 
-\def\@list[#1]#2{%
+\def\tp@list[#1]#2{%
   % Increment the list depth and, in case the depth is zero, i.e. a completely new list and no sublist starts, the list number.
   \global\advance\tp@currListDepth by \@ne%
   \ifnum\tp@currListDepth = \z@
@@ -307,6 +307,8 @@
     }%
   }%
 }
+
+\tpDeclareList{default}{}
 
 \def\tp@list@load@props{\csname tp@list@\tp@list@name @properties\endcsname}
 %    \end{macrocode}
