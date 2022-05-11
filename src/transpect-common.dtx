@@ -501,6 +501,11 @@
       \immediate\write\@auxout{\string\expandafter\string\gdef\string\csname\space tp-#1-#2\string\endcsname{\csname tp-#1-#2\endcsname}}%
     \fi}}
 %    \end{macrocode}
+% This is a general line break macro intended to be re-defined if
+% necessary without touching LaTeX's kernel macros.
+%    \begin{macrocode}
+\DeclareRobustCommand{\tpBreak}{\hfill\break}
+%    \end{macrocode}
 %
 % \subsection{Content lists}
 %
