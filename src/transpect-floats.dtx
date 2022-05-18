@@ -290,6 +290,7 @@
 % environment name, \lstinline{#3}: caption name, \lstinline{#4}:
 % list-of, \lstinline{#5} parameters.
 %    \begin{macrocode}
+\tpDeclareContainer{float}{}
 \def\tpDeclareFloat{\@ifnextchar[{\@tpDeclareFloat}{\@tpDeclareFloat[]}}%]
 \def\@tpDeclareFloat[#1]#2#3#4#5{%
   \def\tp@float@name{#2}%

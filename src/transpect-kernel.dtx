@@ -1,0 +1,96 @@
+% \chapter{transpect-kernel.dtx}
+% This file provides the object-oriented interfaces for all other
+% transpect-tex modules.
+%    \begin{macrocode}[gobble=1]
+%<*kernel>
+%    \end{macrocode}
+%
+% \section*{Hard dependencies}
+%    \begin{macrocode}
+\RequirePackage{etoolbox}
+%    \end{macrocode}
+% \section{Exception handlers}
+%    \begin{macrocode}
+
+\gdef\tpPackageError#1#2#3#4{%
+   \GenericError{%
+      (#1)\@spaces\@spaces\@spaces\@spaces
+   }{%
+      [#1] #2 Error: #3%
+   }{}{#4}%
+}
+
+%    \end{macrocode}
+% \section{Containers}
+%    \begin{macrocode}
+
+%    \end{macrocode}
+%
+% This is the constructor for new Containers
+% \begin{description}
+% \item[\#1] Parent Container (optional)
+% \item[\#2] Container name
+% \item[\#3] Body
+% \end{description}
+%    \begin{macrocode}
+
+\long\def\tpDeclareContainer{\@ifnextchar[{\tp@declare@container}{\tp@declare@container[]}}%]
+\long\def\tp@declare@container[#1]#2#3{%
+  \if!#1!\else
+    \expandafter\ifx\csname tp@container@body@#1\endcsname\relax
+      \tpPackageError{transpect-kernel.sty}{Class}
+        {Parent Container `#1' undeclared}
+        {You tried to make a Container named `#2'\MessageBreak an ascendent of a Container named `#1',\MessageBreak but a Container of name `#1' does not exist.}%
+    \else
+      \csname tp@container@body@#1\endcsname
+    \fi
+  \fi
+  \tp@setter@getter{Components}{#2}%
+  \tp@setter@getter{Properties}{#2}%
+  \expandafter\long\expandafter\def\csname tp@container@body@#2\endcsname{%
+    \tpSetContName{#2}%
+    #3}%
+  \csname tp@container@body@#2\endcsname
+}
+
+\def\tp@setter@getter#1#2{%
+  \expandafter\def\csname tpSet#1\endcsname##1{%
+    \expandafter\def\csname tp@the@#2@#1\endcsname{##1}%
+  }%
+  \expandafter\expandafter\expandafter\let\csname tpGet#1\expandafter\endcsname\csname tp@the@#2@#1\endcsname
+}
+
+\def\tpSetContName#1{%
+  \def\tp@container@name{#1}%
+  \let\tp@namespace\tp@container@name
+}
+
+%    \end{macrocode}
+% \section{Helper macros}
+%    \begin{macrocode}
+
+
+%    \end{macrocode}
+% \subsection{Iterators}
+% This macro traverses in \#1-th steps (optional, defaults to $+1$)
+% through counter \#2 start at number \#3 until and including number
+% \#4 and do at every loop \#5 (from \lstinline{forloop.sty}):
+%    \begin{macrocode}
+\long\def\tp@iterate{\@ifnextchar[{\@tp@iterate}{\@tp@iterate[\@ne]}}%]
+\long\def\@tp@iterate[#1]#2#3#4#5{%
+  \advance#2 by #1\relax
+  #2=#3\relax%
+  \expandafter\ifnum#2>#4\relax%
+  \else
+    #5%
+    \tp@iterate[#1]{#2}{\the#2}{#4}{#5}%
+  \fi}%
+%    \end{macrocode}
+% \section{Legacy Functions}
+%    \begin{macrocode}
+\def\tpNamespace#1{\tpSetContName{#1}}
+\let\tp@namespace\tp@container@name
+%    \end{macrocode}
+%    \begin{macrocode}[gobble=1]
+%</kernel>
+%    \end{macrocode}

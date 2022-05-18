@@ -32,6 +32,10 @@
 % \section{Common low level macros}
 % Contains common macros used in the transpect-tex modules and that
 % are intended for macro and stylesheet programming.
+%    \begin{macrocode}
+\RequirePackage{transpect-kernel}
+%    \end{macrocode}
+%
 % \subsection{Common Variables}
 %    \begin{macrocode}
 %
@@ -78,7 +82,6 @@
 \def\CalcRatio#1#2{\strip@pt\dimexpr\number\numexpr\number\dimexpr#1\relax*65536/\number\dimexpr#2\relax\relax sp}
 \newcount\tpModulo
 \def\CalcModulo#1#2{\tpModulo=\numexpr#1-(#1/#2)*#2\relax}
-
 %    \end{macrocode}
 % Some temporary boxes that won't interfere with LaTeX's temporary
 % boxes.
@@ -101,23 +104,11 @@
   \let\label\@gobble
 }%
 %    \end{macrocode}
-% traverse step-wise through counter \#1, start at number \#2 until and including number \#3 and do at every loop \#4 (from \lstinline{forloop.sty}):
-%    \begin{macrocode}
-\long\def\tp@iterate#1#2#3#4{%
-  \advance#1\@ne\relax
-  #1=#2\relax%
-  \expandafter\ifnum#1>#3\relax%
-  \else
-    #4%
-    \tp@iterate{#1}{\the#1}{#3}{#4}%
-  \fi}%
-%    \end{macrocode}
 %% \section{Hooks}
 %% In this part we provide the facility to utilize Hooks to patch code
 %% into different parts of the package depending on options and loaded
 %% packages.
 %    \begin{macrocode}
-\RequirePackage{etoolbox}
 \def\tpDeclareHook#1{\expandafter\global\expandafter\let\csname tp@hook@\tp@namespace @#1\endcsname\@empty}
 \def\tpAddToHook{\@ifnextchar [{\tp@add@to@hook}{\tp@add@to@hook[\tp@namespace]}}%]
 \def\tp@add@to@hook[#1]#2#3{%
@@ -143,7 +134,6 @@
   \expandafter\long\expandafter\def\csname #1\endcsname##1{%
     #2\expandafter\long\expandafter\def\csname tp@\tp@namespace @#4\endcsname{##1}\ignorespaces#3}%
 }
-\def\tpNamespace#1{\def\tp@namespace{#1}}
 %    \end{macrocode}
 % This macro registers the actual, counter dependent Components. \#1
 % is the overt name of the Component, \#2 is the internal name of the
