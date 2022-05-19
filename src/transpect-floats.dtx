@@ -293,7 +293,6 @@
 \tpDeclareContainer{float}{}
 \def\tpDeclareFloat{\@ifnextchar[{\@tpDeclareFloat}{\@tpDeclareFloat[]}}%]
 \def\@tpDeclareFloat[#1]#2#3#4#5{%
-  \def\tp@float@name{#2}%
   \expandafter\ifx\csname #2\endcsname\relax
     \PackageInfo{transpect}{Declaring #2 environment}%
     \newenvironment{#2}[1][]{\tp@float[##1]{#3}{#4}{#2}}{\endtp@float}%
