@@ -20,8 +20,7 @@
 %    \end{macrocode}
 % \section{Exception handlers}
 %    \begin{macrocode}
-
-\def\tpKernelDebugMsg#1{\if@tp@debug\message{[tp Kernel Debug]\space\space#1}\fi}
+\def\tpKernelDebugMsg#1{\if@tp@debug\message{[tp Kernel Debug]\space\space#1^^J}\fi}
 \def\tpPackageError#1#2#3#4{%
    \GenericError{%
       (#1)\@spaces\@spaces\@spaces\@spaces
@@ -46,12 +45,24 @@
 \long\def\tpDeclareContainer#1#2{%
   \@namedef{tp@container@#1}{}%
   \begingroup
-    \def\tpInherit ##1 from ##2;{%
-      \@tp@inherit{##1}{##2}{#1}%
+    \def\tpInherit ##1 from ##2;{\@tp@inherit{##1}{##2}{#1}}%
+    \def\tpDeclareEnv##1##2{\@namegdef{#1}{\def\tp@namespace{#1}##1}\@namegdef{end#1}{##2}}%
+    \def\tpDeclareType##1##2{%
+      \expandafter\ifx\csname tp@type@##1@#1\endcsname\relax
+        \@namegdef{tp@type@##1@#1}{##2}%
+      \else
+        \gcsappto{tp@type@##1@#1}{##2}%
+      \fi
     }%
-    \def\tpDeclareComponents##1{\@namedef{tp@decl@Components@#1}{##1}}%
-    \def\x{\expandafter\endgroup#2}%
-  \x
+    \def\x{%
+      #2%
+    }%
+  \expandafter\x\endgroup
+}
+
+\def\tpEvalType#1{%
+  \tpKernelDebugMsg{Evaluating tp@type@#1@\tp@namespace:^^J \expandafter\meaning\csname tp@type@#1@\tp@namespace\endcsname}%
+  \csname tp@type@#1@\tp@namespace\endcsname
 }
 
 \def\tpCheckParent#1#2{%
@@ -94,18 +105,20 @@
 \def\tp@do@inherit#1#2#3{%
   \tpKernelDebugMsg{#3 inherits #1 from #2.}%
   \tpCheckParent{#2}{#3}%
-  \tpNamespace{#3}%
-  \expandafter\ifx\csname tp@decl@#1@#2\endcsname\relax
-    \tpPackageError{Kernel}{Type}{Type `#1' was not declared}{Type `#1' was not declared for Container `#2'.}
+  \expandafter\ifx\csname tp@type@#1@#2\endcsname\relax
+    \tpPackageError{Kernel}{Type}{Type `#1' was not declared}{Type `#1' was not declared for Container `#2'.}%
   \else
-    \csname tp@decl@#1@#2\endcsname
+    \edef\x{\noexpand\gcsappto{tp@type@#1@#3}}%
+    \expandafter\expandafter\expandafter\x\expandafter\expandafter\expandafter{\csname tp@type@#1@#2\endcsname}%
+    \tpKernelDebugMsg{value tp@type@#1@#3:^^J \expandafter\meaning\csname tp@type@#1@#3\endcsname}%
   \fi
 }
 
 %    \end{macrocode}
 % \section{Helper macros}
 %    \begin{macrocode}
-
+\def\@namegdef{\global\@namedef}
+\def\gcsappto{\global\csappto}
 
 %    \end{macrocode}
 % \subsection{Iterators}
