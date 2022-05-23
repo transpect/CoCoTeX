@@ -49,7 +49,7 @@
   \tp@title@generic@eval
   \tp@title@fundings@eval
   \tp@title@set@pdfmeta
-  \let\tp@namespace\@empty
+  \let\tp@cur@cont\@empty
 }
 %    \end{macrocode}
 % \section{PDF Meta Data}
@@ -152,7 +152,7 @@
     \tp@prov@num@comp{Content}{content}%
   }}
 \def\tp@title@generic@eval{{%
-  \def\tp@namespace{titlepage}%
+  \def\tp@cur@cont{titlepage}%
   %\tp@iterate@cnts{GenericMeta}{generic-meta-format}%
   %\tpIfComp{GenericMetaBlock}{}{\expandafter\csname tpGenericMetaBlock\expandafter\endcsname\expandafter{\tp@iterate@res}}%
   \tp@compose@cnt{GenericMeta}{generic-meta-format}{GenericMetaBlock}
@@ -173,7 +173,7 @@
   }%
 }
 \def\tp@title@fundings@eval{{%
-    \def\tp@namespace{titlepage}%
+    \def\tp@cur@cont{titlepage}%
     \tp@compose@cnt{Funding}{fund-format}{FundingBlock}%
 }}
 %    \end{macrocode}
@@ -266,7 +266,7 @@
            \def\tp@cnt@grp{#1}%
            \csname #1-Cnt\endcsname=\the\@tempcnta
            \tpCurCount=\the\@tempcnta
-           \protected@edef\@tempb{\csname tp@\tp@namespace @#2\endcsname}%
+           \protected@edef\@tempb{\csname tp@\tp@cur@cont @#2\endcsname}%
            \def\@tempc{\csgappto{tp@iterate@res}}%
            \expandafter\@tempc\expandafter{\@tempb}%
          \egroup
@@ -292,8 +292,8 @@
 \def\tp@create@editor@string#1{%
   \def\@tempa{Author}\def\@argi{#1}%
   \ifx\@tempa\@argi\else
-    \expandafter\ifx\csname tp@\tp@namespace @#1NameList\endcsname\relax\else
-      \expandafter\xdef\csname tp@\tp@namespace @#1NameList\endcsname{%
+    \expandafter\ifx\csname tp@\tp@cur@cont @#1NameList\endcsname\relax\else
+      \expandafter\xdef\csname tp@\tp@cur@cont @#1NameList\endcsname{%
         \tpUseComp{#1NameList}%
         \tpUseProperty{editor-suffix}%
       }%

@@ -12,42 +12,62 @@
 \ReplaceClass{article}{book}
 \BeforePackage{doc}{\let\oldmaketitle\maketitle}
 \documentclass[a4paper]{ltxdoc}
-  \makeatletter
-  \let\tp@fileversion\fileversion
-  \let\tp@filedate\filedate
-  \frenchspacing
-  \parindent0pt
-  \parskip\medskipamount
-  \makeatletter
-  \def\@listi{\leftmargin\leftmargini
-              \parsep\z@
-              \topsep\z@
-              \itemsep\z@}
-  \let\@listI\@listi
-  \@listi
-  \def\@listii{\leftmargin\leftmarginii
-              \labelwidth\leftmarginii
-              \advance\labelwidth-\labelsep
-              \parsep\z@
-              \topsep\z@
-              \itemsep\z@}
-  \makeatother
-  \emergencystretch1em
-  \clubpenalty10000
-  \widowpenalty10000
-  \def\hack#1{#1}
-  \RequirePackage[T1]{fontenc}
-  \RequirePackage[utf8]{inputenc}
-  \RequirePackage{xcolor}
-  \RequirePackage{graphicx}
-  \usepackage{newtxtext,newtxmath}
-  \RequirePackage[breaklinks,pdfborder={0 0 0}]{hyperref}
+\makeatletter
+\let\tp@fileversion\fileversion
+\let\tp@filedate\filedate
+\frenchspacing
+\parindent0pt
+\parskip\medskipamount
+\makeatletter
+\def\@listi{\leftmargin\leftmargini \parsep\z@ \topsep\z@ \itemsep\z@}
+\let\@listI\@listi \@listi \def\@listii{\leftmargin\leftmarginii
+  \labelwidth\leftmarginii \advance\labelwidth-\labelsep \parsep\z@
+  \topsep\z@ \itemsep\z@}
+\makeatother
+\emergencystretch1em
+\clubpenalty10000
+\widowpenalty10000
+\def\hack#1{#1}
+\RequirePackage[T1]{fontenc}
+\RequirePackage[utf8]{inputenc}
+\RequirePackage{xcolor}
+\RequirePackage{graphicx}
+\usepackage{newtxtext,newtxmath}
+\RequirePackage[breaklinks,pdfborder={0 0 0}]{hyperref}
 \definecolor{spot}{cmyk}{0,0.82,0.59,0.18}
 \definecolor{mblue}{cmyk}{0,0.82,0.59,0.18}
 \definecolor{mpurp}{cmyk}{1,0.75,0,0}
 \usepackage{listings}
+\makeatletter
+\def\codeline@wrindex#1{%
+  \if@filesw
+    \immediate\write\@indexfile{\string\indexentry{#1}{\number\c@chapter.\number\c@lstnumber}}%
+  \fi
+}
+\CodelineIndex
+\def\macro{\begingroup
+   \catcode`\\12
+   \let\is@m@cro@\relax
+   \MakePrivateLetters\m@cro@}
+\long\def\m@cro@#1{\endgroup \topsep\MacroTopsep%
+  \edef\saved@macroname{\string#1}%
+  \let\saved@indexname\saved@macroname
+  \ifx\is@m@cro@\relax
+    \submacrosection{\string#1}\ignorespaces
+  \else
+    \macrosection{\string#1}\ignorespaces
+  \fi
+  \SpecialMainIndex{#1}\nobreak
+  \DoNotIndex{#1}%
+}
+\let\endmacro\relax
+\def\SpecialMainIndex#1{%
+  \@bsphack
+    \SpecialIndex@{#1}{\encapchar main}%
+  \@esphack}
+
 \lstset{%
-  basicstyle=\ttfamily,
+  basicstyle={\ttfamily\color{spot}},
   firstnumber=last,
   literate={%
     {Ö}{{\"O}}1
@@ -60,9 +80,14 @@
     {¬}{{$\neg$}}1
     {«}{{\guillemotright}}1
     {»}{{\guillemotleft}}1
-    {~}{{\textasciitilde}}1},
+    {~}{{\textasciitilde}}1
+    {…}{{\dots}}1
+    {≥}{{$\geq$}}1
+    {–}{{--}}1
+    {’}{{'}}1
+  },
   inputencoding=utf8,
-  language=[LaTeX]TeX,
+  language=[AlLaTeX]TeX,
   extendedchars=true,                % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
   % basicstyle=\fontfamily{lmvtt}\selectfont\small,
   columns=fullflexible,
@@ -70,28 +95,30 @@
   numberfirstline=1,
   numberstyle=\scriptsize,
   numbersep=5pt,
-  backgroundcolor=\color{spot!05}, % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
-  % basicstyle=\scriptsize,          % the size of the fonts that are used for the code
+  backgroundcolor=\color{spot!04},  % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+  % basicstyle=\scriptsize,                    % the size of the fonts that are used for the code
   breakatwhitespace=false,           % sets if automatic breaks should only happen at whitespace
   breaklines=true,                   % sets automatic line breaking
   captionpos=t,                      % sets the caption-position
-  commentstyle={\color{spot!70}\itshape},      % comment style
+  commentstyle={\itshape},      % comment style
   frame=single,                      % adds a frame around the code
-  keepspaces=true,                  % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
-  keywordstyle=\color{spot!90},         % keyword style
-  rulecolor=\color{spot},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+  keepspaces=true,                   % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  keywordstyle={\color{spot}\itshape},% keyword style
+  identifierstyle={},
+  texcsstyle={\mybfseries},         % keyword style
+  rulecolor=\color{spot},            % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
   showspaces=false,                  % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
   showstringspaces=true,             % underline spaces within strings only
   showtabs=true,                     % show tabs within strings adding particular underscores
-  stringstyle={\color{spot!80}},     % string literal style
+  stringstyle={},                    % string literal style
   tabsize=2,                         % sets default tabsize to 2 spaces
 }
-
+\let\Finale\PrintIndex
 \let\macrocode\relax
 \lstnewenvironment{macrocode}[1][]{%
   \lstset{style=macrocode,#1}%
 }{}
-\makeatletter
+
 \renewcommand\frontmatter{%
     \cleardoublepage
   \@mainmatterfalse
@@ -151,16 +178,18 @@
 {\endMakeFramed}
 
 \let\mybfseries\bfseries
-\def\bfseries{\mybfseries\sffamily\color{spot!95}}
+\let\sbseries\mybfseries
+\def\bfseries{\mybfseries\sffamily}
 
 \let\myttfamily\ttfamily
 \DeclareTextFontCommand{\mytexttt}{\myttfamily}
-\def\ttfamily{\myttfamily\small\color{spot!95}}
+\def\ttfamily{\myttfamily\small}
 
 \def\titlefont{\mybfseries\sffamily\color{spot}}
 
 \let\mytextbf\textbf
-\def\textbf#1{{\small\bfseries#1\/}}
+\def\textbf#1{{\small\bfseries\color{spot}#1\/}}
+
 
 \parindent\z@
 \parskip.5\baselineskip
@@ -237,18 +266,18 @@
 \def\thechapter{File~\arabic{chapter}}
 \def\ps@headings{%
   \let\@oddfoot\@empty\let\@evenfoot\@empty
-  \def\@evenhead{\hskip-\pageskip\hbox to \pageskip{\hfill\bfseries\thepage\enskip}\htbar\enskip{\sffamily\leftmark}\hfil}%
-  \def\@oddhead{\hfill{\sffamily\rightmark}\enskip\htbar\rlap{\hbox to \pageskip{\enskip\bfseries\thepage\hfill}}}%
+  \def\@evenhead{\hskip-\pageskip\hbox to \pageskip{\hfill\bfseries\color{spot}\thepage\enskip}\htbar\enskip{\sffamily\leftmark}\hfil}%
+  \def\@oddhead{\hfill{\sffamily\rightmark}\enskip\htbar\rlap{\hbox to \pageskip{\enskip\bfseries\color{spot}\thepage\hfill}}}%
   \let\@mkboth\markboth
   \def\chaptermark##1{\markboth
-    {\ifnum \c@secnumdepth >\m@ne\if@mainmatter{\bfseries\thechapter}\enskip\fi\fi##1}
-    {\ifnum \c@secnumdepth >\m@ne\if@mainmatter{\bfseries\thechapter}\enskip\fi\fi##1}}%
-  \def\sectionmark##1{\markright{\ifnum \c@secnumdepth >\z@\if@mainmatter{\bfseries\thechapter:\thesection}\enskip\fi\fi##1}}}
+    {\ifnum \c@secnumdepth >\m@ne\if@mainmatter{\bfseries\color{spot}\thechapter}\enskip\fi\fi##1}
+    {\ifnum \c@secnumdepth >\m@ne\if@mainmatter{\bfseries\color{spot}\thechapter}\enskip\fi\fi##1}}%
+  \def\sectionmark##1{\markright{\ifnum \c@secnumdepth >\z@\if@mainmatter{\bfseries\color{spot}\thechapter:\thesection}\enskip\fi\fi##1}}}
 \def\includeDTX#1{\input src/#1.dtx}
 \def\ps@chapfirst{%
   \let\@oddfoot\@empty\let\@evenfoot\@empty
   \let\@evenhead\@empty%
-  \def\@oddhead{\hfill\htbar\rlap{\hbox to \pageskip{\enskip\bfseries\thepage\hfill}}}%
+  \def\@oddhead{\hfill\htbar\rlap{\hbox to \pageskip{\enskip\bfseries\color{spot}\thepage\hfill}}}%
 }
 
 \pagestyle{headings}
@@ -266,6 +295,7 @@
     \addcontentsline{toc}{chapter}{#1}%
   \fi
   \chaptermark{#1}%
+  \def\tp@cur@module{\number\c@chapter}%
   \@makechapterhead{#2}%
   \@afterheading}
 
@@ -273,12 +303,12 @@
   {\parindent \z@ \raggedright \normalfont
     \ifnum \c@secnumdepth >\m@ne
       \if@mainmatter
-        \LARGE\bfseries\thechapter
+        \LARGE\bfseries\color{spot}\thechapter
         \par\nobreak
       \fi
     \fi
     \interlinepenalty\@M
-    \Huge \bfseries #1\par\nobreak
+    \Huge \bfseries\color{spot} #1\par\nobreak
     \vskip 12bp
     \strut\raise\ht\strutbox\vbox{\vrule\@width\textwidth\@height2bp}%
     \vskip 16bp
@@ -292,7 +322,7 @@
     \begingroup
       \parindent \z@ \rightskip \@pnumwidth
       \parfillskip -\@pnumwidth
-      \leavevmode \bfseries
+      \leavevmode \bfseries\color{spot}
       \advance\leftskip\@tempdima
       \hskip -\leftskip
       #1\nobreak\hfil
@@ -341,45 +371,33 @@
   {1.25ex}%
   {1sp}%
   {\small\mathversion{bold}\titlefont\color{spot!80}}}
-\renewcommand\subparagraph{\@startsection{paragraph}{4}{\z@}%
+\renewcommand\subparagraph{\@startsection{subparagraph}{4}{\z@}%
   {1.25ex}%
   {-.5em}%
   {\small\mathversion{bold}\titlefont\color{spot!75}}}
 
-\lstdefinestyle{macrocode}{language=[latex]TeX,
+\newcommand\macrosection{\@startsection{macrosec}{99}{\z@}%
+  {0.5\baselineskip}%
+  {-.5em}%
+  {\small\ttfamily\mybfseries\color{spot!75}}*}
+\newcommand\submacrosection{\@startsection{macrosec}{99}{\z@}%
+  {0.5\baselineskip}%
+  {-.5em}%
+  {\small\ttfamily\mybfseries\color{spot!50}}*}
+
+\lstdefinestyle{macrocode}{language=[AlLaTeX]TeX,
   keepspaces=false,                   % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
   name=macrocode,
   basicstyle=\footnotesize\ttfamily,
-  classoffset=0,
-    morekeywords={DeclareRobustCommand},
-    keywordstyle=\color{spot},
-    identifierstyle=\textup,
-  classoffset=1,
-    morekeywords={optional,rest,args},
-    keywordstyle=\color{spot!85},
-  classoffset=0,
-  commentstyle=\color{spot!60}\footnotesize, %
+  commentstyle=\color{spot!70}\footnotesize, %
   stringstyle=\itshape, %
-  showstringspaces=false % no special string spaces
+  showstringspaces=false, % no special string spaces
+  moretexcs={DeclareOptionX,define@choicekey,ProcessOptionX},
 }
 \lstdefinestyle{docstrip}{%
   style=macrocode,
   basicstyle=\sffamily\small,
   literate=<{$\langle$}1>{$\rangle$}1,
-}
-\lstdefinestyle{texinline}{language=[latex]TeX,
-  basicstyle=\ttfamily,
-  classoffset=0,
-    morekeywords={DeclareRobustCommand},
-    keywordstyle=\color{spot},
-    identifierstyle=\textup,
-  classoffset=1,
-    morekeywords={optional,rest,args},
-    keywordstyle=\color{spot!85},
-  classoffset=0,
-  commentstyle=\color{spot!60}\footnotesize, %
-  stringstyle=\itshape, %
-  showstringspaces=false % no special string spaces
 }
 
 \usepackage{etoolbox}
@@ -405,7 +423,7 @@
       \@title}%
     \par
     \vskip\baselineskip
-    {\Large\mybfseries\sffamily
+    {\Large\mybfseries\color{spot}\sffamily
       \hfill\vbox{\hsize.5\textwidth\@subtitle\par}}%
     \par\vskip2\baselineskip
     {\large\sffamily Version~\tp@fileversion}\par
@@ -417,6 +435,7 @@
   \tableofcontents
   \clearpage
 }
+\def\Deprecated{\fcolorbox{red}{red!10}{\parbox{40mm}{\centering\bfseries\color{red} WARNING!\\The following section is mostly deprecated and will be changed or deleted in future releases.}}}
 \makeatother
   \OnlyDescription
 \begin{document}
@@ -454,26 +473,27 @@
 %
 % \chapter{Introduction}
 %
-% \section{Loading order and contents of transpect.cls}
 %
-% \begin{enumerate}
-% \item load base cls (article or book)
-% \item load transpect specific cls
-% \item load transpect-modules and their dependencies
-%   \begin{enumerate}
-%   \item transpect-scripts, iff option \lstinline{usescript} is used, standalone \lstinline{babel} otherwise
-%   \item transpect-common\footnote{is a hard dependency in both the headings- and floats modules and required immediately after each the module's option processing.}
-%   \item transpect-headings
-%   \item transpect-floats
-%   \item transpect-title
-%   \item transpect-endnotes
-%   \item transpect-frame
-%   \end{enumerate}
-% \item load packages index and hyperref
-% \item load publisher specific styles
-% \end{enumerate}
+% \section{Basic concepts}
+%
+% The core concept of the \lstinline{transpect-tex} Common Framework is the
+% strict separation between document specific information bearing
+% units and publisher specific layout and rendering instructions to a
+% degree that is far more versatile and delicate than \LaTeX's usual
+% distinction between form and content.
+%
+% The basic data type in the Framework is the \textbf{Container}. On
+% the end-user level, this is virtually always a {\LaTeX} environment
+% that contain a specific set of macros used to store the atomic units
+% of information. Those macros and their contents are called
+% \textbf{Components}.
+%
+% The instructions on how those Components are to be processed and
+% ultimately rendered are called \textbf{Properties}.
 %
 % \section{Flow of macro definitions and their expansions in modules that use the Property and Component mechanism}
+%
+% \Deprecated
 %
 % Modules, that utilize the Property and Component mechanisms, define
 % a \textit{Declare macro}. This Declare macro is basicly a

@@ -192,7 +192,7 @@
   \expandafter\ifx\csname tp@#1@attr@debug\endcsname\relax\else
     \message{^^Jtranspect-float debug:^^J
         Textheight:\space\the\textheight^^J
-        Type:\space\space\space\space\space\space\space\tp@namespace^^J
+        Type:\space\space\space\space\space\space\space\tp@cur@cont^^J
 \ifx\tp@captype\tp@str@figure
         Path: \space\space\space\space\space\space\@tp@fig@path^^J
 \fi
@@ -205,9 +205,9 @@
         Height:\space\space\space\space\space\the\tp@total@flt@height^^J
         Depth:\space\space\space\space\space\space\the\tp@total@flt@depth^^J
 \else
-        Width:\space\space\space\space\space\space\expandafter\meaning\csname tp@\tp@namespace @width-\the\tpSubFloatCnt\endcsname^^J
-        Height:\space\space\space\space\space     \expandafter\meaning\csname tp@\tp@namespace @height-\the\tpSubFloatCnt\endcsname^^J
-        Depth:\space\space\space\space\space\space\expandafter\meaning\csname tp@\tp@namespace @depth-\the\tpSubFloatCnt\endcsname^^J
+        Width:\space\space\space\space\space\space\expandafter\meaning\csname tp@\tp@cur@cont @width-\the\tpSubFloatCnt\endcsname^^J
+        Height:\space\space\space\space\space     \expandafter\meaning\csname tp@\tp@cur@cont @height-\the\tpSubFloatCnt\endcsname^^J
+        Depth:\space\space\space\space\space\space\expandafter\meaning\csname tp@\tp@cur@cont @depth-\the\tpSubFloatCnt\endcsname^^J
 \fi
 }%
   \fi
@@ -317,7 +317,7 @@
   \fi
   \tp@flt@generate@listof@handlers{#4}{#3}{#2}%
   \bgroup
-    \def\tp@namespace{#2}%
+    \def\tp@cur@cont{#2}%
     \tp@init@l@[list-of]{#4}{0}{#3}% Generate listof-Entries for first level floats
     \tp@restore@init{#4}{number-0-maxwd}%
     \tp@init@l@[list-of]{#4}{1}{sub#3}% Generate listof-Entries for sub floats
@@ -397,7 +397,7 @@
   \tpIfComp{Listof#1}
     {}
     {\tpIfComp{#1}
-      {\expandafter\expandafter\expandafter\let\expandafter\csname tp@\tp@namespace @list-of-#2-\the\tpSubFloatCnt\expandafter\endcsname\csname tp@\tp@namespace @#2-\the\tpSubFloatCnt\endcsname}
+      {\expandafter\expandafter\expandafter\let\expandafter\csname tp@\tp@cur@cont @list-of-#2-\the\tpSubFloatCnt\expandafter\endcsname\csname tp@\tp@cur@cont @#2-\the\tpSubFloatCnt\endcsname}
       {\csname Listof#1\endcsname{}}}}
 
 %    \end{macrocode}
@@ -426,10 +426,10 @@
   \fi}
 
 \def\tp@set@label#1{%
-  \expandafter\expandafter\expandafter\edef\expandafter\csname tp@\tp@namespace @number-#1\expandafter\endcsname\expandafter{\csname the\tp@captype\endcsname}%
+  \expandafter\expandafter\expandafter\edef\expandafter\csname tp@\tp@cur@cont @number-#1\expandafter\endcsname\expandafter{\csname the\tp@captype\endcsname}%
 }
 \def\tp@set@sublabel#1{%
-  \tpSetValProp{float-number}{\csname tp@\tp@namespace @number-0\endcsname}%
+  \tpSetValProp{float-number}{\csname tp@\tp@cur@cont @number-0\endcsname}%
   \tpSetValProp{sub-number}{%
     \begingroup
       \expandonce{\tpUseProperty{sub-number-format}}%
@@ -437,7 +437,7 @@
       \csname @\tpUseProperty{sub-number-style}\endcsname{#1}%
       \tpUseProperty{sub-number-after}%
     \endgroup}%
-  \expandafter\expandafter\expandafter\edef\expandafter\csname tp@\tp@namespace @number-#1\expandafter\endcsname\expandafter{\tpUseProperty{sub-number-block}}%
+  \expandafter\expandafter\expandafter\edef\expandafter\csname tp@\tp@cur@cont @number-#1\expandafter\endcsname\expandafter{\tpUseProperty{sub-number-block}}%
 }
 
 %    \end{macrocode}
@@ -505,26 +505,26 @@
   \tp@calc@flt@width=\tp@total@flt@width\relax
   \advance\tp@calc@flt@width-\tp@flt@marg@l\relax
   \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
-    \edef\@tempa{\CalcRatio{\tp@subflt@maxheight}{\csname tp@\tp@namespace @height-\the\@tempcnta\endcsname}}%
+    \edef\@tempa{\CalcRatio{\tp@subflt@maxheight}{\csname tp@\tp@cur@cont @height-\the\@tempcnta\endcsname}}%
     \ifnum\@tempcnta>\@ne
       \advance\tp@calc@flt@width-\tp@subflt@sep\relax%
     \fi
-    \expandafter\@tempdimc\csname tp@\tp@namespace @width-\the\@tempcnta\endcsname\relax
+    \expandafter\@tempdimc\csname tp@\tp@cur@cont @width-\the\@tempcnta\endcsname\relax
     \@tempdimb=\@tempa\@tempdimc\relax
-    \expandafter\edef\csname  tp@\tp@namespace @adj@width-\the\@tempcnta\endcsname{\the\@tempdimb}%
+    \expandafter\edef\csname  tp@\tp@cur@cont @adj@width-\the\@tempcnta\endcsname{\the\@tempdimb}%
     \advance\@tempdima\@tempdimb
   }%
   \@tempcnta=\z@\relax
   \@tempdimb=\z@\relax
   \@tempdimc=\z@\relax
   \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
-    \edef\@tempa{\CalcRatio{\csname tp@\tp@namespace @adj@width-\the\@tempcnta\endcsname}{\@tempdima}}%
-    \expandafter\edef\csname tp@\tp@namespace @res@width-\the\@tempcnta\endcsname{\dimexpr\@tempa\tp@calc@flt@width\relax}%
-    \@tempdimc\dimexpr\csname tp@\tp@namespace @height-\the\@tempcnta\endcsname\relax
+    \edef\@tempa{\CalcRatio{\csname tp@\tp@cur@cont @adj@width-\the\@tempcnta\endcsname}{\@tempdima}}%
+    \expandafter\edef\csname tp@\tp@cur@cont @res@width-\the\@tempcnta\endcsname{\dimexpr\@tempa\tp@calc@flt@width\relax}%
+    \@tempdimc\dimexpr\csname tp@\tp@cur@cont @height-\the\@tempcnta\endcsname\relax
     \@tempdimc\dimexpr\@tempa\@tempdimc\relax
     \ifdim\@tempa\@tempdimb<\@tempdimc\@tempdimb\@tempdimc\relax\fi
   }%
-  \expandafter\edef\csname tp@\tp@namespace @res@height\endcsname{\the\@tempdimb}%
+  \expandafter\edef\csname tp@\tp@cur@cont @res@height\endcsname{\the\@tempdimb}%
 }
 
 %    \end{macrocode}
@@ -683,11 +683,11 @@
 
 \def\endtpSubFloat{%
   \tpUseProperty{subfloat-handler}%
-  \expandafter\xdef\csname tp@\tp@namespace @width-\the\tpSubFloatCnt\endcsname{\the\wd\tp@subfltbox}%
-  \expandafter\xdef\csname tp@\tp@namespace @height-\the\tpSubFloatCnt\endcsname{\the\ht\tp@subfltbox}%
-  \expandafter\xdef\csname tp@\tp@namespace @depth-\the\tpSubFloatCnt\endcsname{\the\dp\tp@subfltbox}%
-  \expandafter\xdef\csname tp@\tp@namespace @col-\the\tpSubFloatCnt\endcsname{\the\tp@subfloat@col}%
-  \expandafter\xdef\csname tp@\tp@namespace @row-\the\tpSubFloatCnt\endcsname{\the\tp@subfloat@row}%
+  \expandafter\xdef\csname tp@\tp@cur@cont @width-\the\tpSubFloatCnt\endcsname{\the\wd\tp@subfltbox}%
+  \expandafter\xdef\csname tp@\tp@cur@cont @height-\the\tpSubFloatCnt\endcsname{\the\ht\tp@subfltbox}%
+  \expandafter\xdef\csname tp@\tp@cur@cont @depth-\the\tpSubFloatCnt\endcsname{\the\dp\tp@subfltbox}%
+  \expandafter\xdef\csname tp@\tp@cur@cont @col-\the\tpSubFloatCnt\endcsname{\the\tp@subfloat@col}%
+  \expandafter\xdef\csname tp@\tp@cur@cont @row-\the\tpSubFloatCnt\endcsname{\the\tp@subfloat@row}%
   \@tempdima=\dimexpr\the\ht\tp@subfltbox+\the\dp\tp@subfltbox\relax
   \@tempdimb=\dimexpr\the\wd\tp@subfltbox\relax
   \ifx\tp@subfloat@parent r\relax
@@ -751,7 +751,7 @@
   \savenotes
   \ifnum#1>\@ne\hfill\fi
   \vtop\bgroup
-    \expandafter\hsize\csname tp@\tp@namespace @res@width-#1\endcsname\relax
+    \expandafter\hsize\csname tp@\tp@cur@cont @res@width-#1\endcsname\relax
     \let\includegraphics\tp@includesubgraphics
     \tpRenderSubFloat{#1}%
   \egroup
@@ -778,7 +778,7 @@
   \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
     \setbox\z@\vbox{%
       \tpSubFloatCnt\@tempcnta\relax
-      \expandafter\hsize\expandafter\dimexpr\csname tp@\tp@namespace @res@width-\the\@tempcnta\endcsname\relax
+      \expandafter\hsize\expandafter\dimexpr\csname tp@\tp@cur@cont @res@width-\the\@tempcnta\endcsname\relax
       \tpGobble
       \tpUseProperty{\tp@prefix caption-format}%
       \tpUseProperty{\tp@prefix caption-format-#1}%
@@ -1049,15 +1049,15 @@
   \bgroup
     \tpSubFloatCnt#1\relax
     \tpIfComp{Label}
-      {\expandafter\let\expandafter\@currentlabel\csname tp@\tp@namespace @number-\the\tpSubFloatCnt\endcsname}
-      {\edef\@currentlabel{tp-\tp@namespace-number-\the\tp@int@flt@cnt}}%
+      {\expandafter\let\expandafter\@currentlabel\csname tp@\tp@cur@cont @number-\the\tpSubFloatCnt\endcsname}
+      {\edef\@currentlabel{tp-\tp@cur@cont-number-\the\tp@int@flt@cnt}}%
     \advance\csname c@\tp@captype\endcsname\m@ne
     \expandafter\H@refstepcounter\expandafter{\tp@captype}%
     \expandafter\hyper@makecurrent\expandafter{\tp@captype}%
     \let\Hy@tempa\Hy@float@caption
     \expandafter\hyper@@anchor\expandafter{\@currentHref}{\relax}%
     \tpIfComp{Label}
-      {\expandafter\let\expandafter\@currentlabel\csname tp@\tp@namespace @number-\the\tpSubFloatCnt\endcsname
+      {\expandafter\let\expandafter\@currentlabel\csname tp@\tp@cur@cont @number-\the\tpSubFloatCnt\endcsname
        \edef\@tempa{\tpUseComp{Label}}%
        \expandafter\tpltx@label\expandafter{\@tempa}}{\relax}%
   \egroup}
