@@ -97,15 +97,7 @@
 % \lstinline{lof} for the List of Figures, \lstinline{lot} for the
 % List of Tables).
 %    \begin{macrocode}
-
-\def\tp@reset@components#1{%
-  \@tempcnta=#1\relax
-  \@tp@reset@components
-  \global\let\@tp@reset@components\relax
-}
-\global\let\@tp@reset@components\relax
-
-\def\tp@reset@defaults#1#2{%
+\def\tp@flt@reset@defaults#1#2{%
   \global\tpSubFloatCnt=\z@
   \global\let\tp@has@capt@top\@undefined
   \global\let\tp@has@capt@bottom\@undefined
@@ -115,7 +107,7 @@
   \global\tp@subfloat@row=\z@
   \global\tp@subfloat@col=\z@
   \global\tp@subflt@maxheight=\z@\relax
-  \tp@reset@components{0}%
+  \tp@reset@components{\tp@cur@cont}{0}%
   \def\tp@captype{#1}%
   \let\tp@prefix\@empty
   \def\tp@caplisttype{#2}%
@@ -449,7 +441,7 @@
   \begingroup
     \global\advance\tp@int@flt@cnt\@ne
     \tpNamespace{#4}%
-    \tp@reset@defaults{#2}{#3}%
+    \tp@flt@reset@defaults{#2}{#3}%
     \tpToggleCountedCond
     \expandafter\tpCascadeProps\expandafter{#4}{float}%
     \tp@get@flt@attr{#1}{#2}%

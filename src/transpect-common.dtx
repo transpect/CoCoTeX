@@ -104,21 +104,6 @@
   \let\label\@gobble
 }%
 %    \end{macrocode}
-%% \section{Hooks}
-%% In this part we provide the facility to utilize Hooks to patch code
-%% into different parts of the package depending on options and loaded
-%% packages.
-%    \begin{macrocode}
-\def\tpDeclareHook#1{\expandafter\global\expandafter\let\csname tp@hook@\tp@cur@cont @#1\endcsname\@empty}
-\def\tpAddToHook{\@ifnextchar [{\tp@add@to@hook}{\tp@add@to@hook[\tp@cur@cont]}}%]
-\def\tp@add@to@hook[#1]#2#3{%
-  \expandafter\ifx\csname tp@hook@\tp@cur@cont @#1\endcsname\relax
-    \tpDeclareHook{#1@#2}%
-  \fi
-  \csgappto{tp@hook@#1@#2}{#3}%
-}
-\def\tpUseHook#1{\expandafter\ifx\csname tp@hook@\tp@cur@cont @#1\endcsname\relax\else\csname tp@hook@\tp@cur@cont @#1\endcsname\fi}
-%    \end{macrocode}
 %
 % \section{Attributes}
 % In this part, we provide some macros to parse enviroment

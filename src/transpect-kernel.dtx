@@ -75,13 +75,7 @@
 % that is specific to this type, usually something like Component or
 % Property declarations, handlers, and so forth.
 %    \begin{macrocode}
-    \def\tpDeclareType##1##2{%
-      \expandafter\ifx\csname tp@type@##1@#1\endcsname\relax
-        \@namegdef{tp@type@##1@#1}{##2}%
-      \else
-        \gcsappto{tp@type@##1@#1}{##2}%
-      \fi
-    }%
+    \def\tpDeclareType##1##2{\csgappto{tp@type@##1@#1}{##2}}%
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tpDeclareEnv}
@@ -95,7 +89,7 @@
 % body should be evaluated using the \lstinline{\tpEvalType} macro,
 % see below.
 %    \begin{macrocode}
-    \def\tpDeclareEnv##1##2{\@namegdef{#1}{\def\tp@cur@cont{#1}##1}\@namegdef{end#1}{##2}}%
+    \def\tpDeclareEnv##1##2{\csgdef{#1}{\def\tp@cur@cont{#1}##1}\csgdef{end#1}{##2}}%
 %    \end{macrocode}
 % \end{macro}
 %    \begin{macrocode}
@@ -170,7 +164,7 @@
   \expandafter\ifx\csname tp@type@#1@#2\endcsname\relax
     \tpPackageError{Kernel}{Type}{Type `#1' was not declared}{Type `#1' was not declared for Container `#2'.}%
   \else
-    \edef\x{\noexpand\gcsappto{tp@type@#1@#3}}%
+    \edef\x{\noexpand\csgappto{tp@type@#1@#3}}%
     \expandafter\expandafter\expandafter\x\expandafter\expandafter\expandafter{\csname tp@type@#1@#2\endcsname}%
     \tpKernelDebugMsg{value tp@type@#1@#3:^^J \expandafter\meaning\csname tp@type@#1@#3\endcsname}%
   \fi
@@ -179,6 +173,7 @@
 % \end{macro}
 %
 % \section{Components}
+% \subsection{Simple Components}
 % \begin{macro}{\tpProvideComp}
 % defines component macros that are only valid within their respective Container.
 % \begin{description}
@@ -195,6 +190,21 @@
 }
 %    \end{macrocode}
 % \end{macro}
+% \subsection{Counted Components}
+% \begin{macro}{\tp@reset@components}
+%   is used to reset Counted Components to prevent that later
+%   Containers of a type with counted containers feed the components
+%   from the previous Container of the same type. Usually, this is
+%   prevented by keeping macro definitions local. This is a precaucion
+%   where this is not possible.
+%    \begin{macrocode}
+\def\tp@reset@components#1#2{%
+  \@tempcnta=#2\relax
+  \csname @tp@reset@components@#1\endcsname
+  \expandafter\global\expandafter\let\csname @tp@reset@components@#1\endcsname\relax
+}
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\tpProvideCountedComp}
 % registers counter dependent Components. \#1
 % is the overt name of the Component, \#2 is the internal name of the
@@ -207,7 +217,7 @@
 \def\tpProvideCountedComp#1#2#3#4#5#6{%
   \tpProvideComp{#1}
     {\bgroup#5\expandafter\global}
-    {\def\@tempa{{@tp@reset@components}}%
+    {\def\@tempa{{@tp@reset@components@\tp@cur@cont}}%
      \edef\@tempb{%
        \noexpand\ltx@LocalExpandAfter\noexpand\global\noexpand\expandafter\noexpand\let
          \noexpand\csname tp@\noexpand\tp@cur@cont @#2-\the#4\noexpand\endcsname
@@ -216,14 +226,14 @@
      \egroup}
     {#2-\the#4}%
   #6\expandafter\long\expandafter\def\csname tp@\tp@cur@cont @#3\endcsname{\csname tp@\tp@cur@cont @#2-\the#4\endcsname}%
-  \csgappto{@tp@reset@components}{\csname tp@\tp@cur@cont @#3\endcsname}%
+  \csgappto{@tp@reset@components@\tp@cur@cont}{\csname tp@\tp@cur@cont @#3\endcsname}%
 }
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tpSetComp}
-% When Namespaces are processed asynchronously, Componets may not be
-% availeable inside Property definitions. In this case, this makro
-% should be used, instead. \#1 is the Comp name, \#2 is the value.
+%   When Containers are processed asynchronously, Componets may not be
+%   availeable inside of Property definitions. In this case, this makro
+%   should be used, instead. \#1 is the Comp name, \#2 is the value.
 %    \begin{macrocode}
 \long\protected\def\tpSetComp#1#2{%
   \expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\relax
@@ -283,7 +293,9 @@
 % \begin{macro}{\tpToggleCountedCond}
 % In order to account for counted Components, we occasionally need to
 % re-define the Component conditionals in a way such that the
-% Component is expanded twice before the comparison takes place:
+% Component is expanded twice before the comparison takes place.
+%
+% \textbf{Warning!} Use this macro only within local groups!
 %    \begin{macrocode}
 \long\def\tpToggleCountedCond{%
   \let\tp@is@counted\relax
@@ -296,12 +308,33 @@
     \expandafter\expandafter\expandafter\ifx\@tempb\@tempa ##2\else ##3\fi}}
 %    \end{macrocode}
 % \end{macro}
+% \section{Hooks}
+% In this part we provide the facility to utilize Hooks to patch code
+% into different parts of the package depending on options and loaded
+% packages.
+% \begin{macro}{\tpDeclareHook} registers a new hook. \#1 is the Hook's name.
+%    \begin{macrocode}
+\def\tpDeclareHook#1{\expandafter\global\expandafter\let\csname tp@hook@\tp@cur@cont @#1\endcsname\@empty}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tpAddToHook} Ads a new 
+%    \begin{macrocode}
+\def\tpAddToHook{\@ifnextchar [{\tp@add@to@hook}{\tp@add@to@hook[\tp@cur@cont]}}%]
+\def\tp@add@to@hook[#1]#2#3{%
+  \expandafter\ifx\csname tp@hook@\tp@cur@cont @#1\endcsname\relax
+    \tpDeclareHook{#1@#2}%
+  \fi
+  \csgappto{tp@hook@#1@#2}{#3}%
+}
+%    \end{macrocode}
+% 
+%    \begin{macrocode}
+\def\tpUseHook#1{\expandafter\ifx\csname tp@hook@\tp@cur@cont @#1\endcsname\relax\else\csname tp@hook@\tp@cur@cont @#1\endcsname\fi}
+%    \end{macrocode}
 %
 %
 % \section{Helper macros}
 %    \begin{macrocode}
-\def\@namegdef{\global\@namedef}
-\def\gcsappto{\global\csappto}
 
 %    \end{macrocode}
 % \subsection{Iterators}
