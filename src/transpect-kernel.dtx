@@ -503,50 +503,59 @@
 % \end{macro}
 %
 % \section{Properties}\label{sec:kernel:props}
+% \subsection{Setting Properties}\label{sec:kernel:prop:set}
 %
-% This high level macro provides the property-value interface for
-% transpect namespaces. \#1 is the name of the property, \#2 is the value assigned to that property.
+% \begin{macro}{\tpSetProperty}
+%   is a user-level macro that provides the Property--Value interface
+%   for Containers. \#1 is the name of the Property, \#2 is the Value
+%   assigned to that Property.
 %    \begin{macrocode}
 \DeclareRobustCommand{\tpSetProperty}[2]{\expandafter\long\expandafter\protect\expandafter\def\csname tp@\tp@cur@cont @#1\endcsname{#2}}
 %    \end{macrocode}
-% This high-level macro is a variant of \lstinline{\tpSetProperty}
-% except that it expands the value \#2 \textit{once} before assigning
-% it to the property macro with the name \#1. This can be used to
-% assign the current value of a variable macro, dimension, counter or
-% length to a property.
+% \end{macro}
+% \begin{macro}{\tpSetValProp}
+%   is a variant of \lstinline{\tpSetProperty} that expands the value
+%   \#2 \textit{once} before assigning it to the Property macro with
+%   the name \#1. This can be used to assign the current value of a
+%   variable macro, dimension, counter or length to a Property.
 %    \begin{macrocode}
 \DeclareRobustCommand{\tpSetValProp}[2]{\def\@tempa{\tpSetProperty{#1}}\expandafter\@tempa\expandafter{#2}}
 %    \end{macrocode}
-% This is another variant of \lstinline{\tpSetProperty} that
-% \textit{fully expands} it's value in \#2 before the Property is
-% stored. Use this if you need to use conditionals to determine the
-% actual values of Properties that otherwise expect fixed named or
-% dimensional values.
+% \end{macro}
+% \begin{macro}{\tpSetPropertyX}
+%   is another variant of \lstinline{\tpSetProperty}, but it
+%   \textit{fully expands} the value defined in \#2 before the
+%   Property is stored in the Property macro named \#1. Use this if
+%   you need to use conditionals to determine the actual values of
+%   Properties that otherwise expect fixed named or dimensional
+%   values.
 %    \begin{macrocode}
 \DeclareRobustCommand{\tpSetPropertyX}[2]{\expandafter\long\expandafter\protect\expandafter\edef\csname tp@\tp@cur@cont @#1\endcsname{#2}}
 %    \end{macrocode}
-% High level command to use a previously set property.
-%    \begin{macrocode}
-\def\tpUseProperty#1{\csname tp@\tp@cur@cont @#1\endcsname}
-%    \end{macrocode}
-% Check if property \#1 is non-empty If so, do \#2, otherwise do \#3.
-%    \begin{macrocode}
-\DeclareRobustCommand{\tpIfProp}[3]{\long\def\@tempa{}%
-  \expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\@tempa#3\else#2\fi\ignorespaces}
-%    \end{macrocode}
-% Check if a property \#1's value is equal to \#2.
-% If so, do \#3, otherwise do \#4.
-%    \begin{macrocode}
-\DeclareRobustCommand{\tpIfPropVal}[4]{\long\def\@tempa{#2}%
-  \expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\@tempa\relax#3\else#4\fi\ignorespaces}
-%    \end{macrocode}
-% Add to namespace-specific defaults; \#1 is the namespace, \#2 is a block of property assignments.
+% \end{macro}
+% \begin{macro}{\tpAddToDefault}
+%   adds material to a Container's defaults; \#1 is the name of the
+%   Container, \#2 is a block of Property assignments.
 %    \begin{macrocode}
 \DeclareRobustCommand{\tpAddToDefault}[2]{\csgappto{tp@#1@default}{#2}}
 %    \end{macrocode}
-% This macro recursivly loads a namespace's properties, the properties
-% of parent namespaces, and the default properties (in reverse
-% order). \#1 is the current namespace, \#2 is the top-level namespace.
+% \end{macro}
+%
+% \subsection{Using Properties}\label{sec:kernel:prop:use}
+%
+% \begin{macro}{\tpUseProperty}
+%   is a user-level command to access a previously set Property.
+%    \begin{macrocode}
+\def\tpUseProperty#1{\csname tp@\tp@cur@cont @#1\endcsname}
+%    \end{macrocode}
+% \end{macro}
+%
+% \Deprecated TODO: Incorporate into the Container inheritance mechanism. Check if inheritance of Container Types is to be distinguished from inheritance of Properties and their Values!
+% \begin{macro}{\tpCascadeProps}
+%   recursivly loads a Container's own Properties, the Properties of
+%   the Container's parent(s), and the default Properties of the top-level
+%   Container. \#1 is the current Container's name, \#2 is the top-level
+%   Container. 
 %    \begin{macrocode}
 \def\tpCascadeProps#1#2{%
   \csname tp@#2@default\endcsname
@@ -568,8 +577,31 @@
   \csname tp@#2@#1@properties\endcsname
 }
 %    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Property Conditionals}\label{sec:kernel:prop:cond}
+%
+% \begin{macro}{\tpIfProp}
+% checks if a Property with the name \#1 is defined and non-empty. If so, do \#2, otherwise do \#3.
+%    \begin{macrocode}
+\DeclareRobustCommand{\tpIfProp}[3]{\long\def\@tempa{}%
+  \expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\@tempa#3\else#2\fi\ignorespaces}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tpIfPropVal}
+%   checks if a Property \#1 expands to \#2.  If so, do \#3, otherwise
+%   do \#4.
+%    \begin{macrocode}
+\DeclareRobustCommand{\tpIfPropVal}[4]{\long\def\@tempa{#2}%
+  \expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\@tempa\relax#3\else#4\fi\ignorespaces}
+%    \end{macrocode}
+% \end{macro}
 %
 % \section{Helper macros}
+% \subsection{Handling of Optional Arguments}
+% Two simple internal macros to ease up the handling of optional
+% arguments that override Container Names
+% (\lstinline{\tp@opt@curcont}) and empty strings ((\lstinline{\tp@opt@empty})).
 %    \begin{macrocode}
 \def\tp@opt@curcont#1{\@ifnextchar[{#1}{#1[\tp@cur@cont]}}%]
 \def\tp@opt@empty#1{\@ifnextchar[{#1}{#1[]}}%]
