@@ -107,7 +107,8 @@
   \global\tp@subfloat@row=\z@
   \global\tp@subfloat@col=\z@
   \global\tp@subflt@maxheight=\z@\relax
-  \tp@reset@components{\tp@cur@cont}{0}%
+  \@tempcnta=\z@\relax
+  \tp@reset@components{\tp@cur@cont}%
   \def\tp@captype{#1}%
   \let\tp@prefix\@empty
   \def\tp@caplisttype{#2}%
@@ -150,13 +151,11 @@
     \def\tp@fps{p}%
   \fi}
 %    \end{macrocode}
-% In order to cathc the actual dimensions of the float box, we need to
+% In order to catch the actual dimensions of the float box, we need to
 % hook into \LaTeX's \lstinline{\@endfloatbox} macro:
 %    \begin{macrocode}
 \AtBeginDocument{%
-  \let\ltx@endfloatbox\@endfloatbox
-\def \@endfloatbox{%
-  \ltx@endfloatbox
+\gappto\@endfloatbox{%
   \global\tp@total@flt@height=\ht\@currbox\relax%
   \global\tp@total@flt@depth=\dp\@currbox\relax%
 }}
@@ -232,7 +231,7 @@
 %    \begin{macrocode}
 
 \def\tpMakeFltComp#1#2#3{%
-  \tpProvideCountedComp{#1}{#2}{#3}{\tpSubFloatCnt}{\ifx\tp@is@subflt\relax\else\tpSubFloatCnt=\z@\relax\fi}{}%
+  \tp@def@counted@comp{#1}{#2}{#3}{\tpSubFloatCnt}{\ifx\tp@is@subflt\relax\else\tpSubFloatCnt=\z@\relax\fi}{}%
 }
 
 \def\tpMakeFltCompL#1#2{%
@@ -330,11 +329,11 @@
   \expandafter\gdef\csname tp@#1@extract@data\endcsname##1##2##3##4{%
     \tpNamespace{#3}%
     \tpCascadeProps{#3}{float}%
-    \tpProvideComp{tpListofCaption}{}{}{ListofCaption}%
-    \tpProvideComp{tpListofLegend}{}{}{ListofLegend}%
-    \tpProvideComp{tpListofSource}{}{}{ListofSource}%
-    \tpProvideComp{tpListofNumber}{}{}{ListofNumber}%
-    \tpProvideComp{tpListofPage}{}{}{ListofPage}%
+    \tpDeclareComp[ListofCaption]{tpListofCaption}{}{}%
+    \tpDeclareComp[ListofLegend]{tpListofLegend}{}{}%
+    \tpDeclareComp[ListofSource]{tpListofSource}{}{}%
+    \tpDeclareComp[ListofNumber]{tpListofNumber}{}{}%
+    \tpDeclareComp[ListofPage]{tpListofPage}{}{}%
     \tpListofPage{\tpUseProperty{list-of-page-format}##4}%
     \tp@expand@l@contents{##3}{#2}{Listof}{Caption}%%
     \tp@format@number{list-of-}{Listof}{##1}%
@@ -661,6 +660,8 @@
 
 %    \end{macrocode}
 % shell for sub floats
+%
+% TODO: transform into a Component Group
 %    \begin{macrocode}
 \def\tpSubFloat{%
   \ifx\tp@is@subflt\relax

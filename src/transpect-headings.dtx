@@ -181,12 +181,12 @@
 \def\tp@toc@extract@data#1#2#3#4{%
   \tpNamespace{heading}%
   \tpCascadeProps{#2}{heading}%
-  \tpProvideComp{tpTocPage}{}{}{TocPage}%
+  \tpDeclareComp[TocPage]{tpTocPage}{}{}%
   \tpTocPage{\tpUseProperty{toc-page-format}#4}%
-  \tpProvideComp{tpTocTitle}{}{}{TocTitle}%
-  \tpProvideComp{tpTocSubtitle}{}{}{TocSubtitle}%
-  \tpProvideComp{tpTocNumber}{}{}{TocNumber}%
-  \tpProvideComp{tpTocAuthor}{}{}{TocAuthor}%
+  \tpDeclareComp[TocTitle]{tpTocTitle}{}{}%
+  \tpDeclareComp[TocSubtitle]{tpTocSubtitle}{}{}%
+  \tpDeclareComp[TocNumber]{tpTocNumber}{}{}%
+  \tpDeclareComp[TocAuthor]{tpTocAuthor}{}{}%
   \tp@expand@l@contents{#3}{heading}{Toc}{Title}%%
   \tp@format@number{toc-}{Toc}{#1}%
 }
@@ -311,8 +311,8 @@
   \tpIfProp{extended}{%
     \tp@extended@ht@macros
   }{}%
-  \tpProvideComp{tpQuote}{}{}{Quote}%
-  \tpProvideComp{tpQuoteSource}{}{}{QuoteSource}}
+  \tpDeclareComp[Quote]{tpQuote}{}{}%
+  \tpDeclareComp[QuoteSource]{tpQuoteSource}{}{}}
 \def\tp@heading@load@props{\csname tp@heading@\tp@heading@name @properties\endcsname}
 %    \end{macrocode}
 % This sub-routine provides some extended markup for certain headings
@@ -330,18 +330,18 @@
 % override the Title.
 %    \begin{macrocode}
 \def\tp@provide@ext@hd@macros#1{%
-  \tpProvideComp{tp#1}{}{}{#1}%
-  \tpProvideComp{tp#1Title}{}{}{#1Title}%
+  \tpDeclareComp[#1]{tp#1}{}{}%
+  \tpDeclareComp[#1Title]{tp#1Title}{}{}%
 }
 %    \end{macrocode}
 % Macro that creates user macros with a three-way distinction between
 % printed data, data sent to toc, and data sent to page styles.
 %    \begin{macrocode}
 \def\tp@provide@hd@macros#1{%
-  \tpProvideComp{tp#1}{}{}{#1}%
-  \tpProvideComp{tpToc#1}{}{}{Toc#1}% toc overrides
-  \tpProvideComp{tpRun#1}{}{}{Run#1}% running overrides
-  \tpProvideComp{tpBM#1}{}{}{BM#1}% bookmark overrides
+  \tpDeclareComp[#1]{tp#1}{}{}%
+  \tpDeclareComp[Toc#1]{tpToc#1}{}{}% toc overrides
+  \tpDeclareComp[Run#1]{tpRun#1}{}{}% running overrides
+  \tpDeclareComp[BM#1]{tpBM#1}{}{}% bookmark overrides
 }
 %    \end{macrocode}
 % The ending part of the heading environment.

@@ -6,13 +6,6 @@
 %    \end{macrocode}
 % \section*{Common workflow of the headings module}
 %
-% The transpect-common module contains definition of some commonly used macros. This style
-% \begin{enumerate}
-% \item defines the macros used to set up properties, components, classes, and hooks
-% \item defines the macros used in the content-list facilities (table of contents, list of figures, list of tables, etc.)
-% \item defines the macros used for indentation of labels/numbers
-% \item defines the macros used to re-build the label-side of \LaTeX's internal referencing mechanism
-% \end{enumerate}
 %
 % \section{Style Preface}
 %    \begin{macrocode}
@@ -142,71 +135,6 @@
 \endgroup
 
 %    \end{macrocode}
-% \section{Properties}\label{sec:common:props}
-% This high level macro provides the property-value interface for
-% transpect namespaces. \#1 is the name of the property, \#2 is the value assigned to that property.
-%    \begin{macrocode}
-\DeclareRobustCommand{\tpSetProperty}[2]{\expandafter\long\expandafter\protect\expandafter\def\csname tp@\tp@cur@cont @#1\endcsname{#2}}
-%    \end{macrocode}
-% This high-level macro is a variant of \lstinline{\tpSetProperty}
-% except that it expands the value \#2 \textit{once} before assigning
-% it to the property macro with the name \#1. This can be used to
-% assign the current value of a variable macro, dimension, counter or
-% length to a property.
-%    \begin{macrocode}
-\DeclareRobustCommand{\tpSetValProp}[2]{\def\@tempa{\tpSetProperty{#1}}\expandafter\@tempa\expandafter{#2}}
-%    \end{macrocode}
-% This is another variant of \lstinline{\tpSetProperty} that
-% \textit{fully expands} it's value in \#2 before the Property is
-% stored. Use this if you need to use conditionals to determine the
-% actual values of Properties that otherwise expect fixed named or
-% dimensional values.
-%    \begin{macrocode}
-\DeclareRobustCommand{\tpSetPropertyX}[2]{\expandafter\long\expandafter\protect\expandafter\edef\csname tp@\tp@cur@cont @#1\endcsname{#2}}
-%    \end{macrocode}
-% High level command to use a previously set property.
-%    \begin{macrocode}
-\def\tpUseProperty#1{\csname tp@\tp@cur@cont @#1\endcsname}
-%    \end{macrocode}
-% Check if property \#1 is non-empty If so, do \#2, otherwise do \#3.
-%    \begin{macrocode}
-\DeclareRobustCommand{\tpIfProp}[3]{\long\def\@tempa{}%
-  \expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\@tempa#3\else#2\fi\ignorespaces}
-%    \end{macrocode}
-% Check if a property \#1's value is equal to \#2.
-% If so, do \#3, otherwise do \#4.
-%    \begin{macrocode}
-\DeclareRobustCommand{\tpIfPropVal}[4]{\long\def\@tempa{#2}%
-  \expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\@tempa\relax#3\else#4\fi\ignorespaces}
-%    \end{macrocode}
-% Add to namespace-specific defaults; \#1 is the namespace, \#2 is a block of property assignments.
-%    \begin{macrocode}
-\DeclareRobustCommand{\tpAddToDefault}[2]{\csgappto{tp@#1@default}{#2}}
-%    \end{macrocode}
-% This macro recursivly loads a namespace's properties, the properties
-% of parent namespaces, and the default properties (in reverse
-% order). \#1 is the current namespace, \#2 is the top-level namespace.
-%    \begin{macrocode}
-\def\tpCascadeProps#1#2{%
-  \csname tp@#2@default\endcsname
-  \expandafter\ifx\csname tp@#2@#1@parent\endcsname\relax\else
-    \expandafter\tp@inherit@props\expandafter{\csname tp@#2@#1@parent\endcsname}{#2}%
-  \fi
-  \csname tp@#2@#1@properties\endcsname
-}
-%    \end{macrocode}
-% This low-level macro recursivly loads properties from parent
-% namespaces, if they exist. \#1 is the parent (may be empty), \#2 is
-% the macro family.
-%    \begin{macrocode}
-\def\tp@inherit@props#1#2{%
-  \expandafter\ifx\csname tp@#2@#1@parent\endcsname\relax\else
-    \edef\@tempa{\csname tp@#2@#1@parent\endcsname}%
-    \expandafter\tp@inherit@props\expandafter{\@tempa}{#2}%
-  \fi
-  \csname tp@#2@#1@properties\endcsname
-}
-%    \end{macrocode}
 % \section{Classes}
 % CSS-like classes, technically nothing but property lists.
 %
@@ -216,7 +144,7 @@
 % \lstinline{default} is used. \#4 is the declaration block of the
 % class. This argument usually containsa set of property assignments
 % using the \lstinline|\tpSetProperty{<prop>}{<val>}| macro, see
-% Sect.~\ref{sec:common:props}. The first optional argument \#1 is the
+% Sect.~\ref{sec:kernel:props}. The first optional argument \#1 is the
 % class' namespace. Using namespaces, you can have classes of the
 % same name for different namespaces, e.g., a \lstinline{default}
 % class for each float and heading namespaces. The second optional
