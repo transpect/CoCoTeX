@@ -15,7 +15,6 @@
 \NeedsTeXFormat{LaTeX2e}[2018/12/01]
 \ProvidesPackage{transpect-title}
     [\filedate \fileversion le-tex transpect title module]
-
 %    \end{macrocode}
 % \section{Top-Level Interface}
 %
@@ -123,14 +122,14 @@
 %
 %    \begin{macrocode}
 \def\tp@title@generic@comp{%
-  \tpDeclareComp[GenericMetaBlock]{tpGenericMetaBlock}{\expandafter\global}{}%
+  \tpDeclareComp{GenericMetaBlock}{\expandafter\global}{}%
   \tpDeclareComponentGroup{tpGenericMeta}{%
-    \tpDeclareCountedComp{Heading}{heading}%
-    \tpDeclareCountedComp{Content}{content}%
+    \tpDeclareCountedComp{Heading}%
+    \tpDeclareCountedComp{Content}%
   }}
 \def\tp@title@generic@eval{{%
   \def\tp@cur@cont{titlepage}%
-  \tpComposeCollection{GenericMeta}{generic-meta-format}{GenericMetaBlock}
+  \tpComposeCollection{tpGenericMeta}{generic-meta-format}{GenericMetaBlock}
 }}
 %    \end{macrocode}
 %
@@ -140,38 +139,38 @@
 % supporter callouts.
 %    \begin{macrocode}
 \def\tp@title@fundings@comp{%
-  \tpDeclareComp[FundingBlock]{tpFundingBlock}{\expandafter\global}{}%
+  \tpDeclareComp{FundingBlock}{\expandafter\global}{}%
   \tpDeclareComponentGroup{tpFunding}{%
-    \tpDeclareCountedComp{FundName}{name}%
-    \tpDeclareCountedComp{FundLogo}{logo}%
-    \tpDeclareCountedComp{FundID}{id}%
+    \tpDeclareCountedComp{FundName}%
+    \tpDeclareCountedComp{FundLogo}%
+    \tpDeclareCountedComp{FundID}%
   }%
 }
 \def\tp@title@fundings@eval{{%
     \def\tp@cur@cont{titlepage}%
-    \tpComposeCollection{Funding}{fund-format}{FundingBlock}%
+    \tpComposeCollection{tpFunding}{fund-format}{FundingBlock}%
 }}
 %    \end{macrocode}
 % \subsection{Name lists}
 % Shortcut to declare Name Components
 %    \begin{macrocode}
 \def\tp@declare@name@block#1#2#3#4{%
-  \tpDeclareComp[#1#2]{tp#1#2}{\expandafter\global}{}%
+  \tpDeclareComp{#1#2}{\expandafter\global}{}%
   \expandafter\gdef\csname tp@title@#1@#3@name\endcsname{#4}%
 }
 \def\tp@title@name@comp#1#2{%
   \tp@declare@name@block{#1}{NameList}{format}{#2-format}%
   \tp@declare@name@block{#1}{MetaBlock}{meta}{#2-meta-format}%
   \tpDeclareComponentGroup{tp#1}{%
-    \tpDeclareCountedComp{FullName}{full-name}%
-    \tpDeclareCountedComp{SurName}{sur-name}%
-    \tpDeclareCountedComp{FirstName}{first-name}%
-    \tpDeclareCountedComp{MidName}{mid-name}%
-    \tpDeclareCountedComp{PersonPrefix}{person-prefix}%
-    \tpDeclareCountedComp{PersonID}{person-id}%
-    \tpDeclareCountedComp{AffilID}{affil-id}%
-    \tpDeclareCountedComp{Mail}{mail}%
-    \tpDeclareCountedComp{Bio}{bio}%
+    \tpDeclareCountedComp{FullName}%
+    \tpDeclareCountedComp{SurName}%
+    \tpDeclareCountedComp{FirstName}%
+    \tpDeclareCountedComp{MidName}%
+    \tpDeclareCountedComp{PersonPrefix}%
+    \tpDeclareCountedComp{PersonID}%
+    \tpDeclareCountedComp{AffilID}%
+    \tpDeclareCountedComp{Mail}%
+    \tpDeclareCountedComp{Bio}%
   }%
 }
 %    \end{macrocode}
@@ -183,7 +182,7 @@
 % This macro eventually evaluates the name family's attributes
 %    \begin{macrocode}
 \def\tp@eval@name@attrs#1{%
-  \tp@iterate{\@tempcnta}{\@ne}{\expandafter\the\csname #1-Cnt\endcsname}{%
+  \tp@iterate{\@tempcnta}{\@ne}{\expandafter\the\csname tp#1-Cnt\endcsname}{%
     \expandafter\ifx\csname tp@title@#1-\the\@tempcnta @attrs\endcsname\relax\else
       \tpParseAttributes{#1-\the\@tempcnta }{\csname tp@title@#1-\the\@tempcnta @attrs\endcsname}%
     \fi
@@ -194,15 +193,15 @@
 \def\tp@title@name@eval#1#2{{%
     \tpNamespace{titlepage}%
     \tp@eval@name@attrs{#1}%
-    \tpComposeCollection{#1}{\csname tp@title@#1@meta@name\endcsname}{#1MetaBlock}
-    \tpApplyCollection{#1}{\csname tp@title@#1@format@name\endcsname}{#1NameList}%
+    \tpComposeCollection{tp#1}{\csname tp@title@#1@meta@name\endcsname}{#1MetaBlock}
+    \tpApplyCollection{tp#1}{\csname tp@title@#1@format@name\endcsname}{#1NameList}%
     \tp@create@editor@string{#1}%
   }}%
 %    \end{macrocode}
 %
 %    \begin{macrocode}
 \def\tp@create@editor@string#1{%
-  \def\@tempa{Author}\def\@argi{#1}%
+  \def\@tempa{tpAuthor}\def\@argi{#1}%
   \ifx\@tempa\@argi\else
     \expandafter\ifx\csname tp@\tp@cur@cont @#1NameList\endcsname\relax\else
       \expandafter\xdef\csname tp@\tp@cur@cont @#1NameList\endcsname{%
@@ -226,7 +225,7 @@
 %    \begin{macrocode}
 \def\tp@title@macro{\@ifnextchar[\@tp@title@macro{\@tp@title@macro[]}}%]
 \def\@tp@title@macro[#1]#2{%
-  \tpDeclareComp[#2]{tp#2}{\expandafter\global}{}%
+  \tpDeclareComp{#2}{\expandafter\global}{}%
   \if!#1!\else\csname tp#2\endcsname{#1}\fi%
 }
 %    \end{macrocode}
@@ -484,7 +483,7 @@
        \tpUseProperty{counted-meta-sep}}{}%
   }
   \tpSetProperty{name-format}{%
-    \tpIfComp{FullName}{}{\tpSetComp{FullName}{\tpUseComp{FirstName}\space\tpUseComp{SurName}}}%
+    \tpIfComp{FullName}{}{\tpComp{FullName}{\tpUseComp{FirstName}\space\tpUseComp{SurName}}}%
     \tpUseComp{FullName}%
     \tpUseProperty{counted-name-sep}%
   }
