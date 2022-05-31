@@ -97,44 +97,6 @@
   \let\label\@gobble
 }%
 %    \end{macrocode}
-%
-% \section{Attributes}
-% In this part, we provide some macros to parse enviroment
-% attributes. Curtesy of the \lstinline{htmltabs} package.
-%
-%    \begin{macrocode}
-\begingroup
-\catcode`"=12
-%    \end{macrocode}
-% High level wrapper for the attribute parser; \#1 is the parent node of the attribute, \#2 is the attribute chain
-%    \begin{macrocode}
-\gdef\tpParseAttributes#1#2{%
-  \if!#1!\else
-    \if!#2!\else
-      \def\tp@cur@node{#1}%
-      \@tp@parse@attributes #2,,\@nil
-    \fi\fi}
-%    \end{macrocode}
-% the actual, recursively applying, parser:
-%    \begin{macrocode}
-\gdef\tp@parse@kv#1=#2=#3\@nil{%
-  \edef\@argii{#2}%
-  \ifx\@argii\@empty
-    \expandafter\let\csname tp@\tp@cur@node @attr@#1\endcsname\@empty%
-  \else
-    \ifx #2 =\else
-      \expandafter\def\csname tp@\tp@cur@node @attr@#1\endcsname{#2}%
-    \fi
-  \fi}
-\gdef\@tp@parse@attributes #1,#2,\@nil{%
-  \if!#1!\else
-    \tp@parse@kv#1==\@nil
-    \if!#2!\else
-      \@tp@parse@attributes#2,\@nil
-    \fi\fi}
-\endgroup
-
-%    \end{macrocode}
 % \section{Style Classes}
 % CSS-like style classes, technically nothing but property lists.
 %
