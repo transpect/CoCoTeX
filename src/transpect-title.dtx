@@ -352,8 +352,8 @@
   \tpSetProperty{fund-width}{.5\textwidth}
   \tpSetProperty{fund-vertical-sep}{\baselineskip}%
   \tpSetProperty{fund-sep}{%
-    \CalcModulo{\tpCurCount}{\tpUseProperty{funding-columns}}%
-    \ifnum\the\tpModulo=\z@
+    \expandafter\@tempcnta\CalcModulo{\tpCurCount}{\tpUseProperty{funding-columns}}%
+    \ifnum\@tempcnta=\z@
       \par
       \ifnum\tpCurCount<\tpTotalCount\relax
         \vskip\tpUseProperty{fund-vertical-sep}%

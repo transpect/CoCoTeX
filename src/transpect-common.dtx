@@ -1,13 +1,10 @@
 % \chapter{transpect-common.dtx}
-% This file provides some basic macros and facilities like macro
-% hooks.
+% This file provides some macros that are used in more than one
+% \lstinline{transpect-tex} module.
+%
 %    \begin{macrocode}[gobble=1]
 %<*common>
 %    \end{macrocode}
-% \section*{Common workflow of the headings module}
-%
-%
-% \section{Style Preface}
 %    \begin{macrocode}
 %%
 %% module for le-tex transpect.cls that provides some commonly used base macros.
@@ -22,28 +19,80 @@
 \RequirePackage{iftex}
 %    \end{macrocode}
 %
-% \section{Common low level macros}
+% \section{Commonly Used Low-Level Macros and Registers}
 % Contains common macros used in the transpect-tex modules and that
 % are intended for macro and stylesheet programming.
 %    \begin{macrocode}
 \RequirePackage{transpect-kernel}
 %    \end{macrocode}
+% \subsection{Hard Dependencies}
+% Hard requirements for all transpect-tex modules:
+%    \begin{macrocode}
+\usepackage{xcolor}
+%    \end{macrocode}
+% Including the \lstinline{graphicx} package and catching case-insensitive
+% graphics file's endings from Word:
+%    \begin{macrocode}
+\usepackage{graphicx}
+\DeclareGraphicsRule{.EPS}{eps}{.EPS}{}
+%    \end{macrocode}
 %
 % \subsection{Common Variables}
-%    \begin{macrocode}
 %
+% \subsubsection{String Variables for Value Comparisions}
+% \begin{macro}{\tp@str@default}
+%    \begin{macrocode}
 \def\tp@str@default{default}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tp@str@table}
+%    \begin{macrocode}
 \def\tp@str@table{table}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tp@str@figure}
+%    \begin{macrocode}
 \def\tp@str@figure{figure}
 %    \end{macrocode}
-% prefix macro used to execute code after the next \lstinline{\fi}:
+% \end{macro}
+%
+% \subsubsection{Box Registers}
+% Some temporary boxes that won't interfere with LaTeX's temporary
+% boxes.
+% \begin{macro}{\tp@tempboxa}
+%    \begin{macrocode}
+\newbox\tp@tempboxa
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tp@tempboxb}
+%    \begin{macrocode}
+\newbox\tp@tempboxb
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsubsection{Length and Skip Registers}
+% \begin{macro}{\tp@tempskipa}
+%    \begin{macrocode}
+\newskip\tp@tempskipa
+%    \end{macrocode}
+% \end{macro}
+% \subsection{Helper macros}
+% \begin{macro}{\afterfi} used to execute code after the next \lstinline{\fi}:
 %    \begin{macrocode}
 \def\afterfi#1\fi{\fi#1}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tp@topstrut} is a \lstinline{\strut} that has the
+%   height of \lstinline{\topskip} and the depth of the difference
+%   between the \lstinline{\baselineskip} and \lstinline{\topskip}.
+%    \begin{macrocode}
 \def\tp@topstrut{\vrule\@width\z@\@height\topskip\@depth\dimexpr\baselineskip-\topskip\relax}
 %    \end{macrocode}
-% \lstinline{\afterbox} prevents indentation and additional spacing after
-% environments. Intended to be used in combination with
-% \lstinline{\aftergroup}.
+% \end{macro}
+% \begin{macro}{\afterbox}
+%   prevents indentation and additional spacing after
+%   environments. Intended to be used in combination with
+%   \lstinline{\aftergroup}.
 %    \begin{macrocode}
 \def\@afterbox{%
   \everypar{%
@@ -60,35 +109,50 @@
       \everypar{}%
     \fi}}
 %    \end{macrocode}
-% hard requirements for all transpect derivates:
+% \end{macro}
+%
+% \subsection{Masks}
+% These macros are intended to mask non-content markup, like page- or
+% line breaking commands in order to find and remove or alter them
+% easier.
+% \begin{macro}{\hack} intended to mask line breaking macros.
 %    \begin{macrocode}
-\usepackage{xcolor}
+\let\hack\@firstofone
 %    \end{macrocode}
-% Including the \lstinline{graphicx} package and catching case-insensitive
-% graphics file's endings from Word:
+% \end{macro}
+% \begin{macro}{\hackfor} intended to hide line breaking macros.
 %    \begin{macrocode}
-\usepackage{graphicx}
-\DeclareGraphicsRule{.EPS}{eps}{.EPS}{}
+\let\hackfor\@gobble
 %    \end{macrocode}
-% This macro is used to calculate the ratio between two integers.
+% \end{macro}
+% \begin{macro}{\Hack} intended to mask page breaking macros.
 %    \begin{macrocode}
-\def\CalcRatio#1#2{\strip@pt\dimexpr\number\numexpr\number\dimexpr#1\relax*65536/\number\dimexpr#2\relax\relax sp}
-\newcount\tpModulo
-\def\CalcModulo#1#2{\tpModulo=\numexpr#1-(#1/#2)*#2\relax}
+\let\Hack\@firstofone
 %    \end{macrocode}
-% Some temporary boxes that won't interfere with LaTeX's temporary
-% boxes.
+% \end{macro}
+% \begin{macro}{\Hackfor} intended to hide page breaking macros.
 %    \begin{macrocode}
-\newbox\tp@tempboxa
-\newbox\tp@tempboxb
-\newskip\tp@tempskipa
+\let\Hackfor\@gobble
 %    \end{macrocode}
-% Temporarily silence a macro with a mandatory argument that may or
-% may not have an optional argument. Use it like this:
-% \lstinline{\let\yourMacroWithOptArg\@gobbleopt}
+% \end{macro}
+% \begin{macro}{\@gobbleopt} intended to nullify a macro's argument
+%   with a possible optional argument interfering.
+%
+%   Use it like this:
+%   \lstinline{\let\yourMacroWithOptArg\@gobbleopt}
 %    \begin{macrocode}
 \long\def\@gobbleopt{\@ifnextchar[\@@gobbleopt{\@@gobbleopt[]}}%]
 \long\def\@@gobbleopt[#1]#2{}%
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tpGobble} is used to de-activate certain macros to
+%   prevent them from being called multiple times while processing
+%   contents. An example is a footnote inside a caption while
+%   calculating the height of the caption. In this case, we need the
+%   space the footnote symbol requires without the actual footnote
+%   being written into the footnote insert, since that should happen
+%   when we actually print the caption.
+%    \begin{macrocode}
 \def\tpGobble{%
   \renewcommand\footnote[2][\the\c@footnote]{\def\@thefnmark{##1}\@makefnmark}%
   \renewcommand\index[2][]{}%
@@ -97,58 +161,25 @@
   \let\label\@gobble
 }%
 %    \end{macrocode}
-% \section{Style Classes}
-% CSS-like style classes, technically nothing but property lists.
-%
-% The top-level macro \lstinline|\tpDeclareClass[#1]{#2}[#3]{#4}| has
-% four arguments, two of which are optional. \#2 is the name of the
-% class. If this argument is empty, the special class name
-% \lstinline{default} is used. \#4 is the declaration block of the
-% class. This argument usually containsa set of property assignments
-% using the \lstinline|\tpSetProperty{<prop>}{<val>}| macro, see
-% Sect.~\ref{sec:kernel:props}. The first optional argument \#1 is the
-% class' namespace. Using namespaces, you can have classes of the
-% same name for different namespaces, e.g., a \lstinline{default}
-% class for each float and heading namespaces. The second optional
-% argument \#3 is the parent class. Properties from that class are
-% loaded automatically prior to the loading of the current class. This
-% applies recursively allowing for a cascading of property values,
-% like in CSS.
+% \end{macro}
+% \subsection{Arithmetics}
+% \begin{macro}{\CalcRatio} is used to calculate the ratio between two
+%   integers.
 %    \begin{macrocode}
-\long\def\tpDeclareClass{\@ifnextchar [{\@tp@set@class}{\@tp@set@class[default]}}%]
-\long\def\@tp@set@class[#1]#2{\@ifnextchar [{\tp@set@class[#1]{#2}}{\tp@set@class[#1]{#2}[]}}%]
-\long\gdef\tp@default@class@default{}
-\long\def\tp@set@class[#1]#2[#3]#4{%
-  \def\@argii{#2}\ifx\@argii\@empty\let\@argii\tp@str@default\fi%
-  \if!#3!\else
-    \expandafter\long\expandafter\def\csname tp@#1@class@\@argii @parent\endcsname{#3}%
-  \fi
-  \expandafter\long\expandafter\def\csname tp@#1@class@\@argii\endcsname{#4}%
-}
+\def\CalcRatio#1#2{\strip@pt\dimexpr\number\numexpr\number\dimexpr#1\relax*65536/\number\dimexpr#2\relax\relax sp}
 %    \end{macrocode}
-% High level macro to expand and “activate” a class's properties,
-% those of its recursive ancestor classes, and the default class
-% respecting the currently active namespace. \#1 is the class name,
-% \#2 is the namespace.
+% \end{macro}
+% \begin{macro}{\CalcModulo} is used to calculate the remainder of
+%   integer division of \#1 by \#2.
 %    \begin{macrocode}
-\def\tpUseClass#1#2{%
-  \expandafter\ifx\csname tp@#2@class@#1\endcsname\relax
-    \expandafter\ifx\csname tp@default@class@#1\endcsname\relax
-      \PackageError{transpect.cls}{Class `#1' with scope `#2' not defined!}{Please declare the class `#1'!}%
-    \fi
-  \fi
-  \csname tp@default@class@#1\endcsname%
-  \expandafter\ifx\csname tp@#2@class@#1@parent\endcsname\relax\else
-    \expandafter\tpUseClass\expandafter{\csname tp@#2@class@#1@parent\endcsname}{#2}%
-  \fi
-  \csname tp@#2@class@#1\endcsname}
+\def\CalcModulo#1#2{\numexpr#1-(#1/#2)*#2\relax}
 %    \end{macrocode}
-%
-% \subsection{minusvspace}
-% Counterpart to \LaTeX's \lstinline{\addvspace}: if the value of
-% \lstinline{\minusvspace} is larger than \lstinline{\lastskip},
-% \lstinline{\lastskip} is used. Otherwise, the value of
-% \lstinline{\minusvspace} is used.
+% \end{macro}
+% \begin{macro}{\minusvspace}
+%   Counterpart to \LaTeX's \lstinline{\addvspace}: if the value of
+%   \lstinline{\minusvspace} is larger than \lstinline{\lastskip},
+%   \lstinline{\lastskip} is used. Otherwise, the value of
+%   \lstinline{\minusvspace} is used.
 %    \begin{macrocode}
 \def\@xminusvskip{%
   \ifdim\lastskip<\@tempskipb
@@ -183,32 +214,31 @@
     \@noitemerr
   \fi}
 %    \end{macrocode}
-%
-% \subsection{Masks}
-% These macros are intended to mask non-content markup, like page- or
-% line breaking commands in order to find and remove or alter them
-% easier.
-%
-%    \begin{macrocode}
-\let\hack\@firstofone
-\let\Hack\@firstofone
-\let\hackfor\@gobble
-\let\Hackfor\@gobble
-
-%    \end{macrocode}
+% \end{macro}
 % \subsection{Determine actual page number}
 %
-% Largely adapted from the \lstinline{marginnote} package.
+% We need to determine the real page a floating object is
+% printed. This mechanism is largely an adaption of the mechanism used
+% in the \lstinline{marginnote} package.
 %
-% Counting absolute page numbers may be misleading when the
+% Counting absolute page numbers, however, may be misleading when the
 % transpect-title module is loaded and the cover page is not followed
 % by an empty page. Therefore, we save the default page counter from
 % {\LaTeX} to evaluate it independently from the actual manner of
 % counting.
 %    \begin{macrocode}
 \def\the@tp@thispage{}%
+%    \end{macrocode}
+% 
+%    \begin{macrocode}
 \newcount\tp@abspage \tp@abspage\z@ \def\thetp@abspage{\the\tp@abspage}
+%    \end{macrocode}
+% 
+%    \begin{macrocode}
 \newif\if@tp@odd \@tp@oddtrue
+%    \end{macrocode}
+% 
+%    \begin{macrocode}
 \AtBeginDocument{%
   \global\tp@abspage=\c@page\relax%
   \g@addto@macro\@outputpage{\global\tp@abspage\c@page}%
@@ -250,10 +280,11 @@
   \protected@write\@auxout{\def\the@tp@cur@cont{\tp@cur@cont}\let\thetp@abspage\relax}{%
     \string\expandafter\string\gdef\string\csname\space \tp@cur@cont-\the@tp@thispage-\the@tp@atthispage\string\endcsname{\thetp@abspage}}%
 }
-
 %    \end{macrocode}
 %
-% \section{Macros used in several modules}
+% \section{Re-Thinking {\LaTeX} Core Functions}
+%
+% \subsection{Keeping .aux-Files Up-to-Date}
 %
 % This macro looks if \#1 has already been defined (e.g., in an
 % earlier tex run) and stores that inital value back in the aux files
@@ -372,7 +403,7 @@
   \tp@set@hang{#1}%
 }
 %    \end{macrocode}
-% \subsection{Macro to determine indentation}
+% \subsection{Indentation}
 %
 % Macro to determine and set the hanging indent of a counter. \#1 is
 % the internal Property prefix.

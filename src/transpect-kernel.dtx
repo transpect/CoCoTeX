@@ -673,6 +673,59 @@
   \fi}
 %    \end{macrocode}
 % \end{macro}
+% \subsection{Style Classes}
+%
+% Style Classes are locally usable sub-Containers.
+%
+% \begin{macro}{\tpDeclareClass}
+%   The top-level macro \lstinline|\tpDeclareClass[#1]{#2}[#3]{#4}|
+%   has four arguments, two of which are optional. \#2 is the name of
+%   the class. If this argument is empty, the special class name
+%   \lstinline{default} is used. \#4 is the declaration block of the
+%   class. This argument usually containsa set of property assignments
+%   using the \lstinline|\tpSetProperty{<prop>}{<val>}| macro, see
+%   Sect.~\ref{sec:kernel:props}. The first optional argument \#1 is
+%   the Style Class' parent Container. Using parent Containers, you
+%   can have Style Classes of the same name for different
+%   (sub-)Containers, e.g., a \lstinline{default} class for each float
+%   and heading Container. The second optional argument \#3 is the
+%   parent Style Class. Properties from that Style Class are loaded
+%   automatically prior to the loading of the current Style Class's
+%   Properties. This applies recursively allowing for a cascading of
+%   property values, as in CSS.
+%    \begin{macrocode}
+\long\def\tpDeclareClass{\@ifnextchar [{\@tp@set@class}{\@tp@set@class[default]}}%]
+\long\def\@tp@set@class[#1]#2{\@ifnextchar [{\tp@set@class[#1]{#2}}{\tp@set@class[#1]{#2}[]}}%]
+\long\gdef\tp@default@class@default{}
+\long\def\tp@set@class[#1]#2[#3]#4{%
+  \def\@argii{#2}\ifx\@argii\@empty\let\@argii\tp@str@default\fi%
+  \if!#3!\else
+    \expandafter\long\expandafter\def\csname tp@#1@class@\@argii @parent\endcsname{#3}%
+  \fi
+  \expandafter\long\expandafter\def\csname tp@#1@class@\@argii\endcsname{#4}%
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tpUseClass}
+%   is a user-level macro to expand and “activate” a Style Class'
+%   Properties, those of its recursive ancestor Style Classes, and the
+%   default Style Class respecting the current Container. \#1 is the
+%   Style Class name, \#2 is the Container.
+%    \begin{macrocode}
+\def\tpUseClass#1#2{%
+  \expandafter\ifx\csname tp@#2@class@#1\endcsname\relax
+    \expandafter\ifx\csname tp@default@class@#1\endcsname\relax
+      \PackageError{transpect.cls}{Class `#1' with scope `#2' not defined!}{Please declare the class `#1'!}%
+    \fi
+  \fi
+  \csname tp@default@class@#1\endcsname%
+  \expandafter\ifx\csname tp@#2@class@#1@parent\endcsname\relax\else
+    \expandafter\tpUseClass\expandafter{\csname tp@#2@class@#1@parent\endcsname}{#2}%
+  \fi
+  \csname tp@#2@class@#1\endcsname}
+% \end{macro}
+%    \end{macrocode}
+% \end{macro}
 % \section{Legacy Functions}
 %    \begin{macrocode}
  \def\tpNamespace#1{\def\tp@cur@cont{#1}}
