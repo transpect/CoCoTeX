@@ -80,17 +80,21 @@
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tpDeclareEnv}
-%   Each container usually consists of a {\LaTeX} environment. The
-%   \lstinline{\tpDeclareEnv} macro is used to set up those
-%   environments, \#\#1 is used for the stuff done at the beginning of
-%   the environment, \#\#2 for the stuff done at the end. The
-%   environment's name is identical to the container's name.
+%   Each container usually is realised as a {\LaTeX} environment. The
+%   \lstinline{\tpDeclareEnv} macro is used to set up this
+%   environment. Usually, the environment has the same name as the
+%   Container. With the optional argument \#\#1 you can override the
+%   environment's name.  However, keep in mind that the Container's
+%   name is not changed by re-naming the corresponding
+%   environment. \#\#2 is used for the stuff done at the beginning of
+%   the environment, \#\#3 for the stuff done at the end.
 %
 %   In the begin part, the Types declared in the Container
 %   declaration's body should be evaluated using the
 %   \lstinline{\tpEvalType} macro, see below.
 %    \begin{macrocode}
-    \def\tpDeclareEnv##1##2{\csgdef{#1}{\global\let\reserved@cont\tp@cur@cont\def\tp@cur@cont{#1}##1}\csgdef{end#1}{##2}\global\let\tp@cur@cont\reserved@cont}%
+    \def\tpDeclareEnv{\@ifnextchar [{\tp@declare@env}{\tp@declare@env[#1]}}%]
+    \def\tp@declare@env[##1]##2##3{\csgdef{##1}{\global\let\reserved@cont\tp@cur@cont\def\tp@cur@cont{#1}##2}\csgdef{end##1}{##3}\global\let\tp@cur@cont\reserved@cont}%
 %    \end{macrocode}
 % \end{macro}
 %    \begin{macrocode}
@@ -578,7 +582,8 @@
 % \subsection{Property Conditionals}\label{sec:kernel:prop:cond}
 %
 % \begin{macro}{\tpIfProp}
-% checks if a Property with the name \#1 is defined and non-empty. If so, do \#2, otherwise do \#3.
+%   checks if a Property with the name \#1 is defined and
+%   non-empty. If so, do \#2, otherwise do \#3.
 %    \begin{macrocode}
 \DeclareRobustCommand{\tpIfProp}[3]{\long\def\@tempa{}%
   \expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\@tempa#3\else#2\fi\ignorespaces}
@@ -597,11 +602,18 @@
 % \subsection{Handling of Optional Arguments}
 % Two simple internal macros to ease up the handling of optional
 % arguments that override Container Names
-% (\lstinline{\tp@opt@curcont}) and empty strings ((\lstinline{\tp@opt@empty})).
+% (\lstinline{\tp@opt@curcont}) and empty strings
+% ((\lstinline{\tp@opt@empty})).
+% \begin{macro}{\tp@opt@curcont}
 %    \begin{macrocode}
 \def\tp@opt@curcont#1{\@ifnextchar[{#1}{#1[\tp@cur@cont]}}%]
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tp@opt@empty}
+%    \begin{macrocode}
 \def\tp@opt@empty#1{\@ifnextchar[{#1}{#1[]}}%]
 %    \end{macrocode}
+% \end{macro}
 % \subsection{Iterators}
 % \begin{macro}{\tp@iterate}
 %   traverses in \#1-th steps (optional, defaults to $+1$) through

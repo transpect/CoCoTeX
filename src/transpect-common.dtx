@@ -226,24 +226,33 @@
 % by an empty page. Therefore, we save the default page counter from
 % {\LaTeX} to evaluate it independently from the actual manner of
 % counting.
+% \begin{macro}{\the@tp@thispage}
 %    \begin{macrocode}
 \def\the@tp@thispage{}%
 %    \end{macrocode}
-% 
+% \end{macro}
+% \begin{macro}{\tp@abspage}
 %    \begin{macrocode}
-\newcount\tp@abspage \tp@abspage\z@ \def\thetp@abspage{\the\tp@abspage}
+\newcount\tp@abspage \tp@abspage\z@
 %    \end{macrocode}
-% 
+% \end{macro}
+% \begin{macro}{\thetp@abspage}
+%    \begin{macrocode}
+\def\thetp@abspage{\the\tp@abspage}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\if@tp@odd}
 %    \begin{macrocode}
 \newif\if@tp@odd \@tp@oddtrue
 %    \end{macrocode}
-% 
+% \end{macro}
 %    \begin{macrocode}
 \AtBeginDocument{%
   \global\tp@abspage=\c@page\relax%
   \g@addto@macro\@outputpage{\global\tp@abspage\c@page}%
 }
 %    \end{macrocode}
+% \begin{macro}{\tp@test@page}
 % We split this into two parts. The first one is run before the
 % floating object is placed. It will store the page according to the
 % placement in the tex source code.
@@ -272,6 +281,8 @@
   \fi
 }
 %    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tp@save@page}
 % the second macro writes the actual position of the floating object
 % into the aux files. This macro has to be placed inside the float
 % environment/macro.
@@ -281,16 +292,18 @@
     \string\expandafter\string\gdef\string\csname\space \tp@cur@cont-\the@tp@thispage-\the@tp@atthispage\string\endcsname{\thetp@abspage}}%
 }
 %    \end{macrocode}
+% \end{macro}
 %
 % \section{Re-Thinking {\LaTeX} Core Functions}
 %
 % \subsection{Keeping .aux-Files Up-to-Date}
 %
-% This macro looks if \#1 has already been defined (e.g., in an
-% earlier tex run) and stores that inital value back in the aux files
-% for the following runs. Useful if you want to store only the highest
-% value of a parameter, like the maximum width of a heading number of
-% a certain level.
+% \begin{macro}{\tp@restore@init}
+%   looks if \#1 has already been defined (e.g., in an earlier tex
+%   run) and stores that inital value back in the aux files for the
+%   following runs. Useful if you want to store only the highest value
+%   of a parameter, like the maximum width of a heading number of a
+%   certain level.
 %    \begin{macrocode}
 \def\tp@restore@init#1#2{%
   \AtBeginDocument{%
@@ -298,11 +311,15 @@
       \immediate\write\@auxout{\string\expandafter\string\gdef\string\csname\space tp-#1-#2\string\endcsname{\csname tp-#1-#2\endcsname}}%
     \fi}}
 %    \end{macrocode}
-% This is a general line break macro intended to be re-defined if
-% necessary without touching LaTeX's kernel macros.
+% \end{macro}
+% \begin{macro}{\tpBreak}
+%   is a general line break macro intended to be re-defined if
+%   necessary without touching LaTeX's kernel page and line breaking
+%   macros.
 %    \begin{macrocode}
 \DeclareRobustCommand{\tpBreak}{\hfill\break}
 %    \end{macrocode}
+% \end{macro}
 %
 % \subsection{Content lists}
 %
@@ -319,16 +336,19 @@
 % \lstinline{l@<level>}, resp.) contains Components.
 %
 % Once a list file is read, those \lstinline{l@<level>} macros are
-% expanded in two steps. Each entry constitutes a Namespace on its
-% own, it therefore has a Namespace and can have multiple
-% Components. The first step is the extraction phase, where the
-% entry's Namespace is declared, the corresponding properties are
-% initialised, and its Components are extracted
+% expanded in two steps. Each entry constitutes a Container in its own
+% right. It therefore can have multiple Components. The first step is
+% the extraction phase, where the entry's Container is dynamically
+% declared, the corresponding properties are initialised, and its
+% Components are extracted
 %
-% This low-level macro is used to dynamically define
-% \lstinline{l@<level>} macros. Optional \#1 is an override for
-% counters that have to be restored, \#2 is the list file ending, \#3
-% numeric level, \#4 is the level's name.
+% \begin{macro}{\tp@init@l@}
+%   is a low-level macro used to dynamically define
+%   \lstinline{l@<level>} macros. Optional \#1 is an override for
+%   counters that have to be restored, \#2 is the list file ending
+%   (raw entries being stored in a file \lstinline{\jobname.#2}), \#3
+%   is a number that indicated the nesting depth, \#4 is the nested
+%   level's unique name.
 %    \begin{macrocode}
 \def\tp@init@l@{\@ifnextchar[\@tp@init@l@{\@tp@init@l@[]}}%]
 \def\@tp@init@l@[#1]#2#3#4{%
@@ -356,16 +376,23 @@
     \fi
     \ifLuaTeX\suppresslongerror=0\fi
   }}
-
-\def\tp@extract@generic#1#2#3#4{%
-}
-\def\tp@print@generic#1{%
-}
 %    \end{macrocode}
-% This macro expands the content of the l@<level> macro and contains
-% some code to catch and handle standard \LaTeX\ headings. \#1 is the
-% content of the l@-macro, \#2 is the namespace, and \#3 is the
-% Component prefix.
+% \end{macro}
+% \begin{macro}{\tp@extract@generic}
+%    \begin{macrocode}
+\def\tp@extract@generic#1#2#3#4{}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tp@print@generic}
+%    \begin{macrocode}
+\def\tp@print@generic#1{}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tp@expand@l@contents}
+%   expands the content of the l@<level> macro and contains some code
+%   to catch and handle standard \LaTeX\ headings. \#1 is the content
+%   of the l@-macro, \#2 is the namespace, and \#3 is the Component
+%   prefix.
 %    \begin{macrocode}
 \def\tp@expand@l@contents#1#2#3#4{%
   \sbox\z@{\def\numberline##1{\expandafter\gdef\csname tp@#2@#3Number\endcsname{##1}}#1}%
@@ -376,9 +403,11 @@
     #1%
   \fi}
 %    \end{macrocode}
-% This macro calculates number widths and prepares macros to be used
-% by the user. \#1 is the internal Property prefix, \#2 is the
-% user-level Component prefix, \#3 is the numerical list level.
+% \end{macro}
+% \begin{macro}{\tp@format@number}
+%   calculates number widths and prepares macros to be used by the
+%   user. \#1 is the internal Property prefix, \#2 is the user-level
+%   Component prefix, \#3 is the numerical list level.
 %    \begin{macrocode}
 \def\tp@format@number#1#2#3{%
   \tpSetProperty{#1formatted-number}{}%
@@ -403,10 +432,13 @@
   \tp@set@hang{#1}%
 }
 %    \end{macrocode}
+% \end{macro}
+%
 % \subsection{Indentation}
 %
-% Macro to determine and set the hanging indent of a counter. \#1 is
-% the internal Property prefix.
+% \begin{macro}{\tp@set@hang}
+%   determines and sets the hanging indent of a counter. \#1 is the
+%   internal Property prefix.
 %    \begin{macrocode}
 \def\tp@set@hang#1{%
   \tpSetProperty{#1hang-number}{\tpUseProperty{#1formatted-number}}%
@@ -420,9 +452,12 @@
             \tpIfPropVal{#1number-align}{right}{}{\hss}}}%
       \fi}{}}
 %    \end{macrocode}
-% Macro that determins the indent of the next higher level of the
-% list. ``Higher'' meaning hierarchical, i.e. the index is lower. \#1
-% is the Property prefix, \#2 is the numerical list level.
+% \end{macro}
+% \begin{macro}{\tp@det@prev@indent}
+%   determines the indent of the next higher level of the
+%   list. ``Higher'' meaning hierarchical, i.e. the index is
+%   lower. \#1 is the Property prefix, \#2 is the numerical list
+%   level.
 %    \begin{macrocode}
 \def\tp@det@prev@indent#1#2{%
   \@tempcnta\numexpr#2-1\relax
@@ -439,11 +474,14 @@
   \tp@store@maxwd{#1#2-indent}{\the\@tempdima}%
   \tpSetProperty{#1margin-left}{\csname tp-\tp@cur@cont-#1#2-indent\endcsname}}
 %    \end{macrocode}
-% This low-level macro takes the csname of an unprefixed dimension and
-% stores its value in the aux files iff the previous value of that
-% conrol structure is lower than the current value.
+% \end{macro}
+% \begin{macro}{\tp@store@maxwd}
+%   low-level macro to take the csname of an unprefixed dimension and
+%   store its value in the aux files iff the previous value of that
+%   conrol structure is lower than the current value.
 %
-% \#1 is the internal name of the property sans \lstinline{tp-}, \#2 is 
+%   \#1 is the internal name of the property, \#2
+%   is the value.
 %    \begin{macrocode}
 \def\tp@store@maxwd#1#2{%
   \expandafter\ifx\csname tp-\tp@cur@cont-#1\endcsname\relax
@@ -456,9 +494,11 @@
     \fi
   \fi}
 %    \end{macrocode}
-% Eventually, write the actually used values for margin-left and
-% indent into the headings's Property list. \#1 is the internal
-% property prefix, \#2 is the numerical list level.
+% \end{macro}
+% \begin{macro}{\tp@get@indent}
+%   Eventually, write the actually used values for margin-left and
+%   indent into the current container's Property list. \#1 is the
+%   internal property prefix, \#2 is the numerical list level.
 %    \begin{macrocode}
 \def\tp@get@indent#1#2{%
   \tpSetPropertyX{int-#1margin-left}{\tpUseProperty{#1margin-left}}%
@@ -490,30 +530,31 @@
                 \tpSetProperty{#1margin-left}{\z@}}}}}}%
     }
 %    \end{macrocode}
+% \end{macro}
+%
 % \subsection{Label generation and selection}
 %
-% \#1 is the language, \#2 is the internal reference name, and \#3 is the language specific label.
+% \begin{macro}{\tpSetBabelLabel} defined a language-dependent string
+%   macro for German and English varieties.  \#1 is the language, \#2
+%   is the internal reference name, and \#3 is the language specific
+%   label.
 %    \begin{macrocode}
-\def\tp@str@german{german}
-\def\tp@str@english{english}
-
 \def\tpSetBabelLabel#1#2#3{%
   \def\@lang{#1}%
   \expandafter\def\expandafter\@tempa\expandafter{\expandafter\def\csname #2name\endcsname{#3}}%
-  \ifx\@lang\tp@str@german
+  \ifdefstring\@lang{german}{%
     \expandafter\addto\expandafter\captionsgerman\expandafter{\@tempa}%
     \expandafter\addto\expandafter\captionsngerman\expandafter{\@tempa}%
-  \else
-    \ifx\@lang\tp@str@english
+  }{%
+    \ifdefstring\@lang{english}{%
       \expandafter\addto\expandafter\captionsbritish\expandafter{\@tempa}%
       \expandafter\addto\expandafter\captionsUKenglish\expandafter{\@tempa}%
       \expandafter\addto\expandafter\captionsenglish\expandafter{\@tempa}%
       \expandafter\addto\expandafter\captionsamerican\expandafter{\@tempa}%
       \expandafter\addto\expandafter\captionsUSenglish\expandafter{\@tempa}%
-    \else
-    \fi
-  \fi}
+    }{}}}
 %    \end{macrocode}
+% \end{macro}
 %    \begin{macrocode}[gobble=1]
 %</common>
 %    \end{macrocode}
