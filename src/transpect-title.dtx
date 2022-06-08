@@ -15,19 +15,21 @@
 \NeedsTeXFormat{LaTeX2e}[2018/12/01]
 \ProvidesPackage{transpect-title}
     [\filedate \fileversion le-tex transpect title module]
+\RequirePackage{transpect-meta}
 %    \end{macrocode}
 % \section{Top-Level Interface}
 %
 % Declarator for the tpMaketitle macro.
 %    \begin{macrocode}
 \tpDeclareContainer{titlepage}{%
+  \tpInherit {Components,Properties} from Meta;
   \tpDeclareType{Containers}{%
     \tp@title@simple@comps
-    \tp@title@generic@comp
+    \tp@meta@generic@comp
     \tp@title@fundings@comp
-    \tp@title@names{comp}%
+    \tp@title@editors{comp}%
   }%
-  \tpDeclareType{Properties}{\tp@titlepage}
+  \tpDeclareType{Properties}{\tp@titlepage}%
   \tpDeclareEnv[tpMeta]{\tp@Meta}{\tp@endMeta}%
 }
 
@@ -47,14 +49,16 @@
 %    \begin{macrocode}
 \def\tp@Meta{%
   \tpEvalType{Containers}%
+  \tpEvalType{Authors}%
 }
 
 \def\tp@endMeta{%
+  \tpNamespace{titlepage}%
   \tpEvalType{Properties}%
   \tp@maketitle
-  %
-  \tp@title@names{eval}%
-  \tp@title@generic@eval
+  \tp@meta@authors{eval}%
+  \tp@title@editors{eval}%
+  \tp@meta@generic@eval
   \tp@title@fundings@eval
   \tp@title@set@pdfmeta
   \let\tp@cur@cont\@empty
@@ -125,23 +129,6 @@
 }
 %    \end{macrocode}
 %
-% \section{Component handlers}
-% \subsection{Generic Blocks}
-%
-%
-%    \begin{macrocode}
-\def\tp@title@generic@comp{%
-  \tpDeclareComp{GenericMetaBlock}{\expandafter\global}{}%
-  \tpDeclareComponentGroup{tpGenericMeta}{%
-    \tpDeclareCountedComp{Heading}%
-    \tpDeclareCountedComp{Content}%
-  }}
-\def\tp@title@generic@eval{{%
-  \def\tp@cur@cont{titlepage}%
-  \tpComposeCollection{tpGenericMeta}{generic-meta-format}{GenericMetaBlock}
-}}
-%    \end{macrocode}
-%
 % \subsection{Funds, Grants, and Supporters}
 % Grants component group. This is a {\LaTeX} environment within
 % \lstinline{tpMeta} which allows to set up multiple funding, grant, or
@@ -160,74 +147,33 @@
     \tpComposeCollection{tpFunding}{fund-format}{FundingBlock}%
 }}
 %    \end{macrocode}
-% \subsection{Name lists}
-% Shortcut to declare Name Components
-%    \begin{macrocode}
-\def\tp@declare@name@block#1#2#3#4{%
-  \tpDeclareComp{#1#2}{\expandafter\global}{}%
-  \expandafter\gdef\csname tp@title@#1@#3@name\endcsname{#4}%
-}
-\def\tp@title@name@comp#1#2{%
-  \tp@declare@name@block{#1}{NameList}{format}{#2-format}%
-  \tp@declare@name@block{#1}{MetaBlock}{meta}{#2-meta-format}%
-  \tpDeclareComponentGroup{tp#1}{%
-    \tpDeclareCountedComp{FullName}%
-    \tpDeclareCountedComp{SurName}%
-    \tpDeclareCountedComp{FirstName}%
-    \tpDeclareCountedComp{MidName}%
-    \tpDeclareCountedComp{PersonPrefix}%
-    \tpDeclareCountedComp{PersonID}%
-    \tpDeclareCountedComp{AffilID}%
-    \tpDeclareCountedComp{Mail}%
-    \tpDeclareCountedComp{Bio}%
-  }%
-}
-%    \end{macrocode}
 % Evaluator for the Corresponding Author
 %    \begin{macrocode}
 \def\tp@title@eval@corresp#1#2{%
   \expandafter\ifx\csname tp@#1-#2@attr@corresp\endcsname\relax\else\tpUseProperty{corresp-mark}\fi}
 %    \end{macrocode}
-% This macro eventually evaluates the name family's attributes
+% Provides the editor name Components
 %    \begin{macrocode}
-\def\tp@eval@name@attrs#1{%
-  \tp@iterate{\@tempcnta}{\@ne}{\expandafter\the\csname tp#1-Cnt\endcsname}{%
-    \expandafter\ifx\csname tp@title@#1-\the\@tempcnta @attrs\endcsname\relax\else
-      \tpParseAttributes{#1-\the\@tempcnta }{\csname tp@title@#1-\the\@tempcnta @attrs\endcsname}%
-    \fi
-  }}
+\def\tp@title@editors#1{%
+  \csname tp@title@eds@#1\endcsname{Editor}{editor}%
+  \csname tp@title@eds@#1\endcsname{SeriesEditor}{series-editor}%
+}
+\let\tp@title@eds@comp\tp@meta@name@comp
+\def\tp@title@eds@eval#1#2{%
+  \tp@meta@name@eval{#1}{#2}%
+  \tp@create@editor@string{#1}%
+}
 %    \end{macrocode}
-% Evaluator for the name lists
-%    \begin{macrocode}
-\def\tp@title@name@eval#1#2{{%
-    \tpNamespace{titlepage}%
-    \tp@eval@name@attrs{#1}%
-    \tpComposeCollection{tp#1}{\csname tp@title@#1@meta@name\endcsname}{#1MetaBlock}
-    \tpApplyCollection{tp#1}{\csname tp@title@#1@format@name\endcsname}{#1NameList}%
-    \tp@create@editor@string{#1}%
-  }}%
-%    \end{macrocode}
-%
+% adds suffix to the editors
 %    \begin{macrocode}
 \def\tp@create@editor@string#1{%
-  \def\@tempa{tpAuthor}\def\@argi{#1}%
-  \ifx\@tempa\@argi\else
-    \expandafter\ifx\csname tp@\tp@cur@cont @#1NameList\endcsname\relax\else
-      \expandafter\xdef\csname tp@\tp@cur@cont @#1NameList\endcsname{%
-        \tpUseComp{#1NameList}%
-        \tpUseProperty{editor-suffix}%
-      }%
-    \fi
+  \expandafter\ifx\csname tp@\tp@cur@cont @#1NameList\endcsname\relax\else
+    \expandafter\xdef\csname tp@\tp@cur@cont @#1NameList\endcsname{%
+      \tpUseComp{#1NameList}%
+      \tpUseProperty{editor-suffix}%
+    }%
   \fi
 }%
-%    \end{macrocode}
-% Provides the Name Components
-%    \begin{macrocode}
-\def\tp@title@names#1{%
-  \csname tp@title@name@#1\endcsname{Author}{author}%
-  \csname tp@title@name@#1\endcsname{Editor}{editor}%
-  \csname tp@title@name@#1\endcsname{SeriesEditor}{series-editor}%
-}
 %    \end{macrocode}
 % \subsection{Simple Component Declarations}
 % Shortcut for simple value components
