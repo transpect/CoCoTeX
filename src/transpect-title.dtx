@@ -27,7 +27,8 @@
     \tp@title@simple@comps
     \tp@meta@generic@comp
     \tp@title@fundings@comp
-    \tp@title@editors{comp}%
+    \tpDeclareRole[editor]{Editor}%
+    \tpDeclareRole[series-editor]{SeriesEditor}%
   }%
   \tpDeclareType{Properties}{\tp@titlepage}%
   \tpDeclareEnv[tpMeta]{\tp@Meta}{\tp@endMeta}%
@@ -56,8 +57,9 @@
   \tpNamespace{titlepage}%
   \tpEvalType{Properties}%
   \tp@maketitle
-  \tp@meta@authors{eval}%
-  \tp@title@editors{eval}%
+  \tp@meta@role@eval{Author}%
+  \tp@title@eds@eval{Editor}%
+  \tp@title@eds@eval{SeriesEditor}%
   \tp@meta@generic@eval
   \tp@title@fundings@eval
   \tp@title@set@pdfmeta
@@ -152,17 +154,12 @@
 \def\tp@title@eval@corresp#1#2{%
   \expandafter\ifx\csname tp@#1-#2@attr@corresp\endcsname\relax\else\tpUseProperty{corresp-mark}\fi}
 %    \end{macrocode}
-% Provides the editor name Components
+%
 %    \begin{macrocode}
-\def\tp@title@editors#1{%
-  \csname tp@title@eds@#1\endcsname{Editor}{editor}%
-  \csname tp@title@eds@#1\endcsname{SeriesEditor}{series-editor}%
-}
-\let\tp@title@eds@comp\tp@meta@name@comp
-\def\tp@title@eds@eval#1#2{%
-  \tp@meta@name@eval{#1}{#2}%
-  \tp@create@editor@string{#1}%
-}
+\def\tp@title@eds@eval#1{%
+  \tp@meta@role@eval{#1}%
+  \tp@create@editor@string{#1}}
+
 %    \end{macrocode}
 % adds suffix to the editors
 %    \begin{macrocode}

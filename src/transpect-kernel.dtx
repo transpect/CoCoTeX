@@ -601,17 +601,22 @@
 % \section{Helper macros}
 % \subsection{Handling of Optional Arguments}
 % Two simple internal macros to ease up the handling of optional
-% arguments that override Container Names
-% (\lstinline{\tp@opt@curcont}) and empty strings
-% ((\lstinline{\tp@opt@empty})).
-% \begin{macro}{\tp@opt@curcont}
+% arguments.
+% \begin{macro}{\tp@opt@curcont} overrides Container Names with the optional argument.
 %    \begin{macrocode}
 \def\tp@opt@curcont#1{\@ifnextchar[{#1}{#1[\tp@cur@cont]}}%]
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@opt@empty}
+% \begin{macro}{\tp@opt@empty} passes an empty string if the optional argument is missing.
 %    \begin{macrocode}
 \def\tp@opt@empty#1{\@ifnextchar[{#1}{#1[]}}%]
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tp@opt@second} passes the first mandatory argument to
+%   the optional argument if the latter is missing.
+%    \begin{macrocode}
+\def\tp@opt@second#1{\def\@tempa[##1]##2{#1[##1\if!##1!##2\fi]{##2}}%
+  \@ifnextchar[{\@tempa}{\@tempa[]}}%]
 %    \end{macrocode}
 % \end{macro}
 % \subsection{Iterators}

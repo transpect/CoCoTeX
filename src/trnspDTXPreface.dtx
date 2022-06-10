@@ -61,9 +61,32 @@
   \DoNotIndex{#1}%
 }
 \let\endmacro\relax
-\def\SpecialMainIndex#1{%
-  \@bsphack
+\def\tpContainer{\begingroup
+   \catcode`\\12
+   \let\is@m@cro@\relax
+   \MakePrivateLetters\tp@doc@container%
+}
+\def\tp@doc@container#1{\endgroup \topsep\MacroTopsep%
+  \edef\saved@macroname{\string#1}%
+  \let\saved@indexname\saved@macroname
+  \ifx\is@m@cro@\relax
+    \submacrosection{Container {\ttfamily\string#1}}\ignorespaces
+  \else
+    \macrosection{Container {\ttfamily\string#1}}\ignorespaces
+  \fi
+  \SpecialContIndex{#1}\nobreak
+  \DoNotIndex{#1}%
+}
+\let\endtpContainer\relax%
+
+\def\SpecialMainIndex#1{\@bsphack
     \SpecialIndex@{#1}{\encapchar main}%
+  \@esphack}
+\def\SpecialContIndex#1{\@bsphack
+  \index{#1\actualchar{\protect\ttfamily#1}
+    (container)\encapchar usage}%
+  \index{containers:\levelchar#1\actualchar
+    {\protect\ttfamily#1}\encapchar usage}%
   \@esphack}
 
 \lstset{%
@@ -264,7 +287,7 @@
 \newdimen\pageskip \pageskip3em\relax
 \def\cleardoublepage{\clearpage\if@twoside \ifodd\c@page\else
     \hbox{}\thispagestyle{empty}\newpage\if@twocolumn\hbox{}\newpage\fi\fi\fi}
-\def\thechapter{File~\arabic{chapter}}
+\def\thechapter{Modul~\@arabic\c@chapter}
 \def\ps@headings{%
   \let\@oddfoot\@empty\let\@evenfoot\@empty
   \def\@evenhead{\hskip-\pageskip\hbox to \pageskip{\hfill\bfseries\color{spot}\thepage\enskip}\htbar\enskip{\sffamily\leftmark}\hfil}%
