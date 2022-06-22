@@ -109,9 +109,10 @@
 % \begin{macro}{\tpEvalType}
 %   calls the Declaration list for data Type \#1.
 %    \begin{macrocode}
-\def\tpEvalType#1{%
-  \tpKernelDebugMsg{Evaluating tp@type@#1@\tp@cur@cont:^^J \expandafter\meaning\csname tp@type@#1@\tp@cur@cont\endcsname}%
-  \csname tp@type@#1@\tp@cur@cont\endcsname
+\def\tpEvalType{\tp@opt@curcont\tp@eval@type}
+\def\tp@eval@type[#1]#2{%
+  \tpKernelDebugMsg{Evaluating tp@type@#2@#1:^^J \expandafter\meaning\csname tp@type@#2@#1\endcsname}%
+  \csname tp@type@#2@#1\endcsname
 }
 %    \end{macrocode}
 % \end{macro}
@@ -349,6 +350,7 @@
         \expandafter\expandafter\expandafter{\expandafter\tp@iterate@res\@tempb}%
       }%
       \expandafter\def\expandafter\tp@iterate@res\expandafter{\tp@iterate@res\noexpand\egroup}%
+    \message{#3: \expandafter\meaning\csname tp#3\endcsname}%
     \expandafter\csname tp#3\expandafter\endcsname\expandafter{\tp@iterate@res}%
   }%
 }
@@ -510,7 +512,7 @@
 %   for Containers. \#1 is the name of the Property, \#2 is the Value
 %   assigned to that Property.
 %    \begin{macrocode}
-\DeclareRobustCommand{\tpSetProperty}[2]{\expandafter\long\expandafter\protect\expandafter\def\csname tp@\tp@cur@cont @#1\endcsname{#2}}
+\DeclareRobustCommand{\tpSetProperty}[2]{\long\protect\csdef{tp@\tp@cur@cont @#1}{#2}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tpSetValProp}
@@ -530,7 +532,7 @@
 %   Properties that otherwise expect fixed named or dimensional
 %   values.
 %    \begin{macrocode}
-\DeclareRobustCommand{\tpSetPropertyX}[2]{\expandafter\long\expandafter\protect\expandafter\edef\csname tp@\tp@cur@cont @#1\endcsname{#2}}
+\DeclareRobustCommand{\tpSetPropertyX}[2]{\long\protect\csedef{tp@\tp@cur@cont @#1}{#2}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tpAddToDefault}
@@ -546,7 +548,7 @@
 % \begin{macro}{\tpUseProperty}
 %   is a user-level command to access a previously set Property.
 %    \begin{macrocode}
-\def\tpUseProperty#1{\csname tp@\tp@cur@cont @#1\endcsname}
+\def\tpUseProperty#1{\csuse{tp@\tp@cur@cont @#1}}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -586,7 +588,10 @@
 %   non-empty. If so, do \#2, otherwise do \#3.
 %    \begin{macrocode}
 \DeclareRobustCommand{\tpIfProp}[3]{\long\def\@tempa{}%
-  \expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\@tempa#3\else#2\fi\ignorespaces}
+  %\expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\relax#3\else
+    \expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\@tempa #3\else#2\fi
+  %\fi
+\ignorespaces}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tpIfPropVal}
@@ -634,6 +639,12 @@
     #5%
     \tp@iterate[#1]{#2}{\the#2}{#4}{#5}%
   \fi}%
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{\csmean} displays the meaning of a control sequence with the name of \#1.
+%    \begin{macrocode}
+\def\csmean#1{\expandafter\meaning\csname#1\endcsname}%
 %    \end{macrocode}
 % \end{macro}
 %

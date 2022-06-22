@@ -299,11 +299,37 @@
 % \subsection{Keeping .aux-Files Up-to-Date}
 %
 % \begin{macro}{\tp@restore@init}
-%   looks if \#1 has already been defined (e.g., in an earlier tex
-%   run) and stores that inital value back in the aux files for the
-%   following runs. Useful if you want to store only the highest value
-%   of a parameter, like the maximum width of a heading number of a
-%   certain level.
+%   The transpec-tex macro family provides a feature that allows the
+%   indention of counted elements to be just as wide as the widest
+%   counter that element needs to be printed.
+%
+%   During compilation the width of each counter is written into the
+%   aux-files if it is bigger than previously calculated width for
+%   that same counter. So, for the next run, the widest instance of
+%   each counter can be retrieved from the project's \lstinline{.aux}
+%   file(s).
+%
+%   This simple approach, however, has a major problem: if the aux
+%   file is updated only if the current width of a counter is wider
+%   than the maximum, then the aux-file is left empty after the second
+%   run, which yields wrong indents after the third run when the
+%   maximums are newly written. This process repeats indefinitely with
+%   alternating output every two runs.
+%
+%   Alternatively, the aux-file could be updated iff the the current
+%   width is greater \textit{or equal} to the maximum. This, however,
+%   leads to .aux-files with lots of identical entries if the number
+%   of counters is large whose widths are the same as the maximmm.
+%
+%   To prevent this, this macro can be used to write the maximum value
+%   established in the previous run into the aux-file exactly once at
+%   the beginnnig of the document environment.
+%
+%   It checks if a macro that stores the maximum value is already
+%   defined, and re-writes its definition towards the maximum value
+%   into the .aux-file.
+%
+%   \#1 is the container name, \#2 is the counter to be stored.
 %    \begin{macrocode}
 \def\tp@restore@init#1#2{%
   \AtBeginDocument{%
@@ -350,7 +376,7 @@
 %   is a number that indicated the nesting depth, \#4 is the nested
 %   level's unique name.
 %    \begin{macrocode}
-\def\tp@init@l@{\@ifnextchar[\@tp@init@l@{\@tp@init@l@[]}}%]
+\def\tp@init@l@{\tp@opt@empty\@tp@init@l@}%
 \def\@tp@init@l@[#1]#2#3#4{%
   \expandafter\ifx\csname c@#2depth\endcsname\relax
     \expandafter\global\expandafter\newcount\csname c@#2depth\endcsname
