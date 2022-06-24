@@ -41,12 +41,12 @@
 % \section{Facility for declaring heading levels and their layouts}%
 % \begin{tpContainer}{heading}
 %    \begin{macrocode}
-\tpDeclareContainer{heading}{%
+\tpDeclareContainer{tpHeading}{%
   \tpInherit {Components,Properties} from Meta;
   \tpDeclareType{Containers}{%
   }%
   \tpDeclareType{Properties}{\tp@heading@default}%
-  \tpDeclareEnv{\heading}{\endheading}%
+  \tpDeclareEnv{\@heading}{\end@heading}%
 }
 %    \end{macrocode}
 % \end{tpContainer}
@@ -73,7 +73,7 @@
 % default heading if no parent is present.
 %    \begin{macrocode}
     \ifx\@argi\@empty
-      \tpInherit {Components,Properties} from heading;
+      \tpInherit {Components,Properties} from tpHeading;
     \else
       \tpInherit {Components,Properties,Parent} from #1;
     \fi
@@ -485,12 +485,12 @@
 %
 % \subsection{Environment Macros}
 %
-% \begin{macro}{\heading} is the macro called at the begin of the
+% \begin{macro}{\@heading} is the macro called at the begin of the
 %   \lstinline{heading} environment. Optional \#1 stores the headings
 %   local parameters, \#2 is the level of the heading.
 %    \begin{macrocode}
-\def\heading{\@ifnextchar [{\@heading}{\@heading[]}}%]
-\def\@heading[#1]#2{%
+\def\@heading{\@ifnextchar [{\@@heading}{\@@heading[]}}%]
+\def\@@heading[#1]#2{%
 %    \end{macrocode}
 % Some {\LaTeX} kernel macros are saved and the namespace is
 % set.
@@ -542,7 +542,7 @@
 %   is stuff that happens at the end of the \lstinline{heading}
 %   environment.
 %    \begin{macrocode}
-\def\endheading{%
+\def\end@heading{%
   \expandafter\ifx\csname tpUseHeading\tp@heading@name\endcsname\relax
     \PackageError{transpect.cls}{Heading level \tp@heading@name\space unknown!}{A Heading with level \tp@heading@name\space is unknown. Use the \string\tpDeclareHeading\space macro to declare heading levels.}%
   \else
@@ -550,6 +550,8 @@
   \fi
   \tp@heading@reset
 }
+\let\heading\tpHeading
+\let\endheading\endtpHeading
 %    \end{macrocode}
 % \end{macro}
 %
