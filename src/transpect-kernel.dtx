@@ -76,7 +76,7 @@
 % that is specific to this type, usually something like Component or
 % Property declarations, handlers, and so forth.
 %    \begin{macrocode}
-    \def\tpDeclareType##1##2{\csgappto{tp@type@##1@#1}{##2}}%
+    \long\def\tpDeclareType##1##2{\csgappto{tp@type@##1@#1}{##2}}%
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tpDeclareEnv}
@@ -111,8 +111,14 @@
 %    \begin{macrocode}
 \def\tpEvalType{\tp@opt@curcont\tp@eval@type}
 \def\tp@eval@type[#1]#2{%
-  \tpKernelDebugMsg{Evaluating tp@type@#2@#1:^^J \expandafter\meaning\csname tp@type@#2@#1\endcsname}%
-  \csname tp@type@#2@#1\endcsname
+  \expandafter\ifx\csname tp@type@#2@#1\endcsname\relax
+    \tpPackageError{Kernel}{Class}
+    {Data Type #2 in Container #1 undefined!}
+    {You try to evaluate a data type `#2' from container `#1', but that data type has not been declared.}%
+  \else
+    \tpKernelDebugMsg{Evaluating tp@type@#2@#1:^^J \expandafter\meaning\csname tp@type@#2@#1\endcsname}%
+    \csname tp@type@#2@#1\endcsname
+  \fi
 }
 %    \end{macrocode}
 % \end{macro}
@@ -250,7 +256,8 @@
 %   the Component macro \#1 is empty (or \lstinline|{}|) within its
 %   Container, and \#3 if it is either not existant or non-empty.
 %    \begin{macrocode}
-\long\def\tpIfCompEmpty#1#2#3{\long\def\@tempa{}\expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\@tempa#2\else#3\fi}
+\long\def\long@empty{}
+\long\def\tpIfCompEmpty#1#2#3{\expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\long@empty#2\else#3\fi}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tp@check@empty} handles the distinction between empty
@@ -294,7 +301,7 @@
   }%
   \expandafter\def\csname end#1\endcsname{}%
 }
-\@onlypreamble\tpDeclareComponentGroup
+%\@onlypreamble\tpDeclareComponentGroup
 %    \end{macrocode}
 % \end{macro}
 %
@@ -344,13 +351,12 @@
           \noexpand\csname #1-Cnt\endcsname=\the\@tempcnta
           %% top-level counter for user interaction
           \noexpand\tpCurCount=\the\@tempcnta
-          \noexpand\tpUseProperty{#2}}%
+          \noexpand\tpUseProperty{\unexpanded{#2}}}%
         \expandafter\expandafter\expandafter\def
         \expandafter\expandafter\expandafter\tp@iterate@res
         \expandafter\expandafter\expandafter{\expandafter\tp@iterate@res\@tempb}%
       }%
       \expandafter\def\expandafter\tp@iterate@res\expandafter{\tp@iterate@res\noexpand\egroup}%
-    \message{#3: \expandafter\meaning\csname tp#3\endcsname}%
     \expandafter\csname tp#3\expandafter\endcsname\expandafter{\tp@iterate@res}%
   }%
 }

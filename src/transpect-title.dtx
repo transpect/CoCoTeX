@@ -23,7 +23,7 @@
 %    \begin{macrocode}
 \tpDeclareContainer{titlepage}{%
   \tpInherit {Components,Properties} from Meta;
-  \tpDeclareType{Containers}{%
+  \tpDeclareType{Components}{%
     \tp@title@simple@comps
     \tp@meta@generic@comp
     \tp@title@fundings@comp
@@ -49,8 +49,8 @@
 % The tpMeta environment
 %    \begin{macrocode}
 \def\tp@Meta{%
-  \tpEvalType{Containers}%
-  \tpEvalType{Authors}%
+  %\tpEvalType{Containers}%
+  \tpEvalType{Components}%
 }
 \def\tp@endMeta{%
   \tpNamespace{titlepage}%
@@ -89,6 +89,7 @@
 % Processes the names written into the meta data
 %    \begin{macrocode}
 \def\tp@title@process@bka{%
+  \tpApplyCollection{tp#1}{\csname tp@meta@role@#1@list\endcsname}{#1NameList}%
   \edef\tpRunBookName{\tpUseProperty{run-book-name}}%
   \expandafter\author\expandafter{\tpRunBookName}%
   \tp@write@pdf@meta{pdfauthor}{\tpRunBookName}%
@@ -164,10 +165,7 @@
 %    \begin{macrocode}
 \def\tp@create@editor@string#1{%
   \expandafter\ifx\csname tp@\tp@cur@cont @#1NameList\endcsname\relax\else
-    \expandafter\xdef\csname tp@\tp@cur@cont @#1NameList\endcsname{%
-      \tpUseComp{#1NameList}%
-      \tpUseProperty{editor-suffix}%
-    }%
+    \csgappto{tp@\tp@cur@cont @#1NameList}{\tpUseProperty{editor-suffix}}%
   \fi
 }%
 %    \end{macrocode}
@@ -427,19 +425,6 @@
     \tpGetComp{PubWeb}%
   }%
   % Name Formats
-  \tpSetProperty{name-meta-format}{%
-    \tpIfComp{Bio}
-      {\tpUseComp{FullName}:\space%
-       \tpUseComp{Bio}\par%
-       \tpUseProperty{counted-meta-sep}}{}%
-  }
-  \tpSetProperty{name-format}{%
-    \tpIfComp{FullName}{}{\tpComp{FullName}{\tpUseComp{FirstName}\space\tpUseComp{SurName}}}%
-    \tpUseComp{FullName}%
-    \tpUseProperty{counted-name-sep}%
-  }
-  \tpSetProperty{author-format}{\tpUseProperty{name-format}}% Override for single author names
-  \tpSetProperty{author-meta-format}{\tpUseProperty{name-meta-format}}% Override for single author meta info
   \tpSetProperty{editor-format}{\tpUseProperty{name-format}}% Override for single editor names
   \tpSetProperty{editor-meta-format}{\tpUseProperty{name-meta-format}}% Override for single editor meta info
   \tpSetProperty{series-editor-format}{\tpUseProperty{name-format}}% Override for single series editor names
@@ -453,22 +438,6 @@
       \tpUseProperty{editor-suffix-sgl}%
     \else
       \tpUseProperty{editor-suffix-pl}%
-    \fi
-  }%
-  \tpSetProperty{name-and}{\space and\space}%
-  \tpSetProperty{name-etal}{\space et~al.}%
-  \tpSetProperty{name-sep}{,\space}%
-  \tpSetProperty{corresp-mark}{*}%
-  \tpSetProperty{counted-meta-sep}{\ifnum\tpCurCount<\tpTotalCount\relax\vskip\baselineskip\fi}%
-  \tpSetProperty{counted-name-sep}{%
-    \ifnum\tpTotalCount>1\relax
-      \ifnum\tpCurCount<\tpTotalCount\relax
-        \ifnum\tpCurCount<\numexpr\tpTotalCount-1\relax
-          \tpUseProperty{name-sep}%
-        \else
-          \tpUseProperty{name-and}%
-        \fi
-      \fi
     \fi
   }%
   % Bio

@@ -43,7 +43,31 @@
 %    \begin{macrocode}
 \tpDeclareContainer{tpHeading}{%
   \tpInherit {Components,Properties} from Meta;
-  \tpDeclareType{Containers}{%
+  \tpDeclareType{Components}{%
+%    \end{macrocode}
+% We already have the Author Component inherited from the
+% \lstinline{Meta} Container. We therefore just need to declare the
+% overrides.
+%    \begin{macrocode}
+    \tp@provide@hd@overrides{Author}%
+%    \end{macrocode}
+% The remaining Components are built as usual.
+%    \begin{macrocode}
+    \tp@provide@hd@macros{Title}%
+    \tp@provide@hd@macros{Subtitle}%
+    \tp@provide@hd@macros{Number}%
+%    \end{macrocode}
+% \Deprecated
+%    \begin{macrocode}
+    \tpIfProp{extended}{%
+      \tp@extended@ht@macros
+    }{}%
+%    \end{macrocode}
+% \lstinline{Quote} and \lstinline{QuoteSource} (so far) don't need
+% overrides; they are declared the standard way.
+%    \begin{macrocode}
+    \tpDeclareComp{Quote}{}{}%
+    \tpDeclareComp{QuoteSource}{}{}%
   }%
   \tpDeclareType{Properties}{\tp@heading@default}%
   \tpDeclareEnv{\@heading}{\end@heading}%
@@ -158,6 +182,10 @@
 % lists to be able to access the Properties.
 %    \begin{macrocode}
     \csname tp@heading@#2@properties\endcsname
+%    \end{macrocode}
+% Processing the author names.
+%    \begin{macrocode}
+    \tp@meta@role@eval{Author}%
 %    \end{macrocode}
 % Hyperref related stuff.
 %    \begin{macrocode}
@@ -512,29 +540,7 @@
 % excluded into its own macro to simplify re-definition if necessary.
 %    \begin{macrocode}
   \tp@heading@load@props%
-%    \end{macrocode}
-% We already have the Author Component from the \lstinline{Meta}
-% Container. We therefore just need to declare the overrides.
-%    \begin{macrocode}
-  \tp@provide@hd@overrides{Author}%
-%    \end{macrocode}
-% The remaining Components are built as usual.
-%    \begin{macrocode}
-  \tp@provide@hd@macros{Title}%
-  \tp@provide@hd@macros{Subtitle}%
-  \tp@provide@hd@macros{Number}%
-%    \end{macrocode}
-% \Deprecated
-%    \begin{macrocode}
-  \tpIfProp{extended}{%
-    \tp@extended@ht@macros
-  }{}%
-%    \end{macrocode}
-% \lstinline{Quote} and \lstinline{QuoteSource} (so far) don't need
-% overrides; they are declared the standard way.
-%    \begin{macrocode}
-  \tpDeclareComp{Quote}{}{}%
-  \tpDeclareComp{QuoteSource}{}{}%
+  \tpEvalType[tpHeading]{Components}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -665,7 +671,7 @@
        {\leftskip0pt}%
      {\tpUseComp{Title}}\par%
      \tpIfComp{Subtitle}{{\tpUseProperty{subtitle-format}\tpUseComp{Subtitle}}\par}{}%
-     \tpIfComp{Author}{{\tpUseProperty{author-format}\tpUseComp{Author}}\par}{}%
+     \tpIfComp{AuthorNameList}{{\tpUseProperty{author-format}\tpUseComp{AuthorNameList}}\par}{}%
      \tpIfComp{Quote}{%
        \bgroup
          \tpUseProperty{quote-format}%

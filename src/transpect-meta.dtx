@@ -28,6 +28,7 @@
     \tpDeclareRole[author]{Author}%
   }%
   \tpDeclareType{Properties}{%
+    \tp@Meta@default
   }%
 }
 %    \end{macrocode}
@@ -104,8 +105,10 @@
     \expandafter\ifx\csname tp#1-Cnt\endcsname \relax\else
       \tp@eval@role@attrs{#1}%
       \tpComposeCollection{tp#1}{\csname tp@meta@role@#1@block\endcsname}{#1MetaBlock}%
-      \tpApplyCollection{tp#1}{\csname tp@meta@role@#1@list\endcsname}{#1NameList}%
+      \tpComposeCollection{tp#1}{\csname tp@meta@role@#1@list\endcsname}{#1NameList}%
+      %\tpApplyCollection{tp#1}{\csname tp@meta@role@#1@list\endcsname}{#1NameList}%
     \fi
+\message{^^J===> \csname tp@meta@role@#1@list\endcsname: \expandafter\meaning\csname tp@meta@role@#1@list\endcsname}%
   }}%
 %    \end{macrocode}
 % \end{macro}
@@ -132,6 +135,41 @@
   \tpDeclareComp{#1#2}{\expandafter\global}{}%
   %\global\csletcs{tp#1#2}{#1#2}%
   \expandafter\gdef\csname tp@meta@role@#1@#3\endcsname{#4}%
+}
+%    \end{macrocode}
+% 
+%    \begin{macrocode}
+\tpAddToDefault{Meta}{%
+  \tpSetProperty{name-meta-format}{%
+    \tpIfComp{Bio}
+      {\tpUseComp{FullName}:\space%
+       \tpUseComp{Bio}\par%
+       \tpUseProperty{counted-meta-sep}}{}%
+  }
+  \tpSetProperty{name-format}{%
+\expandafter\meaning\csname tp@\tp@cur@cont @FullName\endcsname
+    \tpIfCompEmpty{FullName}{\tpComp{FullName}{\tpUseComp{FirstName}\space\tpUseComp{SurName}}}{}%
+    \tpUseComp{FullName}%
+    \tpUseProperty{counted-name-sep}%
+  }
+  \tpSetProperty{author-format}{\tpUseProperty{name-format}}% Override for single author names
+  \tpSetProperty{author-meta-format}{\tpUseProperty{name-meta-format}}% Override for single author meta info
+  \tpSetProperty{counted-meta-sep}{\ifnum\tpCurCount<\tpTotalCount\relax\vskip\baselineskip\fi}%
+  \tpSetProperty{counted-name-sep}{%
+    \ifnum\tpTotalCount>1\relax
+      \ifnum\tpCurCount<\tpTotalCount\relax
+        \ifnum\tpCurCount<\numexpr\tpTotalCount-1\relax
+          \tpUseProperty{name-sep}%
+        \else
+          \tpUseProperty{name-and}%
+        \fi
+      \fi
+    \fi
+  }%
+  \tpSetProperty{name-and}{\space and\space}%
+  \tpSetProperty{name-etal}{\space et~al.}%
+  \tpSetProperty{name-sep}{,\space}%
+  \tpSetProperty{corresp-mark}{*}%
 }
 %    \end{macrocode}
 % \end{macro}
