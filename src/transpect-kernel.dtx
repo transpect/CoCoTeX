@@ -44,6 +44,20 @@
 }
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{\tpPackageWarning}
+%   is a macro to create warnings specific to the Framework. \#1
+%   is the module, \#2 is the type of error, \#3 is the immediate
+%   warning message.
+%    \begin{macrocode}
+\def\tpPackageWarning#1#2#3{%
+   \GenericWarning{%
+      (#1)\@spaces\@spaces\@spaces\@spaces
+   }{%
+      [tp #1 #2 Warning] #3%
+   }%
+}
+%    \end{macrocode}
+% \end{macro}
 % \section{Containers}
 %
 % Containers are the package's core data structure. They are basicly
@@ -290,16 +304,16 @@
 %   declare a new Component Group with the name \#1 and the body \#2.
 %    \begin{macrocode}
 \def\tpDeclareComponentGroup#1#2{%
-  \expandafter\newcount\csname #1-Cnt\endcsname%
-  \expandafter\def\csname #1\endcsname{\expandafter\tp@opt@empty\csname @#1\endcsname}%]
-  \expandafter\def\csname @#1\endcsname[##1]{%
+  \ifcsdef{#1-Cnt}{}{\expandafter\newcount\csname #1-Cnt\endcsname}%
+  \csdef{#1}{\expandafter\tp@opt@empty\csname @#1\endcsname}%]
+  \csdef{@#1}[##1]{%
     \def\tp@cnt@grp{#1}%
     \expandafter\global\expandafter\advance\csname #1-Cnt\endcsname\@ne
     \if!##1!\else
       \csgdef{tp@\tp@cur@cont @#1-\expandafter\the\csname #1-Cnt\endcsname @attrs}{##1}\fi
     #2
   }%
-  \expandafter\def\csname end#1\endcsname{}%
+  \csdef{end#1}{}%
 }
 %\@onlypreamble\tpDeclareComponentGroup
 %    \end{macrocode}

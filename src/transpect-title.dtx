@@ -89,10 +89,22 @@
 % Processes the names written into the meta data
 %    \begin{macrocode}
 \def\tp@title@process@bka{%
-  \tpApplyCollection{tp#1}{\csname tp@meta@role@#1@list\endcsname}{#1NameList}%
-  \edef\tpRunBookName{\tpUseProperty{run-book-name}}%
-  \expandafter\author\expandafter{\tpRunBookName}%
-  \tp@write@pdf@meta{pdfauthor}{\tpRunBookName}%
+  \@tempswatrue
+  \expandafter\ifnum\csname tpAuthor-Cnt\endcsname>\z@
+    \tpApplyCollection{tpAuthor}{pdf-autor-list}{PDFAuthor}%
+  \else
+    \expandafter\ifnum\csname tpEditor-Cnt\endcsname>\z@
+      \tpApplyCollection{tpEditor}{pdf-autor-list}{PDFAuthor}%
+    \else
+      \tpPackageWarning{transcript-title}{Meta Data}{No author or editor given!}%
+      \@tempswafalse
+    \fi
+  \fi
+  \if@tempswa
+    \edef\tpRunBookName{\tpUseProperty{PDFAuthor}}%
+    \expandafter\author\expandafter{\tpRunBookName}%
+    \tp@write@pdf@meta{pdfauthor}{\tpRunBookName}%
+  \fi
 }
 %    \end{macrocode}
 % sets the metadata for the pdf creator
@@ -205,7 +217,8 @@
   \tp@title@macro{PubNote}%   Additional publisher notes
   \tp@title@macro{PubWeb}%    Publisher URL
   %% Pubication Meta
-  \tp@title@macro{PDFCreator}%   PDF creator for pdf metadata
+  \tp@title@macro{PDFCreator}% Creator for pdf metadata
+  \tp@title@macro{PDFAuthor}%   Name list for pdf metadata
   \tp@title@macro[le-tex transpect]{PDFProducer}%   PDF producer for pdf metadata
   \tp@title@macro{Dedication}%   Dedication
   \tp@title@macro{Acknowledgements}%   Acknowledgements
@@ -425,6 +438,11 @@
     \tpGetComp{PubWeb}%
   }%
   % Name Formats
+  \tpSetProperty{pdf-autor-list}{%
+    \ifnum\tpCurCount>1\relax, \fi
+    \tpIfCompEmpty{FullName}{\tpComp{FullName}{\tpUseComp{FirstName}\space\tpUseComp{SurName}}}{}%
+    \tpUseComp{FullName}%
+ }
   \tpSetProperty{editor-format}{\tpUseProperty{name-format}}% Override for single editor names
   \tpSetProperty{editor-meta-format}{\tpUseProperty{name-meta-format}}% Override for single editor meta info
   \tpSetProperty{series-editor-format}{\tpUseProperty{name-format}}% Override for single series editor names

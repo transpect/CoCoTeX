@@ -102,14 +102,13 @@
 %   is the name of the role.
 %    \begin{macrocode}
 \def\tp@meta@role@eval#1{{%
-    \expandafter\ifx\csname tp#1-Cnt\endcsname \relax\else
-      \tp@eval@role@attrs{#1}%
-      \tpComposeCollection{tp#1}{\csname tp@meta@role@#1@block\endcsname}{#1MetaBlock}%
-      \tpComposeCollection{tp#1}{\csname tp@meta@role@#1@list\endcsname}{#1NameList}%
-      %\tpApplyCollection{tp#1}{\csname tp@meta@role@#1@list\endcsname}{#1NameList}%
-    \fi
-\message{^^J===> \csname tp@meta@role@#1@list\endcsname: \expandafter\meaning\csname tp@meta@role@#1@list\endcsname}%
-  }}%
+  \ifcsdef{tp#1-Cnt}
+    {\tp@eval@role@attrs{#1}%
+     \tpComposeCollection{tp#1}{\csname tp@meta@role@#1@block\endcsname}{#1MetaBlock}%
+     \tpApplyCollection{tp#1}{\csname tp@meta@role@#1@list\endcsname}{#1NameList}}
+    {}%
+  \message{^^J===> \csname tp@meta@role@#1@list\endcsname: \expandafter\meaning\csname tp@meta@role@#1@list\endcsname}%
+}}%
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tp@eval@role@attrs} evaluates the attributes that are
@@ -147,7 +146,7 @@
        \tpUseProperty{counted-meta-sep}}{}%
   }
   \tpSetProperty{name-format}{%
-\expandafter\meaning\csname tp@\tp@cur@cont @FullName\endcsname
+ %\expandafter\meaning\csname tp@\tp@cur@cont @FullName\endcsname
     \tpIfCompEmpty{FullName}{\tpComp{FullName}{\tpUseComp{FirstName}\space\tpUseComp{SurName}}}{}%
     \tpUseComp{FullName}%
     \tpUseProperty{counted-name-sep}%
