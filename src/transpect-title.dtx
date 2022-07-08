@@ -27,13 +27,24 @@
     \tp@title@simple@comps
     \tp@meta@generic@comp
     \tp@title@fundings@comp
-    \tpDeclareRole[editor]{Editor}%
-    \tpDeclareRole[series-editor]{SeriesEditor}%
+    \tpDeclareRoleBlock{Author}{MetaBlock}{block}{author-meta-format}%
+    \tp@titlepage@role{editor}{Editor}%
+    \tp@titlepage@role{series-editor}{SeriesEditor}%
   }%
   \tpDeclareType{Properties}{\tp@titlepage}%
   \tpDeclareEnv[tpMeta]{\tp@Meta}{\tp@endMeta}%
 }
-
+%    \end{macrocode}
+% \begin{macro}{\tp@titlepage@role} declares the roles for editors and
+%   series editors and initializes the biography meta block for both.
+%    \begin{macrocode}
+\def\tp@titlepage@role#1#2{%
+  \tpDeclareRole[#1]{#2}%
+  \tpDeclareRoleBlock{#2}{MetaBlock}{block}{#1-meta-format}%
+}
+%    \end{macrocode}
+% \end{macro}
+%    \begin{macrocode}
 \long\def\tpDeclareTitlepage#1{%
   \gdef\tp@titlepage{%
     \tpNamespace{titlepage}%
@@ -49,7 +60,6 @@
 % The tpMeta environment
 %    \begin{macrocode}
 \def\tp@Meta{%
-  %\tpEvalType{Containers}%
   \tpEvalType{Components}%
 }
 \def\tp@endMeta{%
@@ -57,6 +67,7 @@
   \tpEvalType{Properties}%
   \tp@maketitle
   \tp@meta@role@eval{Author}%
+  \tpComposeCollection{tpAuthor}{\csname tp@meta@role@Author@block\endcsname}{AuthorMetaBlock}%
   \tp@title@eds@eval{Editor}%
   \tp@title@eds@eval{SeriesEditor}%
   \tp@meta@generic@eval
@@ -129,7 +140,8 @@
     \gdef\tpMaketitle{%
       \let\tp@cnt@grp\@empty
       \bgroup
-        \csname tp@titlepage\endcsname
+        \tpNamespace{titlepage}%
+        \tpEvalType{Properties}%
         \tpUseProperty{before-titlepage}%
         \tpIfComp{Cover}{%
           \tpUseProperty{coverpage}%
@@ -170,6 +182,7 @@
 %    \begin{macrocode}
 \def\tp@title@eds@eval#1{%
   \tp@meta@role@eval{#1}%
+  \tpComposeCollection{tp#1}{\csname tp@meta@role@#1@block\endcsname}{#1MetaBlock}%
   \tp@create@editor@string{#1}}
 
 %    \end{macrocode}
@@ -357,6 +370,7 @@
     \fi%
     \vskip\baselineskip
     \tpUseComp{Title}%
+    \expandafter\meaning\csname tp@titlepage@editor-2@FullName\endcsname
   }%
   \tpSetProperty{titlepage-ii}{%
     \tpGetComp{Editorial}%
@@ -443,6 +457,25 @@
     \tpIfCompEmpty{FullName}{\tpComp{FullName}{\tpUseComp{FirstName}\space\tpUseComp{SurName}}}{}%
     \tpUseComp{FullName}%
  }
+  \tpSetProperty{counted-meta-sep}{\ifnum\tpCurCount<\tpTotalCount\relax\vskip\baselineskip\fi}%
+  \tpSetProperty{counted-name-sep}{%
+    \ifnum\tpTotalCount>1\relax
+      \ifnum\tpCurCount<\tpTotalCount\relax
+        \ifnum\tpCurCount<\numexpr\tpTotalCount-1\relax
+          \tpUseProperty{name-sep}%
+        \else
+          \tpUseProperty{name-and}%
+        \fi
+      \fi
+    \fi
+  }%
+  \tpSetProperty{name-meta-format}{%
+    \tpIfComp{Bio}
+      {\tpUseComp{FullName}:\space%
+       \tpUseComp{Bio}\par%
+       \tpUseProperty{counted-meta-sep}}{}%
+  }
+  \tpSetProperty{author-meta-format}{\tpUseProperty{name-meta-format}}% Override for single author meta info (this one is titlepage specific and may look different in other places where tpAuthor is used!)
   \tpSetProperty{editor-format}{\tpUseProperty{name-format}}% Override for single editor names
   \tpSetProperty{editor-meta-format}{\tpUseProperty{name-meta-format}}% Override for single editor meta info
   \tpSetProperty{series-editor-format}{\tpUseProperty{name-format}}% Override for single series editor names

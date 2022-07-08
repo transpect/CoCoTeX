@@ -226,23 +226,25 @@
 }
 %    \end{macrocode}
 % \end{macro}
-% Once declared, a component can be set in two ways: First by using
-% the \lstinline{\tpComp} macro which takes two arguments: \#1 is the
-% name of the Component, \#2 is the value. The second way is using
-% \lstinline{\tp<name>} with one argument for its value.
+% Once declared, a component can be set in two ways: The first way is
+% to use \lstinline{\tp<name>} with one argument for its value. The
+% second, preferred, way is to use the \lstinline{\tpComp} macro which
+% takes two arguments: \#1 is the name of the Component, \#2 is the
+% value. This macro checks whether an Component of name \#1 has
+% actually been declared and does so, if not.
 % \begin{macro}{\tpComp}
 %   This is the preferred way to fill a Component with content. \#1 is
 %   the Component's name, \#2 is the value.
 %    \begin{macrocode}
 \long\protected\def\tpComp#1#2{%
-  \expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\relax
-    \ifx\tp@is@counted\relax
-      \tp@def@counted@comp{\tp@cnt@grp-#1-\expandafter\the\csname \tp@cnt@grp-Cnt\endcsname}{#1}{}{}%
-    \else
-      \tpDeclareComp{#1}{}{}%
-    \fi
+  \ifx\tp@is@counted\relax
+    \ifcsdef{tp@\tp@cur@cont @#1}{}
+      {\tp@def@counted@comp{\tp@cnt@grp-#1-\expandafter\the\csname \tp@cnt@grp-Cnt\endcsname}{#1}{}{}}%
+    \csgdef{tp@\tp@cur@cont @\tp@cnt@grp-#1-\expandafter\the\csname \tp@cnt@grp-Cnt\endcsname}{#2}%
+  \else
+    \ifcsdef{tp@\tp@cur@cont @#1}{}{\tpDeclareComp{#1}{}{}}%
+    \csname tp#1\endcsname{#2}%
   \fi
-  \csname tp#1\endcsname{#2}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -353,26 +355,30 @@
 %    \begin{macrocode}
 \def\tpComposeCollection#1#2#3{%
   \tpIfComp{#3}{}{%
-    \edef\tp@iterate@res{%
-      \noexpand\def\noexpand\tpTotalCount{\the\csname #1-Cnt\endcsname}%
-      \noexpand\bgroup
-        \noexpand\tpToggleCountedCond
-        \noexpand\def\noexpand\tp@cnt@grp{#1}}%
-      \expandafter\@tempcntb\csname #1-Cnt\endcsname
-      \tp@iterate{\@tempcnta}{\@ne}{\@tempcntb}{%
-        \edef\@tempb{%
-          %% internal counter for macro grabbing
-          \noexpand\csname #1-Cnt\endcsname=\the\@tempcnta
-          %% top-level counter for user interaction
-          \noexpand\tpCurCount=\the\@tempcnta
-          \noexpand\tpUseProperty{\unexpanded{#2}}}%
-        \expandafter\expandafter\expandafter\def
-        \expandafter\expandafter\expandafter\tp@iterate@res
-        \expandafter\expandafter\expandafter{\expandafter\tp@iterate@res\@tempb}%
-      }%
-      \expandafter\def\expandafter\tp@iterate@res\expandafter{\tp@iterate@res\noexpand\egroup}%
-    \expandafter\csname tp#3\expandafter\endcsname\expandafter{\tp@iterate@res}%
-  }%
+    \ifcsdef{#1-Cnt}{%
+      \expandafter\ifnum\csname #1-Cnt\endcsname > \z@\relax
+        \edef\tp@iterate@res{%
+          \noexpand\def\noexpand\tpTotalCount{\the\csname #1-Cnt\endcsname}%
+          \noexpand\bgroup
+            \noexpand\tpToggleCountedCond
+            \noexpand\def\noexpand\tp@cnt@grp{#1}}%
+          \expandafter\@tempcntb\csname #1-Cnt\endcsname
+          \tp@iterate{\@tempcnta}{\@ne}{\@tempcntb}{%
+            \edef\@tempb{%
+              %% internal counter for macro grabbing
+              \noexpand\csname #1-Cnt\endcsname=\the\@tempcnta
+              %% top-level counter for user interaction
+              \noexpand\tpCurCount=\the\@tempcnta
+              \noexpand\tpUseProperty{#2}}%
+            \expandafter\expandafter\expandafter\def
+            \expandafter\expandafter\expandafter\tp@iterate@res
+            \expandafter\expandafter\expandafter{\expandafter\tp@iterate@res\@tempb}%
+          }%
+          \expandafter\def\expandafter\tp@iterate@res\expandafter{\tp@iterate@res\egroup}%
+        \expandafter\csname tp#3\expandafter\endcsname\expandafter{\tp@iterate@res}%
+        \message{^^J==> composed \string\ tp@\tp@cur@cont @#3: \expandafter\meaning\csname tp@\tp@cur@cont @#3\endcsname}%\STOPP
+      \fi
+    }{}}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -382,7 +388,7 @@
 %    \begin{macrocode}
 \def\tpApplyCollection#1#2#3{%
   \tpIfComp{#3}{}
-    {%\begingroup
+    {\begingroup
        \global\let\tp@iterate@res\relax
        \edef\tpTotalCount{\the\csname #1-Cnt\endcsname}%
        \tp@iterate{\@tempcnta}{\@ne}{\tpTotalCount}{%
@@ -396,7 +402,8 @@
            \expandafter\@tempc\expandafter{\@tempb}%
          \egroup
        }%
-     %\endgroup
+     \endgroup
+\message{^^J==> applied tp#3: \meaning\tp@iterate@res}%\STOPP
      \expandafter\csname tp#3\expandafter\endcsname\expandafter{\tp@iterate@res}%
    }%
 }
@@ -774,7 +781,7 @@
 % \end{macro}
 %    \end{macrocode}
 % \end{macro}
-% \section{Legacy Functions}
+% \section{Legacy Functions}\Deprecated
 %    \begin{macrocode}
  \def\tpNamespace#1{\def\tp@cur@cont{#1}}
 %    \end{macrocode}
