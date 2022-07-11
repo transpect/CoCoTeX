@@ -121,7 +121,8 @@
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tpEvalType}
-%   calls the Declaration list for data Type \#1.
+%   calls the Declaration list for data Type \#2. With optional \#1
+%   the Container Class can be overriden.
 %    \begin{macrocode}
 \def\tpEvalType{\tp@opt@curcont\tp@eval@type}
 \def\tp@eval@type[#1]#2{%
@@ -307,15 +308,22 @@
 %    \begin{macrocode}
 \def\tpDeclareComponentGroup#1#2{%
   \ifcsdef{#1-Cnt}{}{\expandafter\newcount\csname #1-Cnt\endcsname}%
-  \csdef{#1}{\expandafter\tp@opt@empty\csname @#1\endcsname}%]
+  \csdef{#1}{\expandafter\tp@opt@empty\csname @#1\endcsname}%
   \csdef{@#1}[##1]{%
     \def\tp@cnt@grp{#1}%
     \expandafter\global\expandafter\advance\csname #1-Cnt\endcsname\@ne
     \if!##1!\else
       \csgdef{tp@\tp@cur@cont @#1-\expandafter\the\csname #1-Cnt\endcsname @attrs}{##1}\fi
-    #2
+    #2%
   }%
-  \csdef{end#1}{}%
+  \csdef{end#1}{{\tpToggleCountedCond\csname tp@compose@group@#1\endcsname}}%
+}
+\def\tpGroupHandler#1#2{%
+  \ifcsdef{@#1}
+    {\ifcsdef{tp@compose@group@#1}
+      {\csgappto{tp@compose@group@#1}{#2}}
+      {\csgdef{tp@compose@group@#1}{#2}}}
+    {\tpPackageError{Kernel}{Type}{Component Group `#1' unknown!}{You tried to declare a Group Handler for a Component Group that has not been declared, yet!}}%
 }
 %\@onlypreamble\tpDeclareComponentGroup
 %    \end{macrocode}
@@ -358,17 +366,17 @@
     \ifcsdef{#1-Cnt}{%
       \expandafter\ifnum\csname #1-Cnt\endcsname > \z@\relax
         \edef\tp@iterate@res{%
-          \noexpand\def\noexpand\tpTotalCount{\the\csname #1-Cnt\endcsname}%
           \noexpand\bgroup
+            \noexpand\def\noexpand\tpTotalCount{\the\csname #1-Cnt\endcsname}%
             \noexpand\tpToggleCountedCond
             \noexpand\def\noexpand\tp@cnt@grp{#1}}%
           \expandafter\@tempcntb\csname #1-Cnt\endcsname
           \tp@iterate{\@tempcnta}{\@ne}{\@tempcntb}{%
             \edef\@tempb{%
-              %% internal counter for macro grabbing
-              \noexpand\csname #1-Cnt\endcsname=\the\@tempcnta
               %% top-level counter for user interaction
               \noexpand\tpCurCount=\the\@tempcnta
+              %% internal counter for macro grabbing
+              \noexpand\csname #1-Cnt\endcsname=\noexpand\tpCurCount
               \noexpand\tpUseProperty{#2}}%
             \expandafter\expandafter\expandafter\def
             \expandafter\expandafter\expandafter\tp@iterate@res
@@ -376,7 +384,7 @@
           }%
           \expandafter\def\expandafter\tp@iterate@res\expandafter{\tp@iterate@res\egroup}%
         \expandafter\csname tp#3\expandafter\endcsname\expandafter{\tp@iterate@res}%
-        \message{^^J==> composed \string\ tp@\tp@cur@cont @#3: \expandafter\meaning\csname tp@\tp@cur@cont @#3\endcsname}%\STOPP
+\message{^^J==> composed \string\ tp@\tp@cur@cont @#3: \expandafter\meaning\csname tp@\tp@cur@cont @#3\endcsname}%\STOPP
       \fi
     }{}}%
 }
@@ -397,7 +405,8 @@
            \def\tp@cnt@grp{#1}%
            \csname #1-Cnt\endcsname=\the\@tempcnta
            \tpCurCount=\the\@tempcnta
-           \protected@edef\@tempb{\csname tp@\tp@cur@cont @#2\endcsname}%
+           \xdef\@tempb{\csname tp@\tp@cur@cont @#2\endcsname}%
+           \@temptokena \expandafter{\@tempb}%
            \def\@tempc{\csgappto{tp@iterate@res}}%
            \expandafter\@tempc\expandafter{\@tempb}%
          \egroup
@@ -413,6 +422,19 @@
 %
 % \subsubsection{Declaring Counted Component}
 %
+% \begin{macro}{\tpDeclareCountedComp}
+%   is a user-level macro to create a new Counted Component. \#1 is
+%   the user-level name of the Component, \#2 is the internal name.
+%    \begin{macrocode}
+\def\tpDeclareCountedComp#1{%
+  \tp@def@counted@comp
+    {\tp@cnt@grp-#1-\expandafter\the\csname \tp@cnt@grp-Cnt\endcsname}
+    {#1}
+    {}
+    {\expandafter\global}%
+}
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\tp@def@counted@comp}
 %   registers counter dependent Components. \#1 is the internal name
 %   of the Component which is composed out of the group name, the
@@ -433,15 +455,6 @@
      \egroup}%
   #4\expandafter\long\expandafter\def\csname tp@\tp@cur@cont @#2\endcsname{\csname tp@\tp@cur@cont @#1\endcsname}%
   \csgappto{@tp@reset@components@\tp@cur@cont}{\csname tp@\tp@cur@cont @#2\endcsname}%
-}
-%    \end{macrocode}
-% \end{macro}
-% \begin{macro}{\tpDeclareCountedComp}
-%   is a user-level macro to create a new Counted Component. \#1 is
-%   the user-level name of the Component, \#2 is the internal name.
-%    \begin{macrocode}
-\def\tpDeclareCountedComp#1{%
-  \tp@def@counted@comp{\tp@cnt@grp-#1-\expandafter\the\csname \tp@cnt@grp-Cnt\endcsname}{#1}{}{\expandafter\global}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -484,13 +497,13 @@
 %    \begin{macrocode}
 \long\def\tpToggleCountedCond{%
   \let\tp@is@counted\relax
-  \long\protected\def\tpIfComp##1##2##3{%
+  \long\def\tpIfComp##1##2##3{%
     \expandafter\let\expandafter\@tempa\csname tp@\tp@cur@cont @##1\endcsname\relax
     \expandafter\expandafter\expandafter\ifx\@tempa\relax##3\else##2\fi}%
-  \long\protected\def\tpIfCompEmpty##1##2##3{%
-    \long\def\@tempa{}%
-    \expandafter\let\expandafter\@tempb\csname tp@\tp@cur@cont @##1\endcsname\relax
-    \expandafter\expandafter\expandafter\ifx\@tempb\@tempa ##2\else ##3\fi}}
+    % \expandafter\def\expandafter\@tempa\expandafter{\csname tp@\tp@cur@cont @##1\endcsname}%
+    % \expandafter\expandafter\expandafter\ifx\@tempa\relax##3\else##2\fi}%
+  \long\def\tpIfCompEmpty##1##2##3{%
+    \expandafter\expandafter\expandafter\ifx\csname tp@\tp@cur@cont @##1\endcsname\long@empty ##2\else ##3\fi}}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -539,7 +552,14 @@
 %   for Containers. \#1 is the name of the Property, \#2 is the Value
 %   assigned to that Property.
 %    \begin{macrocode}
-\DeclareRobustCommand{\tpSetProperty}[2]{\long\protect\csdef{tp@\tp@cur@cont @#1}{#2}}
+\long\def\tpSetProperty#1#2{\long\csdef{tp@\tp@cur@cont @#1}{#2}}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tpPropertyLet} can be used to create an alias
+%   Property \#1 of a given Property \#2. Is is equivalent to
+%   \lstinline|\tpSetProperty{\#1}{\tpUseProperty{\#2}}|.
+%    \begin{macrocode}
+\long\def\tpPropertyLet#1#2{\long\csdef{tp@\tp@cur@cont @#1}{\csuse{tp@\tp@cur@cont @#2}}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tpSetValProp}
@@ -548,7 +568,7 @@
 %   the name \#1. This can be used to assign the current value of a
 %   variable macro, dimension, counter or length to a Property.
 %    \begin{macrocode}
-\DeclareRobustCommand{\tpSetValProp}[2]{\def\@tempa{\tpSetProperty{#1}}\expandafter\@tempa\expandafter{#2}}
+\long\def\tpSetValProp#1#2{\def\@tempa{\tpSetProperty{#1}}\expandafter\@tempa\expandafter{#2}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tpSetPropertyX}
@@ -559,14 +579,14 @@
 %   Properties that otherwise expect fixed named or dimensional
 %   values.
 %    \begin{macrocode}
-\DeclareRobustCommand{\tpSetPropertyX}[2]{\long\protect\csedef{tp@\tp@cur@cont @#1}{#2}}
+\long\def\tpSetPropertyX#1#2{\long\csedef{tp@\tp@cur@cont @#1}{#2}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tpAddToDefault}
 %   adds material to a Container's defaults; \#1 is the name of the
 %   Container, \#2 is a block of Property assignments.
 %    \begin{macrocode}
-\DeclareRobustCommand{\tpAddToDefault}[2]{\csgappto{tp@#1@default}{#2}}
+\long\def\tpAddToDefault#1#2{\csgappto{tp@#1@default}{#2}}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -614,10 +634,8 @@
 %   checks if a Property with the name \#1 is defined and
 %   non-empty. If so, do \#2, otherwise do \#3.
 %    \begin{macrocode}
-\DeclareRobustCommand{\tpIfProp}[3]{\long\def\@tempa{}%
-  %\expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\relax#3\else
+\long\def\tpIfProp#1#2#3{\long\def\@tempa{}%
     \expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\@tempa #3\else#2\fi
-  %\fi
 \ignorespaces}
 %    \end{macrocode}
 % \end{macro}
@@ -625,7 +643,7 @@
 %   checks if a Property \#1 expands to \#2.  If so, do \#3, otherwise
 %   do \#4.
 %    \begin{macrocode}
-\DeclareRobustCommand{\tpIfPropVal}[4]{\long\def\@tempa{#2}%
+\long\def\tpIfPropVal#1#2#3#4{\long\def\@tempa{#2}%
   \expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\@tempa\relax#3\else#4\fi\ignorespaces}
 %    \end{macrocode}
 % \end{macro}
@@ -648,7 +666,7 @@
 %   the optional argument if the latter is missing.
 %    \begin{macrocode}
 \def\tp@opt@second#1{\def\@tempa[##1]##2{#1[##1\if!##1!##2\fi]{##2}}%
-  \@ifnextchar[{\@tempa}{\@tempa[]}}%]
+  \@ifnextchar[{\@tempa}{\@tempa[]}}%
 %    \end{macrocode}
 % \end{macro}
 % \subsection{Iterators}
@@ -750,7 +768,7 @@
 %   property values, as in CSS.
 %    \begin{macrocode}
 \long\def\tpDeclareClass{\@ifnextchar [{\@tp@set@class}{\@tp@set@class[default]}}%]
-\long\def\@tp@set@class[#1]#2{\@ifnextchar [{\tp@set@class[#1]{#2}}{\tp@set@class[#1]{#2}[]}}%]
+\long\def\@tp@set@class[#1]#2{\tp@opt@empty{\tp@set@class[#1]{#2}}}%
 \long\gdef\tp@default@class@default{}
 \long\def\tp@set@class[#1]#2[#3]#4{%
   \def\@argii{#2}\ifx\@argii\@empty\let\@argii\tp@str@default\fi%
