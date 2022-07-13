@@ -204,7 +204,10 @@
     \fi
     \tpUseHook{before-hook-\tp@heading@name}%
     \tpUseProperty{before-heading}%
-    \everypar{}%
+%    \end{macrocode}
+% Add vertical space before the heading
+%    \begin{macrocode}
+    \tp@do@before@skip
 %    \end{macrocode}
 % The counters we calculated earlier and the space needed to render
 % them are evaluated
@@ -217,6 +220,10 @@
 % fallback.
 %    \begin{macrocode}
     \tpIfProp{after-skip}{\expandafter\global\expandafter\@tempskipa\expandafter=\tpUseProperty{after-skip}\relax}{\global\@tempskipa=1sp\relax}%
+%    \end{macrocode}
+% Labels to be used with LaTeX's cross reference mechanism are defined
+%    \begin{macrocode}
+      \tp@heading@create@labels{#2}% label facility
     \def\@svsec{%
 %    \end{macrocode}
 % The \lstinline{heading block} is the composition of all of the
@@ -230,10 +237,6 @@
         \tpUseProperty{heading-block}%
         \tpIfProp{extended}{\tpUseProperty{extended-heading}}{}%
       \egroup%
-%    \end{macrocode}
-% Labels to be used with LaTeX's cross reference mechanism are defined
-%    \begin{macrocode}
-      \tp@heading@create@labels{#2}% label facility
 %    \end{macrocode}
 % Generate entries for ToC, bookmarks and page headers.
 %    \begin{macrocode}
@@ -267,6 +270,25 @@
 }
 %    \end{macrocode}
 % \end{macro}
+% \end{macro}
+% 
+% \begin{macro}{\tp@do@before@skip} is a routine that determins the skip that is inserted before a heading.
+%    \begin{macrocode}
+\def\tp@do@before@skip{%
+  \setlength\@tempskipa{\tpUseProperty{before-skip}}%
+  \ifdim\@tempskipa<\z@\relax
+    \def\do@skip{\minusvspace{-\@tempskipa}}%
+  \else
+    \def\do@skip{\addvspace{\@tempskipa}}%
+  \fi%
+  \if@nobreak
+    \everypar{}%
+    \do@skip
+  \else
+    \addpenalty\@secpenalty
+    \do@skip
+  \fi}
+%    \end{macrocode}
 % \end{macro}
 %
 % \subsection{Initializers for New Heading Levels}%
@@ -691,6 +713,7 @@
        {\itshape\small\tpUseComp{Keywords}\par}}
      {}%
    }%
+  \tpSetProperty{before-skip}{\z@skip}% TODOC: values < 0pt use \minusvspace, else \addvspace. LaTeX's default behaviour of @afterindent is relocated to the after-indent property.
   \tpSetProperty{after-heading-block}{}%
   \tpSetProperty{before-heading-block}{\parindent\z@ \parskip\z@}%
   \tpSetProperty{after-indent}{}%
