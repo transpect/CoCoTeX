@@ -581,6 +581,17 @@
     }{}}}
 %    \end{macrocode}
 % \end{macro}
+% \subsection{Link Generation}
+%
+% \begin{macro}{\tpCompLink} creates a hyperlink with the target taken
+%   from Component with the name \#1 and the label \#2.
+%    \begin{macrocode}
+\def\tpCompLink#1#2{%
+  \edef\@argi{\tpUseComp{#1}}%
+  \expandafter\href\expandafter{\@argi}{#2}%
+}
+%    \end{macrocode}
+% \end{macro}
 %    \begin{macrocode}[gobble=1]
 %</common>
 %    \end{macrocode}

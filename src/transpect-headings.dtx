@@ -49,7 +49,7 @@
 % \lstinline{Meta} Container. We therefore just need to declare the
 % overrides.
 %    \begin{macrocode}
-    \tp@provide@hd@overrides{Author}%
+    \tp@heading@authors%
 %    \end{macrocode}
 % The remaining Components are built as usual.
 %    \begin{macrocode}
@@ -183,9 +183,10 @@
 %    \begin{macrocode}
     \csname tp@heading@#2@properties\endcsname
 %    \end{macrocode}
-% Processing the author names.
+% Processing the author name list (from transpect-meta.sty).
 %    \begin{macrocode}
     \tp@meta@role@eval{Author}%
+    %\tpComposeCollection{tpAuthor}{author-contact-block-format}{AuthorContactBlock}%
 %    \end{macrocode}
 % Hyperref related stuff.
 %    \begin{macrocode}
@@ -382,17 +383,30 @@
   \tp@check@empty{heading}{Title}{Toc}%
   \tp@check@empty{heading}{Number}{Toc}%
   \tp@check@empty{heading}{Subtitle}{Toc}%
-  \tp@check@empty{heading}{Author}{Toc}%
+  \tp@check@author{Toc}%
   \expandafter\ifx\csname tp@heading@attr@notoc\endcsname\@empty\else
     \edef\tp@heading@toc@entry{%
       \tpIfComp{TocTitle}{\string\tpTocTitle{\string\ignorespaces\space\expandonce{\tp@heading@TocTitle}}}{}%
       \tpIfComp{TocNumber}{\string\tpTocNumber{\string\ignorespaces\space\expandonce{\tp@heading@TocNumber}}}{}%
-      \tpIfComp{TocAuthor}{\string\tpTocAuthor{\string\ignorespaces\space\expandonce{\tp@heading@TocAuthor}}}{}%
+      \tpIfComp{TocAuthorNameList}{\string\tpTocAuthorNameList{\string\ignorespaces\space\expandonce{\tp@heading@TocAuthorNameList}}}{}%
       \tpIfComp{TocSubtitle}{\string\tpTocSubtitle{\string\ignorespaces\space\expandonce{\tp@heading@TocSubtitle}}}{}%
     }%
     \tpIfProp{toc-level}{\edef\tp@heading@name{\tpUseProperty{toc-level}}}{}%
     \addcontentsline{toc}{\tp@heading@name}{\expandonce{\tp@heading@toc@entry}}\relax
-  \fi}
+  \fi
+}
+\def\tp@check@author#1{%
+  \tpIfComp{#1AuthorNameList}{}{%
+    \tpIfComp{AuthorNameList}{%
+      \expandafter\csname tp#1AuthorNameList\expandafter\endcsname\expandafter{\tp@heading@AuthorNameList}%
+    }{\tpCompDef\tp@tempa{tpAuthor}{author-list-format}%
+      \ifx\tp@tempa\relax
+      \else
+        \expandafter\csname tp#1AuthorNameList\expandafter\endcsname\expandafter{\tp@tempa}%
+      \fi
+    }%
+  }%
+}%
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tp@toc@extract@data} is called within
@@ -405,11 +419,11 @@
   \tpNamespace{heading}%
   \tpCascadeProps{#2}{heading}%
   \tpDeclareComp{TocPage}{}{}%
-  \tpTocPage{\tpUseProperty{toc-page-format}#4}%
+  \tpTocPage{\tpUseProperty{toc-page-face}#4}%
   \tpDeclareComp{TocTitle}{}{}%
   \tpDeclareComp{TocSubtitle}{}{}%
   \tpDeclareComp{TocNumber}{}{}%
-  \tpDeclareComp{TocAuthor}{}{}%
+  \tpDeclareComp{TocAuthorNameList}{}{}%
   \tp@expand@l@contents{#3}{heading}{Toc}{Title}%%
   \tp@format@number{toc-}{Toc}{#1}%
 }
@@ -446,7 +460,8 @@
 \def\tp@make@run{%
   \tp@check@empty{heading}{Title}{Run}%
   \tp@check@empty{heading}{Number}{Run}%
-  \tp@check@empty{heading}{Author}{Run}%
+  %\tp@check@empty{heading}{AuthorNameList}{Run}%
+  \tp@check@author{Run}%
   \tp@check@empty{heading}{Subtitle}{Run}%
   \tpUseProperty{running-extra}%
   \tpIfProp{running-level}
@@ -471,7 +486,7 @@
 \def\tp@make@bookmarks{%
   \tp@check@empty[Toc]{heading}{Title}{BM}%
   \tp@check@empty[Toc]{heading}{Number}{BM}%
-  \tp@check@empty[Toc]{heading}{Author}{BM}%
+  \tp@check@empty[Toc]{heading}{AuthorNameList}{BM}%
   \tp@check@empty[Toc]{heading}{Subtitle}{BM}%
   \expandafter\ifx\csname tp@heading@attr@noBM\endcsname\@empty\else
     \tpIfProp{bookmark-level}{\edef\Hy@toclevel{\tpUseProperty{bookmark-level}}}{}%
@@ -542,8 +557,8 @@
 \def\@heading{\@ifnextchar [{\@@heading}{\@@heading[]}}%]
 \def\@@heading[#1]#2{%
 %    \end{macrocode}
-% Some {\LaTeX} kernel macros are saved and the namespace is
-% set.
+% Some {\LaTeX} kernel macros are saved, the namespace is
+% set and counted groups from previous headings are reset.
 %    \begin{macrocode}
   \tp@heading@reserve
 %    \end{macrocode}
@@ -595,6 +610,8 @@
   \let\\\tpBreak
   \let\tpltx@label\label
   \let\tp@heading@label\relax
+  \csname tpAuthor-Cnt\endcsname\z@
+  \tp@reset@components{\tp@cur@cont}%
   }
 %    \end{macrocode}
 % \end{macro}
@@ -642,6 +659,20 @@
 }
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{\tp@heading@role@handlers} sets up the additional Components for the Author Role specific to headings.
+%    \begin{macrocode}
+\def\tp@heading@authors{%
+  % \tpAddToRole{Author}{%
+  %   \tpDeclareCountedComp{AuthorContact}%
+  % }%
+  %\tpDeclareRoleBlock{Author}{ContactBlock}{author-contact-block-format}%
+  % \tpGroupHandler{tpAuthor}{%
+  %   \tpIfComp{AuthorContact}{}{\csname tpAuthorContact\endcsname{\tpUseProperty{author-contact-format}}}{}}%
+  \tp@provide@hd@overrides{AuthorNameList}%
+}
+%    \end{macrocode}
+% 
+% \end{macro}
 % \begin{macro}{\tp@provide@hd@macros} is a wrapper that creates the
 %   user-level macros for the Component itself and its overrides. \#1
 %   is the Component name.
@@ -681,24 +712,24 @@
     \global\@afterindenttrue
   }%
   \tpSetProperty{before-heading}{}%
-  \tpSetProperty{title-format}{\bfseries}%
-  \tpSetProperty{subtitle-format}{\normalfont}%
-  \tpSetProperty{author-format}{\normalfont}%
-  \tpSetProperty{quote-format}{\raggedleft}%
-  \tpSetProperty{quote-source-format}{}%
+  \tpSetProperty{title-face}{\bfseries}%
+  \tpSetProperty{subtitle-face}{\normalfont}%
+  \tpSetProperty{author-face}{\normalfont}%
+  \tpSetProperty{quote-face}{\raggedleft}%
+  \tpSetProperty{quote-source-face}{}%
   \tpSetProperty{heading-block}
-    {\tpUseProperty{title-format}%
+    {\tpUseProperty{title-face}%
      \tpIfComp{Number}
        {\tpUseProperty{hang-number}}
        {\leftskip0pt}%
      {\tpUseComp{Title}}\par%
-     \tpIfComp{Subtitle}{{\tpUseProperty{subtitle-format}\tpUseComp{Subtitle}}\par}{}%
-     \tpIfComp{AuthorNameList}{{\tpUseProperty{author-format}\tpUseComp{AuthorNameList}}\par}{}%
+     \tpIfComp{Subtitle}{{\tpUseProperty{subtitle-face}\tpUseComp{Subtitle}}\par}{}%
+     \tpIfComp{AuthorNameList}{{\tpUseProperty{author-face}\tpUseComp{AuthorNameList}}\par}{}%
      \tpIfComp{Quote}{%
        \bgroup
-         \tpUseProperty{quote-format}%
+         \tpUseProperty{quote-face}%
          \tpUseComp{Quote}\par
-         \tpIfComp{QuoteSource}{{\tpUseProperty{quote-source-format}--\space\tpUseComp{Quote}}\par}{}%
+         \tpIfComp{QuoteSource}{{\tpUseProperty{quote-source-face}--\space\tpUseComp{Quote}}\par}{}%
        \egroup}{}%
     }%
   \tpSetProperty{extended-heading}{%
@@ -728,18 +759,18 @@
   %% running header
   \tpSetProperty{running-level}{}% override level for running title, name
   \tpSetProperty{running-heading}{%
-    \tpIfComp{RunAuthor}{\tpUseComp{RunAuthor}:\space}{}%
+    \tpIfComp{RunAuthorNameList}{\tpUseComp{RunAuthorNameList}:\space}{}%
     \tpUseComp{RunTitle}%
   }%
   %% ToC
   \tpSetProperty{no-toc}{false}% toc entries are generally disabled iff true
   \tpSetProperty{no-BM}{false}% bookmark entries are generally disabled, iff true
   \tpSetProperty{toc-page-sep}{\dotfill}% between toc-title and page
-  \tpSetProperty{toc-page-format}{}%
+  \tpSetProperty{toc-page-face}{}%
   \tpSetProperty{toc-number-width}{}% current width of number
   \tpSetProperty{toc-number-align}{left}% alignment of number within hbox when hanging
-  \tpSetProperty{toc-title-format}{}% format of title
-  \tpSetProperty{toc-number-format}{\tpUseProperty{toc-title-format}}% format of number
+  \tpSetProperty{toc-title-face}{}% face of title
+  \tpPropertyLet{toc-number-face}{toc-title-face}% format of number
   \tpSetProperty{toc-number-sep}{\enskip}% thing between numebr and toc-title
   \tpSetProperty{toc-margin-top}{\z@}% left indent of the whole entry
   \tpSetProperty{toc-margin-bottom}{\z@}% right margin of the whole entry
@@ -759,11 +790,11 @@
   }%
   \tpSetProperty{toc-after-entry}{\par\addvspace{\tpUseProperty{toc-margin-bottom}}}% Thing at the end of the entry, after the page number
   \tpSetProperty{toc-heading}{% Order and formatting of the entry itself
-    \tpUseProperty{toc-title-format}%
+    \tpUseProperty{toc-title-face}%
     \tpIfComp{TocNumber}
       {\tpUseProperty{toc-hang-number}}
       {\leftskip0pt\leavevmode}%
-    \tpIfComp{TocAuthor}{\tpUseComp{TocAuthor}:\space}{}%
+    \tpIfComp{TocAuthorNameList}{\tpUseComp{TocAuthorNameList}:\space}{}%
     \tpUseComp{TocTitle}%
     \tpUseProperty{toc-page-sep}\tpUseComp{TocPage}%
   }%
@@ -772,6 +803,18 @@
   \tpSetProperty{bookmark}{%
     \tpIfComp{BMNumber}{\tpUseComp{BMNumber}\space}{}%
     \tpUseComp{BMTitle}%
+  }%
+  \tpSetProperty{orcid-link}{% how the ORC-ID is rendered
+    \tpIfComp{ORCID}{\tpCompLink{ORCID}{\includegraphics[height=1ex]{logos/ORCID_iD.pdf}}}{}%
+  }%
+  %% a single Author's contact infomration block
+  \tpSetProperty{author-contact-format}{%Format of a single author's contact information
+    \tpUseComp{FullName}\tpIfComp{Affil}{\textsuperscript{\tpUseComp{Affil}}}{}%
+    \tpUseProperty{orcid-link}%
+    %
+  }%
+  \tpSetProperty{author-list-format}{% Format of the whole contact information block
+    \tpUseComp{FullName}\ifnum\tpCurCount<\tpTotalCount\tpUseProperty{counted-name-sep}\fi
   }%
 }
 %    \end{macrocode}

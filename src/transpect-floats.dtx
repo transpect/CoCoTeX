@@ -334,7 +334,7 @@
     \tpDeclareComp{ListofSource}{}{}%
     \tpDeclareComp{ListofNumber}{}{}%
     \tpDeclareComp{ListofPage}{}{}%
-    \tpListofPage{\tpUseProperty{list-of-page-format}##4}%
+    \tpListofPage{\tpUseProperty{list-of-page-face}##4}%
     \tp@expand@l@contents{##3}{#2}{Listof}{Caption}%%
     \tp@format@number{list-of-}{Listof}{##1}%
   }%
@@ -423,7 +423,7 @@
   \tpSetValProp{float-number}{\csname tp@\tp@cur@cont @number-0\endcsname}%
   \tpSetValProp{sub-number}{%
     \begingroup
-      \expandonce{\tpUseProperty{sub-number-format}}%
+      \expandonce{\tpUseProperty{sub-number-face}}%
       \relax\tpUseProperty{sub-number-before}%
       \csname @\tpUseProperty{sub-number-style}\endcsname{#1}%
       \tpUseProperty{sub-number-after}%
@@ -627,7 +627,7 @@
   \fi
   \next%
     \ifx\@argii\tp@str@top\else\vss\fi
-    \tpUseProperty{\tp@prefix caption-format}%
+    \tpUseProperty{\tp@prefix caption-face}%
     \tpUseProperty{\tp@prefix caption-format-#1}%
     \tp@topstrut\tpUseProperty{caption-#1}\strut%
     \ifx\@argii\tp@str@bottom\else\vss\fi%
@@ -773,7 +773,7 @@
       \tpSubFloatCnt\@tempcnta\relax
       \expandafter\hsize\expandafter\dimexpr\csname tp@\tp@cur@cont @res@width-\the\@tempcnta\endcsname\relax
       \tpGobble
-      \tpUseProperty{\tp@prefix caption-format}%
+      \tpUseProperty{\tp@prefix caption-face}%
       \tpUseProperty{\tp@prefix caption-format-#1}%
       \leavevmode
       \strut\tpUseProperty{caption-#1}\strut%
@@ -949,24 +949,24 @@
   \tpSetProperty{subfloat-render}{\tpGenericRender}% Alias for the caption type specific content printer for sub-floats
   \tpSetProperty{subfloat-same-height}{}% if true, the subfloat must/can be adjusted to the same heights
   %% captions
-  \tpSetProperty{caption-format}{}% style applied to top and bottom captions
+  \tpSetProperty{caption-face}{}% style applied to top and bottom captions
   \tpSetProperty{caption-format-top}{}%% style applied to top captions
   \tpSetProperty{caption-format-bottom}{}%% style applied to bottom captions
-  \tpSetProperty{source-format}{}% Format of source, additional to caption-format
-  \tpSetProperty{legend-format}{}% Format of legend, additional to caption-format
+  \tpSetProperty{source-face}{}% Format of source, additional to caption-format
+  \tpSetProperty{legend-face}{}% Format of legend, additional to caption-format
   \tpSetProperty{caption-sep-top}{\z@}%% vertical space between top caption and content
   \tpSetProperty{caption-sep-bottom}{\z@}%% vertical space between content and bottom caption
   \tpSetProperty{caption-top}{%
-    \tpIfComp{Number}{{\tpUseProperty{number-format}\tpUseComp{Number}\tpUseProperty{number-sep}}}{}%
+    \tpIfComp{Number}{{\tpUseProperty{number-face}\tpUseComp{Number}\tpUseProperty{number-sep}}}{}%
     \tpUseComp{Caption}%
   }%
   \tpSetProperty{caption-bottom}{%
-    \tpIfComp{Legend}{{\tpUseProperty{legend-format}\tpUseComp{Legend}}}{}%
+    \tpIfComp{Legend}{{\tpUseProperty{legend-face}\tpUseComp{Legend}}}{}%
     \tpIfComp{Source}{%
       \tpIfComp{Legend}{\par\nopagebreak}{}%
-      {\tpUseProperty{source-format}%
+      {\tpUseProperty{source-face}%
        \tpUseComp{Source}}}{}}%
-  \tpSetProperty{subcaption-format}{\tpUseProperty{caption-format}}% style applied to top and bottom captions
+  \tpPropertyLet{subcaption-face}{caption-face}% style applied to top and bottom captions
   \tpSetProperty{subcaption-format-top}{\tpUseProperty{caption-format-top}}%% style applied to top captions
   \tpSetProperty{subcaption-format-bottom}{\tpUseProperty{caption-format-bottom}}%% style applied to bottom captions
   \tpSetProperty{subcaption-add-sep-top}{\z@}%% additional vertical space between top caption and top sub-caption
@@ -980,10 +980,10 @@
   %% Numbers
   \tpSetProperty{numbering}{auto}%% automatic numbering for missing Number component
   \tpSetProperty{number-sep}{\enskip}% Separator between label and caption
-  \tpSetProperty{number-format}{\bfseries}% Format of number, additional to caption-format
+  \tpSetProperty{number-face}{\bfseries}% Format of number, additional to caption-format
   \tpSetProperty{sub-number-sep}{\,}%% when sub-captions, this is placed between the float counter and the sub-float counter
   \tpSetProperty{sub-number-style}{alph}%% counting style of subcaption counters
-  \tpSetProperty{sub-number-format}{}%% format of subcaption counters
+  \tpSetProperty{sub-number-face}{}%% format of subcaption counters
   \tpSetProperty{sub-number-before}{(}% stuff that is put immediately before the sub counter
   \tpSetProperty{sub-number-after}{)}% stuff that is put immediately after the sub counter
   \tpSetProperty{sub-number-block}{\tpUseProperty{float-number}\tpUseProperty{sub-number-sep}\tpUseProperty{sub-number}}%% Format of sub numbers
@@ -996,7 +996,7 @@
   \tpSetProperty{list-of-margin-left}{auto}%
   \tpSetProperty{list-of-indent}{auto}% list-of-float appearance
   \tpSetProperty{list-of-block}{%
-    \tpUseProperty{list-of-caption-format}%
+    \tpUseProperty{list-of-caption-face}%
     \tpIfComp{ListofNumber}
       {\tpUseComp{list-of-hang-number}}
       {\leftskip0pt}%

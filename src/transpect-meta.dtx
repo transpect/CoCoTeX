@@ -86,9 +86,9 @@
     \tpDeclareCountedComp{FirstName}%
     \tpDeclareCountedComp{MidName}%
     \tpDeclareCountedComp{PersonPrefix}%
-    \tpDeclareCountedComp{PersonID}%
-    \tpDeclareCountedComp{AffilID}%
-    \tpDeclareCountedComp{Mail}%
+    \tpDeclareCountedComp{OCRID}%
+    \tpDeclareCountedComp{Affil}%
+    \tpDeclareCountedComp{Email}%
   }%
   \tpGroupHandler{tp#2}{%
     \tpIfComp{FullName}{}{\tpFullName{\tpUseProperty{name-format}}}%
@@ -100,19 +100,23 @@
 %    \end{macrocode}
 % \#1 is the name of the Component Group's output block, \#2 is the name of the property used to compose the Output Compoent.
 %    \begin{macrocode}
-\def\tpDeclareRoleBlock#1#2#3{
+\def\tpDeclareRoleBlock#1#2#3{%
   \tpDeclareComp{#1#2}{\expandafter\global}{}%
   \csgdef{tp@meta@role@#1@#2}{#3}}
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\tp@meta@role@eval} is the evaluator for the role. \#1
+% \begin{macro}{\tp@meta@role@eval} creates the name list for the role. \#1
 %   is the name of the role.
 %    \begin{macrocode}
 \def\tp@meta@role@eval#1{{%
-  \ifcsdef{tp#1-Cnt}
-    {\tp@eval@role@attrs{#1}%
-     \tpComposeCollection{tp#1}{\csname tp@meta@role@#1@NameList\endcsname}{#1NameList}}{}}}%
+  \tpIfComp{#1NameList}{}{%
+    \ifcsdef{tp#1-Cnt}
+      {\ifnum\csname tp#1-Cnt\endcsname>\z@
+          \tp@eval@role@attrs{#1}%
+          \tpApplyCollection{tp#1}{\csname tp@meta@role@#1@NameList\endcsname}{#1NameList}%
+        \fi
+      }{}}}}%
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tp@eval@role@attrs} evaluates the attributes that are
