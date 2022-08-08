@@ -623,11 +623,35 @@
 % \subsection{Using Properties}\label{sec:kernel:prop:use}
 %
 % \begin{macro}{\tpUseProperty}
-%   is a user-level command to access a previously set Property.
+%   is a user-level command to directly access a previously set Property.
 %    \begin{macrocode}
 \def\tpUseProperty#1{\csuse{tp@\tp@cur@cont @#1}}
 %    \end{macrocode}
 % \end{macro}
+%
+% \begin{macro}{\tpUsePropEnv}
+%   is a user-level command to access a previously set Property and make it an environment accessible to Property specific processing instrunctions (see below).
+%    \begin{macrocode}
+\def\tpUsePropEnv#1{\cslet{tp@#1@active}{\relax}\csuse{tp@\tp@cur@cont @#1}\csundef{tp@#1@active}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Processing Instructions}\label{sect:tpPI}
+%
+% In general, processing instructions are commands that are only
+% visible to a specific process and ignored by others. In
+% \lstinline{transpect-tex}, Processing Instructions (PIs) are
+% commands placed inside a Component that should only take effect when
+% that Component is processed through a specific Property.
+%
+% \begin{macro}{\tpPI} is a Processing Instruction that executes \#2
+%   when a Property with the name \#1 is currently processed with the
+%   \lstinline{\tpUsePropEnv} macro.
+%    \begin{macrocode}
+\DeclareRobustCommand\tpPI[2]{\ifcsdef{tp@#1@active}{#2}{}}
+%    \end{macrocode}
+% \end{macro}
+%
 %
 % \Deprecated TODO: Incorporate into the Container inheritance mechanism. Check if inheritance of Container Types is to be distinguished from inheritance of Properties and their Values!
 % \begin{macro}{\tpCascadeProps}
