@@ -355,13 +355,13 @@
 % Entries in the list-files (e.\,g., \lstinline{\jobname.toc},
 % \lstinline{\jobname.lof}, etc.) usually contain
 % \lstinline{\contentsline} macros that expand to
-% \lstinline{l@<level>}.  Whenever a level of components that are to
-% be written in content lists is declared, the package automatically
-% generates a \lstinline{\l@<level>} macro for this level of entries.
-% The content-baring argument of \lstinline{\contentsline} (or
-% \lstinline{l@<level>}, resp.) contains Components.
+% \lstinline{l@<level>}.  Whenever a level of Components that are to
+% be written into content lists is declared, the package automatically
+% generates a \lstinline{\tp@l@<level>} macro for this level of entries.
+% The content-baring argument of \lstinline{\tpContentsline} (or
+% \lstinline{\tp@l@<level>}, resp.) contains Components.
 %
-% Once a list file is read, those \lstinline{l@<level>} macros are
+% Once a list file is read, those \lstinline{\tp@l@<level>} macros are
 % expanded in two steps. Each entry constitutes a Container in its own
 % right. It therefore can have multiple Components. The first step is
 % the extraction phase, where the entry's Container is dynamically
@@ -370,7 +370,7 @@
 %
 % \begin{macro}{\tp@init@l@}
 %   is a low-level macro used to dynamically define
-%   \lstinline{l@<level>} macros. Optional \#1 is an override for
+%   \lstinline{\tp@l@<level>} macros. Optional \#1 is an override for
 %   counters that have to be restored, \#2 is the list file ending
 %   (raw entries being stored in a file \lstinline{\jobname.#2}), \#3
 %   is a number that indicated the nesting depth, \#4 is the nested
@@ -390,7 +390,7 @@
   \expandafter\ifx\csname tp@#2@print@entry\endcsname\relax
     \expandafter\let\csname tp@#2@print@entry\endcsname\tp@print@generic
   \fi
-  \expandafter\long\expandafter\gdef\csname l@#4\endcsname##1##2{%
+  \expandafter\long\expandafter\gdef\csname tp@l@#4\endcsname##1##2{%
     \ifLuaTeX\suppresslongerror=1\fi
     \expandafter\ifnum \csname c@#2depth\endcsname<#3\relax
     \else
@@ -415,9 +415,9 @@
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tp@expand@l@contents}
-%   expands the content of the l@<level> macro and contains some code
+%   expands the content of the \lstinline{tp@l@<level>} macro and contains some code
 %   to catch and handle standard \LaTeX\ headings. \#1 is the content
-%   of the l@-macro, \#2 is the namespace, and \#3 is the Component
+%   of the \lstinline{tp@l@-macro}, \#2 is the namespace, and \#3 is the Component
 %   prefix.
 %    \begin{macrocode}
 \def\tp@expand@l@contents#1#2#3#4{%
