@@ -294,13 +294,13 @@
 %    \begin{macrocode}
 \def\tp@check@empty{\tp@opt@empty\@tp@check@empty}%]
 \def\@tp@check@empty[#1]#2#3#4{%
-  \tpIfComp{#4#3}
-    {\tpIfCompEmpty{#4#3}
-      {\expandafter\global\expandafter\let\csname tp@#2@#4#3\endcsname\relax}
-      {}}
-    {\tpIfComp{#1#3}
-      {\expandafter\expandafter\expandafter\let\expandafter\csname tp@#2@#4#3\expandafter\endcsname\csname tp@#2@#1#3\endcsname}
-      {}}}
+   \tpIfComp{#4#3}
+     {\tpIfCompEmpty{#4#3}
+       {\expandafter\global\expandafter\let\csname tp@#2@#4#3\endcsname\relax}
+       {}}
+     {\tpIfComp{#1#3}
+       {\expandafter\expandafter\expandafter\let\expandafter\csname tp@#2@#4#3\expandafter\endcsname\csname tp@#2@#1#3\endcsname}
+       {}}}
 %    \end{macrocode}
 % \end{macro}
 %

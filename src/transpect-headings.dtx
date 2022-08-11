@@ -385,14 +385,16 @@
   \tp@check@empty{heading}{Subtitle}{Toc}%
   \tp@check@author{Toc}%
   \expandafter\ifx\csname tp@heading@attr@notoc\endcsname\@empty\else
-    \edef\tp@heading@toc@entry{%
+    \protected@edef\tp@heading@toc@entry{%
       \tpIfComp{TocTitle}{\string\tpTocTitle{\string\ignorespaces\space\expandonce{\tp@heading@TocTitle}}}{}%
       \tpIfComp{TocNumber}{\string\tpTocNumber{\string\ignorespaces\space\expandonce{\tp@heading@TocNumber}}}{}%
       \tpIfComp{TocAuthorNameList}{\string\tpTocAuthorNameList{\string\ignorespaces\space\expandonce{\tp@heading@TocAuthorNameList}}}{}%
       \tpIfComp{TocSubtitle}{\string\tpTocSubtitle{\string\ignorespaces\space\expandonce{\tp@heading@TocSubtitle}}}{}%
     }%
     \tpIfProp{toc-level}{\edef\tp@heading@name{\tpUseProperty{toc-level}}}{}%
-    \addcontentsline{toc}{\tp@heading@name}{\expandonce{\tp@heading@toc@entry}}\relax
+    \protected@write\@auxout
+      {\tpGobble}%
+      {\string\@writefile{toc}{\protect\tpContentsline{\tp@heading@name}{\tp@heading@toc@entry}{\thepage}\protected@file@percent}}\relax
   \fi
 }
 \def\tp@check@author#1{%
@@ -407,6 +409,11 @@
     }%
   }%
 }%
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tpContentsline} is a fork of \LaTeX's \lstinline{\contentsline}, but mine is \lstinline{\long}er.
+%    \begin{macrocode}
+\long\def\tpContentsline#1{\csname l@#1\endcsname}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tp@toc@extract@data} is called within
@@ -464,16 +471,19 @@
   \tp@check@author{Run}%
   \tp@check@empty{heading}{Subtitle}{Run}%
   \tpUseProperty{running-extra}%
-  \tpIfProp{running-level}
+   \tpIfProp{running-level}
     {\expandafter\let\expandafter\tp@mark@name\csname\tpUseProperty{running-level}mark\endcsname}
     {\expandafter\let\expandafter\tp@mark@name\csname\tp@heading@name mark\endcsname}%
     \ifx\tp@mark@name\relax\ifx\tp@heading@parent\@undefined\else
       \expandafter\let\expandafter\tp@mark@name\csname\tp@heading@parent mark\endcsname%
     \fi\fi
   \ifx\tp@mark@name\relax\else
-    \protected@edef\@tempa{\expandafter\@empty\csname tp@heading@running-heading\endcsname}%
-    \expandafter\tp@mark@name\expandafter{\@tempa}%
-  \fi}
+    \begingroup
+      \tpGobble
+      \expandafter\tp@mark@name\expandafter{\csname tp@heading@running-heading\endcsname}%
+    \endgroup
+  \fi
+}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -490,8 +500,11 @@
   \tp@check@empty[Toc]{heading}{Subtitle}{BM}%
   \expandafter\ifx\csname tp@heading@attr@noBM\endcsname\@empty\else
     \tpIfProp{bookmark-level}{\edef\Hy@toclevel{\tpUseProperty{bookmark-level}}}{}%
-    \protected@edef\@tempa{\expandafter\@empty\csname tp@heading@bookmark\endcsname}%
-    \bookmark[level=\Hy@toclevel,dest=\@currentHref]{\expandonce{\@tempa}}%
+    \begingroup
+      \tpGobble
+      \protected@edef\@tempa{\csname tp@heading@bookmark\endcsname}%
+      \bookmark[level=\Hy@toclevel,dest=\@currentHref]{\expandonce{\@tempa}}%
+    \endgroup
   \fi
 }
 %    \end{macrocode}
