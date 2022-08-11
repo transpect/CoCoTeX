@@ -118,21 +118,25 @@
 %    \begin{macrocode}
 \def\tp@title@process@bka{%
   \@tempswatrue
-  \expandafter\ifnum\csname tpAuthor-Cnt\endcsname>\z@
-    \tpCompGDef\tpRunBookName{tpAuthor}{author-list-format}%
-  \else
-    \expandafter\ifnum\csname tpEditor-Cnt\endcsname>\z@
-      \tpCompGDef\tpRunBookName{tpEditor}{editor-list-format}%
-      \csgappto{tpRunBookName}{\tpUseProperty{editor-suffix}}%
+  \begingroup
+    \tpGobble
+    \renewcommand\foreignlanguage[2]{{##2}}%
+    \expandafter\ifnum\csname tpAuthor-Cnt\endcsname>\z@
+      \tpCompGDef\tpRunBookName{tpAuthor}{author-list-format}%
     \else
-      \tpPackageWarning{transcript-title}{Meta Data}{No author or editor given!}%
-      \@tempswafalse
+      \expandafter\ifnum\csname tpEditor-Cnt\endcsname>\z@
+        \tpCompGDef\tpRunBookName{tpEditor}{editor-list-format}%
+        \csgappto{tpRunBookName}{\tpUseProperty{editor-suffix}}%
+      \else
+        \tpPackageWarning{transcript-title}{Meta Data}{No author or editor given!}%
+        \@tempswafalse
+      \fi
     \fi
-  \fi
-  \if@tempswa
-    \expandafter\author\expandafter{\tpRunBookName}%
-    \tp@write@pdf@meta{pdfauthor}{\tpRunBookName}%
-  \fi
+    \if@tempswa
+      \expandafter\author\expandafter{\tpRunBookName}%
+      \tp@write@pdf@meta{pdfauthor}{\tpRunBookName}%
+    \fi
+  \endgroup
 }
 %    \end{macrocode}
 % sets the metadata for the pdf creator
@@ -187,7 +191,7 @@
 }
 \def\tp@title@fundings@eval{{%
     \def\tp@cur@cont{titlepage}%
-    \tpApplyCollection{tpFunding}{fund-format}{FundingBlock}%
+    \tpComposeCollection{tpFunding}{fund-format}{FundingBlock}%
 }}
 %    \end{macrocode}
 % Evaluator for the Corresponding Author
