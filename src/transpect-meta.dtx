@@ -82,11 +82,11 @@
 \def\tp@declare@role[#1]#2{%
   \tpDeclareComponentGroup{tp#2}{%
     \tpDeclareCountedComp{FullName}%
-    \tpDeclareCountedComp{SurName}%
+    \tpDeclareCountedComp{LastName}%
     \tpDeclareCountedComp{FirstName}%
     \tpDeclareCountedComp{MidName}%
     \tpDeclareCountedComp{PersonPrefix}%
-    \tpDeclareCountedComp{OCRID}%
+    \tpDeclareCountedComp{ORCID}%
     \tpDeclareCountedComp{Affil}%
     \tpDeclareCountedComp{Email}%
   }%
@@ -95,10 +95,19 @@
   }%
   \tpDeclareRoleBlock{#2}{NameList}{#1-list-format}%
 }
-
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tpAddToRole} appends another Component declaration block \#2 to a pre-defined Role \#1.
+%    \begin{macrocode}
 \def\tpAddToRole#1#2{\csgappto{tp#1}{#2}}
 %    \end{macrocode}
-% \#1 is the name of the Component Group's output block, \#2 is the name of the property used to compose the Output Compoent.
+% \end{macro}
+% \begin{macro}{\tpDeclareRoleBlock} is used to create a new output
+%   container (named \lstinline{\tp#1#2}) for a given Role \#1. A Role
+%   Block is a Component of the parent Container which contains
+%   certain Components of all members of the Role within its parent
+%   Container. Format and selection of the utilised Components are specified
+%   via the Property given in \#3.
 %    \begin{macrocode}
 \def\tpDeclareRoleBlock#1#2#3{%
   \tpDeclareComp{#1#2}{\expandafter\global}{}%
@@ -111,8 +120,8 @@
 %    \begin{macrocode}
 \def\tp@meta@role@eval#1{{%
   \tpIfComp{#1NameList}{}{%
-    \ifcsdef{tp#1-Cnt}
-      {\ifnum\csname tp#1-Cnt\endcsname>\z@
+    \ifcsdef{tp#1Cnt}
+      {\expandafter\ifnum\csname tp#1Cnt\endcsname>\z@
           \tp@eval@role@attrs{#1}%
           \tpApplyCollection{tp#1}{\csname tp@meta@role@#1@NameList\endcsname}{#1NameList}%
         \fi
@@ -124,7 +133,7 @@
 %   environment. \#1 is the name of the role.
 %    \begin{macrocode}
 \def\tp@eval@role@attrs#1{%
-    \tp@iterate{\@tempcnta}{\@ne}{\expandafter\the\csname tp#1-Cnt\endcsname}{%
+    \tp@iterate{\@tempcnta}{\@ne}{\csname tp#1Cnt\endcsname}{%
       \ifcsdef{tp@meta@#1-\the\@tempcnta @attrs\endcsname}{%
         \tpParseAttributes{#1-\the\@tempcnta }{\csname tp@meta@#1-\the\@tempcnta @attrs\endcsname}%
       }{}}}
@@ -133,7 +142,7 @@
 % Defaut Property settings for the Meta Container.
 %    \begin{macrocode}
 \tpAddToDefault{Meta}{%
-  \tpSetProperty{name-format}{\tpUseComp{FirstName}\space\tpUseComp{SurName}}%
+  \tpSetProperty{name-format}{\tpUseComp{FirstName}\space\tpUseComp{LastName}}%
   \tpSetProperty{name-list-format}{\tpUseComp{FullName}\ifnum\tpCurCount<\tpTotalCount\tpUseProperty{counted-name-sep}\fi}%
   \tpSetProperty{counted-name-sep}{,\space}%
   \tpPropertyLet{author-format}{name-format}% Override for single author names

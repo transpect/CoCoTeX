@@ -121,10 +121,10 @@
   \begingroup
     \tpGobble
     \renewcommand\foreignlanguage[2]{{##2}}%
-    \expandafter\ifnum\csname tpAuthor-Cnt\endcsname>\z@
+    \ifnum\tpAuthorCnt>\z@
       \tpCompGDef\tpRunBookName{tpAuthor}{author-list-format}%
     \else
-      \expandafter\ifnum\csname tpEditor-Cnt\endcsname>\z@
+      \ifnum\tpEditorCnt>\z@
         \tpCompGDef\tpRunBookName{tpEditor}{editor-list-format}%
         \csgappto{tpRunBookName}{\tpUseProperty{editor-suffix}}%
       \else
@@ -383,10 +383,10 @@
     \def\thepage{\roman{page}}%
   }%
   \tpSetProperty{titlepage-i}{%
-    \ifcollection
-      \tpUseProperty{EditorNameList}%
-    \else
+    \ifmonograph
       \tpUseComp{AuthorNameList}%
+    \else
+      \tpUseProperty{EditorNameList}%
     \fi%
     \vskip\baselineskip
     \tpUseComp{Title}%
@@ -400,10 +400,10 @@
     \tpUseProperty{bio-block}%
   }%
   \tpSetProperty{titlepage-iii}{%
-    \ifcollection
-      \tpUseProperty{EditorNameList}%
-    \else
+    \ifmonograph
       \tpUseComp{AuthorNameList}%
+    \else
+      \tpUseProperty{EditorNameList}%
     \fi%
     \par
     \tpUseComp{Title}\par
@@ -527,15 +527,15 @@
   \tpSetProperty{run-book-name}{%
     \tpIfComp{RunNames}
       {\tpUseComp{RunNames}}
-      {\ifcollection
+      {\ifmonograph
+         \tpIfComp{AuthorNameList}
+           {\tpUseComp{AuthorNameList}}
+           {no author defined!}%
+       \else
          \tpIfComp{EditorNameList}
            {\tpUseComp{EditorNameList}}
            %{\tpUseProperty{editor-string}}
            {no editor defined!}%
-       \else
-         \tpIfComp{AuthorNameList}
-           {\tpUseComp{AuthorNameList}}
-           {no author defined!}%
        \fi}%
   }%
 }

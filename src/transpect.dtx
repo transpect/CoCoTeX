@@ -38,30 +38,39 @@
 \DeclareOptionX{endnotesperchapter}{\PassOptionsToPackage{\CurrentOption}{transpect-endnotes}}
 %    \end{macrocode}
 % The option \lstinline{pubtype} (short for ``publication type'') has
-% possible three values: \lstinline{mono}, \lstinline{collection}, and
-% \lstinline{article}. \lstinline{mono} (also the default when no
-% \lstinline{pubtype} is given) and \lstinline{collection} are used to
-% switch between single and multiple contributor documents. Both types
-% implicitly load the {\LaTeX} standard class \lstinline{book}.
+% possible four values: \lstinline{mono}, \lstinline{collection},
+% \lstinline{journal}, and \lstinline{article}. \lstinline{mono} (also
+% the default when no \lstinline{pubtype} is given) and
+% \lstinline{collection} are used to switch between single and
+% multiple contributor documents; \lstinline{collection} and
+% \lstinline{journal} to switch between one-time text collections and
+% periodicals, respectively. All three types implicitly load the
+% {\LaTeX} standard class \lstinline{book}.
 %
 % \lstinline{collection} is used when the document's components
 % (i.\,e., chapters) are contributed by different authors like
-% journals, collections, or proceedings. \lstinline{mono} stands for
-% monographs, i.e., whole books that are written by the same
-% author(s).
+% collections or proceedings. \lstinline{journal} is used for
+% collections where each contribution is accompanied by a myriad of
+% meta data. \lstinline{mono} stands for monographs, i.e., whole books
+% that are written by the same author(s).
 %
 % The publicaten type \lstinline{article} is intended for single
-% articles within a journal and load the {\LaTeX} standard class
+% articles of a journal. It loads the {\LaTeX} standard class
 % \lstinline{article}.
 %    \begin{macrocode}
 \newif\ifcollection \collectionfalse
-\newif\ifarticle   \articlefalse
-\define@choicekey{transpect.cls}{pubtype}[\tp@pubtype\nr]{collection,article,mono}{%
+\newif\ifarticle    \articlefalse
+\newif\ifmonograph  \monographfalse
+\newif\ifjournal    \journalfalse
+\define@choicekey{transpect.cls}{pubtype}[\tp@pubtype\nr]{collection,article,journal,mono}{%
   \ifcase\nr\relax% collection
     \global\collectiontrue
-  \or%
+  \or% article
     \global\articletrue
-  \else% mono
+  \or% journal
+    \global\journaltrue
+  \else% monograph
+    \global\monographytrue
   \fi
 }
 \DeclareOptionX*{\PassOptionsToClass{\CurrentOption}{article}}
