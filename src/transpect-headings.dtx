@@ -695,6 +695,7 @@
 \def\tp@heading@affils{%
   \tpDeclareComp{AffilBlock}{\expandafter\global}{}%
   \tpDeclareComponentGroup{tpAffil}{%
+    \tpDeclareCountedComp{Affiliation}%
     \tpDeclareCountedComp{Address}%
     \tpDeclareCountedComp{Institute}%
     \tpDeclareCountedComp{Country}%
@@ -703,6 +704,7 @@
   }%
   \tpGroupHandler{tpAffil}{%
     \tpIfComp{AffilID}{}{\expandafter\tpAffilID\expandafter{\tpAffilCnt}}%
+    \tpIfComp{Affiliation}{}{\tpAffiliation{\tpUseProperty{affiliation-format}}}%
   }%
 }
 %    \end{macrocode}
@@ -854,9 +856,10 @@
   \tpSetProperty{author-contact-block-format}{% Format of the whole contact information block
     \tpUseComp{AuthorContact}\ifnum\tpCurCount<\tpTotalCount\tpUseProperty{counted-name-sep}\fi
   }%
-  \tpSetProperty{affil-block-format}{% Format of the  affiliation block
-    \textsuperscript{\tpUseComp{AffilID}}\tpUseComp{Institute}, \tpUseComp{Department}, \tpUseComp{Address}\par
+  \tpSetProperty{affiliation-format}{% Format of the  affiliation block
+    \tpUseComp{Institute}, \tpUseComp{Department}, \tpUseComp{Address}\par
   }%
+  \tpSetProperty{affil-block-format}{\textsuperscript{\tpUseComp{AffilID}}\tpUseComp{Affiliation}}
   \tpSetProperty{affil-block-face}{\small\normalfont}
 }
 %    \end{macrocode}
