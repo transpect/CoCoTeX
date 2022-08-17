@@ -120,6 +120,11 @@
 \@onlypreamble\tpDeclareContainer
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{\tpAddToType} add additional content \#3 to a Type \#1 of a previously declared Container \#2.
+%    \begin{macrocode}
+\def\tpAddToType#1#2#3{\csgappto{tp@type@#1@#2}{#3}}
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\tpEvalType}
 %   calls the Declaration list for data Type \#2. With optional \#1
 %   the Container Class can be overriden.
@@ -131,7 +136,7 @@
     {Data Type #2 in Container #1 undefined!}
     {You try to evaluate a data type `#2' from container `#1', but that data type has not been declared.}%
   \else
-    \tpKernelDebugMsg{Evaluating tp@type@#2@#1:^^J \expandafter\meaning\csname tp@type@#2@#1\endcsname}%
+    \tpKernelDebugMsg{Evaluating tp@type@#2@#1:^^J \csmeaning{tp@type@#2@#1}}%
     \csname tp@type@#2@#1\endcsname
   \fi
 }
@@ -247,6 +252,7 @@
     \csname tp#1\endcsname{#2}%
   \fi
 }
+\let\tpSetComp\tpComp
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tpUseComp} is a high level command to return (or

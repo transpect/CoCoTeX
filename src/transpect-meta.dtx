@@ -26,6 +26,7 @@
 \tpDeclareContainer{Meta}{%
   \tpDeclareType{Components}{%
     \tpDeclareRole[author]{Author}%
+    \tp@declare@meta@comp
   }%
   \tpDeclareType{Properties}{%
     \tp@Meta@default
@@ -139,6 +140,17 @@
       }{}}}
 %    \end{macrocode}
 % \end{macro}
+% \section{common meta data}
+%
+%
+%    \begin{macrocode}
+\def\tp@declare@meta@comp{%
+    \tpDeclareComp{Copyright}{\expandafter\global}{}% Copyright text
+    \tpDeclareComp{DOI}{\expandafter\global}{}%         DOI
+}%
+%    \end{macrocode}
+% 
+%
 % Defaut Property settings for the Meta Container.
 %    \begin{macrocode}
 \tpAddToDefault{Meta}{%
