@@ -471,16 +471,17 @@
   \tp@check@author{Run}%
   \tp@check@empty{heading}{Subtitle}{Run}%
   \tpUseProperty{running-extra}%
-   \tpIfProp{running-level}
+  \tpIfProp{running-level}
     {\expandafter\let\expandafter\tp@mark@name\csname\tpUseProperty{running-level}mark\endcsname}
     {\expandafter\let\expandafter\tp@mark@name\csname\tp@heading@name mark\endcsname}%
     \ifx\tp@mark@name\relax\ifx\tp@heading@parent\@undefined\else
-      \expandafter\let\expandafter\tp@mark@name\csname\tp@heading@parent mark\endcsname%
+      \letcs\tp@mark@name{\tp@heading@parent mark}%
     \fi\fi
   \ifx\tp@mark@name\relax\else
     \begingroup
       \tpGobble
-      \expandafter\expandafter\expandafter\tp@mark@name\expandafter\expandafter\expandafter{\csname tp@heading@running-heading\endcsname}%
+      \protected@edef\@tempa{\csname tp@heading@running-heading\endcsname}%
+      \expandafter\tp@mark@name\expandafter{\@tempa}%
     \endgroup
   \fi
 }
@@ -550,7 +551,7 @@
 %    \begin{macrocode}
 \def\tp@block@heading{%
   \@svsec
-  \par \nobreak
+  \tpUseProperty{after-heading-par}%
   \tpIfProp{after-indent}{\global\@afterindenttrue}{\global\@afterindentfalse}%
   \gdef\next{%
     \vskip \@tempskipa
@@ -746,6 +747,7 @@
     \par
     \global\@afterindenttrue
   }%
+  \tpSetProperty{after-heading-par}{\par \nobreak}% par commands at the end of non-inline headings
   \tpSetProperty{before-heading}{}%
   \tpSetProperty{title-face}{\bfseries}%
   \tpSetProperty{subtitle-face}{\normalfont}%
@@ -856,8 +858,12 @@
     \tpUseComp{AuthorContact}\ifnum\tpCurCount<\tpTotalCount\tpUseProperty{counted-name-sep}\fi
   }%
   \tpSetProperty{affiliation-format}{% Format of the  affiliation block
-    \tpUseComp{Institute}, \tpUseComp{Department}, \tpUseComp{Address}\par
+    \tpIfComp{Institute}{\tpUseComp{Institute}}{}%
+    \tpIfComp{Department}{, \tpUseComp{Department}}{}%
+    \tpIfComp{Address}{, \tpUseComp{Address}}{}%
+    \tpUseProperty{affil-sep}%
   }%
+  \tpSetProperty{affil-sep}{\par}
   \tpSetProperty{affil-block-format}{\textsuperscript{\tpUseComp{AffilID}}\tpUseComp{Affiliation}}
   \tpSetProperty{affil-block-face}{\small\normalfont}
 }

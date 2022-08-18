@@ -261,6 +261,12 @@
 \def\tpUseComp#1{\csname tp@\tp@cur@cont @#1\endcsname}
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{\tpUseGComp} is a high level command to return (or
+%   print) the material stored as a global Component from the Container \#1 with the name \#2.
+%    \begin{macrocode}
+\def\tpUseGComp#1#2{\csname tp@#1@#2\endcsname}
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\tpGetComp} is a high level command to return the
 %   contents stored in a Component of name \#1 as a paragraph iff the
 %   Component is non-empty or \lstinline{\relax}.
@@ -275,12 +281,21 @@
 \long\def\tpIfComp#1#2#3{\expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\relax#3\else#2\fi}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tpIfComp} is a high level macro that executes \#2 if
+% \begin{macro}{\tpIfGComp} Global variant of \lstinline{\tpIfComp}.
+\long\def\tpIfGComp#1#2#3#4{\expandafter\ifx\csname tp@#1@#2\endcsname\relax#4\else#3\fi}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tpIfCompEmpty} is a high level macro that executes \#2 if
 %   the Component macro \#1 is empty (or \lstinline|{}|) within its
 %   Container, and \#3 if it is either not existant or non-empty.
 %    \begin{macrocode}
 \long\def\long@empty{}
 \long\def\tpIfCompEmpty#1#2#3{\expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\long@empty#2\else#3\fi}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tpIfGCompEmpty} is a global variant of \lstinline{\tpIfCompEmpty}.
+%    \begin{macrocode}
+\long\def\tpIfGCompEmpty#1#2#3#4{\expandafter\ifx\csname tp@#1@#2\endcsname\long@empty#3\else#4\fi}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tp@check@empty} handles the distinction between empty
@@ -356,6 +371,25 @@
 %   Components of the same group use the same counter.
 %    \begin{macrocode}
 \let\tp@cnt@grp\@empty
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tpUseGroupComp} picks a specific Component of a group.
+%    \begin{macrocode}
+\def\tpUseGroupComp#1#2{{\def\tp@cnt@grp{#1}\csname\tp@cnt@grp-#2-\csname \tp@cnt@grp Cnt\endcsname}}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tpUseGroupProp} picks a specific Property of a group.
+%    \begin{macrocode}
+\def\tpUseGroupProp#1#2#3{%
+  \begingroup
+    \@tempcnta\numexpr#2\relax
+    \letcs\tpTotalCount{#1Cnt}%
+    \def\tp@cnt@grp{#1}%
+    \tpToggleCountedCond
+    \csnumdef{#1Cnt}{\the\@tempcnta}%
+    \tpCurCount=\the\@tempcnta\relax%
+    \csname tp@\tp@cur@cont @#3\endcsname%
+  \endgroup}
 %    \end{macrocode}
 % \end{macro}
 %
