@@ -267,6 +267,8 @@
   \tp@title@macro{EISBN}%      Ebook-ISBN
   \tp@title@macro{EpubISBN}%  Epub-ISBN
   \tp@title@macro{ElibPDF}%   ???
+  \tp@title@macro{BiblISSN}%  Bibl-ISBN
+  \tp@title@macro{BibleISSN}%  Bible-ISBN
   %% Funding
   \tp@title@macro{FundingPreText}% Text before the Funding list
   \tp@title@macro{FundingPostText}% Text after the Funding list
@@ -284,6 +286,7 @@
   \tp@title@macro{UsedFont}%    Used Font(s)
   \tp@title@macro{Conversion}% Data Converison
   \tp@title@macro{EnvDisclaimer}% Environmental Disclaimer
+  \tp@title@macro{Advertise}%  Advertisements
   %% Licencing
   \tp@title@macro{LicenceText}%   License Description
   \tp@title@macro{LicenceLogo}%   License Logo
@@ -502,8 +505,8 @@
   \tpPropertyLet{series-editor-bio-format}      {name-bio-format}% Override for single series editor meta info
   \tpPropertyLet{series-editor-bio-block-format}{name-bio-block-format}% Override for single series editor meta info
   % name Separators
-  \tpSetProperty{editor-suffix-sgl}{\space(Ed.)}%
-  \tpSetProperty{editor-suffix-pl}{\space(Eds.)}%
+  \tpSetProperty{editor-suffix-sgl}{(Ed.)}%
+  \tpSetProperty{editor-suffix-pl}{(Eds.)}%
   \tpSetProperty{editor-suffix}{%
     \space
     \ifnum\tpTotalCount=\@ne\relax

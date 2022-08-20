@@ -308,7 +308,7 @@
 % \begin{macro}{\tp@init@cnt} initialises a counter with the name \#1
 %   for automatic numbering if it doesn't exist, yet.
 %    \begin{macrocode}
-\def\tp@init@cnt#1{\tpIfPropVal{numbering}{auto}{\@definecounter{#1}}{}}
+\def\tp@init@cnt#1{\@definecounter{#1}}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -331,11 +331,13 @@
 %    \begin{macrocode}
 \def\tp@auto@number#1#2{%
   \tpIfPropVal{numbering}{auto}
-    {\expandafter\ifx\csname tp@heading@attr@nonumber\endcsname\@empty
+    {\expandafter\ifx\csname c@#2\endcsname\relax\tp@init@cnt{#2}\fi
+     \expandafter\ifx\csname tp@heading@attr@nonumber\endcsname\@empty
      \else
-       \tpIfComp{Number}{}
+       \tpIfComp{Number}
+         {}
          {\ifnum #1>\c@secnumdepth\relax\else
-            \refstepcounter{#2}%
+            \stepcounter{#2}%
             \edef\@tempa{\csname the#2\endcsname}%
             \expandafter\tpNumber\expandafter{\@tempa}%
           \fi}%
