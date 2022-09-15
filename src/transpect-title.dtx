@@ -205,7 +205,6 @@
   \tp@meta@role@eval{#1}%
   \tpApplyCollection{tp#1}{\csname tp@meta@role@#1@BioBlock\endcsname}{#1BioBlock}%
   \tp@create@editor@string{#1}}
-
 %    \end{macrocode}
 % adds suffix to the editors
 %    \begin{macrocode}
@@ -297,6 +296,11 @@
   \tp@title@macro{JournalName}% Full name of the journal
   \tp@title@macro{JournalAbbrev}% Short name of the journal
   \tp@title@macro{Issue}% Issue of the journal
+  %% Generic additional information
+  \tp@title@macro{AddNoteI}%                      Additional information, title page I
+  \tp@title@macro{AddNoteII}%                     Additional information, title page II
+  \tp@title@macro{AddNoteIII}%                    Additional information, title page III
+  \tp@title@macro{AddNoteIV}%                     Additional information, title page IV
 }
 %    \end{macrocode}
 % \section{Default Settings}
