@@ -1,0 +1,30 @@
+\def\fileversion{0.2.1}%
+\def\filedate{2021-08-20}%
+%% INCLUDE-DOC
+% One more driver function
+%    \begin{macrocode}[gobble=1]
+%<*driver>
+%    \end{macrocode}
+% If we want to run the splitted development dtx locally, this macro prevents undefined control sequence errors and actually includes the dtx chunks.
+%    \begin{macrocode}
+\def\includeDTX#1{\input src/#1.dtx}
+%    \end{macrocode}
+% End driver function
+%    \begin{macrocode}[gobble=1]
+%</driver>
+%    \end{macrocode}
+\includeDTX{cocotex}
+% \part{Core Functions}
+\includeDTX{coco-kernel}
+\includeDTX{coco-common}
+\includeDTX{coco-meta}
+% \part{Document Level Structures}
+\includeDTX{coco-headings}
+\includeDTX{coco-notes}
+\includeDTX{coco-script}
+\includeDTX{coco-title}
+\includeDTX{coco-floats}
+\includeDTX{coco-frame}
+\includeDTX{coco-lists}
+%\Finale
+% \endinput

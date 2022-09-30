@@ -1,0 +1,181 @@
+% \chapter{cocotex.dtx}
+%
+% This is the main class file for the {\CoCoTeX} {\LaTeX} package.
+%
+%    \begin{macrocode}[gobble=1]
+%<*class>
+%    \end{macrocode}
+% File Preamble
+%    \begin{macrocode}
+%%
+%% Common document class for \textit{xerif} projects.
+%%
+%% Maintainer: p.schulz@le-tex.de
+%%
+%% lualatex  -  texlive > 2019
+%%
+\NeedsTeXFormat{LaTeX2e}[2018/12/01]
+\ProvidesClass{cocotex}
+    [\filedate \fileversion cocotex]
+%    \end{macrocode}
+% Hard-coded requirements
+%    \begin{macrocode}
+\RequirePackage{kvoptions-patch}
+\RequirePackage{xkeyval}
+\PassOptionsToPackage{cmyk}{xcolor}
+\RequirePackage{coco-common}
+%    \end{macrocode}
+% Passing options down to the \LaTeX\space standard packages
+%    \begin{macrocode}
+\DeclareOptionX{main}{\PassOptionsToPackage{\CurrentOption}{babel}}
+\PassOptionsToPackage{shorthands=off}{babel}
+%    \end{macrocode}
+% Passing options down to the \lstinline{coco-notes} package
+%    \begin{macrocode}
+\DeclareOptionX{ennotoc}{\PassOptionsToPackage{\CurrentOption}{coco-notes}}
+\DeclareOptionX{endnotes}{\PassOptionsToPackage{\CurrentOption}{coco-notes}}
+\DeclareOptionX{resetnotesperchapter}{\PassOptionsToPackage{\CurrentOption}{coco-notes}}
+\DeclareOptionX{endnotesperchapter}{\PassOptionsToPackage{\CurrentOption}{coco-notes}}
+%    \end{macrocode}
+% The option \lstinline{pubtype} (short for ``publication type'') has
+% possible four values: \lstinline{mono}, \lstinline{collection},
+% \lstinline{journal}, and \lstinline{article}. \lstinline{mono} (also
+% the default when no \lstinline{pubtype} is given) and
+% \lstinline{collection} are used to switch between single and
+% multiple contributor documents; \lstinline{collection} and
+% \lstinline{journal} to switch between one-time text collections and
+% periodicals, respectively. All three types implicitly load the
+% {\LaTeX} standard class \lstinline{book}.
+%
+% \lstinline{collection} is used when the document's components
+% (i.\,e., chapters) are contributed by different authors like
+% collections or proceedings. \lstinline{journal} is used for
+% collections where each contribution is accompanied by a myriad of
+% meta data. \lstinline{mono} stands for monographs, i.e., whole books
+% that are written by the same author(s).
+%
+% The publicaten type \lstinline{article} is intended for single
+% articles of a journal. It loads the {\LaTeX} standard class
+% \lstinline{article}.
+%    \begin{macrocode}
+\newif\ifcollection \collectionfalse
+\newif\ifarticle    \articlefalse
+\newif\ifmonograph  \monographfalse
+\newif\ifjournal    \journalfalse
+\define@choicekey{cocotex.cls}{pubtype}[\tp@pubtype\nr]{collection,article,journal,mono}{%
+  \ifcase\nr\relax% collection
+    \global\collectiontrue
+  \or% article
+    \global\articletrue
+  \or% journal
+    \global\journaltrue
+  \else% monograph
+    \global\monographytrue
+  \fi
+}
+\DeclareOptionX*{\PassOptionsToClass{\CurrentOption}{article}}
+\DeclareOptionX*{\PassOptionsToClass{\CurrentOption}{book}}
+\DeclareOptionX{debug}{\PassOptionsToPackage{\CurrentOption}{coco-kernel}}
+\DeclareOptionX{usescript}{\PassOptionsToPackage{\CurrentOption}{coco-script}}
+\DeclareOptionX{nofigs}{\PassOptionsToPackage{\CurrentOption}{coco-floats}}
+\ProcessOptionsX
+%    \end{macrocode}
+% All publication types supported by {\CoCoTeX} are based on one of
+% \LaTeX's default classes \lstinline{book} or \lstinline{article}:
+%    \begin{macrocode}
+\ifarticle
+  \LoadClass[10pt,a4paper]{article}
+\else
+  \LoadClass[10pt,a4paper]{book}
+\fi
+%    \end{macrocode}
+% Offsets are the removed to make all values relative to the upper left corner of the page to ease maintainance.
+%    \begin{macrocode}
+\voffset-1in\relax
+\hoffset-1in\relax
+%    \end{macrocode}
+% Typesetting automata need some room to play
+%    \begin{macrocode}
+\emergencystretch=2em
+%    \end{macrocode}
+% and strong restrictions:
+%    \begin{macrocode}
+\frenchspacing
+\clubpenalty10000
+\widowpenalty10000
+%    \end{macrocode}
+% page style without any headers or footers
+%    \begin{macrocode}
+\def\ps@empty{%
+  \let\@oddhead\@empty
+  \let\@evenhead\@empty
+  \let\@oddfoot\@empty
+  \let\@evenfoot\@empty
+}
+%    \end{macrocode}
+% vacancy pages need to have page style \lstinline{empty}:
+%    \begin{macrocode}
+\def\cleardoublepage{\clearpage\if@twoside \ifodd\c@page\else
+    \hbox{}\thispagestyle{empty}\newpage\if@twocolumn\hbox{}\newpage\fi\fi\fi}
+%    \end{macrocode}
+% re-defined to make front- and backmatter components distinguish-able
+%    \begin{macrocode}
+\ifarticle\else
+  \newif\if@frontmatter  \@frontmatterfalse
+  \renewcommand\frontmatter{%
+    \cleardoublepage
+    \@mainmatterfalse
+    \@frontmattertrue
+    \pagenumbering{arabic}}
+
+  \renewcommand\mainmatter{%
+    \cleardoublepage
+    \@frontmatterfalse
+    \@mainmattertrue}
+
+  \renewcommand\backmatter{%
+    \cleardoublepage
+    \@mainmatterfalse
+    \@frontmatterfalse}
+\fi
+\usepackage{soul}
+%    \end{macrocode}
+% Inclusion of the script module which also loads the babel package
+%    \begin{macrocode}
+\ifLuaTeX
+\RequirePackage{coco-script}
+\else
+\RequirePackage{babel}
+\fi
+%    \end{macrocode}
+% In the \lstinline{coco-headings.sty}, we include the
+% \lstinline{bookmark} package, which within calls the
+% \lstinline{hyperref} package.
+%    \begin{macrocode}
+\PassOptionsToPackage{breaklinks,linktoc=none,pdfborder={0 0 0},pdfencoding=auto,bookmarksnumbered=true}{hyperref}
+\RequirePackage{coco-headings}
+%    \end{macrocode}
+% Inclusion of the float module
+%    \begin{macrocode}
+\RequirePackage{coco-floats}
+%    \end{macrocode}
+% Inclusion of the title page module
+%    \begin{macrocode}
+\RequirePackage{coco-title}
+%    \end{macrocode}
+% Inclusion of the end-/footnotes module
+%    \begin{macrocode}
+\RequirePackage{coco-notes}
+%    \end{macrocode}
+% Fallback, in case, \lstinline{coco-headings.sty} is not loaded for
+% some reason.
+%
+% Some more hard dependencies:
+%    \begin{macrocode}
+\RequirePackage{index}
+\makeindex
+\RequirePackage{hyperref}
+%    \end{macrocode}
+%    \begin{macrocode}[gobble=1]
+%</class>
+%    \end{macrocode}

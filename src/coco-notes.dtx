@@ -1,0 +1,180 @@
+% \chapter{coco-notes.dtx}
+% This file contains the code for foot-  and endnote handling. It provides a
+% switch between endnotes and footnotes as well as options to handle
+% the resetting of footnote/endnote counters.
+%    \begin{macrocode}[gobble=1]
+%<*endnotes>
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%%
+%% module for CoCoTeX that handles footnote/endnote switching.
+%%
+%% Maintainer: p.schulz@le-tex.de
+%%
+%% lualatex  -  texlive > 2019
+%%
+\NeedsTeXFormat{LaTeX2e}[2018/12/01]
+\ProvidesPackage{coco-notes}
+    [\filedate \fileversion le-tex coco notes module]
+%    \end{macrocode}
+% internal switch for endnotes (\lstinline{\endnotestrue}) or footnotes (\lstinline{\endnotesfalse}, default).
+%    \begin{macrocode}
+\newif\ifendnotes \endnotesfalse
+%    \end{macrocode}
+% package options:
+% \begin{itemize}
+% \item \lstinline{endnotes} activates endnotes.
+% \item \lstinline{ennotoc} prevents chapter headings in the Notes
+%   section from creating toc entries.
+% \item \lstinline{resetnotesperchapter} resets foot- and endnotes at
+%   the start of each chapter level heading. If omitted (default)
+%   foot- or endnotes are numbered throughout the whole document
+% \item \lstinline{endnotesperchapter} implies \lstinline{endnotes}
+%   and allows the output of all collected endnotes at the end of each
+%   chapter. It also sets the note's heading to section level
+%   (otherwise it is chapter level).
+% \end{itemize}
+%    \begin{macrocode}
+\DeclareOption{endnotes}{\global\endnotestrue}
+\DeclareOption{ennotoc}{\global\let\tp@ennotoc\relax}
+\DeclareOption{resetnotesperchapter}{\global\let\reset@notes@per@chapter\relax}
+\DeclareOption{endnoteswithchapters}{\global\endnotestrue\global\let\endnotes@with@chapters\relax}
+\ProcessOptions
+%    \end{macrocode}
+% footnote package is mandatory since it provides the \lstinline{\savenotes} and \lstinline{\spewnotes} macros:
+%    \begin{macrocode}
+\RequirePackage{footnote}
+%    \end{macrocode}
+% Handling of endnotes:
+%    \begin{macrocode}
+\newif\if@enotesopen
+\AtBeginDocument{\edef\tpfn@parindent{\the\parindent}}
+\ifendnotes
+  \RequirePackage{endnotes}
+  \@ifpackageloaded{coco-headings}{\let\tp@useTeXHeading\relax}{}
+  \let\footnote=\endnote
+  \def\enotesize{\normalsize}%
+  \def\enoteformat{%
+    \noindent
+    \leavevmode
+    \hskip-2em\hb@xt@2em{\@theenmark\hss}%
+    \expandafter\parindent\tpfn@parindent\relax\expandafter}%
+  \gdef\enoteheading{%
+    \leftskip2em
+  }%
+  \def\printnotes{%
+    \ifx\endnotes@with@chapters\relax
+      \ifnum\c@endnote>\z@
+        \expandafter\global\expandafter\let\csname enotes@in@\the\realchap\endcsname\@empty
+      \fi
+    \fi
+    \if@enotesopen
+      \global\c@endnote\z@%
+      \bgroup
+      %\parindent\z@
+      \parskip\z@
+      \theendnotes
+      \egroup
+    \fi}
+\else
+  \newcount\c@endnote \c@endnote\z@
+  \let\printnotes\relax
+\fi
+
+\newcount\realchap \realchap\z@
+\ifx\endnotes@with@chapters\relax
+  \AtBeginDocument{%
+    \tpAddToHook[heading]{before-hook-chapter}{%
+      \ifnum\c@endnote>\z@\relax
+        \expandafter\global\expandafter\let\csname enotes@in@\the\realchap\endcsname\@empty
+      \fi
+      \global\advance\realchap\@ne
+      \global\c@endnote\z@
+      \def\tp@par@title{\tpIfComp{TocTitle}{\tpUseComp{TocTitle}}{\tpUseComp{Title}}}%
+      \def\tp@par@runtitle{\tpIfComp{RunTitle}{\tpUseComp{RunTitle}}{\tpUseComp{Title}}}%
+      \addtoendnotes{%
+        \noexpand\expandafter\noexpand\ifx\noexpand\csname enotes@in@\the\realchap\noexpand\endcsname\noexpand\@empty
+          \bgroup
+            \noexpand\leftskip\noexpand\z@
+            \noexpand\begin{heading}\ifx\tp@ennotoc\relax[notoc]\fi{section}%
+              \noexpand\tpTitle{\tp@par@title}%
+              \noexpand\tpRunTitle{\tp@par@runtitle}%
+            \noexpand\end{heading}%
+          \egroup
+        \noexpand\fi}%
+    }%
+  }
+\fi
+
+\ifx\reset@notes@per@chapter\relax
+  \AtBeginDocument{%
+    \tpAddToHook[heading]{before-hook-chapter}{%
+      \global\c@footnote\z@
+      \global\c@endnote\z@
+    }%
+  }%
+\fi
+
+%    \end{macrocode}
+% Here we make a small adjustment to the \lstinline{\fn@fntext} macro
+% from the \lstinline{footnote} package by making it \lstinline{\long}
+% and therefore allowing \lstinline{\par} inside it's argument.
+%    \begin{macrocode}
+\long\def\fn@fntext#1{%
+  \ifx\ifmeasuring@\@@undefined%
+    \expandafter\@secondoftwo\else\expandafter\@iden%
+  \fi%
+  {\ifmeasuring@\expandafter\@gobble\else\expandafter\@iden\fi}%
+  {%
+    \global\setbox\fn@notes\vbox{%
+      \unvbox\fn@notes%
+      \fn@startnote%
+      \@makefntext{%
+        \rule\z@\footnotesep%
+        \ignorespaces%
+        #1%
+        \@finalstrut\strutbox%
+      }%
+      \fn@endnote%
+    }%
+  }%
+}
+%    \end{macrocode}
+% Re-definition of \lstinline{footnote} package's footnote mark
+% retriever to allow non-numeric values in the optional argument of
+% \lstinline{\footnote}.
+%    \begin{macrocode}
+\def\fn@getmark@i#1[#2]{%
+  \sbox\z@{\@tempcnta0#2\relax}%
+  \ifdim\wd\z@>0\p@\relax
+    \def\thempfn{#2}%
+    \fn@getmark@iii%
+  \else
+    \csname c@\@mpfn\endcsname#2%
+    \fn@getmark@ii%
+  \fi
+}
+\def\fn@getmark@iii#1{%
+  \unrestored@protected@xdef\@thefnmark{\thempfn}%
+  \endgroup%
+  #1%
+}
+%    \end{macrocode}
+% And the same for plain \LaTeX:
+%    \begin{macrocode}
+\def\@xfootnote[#1]{%
+   \begingroup
+     \sbox\z@{\@tempcnta0#1\relax}%
+     \ifdim\wd\z@>0\p@\relax
+       \unrestored@protected@xdef\@thefnmark{#1}%
+     \else
+       \csname c@\@mpfn\endcsname #1\relax
+       \unrestored@protected@xdef\@thefnmark{\thempfn}%
+     \fi
+   \endgroup
+   \@footnotemark\@footnotetext}
+%    \end{macrocode}
+%    \begin{macrocode}[gobble=1]
+%</endnotes>
+%    \end{macrocode}

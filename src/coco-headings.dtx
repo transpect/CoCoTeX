@@ -1,0 +1,909 @@
+% \chapter{coco-headings.dtx}
+% This module provides handlers for headings like parts, chapters,
+% sections, or inline headings common to all CoCoTeX projects.
+%
+%    \begin{macrocode}[gobble=1]
+%<*headings>
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%%
+%% module for CoCoTeX that extends heading objects.
+%%
+%% Maintainer: p.schulz@le-tex.de
+%%
+%% lualatex  -  texlive >= 2019
+%%
+\NeedsTeXFormat{LaTeX2e}[2018/12/01]
+\ProvidesPackage{coco-headings}
+    [\filedate \fileversion CoCoTeX headings module]
+\RequirePackage{coco-meta}
+%    \end{macrocode}
+%
+% Headings are handled differently with \lstinline{cocotex.cls}
+% compared to standard \LaTeX, since cocotex manuscripts tend to
+% have a whole collection of additional information that are pressed
+% into the headings, like subtitles or section authors down to
+% subsection level, etc. Therefore, the \lstinline{\@startsection} and
+% \lstinline{\@make[s]chapterhead} facilities from {\LaTeX} are no longer
+% sufficient. At the same time, the package does not redefine those
+% macros and keeps them available for backwards compatibility.
+%
+% First, we load the \lstinline{bookmark} package:
+%    \begin{macrocode}
+\RequirePackage{bookmark}
+%    \end{macrocode}
+% Since we use our own heading levels, we disable all automatically generated bookmarks.
+%    \begin{macrocode}
+\hypersetup{bookmarksdepth=-999}
+%    \end{macrocode}
+%
+% \section{Facility for declaring heading levels and their layouts}%
+% \begin{tpContainer}{heading}
+%    \begin{macrocode}
+\tpDeclareContainer{tpHeading}{%
+  \tpInherit {Components,Properties} from Meta;
+  \tpDeclareType{Components}{%
+%    \end{macrocode}
+% We already have the Author Component inherited from the
+% \lstinline{Meta} Container. We therefore just need to declare the
+% overrides.
+%    \begin{macrocode}
+    \tp@heading@authors%
+%    \end{macrocode}
+% The remaining Components are built as usual.
+%    \begin{macrocode}
+    \tp@provide@hd@macros{Title}%
+    \tp@provide@hd@macros{Subtitle}%
+    \tp@provide@hd@macros{Number}%
+%    \end{macrocode}
+% \Deprecated
+%    \begin{macrocode}
+    \tpIfProp{extended}{%
+      \tp@extended@ht@macros
+    }{}%
+%    \end{macrocode}
+% \lstinline{Quote} and \lstinline{QuoteSource} (so far) don't need
+% overrides; they are declared the standard way.
+%    \begin{macrocode}
+    \tpDeclareComp{Quote}{}{}%
+    \tpDeclareComp{QuoteSource}{}{}%
+  }%
+  \tpDeclareType{Properties}{\tp@heading@default}%
+  \tpDeclareEnv{\@heading}{\end@heading}%
+}
+%    \end{macrocode}
+% \end{tpContainer}
+% \begin{macro}{\tpDeclareHeading} is the user-level macro to declare
+%   new headings.
+% \begin{description}[2em]
+% \item[\#1] (optional) inherit-from: load all properties from that heading level, first.
+% \item[\#2] level: used for toc entries. -1 for part, 0 for chapter, 1 for section, etc.
+% \item[\#3] name: part, chapter, section, etc, to be used in toc, head lines, bookmarks, etc.
+% \item[\#4] Property definitions and switches
+% \end{description}
+%    \begin{macrocode}
+\long\def\tpDeclareHeading{\tp@opt@empty\@tpDeclareHeading}
+\long\def\@tpDeclareHeading[#1]#2#3#4{%
+%    \end{macrocode}
+% Each new heading constitutes its own Sub-Container of the heading
+% Container. The name of this Sub-Container is the headings name.
+%    \begin{macrocode}
+  \tpDeclareContainer{#3}{%
+    \edef\@argi{#1}%
+    \tpDeclareType{Parent}{\tp@heading@create@parent{#1}{#3}}
+%    \end{macrocode}
+% We inherit everything from the heading levels parent, or from the
+% default heading if no parent is present.
+%    \begin{macrocode}
+    \ifx\@argi\@empty
+      \tpInherit {Components,Properties} from tpHeading;
+    \else
+      \tpInherit {Components,Properties,Parent} from #1;
+    \fi
+%    \end{macrocode}
+% The main body of the heading Declaration is a list of Property
+% definitions which we append to the Sub-Container's ``Property''
+% Type.
+%    \begin{macrocode}
+    \tpDeclareType{Properties}{%
+      #4%
+    }%
+%    \end{macrocode}
+% For each heading we declare some common macros like the ToC entry
+% handlers, the heading's counters and its hooks.
+%    \begin{macrocode}
+    \tpDeclareType{Init}{%
+      \tp@init@hooks{#3}%
+      \tp@init@l@{toc}{#2}{#3}%
+      \tp@init@cnt{#3}%
+      \tp@restore@init{heading}{number-#2-maxwd}%
+    }%
+%    \end{macrocode}
+% Unlike other Sub-Containers, headings form no own {\LaTeX}
+% environment.  Instead, headings are specifications of one common
+% \lstinline{heading} environment. Is is outsourced into the internal
+% \lstinline{\tp@declare@heading} macro, which is defined below.
+%
+% The reason for that is that we don't want to define versions of the
+% same property macros for each and every single heading
+% level. Instead, we locally re-define the general low-level macros
+% that represent the heading's properties for each instance of the
+% generalised \lstinline{heading} container.
+%    \begin{macrocode}
+    \tp@declare@heading{#2}{#3}%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tp@heading@create@parent} stores the heading level's name and its
+%   parent, if it exists.
+%    \begin{macrocode}
+\def\tp@heading@create@parent#1#2{%
+  \def\tp@heading@name{#2}%
+  \if!#1!\else
+    \tpCheckParent{#1}{#2}%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tp@declare@heading} consists of two parts: In the
+%   first part, the inheritance mechanism and the initializers for
+%   each new heading level are triggered.
+%    \begin{macrocode}
+\def\tp@declare@heading#1#2{%
+  \tpEvalType{Parent}%
+  \tpEvalType{Init}%
+%    \end{macrocode}
+%
+% \begin{macro}{\tpUseHeading} is defined as second step. It is called
+%   at the end of each \lstinline{heading} environment to process the
+%   Components within the Container instance. Each heading level has
+%   its own ``version'' of this macro.
+%    \begin{macrocode}
+  \csgdef{tpUseHeading#2}{%
+%    \end{macrocode}
+% Since heading levels don't define their own environments, we make
+% sure that \lstinline{heading} is the namespace we are working in.
+%    \begin{macrocode}
+    \tpNamespace{heading}%
+    \@setpar{\@@par}%
+%    \end{macrocode}
+% Properties are stored in macros specific to the current heading
+% Sub-Container, therefore we evaluate the level's Properties, not
+% those of the \lstinline{heading} Container. However, since we made
+% use of the inheritance mechanism earlier, each Sub-Container's
+% Property list also contains the general \lstinline{heading} Property
+% list.
+%    \begin{macrocode}
+    \tpEvalType[#2]{Properties}%
+%    \end{macrocode}
+% Immediately after setting the cascaded Properties we execute those
+% lists to be able to access the Properties.
+%    \begin{macrocode}
+    \csname tp@heading@#2@properties\endcsname
+%    \end{macrocode}
+% Processing the author name list (from coco-meta.sty).
+%    \begin{macrocode}
+    \tp@meta@role@eval{Author}%
+    \tpComposeCollection{tpAuthor}{author-contact-block-format}{AuthorContactBlock}%
+    \tpComposeCollection{tpAffil}{affil-block-format}{AffilBlock}%
+%    \end{macrocode}
+% Hyperref related stuff.
+%    \begin{macrocode}
+    \def\Hy@toclevel{#1}%
+%    \end{macrocode}
+% Call the mechanism to calculate the heading's counter.
+%    \begin{macrocode}
+    \tp@auto@number{#1}{#2}%
+%    \end{macrocode}
+% Here, the actual construction of the heading begins.
+%    \begin{macrocode}
+    \tpUseProperty{heading-par}%
+    \expandafter\ifx\csname tp@parent@#2\endcsname\relax\else
+      \edef\@@parent{before-hook-\csname\tp@parent@#2\endcsname}%
+      \expandafter\tpUseHook\expandafter{\@@parent}%
+    \fi
+    \tpUseHook{before-hook-\tp@heading@name}%
+    \tpUseProperty{before-heading}%
+%    \end{macrocode}
+% Add vertical space before the heading
+%    \begin{macrocode}
+    \tp@do@before@skip
+%    \end{macrocode}
+% The counters we calculated earlier and the space needed to render
+% them are evaluated
+%    \begin{macrocode}
+    \tp@format@number{}{}{#2}%
+%    \end{macrocode}
+% The value of after-skip is essential to determine whether the
+% heading is to be displayed as block or inline element. In case, some
+% heading definition omits setting a proper value, we build a
+% fallback.
+%    \begin{macrocode}
+    \tpIfProp{after-skip}{\expandafter\global\expandafter\@tempskipa\expandafter=\tpUseProperty{after-skip}\relax}{\global\@tempskipa=1sp\relax}%
+%    \end{macrocode}
+% Labels to be used with LaTeX's cross reference mechanism are defined
+%    \begin{macrocode}
+      \tp@heading@create@labels{#2}% label facility
+    \def\@svsec{%
+%    \end{macrocode}
+% The \lstinline{heading block} is the composition of all of the
+% heading's Components that are to be printed where the
+% \lstinline{heading} environment is in the source.
+%    \begin{macrocode}
+      \tpUseProperty{before-heading-block}%
+      \leftskip\tpUseProperty{margin-left}%
+      \rightskip\tpUseProperty{margin-right}%
+      \bgroup
+        \tpUseProperty{heading-block}%
+        \tpIfProp{extended}{\tpUseProperty{extended-heading}}{}%
+      \egroup%
+%    \end{macrocode}
+% Generate entries for ToC, bookmarks and page headers.
+%    \begin{macrocode}
+      \tpIfPropVal{no-toc}{true}{}{\tp@make@toc}% ToC entries
+      \tpIfPropVal{no-BM}{true}{}{\tp@make@bookmarks}% Bookmarks
+      \tp@make@run% Running headers
+      \tpUseProperty{after-heading-block}%
+    }%
+%    \end{macrocode}
+% Finally, we decide whether the printable material we stored in
+% \lstinline{\@svsec} is to be rendered as a block or inline. This is
+% adopted from \LaTeX's \lstinline{\@startsection}. The distinction is
+% made by the sign of \lstinline{after-skip}: a positive value yields
+% a block heading, a negative value yields an inline heading.
+%    \begin{macrocode}
+    \ifdim\@tempskipa <\z@\relax
+      \tp@inline@heading
+    \else
+      \tp@block@heading
+    \fi
+%    \end{macrocode}
+% This macro is called at the end of the heading environment. In order
+% to deal with possible vertical spaces after the heading, we wait
+% until the group of the heading environemnt is closed before we
+% actually print the fully composed heading. The definition of
+% \lstinline{\next} happens in either \lstinline{\tp@inline@heading}
+% or \lstinline{\tp@block@heading}.
+%    \begin{macrocode}
+    \aftergroup\next%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% 
+% \begin{macro}{\tp@do@before@skip} is a routine that determins the skip that is inserted before a heading.
+%    \begin{macrocode}
+\def\tp@do@before@skip{%
+  \setlength\@tempskipa{\tpUseProperty{before-skip}}%
+  \ifdim\@tempskipa<\z@\relax
+    \def\do@skip{\minusvspace{-\@tempskipa}}%
+  \else
+    \def\do@skip{\addvspace{\@tempskipa}}%
+  \fi%
+  \if@nobreak
+    \everypar{}%
+    \do@skip
+  \else
+    \addpenalty\@secpenalty
+    \do@skip
+  \fi}
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Initializers for New Heading Levels}%
+%
+% \begin{macro}{\tp@init@hooks} initializes the Hooks for heading
+%   level \#1.
+%    \begin{macrocode}
+\def\tp@init@hooks#1{%
+  \tpDeclareHook{toc-before-hook-#1}%
+  \tpDeclareHook{toc-after-hook-#1}%
+  \tpDeclareHook{before-hook-#1}%
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tp@init@cnt} initialises a counter with the name \#1
+%   for automatic numbering if it doesn't exist, yet.
+%    \begin{macrocode}
+\def\tp@init@cnt#1{\@definecounter{#1}}
+%    \end{macrocode}
+% \end{macro}
+%
+% {\CoCoTeX} provides a feature that allows headings to be indented
+% to the maximum width that is needed to print the counters of
+% \textit{all (other) heading levels}. This overall maximum widths are
+% stored in the .aux-files for both the headings itself and their
+% toc-entries.
+%    \begin{macrocode}
+\tp@restore@init{heading}{toc-number-maxwd}
+\tp@restore@init{heading}{number-maxwd}
+%    \end{macrocode}
+% \subsection{Initializers for Instances of Heading Levels}%
+%
+% \begin{macro}{\tp@auto@number}
+%   advances the heading counter if the \lstinline{numbering} Property
+%   is set to \texttt{auto} and the current heading is not overridden
+%   by the \lstinline{Number} Component.  \#1 is the numeric level of
+%   the heading, \#2 is the name of the heading's counter.
+%    \begin{macrocode}
+\def\tp@auto@number#1#2{%
+  \tpIfPropVal{numbering}{auto}
+    {\expandafter\ifx\csname c@#2\endcsname\relax\tp@init@cnt{#2}\fi
+     \expandafter\ifx\csname tp@heading@attr@nonumber\endcsname\@empty
+     \else
+       \tpIfComp{Number}
+         {}
+         {\ifnum #1>\c@secnumdepth\relax\else
+            \stepcounter{#2}%
+            \edef\@tempa{\csname the#2\endcsname}%
+            \expandafter\tpNumber\expandafter{\@tempa}%
+          \fi}%
+     \fi}{}%
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tp@heading@create@labels} generates the labels to be used
+%   with \LaTeX's cross reference mechanisms. This macro locally
+%   redefines LaTeX's \lstinline{\label} macro.
+%    \begin{macrocode}
+\def\tp@heading@create@labels#1{%
+  \ifx\Hy@MakeCurrentHrefAuto\@undefined\else
+    \Hy@MakeCurrentHrefAuto{tp.#1}%
+    \Hy@raisedlink{\hyper@anchorstart{\@currentHref}\hyper@anchorend}%
+  \fi
+  \expandafter\ifx\csname tp@heading@attr@label\endcsname\relax\else
+    \tpIfComp{Number}
+      {\edef\@tempa{\expandonce{\tp@heading@Number}}%
+       \let\@currentlabel\@tempa\relax
+       \let\@currentlabelname\tp@heading@Title}
+%    \end{macrocode}
+% in case, un-numbered headings receive a \lstinline{label} to be
+% accessed via \lstinline{\pageref} or something:
+%    \begin{macrocode}
+      {\phantomsection}
+    \expandafter\tpltx@label\expandafter{\tp@heading@attr@label}%
+  \fi
+  \global\let\label\tpltx@label}
+%    \end{macrocode}
+% \end{macro}
+%
+%
+% \section{Externalisation of Heading Compoents}
+%
+% Components of headings may be used far away from the heading
+% itself. Since, by design, Components are defined strictly local
+% within their containers, those externale usages demand special
+% treatment.
+%
+% \subsection{Table of Contents Entry}
+%
+% \begin{macro}{\tp@make@toc} initializes the creation of a
+%   \lstinline{heading} instance's entry in the table of contents.
+%
+%   Each entry is in itself treated as a Container. As such, it
+%   consists of Components that are written into the .toc file.
+%    \begin{macrocode}
+\def\tp@make@toc{%
+  \tp@check@empty{heading}{Title}{Toc}%
+  \tp@check@empty{heading}{Number}{Toc}%
+  \tp@check@empty{heading}{Subtitle}{Toc}%
+  \tp@check@author{Toc}%
+  \expandafter\ifx\csname tp@heading@attr@notoc\endcsname\@empty\else
+    \protected@edef\tp@heading@toc@entry{%
+      \tpIfComp{TocTitle}{\string\tpTocTitle{\string\ignorespaces\space\expandonce{\tp@heading@TocTitle}}}{}%
+      \tpIfComp{TocNumber}{\string\tpTocNumber{\string\ignorespaces\space\expandonce{\tp@heading@TocNumber}}}{}%
+      \tpIfComp{TocAuthorNameList}{\string\tpTocAuthorNameList{\string\ignorespaces\space\expandonce{\tp@heading@TocAuthorNameList}}}{}%
+      \tpIfComp{TocSubtitle}{\string\tpTocSubtitle{\string\ignorespaces\space\expandonce{\tp@heading@TocSubtitle}}}{}%
+    }%
+    \tpIfProp{toc-level}{\edef\tp@heading@name{\tpUseProperty{toc-level}}}{}%
+    \protected@write\@auxout
+      {\tpGobble}%
+      {\string\@writefile{toc}{\protect\tpContentsline{\tp@heading@name}{\tp@heading@toc@entry}{\thepage}{\@currentHref}\protected@file@percent}}\relax
+  \fi
+}
+\def\tp@check@author#1{%
+  \tpIfComp{#1AuthorNameList}{}{%
+    \tpIfComp{AuthorNameList}{%
+      \expandafter\csname tp#1AuthorNameList\expandafter\endcsname\expandafter{\tp@heading@AuthorNameList}%
+    }{\tpCompDef\tp@tempa{tpAuthor}{author-list-format}%
+      \ifx\tp@tempa\relax
+      \else
+        \expandafter\csname tp#1AuthorNameList\expandafter\endcsname\expandafter{\tp@tempa}%
+      \fi
+    }%
+  }%
+}%
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tpContentsline} is a fork of \LaTeX's \lstinline{\contentsline}, but mine is \lstinline{\long}er.
+%    \begin{macrocode}
+\long\def\tpContentsline#1#2#3#4{\bgroup\csletcs{l@#1}{tp@l@#1}\contentsline{#1}{#2}{#3}{#4}\egroup}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tp@toc@extract@data} is called within
+%   the \lstinline{\l@<level>} macro to extract the Components for
+%   each entry in the .toc file. \#1 is the numerical heading level,
+%   \#2 is the name of the heading level, \#3 is the content of the
+%   toc entry (which holds the Components), \#4 is the page number.
+%    \begin{macrocode}
+\def\tp@toc@extract@data#1#2#3#4{%
+  \tpNamespace{heading}%
+  \tpCascadeProps{#2}{heading}%
+  \tpDeclareComp{TocPage}{}{}%
+  \tpTocPage{\tpUseProperty{toc-page-face}#4}%
+  \tpDeclareComp{TocTitle}{}{}%
+  \tpDeclareComp{TocSubtitle}{}{}%
+  \tpDeclareComp{TocNumber}{}{}%
+  \tpDeclareComp{TocAuthorNameList}{}{}%
+  \tp@expand@l@contents{#3}{heading}{Toc}{Title}%%
+  \tp@format@number{toc-}{Toc}{#1}%
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tp@toc@print@entry} is also called within the
+%   \lstinline{\l@<level>} macro and eventually prints the entry by
+%   expanding a \lstinline{heading}'s toc-specific Properties.
+%    \begin{macrocode}
+\def\tp@toc@print@entry#1{%
+  \bgroup
+    \tpUseHook{toc-before-hook-#1}%
+    \tpUseProperty{toc-before-entry}%
+    \tpUseProperty{toc-heading}%
+    \tpUseHook{toc-after-hook-#1}%
+    \tpUseProperty{toc-after-entry}%
+  \egroup}
+%    \end{macrocode}
+% \end{macro}
+%
+%\subsection{Facility to create the running title macros}
+%
+% \begin{macro}{\tp@make@run}
+%   prepares the Components used to compose the running titles. It
+%   checks if the user provides page header specific overrides in the
+%   \lstinline{heading} instance. If not, it uses the non-specific
+%   Components instead, as long as they are not empty.
+%
+%   After all the header-specific Components are set, the heading
+%   level specific property \lstinline{running-heading} is evaluated
+%   and passed to the corresponding \lstinline{\<level>mark} macros
+%   iff they exist.
+%    \begin{macrocode}
+\def\tp@make@run{%
+  \tp@check@empty{heading}{Title}{Run}%
+  \tp@check@empty{heading}{Number}{Run}%
+  \tp@check@author{Run}%
+  \tp@check@empty{heading}{Subtitle}{Run}%
+  \tpUseProperty{running-extra}%
+  \tpIfProp{running-level}
+    {\expandafter\let\expandafter\tp@mark@name\csname\tpUseProperty{running-level}mark\endcsname}
+    {\expandafter\let\expandafter\tp@mark@name\csname\tp@heading@name mark\endcsname}%
+    \ifx\tp@mark@name\relax\ifx\tp@heading@parent\@undefined\else
+      \letcs\tp@mark@name{\tp@heading@parent mark}%
+    \fi\fi
+  \ifx\tp@mark@name\relax\else
+    \begingroup
+      \tpGobble
+      \protected@edef\@tempa{\csname tp@heading@running-heading\endcsname}%
+      \expandafter\tp@mark@name\expandafter{\@tempa}%
+    \endgroup
+  \fi
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Facility to create PDF bookmarks}
+%
+% \begin{macro}{\tp@make@bookmarks} generates an entry that is
+%   directly written as Bookmark into the PDF file. This is done using
+%   the \lstinline{bookmark} package.
+%    \begin{macrocode}
+\def\tp@make@bookmarks{%
+  \tp@check@empty[Toc]{heading}{Title}{BM}%
+  \tp@check@empty[Toc]{heading}{Number}{BM}%
+  \tp@check@empty[Toc]{heading}{AuthorNameList}{BM}%
+  \tp@check@empty[Toc]{heading}{Subtitle}{BM}%
+  \expandafter\ifx\csname tp@heading@attr@noBM\endcsname\@empty\else
+    \tpIfProp{bookmark-level}{\edef\Hy@toclevel{\tpUseProperty{bookmark-level}}}{}%
+    \begingroup
+      \tpGobble
+      \protected@edef\@tempa{\csname tp@heading@bookmark\endcsname}%
+      \bookmark[level=\Hy@toclevel,dest=\@currentHref]{\expandonce{\@tempa}}%
+    \endgroup
+  \fi
+}
+%    \end{macrocode}
+% \end{macro}
+%
+%\section{Rendering the Headings}
+%
+%\subsection{Inline Headings}
+%
+% \begin{macro}{\tp@inline@heading}
+%   Inline headings are stored in a temporary box and expanded after
+%   the next (non-heading) paragraph is opened.
+%    \begin{macrocode}
+\newbox\tp@inlinesecbox
+\def\tp@inline@heading{%
+  \tpIfProp{after-indent}{\global\@afterindenttrue}{\global\@afterindentfalse}%
+  \tpIfProp{interline-para}
+    {\global\setbox\tp@inlinesecbox\hbox{\ifvoid\tp@inlinesecbox\else\unhbox\tp@inlinesecbox\tpUseProperty{interline-para-sep}\fi\@svsec}}%
+    {\global\setbox\tp@inlinesecbox\hbox{\@svsec}}
+  \@nobreakfalse
+  \global\@noskipsectrue
+  \gdef\next{%
+    \global\everypar{%
+      \if@noskipsec
+        \global\@noskipsecfalse
+        {\setbox\z@\lastbox}%
+        \clubpenalty\@M
+        \begingroup \unhbox\tp@inlinesecbox \endgroup
+        \unskip
+        \hskip -\@tempskipa
+      \else
+        \clubpenalty \@clubpenalty
+        \global\setbox\tp@inlinesecbox\box\voidb@x
+        \everypar{}%
+      \fi}%
+    \ignorespaces}}
+%    \end{macrocode}
+% \end{macro}
+%
+%\subsection{Block Headings}
+%
+% \begin{macro}{\tp@block@heading} is used to print block headings.
+%    \begin{macrocode}
+\def\tp@block@heading{%
+  \@svsec
+  \tpUseProperty{after-heading-par}%
+  \tpIfProp{after-indent}{\global\@afterindenttrue}{\global\@afterindentfalse}%
+  \gdef\next{%
+    \vskip \@tempskipa
+    \@afterheading
+    \ignorespaces}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \section{The \protect\texttt{heading} environment}
+%
+% \subsection{Environment Macros}
+%
+% \begin{macro}{\@heading} is the macro called at the begin of the
+%   \lstinline{heading} environment. Optional \#1 stores the headings
+%   local parameters, \#2 is the level of the heading.
+%    \begin{macrocode}
+\def\@heading{\@ifnextchar [{\@@heading}{\@@heading[]}}%]
+\def\@@heading[#1]#2{%
+%    \end{macrocode}
+% Some {\LaTeX} kernel macros are saved, the namespace is
+% set and counted groups from previous headings are reset.
+%    \begin{macrocode}
+  \tp@heading@reserve
+%    \end{macrocode}
+% Handling of the optional argument
+%    \begin{macrocode}
+  \tpParseAttributes{heading}{#1}%
+%    \end{macrocode}
+% The mandatory argument contains the heading level. This corresponds
+% to \LaTeX's way of counting heading levels, where, by default,
+% \lstinline{part} is \lstinline{-1}, \lstinline{chapter} is
+% \lstinline{0}, \lstinline{section} is \lstinline{1}, etc.
+%    \begin{macrocode}
+  \edef\tp@heading@name{#2}%
+%    \end{macrocode}
+% The cascaded Properties of the heading level are expanded. This is
+% excluded into its own macro to simplify re-definition if necessary.
+%    \begin{macrocode}
+  \tp@heading@load@props%
+  \tpEvalType[#2]{Components}%
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\endheading}
+%   is stuff that happens at the end of the \lstinline{heading}
+%   environment.
+%    \begin{macrocode}
+\def\end@heading{%
+  \expandafter\ifx\csname tpUseHeading\tp@heading@name\endcsname\relax
+    \PackageError{coco-headings.sty}{Heading level \tp@heading@name\space unknown!}{A Heading with level \tp@heading@name\space is unknown. Use the \string\tpDeclareHeading\space macro to declare heading levels.}%
+  \else
+    \csname tpUseHeading\tp@heading@name\endcsname%
+  \fi
+  \tp@heading@reset
+}
+\let\heading\tpHeading
+\let\endheading\endtpHeading
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Content Handlers}
+%
+% \begin{macro}{\tp@heading@reserve}
+%   re-directs some of \LaTeX's kernel macros and makes sure that some
+%   other macros have their default values:
+%    \begin{macrocode}
+\def\tp@heading@reserve{%
+  \tpNamespace{heading}%
+  \let\tpltx@dbl@backslash\\
+  \let\\\tpBreak
+  \let\tpltx@label\label
+  \let\tp@heading@label\relax
+  \def\tpAuthorCnt{\z@}%
+  \def\tpAffilCnt{\z@}%
+  \tp@reset@components{\tp@cur@cont}%
+  }
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro} restores \LaTeX's default definitions (however, this
+%   should be unnecessary since \lstinline{heading} is an environment
+%   and therefore constitutes a closed group).
+%    \begin{macrocode}
+\def\tp@heading@reset{%
+  \let\tp@cur@cont\relax
+  \let\\\tpltx@dbl@backslash
+  \let\label\tpltx@label
+  \let\tp@heading@name\relax
+  \let\tp@heading@label\relax
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\tp@heading@load@props} expands the level specific
+%   Property list.
+%    \begin{macrocode}
+\def\tp@heading@load@props{\csname tp@heading@\tp@heading@name @properties\endcsname}
+%    \end{macrocode}
+% \end{macro}
+% \Deprecated The next two macros should go to the Meta Container.
+% \begin{macro}{\tp@extended@ht@macros}
+%   provides some extended markup for certain headings levels, mostly
+%   used for compilations of contributions by different authors like
+%   collections, proceedings, or journals.
+%    \begin{macrocode}
+\def\tp@extended@ht@macros{%
+  \tp@provide@ext@hd@macros{Abstract}%
+  \tp@provide@ext@hd@macros{Keywords}%
+  \tp@provide@ext@hd@macros{DOI}%
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tp@provide@ext@hd@macros}
+%   Provides component macros to encode meta data. Each macro consists
+%   of two parts: one that carries the content, and one that allows to
+%   override the Title.
+%    \begin{macrocode}
+\def\tp@provide@ext@hd@macros#1{%
+  \tpDeclareComp{#1}{}{}%
+  \tpDeclareComp{#1Title}{}{}%
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tp@heading@role@handlers} sets up the additional Components for the Author Role specific to headings.
+%    \begin{macrocode}
+\def\tp@heading@authors{%
+  \tpAddToRole{Author}{%
+    \tpDeclareCountedComp{AuthorContact}%
+  }%
+  \tpDeclareRoleBlock{Author}{ContactBlock}{author-contact-block-format}%
+  \tpGroupHandler{tpAuthor}{%
+    \tpIfComp{AuthorContact}{}{\csname tpAuthorContact\endcsname{\tpUseProperty{author-contact-format}}}{}%
+  }%
+  \tp@provide@hd@overrides{AuthorNameList}%
+  \tp@heading@affils
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tp@heading@affils} is a wrapper that creates the
+%   user-level macros for the affiliations.
+%    \begin{macrocode}
+\def\tp@heading@affils{%
+  \tpDeclareComp{AffilBlock}{\expandafter\global}{}%
+  \tpDeclareComponentGroup{tpAffil}{%
+    \tpDeclareCountedComp{Affiliation}%
+    \tpDeclareCountedComp{Address}%
+    \tpDeclareCountedComp{Institute}%
+    \tpDeclareCountedComp{Country}%
+    \tpDeclareCountedComp{Department}%
+    \tpDeclareCountedComp{AffilID}%
+  }%
+  \tpGroupHandler{tpAffil}{%
+    \tpIfComp{AffilID}{}{\expandafter\tpAffilID\expandafter{\tpAffilCnt}}%
+    \tpIfComp{Affiliation}{}{\tpAffiliation{\tpUseProperty{affiliation-format}}}%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tp@provide@hd@macros} is a wrapper that creates the
+%   user-level macros for the Component itself and its overrides. \#1
+%   is the Component name.
+%    \begin{macrocode}
+\def\tp@provide@hd@macros#1{%
+  \tpDeclareComp{#1}{}{}%
+  \tp@provide@hd@overrides{#1}%
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tp@provide@hd@overrides} declares the Component
+%   macros for a heading Component's overrides. \#1 is the Component
+%   name. The overrides allow a four-way distinction between
+%   \textit{i} the data printed in-situ (\lstinline{\tp#1}), \textit{ii} data sent
+%   to toc (\lstinline{\tpToc#1}), (iii) data sent to the page styles (\lstinline{\tpRun#1}), and (iv) the data sent
+%   to the PDF bookmarks (\lstinline{\tpBM#1}).
+%    \begin{macrocode}
+\def\tp@provide@hd@overrides#1{%
+  \tpDeclareComp{Toc#1}{}{}% toc overrides
+  \tpDeclareComp{Run#1}{}{}% running overrides
+  \tpDeclareComp{BM#1}{}{}% bookmark overrides
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \section{Defaults}
+%
+% \begin{macro}{\tp@heading@default} are the global default Property
+%   definitions for all headings.
+%    \begin{macrocode}
+\tpAddToDefault{heading}{%
+  \tpSetProperty{interline-para}{}%
+  \tpSetProperty{interline-para-sep}{\space}
+  \tpSetProperty{heading-par}{%
+    \tpIfProp{interline-para}{\if@noskipsec \leavevmode \fi}{}%
+    \par
+    \global\@afterindenttrue
+  }%
+  \tpSetProperty{after-heading-par}{\par \nobreak}% par commands at the end of non-inline headings
+  \tpSetProperty{before-heading}{}%
+  \tpSetProperty{title-face}{\bfseries}%
+  \tpSetProperty{subtitle-face}{\normalfont}%
+  \tpSetProperty{author-face}{\normalfont}%
+  \tpSetProperty{quote-face}{\raggedleft}%
+  \tpSetProperty{quote-source-face}{}%
+  \tpSetProperty{heading-block}
+    {\tpUseProperty{title-face}%
+     \tpIfComp{Number}
+       {\tpUseProperty{hang-number}}
+       {\leftskip0pt}%
+     \tpUseComp{Title}\par%
+     \tpIfComp{Subtitle}{{\tpUseProperty{subtitle-face}\tpUseComp{Subtitle}}\par}{}%
+     \tpIfComp{AuthorNameList}{{\tpUseProperty{author-face}\tpUseComp{AuthorNameList}}\par}{}%
+     \tpIfComp{Quote}{%
+       \bgroup
+         \tpUseProperty{quote-face}%
+         \tpUseComp{Quote}\par
+         \tpIfComp{QuoteSource}{{\tpUseProperty{quote-source-face}--\space\tpUseComp{Quote}}\par}{}%
+       \egroup}{}%
+     \tpIfComp{AffilBlock}{{\tpUseProperty{affil-block-face}\tpUseComp{AffilBlock}}\par}{}%
+    }%
+  \tpSetProperty{extended-heading}{%
+    \tpIfComp{Abstract}
+      {\par\vskip\baselineskip
+       {\bfseries\tpIfComp{AbstractTitle}{\tpUseComp{AbstractTitle}}{Abstract}}\par
+       {\itshape\small\tpUseComp{Abstract}}\par}
+      {}%
+    \tpIfComp{Keywords}
+      {\par\vskip\baselineskip
+       {\bfseries\tpIfComp{KeywordsTtitle}{\tpUseComp{KeywordsTitle}}{Keywords}}\par
+       {\itshape\small\tpUseComp{Keywords}\par}}
+     {}%
+   }%
+  \tpSetProperty{before-skip}{\z@skip}% TODOC: values < 0pt use \minusvspace, else \addvspace. LaTeX's default behaviour of @afterindent is relocated to the after-indent property.
+  \tpSetProperty{after-heading-block}{}%
+  \tpSetProperty{before-heading-block}{\parindent\z@ \parskip\z@}%
+  \tpSetProperty{after-indent}{}%
+  \tpSetProperty{margin-left}{\z@}%
+  \tpSetProperty{margin-right}{\@flushglue}%
+  \tpSetProperty{after-skip}{1sp}%
+  \tpSetProperty{indent}{auto}%
+  \tpSetProperty{number-width}{}%
+  \tpSetProperty{number-sep}{\space}%
+  \tpSetProperty{number-align}{left}%
+  \tpSetProperty{numbering}{auto}%
+  %% running header
+  \tpSetProperty{running-level}{}% override level for running title, name
+  \tpSetProperty{running-heading}{%
+    \tpIfComp{RunAuthorNameList}{\tpUseComp{RunAuthorNameList}:\space}{}%
+    \tpUseComp{RunTitle}%
+  }%
+  %% ToC
+  \tpSetProperty{no-toc}{false}% toc entries are generally disabled iff true
+  \tpSetProperty{no-BM}{false}% bookmark entries are generally disabled, iff true
+  \tpSetProperty{toc-page-sep}{\dotfill}% between toc-title and page
+  \tpSetProperty{toc-page-face}{}%
+  \tpSetProperty{toc-number-width}{}% current width of number
+  \tpSetProperty{toc-number-align}{left}% alignment of number within hbox when hanging
+  \tpSetProperty{toc-title-face}{}% face of title
+  \tpPropertyLet{toc-number-face}{toc-title-face}% format of number
+  \tpSetProperty{toc-number-sep}{\enskip}% thing between numebr and toc-title
+  \tpSetProperty{toc-margin-top}{\z@}% left indent of the whole entry
+  \tpSetProperty{toc-margin-bottom}{\z@}% right margin of the whole entry
+  \tpSetProperty{toc-margin-left}{auto}% left indent of the whole entry
+  \tpSetProperty{toc-margin-right}{\@pnumwidth}% right margin of the whole entry
+  \tpSetProperty{toc-link}{none}% should toc entries be linked? values: none,title,page,all
+  \tpSetProperty{toc-level}{}% override heading level for ToC, name!
+  \tpSetProperty{toc-indent}{auto}% offset of the first line of the entry. auto: hang indent by max-number-width for the level
+  \tpSetProperty{toc-before-entry}{% stuff before anything is output; used to setup margins, alignment, line-breaking rules, etc.
+    \addvspace{\tpUseProperty{toc-margin-top}}%
+    \parindent \z@
+    \let\\\@centercr
+    \hyphenpenalty=\@M
+    \rightskip \tpUseProperty{toc-margin-right} \@plus 1fil\relax
+    \parfillskip -\rightskip
+    \leftskip\tpUseProperty{toc-margin-left}%
+  }%
+  \tpSetProperty{toc-after-entry}{\par\addvspace{\tpUseProperty{toc-margin-bottom}}}% Thing at the end of the entry, after the page number
+  \tpSetProperty{toc-heading}{% Order and formatting of the entry itself
+    \tpUseProperty{toc-title-face}%
+    \tpIfComp{TocNumber}
+      {\tpUseProperty{toc-hang-number}}
+      {\leftskip0pt\leavevmode}%
+    \tpIfComp{TocAuthorNameList}{\tpUseComp{TocAuthorNameList}:\space}{}%
+    \tpUseComp{TocTitle}%
+    \tpUseProperty{toc-page-sep}\tpUseComp{TocPage}%
+  }%
+  %% PDF-Bookmarks
+  \tpSetProperty{bookmark-level}{}% override heading level for PDF bookmarks, numeric!
+  \tpSetProperty{bookmark}{%
+    \tpIfComp{BMNumber}{\tpUseComp{BMNumber}\space}{}%
+    \tpUseComp{BMTitle}%
+  }%
+  \tpSetProperty{orcid-link}{% how the ORC-ID is rendered
+    \tpIfComp{ORCID}{\tpCompLink{ORCID}{\includegraphics[height=1em]{logos/ORCID.pdf}}}{}%
+  }%
+  %% a single Author's contact infomration block
+  \tpSetProperty{author-contact-format}{%Format of a single author's contact information
+    \tpUseComp{FullName}\tpIfComp{Affil}{\textsuperscript{\tpUseComp{Affil}}}{}%
+    \tpUseProperty{orcid-link}%
+    %
+  }%
+  \tpSetProperty{author-list-format}{% Format of the whole contact information block
+    \tpUseComp{FullName}\ifnum\tpCurCount<\tpTotalCount\tpUseProperty{counted-name-sep}\fi
+  }%
+  \tpSetProperty{author-contact-block-format}{% Format of the whole contact information block
+    \tpUseComp{AuthorContact}\ifnum\tpCurCount<\tpTotalCount\tpUseProperty{counted-name-sep}\fi
+  }%
+  \tpSetProperty{affiliation-format}{% Format of the  affiliation block
+    \tpIfComp{Institute}{\tpUseComp{Institute}}{}%
+    \tpIfComp{Department}{, \tpUseComp{Department}}{}%
+    \tpIfComp{Address}{, \tpUseComp{Address}}{}%
+    \tpUseProperty{affil-sep}%
+  }%
+  \tpSetProperty{affil-sep}{\par}
+  \tpSetProperty{affil-block-format}{\textsuperscript{\tpUseComp{AffilID}}\tpUseComp{Affiliation}}
+  \tpSetProperty{affil-block-face}{\small\normalfont}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \section{Miscellaneous}
+%
+% \subsection{Alternative paragraph separation}
+%
+% \begin{macro}{\tpNewPar} is a user-level macro to have a vertical
+%   skip between two local paragraphs and no indent in the second
+%   one. The amount of vertical space between the paragraphs can be
+%   adjusted with the optional argument. If \#1 is omitted,
+%   \lstinline{\tpnewparskip} is inserted, which defaults to
+%   \lstinline{1\baselineskip} if the dimension isn't set to something
+%   other than 0pt in the preamble. This macro is intended to be used
+%   at the end of the first of the paragraphs.
+%    \begin{macrocode}
+\newdimen\tpnewparskip \AtBeginDocument{\ifdim\tpnewparskip=\z@\relax \tpnewparskip=1\baselineskip\relax\fi}
+\def\tpNewPar{\@ifnextchar[{\@tpnewpar}{\@tpnewpar[\the\tpnewparskip]}}%]
+\def\@tpnewpar[#1]{%
+  \ifhmode\par\fi
+  \vskip#1\relax
+  \@afterheading
+}
+%    \end{macrocode}
+% \end{macro}
+% \Deprecated
+% \begin{macro}{\TitleBreak}
+%    \begin{macrocode}
+\let\TitleBreak\tpBreak
+%    \end{macrocode}
+% \end{macro}
+%    \begin{macrocode}[gobble=1]
+%</headings>
+%    \end{macrocode}
