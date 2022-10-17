@@ -345,16 +345,41 @@
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@heading@create@labels} generates the labels to be used
-%   with \LaTeX's cross reference mechanisms. This macro locally
-%   redefines LaTeX's \lstinline{\label} macro.
+%
+% \subsection{Label mechanism}
+% \begin{macro}{\@tp@heading@parse@label} separates multiple
+%   comma-separated values within the same \lstinline{label} attribute.
+%    \begin{macrocode}
+\def\@tp@heading@parse@label#1,#2,\@nil#3\@nil{%
+  \@tp@heading@create@labels{#3}{#1}%
+  \if!#2!\else
+    \@tp@heading@parse@label#2,\@nil#3\@nil
+  \fi}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tp@heading@create@labels} is the wrapper to handle
+%   multiple values in the \lstinline{label} Attribute.
 %    \begin{macrocode}
 \def\tp@heading@create@labels#1{%
+  \expandafter\ifx\csname tp@heading@attr@label\endcsname\relax
+    \@tp@heading@create@labels{#1}{}%
+  \else
+    \expandafter\@tp@heading@parse@label\tp@heading@attr@label,,\@nil#1\@nil
+  \fi
+}
+%    \end{macrocode}
+% \begin{macro}{\@tp@heading@create@labels} generates the labels to be
+%   used with \LaTeX's cross reference and \lstinline{hyperref}'s
+%   hyperlink mechanisms, simultanuously. This macro locally redefines
+%   LaTeX's \lstinline{\label} macro and sets both \lstinline{\@currentlabel} as
+%   well as a~\lstinline{\hyperlink} target.
+%    \begin{macrocode}
+\def\@tp@heading@create@labels#1#2{%
   \ifx\Hy@MakeCurrentHrefAuto\@undefined\else
     \Hy@MakeCurrentHrefAuto{tp.#1}%
     \Hy@raisedlink{\hyper@anchorstart{\@currentHref}\hyper@anchorend}%
   \fi
-  \expandafter\ifx\csname tp@heading@attr@label\endcsname\relax\else
+  \if!#2!\else
     \tpIfComp{Number}
       {\edef\@tempa{\expandonce{\tp@heading@Number}}%
        \let\@currentlabel\@tempa\relax
@@ -363,8 +388,9 @@
 % in case, un-numbered headings receive a \lstinline{label} to be
 % accessed via \lstinline{\pageref} or something:
 %    \begin{macrocode}
-      {\phantomsection}
-    \expandafter\tpltx@label\expandafter{\tp@heading@attr@label}%
+      {\phantomsection}%
+    \expandafter\hypertarget\expandafter{#2}{}%
+    \expandafter\tpltx@label\expandafter{#2}%
   \fi
   \global\let\label\tpltx@label}
 %    \end{macrocode}
