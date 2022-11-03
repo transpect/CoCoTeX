@@ -216,7 +216,7 @@
 % The counters we calculated earlier and the space needed to render
 % them are evaluated
 %    \begin{macrocode}
-    \tp@format@number{}{}{#2}%
+    \tp@format@number{}{}{#1}%
 %    \end{macrocode}
 % The value of after-skip is essential to determine whether the
 % heading is to be displayed as block or inline element. In case, some
@@ -404,6 +404,30 @@
 % within their containers, those externale usages demand special
 % treatment.
 %
+% \subsection{Common Stuff}
+%
+% \begin{macro}{\tp@check@author} checks if the
+%   \lstinline{AuthorNameList} override Component is given in the
+%   input for any given output override prefixed by \#1. If not, it is
+%   built if there are any Author subcontainers, at all.
+%    \begin{macrocode}
+
+\def\tp@check@author#1{%
+  \tpIfComp{#1AuthorNameList}{}{%
+    \tpIfComp{AuthorNameList}{%
+      \expandafter\csname tp#1AuthorNameList\expandafter\endcsname\expandafter{\tp@heading@AuthorNameList}%
+    }{\ifnum\tpAuthorCnt>\z@
+        \tpCompDef\tp@tempa{tpAuthor}{author-list-format}%
+        \ifx\tp@tempa\relax
+        \else
+          \expandafter\csname tp#1AuthorNameList\expandafter\endcsname\expandafter{\tp@tempa}%
+        \fi
+      \fi
+    }}}%
+
+%    \end{macrocode}
+% \end{macro}
+%
 % \subsection{Table of Contents Entry}
 %
 % \begin{macro}{\tp@make@toc} initializes the creation of a
@@ -430,18 +454,6 @@
       {\string\@writefile{toc}{\protect\tpContentsline{\tp@heading@name}{\tp@heading@toc@entry}{\thepage}{\@currentHref}\protected@file@percent}}\relax
   \fi
 }
-\def\tp@check@author#1{%
-  \tpIfComp{#1AuthorNameList}{}{%
-    \tpIfComp{AuthorNameList}{%
-      \expandafter\csname tp#1AuthorNameList\expandafter\endcsname\expandafter{\tp@heading@AuthorNameList}%
-    }{\tpCompDef\tp@tempa{tpAuthor}{author-list-format}%
-      \ifx\tp@tempa\relax
-      \else
-        \expandafter\csname tp#1AuthorNameList\expandafter\endcsname\expandafter{\tp@tempa}%
-      \fi
-    }%
-  }%
-}%
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tpContentsline} is a fork of \LaTeX's \lstinline{\contentsline}, but mine is \lstinline{\long}er.
