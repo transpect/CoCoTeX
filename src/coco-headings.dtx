@@ -56,8 +56,8 @@
     \tp@provide@hd@macros{Title}%
     \tp@provide@hd@macros{Subtitle}%
     \tp@provide@hd@macros{Number}%
-    \tp@provide@hd@macros{LicenceLogo}
-    \tp@provide@hd@macros{LicenceName}
+    \tp@provide@hd@macros{LicenceLogo}%
+    \tp@provide@hd@macros{LicenceName}%
 %    \end{macrocode}
 % \Deprecated
 %    \begin{macrocode}
@@ -179,11 +179,6 @@
 % list.
 %    \begin{macrocode}
     \tpEvalType[#2]{Properties}%
-%    \end{macrocode}
-% Immediately after setting the cascaded Properties we execute those
-% lists to be able to access the Properties.
-%    \begin{macrocode}
-    \csname tp@heading@#2@properties\endcsname
 %    \end{macrocode}
 % Processing the author name list (from coco-meta.sty).
 %    \begin{macrocode}
@@ -469,7 +464,7 @@
 %    \begin{macrocode}
 \def\tp@toc@extract@data#1#2#3#4{%
   \tpNamespace{heading}%
-  \tpCascadeProps{#2}{heading}%
+  \tpEvalType[#2]{Properties}%
   \tpDeclareComp{TocPage}{}{}%
   \tpTocPage{\tpUseProperty{toc-page-face}#4}%
   \tpDeclareComp{TocTitle}{}{}%
@@ -637,7 +632,6 @@
 % The cascaded Properties of the heading level are expanded. This is
 % excluded into its own macro to simplify re-definition if necessary.
 %    \begin{macrocode}
-  \tp@heading@load@props%
   \tpEvalType[#2]{Components}%
 }
 %    \end{macrocode}
@@ -691,12 +685,6 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\tp@heading@load@props} expands the level specific
-%   Property list.
-%    \begin{macrocode}
-\def\tp@heading@load@props{\csname tp@heading@\tp@heading@name @properties\endcsname}
-%    \end{macrocode}
-% \end{macro}
 % \Deprecated The next two macros should go to the Meta Container.
 % \begin{macro}{\tp@extended@ht@macros}
 %   provides some extended markup for certain headings levels, mostly
