@@ -28,6 +28,8 @@
 % Passing options down to the \LaTeX\space standard packages
 %    \begin{macrocode}
 \DeclareOptionX{main}{\PassOptionsToPackage{\CurrentOption}{babel}}
+\DeclareOption{es-noindentfirst}{\PassOptionsToPackage{es-noindentfirst}{babel}}
+\DeclareOption{es-noshorthands}{\PassOptionsToPackage{es-noshorthands}{babel}}
 \PassOptionsToPackage{shorthands=off}{babel}
 %    \end{macrocode}
 % Passing options down to the \lstinline{coco-notes} package
