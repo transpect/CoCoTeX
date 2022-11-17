@@ -110,6 +110,8 @@
   \let\tpBreak\space
   \expandafter\title\expandafter{\tpUseComp{Title}}%
   \tp@write@pdf@meta{pdftitle}{\tpUseComp{Title}}%
+  \protected@edef\tp@run@book@title{\tpUseProperty{run-book-title}}%
+  \expandafter\gdef\expandafter\tpRunBookTitle\expandafter{\tp@run@book@title}%
 }
 %    \end{macrocode}
 % Processes the names written into the meta data
@@ -143,13 +145,6 @@
 \def\tp@title@process@bkc{%
   \tp@write@pdf@meta{pdfcreator}{\tpIfComp{PDFCreator}{\tpUseComp{PDFCreator}}{\tpUseComp{Publisher}\tpIfComp{PubPlace}{, \tpUseComp{PubPlace}}{}}}%
   \tp@write@pdf@meta{pdfproducer}{\tpUseComp{PDFProducer}}%
-}
-%    \end{macrocode}
-% Processes the running book title.
-%    \begin{macrocode}
-\AtBeginDocument{%
-  \edef\tp@run@book@title{\tpUseProperty{run-book-title}}%
-  \expandafter\gdef\expandafter\tpRunBookTitle\expandafter{\tp@run@book@title}%
 }
 %    \end{macrocode}
 % \section{Intermediate Level Interfaces}

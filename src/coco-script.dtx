@@ -199,6 +199,20 @@
     WordSpace = 1.25%
     ]{NotoSans-Regular.ttf}%
   }
+
+%    \end{macrocode}
+% \subsection{Support for medieval scripts and special characters}
+% only \lstinline{rm}!
+%    \begin{macrocode}
+\babelfont{mdv}[%
+Path=fonts/Junicode/,%
+ItalicFont = Junicode-Italic.ttf,%
+BoldFont = Junicode-Bold.ttf,%
+BoldItalicFont = Junicode-BoldItalic.ttf,%
+]{Junicode.ttf}
+
+\def\mdvfont#1{{\mdvfamily#1}}
+
 %    \end{macrocode}
 %    \begin{macrocode}[gobble=1]
 %</script>
