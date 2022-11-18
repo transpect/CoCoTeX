@@ -220,10 +220,6 @@
 % fallback.
 %    \begin{macrocode}
     \tpIfProp{after-skip}{\expandafter\global\expandafter\@tempskipa\expandafter=\tpUseProperty{after-skip}\relax}{\global\@tempskipa=1sp\relax}%
-%    \end{macrocode}
-% Labels to be used with LaTeX's cross reference mechanism are defined
-%    \begin{macrocode}
-      \tp@heading@create@labels{#2}% label facility
     \def\@svsec{%
 %    \end{macrocode}
 % The \lstinline{heading block} is the composition of all of the
@@ -231,6 +227,10 @@
 % \lstinline{heading} environment is in the source.
 %    \begin{macrocode}
       \tpUseProperty{before-heading-block}%
+%    \end{macrocode}
+% Labels to be used with LaTeX's cross reference mechanism are defined
+%    \begin{macrocode}
+      \tp@heading@create@labels{#2}% label facility
       \leftskip\tpUseProperty{margin-left}%
       \rightskip\tpUseProperty{margin-right}%
       \bgroup
