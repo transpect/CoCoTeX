@@ -64,12 +64,7 @@
     \tpIfProp{extended}{%
       \tp@extended@ht@macros
     }{}%
-%    \end{macrocode}
-% \lstinline{Quote} and \lstinline{QuoteSource} (so far) don't need
-% overrides; they are declared the standard way.
-%    \begin{macrocode}
-    \tpDeclareComp{Quote}{}{}%
-    \tpDeclareComp{QuoteSource}{}{}%
+    \tp@heading@quotes
   }%
   \tpDeclareType{Properties}{\tp@heading@default}%
   \tpDeclareEnv{\@heading}{\end@heading}%
@@ -186,6 +181,10 @@
     \tp@meta@role@eval{Author}%
     \tpComposeCollection{tpAuthor}{author-contact-block-format}{AuthorContactBlock}%
     \tpComposeCollection{tpAffil}{affil-block-format}{AffilBlock}%
+%    \end{macrocode}
+% Processing the \lstinline{tpQuote} environments, if any.
+%    \begin{macrocode}
+    \tpComposeCollection{tpQuote}{quote-block-format}{QuoteBlock}%
 %    \end{macrocode}
 % Hyperref related stuff.
 %    \begin{macrocode}
@@ -706,6 +705,20 @@
 }
 %    \end{macrocode}
 % \end{macro}
+%
+% \begin{macro}{\tp@heading@quotes} covers multiple quotation blocks
+%   assocciated with a heading.
+%    \begin{macrocode}
+\def\tp@heading@quotes{%
+  \tpDeclareComp{QuoteBlock}{}{}%
+  \tpDeclareComponentGroup{tpQuote}{%
+    \tpDeclareCountedComp{QuoteText}%
+    \tpDeclareCountedComp{QuoteSource}%
+  }%
+}
+
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\tp@heading@role@handlers} sets up the additional Components for the Author Role specific to headings.
 %    \begin{macrocode}
 \def\tp@heading@authors{%
@@ -786,6 +799,12 @@
   \tpSetProperty{author-face}{\normalfont}%
   \tpSetProperty{quote-face}{\raggedleft}%
   \tpSetProperty{quote-source-face}{}%
+  \tpSetProperty{quote-block-format}{%
+    \bgroup
+      \tpUseProperty{quote-face}%
+      \tpUseComp{QuoteText}\par
+      \tpIfComp{QuoteSource}{{\tpUseProperty{quote-source-face}--\space\tpUseComp{QuoteSource}}\par}{}%
+    \egroup}
   \tpSetProperty{heading-block}
     {\tpUseProperty{title-face}%
      \tpIfComp{Number}
@@ -794,12 +813,7 @@
      \tpUseComp{Title}\par%
      \tpIfComp{Subtitle}{{\tpUseProperty{subtitle-face}\tpUseComp{Subtitle}}\par}{}%
      \tpIfComp{AuthorNameList}{{\tpUseProperty{author-face}\tpUseComp{AuthorNameList}}\par}{}%
-     \tpIfComp{Quote}{%
-       \bgroup
-         \tpUseProperty{quote-face}%
-         \tpUseComp{Quote}\par
-         \tpIfComp{QuoteSource}{{\tpUseProperty{quote-source-face}--\space\tpUseComp{Quote}}\par}{}%
-       \egroup}{}%
+     \tpIfComp{QuoteBlock}{\ptUseComp{QuoteBlock}}{}%
      \tpIfComp{AffilBlock}{{\tpUseProperty{affil-block-face}\tpUseComp{AffilBlock}}\par}{}%
     }%
   \tpSetProperty{extended-heading}{%
