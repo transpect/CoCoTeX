@@ -78,10 +78,10 @@
   \DoNotIndex{#1}%
 }
 \let\endtpContainer\relax%
-
-\def\SpecialMainIndex#1{\@bsphack
-    \SpecialIndex@{#1}{\encapchar main}%
-  \@esphack}
+ %% no longer working with TL>2022 *grrrr*
+ %\def\SpecialMainIndex#1{\@bsphack
+ %    \SpecialIndex@{#1}{\encapchar main}%
+ %  \@esphack}
 \def\SpecialContIndex#1{\@bsphack
   \index{#1\actualchar{\protect\ttfamily#1}
     (container)\encapchar usage}%
@@ -473,12 +473,14 @@
 \usepackage{multicol}
 \def\printdate#1-#2-#3§{#3/#2/#1}
 \renewcommand\tableofcontents{%
-  {\let\noclearpage\relax
-   \clearpage
-   \@makechapterhead{Table of contents}%
-   \thispagestyle{empty}%
-   \parskip\z@
-   \@starttoc{toc}}%
+  \bgroup
+    \let\noclearpage\relax
+    \clearpage
+    \@makechapterhead{Table of contents}%
+    \thispagestyle{empty}%
+    \parskip\z@
+    \@starttoc{toc}%
+  \egroup
 }
 \def\subtitle#1{\def\@subtitle{#1}}
 \def\authormail#1{\def\@authormail{#1}}
