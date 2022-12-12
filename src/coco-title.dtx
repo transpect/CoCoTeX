@@ -60,7 +60,8 @@
 }
 %    \end{macrocode}
 % \end{macro}
-% Default titlepage Declarator
+% \begin{macro}{\tpDeclareTitlepage} is the default titlepage
+%   declarator with \#1 being the titlepage's Property list.
 %    \begin{macrocode}
 \long\def\tpDeclareTitlepage#1{%
   \gdef\tp@titlepage{%
@@ -70,15 +71,20 @@
   }%
 }
 %    \end{macrocode}
+% \end{macro}
 % which we call immediately
 %    \begin{macrocode}
 \tpDeclareTitlepage{}
 %    \end{macrocode}
-% The tpMeta environment
+% \begin{macro}{\tp@Meta} is the code executed at the beginning of the \lstinline{tpMeta} Container
 %    \begin{macrocode}
 \def\tp@Meta{%
   \tpEvalType{Components}%
 }
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tp@endMeta} is the code executed at the end of the \lstinline{tpMeta} Container
+%    \begin{macrocode}
 \def\tp@endMeta{%
   \tpNamespace{titlepage}%
   \tpEvalType{Properties}%
@@ -93,18 +99,32 @@
   \let\tp@cur@cont\@empty
 }
 %    \end{macrocode}
+% \end{macro}
+%
 % \section{PDF Meta Data}
-% This macro sets the metadata that are written directly into the pdf
-% file, as well as meta data used later in the book.
+%
+% The next few macros handle the content that is written directly
+% into the pdf as meta data.
+%
+% \begin{macro}{\tp@title@set@pdfmeta} is the wrapper for the whole meta data handling.
 %    \begin{macrocode}
 \def\tp@title@set@pdfmeta{%
+%    \end{macrocode}
+% \begin{macro}{\tp@write@pdf@meta} is used to transfer the fully
+%   expanded meta data via the pdfinfo interface provided by the
+%   hyperref package into the pdf.
+%    \begin{macrocode}
   \def\tp@write@pdf@meta##1##2{\protected\def\@tempa{##2}\edef\x{\noexpand\hypersetup{##1={\expandonce{\@tempa}}}}\x}%
+%    \end{macrocode}
+% \end{macro}
+%    \begin{macrocode}
   \tp@title@process@bkt
   \tp@title@process@bka
   \tp@title@process@bkc
 }
 %    \end{macrocode}
-% Processes the title
+% \end{macro}
+% \begin{macro}{\tp@title@process@bkt} processes the document's main title
 %    \begin{macrocode}
 \def\tp@title@process@bkt{%
   \let\tpBreak\space
@@ -114,7 +134,10 @@
   \expandafter\gdef\expandafter\tpRunBookTitle\expandafter{\tp@run@book@title}%
 }
 %    \end{macrocode}
-% Processes the names written into the meta data
+% \end{macro}
+% \begin{macro}{\tp@title@process@bka} processes the document's main
+%   author or, if that doesn't exist, the main editor, or throws an
+%   error message if neither exist.
 %    \begin{macrocode}
 \def\tp@title@process@bka{%
   \@tempswatrue
@@ -127,7 +150,6 @@
     \else
       \ifnum\tpEditorCnt>\z@
         \tpCompGDef\tpRunBookName{tpEditor}{editor-list-format}%
-        \csgappto{tpRunBookName}{\tpUseProperty{editor-suffix}}%
       \else
         \tpPackageWarning{transcript-title}{Meta Data}{No author or editor given!}%
         \@tempswafalse
@@ -140,16 +162,21 @@
   \endgroup
 }
 %    \end{macrocode}
-% sets the metadata for the pdf creator
+% \end{macro}
+% \begin{macro}{\tp@title@process@bkc} processes the metadata for the pdf
+%   creator
 %    \begin{macrocode}
 \def\tp@title@process@bkc{%
   \tp@write@pdf@meta{pdfcreator}{\tpIfComp{PDFCreator}{\tpUseComp{PDFCreator}}{\tpUseComp{Publisher}\tpIfComp{PubPlace}{, \tpUseComp{PubPlace}}{}}}%
   \tp@write@pdf@meta{pdfproducer}{\tpUseComp{PDFProducer}}%
 }
 %    \end{macrocode}
+% \end{macro}
+%
 % \section{Intermediate Level Interfaces}
 %
-% Collect the meta information and construct the tpMaketitle macro
+% \begin{macro}{\tp@maketitle}
+%   collects the meta information and constructs the tpMaketitle macro
 %    \begin{macrocode}
 \def\tp@maketitle{%
   %\csname tp@titlepage\endcsname
@@ -176,11 +203,13 @@
   \fi
 }
 %    \end{macrocode}
+% \end{macro}
 %
 % \subsection{Funds, Grants, and Supporters}
-% Grants component group. This is a {\LaTeX} environment within
-% \lstinline{tpMeta} which allows to set up multiple funding, grant, or
-% supporter callouts.
+%
+% This is a Subcontainer within \lstinline{tpMeta} which allows to set
+% up multiple funding, grant, or supporter callouts.
+% \begin{macro}{\tp@title@fundings@comp} wrapper to set up the Subcontainer
 %    \begin{macrocode}
 \def\tp@title@fundings@comp{%
   \tpDeclareComp{FundingBlock}{\expandafter\global}{}%
@@ -190,24 +219,35 @@
     \tpDeclareCountedComp{FundID}%
   }{}%
 }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\tp@title@fundings@eval} Evaluator for the funding
+%    \begin{macrocode}
 \def\tp@title@fundings@eval{{%
     \def\tp@cur@cont{titlepage}%
     \tpComposeCollection{tpFunding}{fund-format}{FundingBlock}%
 }}
 %    \end{macrocode}
-% Evaluator for the Corresponding Author
+% \end{macro}
+% \begin{macro}{\tp@title@eval@corresp} is the evaluator for the
+%   Corresponding Author
 %    \begin{macrocode}
 \def\tp@title@eval@corresp#1#2{%
   \expandafter\ifx\csname tp@#1-#2@attr@corresp\endcsname\relax\else\tpUseProperty{corresp-mark}\fi}
 %    \end{macrocode}
+% \end{macro}
 %
+% \begin{macro}{\tp@title@eds@eval} evaluator for the editors
 %    \begin{macrocode}
 \def\tp@title@eds@eval#1{%
   \tp@meta@role@eval{#1}%
   \tpApplyCollection{tp#1}{\csname tp@meta@role@#1@BioBlock\endcsname}{#1BioBlock}%
   \tp@create@editor@string{#1}}
 %    \end{macrocode}
-% adds suffix to the editors
+% \end{macro}
+% \begin{macro}{\tp@create@editor@string} evaluates the editor string
+%   and adds a suffix.
 %    \begin{macrocode}
 \def\tp@create@editor@string#1{%
   \expandafter\ifx\csname tp@\tp@cur@cont @#1NameList\endcsname\relax\else
@@ -215,8 +255,13 @@
   \fi
 }%
 %    \end{macrocode}
+% \end{macro}
+%
 % \subsection{Simple Component Declarations}
-% Shortcut for simple value components
+%
+% \begin{macro}{\tp@title@macro} is a shortcut to declare simple title
+%   Components with the name \#2. They are usually empty. Non-empty
+%   default value can be provided by the optional argument \#1.
 %    \begin{macrocode}
 \def\tp@title@macro{\@ifnextchar[\@tp@title@macro{\@tp@title@macro[]}}%]
 \def\@tp@title@macro[#1]#2{%
@@ -224,7 +269,8 @@
   \if!#1!\else\csname tp#2\endcsname{#1}\fi%
 }
 %    \end{macrocode}
-% Declaration of simple value Components
+% \end{macro}
+% \begin{macro}{\tp@title@simple@comps} wrapper for the Titlepage's simple Components.
 %    \begin{macrocode}
 \def\tp@title@simple@comps{%
   %% Cover
@@ -304,8 +350,12 @@
   \tp@title@macro{AddNoteIV}%                     Additional information, title page IV
 }
 %    \end{macrocode}
+% \end{macro}
+%
 % \section{Default Settings}
-% Default properties for tpMaketitle
+%
+% \begin{macro}{\tp@titlepage@default} defines the default Properties
+%   for \lstinline{\tpMaketitle}
 %    \begin{macrocode}
 \def\tp@titlepage@default{%
   \tpSetProperty{article-title}{}%
@@ -551,6 +601,7 @@
   }%
 }
 %    \end{macrocode}
+% \end{macro}
 %    \begin{macrocode}[gobble=1]
 %</title>
 %    \end{macrocode}
