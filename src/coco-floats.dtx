@@ -371,13 +371,6 @@
       \tpIfComp{ListofSource}{\csgappto{@tp@listof@entry}{\string\tpListofSource{\tpUseComp{ListofSource}}}}{}%
       \ifx\@tp@listof@entry\relax\else
         \protected@edef\tp@listof@entry{\@tp@listof@entry}%
-        \ifx\tp@captype\tp@str@figure
-          \tp@set@label{\the\c@figure}%
-          \global\advance\c@figure by \@ne%
-        \else
-          \tp@set@label{\the\c@table}%
-          \global\advance\c@table by \@ne%
-        \fi
         \ifx\tp@is@subflt\relax
           \tp@savecontentsline{#1}{\tp@captype}{\expandonce{\tp@listof@entry}}%
         \else
@@ -406,23 +399,28 @@
       {\csname Listof#1\endcsname{}}}}
 
 %    \end{macrocode}
-% Faculity to create auto-numbered counters
+% Faculity to create auto-numbered counters. We advance the captype
+% only locally since they are automatically and globally updated when
+% \lstinline{\tp@make@anchors} is called.
 %    \begin{macrocode}
 \def\tp@flt@create@counters{%
   \expandafter\ifx\csname tp@\tp@captype @attr@nonumber\endcsname\relax
     \tpIfPropVal{numbering}{auto}{%
       \tpIfComp{number-0}
         {}%
-        {\expandafter\global\expandafter\advance\csname c@\tp@captype\endcsname\@ne\relax
-         \tp@set@label{0}}%
+        {\expandafter\advance\csname c@\tp@captype\endcsname\@ne\relax
+         \tp@set@label{0}%
+         \expandafter\advance\csname c@\tp@captype\endcsname\m@ne\relax
+       }%
       \ifnum\tpSubFloatCnt=\z@\relax\else
         \@tempcnta\z@
         \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
           \tpIfComp{number-\the\@tempcnta}
             {}%
             {\expandafter\ifx\csname tp@\tp@captype @attr@subfloat\endcsname\relax
-               \expandafter\global\expandafter\advance\csname c@\tp@captype\endcsname\@ne\relax
+               \expandafter\advance\csname c@\tp@captype\endcsname\@ne\relax
                \tp@set@label{\the\@tempcnta}%
+               \expandafter\advance\csname c@\tp@captype\endcsname\m@ne\relax
              \else
                \tp@set@sublabel{\the\@tempcnta}%
              \fi
@@ -1063,10 +1061,9 @@
     \tpIfComp{Label}
       {\expandafter\let\expandafter\@currentlabel\csname tp@\tp@cur@cont @number-\the\tpSubFloatCnt\endcsname}
       {\edef\@currentlabel{tp-\tp@cur@cont-number-\the\tp@int@flt@cnt}}%
-    \advance\csname c@\tp@captype\endcsname\m@ne
     \expandafter\H@refstepcounter\expandafter{\tp@captype}%
     \expandafter\hyper@makecurrent\expandafter{\tp@captype}%
-    \let\Hy@tempa\Hy@float@caption
+    \global\let\Hy@tempa\Hy@float@caption
     \expandafter\hyper@@anchor\expandafter{\@currentHref}{\relax}%
     \tpIfComp{Label}
       {\expandafter\let\expandafter\@currentlabel\csname tp@\tp@cur@cont @number-\the\tpSubFloatCnt\endcsname
