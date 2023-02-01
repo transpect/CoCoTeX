@@ -601,6 +601,12 @@
 }
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{\tpPageLabel} enables referencing pages via \pageref
+%   by using \phantomsection to create a hyperref anchor for label \#1.
+%    \begin{macrocode}
+\def\tpPageLabel#1{\phantomsection\label{#1}}
+%    \end{macrocode}
+% \end{macro}
 %    \begin{macrocode}[gobble=1]
 %</common>
 %    \end{macrocode}
