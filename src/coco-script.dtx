@@ -202,8 +202,41 @@
 
 %    \end{macrocode}
 % \subsection{Support for Syrian script}
+%
+% Since Babel does not support the Syrian script natively, we need to create an babel-syriac.ini file first. Otherwise, the kerning and ligatures will be off:
 %    \begin{macrocode}
-\tpDeclareBabelFont{syriac}{[%
+\expandafter\ifx\csname use@script@syriac\endcsname\@empty%
+\RequirePackage{filecontents}
+\begin{filecontents*}{babel-syriac.ini}
+[identification]
+charset = utf8
+version = 0.1
+date = 2019-08-25
+name.local = ܠܫܢܐ ܣܘܪܝܝܐ
+name.english = Classical Syriac
+name.babel = classicalsyriac
+tag.bcp47 = syc
+tag.opentype = SYR
+script.name = Syriac
+script.tag.bcp47 = Syrc
+script.tag.opentype = syrc
+level = 1
+encodings = 
+derivate = no
+[captions]
+[date.gregorian]
+[date.islamic]
+[time.gregorian]
+[typography]
+[characters]
+[numbers]
+[counters]
+\end{filecontents*}
+\fi
+%    \end{macrocode}
+% Now, we can create the fallback font and import the newly created ini file:
+%    \begin{macrocode}
+\tpDeclareBabelFont[import=syriac]{syriac}{[%
     BoldFont = NotoSansSyriac-Black.ttf,%
     ItalicFont = NotoSansSyriac-Regular.ttf,%
     BoldItalicFont = NotoSansSyriac-Black.ttf,%
@@ -219,6 +252,7 @@
   }
 
 %    \end{macrocode}
+%
 % \subsection{Support for medieval scripts and special characters}
 % only \lstinline{rm}!
 %    \begin{macrocode}
