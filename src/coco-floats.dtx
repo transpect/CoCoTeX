@@ -62,7 +62,7 @@
 \newcount\tpSubFloatCnt       \tpSubFloatCnt=\z@\relax
 \newcount\tp@int@flt@cnt      \tp@int@flt@cnt\z@
 %    \end{macrocode}
-% Coutners for the rows and columns in a subfloat-block (TODO: not implemented yet)
+% Counters for the rows and columns in a sub-float block (TODO: not implemented yet)
 %    \begin{macrocode}
 \newcount\tp@subfloat@row     \tp@subfloat@row\z@
 \newcount\tp@subfloat@col     \tp@subfloat@col\z@
@@ -158,7 +158,7 @@
 % \subsection{Generic resetter}
 %
 % \begin{macro}{\tp@flt@reset@defaults} resets the parameters for
-%   subfloats.
+%   sub-floats.
 %   \begin{description}
 %   \item[\#1] the caption type (e.g., \lstinline{figure}, \lstinline{table})
 %   \item[\#2] abbreviation of the caption list (e.g., standard
@@ -363,7 +363,8 @@
   }
 %    \end{macrocode}
 % \end{macro}
-% inner and outer margins are realised via the left and right margins.
+% \begin{macro}{\tp@flt@set@margins} realises inner and outer margins
+%   via the left and right margins.
 %    \begin{macrocode}
 \def\tp@flt@set@margins{%
   \tp@test@page
@@ -375,16 +376,31 @@
     \advance\tp@flt@marg@r\tp@flt@marg@i
   \fi
 }
-
 %    \end{macrocode}
-% High level macro to (re-)declare a new \lstinline{tpFloat}
-% environment. \lstinline{#1}: inherit from, \lstinline{#2}:
-% environment name, \lstinline{#3}: caption name, \lstinline{#4}:
-% list-of, \lstinline{#5} parameters.
+% \end{macro}
+% \begin{tpContainer}{float}
 %    \begin{macrocode}
 \tpDeclareContainer{float}{}
+%    \end{macrocode}
+% \begin{macro}{\tpDeclareFloat} is the user-level macro used to
+%   (re-)declare a (new) \lstinline{tpFloat} environment.
+%   \begin{description}
+%   \item[\#1] Name of the float Container from which the declared
+%     Container should inherit Properties (\textit{optional})
+%   \item[\#2] top-level name of the float environment (e.g.,
+%     \texttt{tpTable}, \texttt{tpFigure})
+%   \item[\#3] caption type (e.g., \texttt{table}, \texttt{figure})
+%   \item[\#4] list (e.g., \texttt{lot}, \texttt{lof})
+%   \item[\#5] Property list
+%   \end{description}
+%    \begin{macrocode}
 \def\tpDeclareFloat{\@ifnextchar[{\@tpDeclareFloat}{\@tpDeclareFloat[]}}%]
 \def\@tpDeclareFloat[#1]#2#3#4#5{%
+%    \end{macrocode}
+% The macro actually defines two {\LaTeX} environments; a normal one
+% for one-column floats, and a starred one for page-wide floats in
+% two-column mode.
+%    \begin{macrocode}
   \expandafter\ifx\csname #2\endcsname\relax
     \PackageInfo{coco-floats.sty}{Declaring #2 environment}%
     \newenvironment{#2}[1][]{\tp@float[##1]{#3}{#4}{#2}}{\endtp@float}%
@@ -394,9 +410,15 @@
     \renewenvironment{#2}[1][]{\tp@float[##1]{#3}{#4}{#2}}{\endtp@float}%
     \renewenvironment{#2*}[1][]{\let\tp@do@dblfloat\relax\tp@float[##1]{#3}{#4}{#2}}{\let\tp@do@dblfloat\relax\endtp@float}%
   \fi
+%    \end{macrocode}
+% Saving the float container's parent for the Property inheritance mechanism:
+%    \begin{macrocode}
   \if!#1!\else
     \expandafter\def\csname tp@float@#2@parent\endcsname{#1}%
   \fi
+%    \end{macrocode}
+% Saving the Container's Property list, or appending it in case it has already been declared
+%    \begin{macrocode}
   \expandafter\ifx\csname tp@float@#2@properties\endcsname\relax%
     \expandafter\def\csname tp@float@#2@properties\endcsname{#5}%
   \else
@@ -407,25 +429,41 @@
     \expandafter\csname tp@float@#2@properties\expandafter\endcsname
     \expandafter{\@tempa #5}%
   \fi
+%    \end{macrocode}
+% Generating the Handlers for the list-of entries and define the
+% corresponding \lstinline{l@} macros
+%    \begin{macrocode}
   \tp@flt@generate@listof@handlers{#4}{#3}{#2}%
   \bgroup
     \def\tp@cur@cont{#2}%
     \tp@init@l@[Listof]{#4}{0}{#3}% Generate listof-Entries for first level floats
     \tp@restore@init{#4}{number-0-maxwd}%
-    \tp@init@l@[Listof]{#4}{1}{sub#3}% Generate listof-Entries for sub floats
+    \tp@init@l@[Listof]{#4}{1}{sub#3}% Generate listof-Entries for sub-floats
     \tp@restore@init{#4}{number-1-maxwd}%
   \egroup
 }
 %    \end{macrocode}
-% Generate handlers for listof-entries. \#1 is the file ending, \#2 is the caption name, \#3 is the namespace (env name)
+% \end{macro}
+% \begin{macro}{\tp@flt@generate@listof@handlers} generates handlers
+%   for listof-entries.
+%   \begin{description}
+%   \item[\#1] is the file ending
+%   \item[\#2] is the caption type
+%   \item[\#3] is the Container name
+%   \end{description}
 %    \begin{macrocode}
 \def\tp@flt@generate@listof@handlers#1#2#3{%
 %    \end{macrocode}
-% The first macro that is dynamicly defined, is the Component
-% collector. \#\#1 is a numeric level that represents the order of the
-% listof-entries; \#\#2 is the caption type; \#\#3 is the
-% content of the \lstinline{l@<level>} macro; and \#\#4 is the page
-% number associated with that entry.
+% \begin{macro}{\csname tp@#1@extract@data\endcsname}
+%   The first macro that is dynamicly defined, is the Component
+%   collector.
+%   \begin{description}
+%   \item[\#\#1] is a numeric level that represents the order of the
+%     listof-entries
+%   \item[\#\#2] is the caption type
+%   \item[\#\#3] is the content of the \lstinline{l@<level>} macro
+%   \item[\#\#4] is the page number associated with that entry.
+%   \end{description}
 %    \begin{macrocode}
   \expandafter\gdef\csname tp@#1@extract@data\endcsname##1##2##3##4{%
     \tpNamespace{#3}%
@@ -441,9 +479,11 @@
     \tp@format@number{list-of-}{Listof}{##1}%
   }%
 %    \end{macrocode}
-% The second dynamically defined macro is the entry renderer. It
-% applies the Listof properties and selects the components to be
-% printed. \#\#1 is the caption name of the float.
+% \end{macro}
+% \begin{macro}{\csname tp@#1@print@entry\endcsname}
+%   The second dynamically defined macro is the entry renderer. It
+%   applies the Listof properties and selects the components to be
+%   printed. \#\#1 is the caption type of the float.
 %    \begin{macrocode}
   \expandafter\gdef\csname tp@#1@print@entry\endcsname##1{%
     \bgroup
@@ -454,9 +494,11 @@
       \tpUseProperty{list-of-after-entry}%
     \egroup}%
 %    \end{macrocode}
-% The last macro to be defined here is the listof writer. This macro
-% is responsible to write the entry into TeX's auxiliary file
-% system. \#\#1 is the name of the ``level'' for the entry.
+% \end{macro}
+% \begin{macro}{\csname tp@make@listof@#2\endcsname}
+%   The last macro to be defined here is the Listof writer. This macro
+%   is responsible to write the entry into TeX's auxiliary file
+%   system. \#\#1 is the name of the ``level'' for the entry.
 %    \begin{macrocode}
   \expandafter\gdef\csname tp@make@listof@#2\endcsname##1{%
     \tpGobble
@@ -482,15 +524,31 @@
     \fi
   }%
 }
-
-\def\tp@savecontentsline#1#2#3{\protected@xdef\tp@@savecontentsline{\expandonce{\tp@@savecontentsline}\noexpand\tp@flt@addcontentsline{#1}{#2}{#3}\relax}}
-
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \begin{macro}{\tp@savecontentsline} saves the contentsline macros for prematurely expanded captions (DEPRECATED?)
+%    \begin{macrocode}
+\def\tp@savecontentsline#1#2#3{%
+  \protected@xdef\tp@@savecontentsline{\expandonce{\tp@@savecontentsline}\noexpand\tp@flt@addcontentsline{#1}{#2}{#3}\relax}}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tp@flt@addcontentsline} fork of \LaTeX's \lstinline{\addtocontents} macro
+%   \begin{description}
+%   \item[\#1] extension of the list file
+%   \item[\#2] caption type; passed to the first argument of \LaTeX's \lstinline{\contentsline}
+%   \item[\#3] the entry itself; passed to the second argument of \LaTeX's \lstinline{\contentsline}
+%   \end{description}
+%    \begin{macrocode}
 \def\tp@flt@addcontentsline#1#2#3{%
   \protected@write\@auxout
     {\tpGobble}%
     {\string\@writefile{#1}{\protect\tpContentsline{#2}{#3}{\thepage}{\@currentHref}\protected@file@percent}}\relax
 }
-
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tp@flt@check@empty} fork of CoCoTeX kernel's \lstinline{\tp@check@empty}, probably DEPRECATED(?)
+%    \begin{macrocode}
 \def\tp@flt@check@empty#1#2{%
   \ifx\tp@is@subflt\relax\else\tpSubFloatCnt\z@\fi
   \tpIfComp{Listof#1}
@@ -498,11 +556,16 @@
     {\tpIfComp{#1}
       {\csletcs{tp@\tp@cur@cont @Listof#1-\the\tpSubFloatCnt}{tp@\tp@cur@cont @#1-\the\tpSubFloatCnt}}
       {\csname Listof#1\endcsname{}}}}
-
 %    \end{macrocode}
-% Faculity to create auto-numbered counters. We advance the captype
-% only locally since they are automatically and globally updated when
-% \lstinline{\tp@make@anchors} is called.
+% \end{macro}
+% \end{tpContainer}
+%
+% \section{Float-specific functionality}
+%
+% \begin{macro}{\tp@flt@create@counters} creates auto-numbered
+%   counters. We advance the caption type only locally since they are
+%   automatically and globally updated when
+%   \lstinline{\tp@make@anchors} is called.
 %    \begin{macrocode}
 \def\tp@flt@create@counters{%
   \expandafter\ifx\csname tp@\tp@captype @attr@nonumber\endcsname\relax
@@ -528,10 +591,18 @@
             }}%
       \fi}{}%
   \fi}
-
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tp@set@label} generates the first level float counter. \#1 is the sub-float counter.
+%    \begin{macrocode}
 \def\tp@set@label#1{%
   \expandafter\expandafter\expandafter\edef\expandafter\csname tp@\tp@cur@cont @number-#1\expandafter\endcsname\expandafter{\csname the\tp@captype\endcsname}%
 }
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{\tp@set@sublabel} generates second level counters for numbered sub-floats. \#1 is the sub-float counter
+%    \begin{macrocode}
 \def\tp@set@sublabel#1{%
   \tpSetValProp{float-number}{\csname tp@\tp@cur@cont @number-0\endcsname}%
   \tpSetValProp{sub-number}{%
@@ -543,10 +614,22 @@
     \endgroup}%
   \expandafter\expandafter\expandafter\edef\expandafter\csname tp@\tp@cur@cont @number-#1\expandafter\endcsname\expandafter{\tpUseProperty{sub-number-block}}%
 }
-
 %    \end{macrocode}
-% Mid-level Macro that provides the common floating {\LaTeX}
-% environment.
+% \end{macro}
+%
+%
+% \section{Processing the Float}
+%
+% \subsection{Common Float and Sub-Float Environments}
+%
+% \begin{macro}{\tp@float} is a mid-level Macro that provides the
+%   common floating {\LaTeX} environment.
+%   \begin{description}
+%   \item[\#1] float position (optional)
+%   \item[\#2] corresponds to the caption type, e.g., \texttt{table}, \texttt{figure}
+%   \item[\#3] list (e.g., \texttt{lot}, \texttt{lof})
+%   \item[\#4] the Container name (e.g., \texttt{tpFigure}, \texttt{tpTable})
+%   \end{description}
 %    \begin{macrocode}
 \def\tp@float[#1]#2#3#4{%
   \par
@@ -565,7 +648,11 @@
     \tp@set@flt@env
     \ifx\tp@fps\@empty\else\savenotes\fi
 }
-
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\endtp@float} is the end of the common float
+%   environment.
+%    \begin{macrocode}
 \def\endtp@float{%
     \tp@b@float
     \tp@set@top@sep
@@ -582,202 +669,8 @@
   \global\let\tp@current@class\relax
 }
 %    \end{macrocode}
-% Test if the current (sub)float has any top or bottom captions that
-% needed printed
-%    \begin{macrocode}
-\def\tp@test@subcapt{%
-  \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
-    \tp@test@caption{\the\@tempcnta}{subcapt}{top}%
-    \tp@test@caption{\the\@tempcnta}{subcapt}{bottom}%
-  }%
-}
-
-\def\tp@test@caption#1#2#3{%
-  \setbox\tp@tempboxa\hbox{\tpGobble\tpSubFloatCnt#1\relax\tpUseProperty{caption-#3}\relax}%
-  \setbox\tp@tempboxb\hbox{\tpGobble\tpSubFloatCnt\m@ne\relax\tpUseProperty{caption-#3}\relax}%
-  \ifdim\wd\tp@tempboxa>\wd\tp@tempboxb\relax
-    \expandafter\global\expandafter\let\csname tp@has@#2@#3\endcsname\@empty
-  \fi
-}
-
-%    \end{macrocode}
-% Calculate the ratio between each subfloat's height and the height of the largest subfloat
-%    \begin{macrocode}
-\def\tp@flt@calc@sameheight{%
-  \@tempdima=\z@\relax
-  \@tempcnta=\z@\relax
-  \tp@calc@flt@width=\tp@total@flt@width\relax
-  \advance\tp@calc@flt@width-\tp@flt@marg@l\relax
-  \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
-    \edef\@tempa{\CalcRatio{\tp@subflt@maxheight}{\csname tp@\tp@cur@cont @height-\the\@tempcnta\endcsname}}%
-    \ifnum\@tempcnta>\@ne
-      \advance\tp@calc@flt@width-\tp@subflt@sep\relax%
-    \fi
-    \expandafter\@tempdimc\csname tp@\tp@cur@cont @width-\the\@tempcnta\endcsname\relax
-    \@tempdimb=\@tempa\@tempdimc\relax
-    \expandafter\edef\csname  tp@\tp@cur@cont @adj@width-\the\@tempcnta\endcsname{\the\@tempdimb}%
-    \advance\@tempdima\@tempdimb
-  }%
-  \@tempcnta=\z@\relax
-  \@tempdimb=\z@\relax
-  \@tempdimc=\z@\relax
-  \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
-    \edef\@tempa{\CalcRatio{\csname tp@\tp@cur@cont @adj@width-\the\@tempcnta\endcsname}{\@tempdima}}%
-    \expandafter\edef\csname tp@\tp@cur@cont @res@width-\the\@tempcnta\endcsname{\dimexpr\@tempa\tp@calc@flt@width\relax}%
-    \@tempdimc\dimexpr\csname tp@\tp@cur@cont @height-\the\@tempcnta\endcsname\relax
-    \@tempdimc\dimexpr\@tempa\@tempdimc\relax
-    \ifdim\@tempa\@tempdimb<\@tempdimc\@tempdimb\@tempdimc\relax\fi
-  }%
-  \expandafter\edef\csname tp@\tp@cur@cont @res@height\endcsname{\the\@tempdimb}%
-}
-
-%    \end{macrocode}
-% Process the contents of a float environment
-%    \begin{macrocode}
-
-\def\tp@flt@process{%
-  \tp@test@subcapt
-  \ifx\tp@has@capt@top\@empty\leavevmode\fi
-  \tp@make@outer@caption{top}%
-  \ifnum\tpSubFloatCnt=\z@\relax
-    \bgroup\advance\hsize-\tp@flt@marg@l
-      \tpUseProperty{float-render}%
-    \egroup
-  \else
-    \let\tp@is@subflt\relax
-    \tp@flt@calc@sameheight
-    \ifx\tp@has@subcapt@top\@empty\tp@flt@calc@row@ht{top}\fi%
-    \ifx\tp@has@subcapt@bottom\@empty\tp@flt@calc@row@ht{bottom}\fi%
-    \def\tp@prefix{sub}%
-    \tpUseProperty{subfloat-render}%
-    \let\tp@prefix\@empty
-    \let\tp@is@subflt\@undefined
-  \fi
-  \tp@make@outer@caption{bottom}%
-}
-
-%    \end{macrocode}
-% This macro finally composes the entire float object.
-%    \begin{macrocode}
-\def\tp@flt@compose{%
-  \bgroup
-    \hsize\tp@total@flt@width
-    \tp@flt@process
-    \tp@make@anchors%
-    \csname tp@make@listof@\tp@captype\endcsname{\tp@captype}% single float
-    \par
-  \egroup}
-
-%    \end{macrocode}
-% \section{Caption mechanism}
-%
-% This sub-routine cycles through the subfloats and creates boxes for
-% each component. \#1 is the content, \#2 is the vertical alignment
-% within the box, \#3 is the height of the row.
-%    \begin{macrocode}
-
-%    \end{macrocode}
-% Determins the spacing inserted \textbf{above both captions}.
-%    \begin{macrocode}
-\def\tp@capt@top@offset{%
-  \ifx\@argi\tp@str@top
-  \else
-    \par\nopagebreak
-    \expandafter\@tempskipa\tpUseProperty{\tp@prefix caption-sep-bottom}\relax%
-    \advance\@tempskipa\dimexpr-\topskip+\dp\strutbox\relax
-    \ifx\tp@has@subcapt@bottom\@empty
-      \ifnum\tpSubFloatCnt=\z@
-        %% subcapt-bot exists and capt-bot is rendered
-        \advance\@tempskipa\dimexpr\dp\strutbox\relax
-        \expandafter\advance\expandafter\@tempskipa\tpUseProperty{subcaption-add-sep-bottom}\relax%
-      \fi
-    \fi
-    \vskip\@tempskipa
-    \leavevmode
-  \fi}
-
-%    \end{macrocode}
-% Determins the spacing inserted \textbf{below the captions}.
-%    \begin{macrocode}
-\def\tp@capt@bottom@offset{%
-  \ifx\@argi\tp@str@top
-    \@tempskipa\z@
-    \expandafter\advance\expandafter\@tempskipa\tpUseProperty{\tp@prefix caption-sep-top}%
-    %
-    \ifnum\tpSubFloatCnt=\z@
-      \ifx\tp@has@subcapt@top\@empty
-        %% subcapt-top exists and capt-top is rendered
-        \advance\@tempskipa\dimexpr\ht\strutbox-\topskip-\p@\relax
-        \expandafter\advance\expandafter\@tempskipa\tpUseProperty{subcaption-add-sep-top}\relax%
-      \else
-        \advance\@tempskipa\dimexpr-\dp\strutbox\relax
-      \fi
-    \fi
-    \vskip\@tempskipa
-    \par\nopagebreak
-  \else
-    \ifnum\tpSubFloatCnt>\z@
-      \vskip\dp\strutbox
-    \fi
-  \fi}
-
-%    \end{macrocode}
-% prints the caption. \#1 is the
-% placement (top, bottom), \#2 is the vertical alignment (top, middle,
-% bottom), \#3 is the left margin.
-%    \begin{macrocode}
-\long\def\tp@make@caption#1#2{%
-  \edef\@argi{#1}\edef\@argii{#2}%
-  \tp@capt@top@offset
-  \ifnum\tpSubFloatCnt=\z@
-    \def\next{%
-      \expandafter\ifx\csname tp@\tp@captype @attr@orientation\endcsname\tp@str@landscape\relax%
-        \vbox\bgroup\hsize\textheight%
-      \else%
-        \hskip\tp@flt@marg@l%
-        \vbox\bgroup\advance\hsize-\tp@flt@marg@l%
-      \fi%
-    }%
-  \else
-    \expandafter\tp@tempskipa\csname tp@flt@capt@row@height@#1\endcsname\relax
-    \expandafter\advance\expandafter\tp@tempskipa\dimexpr-\baselineskip+\topskip\relax
-    \def\next{\vbox to \tp@tempskipa\bgroup}%
-  \fi
-  \next%
-    \ifx\@argii\tp@str@top\else\vss\fi
-    \tpUseProperty{\tp@prefix caption-face}%
-    \tpUseProperty{\tp@prefix caption-format-#1}%
-    \tp@topstrut\tpUseProperty{caption-#1}\strut%
-    \ifx\@argii\tp@str@bottom\else\vss\fi%
-  \egroup%
-  \tp@capt@bottom@offset
-}
-
-%    \end{macrocode}
-% Shell for the outer captions, \#1 is the placement (top, bottom)
-%    \begin{macrocode}
-\def\tp@make@outer@caption#1{%
-  \def\@argi{#1}%
-  \expandafter\ifx\csname tp@has@capt@#1\endcsname\@empty
-    \setbox\z@\vbox{%
-      \tpGobble
-      \tpSubFloatCnt\z@
-      \tp@make@caption{#1}{top}%
-    }%
-    \immediate\write\@auxout{\string\expandafter\string\gdef\string\csname\space tpFloat\the\tp@int@flt@cnt Cap#1\string\endcsname{\the\dimexpr \ht\z@+\dp\z@\relax}}%
-    \bgroup
-      \savenotes
-      \nopagebreak
-      \tpSubFloatCnt\z@
-      \tp@make@caption{#1}{top}%
-      \spewnotes
-    \egroup
-    \ifx\@argi\tp@str@top\nopagebreak\fi
-  \fi
-}
-
-%    \end{macrocode}
-% shell for sub floats
+% \end{macro}
+% \begin{macro}{\tpSubFloat} is the user-level environment for sub-floats
 %
 % TODO: transform into a Component Group
 %    \begin{macrocode}
@@ -789,9 +682,10 @@
     \global\advance\tpSubFloatCnt\@ne
     \ignorespaces
   \fi}
-
-\def\tp@flt@create@natural{\tpUseComp{Fig}}
-
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\endtpSubFloat} is the end of the sub-float environment
+%    \begin{macrocode}
 \def\endtpSubFloat{%
   \tpUseProperty{subfloat-handler}%
   \expandafter\xdef\csname tp@\tp@cur@cont @width-\the\tpSubFloatCnt\endcsname{\the\wd\tp@subfltbox}%
@@ -831,8 +725,195 @@
   \setbox\tp@subfltbox\box\voidb@x
   \let\tp@is@subflt\@undefined
 }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Processing the Contents of the Float Environment}
+%
+% \begin{macro}{\tp@flt@process} processes the contents of a float
+%   environment
+%    \begin{macrocode}
+\def\tp@flt@process{%
+  \tp@test@subcapt
+  \ifx\tp@has@capt@top\@empty\leavevmode\fi
+  \tp@make@outer@caption{top}%
+  \ifnum\tpSubFloatCnt=\z@\relax
+    \bgroup\advance\hsize-\tp@flt@marg@l
+      \tpUseProperty{float-render}%
+    \egroup
+  \else
+    \let\tp@is@subflt\relax
+    \tp@flt@calc@sameheight
+    \ifx\tp@has@subcapt@top\@empty\tp@flt@calc@row@ht{top}\fi%
+    \ifx\tp@has@subcapt@bottom\@empty\tp@flt@calc@row@ht{bottom}\fi%
+    \def\tp@prefix{sub}%
+    \tpUseProperty{subfloat-render}%
+    \let\tp@prefix\@empty
+    \let\tp@is@subflt\@undefined
+  \fi
+  \tp@make@outer@caption{bottom}%
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tp@flt@compose}
+% This macro prints the entire float object.
+%    \begin{macrocode}
+\def\tp@flt@compose{%
+  \bgroup
+    \hsize\tp@total@flt@width
+    \tp@flt@process
+    \tp@make@anchors%
+    \csname tp@make@listof@\tp@captype\endcsname{\tp@captype}% single float
+    \par
+  \egroup}
 
+%    \end{macrocode}
+% \end{macro}
+%
+%
+% \subsection{Caption mechanism}
+%
+%
+% \begin{macro}{\tp@test@caption} tests if the current sub-float has
+%   any top or bottom caption that needs to be printed.
+%   \begin{description}
+%   \item[\#1] is the value of the sub-float counter
+%   \item[\#1] indicates if the caption belongs to the whole float
+%     (\lstinline{capt}) or a sub-float (\lstinline{subcapt})
+%   \item[\#1] \lstinline{top} or \lstinline{bottom}
+%   \end{description}
+%    \begin{macrocode}
+\def\tp@test@caption#1#2#3{%
+  \setbox\tp@tempboxa\hbox{\tpGobble\tpSubFloatCnt#1\relax\tpUseProperty{caption-#3}\relax}%
+  \setbox\tp@tempboxb\hbox{\tpGobble\tpSubFloatCnt\m@ne\relax\tpUseProperty{caption-#3}\relax}%
+  \ifdim\wd\tp@tempboxa>\wd\tp@tempboxb\relax
+    \expandafter\global\expandafter\let\csname tp@has@#2@#3\endcsname\@empty
+  \fi
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tp@test@subcapt} tests if the current float has
+%   any top or bottom captions that need to be printed
+%    \begin{macrocode}
+\def\tp@test@subcapt{%
+  \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
+    \tp@test@caption{\the\@tempcnta}{subcapt}{top}%
+    \tp@test@caption{\the\@tempcnta}{subcapt}{bottom}%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tp@capt@top@offset} determines the spacing inserted
+%   \textbf{above both captions}.
+%    \begin{macrocode}
+\def\tp@capt@top@offset{%
+  \ifx\@argi\tp@str@top
+  \else
+    \par\nopagebreak
+    \expandafter\@tempskipa\tpUseProperty{\tp@prefix caption-sep-bottom}\relax%
+    \advance\@tempskipa\dimexpr-\topskip+\dp\strutbox\relax
+    \ifx\tp@has@subcapt@bottom\@empty
+      \ifnum\tpSubFloatCnt=\z@
+        %% subcapt-bot exists and capt-bot is rendered
+        \advance\@tempskipa\dimexpr\dp\strutbox\relax
+        \expandafter\advance\expandafter\@tempskipa\tpUseProperty{subcaption-add-sep-bottom}\relax%
+      \fi
+    \fi
+    \vskip\@tempskipa
+    \leavevmode
+  \fi}
 
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro} determines the spacing inserted \textbf{below the
+%   captions}.
+%    \begin{macrocode}
+\def\tp@capt@bottom@offset{%
+  \ifx\@argi\tp@str@top
+    \@tempskipa\z@
+    \expandafter\advance\expandafter\@tempskipa\tpUseProperty{\tp@prefix caption-sep-top}%
+    %
+    \ifnum\tpSubFloatCnt=\z@
+      \ifx\tp@has@subcapt@top\@empty
+        %% subcapt-top exists and capt-top is rendered
+        \advance\@tempskipa\dimexpr\ht\strutbox-\topskip-\p@\relax
+        \expandafter\advance\expandafter\@tempskipa\tpUseProperty{subcaption-add-sep-top}\relax%
+      \else
+        \advance\@tempskipa\dimexpr-\dp\strutbox\relax
+      \fi
+    \fi
+    \vskip\@tempskipa
+    \par\nopagebreak
+  \else
+    \ifnum\tpSubFloatCnt>\z@
+      \vskip\dp\strutbox
+    \fi
+  \fi}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tp@make@caption} prints the caption.
+%   \begin{description}
+%   \item[\#1] is the placement (\texttt{top}, \texttt{bottom})
+%   \item[\#2] is the vertical alignment (\texttt{top}, \texttt{middle}, \texttt{bottom})
+%   \item[\#3] is the left margin.
+% \end{description}
+%    \begin{macrocode}
+\long\def\tp@make@caption#1#2{%
+  \edef\@argi{#1}\edef\@argii{#2}%
+  \tp@capt@top@offset
+  \ifnum\tpSubFloatCnt=\z@
+    \def\next{%
+      \expandafter\ifx\csname tp@\tp@captype @attr@orientation\endcsname\tp@str@landscape\relax%
+        \vbox\bgroup\hsize\textheight%
+      \else%
+        \hskip\tp@flt@marg@l%
+        \vbox\bgroup\advance\hsize-\tp@flt@marg@l%
+      \fi%
+    }%
+  \else
+    \expandafter\tp@tempskipa\csname tp@flt@capt@row@height@#1\endcsname\relax
+    \expandafter\advance\expandafter\tp@tempskipa\dimexpr-\baselineskip+\topskip\relax
+    \def\next{\vbox to \tp@tempskipa\bgroup}%
+  \fi
+  \next%
+    \ifx\@argii\tp@str@top\else\vss\fi
+    \tpUseProperty{\tp@prefix caption-face}%
+    \tpUseProperty{\tp@prefix caption-format-#1}%
+    \tp@topstrut\tpUseProperty{caption-#1}\strut%
+    \ifx\@argii\tp@str@bottom\else\vss\fi%
+  \egroup%
+  \tp@capt@bottom@offset
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tp@make@outer@caption} is a shell for the outer
+%   captions. \#1 is the placement (\texttt{top}, \texttt{bottom})
+%    \begin{macrocode}
+\def\tp@make@outer@caption#1{%
+  \def\@argi{#1}%
+  \expandafter\ifx\csname tp@has@capt@#1\endcsname\@empty
+    \setbox\z@\vbox{%
+      \tpGobble
+      \tpSubFloatCnt\z@
+      \tp@make@caption{#1}{top}%
+    }%
+    \immediate\write\@auxout{\string\expandafter\string\gdef\string\csname\space tpFloat\the\tp@int@flt@cnt Cap#1\string\endcsname{\the\dimexpr \ht\z@+\dp\z@\relax}}%
+    \bgroup
+      \savenotes
+      \nopagebreak
+      \tpSubFloatCnt\z@
+      \tp@make@caption{#1}{top}%
+      \spewnotes
+    \egroup
+    \ifx\@argi\tp@str@top\nopagebreak\fi
+  \fi
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% HIER WEITER!
+%
+%    \begin{macrocode}
 \def\tpSubFloatRow{%
   \advance\tp@subfloat@row\@ne
   \let\tp@subfloat@prev@parent\tp@subfloat@parent
@@ -840,20 +921,27 @@
   \expandafter\def\csname tp@flt@max@row@height@\the\tp@subfloat@row\endcsname{\z@}%
   \expandafter\def\csname tp@flt@max@row@width@\the\tp@subfloat@row\endcsname{\z@}%
 }
+%    \end{macrocode}
+% 
+%    \begin{macrocode}
 \def\endtpSubFloatRow{%
   \let\tp@subfloat@parent\tp@subfloat@prev@parent
 }
-
+%    \end{macrocode}
+% 
+%    \begin{macrocode}
 \def\tpSubFloatCol{%
   \advance\tp@subfloat@col\@ne
   \let\tp@subfloat@prev@parent\tp@subfloat@parent
   \let\tp@subfloat@parent=c\relax
   \expandafter\let\csname tp@flt@max@col@width@\the\tp@subfloat@col\endcsname=\z@\relax
 }
+%    \end{macrocode}
+% 
+%    \begin{macrocode}
 \def\endtpSubFloatCol{%
   \let\tp@subfloat@parent\tp@subfloat@prev@parent
 }
-
 %    \end{macrocode}
 % Iterates through the single sub-floats and renders them in a nice row. \#1 is the subfloat counter.
 %    \begin{macrocode}
@@ -900,7 +988,41 @@
   }%
   \expandafter\edef\csname tp@flt@capt@row@height@#1\endcsname{\the\@tempdima}%
 }
-
+%    \end{macrocode}
+% 
+% \begin{macro}{\tp@flt@calc@sameheight} calculates the ratio between
+%   each sub-float's height and the height of the largest sub-float
+%    \begin{macrocode}
+\def\tp@flt@calc@sameheight{%
+  \@tempdima=\z@\relax
+  \@tempcnta=\z@\relax
+  \tp@calc@flt@width=\tp@total@flt@width\relax
+  \advance\tp@calc@flt@width-\tp@flt@marg@l\relax
+  \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
+    \edef\@tempa{\CalcRatio{\tp@subflt@maxheight}{\csname tp@\tp@cur@cont @height-\the\@tempcnta\endcsname}}%
+    \ifnum\@tempcnta>\@ne
+      \advance\tp@calc@flt@width-\tp@subflt@sep\relax%
+    \fi
+    \expandafter\@tempdimc\csname tp@\tp@cur@cont @width-\the\@tempcnta\endcsname\relax
+    \@tempdimb=\@tempa\@tempdimc\relax
+    \expandafter\edef\csname  tp@\tp@cur@cont @adj@width-\the\@tempcnta\endcsname{\the\@tempdimb}%
+    \advance\@tempdima\@tempdimb
+  }%
+  \@tempcnta=\z@\relax
+  \@tempdimb=\z@\relax
+  \@tempdimc=\z@\relax
+  \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
+    \edef\@tempa{\CalcRatio{\csname tp@\tp@cur@cont @adj@width-\the\@tempcnta\endcsname}{\@tempdima}}%
+    \expandafter\edef\csname tp@\tp@cur@cont @res@width-\the\@tempcnta\endcsname{\dimexpr\@tempa\tp@calc@flt@width\relax}%
+    \@tempdimc\dimexpr\csname tp@\tp@cur@cont @height-\the\@tempcnta\endcsname\relax
+    \@tempdimc\dimexpr\@tempa\@tempdimc\relax
+    \ifdim\@tempa\@tempdimb<\@tempdimc\@tempdimb\@tempdimc\relax\fi
+  }%
+  \expandafter\edef\csname tp@\tp@cur@cont @res@height\endcsname{\the\@tempdimb}%
+}
+%    \end{macrocode}
+% \end{macro}
+%    \begin{macrocode}
 \def\tp@includesubgraphics{\@ifnextchar [\@tp@includesubgraphics{\@tp@includesubgraphics[]}}%]
 \def\@tp@includesubgraphics[#1]#2{%
   \ifx\tp@current@class\relax
@@ -933,14 +1055,13 @@
 % main namespace, and main content container of figure floats.
 %    \begin{macrocode}
 \def\tpFigureHandler{\tpMakeFltComp{Fig}}
+\def\tp@flt@create@natural{\tpUseComp{Fig}}
 \def\tpSubFigureHandler{%
   \ifx\tp@nofigs\relax
     \setbox\tp@subfltbox\hbox{\rule{0pt}{1pt}\rule{1pt}{0pt}}%
   \else
     \setbox\tp@subfltbox\hbox{\tpGobble\tp@flt@create@natural}%
-  \fi
-
-}
+  \fi}
 
 %    \end{macrocode}
 % The \lstinline{\tpFigureRender} macro tells the module how figures
