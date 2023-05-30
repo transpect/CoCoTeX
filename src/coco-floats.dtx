@@ -19,7 +19,8 @@
 \DeclareOptionX{nofigs}{\global\let\tp@nofigs\relax}
 \ProcessOptionsX
 %    \end{macrocode}
-% Hard requirements:
+% \section{Package Setup}
+% \subsection{Hard requirements}
 %    \begin{macrocode}
 \RequirePackage{coco-common}
 \RequirePackage{rotating}
@@ -29,7 +30,10 @@
 \usepackage{stfloats}
 \setcounter{dblbotnumber}{5}
 %    \end{macrocode}
-% for automatic typesetting and float positioning, we use very high tolerances from standard \LaTeX:
+% \subsection{Document Class Option overrides}
+%
+% for automatic typesetting and float positioning, we set very high
+% tolerances in macros from \LaTeX's standard \section{.clo} files:
 %    \begin{macrocode}
 \def\topfraction{0.9}
 \def\textfraction{0.1}
@@ -41,45 +45,93 @@
 \@fptop\z@
 \@fpbot\@flushglue
 %    \end{macrocode}
-% some reserved registers
+%
+% \subsection{Internal registers}
+%
+% Some reserved box registers for measuring, the first one,
+% \lstinline{\tp@floatbox}, is for the whole float, the second one,
+% \lstinline{\tp@subfltbox}, is for a single sub-float.
 %    \begin{macrocode}
 \newbox  \tp@floatbox
 \newbox  \tp@subfltbox
+%    \end{macrocode}
+% Internal counters: \lstinline{\tpSubFloatCnt} counts the sub-floats
+% within a single float, \lstinline{\tp@int@flt@cnt} is the internal
+% global counter for all floats.
+%    \begin{macrocode}
 \newcount\tpSubFloatCnt       \tpSubFloatCnt=\z@\relax
+\newcount\tp@int@flt@cnt      \tp@int@flt@cnt\z@
+%    \end{macrocode}
+% Coutners for the rows and columns in a subfloat-block (TODO: not implemented yet)
+%    \begin{macrocode}
 \newcount\tp@subfloat@row     \tp@subfloat@row\z@
 \newcount\tp@subfloat@col     \tp@subfloat@col\z@
-\newcount\tp@int@flt@cnt      \tp@int@flt@cnt\z@
-
+%    \end{macrocode}
+% Various dimension registers that store dimensions and spaces of floats and sub-floats:
+% \begin{itemize}
+% \item \lstinline{\tp@subflt@maxheight} stores and self-updates the
+%   height of the largest sub-float inside a float
+% \item \lstinline{\tp@subflt@sep} is the space between sub-floats
+% \item \lstinline{\tp@total@flt@width} stores the cumulated overall
+%   width of the entire float
+% \item \lstinline{\tp@calc@flt@width} is an internal dimension used
+%   to calculate the ratio between mutiple sub-floats that should be
+%   scaled to the same height
+% \item \lstinline{\tp@total@flt@height} is the overall height of a float
+% \item \lstinline{\tp@total@flt@depth} is the overall depth of a float
+% \end{itemize}
+%    \begin{macrocode}
 \newdimen\tp@subflt@maxheight \tp@subflt@maxheight=\z@\relax
 \newdimen\tp@subflt@sep       \tp@subflt@sep=\fboxsep\relax
 \newdimen\tp@total@flt@width  \tp@total@flt@width=\textwidth\relax
 \newdimen\tp@calc@flt@width   \tp@calc@flt@width=\tp@total@flt@width\relax
 \newdimen\tp@total@flt@height \tp@total@flt@height=\textwidth\relax
 \newdimen\tp@total@flt@depth  \tp@total@flt@depth=\textwidth\relax
-
+%    \end{macrocode}
+% Those two dimensions are used to pass the \lstinline{intext-skip}
+% and \lstinline{float-skip} Properties to the render engine for
+% spacing above and below the float, respectively.
+%    \begin{macrocode}
 \newdimen\tp@flt@sep@top      \tp@flt@sep@top=\z@\relax
 \newdimen\tp@flt@sep@bottom   \tp@flt@sep@bottom=\z@\relax
-
+%    \end{macrocode}
+% Internal dimensions for the horizontal margins (right, left, inner
+% and outer, respectively)
+%    \begin{macrocode}
 \newdimen\tp@flt@marg@r       \tp@flt@marg@r=\z@\relax
 \newdimen\tp@flt@marg@l       \tp@flt@marg@l=\z@\relax
 \newdimen\tp@flt@marg@i       \tp@flt@marg@i=\z@\relax
 \newdimen\tp@flt@marg@o       \tp@flt@marg@o=\z@\relax
-
+%    \end{macrocode}
+% String definitions for Property value comparisons
+%    \begin{macrocode}
 \def\tp@str@landscape{landscape}
 \def\tp@str@figure{figure}
 \def\tp@str@table{table}
 \def\tp@str@bottom{bottom}
 \def\tp@str@top{top}
-
 %    \end{macrocode}
-% Storing the final definition of \lstinline{\label}:
+%
+% \subsection{AtBeginDocument hook}
+%
 %    \begin{macrocode}
 \AtBeginDocument{%
+%    \end{macrocode}
+% Storing the final definitions of \lstinline{\label}
+%    \begin{macrocode}
   \global\let\tpltx@label\label
+%    \end{macrocode}
+% implementing the \lstinline{nofigs} option, doing some minor
+% adjustments to the \lstinline{htmltabs} package and store the final
+% definition of includegraphics.
+%    \begin{macrocode}
   \ifx\tp@nofigs\relax
     \renewcommand\includegraphics[2][]{}%
   \fi
   \global\let\tpltx@includegraphics\includegraphics
+%    \end{macrocode}
+% Adjustments to the \lstinline{htmltabs} package, if it is used:
+%    \begin{macrocode}
   \@ifpackageloaded{htmltabs}
     {\global\let\tp@uses@htmltabs\relax
      \def\ht@adjust@linewidth{%
@@ -89,13 +141,30 @@
        \advance\linewidth-\rightskip
      }%
    }{}%
-}%
+%    \end{macrocode}
+% In order to catch the actual dimensions of the float box, we need to
+% hook into \LaTeX's \lstinline{\@endfloatbox} macro:
+%    \begin{macrocode}
+   \gappto\@endfloatbox{%
+     \global\tp@total@flt@height=\ht\@currbox\relax%
+     \global\tp@total@flt@depth=\dp\@currbox\relax%
+   }%
+ }%
 
 %    \end{macrocode}
-% Resetting the subfloats. \#1 is the caption family, \#2 is the
-% abbreviation of the caption list (e.g., standard {\LaTeX} uses
-% \lstinline{lof} for the List of Figures, \lstinline{lot} for the
-% List of Tables).
+%
+% \section{Internal macros}
+%
+% \subsection{Generic resetter}
+%
+% \begin{macro}{\tp@flt@reset@defaults} resets the parameters for
+%   subfloats.
+%   \begin{description}
+%   \item[\#1] the caption type (e.g., \lstinline{figure}, \lstinline{table})
+%   \item[\#2] abbreviation of the caption list (e.g., standard
+%     {\LaTeX} uses \lstinline{lof} for the List of Figures,
+%     \lstinline{lot} for the List of Tables)
+%   \end{description}
 %    \begin{macrocode}
 \def\tp@flt@reset@defaults#1#2{%
   \global\tpSubFloatCnt=\z@
@@ -117,8 +186,16 @@
   \global\let\tp@subfloat@parent=f\relax
 }
 %    \end{macrocode}
-% Handles the optional argument of float environments. \#1 is the
-% content of the optional argument, \#2 is the caption family.
+% \end{macro}
+%
+% \subsection{Internal macros that handle Attributes}
+%
+% \begin{macro}{\tp@get@flt@attr} invokes the parser for the optional
+%   argument of float environments.
+%   \begin{description}
+%   \item[\#1] is the content of the optional argument,
+%   \item[\#2] is the caption type.
+% \end{description}
 %    \begin{macrocode}
 \def\tp@get@flt@attr#1#2{%
   \if!#1!\else
@@ -132,7 +209,12 @@
   \fi
   \tp@get@flt@pos{#2}}
 %    \end{macrocode}
-% Handler for determining the floating position
+% \end{macro}
+% \begin{macro}{\tp@get@flt@pos} is the handler for determining the
+%   floating position. Some float Properties and Attributes restrict
+%   and override the explicit float positions, e.g., fully rotated
+%   floats must be positioned in \lstinline{p} mode (i.e., as float
+%   page). \#1 is the caption type.
 %    \begin{macrocode}
 \def\tp@get@flt@pos#1{%
   \expandafter\ifx\csname tp@#1@attr@float-pos\endcsname\relax
@@ -151,15 +233,12 @@
     \def\tp@fps{p}%
   \fi}
 %    \end{macrocode}
-% In order to catch the actual dimensions of the float box, we need to
-% hook into \LaTeX's \lstinline{\@endfloatbox} macro:
+% \end{macro}
+% \begin{macro}{\tp@set@flt@env} determines the low-level {\LaTeX}
+%   float environment depending on orientation and document options.
+%   If no \lstinline{float-pos} is given (implicitely or determined),
+%   the object is not treated as a float at all.
 %    \begin{macrocode}
-\AtBeginDocument{%
-\gappto\@endfloatbox{%
-  \global\tp@total@flt@height=\ht\@currbox\relax%
-  \global\tp@total@flt@depth=\dp\@currbox\relax%
-}}
-
 \def\tp@set@flt@env{%
   \ifx\tp@fps\@empty
     \let\tp@b@float\relax
@@ -177,7 +256,10 @@
     \fi
   \fi}
 %    \end{macrocode}
-% debug output
+% \end{macro}
+% \begin{macro}{\tp@flt@debug} prints some debug information to the
+%   \lstinline{stdout} for a single float that has the Attribute
+%   \lstinline{debug} set.
 %    \begin{macrocode}
 \def\tp@flt@debug#1{%
   \expandafter\ifx\csname tp@#1@attr@debug\endcsname\relax\else
@@ -204,7 +286,9 @@
   \fi
 }
 %    \end{macrocode}
-% depending on the float positions, determine the top and bottom skips
+% \end{macro}
+% \begin{macro}{\tp@get@seps} determines the top and bottom skips
+%   dependent on float position and orientation
 %    \begin{macrocode}
 \def\tp@get@seps{%
   \ifx\tp@fps\@empty
@@ -222,22 +306,37 @@
   \fi
 }
 %    \end{macrocode}
-% Hooks to apply top and bottom skips
+% \end{macro}
+% \begin{macro}{\tp@set@*@sep} Hooks to apply top and bottom skips,
+%   respectively.
 %    \begin{macrocode}
 \def\tp@set@top@sep{\addvspace{\tp@flt@sep@top}}
 \def\tp@set@bot@sep{\addvspace{\tp@flt@sep@bottom}}
 %    \end{macrocode}
-% Declarations for caption related Components in float environments.
+% \end{macro}
+%
+% \section{Float Container and Component Declarations}
+%
+% \begin{macro}{\tpMakeFltComp} is a shortcut for float Component
+%   declarations. \#1 is the generic name of the Component.
 %    \begin{macrocode}
-
 \def\tpMakeFltComp#1{%
   \tp@def@counted@comp{#1-\the\tpSubFloatCnt}{#1}{\ifx\tp@is@subflt\relax\else\tpSubFloatCnt=\z@\relax\fi}{}%
 }
-
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tpMakeFltCompL} is a shortcut to declare Float
+%   Components together with their \lstinline{list-of} overrides. \#1
+%   is the generic name of the Component.
+%    \begin{macrocode}
 \def\tpMakeFltCompL#1{%
   \tpMakeFltComp{#1}%
   \tpMakeFltComp{Listof#1}}
-
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tp@set@caption@comps} sets the Components related to
+%   the float's caption.
+%    \begin{macrocode}
 \def\tp@set@caption@comps{%
   \tpMakeFltCompL{Caption}%
   \tpMakeFltCompL{Legend}%
@@ -245,11 +344,12 @@
   \tpMakeFltCompL{Number}%
   \tpMakeFltComp{label}%
 }
-
 %    \end{macrocode}
-% Calculate the available maximum width for the float contents and
-% captions according to the values of the \lstinline{margin-right} and
-% the \lstinline{margin-left} properties.
+% \end{macro}
+% \begin{macro}{\tp@flt@set@hsize} calculates the available maximum
+%   width for the float contents and captions according to the values
+%   of the \lstinline{margin-right} and the \lstinline{margin-left}
+%   properties.
 %    \begin{macrocode}
 \def\tp@flt@set@hsize{%
   \expandafter\tp@subflt@sep\tpUseProperty{sub-float-sep}\relax%
@@ -262,6 +362,7 @@
   \advance\tp@total@flt@width-\tp@flt@marg@r\relax
   }
 %    \end{macrocode}
+% \end{macro}
 % inner and outer margins are realised via the left and right margins.
 %    \begin{macrocode}
 \def\tp@flt@set@margins{%
