@@ -560,7 +560,7 @@
 % \end{macro}
 % \end{tpContainer}
 %
-% \section{Float-specific functionality}
+% \section{Label and Referencing mechanisms}
 %
 % \begin{macro}{\tp@flt@create@counters} creates auto-numbered
 %   counters. We advance the caption type only locally since they are
@@ -600,7 +600,7 @@
 }
 %    \end{macrocode}
 % \end{macro}
-% 
+%
 % \begin{macro}{\tp@set@sublabel} generates second level counters for numbered sub-floats. \#1 is the sub-float counter
 %    \begin{macrocode}
 \def\tp@set@sublabel#1{%
@@ -614,6 +614,39 @@
     \endgroup}%
   \expandafter\expandafter\expandafter\edef\expandafter\csname tp@\tp@cur@cont @number-#1\expandafter\endcsname\expandafter{\tpUseProperty{sub-number-block}}%
 }
+%    \end{macrocode}
+% \end{macro}
+%
+% The next two macros are a re-implementation of
+% \lstinline{hyperref}'s anchor mechanism to make labels work. If no
+% explicit label is given, the mechanism generates one, unique to each
+% (sub)float.
+% \begin{macro}{\tp@make@anchors} iterates through the (sub-)floats of
+%   a \lstinline{float} Container instance and generates the anchor
+%   (and hidden label, if necessary) for each of them
+%    \begin{macrocode}
+\def\tp@make@anchors{\@tempcnta\z@\tp@iterate{\@tempcnta}{\z@}{\tpSubFloatCnt}{\tp@make@anchor{\the\@tempcnta}}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\tp@make@anchors} generates the anchor and label of a
+%   single (sub-)float. \#1 is the value of the internal sub-float counter.
+%    \begin{macrocode}
+\def\tp@make@anchor#1{%
+  \bgroup
+    \tpSubFloatCnt#1\relax
+    \tpIfComp{Label}
+      {\expandafter\let\expandafter\@currentlabel\csname tp@\tp@cur@cont @number-\the\tpSubFloatCnt\endcsname}
+      {\edef\@currentlabel{tp-\tp@cur@cont-number-\the\tp@int@flt@cnt}}%
+    \expandafter\H@refstepcounter\expandafter{\tp@captype}%
+    \expandafter\hyper@makecurrent\expandafter{\tp@captype}%
+    \global\let\Hy@tempa\Hy@float@caption
+    \expandafter\hyper@@anchor\expandafter{\@currentHref}{\relax}%
+    \tpIfComp{Label}
+      {\expandafter\let\expandafter\@currentlabel\csname tp@\tp@cur@cont @number-\the\tpSubFloatCnt\endcsname
+       \edef\@tempa{\tpUseComp{Label}}%
+       \expandafter\tpltx@label\expandafter{\@tempa}}{\relax}%
+  \egroup}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -911,8 +944,9 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% HIER WEITER!
+% \subsection{Sub-Float Grid  (not yet implemented!)}
 %
+% \begin{macro}{\tpSubFloatRow} User-level macro that opens a row of sub-float Containers
 %    \begin{macrocode}
 \def\tpSubFloatRow{%
   \advance\tp@subfloat@row\@ne
@@ -922,13 +956,18 @@
   \expandafter\def\csname tp@flt@max@row@width@\the\tp@subfloat@row\endcsname{\z@}%
 }
 %    \end{macrocode}
-% 
+% \end{macro}
+%
+% \begin{macro}{\endtpSubFloatRow} user-level macro that ends a row of
+%   sub-float Containers
 %    \begin{macrocode}
 \def\endtpSubFloatRow{%
   \let\tp@subfloat@parent\tp@subfloat@prev@parent
 }
 %    \end{macrocode}
-% 
+% \end{macro}
+%
+% \begin{macro}{\tpSubFloatCol} User-level macro that start a column of sub-float Containers
 %    \begin{macrocode}
 \def\tpSubFloatCol{%
   \advance\tp@subfloat@col\@ne
@@ -937,27 +976,41 @@
   \expandafter\let\csname tp@flt@max@col@width@\the\tp@subfloat@col\endcsname=\z@\relax
 }
 %    \end{macrocode}
-% 
+% \end{macro}
+%
+% \begin{macro}{\endtpSubFloatCol} User-level macro that ends a column of sub-float Containers
 %    \begin{macrocode}
 \def\endtpSubFloatCol{%
   \let\tp@subfloat@parent\tp@subfloat@prev@parent
 }
 %    \end{macrocode}
-% Iterates through the single sub-floats and renders them in a nice row. \#1 is the subfloat counter.
+% \end{macro}
+% \begin{macro}{\tpRenderSubFloats} iterates through the single
+%   sub-floats and renders them in a nice row.
+%   \begin{description}
+%   \item[\#1] is the subfloat counter,
+%   \item[\#2] Component name that contains the actual contents of the
+%     sub-float, for \lstinline{tpFigure} it is \lstinline{Fig}, for
+%     \lstinline{tpTable} it is \lstinline{Content}.
+% \end{description}
 %    \begin{macrocode}
-\long\def\tp@render@sub@floats#1#2{%
+\long\def\tpRenderSubFloats#1#2{%
   \leavevmode
   \savenotes
   \ifnum#1>\@ne\hfill\fi
   \vtop\bgroup
     \expandafter\hsize\csname tp@\tp@cur@cont @res@width-#1\endcsname\relax
     \let\includegraphics\tp@includesubgraphics
-    \tpRenderSubFloat{#1}{#2}%
+    \tp@render@sub@float{#1}{#2}%
   \egroup
   \spewnotes
 }
-
-\long\def\tpRenderSubFloat#1#2{%
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tp@render@sub@float} renders a single sub-float. For
+%   the arguments, see \lstinline{\tpRenderSubFloats}, above.
+%    \begin{macrocode}
+\long\def\tp@render@sub@float#1#2{%
   \tpSubFloatCnt=#1\relax
   \expandafter\ifx\csname tp@has@\tp@prefix capt@top\endcsname\@empty
     \tp@make@caption{top}{\tpUseProperty{\tp@prefix caption-valign-top}}%
@@ -968,8 +1021,11 @@
   \fi
 }
 %    \end{macrocode}
-% Calculate the heights of all captions in the same row. \#1 determins
-% if the top or bottom row is calculated.
+% \end{macro}
+% \begin{macro}{\tp@flt@calc@row@ht} calculates the heights of all
+%   captions in the same row.
+%
+%   \#1 determins if the \lstinline{top} or \lstinline{bottom} row is calculated.
 %    \begin{macrocode}
 \def\tp@flt@calc@row@ht#1{%
   \@tempcnta\z@
@@ -989,7 +1045,8 @@
   \expandafter\edef\csname tp@flt@capt@row@height@#1\endcsname{\the\@tempdima}%
 }
 %    \end{macrocode}
-% 
+% \end{macro}
+%
 % \begin{macro}{\tp@flt@calc@sameheight} calculates the ratio between
 %   each sub-float's height and the height of the largest sub-float
 %    \begin{macrocode}
@@ -1022,6 +1079,81 @@
 }
 %    \end{macrocode}
 % \end{macro}
+%
+% \section{Handlers for different float types}
+%
+% \subsection{Handlers for generic floats}
+%
+% \begin{macro}{\tpGenericRender} is the Component that contains
+%   the contents of a generic float.
+%    \begin{macrocode}
+\def\tpGenericRender{\tpUseComp{Content}}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tpGenericHandler} is the generic content handler of a float
+%    \begin{macrocode}
+\def\tpGenericHandler{\tpMakeFltComp{content}}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tpSubGenericHandler} is the generic handler of a sub-float.
+%    \begin{macrocode}
+\def\tpSubGenericHandler{}
+%    \end{macrocode}
+% \end{macro}
+%
+%
+% \subsection{Handlers for figures}
+%
+% \begin{macro}{\tpFigureHandler} tells the float module the name,
+%   main namespace, and main content Container of \lstinline{tpFigure}
+%   type floats.
+%    \begin{macrocode}
+\def\tpFigureHandler{\tpMakeFltComp{Fig}}
+%    \end{macrocode}
+%
+% \end{macro}
+% \begin{macro}{\tp@flt@create@natural} is the actual handler for sub-figures.
+%    \begin{macrocode}
+\def\tp@flt@create@natural{\tpUseComp{Fig}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\tpSubFigureHandler} is the User-level macro that
+%   defines the handler for sub-figures. It also contains code for the
+%   \lstinline{nofigs} package option.
+%    \begin{macrocode}
+\def\tpSubFigureHandler{%
+  \ifx\tp@nofigs\relax
+    \setbox\tp@subfltbox\hbox{\rule{0pt}{1pt}\rule{1pt}{0pt}}%
+  \else
+    \setbox\tp@subfltbox\hbox{\tpGobble\tp@flt@create@natural}%
+  \fi}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tpFigureRender} tells the module how
+%   \lstinline{tpFigures} are to be rendered.
+%    \begin{macrocode}
+\def\tpFigureRender{%
+  \bgroup
+    \let\includegraphics\tp@includesubgraphics
+    \hskip\tp@flt@marg@l
+    \strut\tpUseComp{Fig}\strut
+  \egroup}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tpSubFigureRender} tells the module how sub-floats of
+%   \lstinline{tpFigure} type floats are to be rendered.
+%    \begin{macrocode}
+\def\tpSubFigureRender{%
+  \hskip\tp@flt@marg@l
+  \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
+    \tpRenderSubFloats{\the\@tempcnta}{Fig}%
+  }}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tp@includesubgraphics} is an override of \LaTeX's
+%   \lstinline{\includegraphics} patched to adjust for maximum width
+%   and height.
 %    \begin{macrocode}
 \def\tp@includesubgraphics{\@ifnextchar [\@tp@includesubgraphics{\@tp@includesubgraphics[]}}%]
 \def\@tp@includesubgraphics[#1]#2{%
@@ -1037,73 +1169,38 @@
   \expandafter\tpltx@includegraphics\expandafter[\@igopts]{#2}%
 }
 %    \end{macrocode}
-%
-% \section{Handlers for different float types}
-%
-% \subsection{Handlers for generic floats}
-%
-%    \begin{macrocode}
-\def\tpGenericRender{\tpUseComp{Content}}
-\def\tpGenericHandler{\tpMakeFltComp{content}}
-\def\tpSubGenericHandler{}
-%    \end{macrocode}
-%
-%
-% \subsection{Handlers for figures}
-%
-% The \lstinline{\tpFigureHandler} tells the float module the name,
-% main namespace, and main content container of figure floats.
-%    \begin{macrocode}
-\def\tpFigureHandler{\tpMakeFltComp{Fig}}
-\def\tp@flt@create@natural{\tpUseComp{Fig}}
-\def\tpSubFigureHandler{%
-  \ifx\tp@nofigs\relax
-    \setbox\tp@subfltbox\hbox{\rule{0pt}{1pt}\rule{1pt}{0pt}}%
-  \else
-    \setbox\tp@subfltbox\hbox{\tpGobble\tp@flt@create@natural}%
-  \fi}
-
-%    \end{macrocode}
-% The \lstinline{\tpFigureRender} macro tells the module how figures
-% are to be rendered.
-%    \begin{macrocode}
-\def\tpFigureRender{%
-  \bgroup
-    \let\includegraphics\tp@includesubgraphics
-    \hskip\tp@flt@marg@l
-    \strut\tpUseComp{Fig}\strut
-  \egroup%
-}%
-%    \end{macrocode}
-% The \lstinline{\tpSubFigureRender} macro tells the module how
-% subfloats of figure floats are to be rendered.
-%    \begin{macrocode}
-\def\tpSubFigureRender{%
-  \hskip\tp@flt@marg@l
-  \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
-    \tp@render@sub@floats{\the\@tempcnta}{Fig}%
-  }%
-}
-%    \end{macrocode}
+% \end{macro}
 %
 %
 %\subsection{Handlers for tables}
 %
+% \begin{macro}{\tp@reserve@tabular} is a shell macro that stores the
+%   default macro definitions for various tabular mechanisms (so far,
+%   only \lstinline{tabulary} and \lstinline{tabularx} are supported
+%   as content Component of \lstinline{tpTable})
 %    \begin{macrocode}
-
 \def\tp@reserve@tabular{%
-  %\@tp@reserve@tab{}% TODO: tabularx(and y) use tabular, so we can't re-define it
   \@tp@reserve@tab{x}%
   \@tp@reserve@tab{y}%
+  % \@tp@reserve@tab{}% TODO: tabularx and tabulary both use LaTeX's default tabular macros, so we can't re-define them
 }
-
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\@tp@reserve@tab} stores the default definitions for a
+%   specific vanilla-{\LaTeX} tabular environment and re-defines the
+%   macros in a way that the tabulars are stored in the
+%   \lstinline{\tp@floatbox} instead of printed onto the page.
+%    \begin{macrocode}
 \def\@tp@reserve@tab#1{%
   \expandafter\expandafter\expandafter\let\expandafter\csname orig@tabular#1\expandafter\endcsname\csname tabular#1\endcsname
   \expandafter\expandafter\expandafter\let\expandafter\csname orig@endtabular#1\expandafter\endcsname\csname endtabular#1\endcsname
   \expandafter\def\csname tabular#1\endcsname{\global\setbox\tp@floatbox\vbox\bgroup\csname orig@tabular#1\endcsname}%
   \expandafter\def\csname endtabular#1\endcsname{\csname orig@endtabular#1\endcsname\egroup}%
 }
-
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tpTableHandler} defines the content handler for \lstinline{tpTable}.
+%    \begin{macrocode}
 \def\tpTableHandler{%
   \tpMakeFltComp{Content}%
   \tp@reserve@tabular
@@ -1126,21 +1223,33 @@
     \global\setbox\htTableBox\box\voidb@x
     \let\htOutputTable\relax
   \fi}
-
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tpGetTableContent} returns the \lstinline{tp@floatbox} if it is not un-itialized or void.
+%    \begin{macrocode}
 \def\tpGetTableContent{%
   \ifx\htTableBox\@undefined\else
     \ifvoid\htTableBox\else
       \let\tp@floatbox\htTableBox%
     \fi\fi}
-
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tpSubTableHandler} is the handler for sub-tables. So
+%   far, \lstinline{coco-floats.sty} does not support tables to be
+%   sub-floats, so we just generate an Error message.
+%    \begin{macrocode}
 \def\tpSubTableHandler{%
-  \PackageError{coco-floats.sty}{tpSubFloat does not support tables (yet)!}{You cannot use a tabular within the `tpSubFloat'!}
+  \PackageError{coco-floats.sty}{tpSubFloat does not support tables (yet)!}{You cannot use a tabular within the `tpSubFloat'!}%
   % \tpGetTableContent
   % \setbox\tp@subfltbox\hbox{\tpGobble\copy\tp@floatbox}%
   % \tpGetTableContent
   % \setbox\tp@subfltbox\hbox{\strut\quad}%
 }
-
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tpTableRender} defines the Renderer for
+%   \lstinline{tpTable} content Components
+%    \begin{macrocode}
 \def\tpTableRender{%
   \tpGetTableContent
   \tpContent{\unvbox\tp@floatbox}%
@@ -1148,28 +1257,33 @@
   \par\nopagebreak
   \vskip\dp\strutbox
 }
-
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tpSubTableRender} Is the Renderer for table sub-floats (which we don't allow yet, so this definition is un-used at the moment)
+%    \begin{macrocode}
 \def\tpSubTableRender{%
   \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
     \tpGetTableContent
     \tpContent{\unvbox\tp@floatbox}%
-    \tp@render@sub@floats{\the\@tempcnta}{Content}%
-  }%
-}
+    \tpRenderSubFloats{\the\@tempcnta}{Content}%
+  }}
 %    \end{macrocode}
+% \end{macro}
+%
+%
 % \subsection{Helpers}
 %
-% \lstinline{\tpFloatBarrier} can be used to force all pending floats
+% \begin{macro}{\tpFloatBarrier} can be used to force all pending floats
 % to be printed at the next shipout.
 %    \begin{macrocode}
 \def\tpFloatBarrier{\AtBeginShipoutNext{\clearpage}}
-
 %    \end{macrocode}
+% \end{macro}
 %
 % \section{Default Settings}
 %
-% These declarations also provide the default values for the
-% properties of the respective environments.
+% \begin{macro}{\tp@float@default} provide the default values for the
+%   Properties all float-derived Containers.
 %    \begin{macrocode}
 \tpAddToDefault{float}{%
   \tpSetProperty{intext-skip-top}{\intextsep}%% non-float sep top
@@ -1255,7 +1369,11 @@
   }% list-of-float appearance
   \tpSetProperty{list-of-after-entry}{\par}% list-of-float appearance
 }
-
+%    \end{macrocode}
+% \end{macro}
+% \begin{tpContainer}{tpFigure} defines the defaults for the
+%   \lstinline{tpFigure} Container.
+%    \begin{macrocode}
 \tpDeclareFloat{tpFigure}{figure}{lof}{%
   \tpSetProperty{subfloat-same-height}{true}% if true, the subfloat must/can be adjusted to the same heights
   \tpSetProperty{float-handler}{\tpFigureHandler}%
@@ -1263,7 +1381,11 @@
   \tpSetProperty{float-render}{\tpFigureRender}%
   \tpSetProperty{subfloat-render}{\tpSubFigureRender}%
 }
-
+%    \end{macrocode}
+% \end{tpContainer}
+% \begin{tpContainer}{tpTable} defines the default Properties of the
+%   \lstinline{tpTable} Container.
+%    \begin{macrocode}
 \tpDeclareFloat{tpTable}{table}{lot}{%
   \tpSetProperty{sub-caption-valign-top}{bottom}%
   \tpSetProperty{float-handler}{\tpTableHandler}%
@@ -1272,48 +1394,7 @@
   \tpSetProperty{subfloat-render}{\tpSubTableRender}%
 }
 %    \end{macrocode}
-% This is an implementation of hyperref's anchor mechanism to make
-% labels work. If no explicit label is given, the mechanism generates
-% one, unique to each (sub)float.
-%    \begin{macrocode}
-\def\tp@make@anchors{\@tempcnta\z@\tp@iterate{\@tempcnta}{\z@}{\tpSubFloatCnt}{\tp@make@anchor{\the\@tempcnta}}}
-\def\tp@make@anchor#1{%
-  \bgroup
-    \tpSubFloatCnt#1\relax
-    \tpIfComp{Label}
-      {\expandafter\let\expandafter\@currentlabel\csname tp@\tp@cur@cont @number-\the\tpSubFloatCnt\endcsname}
-      {\edef\@currentlabel{tp-\tp@cur@cont-number-\the\tp@int@flt@cnt}}%
-    \expandafter\H@refstepcounter\expandafter{\tp@captype}%
-    \expandafter\hyper@makecurrent\expandafter{\tp@captype}%
-    \global\let\Hy@tempa\Hy@float@caption
-    \expandafter\hyper@@anchor\expandafter{\@currentHref}{\relax}%
-    \tpIfComp{Label}
-      {\expandafter\let\expandafter\@currentlabel\csname tp@\tp@cur@cont @number-\the\tpSubFloatCnt\endcsname
-       \edef\@tempa{\tpUseComp{Label}}%
-       \expandafter\tpltx@label\expandafter{\@tempa}}{\relax}%
-  \egroup}
-%    \end{macrocode}
-% LEGACY: Hooks to change the text font of a standard \LaTeX\ tabular
-%    \begin{macrocode}
-\def\tablefont{\small}
-\def\arraystretch{1.3}
-\def\@tabular{%
-  \leavevmode
-  \hbox \bgroup\tablefont $\col@sep\tabcolsep \let\d@llarbegin\begingroup%$
-                                    \let\d@llarend\endgroup
-  \ifx\ST@tableformat\@undefined\gdef\@tablefont{\tablefont}\fi
-  \@tabarray}
-\let\@classzold\@classz
-\def\@classz{%
-   \expandafter\ifx\d@llarbegin\begingroup
-     \toks \count@ =
-     \expandafter{\expandafter\@tablefont\the\toks\count@}%
-   \fi
-   \@classzold}
-\def\endtabular{%
-  \endarray
-  $\egroup}%$
-\expandafter\let\csname endtabular*\endcsname=\endtabular
+% \end{tpContainer}
 %    \begin{macrocode}[gobble=1]
 %</floats>
 %    \end{macrocode}
