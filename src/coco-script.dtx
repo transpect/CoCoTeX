@@ -203,7 +203,16 @@
 %    \end{macrocode}
 % \subsection{Support for Syrian script}
 %
-% Since Babel does not support the Syrian script natively, we need to create an babel-syriac.ini file first. Otherwise, the kerning and ligatures will be off:
+% Since Babel does not support the Syrian script natively, we create a
+% \lstinline{babel-syriac.ini} file and include it, if it is
+% needed. If we don't, the kerning and ligatures of Syriac text will
+% be off.
+%
+% Please note that due to the restrictions of the
+% \lstinline{listings}-Package, some Unicode characters cannot be
+% displayed correctly in the documentation of the following code.
+% Therefore, Syriac letters appear as ``x'' in the following source
+% code listing.
 %    \begin{macrocode}
 \expandafter\ifx\csname use@script@syriac\endcsname\@empty%
 \RequirePackage{filecontents}

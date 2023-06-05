@@ -30,6 +30,7 @@
 \def\hack#1{#1}
 \RequirePackage[T1]{fontenc}
 \RequirePackage[utf8]{inputenc}
+\UseRawInputEncoding
 \RequirePackage{xcolor}
 \RequirePackage{graphicx}
 \usepackage{newtxtext,newtxmath}
@@ -100,6 +101,16 @@
     {ü}{{\"u}}1
     {ä}{{\"a}}1
     {ö}{{\"o}}1
+    {ܐ}{{x}}1
+    {ܠ}{{x}}1
+    {ܫ}{{x}}1
+    {ܢ}{{x}}1
+    {ܐ}{{x}}1
+    {ܣ}{{x}}1
+    {ܘ}{{x}}1
+    {ܪ}{{x}}1
+    {ܝ}{{x}}1
+    {ܐ}{{x}}1
     {¬}{{$\neg$}}1
     {«}{{\guillemotright}}1
     {»}{{\guillemotleft}}1
@@ -238,7 +249,7 @@
 {\list{}{%
     \labelwidth=\z@
     \if!#1!\else\labelwidth#1\relax\fi%
-    \ifdim\labelwidth=\z@\labelwidth 30mm\fi
+    \ifdim\labelwidth=\z@\labelwidth 2.5em\fi
     \topsep.25\baselineskip
     \labelsep   -\labelwidth\relax
     \leftmargin  \labelwidth\relax
@@ -383,7 +394,7 @@
   \ifnum \c@tocdepth >\m@ne
     \addpenalty{-\@highpenalty}%
     \vskip 1.0em \@plus\p@
-    \setlength\@tempdima{3.5em}%
+    \setlength\@tempdima{6em}%
     \begingroup
       \parindent \z@ \rightskip \@pnumwidth
       \parfillskip -\@pnumwidth

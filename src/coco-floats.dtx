@@ -454,7 +454,7 @@
 %    \begin{macrocode}
 \def\tp@flt@generate@listof@handlers#1#2#3{%
 %    \end{macrocode}
-% \begin{macro}{\csname tp@#1@extract@data\endcsname}
+% \begin{macro}{tp@<list>@extract@data}
 %   The first macro that is dynamicly defined, is the Component
 %   collector.
 %   \begin{description}
@@ -480,7 +480,7 @@
   }%
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\csname tp@#1@print@entry\endcsname}
+% \begin{macro}{\csname tp@<list>@print@entry\endcsname}
 %   The second dynamically defined macro is the entry renderer. It
 %   applies the Listof properties and selects the components to be
 %   printed. \#\#1 is the caption type of the float.
@@ -495,7 +495,7 @@
     \egroup}%
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\csname tp@make@listof@#2\endcsname}
+% \begin{macro}{\csname tp@make@listof@<type>\endcsname}
 %   The last macro to be defined here is the Listof writer. This macro
 %   is responsible to write the entry into TeX's auxiliary file
 %   system. \#\#1 is the name of the ``level'' for the entry.
