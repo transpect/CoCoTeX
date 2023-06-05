@@ -234,13 +234,19 @@
       \rightskip\tpUseProperty{margin-right}%
       \bgroup
         \tpUseProperty{heading-block}%
-        \tpIfProp{extended}{\tpUseProperty{extended-heading}}{}%
-      \egroup%
 %    \end{macrocode}
-% Generate entries for ToC, bookmarks and page headers.
+% Generate entries for ToC, bookmarks and page headers. This has to be
+% here because in rare cases, abstracts could cause the whole heading
+% to spread over more than one page and that results in the ToC entry
+% pointing to the last page.
+%
+% \textbf{Style progammers need to make sure that no page breaks are
+% allowed within the \lstinline{heading-block}!}
 %    \begin{macrocode}
       \tpIfPropVal{no-toc}{true}{}{\tp@make@toc}% ToC entries
       \tpIfPropVal{no-BM}{true}{}{\tp@make@bookmarks}% Bookmarks
+        \tpIfProp{extended}{\tpUseProperty{extended-heading}}{}%
+      \egroup%
       \tp@make@run% Running headers
       \tpUseProperty{after-heading-block}%
     }%
