@@ -1171,6 +1171,56 @@
 }
 %    \end{macrocode}
 % \end{macro}
+% \section{Handlers for different float types}
+%
+% \subsection{Handlers for generic floats}
+%
+%    \begin{macrocode}
+\def\tpGenericRender{\tpUseComp{Content}}
+\def\tpGenericHandler{\tpMakeFltComp{content}}
+\def\tpSubGenericHandler{}
+%    \end{macrocode}
+%
+%
+% \subsection{Handlers for figures}
+%
+% The \lstinline{\tpFigureHandler} tells the float module the name,
+% main namespace, and main content container of figure floats.
+%    \begin{macrocode}
+\def\tpFigureHandler{\tpMakeFltComp{Fig}}
+\def\tpSubFigureHandler{%
+  \ifx\tp@nofigs\relax
+    \setbox\tp@subfltbox\hbox{\rule{0pt}{1pt}\rule{1pt}{0pt}}%
+  \else
+    \setbox\tp@subfltbox\hbox{\tpGobble\tp@flt@create@natural}%
+  \fi
+
+}
+%    \end{macrocode}
+% The \lstinline{\tpFigureRender} macro tells the module how figures
+% are to be rendered.
+%    \begin{macrocode}
+\def\tpFigureRender{%
+  \bgroup
+    \let\includegraphics\tp@includesubgraphics
+    \expandafter\ifx\csname tp@\tp@captype @attr@orientation\endcsname\tp@str@landscape\relax
+      \let\hsize\textwidth%
+    \fi%
+    \hskip\tp@flt@marg@l
+    \strut\tpUseComp{Fig}\strut
+  \egroup%
+}%
+%    \end{macrocode}
+% The \lstinline{\tpSubFigureRender} macro tells the module how
+% subfloats of figure floats are to be rendered.
+%    \begin{macrocode}
+\def\tpSubFigureRender{%
+  \hskip\tp@flt@marg@l
+  \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
+    \tp@render@sub@floats{\the\@tempcnta}{Fig}%
+  }%
+}
+%    \end{macrocode}
 %
 %
 %\subsection{Handlers for tables}
@@ -1360,7 +1410,7 @@
   \tpSetProperty{list-of-before-entry}{%
     \tpGobble
     \leftskip\tpUseProperty{list-of-margin-left}\relax%
-    \rightskip \tpUseProperty{list-of-margin-right}\relax
+    \rightskip \tpUseProperty{list-of-margin-right} \@plus 1fil\relax%
     \parfillskip \tpUseProperty{list-of-parfillskip}\relax
     \parindent\z@
     \@afterindenttrue
