@@ -1217,7 +1217,7 @@
 \def\tpSubFigureRender{%
   \hskip\tp@flt@marg@l
   \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
-    \tp@render@sub@floats{\the\@tempcnta}{Fig}%
+    \tp@render@sub@float{\the\@tempcnta}{Fig}%
   }%
 }
 %    \end{macrocode}
@@ -1226,14 +1226,16 @@
 %\subsection{Handlers for tables}
 %
 % \begin{macro}{\tp@reserve@tabular} is a shell macro that stores the
-%   default macro definitions for various tabular mechanisms (so far,
-%   only \lstinline{tabulary} and \lstinline{tabularx} are supported
-%   as content Component of \lstinline{tpTable})
+%   default macro definitions for various tabular mechanisms
+%   (currently, only plain \lstinline{tabular}, \lstinline{tabulary},
+%   \lstinline{tabularx}, and \lstinline{htmltabs} are supported as
+%   content Component of \lstinline{tpTable})
 %    \begin{macrocode}
 \def\tp@reserve@tabular{%
+  \@tp@reserve@tab{}%
   \@tp@reserve@tab{x}%
   \@tp@reserve@tab{y}%
-  % \@tp@reserve@tab{}% TODO: tabularx and tabulary both use LaTeX's default tabular macros, so we can't re-define them
+  \@tp@reserve@htmltab%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -1245,9 +1247,42 @@
 \def\@tp@reserve@tab#1{%
   \expandafter\expandafter\expandafter\let\expandafter\csname orig@tabular#1\expandafter\endcsname\csname tabular#1\endcsname
   \expandafter\expandafter\expandafter\let\expandafter\csname orig@endtabular#1\expandafter\endcsname\csname endtabular#1\endcsname
-  \expandafter\def\csname tabular#1\endcsname{\global\setbox\tp@floatbox\vbox\bgroup\csname orig@tabular#1\endcsname}%
+  \expandafter\def\csname tabular#1\endcsname{%
+    \global\setbox\tp@floatbox
+    \vbox\bgroup
+      \if!#1!\else
+        \let\tabular\orig@tabular
+        \let\endtabular\orig@endtabular
+      \fi
+      \csname orig@tabular#1\endcsname}%
   \expandafter\def\csname endtabular#1\endcsname{\csname orig@endtabular#1\endcsname\egroup}%
 }
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\@tp@reserve@htmltab} special handler for tables using
+%   the \lstinline{htmltabs} package:
+%    \begin{macrocode}
+\@ifpackageloaded{htmltabs}{%
+\def\@tp@reserve@htmltab{%
+  \let\tp@addstyle\@empty
+  \ifx\tp@fps\@empty
+    \expandafter\ifx\csname tpFloat\the\tp@int@flt@cnt Captop\endcsname\relax\else
+      \htInitSkip\csname tpFloat\the\tp@int@flt@cnt Captop\endcsname
+      \advance\htInitSkip\tp@flt@sep@top%
+    \fi
+    \expandafter\ifx\csname tpFloat\the\tp@int@flt@cnt Capbottom\endcsname\relax\else
+      \htAddToBottom\csname tpFloat\the\tp@int@flt@cnt Capbottom\endcsname
+      \advance\htAddToBottom\tp@flt@sep@bottom%
+    \fi
+  \else
+    \def\tp@addstyle{;break-table:false;}%
+  \fi
+  \edef\tp@tempa{margin-left:\tp@flt@marg@l\tp@addstyle}%
+  \expandafter\htAddStyle\expandafter{\tp@tempa}%
+  \global\setbox\htTableBox\box\voidb@x
+  \let\htOutputTable\relax
+}%
+}{\let\@tp@reserve@htmltab\relax}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tpTableHandler} defines the content handler for \lstinline{tpTable}.
@@ -1255,25 +1290,7 @@
 \def\tpTableHandler{%
   \tpMakeFltComp{Content}%
   \tp@reserve@tabular
-  \ifx\tp@uses@htmltabs\relax
-    \let\tp@addstyle\@empty
-    \ifx\tp@fps\@empty
-      \expandafter\ifx\csname tpFloat\the\tp@int@flt@cnt Captop\endcsname\relax\else
-        \htInitSkip\csname tpFloat\the\tp@int@flt@cnt Captop\endcsname
-        \advance\htInitSkip\tp@flt@sep@top%
-      \fi
-      \expandafter\ifx\csname tpFloat\the\tp@int@flt@cnt Capbottom\endcsname\relax\else
-        \htAddToBottom\csname tpFloat\the\tp@int@flt@cnt Capbottom\endcsname
-        \advance\htAddToBottom\tp@flt@sep@bottom%
-      \fi
-    \else
-      \def\tp@addstyle{;break-table:false;}%
-    \fi
-    \edef\tp@tempa{margin-left:\tp@flt@marg@l\tp@addstyle}%
-    \expandafter\htAddStyle\expandafter{\tp@tempa}%
-    \global\setbox\htTableBox\box\voidb@x
-    \let\htOutputTable\relax
-  \fi}
+  }
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tpGetTableContent} returns the \lstinline{tp@floatbox} if it is not un-itialized or void.
