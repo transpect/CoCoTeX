@@ -172,7 +172,7 @@
   \global\let\tp@has@capt@bottom\@undefined
   \global\let\tp@has@subcapt@top\@undefined
   \global\let\tp@has@subcapt@bottom\@undefined
-  \global\let\tp@@savecontentsline\@empty
+  \global\let\tp@sub@contentsline@store\@empty
   \global\tp@subfloat@row=\z@
   \global\tp@subfloat@col=\z@
   \global\tp@subflt@maxheight=\z@\relax
@@ -183,7 +183,6 @@
   \def\tp@caplisttype{#2}%
   \let\ht@cur@element\tp@captype
   \global\let\tp@current@class\relax
-  \global\let\tp@subfloat@parent=f\relax
 }
 %    \end{macrocode}
 % \end{macro}
@@ -497,8 +496,8 @@
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\csname tp@make@listof@<type>\endcsname}
-%   The last macro to be defined here is the Listof writer. This macro
-%   is responsible to write the entry into TeX's auxiliary file
+%   The last macro to be defined here is the list-of writer. This
+%   macro is responsible to write the entry into TeX's auxiliary file
 %   system. \#\#1 is the name of the ``level'' for the entry.
 %    \begin{macrocode}
   \expandafter\gdef\csname tp@make@listof@#2\endcsname##1{%
@@ -513,14 +512,18 @@
       \tpIfComp{ListofNumber}{\csgappto{@tp@listof@entry}{\string\tpListofNumber{\tpUseComp{ListofNumber}}}}{}%
       \tpIfComp{ListofLegend}{\csgappto{@tp@listof@entry}{\string\tpListofLegend{\tpUseComp{ListofLegend}}}}{}%
       \tpIfComp{ListofSource}{\csgappto{@tp@listof@entry}{\string\tpListofSource{\tpUseComp{ListofSource}}}}{}%
-      \ifx\@tp@listof@entry\relax\else
+      \ifx\@tp@listof@entry\relax
+        \ifx\tp@is@subflt\relax\else
+          \tp@restore@contentsline
+        \fi
+      \else
         \protected@edef\tp@listof@entry{\@tp@listof@entry}%
-        %\ifx\tp@is@subflt\relax
-        %  \tp@savecontentsline{#1}{\tp@captype}{\expandonce{\tp@listof@entry}}%
-        %\else
+        \ifx\tp@is@subflt\relax
+          \tp@store@sub@contentsline{#1}{\tp@captype}{\expandonce{\tp@listof@entry}}%
+        \else
           \tp@flt@addcontentsline{#1}{\tp@captype}{\expandonce{\tp@listof@entry}}%
-          \tp@@savecontentsline
-        %\fi
+          \tp@restore@contentsline
+        \fi
       \fi
     \fi
   }%
@@ -528,10 +531,30 @@
 %    \end{macrocode}
 % \end{macro}
 % \end{macro}
-% \begin{macro}{\tp@savecontentsline} saves the contentsline macros for prematurely expanded captions (DEPRECATED?)
+% \begin{macro}{\tp@store@sub@contentsline} saves the contentsline macros
+%   for prematurely expanded captions.
+%
+%   If we immediatetly write the list-of entries for sub-floats into
+%   the list-of files, they will be printed before their respective
+%   parent entry. This is because sub-floats are processed before
+%   their parent floats. To avoid the wrong order in the list-of, we
+%   progressively store the sub-float's addcontentsline commands in
+%   the \lstinline{\tp@sub@contentsline@store} macro and expand it
+%   after the list-of for the parent float has been processed.
 %    \begin{macrocode}
-\def\tp@savecontentsline#1#2#3{%
-  \protected@xdef\tp@@savecontentsline{\expandonce{\tp@@savecontentsline}\noexpand\tp@flt@addcontentsline{#1}{#2}{#3}\relax}}
+\def\tp@store@sub@contentsline#1#2#3{%
+  \protected@xdef\tp@sub@contentsline@store{\expandonce{\tp@sub@contentsline@store}\noexpand\tp@flt@addcontentsline{#1}{#2}{#3}\relax}}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tp@restore@contetnsline} restores and expands the
+%   list of sub-float addcontentsline commands, if there are any.
+%    \begin{macrocode}
+\def\tp@restore@contentsline{%
+  \ifx\tp@sub@contentsline@store\@empty\else
+    \tp@sub@contentsline@store
+    \global\let\tp@sub@contentsline@store\@empty
+  \fi
+}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tp@flt@addcontentsline} fork of \LaTeX's \lstinline{\addtocontents} macro
@@ -710,7 +733,7 @@
 %    \begin{macrocode}
 \def\tpSubFloat{%
   \ifx\tp@is@subflt\relax
-    \PackageError{coco-floats.sty}{Nested tpSubFloats detected!}{You cannot nest a `tpSubFloat' environment into another `tpSubFloat' environment! Use the `tpSubFloatRow' and `tpSubFloatCol' environments to create more complex structures, instead.}%
+    \PackageError{coco-floats.sty}{Nested tpSubFloats detected!}{You cannot (yet) nest a `tpSubFloat' environment into another `tpSubFloat' environment!}%
   \else
     \let\tp@is@subflt\relax
     \global\advance\tpSubFloatCnt\@ne
@@ -729,26 +752,8 @@
   \expandafter\xdef\csname tp@\tp@cur@cont @row-\the\tpSubFloatCnt\endcsname{\the\tp@subfloat@row}%
   \@tempdima=\dimexpr\the\ht\tp@subfltbox+\the\dp\tp@subfltbox\relax
   \@tempdimb=\dimexpr\the\wd\tp@subfltbox\relax
-  \ifx\tp@subfloat@parent r\relax
-    \expandafter\expandafter\expandafter\edef\expandafter\csname tp@flt@max@row@width@\the\tp@subfloat@row\expandafter\endcsname\expandafter
-      {\dimexpr\csname tp@flt@max@row@width@\the\tp@subfloat@row\endcsname+\the\wd\tp@subfltbox\relax}%
-    \expandafter\expandafter\expandafter\ifdim\expandafter\@tempdima>\csname tp@flt@max@row@height@\the\tp@subfloat@row\endcsname\relax
-      \expandafter\edef\csname tp@flt@max@row@height@\the\tp@subfloat@row\endcsname{\the\@tempdima}%
-    \fi
-  \else
-    \ifx\tp@subfloat@parent c\relax
-      \expandafter\expandafter\expandafter\edef\expandafter\csname tp@flt@max@col@height@\the\tp@subfloat@col\expandafter\endcsname\expandafter
-        {\dimexpr\csname tp@flt@max@col@height@\the\tp@subfloat@col\endcsname+\the\ht\tp@subfltbox+\the\dp\tp@subfltbox\relax}%
-      \expandafter\expandafter\expandafter\ifdim\expandafter\@tempdimb>\csname tp@flt@max@col@width@\the\tp@subfloat@col\endcsname\relax
-        \expandafter\edef\csname tp@flt@max@col@width@\the\tp@subfloat@col\endcsname{\the\@tempdimb}%
-      \fi
-    \else
-      \ifx\tp@subfloat@parent f\relax
-        \ifdim\@tempdima>\tp@subflt@maxheight\relax
-          \global\tp@subflt@maxheight=\@tempdima\relax
-        \fi
-      \fi
-    \fi
+  \ifdim\@tempdima>\tp@subflt@maxheight\relax
+    \global\tp@subflt@maxheight=\@tempdima\relax
   \fi
   \ignorespaces
   \expandafter\ifx\csname tp@\tp@captype @attr@subfloat\endcsname\relax
@@ -944,48 +949,6 @@
 }
 %    \end{macrocode}
 % \end{macro}
-%
-% \subsection{Sub-Float Grid  (not yet implemented!)}
-%
-% \begin{macro}{\tpSubFloatRow} User-level macro that opens a row of sub-float Containers
-%    \begin{macrocode}
-\def\tpSubFloatRow{%
-  \advance\tp@subfloat@row\@ne
-  \let\tp@subfloat@prev@parent\tp@subfloat@parent
-  \let\tp@subfloat@parent=r\relax
-  \expandafter\def\csname tp@flt@max@row@height@\the\tp@subfloat@row\endcsname{\z@}%
-  \expandafter\def\csname tp@flt@max@row@width@\the\tp@subfloat@row\endcsname{\z@}%
-}
-%    \end{macrocode}
-% \end{macro}
-%
-% \begin{macro}{\endtpSubFloatRow} user-level macro that ends a row of
-%   sub-float Containers
-%    \begin{macrocode}
-\def\endtpSubFloatRow{%
-  \let\tp@subfloat@parent\tp@subfloat@prev@parent
-}
-%    \end{macrocode}
-% \end{macro}
-%
-% \begin{macro}{\tpSubFloatCol} User-level macro that start a column of sub-float Containers
-%    \begin{macrocode}
-\def\tpSubFloatCol{%
-  \advance\tp@subfloat@col\@ne
-  \let\tp@subfloat@prev@parent\tp@subfloat@parent
-  \let\tp@subfloat@parent=c\relax
-  \expandafter\let\csname tp@flt@max@col@width@\the\tp@subfloat@col\endcsname=\z@\relax
-}
-%    \end{macrocode}
-% \end{macro}
-%
-% \begin{macro}{\endtpSubFloatCol} User-level macro that ends a column of sub-float Containers
-%    \begin{macrocode}
-\def\endtpSubFloatCol{%
-  \let\tp@subfloat@parent\tp@subfloat@prev@parent
-}
-%    \end{macrocode}
-% \end{macro}
 % \begin{macro}{\tpRenderSubFloats} iterates through the single
 %   sub-floats and renders them in a nice row.
 %   \begin{description}
@@ -1137,6 +1100,9 @@
 \def\tpFigureRender{%
   \bgroup
     \let\includegraphics\tp@includesubgraphics
+    \expandafter\ifx\csname tp@\tp@captype @attr@orientation\endcsname\tp@str@landscape\relax
+      \let\hsize\textwidth%
+    \fi%
     \hskip\tp@flt@marg@l
     \strut\tpUseComp{Fig}\strut
   \egroup}
@@ -1169,58 +1135,9 @@
   \gdef\@tp@fig@path{#2}%
   \expandafter\tpltx@includegraphics\expandafter[\@igopts]{#2}%
 }
+
 %    \end{macrocode}
 % \end{macro}
-% \section{Handlers for different float types}
-%
-% \subsection{Handlers for generic floats}
-%
-%    \begin{macrocode}
-\def\tpGenericRender{\tpUseComp{Content}}
-\def\tpGenericHandler{\tpMakeFltComp{content}}
-\def\tpSubGenericHandler{}
-%    \end{macrocode}
-%
-%
-% \subsection{Handlers for figures}
-%
-% The \lstinline{\tpFigureHandler} tells the float module the name,
-% main namespace, and main content container of figure floats.
-%    \begin{macrocode}
-\def\tpFigureHandler{\tpMakeFltComp{Fig}}
-\def\tpSubFigureHandler{%
-  \ifx\tp@nofigs\relax
-    \setbox\tp@subfltbox\hbox{\rule{0pt}{1pt}\rule{1pt}{0pt}}%
-  \else
-    \setbox\tp@subfltbox\hbox{\tpGobble\tp@flt@create@natural}%
-  \fi
-
-}
-%    \end{macrocode}
-% The \lstinline{\tpFigureRender} macro tells the module how figures
-% are to be rendered.
-%    \begin{macrocode}
-\def\tpFigureRender{%
-  \bgroup
-    \let\includegraphics\tp@includesubgraphics
-    \expandafter\ifx\csname tp@\tp@captype @attr@orientation\endcsname\tp@str@landscape\relax
-      \let\hsize\textwidth%
-    \fi%
-    \hskip\tp@flt@marg@l
-    \strut\tpUseComp{Fig}\strut
-  \egroup%
-}%
-%    \end{macrocode}
-% The \lstinline{\tpSubFigureRender} macro tells the module how
-% subfloats of figure floats are to be rendered.
-%    \begin{macrocode}
-\def\tpSubFigureRender{%
-  \hskip\tp@flt@marg@l
-  \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
-    \tp@render@sub@float{\the\@tempcnta}{Fig}%
-  }%
-}
-%    \end{macrocode}
 %
 %
 %\subsection{Handlers for tables}
@@ -1307,11 +1224,7 @@
 %   sub-floats, so we just generate an Error message.
 %    \begin{macrocode}
 \def\tpSubTableHandler{%
-  \PackageError{coco-floats.sty}{tpSubFloat does not support tables (yet)!}{You cannot use a tabular within the `tpSubFloat'!}%
-  % \tpGetTableContent
-  % \setbox\tp@subfltbox\hbox{\tpGobble\copy\tp@floatbox}%
-  % \tpGetTableContent
-  % \setbox\tp@subfltbox\hbox{\strut\quad}%
+  \PackageError{coco-floats.sty}{tpSubFloat does not support sub-tables (yet)!}{You cannot yet use a tables within the `tpSubFloat'!}%
 }
 %    \end{macrocode}
 % \end{macro}
