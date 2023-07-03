@@ -166,7 +166,7 @@
 %     \lstinline{lot} for the List of Tables)
 %   \end{description}
 %    \begin{macrocode}
-\def\tp@flt@reset@defaults#1#2{%
+\def\tp@flt@reset@defaults{%
   \global\tpSubFloatCnt=\z@
   \global\let\tp@has@capt@top\@undefined
   \global\let\tp@has@capt@bottom\@undefined
@@ -178,9 +178,7 @@
   \global\tp@subflt@maxheight=\z@\relax
   \@tempcnta=\z@\relax
   \tp@reset@components{\tp@cur@cont}%
-  \def\tp@captype{#1}%
   \let\tp@prefix\@empty
-  \def\tp@caplisttype{#2}%
   \let\ht@cur@element\tp@captype
   \global\let\tp@current@class\relax
 }
@@ -333,19 +331,6 @@
   \tpMakeFltComp{Listof#1}}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@set@caption@comps} sets the Components related to
-%   the float's caption.
-%    \begin{macrocode}
-\def\tp@set@caption@comps{%
-  \tpMakeFltCompL{Caption}%
-  \tpMakeFltCompL{Legend}%
-  \tpMakeFltCompL{Source}%
-  \tpMakeFltCompL{Number}%
-  \tpMakeFltComp{label}%
-  \tpMakeFltComp{AltText}% neu: 2023-06-08; TODO: muss noch implementiert werden
-}
-%    \end{macrocode}
-% \end{macro}
 % \begin{macro}{\tp@flt@set@hsize} calculates the available maximum
 %   width for the float contents and captions according to the values
 %   of the \lstinline{margin-right} and the \lstinline{margin-left}
@@ -378,9 +363,19 @@
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{tpContainer}{float}
+% \begin{tpContainer}{tpFloat}
 %    \begin{macrocode}
-\tpDeclareContainer{float}{}
+\tpDeclareContainer{tpFloat}{%
+  \tpDeclareType{Components}{%
+    \tpMakeFltCompL{Caption}%
+    \tpMakeFltCompL{Legend}%
+    \tpMakeFltCompL{Source}%
+    \tpMakeFltCompL{Number}%
+    \tpMakeFltComp{label}%
+    \tpMakeFltComp{AltText}% neu: 2023-06-08; TODO: muss noch implementiert werden
+  }%
+  \tpDeclareType{Properties}{\tp@float@default}%
+}
 %    \end{macrocode}
 % \begin{macro}{\tpDeclareFloat} is the user-level macro used to
 %   (re-)declare a (new) \lstinline{tpFloat} environment.
@@ -394,53 +389,46 @@
 %   \item[\#5] Property list
 %   \end{description}
 %    \begin{macrocode}
-\def\tpDeclareFloat{\@ifnextchar[{\@tpDeclareFloat}{\@tpDeclareFloat[]}}%]
+\long\def\tpDeclareFloat{\tp@opt@empty\@tpDeclareFloat}
 \def\@tpDeclareFloat[#1]#2#3#4#5{%
+  \def\tp@float@parent{#1}%
+  \tpDeclareContainer{#2}{%
+    \ifcsdef{tp@app@container@#2}{}{%
+        \ifx\tp@float@parent\@empty
+          \tpInherit {Properties,Components} from tpFloat;
+        \else
+          \tpInherit {Properties,Components} from \tp@float@parent;
+        \fi
+        \tpDeclareType{FloatEnvInfo}{%
+          \tpNamespace{#2}%
+          \def\tp@captype{#3}%
+          \def\tp@caplisttype{#4}%
+        }% /FloatEnvInfo
 %    \end{macrocode}
 % The macro actually defines two {\LaTeX} environments; a normal one
 % for one-column floats, and a starred one for page-wide floats in
 % two-column mode.
 %    \begin{macrocode}
-  \expandafter\ifx\csname #2\endcsname\relax
-    \PackageInfo{coco-floats.sty}{Declaring #2 environment}%
-    \newenvironment{#2}[1][]{\tp@float[##1]{#3}{#4}{#2}}{\endtp@float}%
-    \newenvironment{#2*}[1][]{\let\tp@do@dblfloat\relax\tp@float[##1]{#3}{#4}{#2}}{\let\tp@do@dblfloat\relax\endtp@float}%
-  \else
-    \PackageInfo{coco-floats.sty}{#2 environment already exists. Re-Declaring.}%
-    \renewenvironment{#2}[1][]{\tp@float[##1]{#3}{#4}{#2}}{\endtp@float}%
-    \renewenvironment{#2*}[1][]{\let\tp@do@dblfloat\relax\tp@float[##1]{#3}{#4}{#2}}{\let\tp@do@dblfloat\relax\endtp@float}%
-  \fi
-%    \end{macrocode}
-% Saving the float container's parent for the Property inheritance mechanism:
-%    \begin{macrocode}
-  \if!#1!\else
-    \expandafter\def\csname tp@float@#2@parent\endcsname{#1}%
-  \fi
-%    \end{macrocode}
-% Saving the Container's Property list, or appending it in case it has already been declared
-%    \begin{macrocode}
-  \expandafter\ifx\csname tp@float@#2@properties\endcsname\relax%
-    \expandafter\def\csname tp@float@#2@properties\endcsname{#5}%
-  \else
-    \expandafter\expandafter\expandafter\def
-    \expandafter\expandafter\expandafter\@tempa
-    \expandafter\expandafter\expandafter{\csname tp@float@#2@properties\endcsname}%
-    \expandafter\expandafter\expandafter\def
-    \expandafter\csname tp@float@#2@properties\expandafter\endcsname
-    \expandafter{\@tempa #5}%
-  \fi
+        \tpDeclareEnv[#2]{\tp@float}{\endtp@float}%
+        \tpDeclareEnv[#2*]{\let\tp@do@dblfloat\relax\tp@float}{\let\tp@do@dblfloat\relax\endtp@float}%
+        \tpDeclareType{Components}{%
+          \tpUseProperty{float-handler}%
+        }%
+        \tp@flt@generate@listof@handlers{#4}{#3}{#2}%
+        \bgroup
+          \def\tp@cur@cont{#2}%
+          \tp@init@l@[Listof]{#4}{0}{#3}% Generate listof-Entries for first level floats
+          \tp@restore@init{#4}{number-0-maxwd}%
+          \tp@init@l@[Listof]{#4}{1}{sub#3}% Generate listof-Entries for sub-floats
+          \tp@restore@init{#4}{number-1-maxwd}%
+        \egroup
+      }%
+    \tpDeclareType{Properties}{#5}%
 %    \end{macrocode}
 % Generating the Handlers for the list-of entries and define the
 % corresponding \lstinline{l@} macros
 %    \begin{macrocode}
-  \tp@flt@generate@listof@handlers{#4}{#3}{#2}%
-  \bgroup
-    \def\tp@cur@cont{#2}%
-    \tp@init@l@[Listof]{#4}{0}{#3}% Generate listof-Entries for first level floats
-    \tp@restore@init{#4}{number-0-maxwd}%
-    \tp@init@l@[Listof]{#4}{1}{sub#3}% Generate listof-Entries for sub-floats
-    \tp@restore@init{#4}{number-1-maxwd}%
-  \egroup
+  }% /container
 }
 %    \end{macrocode}
 % \end{macro}
@@ -680,27 +668,25 @@
 % \subsection{Common Float and Sub-Float Environments}
 %
 % \begin{macro}{\tp@float} is a mid-level Macro that provides the
-%   common floating {\LaTeX} environment.
+%   common floating {\LaTeX} environment. \#1 is the float
+%   environment's kv-attribute list.
 %   \begin{description}
 %   \item[\#1] float position (optional)
-%   \item[\#2] corresponds to the caption type, e.g., \texttt{table}, \texttt{figure}
-%   \item[\#3] list (e.g., \texttt{lot}, \texttt{lof})
-%   \item[\#4] the Container name (e.g., \texttt{tpFigure}, \texttt{tpTable})
 %   \end{description}
 %    \begin{macrocode}
-\def\tp@float[#1]#2#3#4{%
+\def\tp@float{\tp@opt@empty\@tp@float}
+\def\@tp@float[#1]{%
   \par
   \begingroup
     \global\advance\tp@int@flt@cnt\@ne
-    \tpNamespace{#4}%
-    \tp@flt@reset@defaults{#2}{#3}%
+    \tpEvalType{FloatEnvInfo}%
+    \tp@flt@reset@defaults
     \tpToggleCountedCond
-    \expandafter\tpCascadeProps\expandafter{#4}{float}%
-    \tp@get@flt@attr{#1}{#2}%
-    \tp@set@caption@comps
+    \tpEvalType{Properties}%
+    \tp@get@flt@attr{#1}{\tp@captype}%
     \tp@flt@set@hsize
     \tp@get@seps
-    \tpUseProperty{float-handler}%
+    \tpEvalType{Components}%
     \tpUseProperty{before-float}%
     \tp@set@flt@env
     \ifx\tp@fps\@empty\else\savenotes\fi
@@ -1056,7 +1042,7 @@
 % \end{macro}
 % \begin{macro}{\tpGenericHandler} is the generic content handler of a float
 %    \begin{macrocode}
-\def\tpGenericHandler{\tpMakeFltComp{content}}
+\def\tpGenericHandler{\tpMakeFltComp{Content}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tpSubGenericHandler} is the generic handler of a sub-float.
