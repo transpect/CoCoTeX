@@ -311,7 +311,7 @@
 % \begin{macro}{\tp@init@cnt} initialises a counter with the name \#1
 %   for automatic numbering if it doesn't exist, yet.
 %    \begin{macrocode}
-\def\tp@init@cnt#1{\@definecounter{#1}}
+\def\tp@init@cnt#1{\ifcsname c@#1\endcsname\else\@definecounter{#1}\fi}
 %    \end{macrocode}
 % \end{macro}
 %
