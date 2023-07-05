@@ -65,12 +65,12 @@
 %
 % \begin{macro}{\tpDeclareContainer}
 %   is the constructor for new Containers. \#1 is the Container's
-%   name, \#2 its body which conists of Component and Property
-%   declarations.
+%   name, \#2 its body which conists of Inheritance instructions, Type
+%   and Env declarations.
 %    \begin{macrocode}
 \long\def\tpDeclareContainer#1#2{%
-  \@namedef{tp@container@#1}{}%
-  \@namedef{tp@cur@cont}{#1}%
+  \ifcsdef{tp@container@#1}{\csdef{tp@app@container@#1}{}}{\csdef{tp@container@#1}{}}
+  \csdef{tp@cur@cont}{#1}%
 %    \end{macrocode}
 % We want the declarator macros to be only allowed inside the \lstinline{\tpDeclareContainer} macro.
 %    \begin{macrocode}
@@ -108,7 +108,9 @@
 %   \lstinline{\tpEvalType} macro, see below.
 %    \begin{macrocode}
     \def\tpDeclareEnv{\@ifnextchar [{\tp@declare@env}{\tp@declare@env[#1]}}%]
-    \def\tp@declare@env[##1]##2##3{\csgdef{##1}{\global\let\reserved@cont\tp@cur@cont\def\tp@cur@cont{#1}##2}\csgdef{end##1}{##3}\global\let\tp@cur@cont\reserved@cont}%
+    \def\tp@declare@env[##1]##2##3{%
+      \csgdef{##1}{\global\let\reserved@cont\tp@cur@cont\def\tp@cur@cont{#1}##2}%
+      \csgdef{end##1}{##3}\global\let\tp@cur@cont\reserved@cont}%
 %    \end{macrocode}
 % \end{macro}
 %    \begin{macrocode}
@@ -500,7 +502,7 @@
 %
 % \begin{macro}{\tpDeclareCountedComp}
 %   is a user-level macro to create a new Counted Component. \#1 is
-%   the user-level name of the Component, \#2 is the internal name.
+%   the user-level name of the Component.
 %    \begin{macrocode}
 \def\tpDeclareCountedComp#1{%
   \tp@def@counted@comp
