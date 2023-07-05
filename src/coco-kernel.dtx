@@ -39,7 +39,7 @@
    \GenericError{%
       (#1)\@spaces\@spaces\@spaces\@spaces
    }{%
-      [tp #1 #2 Error] #3%
+      [CoCoTeX #1 #2 Error] #3%
    }{}{#4}%
 }
 %    \end{macrocode}
@@ -53,7 +53,21 @@
    \GenericWarning{%
       (#1)\@spaces\@spaces\@spaces\@spaces
    }{%
-      [tp #1 #2 Warning] #3%
+      [CoCoTeX #1 \if!#2!\else#2 \fi Warning] #3%
+   }%
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tpPackageInfo}
+%   is a macro to create shell output specific to the Framework. \#1
+%   is the module, \#2 is the type of message, \#3 is the immediate
+%   info string.
+%    \begin{macrocode}
+\def\tpPackageInfo#1#2#3{%
+   \GenericInfo{%
+      (#1)\@spaces\@spaces\@spaces\@spaces
+   }{%
+      [CoCoTeX #1 \if!#2!\else#2 \fi] #3%
    }%
 }
 %    \end{macrocode}
@@ -68,8 +82,15 @@
 %   name, \#2 its body which conists of Inheritance instructions, Type
 %   and Env declarations.
 %    \begin{macrocode}
+\def\tp@warningspaces{\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space}%
 \long\def\tpDeclareContainer#1#2{%
-  \ifcsdef{tp@container@#1}{\csdef{tp@app@container@#1}{}}{\csdef{tp@container@#1}{}}
+  \ifcsdef{tp@container@#1}
+    {\tpPackageWarning{Kernel}{}{`#1' has already been declared!^^J
+\tp@warningspaces Properties from the original Declaration may be^^J
+\tp@warningspaces overridden by the global defaults. Use \string\tpAddToType^^J
+\tp@warningspaces to add new Properties to pre-existing Containers!^^J
+}}
+    {\csdef{tp@container@#1}{}}%
   \csdef{tp@cur@cont}{#1}%
 %    \end{macrocode}
 % We want the declarator macros to be only allowed inside the \lstinline{\tpDeclareContainer} macro.

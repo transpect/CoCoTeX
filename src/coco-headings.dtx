@@ -82,40 +82,59 @@
 %    \begin{macrocode}
 \long\def\tpDeclareHeading{\tp@opt@empty\@tpDeclareHeading}
 \long\def\@tpDeclareHeading[#1]#2#3#4{%
+  \ifcsdef{tp@container@#3}{%
+    \tpPackageInfo{Headings}{}{Appending to `#3'}%
+    \ifcsstring{tp@hdg@#3@level}{#2}{}{%
+        \tpPackageError{Headings}
+          {Level Mismatch}
+          {Level of heading `#3' cannot be altered!}
+          {The already existing heading `#3' has toc level `\csname tp@hdg@#3@level\endcsname', but your^^J%
+           re-declaration states `#2'.^^J%
+           ^^J%
+           Consider declaring a new heading alltogether with `#3' as parent,^^J%
+           or add Properties to the existing `#3' using \string\tpAddToType.}%
+       }%
+    \if!#1!\else
+      \tpInherit {Properties,Components,Parent} from #1;
+    \fi
+    \tpAddToType{Properties}{#3}{#4}%
+  }{%
 %    \end{macrocode}
 % Each new heading constitutes its own Sub-Container of the heading
 % Container. The name of this Sub-Container is the headings name.
 %    \begin{macrocode}
-  \tpDeclareContainer{#3}{%
-    \edef\@argi{#1}%
-    \tpDeclareType{Parent}{\tp@heading@create@parent{#1}{#3}}
+    \tpDeclareContainer{#3}{%
+      \csgdef{tp@hdg@#3@level}{#2}%
+      \tpPackageInfo{Headings}{}{Declaring heading `#3'}%
+      \edef\@argi{#1}%
+      \tpDeclareType{Parent}{\tp@heading@create@parent{#1}{#3}}
 %    \end{macrocode}
 % We inherit everything from the heading levels parent, or from the
 % default heading if no parent is present.
 %    \begin{macrocode}
-    \ifx\@argi\@empty
-      \tpInherit {Components,Properties} from tpHeading;
-    \else
-      \tpInherit {Components,Properties,Parent} from #1;
-    \fi
+      \ifx\@argi\@empty
+        \tpInherit {Components,Properties} from tpHeading;
+      \else
+        \tpInherit {Components,Properties,Parent} from #1;
+      \fi
 %    \end{macrocode}
 % The main body of the heading Declaration is a list of Property
 % definitions which we append to the Sub-Container's ``Property''
 % Type.
 %    \begin{macrocode}
-    \tpDeclareType{Properties}{%
-      #4%
-    }%
+      \tpDeclareType{Properties}{%
+        #4%
+      }%
 %    \end{macrocode}
 % For each heading we declare some common macros like the ToC entry
 % handlers, the heading's counters and its hooks.
 %    \begin{macrocode}
-    \tpDeclareType{Init}{%
-      \tp@init@hooks{#3}%
-      \tp@init@l@{toc}{#2}{#3}%
-      \tp@init@cnt{#3}%
-      \tp@restore@init{heading}{number-#2-maxwd}%
-    }%
+      \tpDeclareType{Init}{%
+        \tp@init@hooks{#3}%
+        \tp@init@l@{toc}{#2}{#3}%
+        \tp@init@cnt{#3}%
+        \tp@restore@init{heading}{number-#2-maxwd}%
+      }%
 %    \end{macrocode}
 % Unlike other Sub-Containers, headings form no own {\LaTeX}
 % environment.  Instead, headings are specifications of one common
@@ -128,7 +147,8 @@
 % that represent the heading's properties for each instance of the
 % generalised \lstinline{heading} container.
 %    \begin{macrocode}
-    \tp@declare@heading{#2}{#3}%
+      \tp@declare@heading{#2}{#3}%
+    }%
   }%
 }
 %    \end{macrocode}
