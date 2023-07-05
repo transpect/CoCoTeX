@@ -62,11 +62,6 @@
 \newcount\tpSubFloatCnt       \tpSubFloatCnt=\z@\relax
 \newcount\tp@int@flt@cnt      \tp@int@flt@cnt\z@
 %    \end{macrocode}
-% Counters for the rows and columns in a sub-float block (TODO: not implemented yet)
-%    \begin{macrocode}
-\newcount\tp@subfloat@row     \tp@subfloat@row\z@
-\newcount\tp@subfloat@col     \tp@subfloat@col\z@
-%    \end{macrocode}
 % Various dimension registers that store dimensions and spaces of floats and sub-floats:
 % \begin{itemize}
 % \item \lstinline{\tp@subflt@maxheight} stores and self-updates the
@@ -105,7 +100,6 @@
 %    \end{macrocode}
 % String definitions for Property value comparisons
 %    \begin{macrocode}
-\def\tp@str@landscape{landscape}
 \def\tp@str@figure{figure}
 \def\tp@str@table{table}
 \def\tp@str@bottom{bottom}
@@ -173,8 +167,6 @@
   \global\let\tp@has@subcapt@top\@undefined
   \global\let\tp@has@subcapt@bottom\@undefined
   \global\let\tp@sub@contentsline@store\@empty
-  \global\tp@subfloat@row=\z@
-  \global\tp@subfloat@col=\z@
   \global\tp@subflt@maxheight=\z@\relax
   \@tempcnta=\z@\relax
   \tp@reset@components{\tp@cur@cont}%
@@ -217,7 +209,7 @@
   \expandafter\ifx\csname tp@#1@attr@float-pos\endcsname\relax
     \let\tp@fps\@empty
   \else
-    \expandafter\let\expandafter\tp@fps\csname tp@#1@attr@float-pos\endcsname
+    \letcs\tp@fps{tp@#1@attr@float-pos}%
   \fi
   \def\@tempa{h!}\ifx\tp@fps\@tempa\let\tp@fps\@empty\fi
   \def\@tempa{h}\ifx\tp@fps\@tempa\def\tp@fps{htbp!}\fi
@@ -225,10 +217,10 @@
     \ifx\tp@fps\@empty\def\tp@fps{htpb!}\fi% 11514
     \linewidth\dimexpr2\columnwidth+\columnsep\relax
   \fi
-  \expandafter\ifx\csname tp@#1@attr@orientation\endcsname\tp@str@landscape\relax
+  \ifcsstring{tp@#1@attr@orientation}{landscape}{%
     \linewidth\textheight
     \def\tp@fps{p}%
-  \fi}
+  }{}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tp@set@flt@env} determines the low-level {\LaTeX}
@@ -242,15 +234,15 @@
     \let\tp@e@float\relax
   \else
     \let\tp@b@float\tp@captype%
-    \expandafter\ifx\csname tp@\tp@captype @attr@orientation\endcsname\tp@str@landscape\relax
+    \ifcsstring{tp@\tp@captype @attr@orientation}{landscape}{%
       \edef\@tp@b@float{sideways\tp@b@float}%
       \edef\tp@b@float{\noexpand\begin{\@tp@b@float\ifx\tp@do@dblfloat\relax*\fi}}
       \edef\tp@e@float{\noexpand\end{\@tp@b@float\ifx\tp@do@dblfloat\relax*\fi}}
-    \else
+    }{%
       \edef\tp@flt@env{\ifx\tp@do@dblfloat\relax dbl\fi}
       \edef\tp@b@float{\expandafter\noexpand\csname @x\tp@flt@env float\endcsname {\tp@captype}[\tp@fps]}
       \edef\tp@e@float{\expandafter\noexpand\csname end@\tp@flt@env float\endcsname}
-    \fi
+    }%
   \fi}
 %    \end{macrocode}
 % \end{macro}
@@ -293,15 +285,13 @@
   \else
     \expandafter\tp@flt@sep@top\dimexpr\tpUseProperty{float-skip-top}\relax%
   \fi
-  \expandafter\ifx\csname tp@\tp@captype @attr@orientation\endcsname\tp@str@landscape
-  \else
+    \ifcsstring{tp@\tp@captype @attr@orientation}{landscape}{}{%
     \ifx\tp@fps\@empty
       \expandafter\tp@flt@sep@bottom\dimexpr\tpUseProperty{intext-skip-bottom}\relax%
     \else
       \expandafter\tp@flt@sep@bottom\dimexpr\tpUseProperty{float-skip-bottom}\relax%
     \fi
-  \fi
-}
+  }}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tp@set@*@sep} Hooks to apply top and bottom skips,
@@ -734,8 +724,6 @@
   \expandafter\xdef\csname tp@\tp@cur@cont @width-\the\tpSubFloatCnt\endcsname{\the\wd\tp@subfltbox}%
   \expandafter\xdef\csname tp@\tp@cur@cont @height-\the\tpSubFloatCnt\endcsname{\the\ht\tp@subfltbox}%
   \expandafter\xdef\csname tp@\tp@cur@cont @depth-\the\tpSubFloatCnt\endcsname{\the\dp\tp@subfltbox}%
-  \expandafter\xdef\csname tp@\tp@cur@cont @col-\the\tpSubFloatCnt\endcsname{\the\tp@subfloat@col}%
-  \expandafter\xdef\csname tp@\tp@cur@cont @row-\the\tpSubFloatCnt\endcsname{\the\tp@subfloat@row}%
   \@tempdima=\dimexpr\the\ht\tp@subfltbox+\the\dp\tp@subfltbox\relax
   \@tempdimb=\dimexpr\the\wd\tp@subfltbox\relax
   \ifdim\@tempdima>\tp@subflt@maxheight\relax
@@ -888,12 +876,10 @@
   \tp@capt@top@offset
   \ifnum\tpSubFloatCnt=\z@
     \def\next{%
-      \expandafter\ifx\csname tp@\tp@captype @attr@orientation\endcsname\tp@str@landscape\relax%
-        \vbox\bgroup\hsize\textheight%
-      \else%
-        \hskip\tp@flt@marg@l%
-        \vbox\bgroup\advance\hsize-\tp@flt@marg@l%
-      \fi%
+      \ifcsstring{tp@\tp@captype @attr@orientation}{landscape}
+        {\vbox\bgroup\hsize\textheight}
+        {\hskip\tp@flt@marg@l%
+        \vbox\bgroup\advance\hsize-\tp@flt@marg@l}%
     }%
   \else
     \expandafter\tp@tempskipa\csname tp@flt@capt@row@height@#1\endcsname\relax
@@ -1086,9 +1072,9 @@
 \def\tpFigureRender{%
   \bgroup
     \let\includegraphics\tp@includesubgraphics
-    \expandafter\ifx\csname tp@\tp@captype @attr@orientation\endcsname\tp@str@landscape\relax
-      \let\hsize\textwidth%
-    \fi%
+    \ifcsstring{tp@\tp@captype @attr@orientation}{landscape}
+      {\let\hsize\textwidth}%
+      {}%
     \hskip\tp@flt@marg@l
     \strut\tpUseComp{Fig}\strut
   \egroup}
@@ -1165,27 +1151,28 @@
 % \begin{macro}{\@tp@reserve@htmltab} special handler for tables using
 %   the \lstinline{htmltabs} package:
 %    \begin{macrocode}
-\@ifpackageloaded{htmltabs}{%
-\def\@tp@reserve@htmltab{%
-  \let\tp@addstyle\@empty
-  \ifx\tp@fps\@empty
-    \expandafter\ifx\csname tpFloat\the\tp@int@flt@cnt Captop\endcsname\relax\else
-      \htInitSkip\csname tpFloat\the\tp@int@flt@cnt Captop\endcsname
-      \advance\htInitSkip\tp@flt@sep@top%
-    \fi
-    \expandafter\ifx\csname tpFloat\the\tp@int@flt@cnt Capbottom\endcsname\relax\else
-      \htAddToBottom\csname tpFloat\the\tp@int@flt@cnt Capbottom\endcsname
-      \advance\htAddToBottom\tp@flt@sep@bottom%
-    \fi
-  \else
-    \def\tp@addstyle{;break-table:false;}%
-  \fi
-  \edef\tp@tempa{margin-left:\tp@flt@marg@l\tp@addstyle}%
-  \expandafter\htAddStyle\expandafter{\tp@tempa}%
-  \global\setbox\htTableBox\box\voidb@x
-  \let\htOutputTable\relax
-}%
-}{\let\@tp@reserve@htmltab\relax}
+\AtBeginDocument{%
+  \@ifpackageloaded{htmltabs}{%
+    \def\@tp@reserve@htmltab{%
+      \let\tp@addstyle\@empty
+      \ifx\tp@fps\@empty
+        \expandafter\ifx\csname tpFloat\the\tp@int@flt@cnt Captop\endcsname\relax\else
+          \htInitSkip\csname tpFloat\the\tp@int@flt@cnt Captop\endcsname
+          \advance\htInitSkip\tp@flt@sep@top%
+        \fi
+        \expandafter\ifx\csname tpFloat\the\tp@int@flt@cnt Capbottom\endcsname\relax\else
+          \htAddToBottom\csname tpFloat\the\tp@int@flt@cnt Capbottom\endcsname
+          \advance\htAddToBottom\tp@flt@sep@bottom%
+        \fi
+      \else
+        \def\tp@addstyle{;break-table:false;}%
+      \fi
+      \edef\tp@tempa{margin-left:\tp@flt@marg@l\tp@addstyle}%
+      \expandafter\htAddStyle\expandafter{\tp@tempa}%
+      \global\setbox\htTableBox\box\voidb@x
+      \let\htOutputTable\relax
+    }}{\let\@tp@reserve@htmltab\relax}%
+}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tpTableHandler} defines the content handler for \lstinline{tpTable}.
