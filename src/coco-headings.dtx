@@ -82,7 +82,14 @@
 %    \begin{macrocode}
 \long\def\tpDeclareHeading{\tp@opt@empty\@tpDeclareHeading}
 \long\def\@tpDeclareHeading[#1]#2#3#4{%
+%    \end{macrocode}
+% First, we check if the heading has already been declared.
+%    \begin{macrocode}
   \ifcsdef{tp@container@#3}{%
+%    \end{macrocode}
+% If yes, then we check if the new declaration's parameters match with
+% the pre-existing one. We start with the heading level.
+%    \begin{macrocode}
     \tpPackageInfo{Headings}{}{Appending to `#3'}%
     \ifcsstring{tp@hdg@#3@level}{#2}{}{%
         \tpPackageError{Headings}
@@ -92,14 +99,37 @@
            re-declaration states `#2'.^^J%
            ^^J%
            Consider declaring a new heading alltogether with `#3' as parent,^^J%
-           or add Properties to the existing `#3' using \string\tpAddToType.}%
+           or add Properties to `#3' using \string\tpAddToType\string{Properties\string}\string{#3\string}.}%
        }%
+%    \end{macrocode}
+% we also check the parent.
+%    \begin{macrocode}
     \if!#1!\else
-      \tpInherit {Properties,Components,Parent} from #1;
+      \ifcsstring{tp@parent@#3}{#1}{}{%
+        \tpPackageError{Headings}
+          {Parent Mismatch}
+          {Parent of heading `#3'^^J cannot be altered!}
+          {The already existing heading `#3' inherits from `\csname tp@parent@#3\endcsname',^^J%
+           but your re-declaration sets Parent to `#1'.^^J%
+           ^^J%
+           Consider declaring a new heading alltogether with `#1' as parent.}%
+      }%
     \fi
+%    \end{macrocode}
+% and finally pass the new Properties to the existing heading.
+%    \begin{macrocode}
     \tpAddToType{Properties}{#3}{#4}%
+%    \end{macrocode}
+% Finally, we need to re-define the \lstinline{\tpUseHeading} macro so
+% that changes to the heading's Property list will be taken into
+% account for all dependend constructions like list-ofs and
+% toc-entries.
+%    \begin{macrocode}
+    \tp@declare@heading{#2}{#3}%
   }{%
 %    \end{macrocode}
+% If the heading does not already exist, we build a new one.
+%
 % Each new heading constitutes its own Sub-Container of the heading
 % Container. The name of this Sub-Container is the headings name.
 %    \begin{macrocode}
