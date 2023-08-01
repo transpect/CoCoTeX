@@ -161,7 +161,10 @@
 %    \begin{macrocode}
       \tpDeclareType{Init}{%
         \tp@init@hooks{#3}%
+        \let\@tp@cur@cont\tp@cur@cont
+        \def\tp@cur@cont{heading}%
         \tp@init@l@{toc}{#2}{#3}%
+        \let\tp@cur@cont\@tp@cur@cont
         \tp@init@cnt{#3}%
         \tp@restore@init{heading}{number-#2-maxwd}%
       }%

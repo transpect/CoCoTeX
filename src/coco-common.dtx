@@ -299,9 +299,9 @@
 % \subsection{Keeping .aux-Files Up-to-Date}
 %
 % \begin{macro}{\tp@restore@init}
-%   The transpec-tex macro family provides a feature that allows the
-%   indention of counted elements to be just as wide as the widest
-%   counter that element needs to be printed.
+%   CoCoTeX provides a feature that allows the indention of counted
+%   elements to be just as wide as the widest counter that element
+%   needs to be printed.
 %
 %   During compilation the width of each counter is written into the
 %   aux-files if it is bigger than previously calculated width for
@@ -333,6 +333,7 @@
 %    \begin{macrocode}
 \def\tp@restore@init#1#2{%
   \AtBeginDocument{%
+    \tpKernelDebugMsg{Trying to restore \string\tp-#1-#2 (\csmeaning{tp-#1-#2})}%
     \expandafter\ifx\csname tp-#1-#2\endcsname\relax\else
       \immediate\write\@auxout{\string\expandafter\string\gdef\string\csname\space tp-#1-#2\string\endcsname{\csname tp-#1-#2\endcsname}}%
     \fi}}
@@ -383,7 +384,7 @@
     \expandafter\global\csname c@#2depth\endcsname=0\relax
   \fi
   \expandafter\tp@restore@init\expandafter{\tp@cur@cont}{#1\if!#1!#2\fi-number-#3-maxwd}%
-  \expandafter\tp@restore@init\expandafter{\tp@cur@cont}{#1\if!#1!#2\fi-number-#3-indent}%
+  \expandafter\tp@restore@init\expandafter{\tp@cur@cont}{#1\if!#1!#2\fi-#3-indent}%
   \expandafter\ifx\csname tp@#2@extract@data\endcsname\relax
     \expandafter\let\csname tp@#2@extract@data\endcsname\tp@extract@generic
   \fi
@@ -530,11 +531,11 @@
   \else
     \expandafter\ifdim\csname tp-\tp@cur@cont-#1\endcsname>#2\relax
     \else
-      % Store the value in case of <= #2. In case of < instead of <=,
-      % used values might alternate between TeX runs due to not
-      % having been stored in the run before.
-      \immediate\write\@auxout{\string\expandafter\string\gdef\string\csname\space tp-\tp@cur@cont-#1\string\endcsname{#2}}%
-      \expandafter\xdef\csname tp-\tp@cur@cont-#1\endcsname{#2}%
+      \expandafter\ifdim\csname tp-\tp@cur@cont-#1\endcsname=#2\relax
+      \else
+        \immediate\write\@auxout{\string\expandafter\string\gdef\string\csname\space tp-\tp@cur@cont-#1\string\endcsname{#2}}%
+        \expandafter\xdef\csname tp-\tp@cur@cont-#1\endcsname{#2}%
+      \fi
     \fi
   \fi}
 %    \end{macrocode}

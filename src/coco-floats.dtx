@@ -50,10 +50,13 @@
 %
 % Some reserved box registers for measuring, the first one,
 % \lstinline{\tp@floatbox}, is for the whole float, the second one,
-% \lstinline{\tp@subfltbox}, is for a single sub-float.
+% \lstinline{\tp@subfltbox}, is for a single sub-float. The third one,
+% \lstinline{\tp@calcfltbox}, is used to calculate the overall
+% dimensions of the float.
 %    \begin{macrocode}
 \newbox  \tp@floatbox
 \newbox  \tp@subfltbox
+\newbox  \tp@calcfltbox
 %    \end{macrocode}
 % Internal counters: \lstinline{\tpSubFloatCnt} counts the sub-floats
 % within a single float, \lstinline{\tp@int@flt@cnt} is the internal
@@ -134,16 +137,21 @@
        %\advance\linewidth-\leftskip
        \advance\linewidth-\rightskip
      }%
-   }{}%
+    }{}%
 %    \end{macrocode}
 % In order to catch the actual dimensions of the float box, we need to
-% hook into \LaTeX's \lstinline{\@endfloatbox} macro:
+% hook into \LaTeX's \lstinline{\@endfloatbox} macro. This macro is
+% low-level enough so it covers regular, double-column, and rotated
+% floats. Those values will later be written into the \lstinline{.aux}
+% file for each float. The values, together with the float's overall
+% width, are stored in a macro called
+% \lstinline{tp-float-\the\tp@int@flt@cnt-dimens}.
 %    \begin{macrocode}
-   \gappto\@endfloatbox{%
-     \global\tp@total@flt@height=\ht\@currbox\relax%
-     \global\tp@total@flt@depth=\dp\@currbox\relax%
-   }%
- }%
+  \gappto\@endfloatbox{%
+    \global\tp@total@flt@height=\ht\@currbox\relax%
+    \global\tp@total@flt@depth=\dp\@currbox\relax%
+  }%
+}%
 
 %    \end{macrocode}
 %
@@ -162,6 +170,7 @@
 %    \begin{macrocode}
 \def\tp@flt@reset@defaults{%
   \global\tpSubFloatCnt=\z@
+  \global\tp@total@flt@width=\z@
   \global\let\tp@has@capt@top\@undefined
   \global\let\tp@has@capt@bottom\@undefined
   \global\let\tp@has@subcapt@top\@undefined
@@ -325,13 +334,13 @@
 %    \begin{macrocode}
 \def\tp@flt@set@hsize{%
   \expandafter\tp@subflt@sep\tpUseProperty{sub-float-sep}\relax%
-  \tp@total@flt@width=\hsize\relax
+  \global\tp@total@flt@width=\hsize\relax
   \expandafter\tp@flt@marg@l\tpUseProperty{margin-left}\relax
   \expandafter\tp@flt@marg@r\tpUseProperty{margin-right}\relax
   \expandafter\tp@flt@marg@i\tpUseProperty{margin-inner}\relax
   \expandafter\tp@flt@marg@o\tpUseProperty{margin-outer}\relax
   \tp@flt@set@margins
-  \advance\tp@total@flt@width-\tp@flt@marg@r\relax
+  \global\advance\tp@total@flt@width-\tp@flt@marg@r\relax
   }
 %    \end{macrocode}
 % \end{macro}
@@ -434,10 +443,10 @@
         \tp@flt@generate@listof@handlers{#4}{#3}{#2}%
         \bgroup
           \def\tp@cur@cont{#2}%
-          \tp@init@l@[Listof]{#4}{0}{#3}% Generate listof-Entries for first level floats
-          \tp@restore@init{#4}{number-0-maxwd}%
-          \tp@init@l@[Listof]{#4}{1}{sub#3}% Generate listof-Entries for sub-floats
-          \tp@restore@init{#4}{number-1-maxwd}%
+          \tp@restore@init{#2}{list-of-number-maxwd}%
+          \tp@restore@init{#2}{list-of-indent}%
+          \tp@init@l@[list-of]{#4}{0}{#3}% Generate listof-Entries for first level floats
+          \tp@init@l@[list-of]{#4}{1}{sub#3}% Generate listof-Entries for sub-floats
         \egroup
         \tpDeclareType{Properties}{#5}%
       }% /container
@@ -721,6 +730,12 @@
     \tp@flt@debug{\tp@captype}%
     \ifx\tp@fps\@empty\else\spewnotes\fi
   \endgroup
+  \immediate\write\@auxout
+    {\string\expandafter\string\gdef\string\csname\space tp-float-\the\tp@int@flt@cnt-dimens\string\endcsname{%
+        {\the\tp@total@flt@width}%
+        {\the\tp@total@flt@height}%
+        {\the\tp@total@flt@depth}%
+      }}%
   \global\let\tp@current@class\relax
 }
 %    \end{macrocode}
@@ -765,8 +780,8 @@
 %
 % \subsection{Processing the Contents of the Float Environment}
 %
-% \begin{macro}{\tp@flt@process} processes the contents of a float
-%   environment
+% \begin{macro}{\tp@flt@process} prints the contents of a float
+%   environment.
 %    \begin{macrocode}
 \def\tp@flt@process{%
   \tp@test@subcapt
