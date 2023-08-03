@@ -26,6 +26,7 @@
   \tpDeclareType{Components}{%
     \tpDeclareRole[author]{Author}%
     \tp@declare@meta@comp
+    \tp@declare@meta@affils
   }%
   \tpDeclareType{Properties}{%
     \tp@Meta@default
@@ -139,8 +140,8 @@
       }{}}}
 %    \end{macrocode}
 % \end{macro}
-% \section{common meta data}
 %
+% \section{common meta data}
 %
 %    \begin{macrocode}
 \def\tp@declare@meta@comp{%
@@ -148,7 +149,60 @@
     \tpDeclareComp{DOI}{\expandafter\global}{}%         DOI
 }%
 %    \end{macrocode}
-% 
+% \begin{macro}{\tp@extended@meta@macros}
+%   provides some extended markup. Some headings use these Components
+%   for compilations of contributions by different authors. They are
+%   also loaded by article title pages.
+%    \begin{macrocode}
+\def\tp@extended@meta@macros{%
+  \tp@provide@ext@meta@macros[Abstract]{Abstract}%
+  \tp@provide@ext@meta@macros[Keywords]{Keywords}%
+  \tp@provide@ext@meta@macros{DOI}%
+  \tp@provide@ext@meta@macros{TitleEn}%
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tp@provide@ext@meta@macros}
+%   Provides component macros to encode meta data. Each macro consists
+%   of two parts: one that carries the content, and one that allows to
+%   override the Title. \changes{v0.3}{2023/08/03}{The optional Argument allows to define a
+%   global default value for the Title.}
+%    \begin{macrocode}
+\def\tp@provide@ext@meta@macros{\tp@opt@empty\@tp@provide@ext@meta@macros}%
+\def\@tp@provide@ext@meta@macros[#1]#2{%
+  \tpDeclareComp{#2}{}{}%
+  \tpDeclareComp{#2Title}{}{}%
+  \if!#1!\else
+    \expandafter\long\expandafter\def\csname tp@\tp@cur@cont @#1\endcsname{#2}%
+  \fi
+}
+%    \end{macrocode}
+% \end{macro}
+%
+%
+% \subsection{Affiliations}
+%
+% \begin{macro}{\tp@meta@affils} is a wrapper that creates the
+%   user-level macros for the affiliations.
+%    \begin{macrocode}
+\def\tp@declare@meta@affils{%
+  \tpDeclareComp{AffilBlock}{\expandafter\global}{}%
+  \tpDeclareComponentGroup{tpAffil}{%
+    \tpDeclareCountedComp{Affiliation}%
+    \tpDeclareCountedComp{Address}%
+    \tpDeclareCountedComp{Institute}%
+    \tpDeclareCountedComp{Country}%
+    \tpDeclareCountedComp{Department}%
+    \tpDeclareCountedComp{AffilID}%
+  }%
+  \tpGroupHandler{tpAffil}{%
+    \tpIfComp{AffilID}{}{\expandafter\tpAffilID\expandafter{\tpAffilCnt}}%
+    \tpIfComp{Affiliation}{}{\tpAffiliation{\tpUseProperty{affiliation-format}}}%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}
+%
 %
 % Defaut Property settings for the Meta Container.
 %    \begin{macrocode}
@@ -161,6 +215,16 @@
   \tpSetProperty{name-etal}{\space et~al.}%
   \tpSetProperty{name-sep}{,\space}%
   \tpSetProperty{corresp-mark}{*}%
+  % Affiliation Properties
+  \tpSetProperty{affiliation-format}{% Format of the  affiliation block
+    \tpIfComp{Institute}{\tpUseComp{Institute}}{}%
+    \tpIfComp{Department}{, \tpUseComp{Department}}{}%
+    \tpIfComp{Address}{, \tpUseComp{Address}}{}%
+    \tpUseProperty{affil-sep}%
+  }%
+  \tpSetProperty{affil-sep}{\par}
+  \tpSetProperty{affil-block-format}{\textsuperscript{\tpUseComp{AffilID}}\tpUseComp{Affiliation}}
+  \tpSetProperty{affil-block-face}{\small\normalfont}
 }
 %    \end{macrocode}
 %    \begin{macrocode}[gobble=1]

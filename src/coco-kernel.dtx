@@ -247,7 +247,7 @@
 % \item[\#4] is code that is executed \textit{after} assignment of the user's value
 % \end{description}
 %    \begin{macrocode}
-\def\tpDeclareComp{\@dblarg\@tpDeclareComp}
+\def\tpDeclareComp{\tp@opt@second\@tpDeclareComp}
 \def\@tpDeclareComp[#1]#2#3#4{%
   \ltx@LocalExpandAfter\global\expandafter\let\csname tp@\tp@cur@cont @#1\endcsname\relax
   \expandafter\long\expandafter\def\csname tp#2\endcsname##1{%
@@ -773,19 +773,18 @@
 % arguments.
 % \begin{macro}{\tp@opt@curcont} overrides Container Names with the optional argument.
 %    \begin{macrocode}
-\def\tp@opt@curcont#1{\@ifnextchar[{#1}{#1[\tp@cur@cont]}}%]
+\long\def\tp@opt@curcont#1{\@ifnextchar[{#1}{#1[\tp@cur@cont]}}%]
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tp@opt@empty} passes an empty string if the optional argument is missing.
 %    \begin{macrocode}
-\def\tp@opt@empty#1{\@ifnextchar[{#1}{#1[]}}%]
+\long\def\tp@opt@empty#1{\@ifnextchar[{#1}{#1[]}}%]
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tp@opt@second} passes the first mandatory argument to
 %   the optional argument if the latter is missing.
 %    \begin{macrocode}
-\def\tp@opt@second#1{\def\@tempa[##1]##2{#1[##1\if!##1!##2\fi]{##2}}%
-  \@ifnextchar[{\@tempa}{\@tempa[]}}%
+\let\tp@opt@second\@dblarg
 %    \end{macrocode}
 % \end{macro}
 % \subsection{Iterators}
