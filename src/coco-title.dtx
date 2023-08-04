@@ -195,8 +195,13 @@
   %\csname tp@titlepage\endcsname
   \ifarticle
     \gdef\tpMaketitle{%
-      \csname tp@titlepage\endcsname
-      \tpUseProperty{article-title}%
+      \let\tp@cnt@grp\@empty
+      \bgroup
+        \tpNamespace{titlepage}%
+        \tpEvalType{Properties}%
+        \tpUseProperty{before-titlepage}%
+        \tpUseProperty{article-title}%
+      \egroup
     }%
   \else
     \gdef\tpMaketitle{%
