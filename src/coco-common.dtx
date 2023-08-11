@@ -171,8 +171,12 @@
 % \end{macro}
 % \begin{macro}{\CalcModulo} is used to calculate the remainder of
 %   integer division of \#1 by \#2.
+%   This needs a different approach than the common modulo definition,
+%   which would return negative results in some cases, as TeX
+%   rounds up the quotient of \#1 and \#2 if the first decimal
+%   place is equal to or greater 5.
 %    \begin{macrocode}
-\def\CalcModulo#1#2{\numexpr#1-(#1/#2)*#2\relax}
+\def\CalcModulo#1#2{\number\numexpr#1+#2-((#1+#2/2)/#2)*#2\relax}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\minusvspace}
@@ -439,7 +443,7 @@
   \sbox\z@{\def\numberline##1{\expandafter\gdef\csname tp@#2@#3Number\endcsname{##1}}#1}%
   \ifdim\wd\z@>\z@
     \let\numberline\@gobble%
-    \expandafter\xdef\csname tp@#2@#3#4\endcsname{#1}%
+    \protected@csxdef{tp@#2@#3#4}{#1}%
   \else
     #1%
   \fi}
@@ -452,6 +456,7 @@
 %    \begin{macrocode}
 \def\tp@format@number#1#2#3{%
   \tpSetProperty{#1formatted-number}{}%
+  \tpSetValProp{#1curr-number-level}{#3}%
   \tpIfComp{#2Number}{%
     \tpSetProperty{#1formatted-number}{%
       \bgroup
