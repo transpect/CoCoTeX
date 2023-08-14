@@ -134,6 +134,7 @@
   \tp@title@process@bkt
   \tp@title@process@bka
   \tp@title@process@bkc
+  \tpUseHook{document-meta-hook}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -192,6 +193,7 @@
 %   Hook that is expanded right before the titlepage is printed.
 %    \begin{macrocode}
 \tpDeclareHook[titlepage]{before-maketitle-hook}
+\tpDeclareHook[titlepage]{document-meta-hook}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tp@maketitle}
@@ -288,7 +290,7 @@
 %   Components with the name \#2. They are usually empty. Non-empty
 %   default value can be provided by the optional argument \#1.
 %    \begin{macrocode}
-\def\tp@title@macro{\@ifnextchar[\@tp@title@macro{\@tp@title@macro[]}}%]
+\def\tp@title@macro{\tp@opt@empty\@tp@title@macro}%
 \def\@tp@title@macro[#1]#2{%
   \tpDeclareComp{#2}{\expandafter\global}{}%
   \if!#1!\else\csname tp#2\endcsname{#1}\fi%
@@ -377,11 +379,13 @@
   %% for single articles
   \tp@title@macro{StartPage}                     % Start page of a single article
   \tp@title@macro{EndPage}                       % End page of a single article
-  \tp@title@macro{Received}                      % Date the article was recieved
-  \tp@title@macro{Reviewed}                      % Date the article was reviewed
-  \tp@title@macro{Accepted}                      % Date the article was accepted
-  \tp@title@macro{Published}                     % Date the article was published
-  \tp@provide@ext@meta@macros[Conflict of Interest]{COIStatement}% Conflict of Interest statement (and title)
+  \tpDeclareLabeledComp[Submitted]{Submitted}{sumbitted}   % Date the article was submitted
+  \tpDeclareLabeledComp[Received]{Received}{received}      % Date the article was recieved
+  \tpDeclareLabeledComp[Revised]{Revised}{revised}         % Date the article was revised
+  \tpDeclareLabeledComp[Reviewed]{Reviewed}{reviewed}      % Date the article was reviewed
+  \tpDeclareLabeledComp[Accepted]{Accepted}{accepted}      % Date the article was accepted
+  \tpDeclareLabeledComp[Published]{Published}{published}   % Date the article was published
+  \tpDeclareLabeledComp[Conflict of Interest]{COIStatement}{coi-statement}% Conflict of Interest statement
   %% Generic additional information
   \tp@title@macro{AddNoteI}                      % Additional information, title page I
   \tp@title@macro{AddNoteII}                     % Additional information, title page II
@@ -492,7 +496,7 @@
     \bgroup
       \tpUseProperty{title-face}\tpUseComp{Title}%
     \egroup
-    \expandafter\meaning\csname tp@titlepage@editor-2@FullName\endcsname
+    %\expandafter\meaning\csname tp@titlepage@editor-2@FullName\endcsname
   }%
   \tpSetProperty{titlepage-ii}{%
     \tpGetComp{Editorial}%
@@ -538,7 +542,7 @@
     \tpIfComp{Subtitle}{\tpUseProperty{subtitle-format}}{}%
     \tpGetComp{Statement}%
     \vskip\baselineskip
-  }
+  }%
   \tpSetProperty{subtitle-face}{\Large\sffamily\bfseries}%
   \tpSetProperty{subtitle-format}{%
     \bgroup
@@ -546,7 +550,7 @@
       \tpUseComp{Subtitle}%
     \egroup
     \par
-  }
+  }%
   %% Imprint
   \tpSetProperty{imprint-face}{\footnotesize}%
   \tpSetProperty{imprint-sep}{\ifhmode\par\fi\addvspace{\baselineskip}}%
@@ -575,15 +579,25 @@
     \tpUseProperty{imprint-sep}%
     \tpGetComp{EnvDisclaimer}%
   }%
+  \tpSetProperty{journal-meta}{%
+    \tpUseLabeledComp{Submitted}%
+    \tpUseLabeledComp{Received}%
+    \tpUseLabeledComp{Revised}%
+    \tpUseLabeledComp{Accepted}%
+    \tpUseLabeledComp{Published}%
+    \tpUseLabeledComp{Copyright}%
+    \tpUseLabeledComp{COIStatement}%
+    \tpUseLabeledComp{Keywords}
+  }%
   \tpSetProperty{licence}{%
     \tpIfComp{LicenceLogo}{\includegraphics{\tpUseComp{LicenceLogo}}\par}{}%
     \tpGetComp{LicenceText}%
-  }
+  }%
   \tpSetProperty{copyright}{%
     \tpIfComp{Copyright}
       {\tpUseComp{Copyright}\par}
       {\textcopyright\space\tpUseComp{Year}\space\tpUseComp{Publisher},\space\tpUseComp{PubPlace}\par}%
-    }
+    }%
   \tpSetProperty{publisher}{%
     \tpGetComp{PubDivInfo}%
     \tpUseProperty{copyright}%
@@ -608,15 +622,18 @@
     {\bfseries\tpUseComp{FullName}:}\space%
     \tpUseComp{Bio}%
   }%
-  \tpPropertyLet{author-list-format}            {name-list-format}% Override for single author names
   \tpPropertyLet{author-bio-format}             {name-bio-format}% Override for single author meta info (this one is titlepage specific and may look different in other places where tpAuthor is used!)
   \tpPropertyLet{author-bio-block-format}       {name-bio-block-format}% Override for single author meta info (this one is titlepage specific and may look different in other places where tpAuthor is used!)
   \tpPropertyLet{editor-format}                 {name-format}% Override for single editor names
   \tpPropertyLet{editor-list-format}            {name-list-format}% Override for single editor names
+  \tpPropertyLet{editor-citation-format}        {name-citation-format}% Override for single author names
+  \tpPropertyLet{editor-short-citation-format}  {name-short-citation-format}% Override for single author names
   \tpPropertyLet{editor-bio-format}             {name-bio-format}% Override for single editor meta info
   \tpPropertyLet{editor-bio-block-format}       {name-bio-block-format}% Override for single editor meta info
   \tpPropertyLet{series-editor-format}          {name-format}% Override for single series editor names
   \tpPropertyLet{series-editor-list-format}     {name-list-format}% Override for single editor names
+  \tpPropertyLet{series-editor-citation-format}        {name-citation-format}% Override for single author names
+  \tpPropertyLet{series-editor-short-citation-format}  {name-short-citation-format}% Override for single author names
   \tpPropertyLet{series-editor-bio-format}      {name-bio-format}% Override for single series editor meta info
   \tpPropertyLet{series-editor-bio-block-format}{name-bio-block-format}% Override for single series editor meta info
   % name Separators

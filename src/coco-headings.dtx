@@ -828,12 +828,12 @@
   \tpSetProperty{extended-heading}{%
     \tpIfComp{Abstract}
       {\par\vskip\baselineskip
-       {\bfseries\tpIfComp{AbstractTitle}{\tpUseComp{AbstractTitle}}{Abstract}}\par
+       {\bfseries\tpIfComp{AbstractLabel}{\tpUseComp{AbstractLabel}}{Abstract}}\par
        {\itshape\small\tpUseComp{Abstract}}\par}
       {}%
     \tpIfComp{Keywords}
       {\par\vskip\baselineskip
-       {\bfseries\tpIfComp{KeywordsTtitle}{\tpUseComp{KeywordsTitle}}{Keywords}}\par
+       {\bfseries\tpIfComp{KeywordsLabel}{\tpUseComp{KeywordsLabel}}{Keywords}}\par
        {\itshape\small\tpUseComp{Keywords}\par}}
      {}%
    }%

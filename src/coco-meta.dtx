@@ -83,6 +83,9 @@
 \def\tp@declare@role[#1]#2{%
   \tpDeclareComponentGroup{tp#2}{%
     \tpDeclareCountedComp{FullName}%
+    \tpDeclareCountedComp{CiteName}%
+    \tpDeclareCountedComp{ShortCiteName}%
+    \tpDeclareCountedComp{Initial}%
     \tpDeclareCountedComp{LastName}%
     \tpDeclareCountedComp{FirstName}%
     \tpDeclareCountedComp{MidName}%
@@ -93,8 +96,13 @@
   }%
   \tpGroupHandler{tp#2}{%
     \tpIfComp{FullName}{}{\tpFullName{\tpUseProperty{name-format}}}%
+    \tpIfComp{Initial}{}{\tpInitial{\tpUseProperty{initials-format}}}%
+    \tpIfComp{CiteName}{}{\tpCiteName{\tpUseProperty{cite-name-format}}}%
+    \tpIfComp{ShortCiteName}{}{\tpShortCiteName{\tpUseProperty{short-cite-name-format}}}%
   }%
   \tpDeclareRoleBlock{#2}{NameList}{#1-list-format}%
+  \tpDeclareRoleBlock{#2}{CitationList}{#1-citation-format}%
+  \tpDeclareRoleBlock{#2}{ShortCitationList}{#1-short-citation-format}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -116,17 +124,48 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\tp@meta@role@eval} creates the name list for the role. \#1
-%   is the name of the role.
+% \begin{macro}{\tp@meta@role@eval} creates the name lists for the
+%   role. \#1 is the name of the role.
 %    \begin{macrocode}
 \def\tp@meta@role@eval#1{{%
-  \tpIfComp{#1NameList}{}{%
+    \@tp@meta@role@eval{#1}{NameList}%
+    \@tp@meta@role@eval{#1}{CitationList}%
+    \@tp@meta@role@eval{#1}{ShortCitationList}%
+  }}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@tp@meta@role@eval} \#1 is the name of the role and
+%   \#2 is the name of the list. The access Component is
+%   \lstinline{#1#2}, i.e., both argumets together.
+%
+%    \begin{macrocode}
+\def\@tp@meta@role@eval#1#2{%
+%    \end{macrocode}
+% First, we check if the Component has already been set in the
+% input. if so, nothing is done since this counts as global override
+% before any automatic list creation.
+%    \begin{macrocode}
+  \tpIfComp{#1#2}{}{%
+%    \end{macrocode}
+% Second, we check if the counter for the Role is defined and greater
+% than 0. If neither is the case, this means that the Group does not
+% occur in the input, at all, so we don't need to do anything.
+%    \begin{macrocode}
     \ifcsdef{tp#1Cnt}
       {\expandafter\ifnum\csname tp#1Cnt\endcsname>\z@
+%    \end{macrocode}
+% otherwise, we evaluate the attributes on the Group's Container
+%    \begin{macrocode}
           \tp@eval@role@attrs{#1}%
-          \tpApplyCollection{tp#1}{\csname tp@meta@role@#1@NameList\endcsname}{#1NameList}%
+%    \end{macrocode}
+% and call the Property that is stored in
+% \lstinline{\tp@meta@role@#1@#2} and store teh result in the
+% Component \lstinline{#1#2}.
+%    \begin{macrocode}
+          \tpApplyCollection{tp#1}{\csname tp@meta@role@#1@#2\endcsname}{#1#2}%
         \fi
-      }{}}}}%
+      }{}}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tp@eval@role@attrs} evaluates the attributes that are
@@ -138,6 +177,81 @@
       \ifcsdef{tp@meta@#1-\the\@tempcnta @attrs\endcsname}{%
         \tpParseAttributes{#1-\the\@tempcnta }{\csname tp@meta@#1-\the\@tempcnta @attrs\endcsname}%
       }{}}}
+%    \end{macrocode}
+% \end{macro}
+%
+%
+% \section{Labeled Components}
+%
+% \begin{macro}{\tpDeclareLabeledComp} declares two Components: one
+%   named \lstinline{\csname tp#2\endcsname} for the value and another
+%   one named \lstinline{\csname tp#2Label\endcsname} for its
+%   corresponding label. \#3 is used for property overrides. The
+%   optional Argument \#1 allows to set a default value for the Label.
+%    \begin{macrocode}
+\def\tpDeclareLabeledComp{\tp@opt@empty\tp@declare@labeled@comp}
+\def\tp@declare@labeled@comp[#1]#2#3{%
+  \tpDeclareComp{#2}{\expandafter\global}{}%
+  \tpDeclareComp{#2Label}{\expandafter\global}{}%
+  \csxdef{property-infix-\tp@cur@cont-#2}{#3}%
+  \if!#1!\else\expandafter\long\expandafter\def\csname tp@\tp@cur@cont @#2Label\endcsname{#1}\fi
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tpUseLabeledComp} declares two Components: one named
+%   \lstinline{\csname tp#1\endcsname} for the value and another one
+%   named \lstinline{\csname tp#1Label\endcsname} for its
+%   corresponding label. An optional Argument allows to set a default
+%   value for the Label.
+%    \begin{macrocode}
+\def\tpUseLabeledComp#1{%
+  \tpIfComp{#1}{%
+    \letcs\tp@infix{property-infix-\tp@cur@cont-#1}%
+    \tpIfProp{meta-before-\tp@infix}{\tpUseProperty{meta-before-\tp@infix}}{\tpMetaBeforeLabeledComp}%
+    \bgroup
+      \tpIfProp{meta-\tp@infix-face}{\tpUseProperty{meta-\tp@infix-face}}{\tpMetaLabeledCompFace}%
+      \tpIfComp{#1Label}{%
+        \bgroup
+          \tpIfProp{meta-\tp@infix-label-face}{\tpUseProperty{meta-\tp@infix-label-face}}{\tpMetaLabeledCompLabelFace}%
+          \tpUseComp{#1Label}%
+          \tpIfProp{meta-\tp@infix-sep}{\tpUseProperty{meta-\tp@infix-sep}}{\tpMetaLabeledCompLabelSep}%
+        \egroup
+      }{}%
+      \tpUseComp{#1}%
+    \egroup
+    \tpIfProp{meta-after-\tp@infix}{\tpUseProperty{meta-after-\tp@infix}}{\tpMetaAfterLabeledComp}%
+  }{}}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tpMetaBeforeLabeledComp} is the default fallback for
+%   material that is inserted at the beginning of labeled meta
+%   Components
+%%    \begin{macrocode}
+\def\tpMetaBeforeLabeledComp{}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tpMetaAfterLabeledComp} is the default fallback for
+%   material that is inserted at the end of labeled meta Components
+%%    \begin{macrocode}
+\def\tpMetaAfterLabeledComp{\par}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tpMetaLabeledCompFace} is the default font face for
+%   labeled meta Components
+%%    \begin{macrocode}
+\def\tpMetaLabeledCompFace{}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tpMetaLabeledCompLabelFace} is the default font face
+%   for the label of labeled meta components
+%%    \begin{macrocode}
+\def\tpMetaLabeledCompLabelFace{\bfseries}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tpMetaLabeledCompLabelSep} is the default seperator
+%   between the label and the content of a labeled meta Component
+%%    \begin{macrocode}
+\def\tpMetaLabeledCompLabelSep{:\enskip}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -155,26 +269,10 @@
 %   also loaded by article title pages.
 %    \begin{macrocode}
 \def\tp@extended@meta@macros{%
-  \tp@provide@ext@meta@macros[Abstract]{Abstract}%
-  \tp@provide@ext@meta@macros[Keywords]{Keywords}%
-  \tp@provide@ext@meta@macros{DOI}%
-  \tp@provide@ext@meta@macros{TitleEn}%
-}
-%    \end{macrocode}
-% \end{macro}
-% \begin{macro}{\tp@provide@ext@meta@macros}
-%   Provides component macros to encode meta data. Each macro consists
-%   of two parts: one that carries the content, and one that allows to
-%   override the Title. \changes{v0.3}{2023/08/03}{The optional Argument allows to define a
-%   global default value for the Title.}
-%    \begin{macrocode}
-\def\tp@provide@ext@meta@macros{\tp@opt@empty\@tp@provide@ext@meta@macros}%
-\def\@tp@provide@ext@meta@macros[#1]#2{%
-  \tpDeclareComp{#2}{}{}%
-  \tpDeclareComp{#2Title}{}{}%
-  \if!#1!\else
-    \expandafter\long\expandafter\def\csname tp@\tp@cur@cont @#1\endcsname{#2}%
-  \fi
+  \tpDeclareLabeledComp[Abstract]{Abstract}{abstract}%
+  \tpDeclareLabeledComp[Keywords]{Keywords}{keyword}%
+  \tpDeclareLabeledComp{DOI}{doi}%
+  \tpDeclareLabeledComp{TitleEn}{title-en}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -207,10 +305,32 @@
 % Defaut Property settings for the Meta Container.
 %    \begin{macrocode}
 \tpAddToDefault{Meta}{%
+  \tpSetProperty{initials-format}{%
+    \expandafter\ifx\csname tp@\tp@cur@cont @\tp@cnt@grp-FirstName-\the\tpCurCount\endcsname\long@empty\else
+      \expandafter\ifx\csname tp@\tp@cur@cont @\tp@cnt@grp-FirstName-\the\tpCurCount\endcsname\relax\else
+        \expandafter\expandafter\expandafter\@car\csname tp@\tp@cur@cont @\tp@cnt@grp-FirstName-\the\tpCurCount\endcsname\relax\@nil\tpUseProperty{initials-period}
+      \expandafter\ifx\csname tp@\tp@cur@cont @\tp@cnt@grp-MidName-\the\tpCurCount\endcsname\long@empty\else
+        \expandafter\ifx\csname tp@\tp@cur@cont @\tp@cnt@grp-MidName-\the\tpCurCount\endcsname\relax\else
+          \tpUseProperty{initials-sep}%
+          \expandafter\expandafter\expandafter\@car\csname tp@\tp@cur@cont @\tp@cnt@grp-MidName-\the\tpCurCount\endcsname\relax\@nil\tpUseProperty{initials-period}%
+        \fi\fi
+    \fi\fi
+  }
+  \tpSetProperty{initials-sep}{~}
+  \tpSetProperty{initials-period}{.}
   \tpSetProperty{name-format}{\tpUseComp{FirstName}\space\tpUseComp{LastName}}%
+  \tpSetProperty{cite-name-format}{\tpUseComp{LastName}}%
+  \tpSetProperty{short-cite-name-format}{\tpUseComp{LastName},~\tpUseComp{Initial}}%
   \tpSetProperty{name-list-format}{\tpUseComp{FullName}\ifnum\tpCurCount<\tpTotalCount\tpUseProperty{counted-name-sep}\fi}%
-  \tpSetProperty{counted-name-sep}{,\space}%
+  \tpSetProperty{name-citation-format}{\tpUseComp{CiteName}}%
+  \tpSetProperty{name-short-citation-format}{\tpUseComp{ShortCiteName}}%
+  % Aliasses
   \tpPropertyLet{author-format}{name-format}% Override for single author names
+  \tpPropertyLet{author-list-format}            {name-list-format}% Override for single author names
+  \tpPropertyLet{author-citation-format}        {name-citation-format}% Override for single author names
+  \tpPropertyLet{author-short-citation-format}  {name-short-citation-format}% Override for single author names
+  %
+  \tpSetProperty{counted-name-sep}{,\space}%
   \tpSetProperty{name-and}{\space and\space}%
   \tpSetProperty{name-etal}{\space et~al.}%
   \tpSetProperty{name-sep}{,\space}%
