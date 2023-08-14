@@ -188,6 +188,12 @@
 %
 % \section{Intermediate Level Interfaces}
 %
+% \begin{macro}{before-maketitle-hook}
+%   Hook that is expanded right before the titlepage is printed.
+%    \begin{macrocode}
+\tpDeclareHook[titlepage]{before-maketitle-hook}
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\tp@maketitle}
 %   collects the meta information and constructs the tpMaketitle macro
 %    \begin{macrocode}
@@ -196,16 +202,17 @@
   \ifarticle
     \gdef\tpMaketitle{%
       \let\tp@cnt@grp\@empty
+      \tpUseHook[titlepage]{before-maketitle-hook}%
       \bgroup
         \tpNamespace{titlepage}%
         \tpEvalType{Properties}%
-        \tpUseProperty{before-titlepage}%
         \tpUseProperty{article-title}%
       \egroup
     }%
   \else
     \gdef\tpMaketitle{%
       \let\tp@cnt@grp\@empty
+      \tpUseHook[titlepage]{before-maketitle-hook}%
       \bgroup
         \tpNamespace{titlepage}%
         \tpEvalType{Properties}%
@@ -392,6 +399,7 @@
 \def\tp@titlepage@default{%
   \tpSetProperty{article-title}{}%
   % Title page hooks
+  % Before \tpMaketitle and outside the group
   \tpSetProperty{before-titlepage}{%
     \pagestyle{empty}%
     \parindent\z@
@@ -481,7 +489,9 @@
       \tpUseProperty{EditorNameList}%
     \fi%
     \vskip\baselineskip
-    \tpUseComp{Title}%
+    \bgroup
+      \tpUseProperty{title-face}\tpUseComp{Title}%
+    \egroup
     \expandafter\meaning\csname tp@titlepage@editor-2@FullName\endcsname
   }%
   \tpSetProperty{titlepage-ii}{%
@@ -498,10 +508,7 @@
       \tpUseProperty{EditorNameList}%
     \fi%
     \par
-    \tpUseComp{Title}\par
-    \tpGetComp{Subtitle}%
-    \tpGetComp{Statement}%
-    \vskip\baselineskip
+    \tpUseProperty{title-format}
     \tpGetComp{Edition}%
     \tpGetComp{EditionNote}%
     \vfill
@@ -521,6 +528,25 @@
     \egroup
     \clearpage
   }%
+  %% predefined face and format Properties
+  \tpSetProperty{title-face}{\Huge\sffamily\bfseries}%
+  \tpSetProperty{title-format}{%
+    \bgroup
+      \tpUseProperty{title-face}%
+      \tpUseComp{Title}\par
+    \egroup
+    \tpIfComp{Subtitle}{\tpUseProperty{subtitle-format}}{}%
+    \tpGetComp{Statement}%
+    \vskip\baselineskip
+  }
+  \tpSetProperty{subtitle-face}{\Large\sffamily\bfseries}%
+  \tpSetproperty{subtitle-format}{%
+    \bgroup
+      \tpUseProperty{subtitle-face}%
+      \tpUseComp{Subtitle}%
+    \egroup
+    \par
+  }
   %% Imprint
   \tpSetProperty{imprint-face}{\footnotesize}%
   \tpSetProperty{imprint-sep}{\ifhmode\par\fi\addvspace{\baselineskip}}%
