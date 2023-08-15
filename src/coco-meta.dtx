@@ -193,7 +193,7 @@
 \def\tp@declare@labeled@comp[#1]#2#3{%
   \tpDeclareComp{#2}{\expandafter\global}{}%
   \tpDeclareComp{#2Label}{\expandafter\global}{}%
-  \csxdef{property-infix-\tp@cur@cont-#2}{#3}%
+  \csxdef{labeled-meta-property-infix-\tp@cur@cont-#2}{#3}%
   \if!#1!\else\expandafter\long\expandafter\def\csname tp@\tp@cur@cont @#2Label\endcsname{#1}\fi
 }
 %    \end{macrocode}
@@ -206,52 +206,24 @@
 %    \begin{macrocode}
 \def\tpUseLabeledComp#1{%
   \tpIfComp{#1}{%
-    \letcs\tp@infix{property-infix-\tp@cur@cont-#1}%
-    \tpIfProp{meta-before-\tp@infix}{\tpUseProperty{meta-before-\tp@infix}}{\tpMetaBeforeLabeledComp}%
-    \bgroup
-      \tpIfProp{meta-\tp@infix-face}{\tpUseProperty{meta-\tp@infix-face}}{\tpMetaLabeledCompFace}%
-      \tpIfComp{#1Label}{%
-        \bgroup
-          \tpIfProp{meta-\tp@infix-label-face}{\tpUseProperty{meta-\tp@infix-label-face}}{\tpMetaLabeledCompLabelFace}%
-          \tpUseComp{#1Label}%
-          \tpIfProp{meta-\tp@infix-sep}{\tpUseProperty{meta-\tp@infix-sep}}{\tpMetaLabeledCompLabelSep}%
-        \egroup
-      }{}%
-      \tpUseComp{#1}%
-    \egroup
-    \tpIfProp{meta-after-\tp@infix}{\tpUseProperty{meta-after-\tp@infix}}{\tpMetaAfterLabeledComp}%
+%    \end{macrocode}
+%
+% \begin{macro}{\tpCurInfix} stores the currently active property
+%   infix for the Labeled Component
+%    \begin{macrocode}
+    \letcs\tpCurInfix{labeled-meta-property-infix-\tp@cur@cont-#1}%
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tpCurComp} stores the currently active Component name
+%    \begin{macrocode}
+    \def\tpCurComp{#1}%
+%    \end{macrocode}
+% \end{macro}
+%    \begin{macrocode}
+    \tpIfProp{labeled-meta-\tpCurInfix-format}
+      {\tpUseProperty{labeled-meta-\tpCurInfix-format}}
+      {\tpUseProperty{labeled-meta-format}}%
   }{}}
-%    \end{macrocode}
-% \end{macro}
-% \begin{macro}{\tpMetaBeforeLabeledComp} is the default fallback for
-%   material that is inserted at the beginning of labeled meta
-%   Components
-%%    \begin{macrocode}
-\def\tpMetaBeforeLabeledComp{}
-%    \end{macrocode}
-% \end{macro}
-% \begin{macro}{\tpMetaAfterLabeledComp} is the default fallback for
-%   material that is inserted at the end of labeled meta Components
-%%    \begin{macrocode}
-\def\tpMetaAfterLabeledComp{\par}
-%    \end{macrocode}
-% \end{macro}
-% \begin{macro}{\tpMetaLabeledCompFace} is the default font face for
-%   labeled meta Components
-%%    \begin{macrocode}
-\def\tpMetaLabeledCompFace{}
-%    \end{macrocode}
-% \end{macro}
-% \begin{macro}{\tpMetaLabeledCompLabelFace} is the default font face
-%   for the label of labeled meta components
-%%    \begin{macrocode}
-\def\tpMetaLabeledCompLabelFace{\bfseries}
-%    \end{macrocode}
-% \end{macro}
-% \begin{macro}{\tpMetaLabeledCompLabelSep} is the default seperator
-%   between the label and the content of a labeled meta Component
-%%    \begin{macrocode}
-\def\tpMetaLabeledCompLabelSep{:\enskip}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -345,6 +317,41 @@
   \tpSetProperty{affil-sep}{\par}
   \tpSetProperty{affil-block-format}{\textsuperscript{\tpUseComp{AffilID}}\tpUseComp{Affiliation}}
   \tpSetProperty{affil-block-face}{\small\normalfont}
+  % Labeled Meta Properties
+  \tpSetProperty{labeled-meta-format}{%
+    \tpIfProp{labeled-meta-before-\tpCurInfix}
+      {\tpUseProperty{labeled-meta-before-\tpCurInfix}}
+      {\tpUseProperty{labeled-meta-before}}%
+    \bgroup
+      \tpIfProp{labeled-meta-\tpCurInfix-face}
+        {\tpUseProperty{labeled-meta-\tpCurInfix-face}}
+        {\tpUseProperty{labeled-meta-face}}%
+      \tpIfProp{labeled-meta-\tpCurInfix-label-format}
+        {\tpUseProperty{labeled-meta-\tpCurInfix-label-format}}
+        {\tpUseProperty{labeled-meta-label-format}}%
+      \tpUseComp{\tpCurComp}%
+    \egroup
+    \tpIfProp{labeled-meta-after-\tpCurInfix}
+      {\tpUseProperty{labeled-meta-after-\tpCurInfix}}
+      {\tpUseProperty{labeled-meta-after}}%
+  }
+  \tpSetProperty{labeled-meta-label-format}{%
+    \tpIfComp{\tpCurComp Label}{%
+      \bgroup
+        \tpIfProp{labeled-meta-\tpCurInfix-label-face}
+          {\tpUseProperty{labeled-meta-\tpCurInfix-label-face}}
+          {\tpUseProperty{labeled-meta-label-face}}%
+        \tpUseComp{\tpCurComp Label}%
+        \tpIfProp{meta-labeled-\tpCurInfix-sep}
+          {\tpUseProperty{labeled-meta-\tpCurInfix-label-sep}}
+          {\tpUseProperty{labeled-meta-label-sep}}%
+      \egroup
+    }{}}
+  \tpSetProperty{labeled-meta-label-face}{\bfseries}
+  \tpSetProperty{labeled-meta-label-sep}{:\enskip}
+  \tpSetProperty{labeled-meta-face}{}
+  \tpSetProperty{labeled-meta-before}{}
+  \tpSetProperty{labeled-meta-after}{\par}
 }
 %    \end{macrocode}
 %    \begin{macrocode}[gobble=1]
