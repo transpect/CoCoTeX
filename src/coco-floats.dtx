@@ -443,8 +443,6 @@
         \tp@flt@generate@listof@handlers{#4}{#3}{#2}%
         \bgroup
           \def\tp@cur@cont{#2}%
-          \tp@restore@init{#2}{list-of-number-maxwd}%
-          \tp@restore@init{#2}{list-of-indent}%
           \tp@init@l@[list-of]{#4}{0}{#3}% Generate listof-Entries for first level floats
           \tp@init@l@[list-of]{#4}{1}{sub#3}% Generate listof-Entries for sub-floats
         \egroup

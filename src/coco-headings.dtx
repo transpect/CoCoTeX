@@ -166,7 +166,6 @@
         \tp@init@l@{toc}{#2}{#3}%
         \let\tp@cur@cont\@tp@cur@cont
         \tp@init@cnt{#3}%
-        \tp@restore@init{heading}{number-#2-maxwd}%
       }%
 %    \end{macrocode}
 % Unlike other Sub-Containers, headings form no own {\LaTeX}
@@ -366,17 +365,6 @@
 %   for automatic numbering if it doesn't exist, yet.
 %    \begin{macrocode}
 \def\tp@init@cnt#1{\ifcsname c@#1\endcsname\else\@definecounter{#1}\fi}
-%    \end{macrocode}
-% \end{macro}
-%
-% {\CoCoTeX} provides a feature that allows headings to be indented
-% to the maximum width that is needed to print the counters of
-% \textit{all (other) heading levels}. This overall maximum widths are
-% stored in the .aux-files for both the headings itself and their
-% toc-entries.
-%    \begin{macrocode}
-\tp@restore@init{heading}{toc-number-maxwd}
-\tp@restore@init{heading}{number-maxwd}
 %    \end{macrocode}
 % \subsection{Initializers for Instances of Heading Levels}%
 %
@@ -900,6 +888,13 @@
   \tpSetProperty{number-width}{}%
   \tpSetProperty{number-sep}{\space}%
   \tpSetProperty{number-align}{left}%
+  \tpSetProperty{number-format}{%
+    \bgroup
+      \tpUseProperty{title-face}%
+      \tpUseProperty{number-face}%
+      \tpUseComp{Number}%
+      \tpUseProperty{number-sep}%
+    \egroup}
   \tpSetProperty{numbering}{auto}%
   %% running header
   \tpSetProperty{running-level}{}% override level for running title, name
@@ -910,20 +905,33 @@
   %% ToC
   \tpSetProperty{no-toc}{false}% toc entries are generally disabled iff true
   \tpSetProperty{no-BM}{false}% bookmark entries are generally disabled, iff true
-  \tpSetProperty{toc-page-sep}{\dotfill}% between toc-title and page
-  \tpSetProperty{toc-page-face}{}%
-  \tpSetProperty{toc-number-width}{}% current width of number
-  \tpSetProperty{toc-number-align}{left}% alignment of number within hbox when hanging
-  \tpSetProperty{toc-title-face}{}% face of title
-  \tpPropertyLet{toc-number-face}{toc-title-face}% format of number
-  \tpSetProperty{toc-number-sep}{\enskip}% thing between numebr and toc-title
   \tpSetProperty{toc-margin-top}{\z@}% left indent of the whole entry
   \tpSetProperty{toc-margin-bottom}{\z@}% right margin of the whole entry
   \tpSetProperty{toc-margin-left}{auto}% left indent of the whole entry
   \tpSetProperty{toc-margin-right}{\@pnumwidth}% right margin of the whole entry
+  \tpSetProperty{toc-title-face}{}% appearance of title
+  \tpSetProperty{toc-indent}{auto}% offset of the first line of the entry. auto: hang indent by max-number-width for the level
+  \tpSetProperty{toc-number-width}{}% current width of the TocNumber
+  \tpSetProperty{toc-number-align}{left}% alignment of TocNumber within the hbox when hanging
+  \tpPropertyLet{toc-number-face}{toc-title-face}% appearance of the TocNumber
+  \tpSetProperty{toc-number-sep}{\enskip}% thing between TocNumber and TocTitle
+  \tpSetProperty{toc-number-format}{% Format of the TocNumber
+    \bgroup
+      \tpUseProperty{toc-title-face}%
+      \tpUseProperty{toc-number-face}%
+      \tpUseComp{TocNumber}%
+      \tpUseProperty{toc-number-sep}%
+    \egroup}
+  \tpSetProperty{toc-page-sep}{\dotfill}% between TocTitle and the page counter
+  \tpSetProperty{toc-page-face}{}% appearance of the page value
+  \tpSetProperty{toc-page-format}{%
+    \tpUseProperty{toc-page-sep}%
+    \bgroup
+      \tpUseProperty{toc-page-face}%
+      \tpUseComp{TocPage}%
+    \egroup}% format of the page value
   \tpSetProperty{toc-link}{none}% should toc entries be linked? values: none,title,page,all
   \tpSetProperty{toc-level}{}% override heading level for ToC, name!
-  \tpSetProperty{toc-indent}{auto}% offset of the first line of the entry. auto: hang indent by max-number-width for the level
   \tpSetProperty{toc-before-entry}{% stuff before anything is output; used to setup margins, alignment, line-breaking rules, etc.
     \addvspace{\tpUseProperty{toc-margin-top}}%
     \parindent \z@
@@ -941,7 +949,7 @@
       {\leftskip0pt\leavevmode}%
     \tpIfComp{TocAuthorNameList}{\tpUseComp{TocAuthorNameList}:\space}{}%
     \tpUseComp{TocTitle}%
-    \tpUseProperty{toc-page-sep}\tpUseComp{TocPage}%
+    \tpUseProperty{toc-page-format}%
   }%
   %% PDF-Bookmarks
   \tpSetProperty{bookmark-level}{}% override heading level for PDF bookmarks, numeric!
