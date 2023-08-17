@@ -439,33 +439,33 @@
 % parameters.
 %
 % \begin{macro}{\tp@store@maxwd}
-%   low-level macro that stores the maximum value of a dimension in a
-%   control sequence, twice. The first copy is global and can be set
-%   from the aux file, the other one is local and always starts at a
-%   value of \lstinline{0pt}. Both values are constantly updated
-%   whenever the macro is called and the previously stored value is
-%   lower than the one given in \lstinline{#2}. But only the global
-%   value is used when rendering contents.
+%   low-level macro that stores the maximum value of a dimension
+%   Property \#1. An internal Property \lstinline{\#1-local} is
+%   constantly updated whenever the macro is called and the previously
+%   stored value is lower than the one given in \lstinline{#2}.
 %
-%   \#1 is the internal name of the property, \#2
-%   is the value.
+%   The first call of the macro for a given Property triggers an
+%   addendum to the \lstinline{\@enddocumenthook} which causes the
+%   last value for that dimension to be stored in the .aux file. If
+%   the Property hasn't been set from a previous {\LaTeX} run or a
+%   previous call to the \lstinline{\tp@store@maxwd} macro for the
+%   same Property and the same level, it is set to \#2.
+%
+%   \#1 is the internal name of the property, \#2 is the check value.
 %    \begin{macrocode}
 \def\tp@store@maxwd#1#2{%
-  \expandafter\ifx\csname tp-\tp@cur@cont-#1\endcsname\relax
-    \csxdef{tp-\tp@cur@cont-#1}{#2}%
-    \csxdef{tp-\tp@cur@cont-#1-tmp}{#2}%
+  \expandafter\ifx\csname tp-\tp@cur@cont-#1\endcsname\relax\csxdef{tp-\tp@cur@cont-#1}{#2}\fi
+  \expandafter\ifx\csname tp-\tp@cur@cont-#1-local\endcsname\relax
+    \csxdef{tp-\tp@cur@cont-#1-local}{#2}%
   \else
-    \expandafter\ifdim\csname tp-\tp@cur@cont-#1\endcsname>#2\relax
-      \csxdef{tp-\tp@cur@cont-#1}{#2}%
-    \fi
-    \expandafter\ifdim\csname tp-\tp@cur@cont-#1-temp\endcsname>#2\relax
-      \csxdef{tp-\tp@cur@cont-#1-tmp}{#2}%
+    \expandafter\ifdim\csname tp-\tp@cur@cont-#1-local\endcsname<#2\relax
+      \csxdef{tp-\tp@cur@cont-#1-local}{#2}%
     \fi
   \fi
 %    \end{macrocode}
 % The second step is to store the highest values in the .aux file for
 % later LaTeX runs. A \lstinline{\write\@auxout} command for the
-% control sequence is therefore added to the
+% storage macro is therefore added to the
 % \lstinline{\@enddocumenthook} and a flag is set that indicates that
 % the write command has already been added to the hook, since that
 % needs to be done only once for each to-be-stored dimension.
@@ -477,14 +477,17 @@
 % values change, you still need to do at least two more {\LaTeX} runs
 % before the values stabilize.
 %    \begin{macrocode}
-  \ifcsdef{tp-#1-#2-stored-trigger}{}
-    {\AtEndDocument{%
-       \tpKernelDebugMsg{Storing \string\tp-#1-#2 (\csmeaning{tp-#1-#2-tmp})}%
-       \write\@auxout{\string\expandafter\string\gdef\string\csname\space tp-#1-#2\string\endcsname{\csname tp-#1-#2-tmp\endcsname}}%
-     }%
-   \csgdef{tp-#1-#2-stored-trigger}{\@empty}%
+  \ifcsdef{tp-\tp@cur@cont-#1-stored-trigger}{}
+    {%
+      \edef\@tempa{%
+        \noexpand\write\noexpand\@auxout{%
+          \noexpand\string\noexpand\csgdef{tp-\tp@cur@cont-#1}{%
+            \noexpand\csname\noexpand\space tp-\tp@cur@cont-#1-local\noexpand\endcsname}}}%
+     \expandafter\AtEndDocument\expandafter{\@tempa}%
+\message{^^J===>added {\meaning\@tempa} to the @enddocumenthook (now: \meaning\@enddocumenthook). Setting tp-\tp@cur@cont-#1-stored-trigger.}%
+     \csgdef{tp-\tp@cur@cont-#1-stored-trigger}{\@empty}%
    }%
-}
+ }
 %    \end{macrocode}
 % \end{macro}
 %
@@ -596,8 +599,8 @@
 %   internal property prefix, \#2 is the numerical list level.
 %    \begin{macrocode}
 \def\tp@get@indent#1#2{%
-  \csedef{int-#1margin-left}{\tpUseProperty{#1margin-left}}%
-  \csedef{int-#1indent}{\tpUseProperty{#1indent}}%
+  \tpPropertyLetX{int-#1margin-left}{#1margin-left}%
+  \tpPropertyLetX{int-#1indent}{#1indent}%
   \edef\tp@tmp@numwd{\tpUseProperty{#1number-width-level-max}}%
   \tpIfPropVal{#1indent}{auto-global}
 %    \end{macrocode}
@@ -608,25 +611,35 @@
 % \lstinline{margin-left}.
 %    \begin{macrocode}
     {\tpSetPropertyX{#1indent}{-\tpUseProperty{#1number-width-max}}%
-     \@tempdima=\dimexpr\tpUseProperty{#1number-width-max}+\tpUseProperty{#1margin-left}\relax
+     \@tempdima=\dimexpr\tpUseProperty{#1number-width-max}+\tpUseProperty{int-#1margin-left}\relax
      \tpSetPropertyX{#1margin-left}{\the\@tempdima}}
     {\tpIfPropVal{int-#1margin-left}{auto}
 %    \end{macrocode}
 % If \lstinline{#1margin-left} is set to \lstinline{auto}, all
 % items of the same level get the same left margin that is determined
-% by the sums of the indent of all higher levels.
+% by the sums of the indents of all higher levels.
 %    \begin{macrocode}
        {\tpIfPropVal{int-#1indent}{auto}
 %    \end{macrocode}
-% if \lstinline{#1indent} is set to \lstinline{auto}, 
+% if \lstinline{#1indent} is also set to \lstinline{auto}, the
+% \lstinline{indent} of the current item is set to the wides Number of
+% the same level.
 %    \begin{macrocode}
           {\tpSetProperty{#1indent}{-\tp@tmp@numwd}}
+%    \end{macrocode}
+% otherwise it is set to the value of indent, or \lstinline{0pt} if it
+% was not set at all.
+%    \begin{macrocode}
           {\tpIfProp{int-#1indent}
              {\tpSetPropertyX{#1indent}{\tpUseProperty{int-#1indent}}}
              {\tpSetProperty{#1indent}{\z@}}}%
+%    \end{macrocode}
+% the final left margin for the item is determined by the
+% \lstinline{\tp@det@margin@left} macro, above.
+%    \begin{macrocode}
         \tp@det@margin@left{#1}{#2}}
 %    \end{macrocode}
-% HIER WEITER
+% 
 %    \begin{macrocode}
        {\tpIfProp{int-#1margin-left}
           {\tpIfPropVal{int-#1indent}{auto}
