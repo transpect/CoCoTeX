@@ -393,17 +393,21 @@
 % \begin{macro}{\tp@expand@l@contents}
 %   expands the content of the \lstinline{tp@l@<level>} macro and contains some code
 %   to catch and handle standard \LaTeX\ headings. \#1 is the content
-%   of the \lstinline{tp@l@-macro}, \#2 is the namespace, and \#3 is the Component
-%   prefix.
+%   of the \lstinline{tp@l@-macro}, \#2 is the namespace, \#3 is the Component
+%   prefix and \#4 is the name of the Content component.
 %    \begin{macrocode}
 \def\tp@expand@l@contents#1#2#3#4{%
-  \sbox\z@{\def\numberline##1{\expandafter\gdef\csname tp@#2@#3Number\endcsname{##1}}#1}%
+  \global\let\tp@tempa\relax
+  \sbox\z@{\def\numberline##1{\xdef\tp@tempa{\noexpand\csdef{tp@#2@#3Number}{##1}}}#1}%
   \ifdim\wd\z@>\z@
     \let\numberline\@gobble%
-    \protected@csxdef{tp@#2@#3#4}{#1}%
+    \protected@csedef{tp@#2@#3#4}{#1}%
+    \tp@tempa
   \else
     #1%
-  \fi}
+  \fi
+  \global\let\tp@tempa\relax
+}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -481,7 +485,6 @@
          \noexpand\string\noexpand\csgdef{tp-\tp@cur@cont-#1}{%
            \noexpand\csname tp-\tp@cur@cont-#1-local\noexpand\endcsname}}}%
      \expandafter\AtEndDocument\expandafter{\@tempa}%
-\message{^^J===>added {\meaning\@tempa} to the @enddocumenthook (now: \meaning\@enddocumenthook). Setting tp-\tp@cur@cont-#1-stored-trigger.}%
      \csgdef{tp-\tp@cur@cont-#1-stored-trigger}{\@empty}}}
 %    \end{macrocode}
 % \end{macro}

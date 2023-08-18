@@ -482,7 +482,7 @@
     \tpDeclareComp{ListofNumber}{}{}%
     \tpDeclareComp{ListofPage}{}{}%
     \tpListofPage{\tpUseProperty{list-of-page-face}##4}%
-    \tp@expand@l@contents{##3}{#2}{Listof}{Caption}%%
+    \tp@expand@l@contents{##3}{#3}{Listof}{Caption}%%
     \tp@format@number{list-of-}{Listof}{##1}%
   }%
 %    \end{macrocode}
@@ -632,7 +632,10 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\tp@set@sublabel} generates second level counters for numbered sub-floats. \#1 is the sub-float counter
+% \begin{macro}{\tp@set@sublabel} generates second level counters for
+%   numbered sub-floats. \#1 is the sub-float counter
+%
+% TODO: float-number und sub-number sollten beides Components sein, nicht Properties!
 %    \begin{macrocode}
 \def\tp@set@sublabel#1{%
   \tpSetValProp{float-number}{\csname tp@\tp@cur@cont @number-0\endcsname}%
@@ -643,7 +646,7 @@
       \csname @\tpUseProperty{sub-number-style}\endcsname{#1}%
       \tpUseProperty{sub-number-after}%
     \endgroup}%
-  \expandafter\expandafter\expandafter\edef\expandafter\csname tp@\tp@cur@cont @number-#1\expandafter\endcsname\expandafter{\tpUseProperty{sub-number-block}}%
+  \expandafter\expandafter\expandafter\edef\expandafter\csname tp@\tp@cur@cont @number-#1\expandafter\endcsname\expandafter{\tpUseProperty{sub-number-format}}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -924,7 +927,7 @@
   \next%
     \ifx\@argii\tp@str@top\else\vss\fi
     \tpUseProperty{\tp@prefix caption-face}%
-    \tpUseProperty{\tp@prefix caption-format-#1}%
+    \tpUseProperty{\tp@prefix caption-face-#1}%
     \tp@topstrut\tpUseProperty{caption-#1}\strut%
     \ifx\@argii\tp@str@bottom\else\vss\fi%
   \egroup%
@@ -1007,7 +1010,7 @@
       \expandafter\hsize\expandafter\dimexpr\csname tp@\tp@cur@cont @res@width-\the\@tempcnta\endcsname\relax
       \tpGobble
       \tpUseProperty{\tp@prefix caption-face}%
-      \tpUseProperty{\tp@prefix caption-format-#1}%
+      \tpUseProperty{\tp@prefix caption-face-#1}%
       \leavevmode
       \strut\tpUseProperty{caption-#1}\strut%
       }%
@@ -1292,8 +1295,8 @@
   \tpSetProperty{subfloat-same-height}{}% if true, the subfloat must/can be adjusted to the same heights
   %% captions
   \tpSetProperty{caption-face}{}% style applied to top and bottom captions
-  \tpSetProperty{caption-format-top}{}%% style applied to top captions
-  \tpSetProperty{caption-format-bottom}{}%% style applied to bottom captions
+  \tpSetProperty{caption-face-top}{}%% style applied to top captions
+  \tpSetProperty{caption-face-bottom}{}%% style applied to bottom captions
   \tpSetProperty{source-face}{}% Format of source, additional to caption-format
   \tpSetProperty{legend-face}{}% Format of legend, additional to caption-format
   \tpSetProperty{caption-sep-top}{\z@}%% vertical space between top caption and content
@@ -1309,8 +1312,8 @@
       {\tpUseProperty{source-face}%
        \tpUseComp{Source}}}{}}%
   \tpPropertyLet{subcaption-face}{caption-face}% style applied to top and bottom captions
-  \tpSetProperty{subcaption-format-top}{\tpUseProperty{caption-format-top}}%% style applied to top captions
-  \tpSetProperty{subcaption-format-bottom}{\tpUseProperty{caption-format-bottom}}%% style applied to bottom captions
+  \tpSetProperty{subcaption-face-top}{\tpUseProperty{caption-face-top}}%% style applied to top captions
+  \tpSetProperty{subcaption-face-bottom}{\tpUseProperty{caption-face-bottom}}%% style applied to bottom captions
   \tpSetProperty{subcaption-add-sep-top}{\z@}%% additional vertical space between top caption and top sub-caption
   \tpSetProperty{subcaption-add-sep-bottom}{\z@}%% additional vertical space between bottom sub-caption and bottom caption
   \tpSetProperty{subcaption-sep-top}{\tpUseProperty{caption-sep-top}}%% vertical space between top sub-caption and content
@@ -1328,11 +1331,21 @@
   \tpSetProperty{sub-number-face}{}%% format of subcaption counters
   \tpSetProperty{sub-number-before}{(}% stuff that is put immediately before the sub counter
   \tpSetProperty{sub-number-after}{)}% stuff that is put immediately after the sub counter
-  \tpSetProperty{sub-number-block}{\tpUseProperty{float-number}\tpUseProperty{sub-number-sep}\tpUseProperty{sub-number}}%% Format of sub numbers
+  \tpSetProperty{sub-number-format}{% Format of the sub number
+    \tpUseProperty{float-number}%
+    \tpUseProperty{sub-number-sep}%
+    \tpUseProperty{sub-number}}%
   %% List-of entries
   \tpSetProperty{list-of-page-sep}{\dotfill}%
+  \tpPropertyLet{list-of-number-face}{list-of-caption-face}%
   \tpSetProperty{list-of-number-sep}{\enskip}%
   \tpSetProperty{list-of-number-align}{left}%
+  \tpSetProperty{list-of-number-format}{%
+    \bgroup
+      \tpUseProperty{list-of-number-face}%
+      \tpUseComp{ListofNumber}%
+      \tpUseProperty{list-of-number-sep}%
+    \egroup}%
   \tpSetProperty{list-of-parfillskip}{-\rightskip}%
   \tpSetProperty{list-of-margin-right}{\@pnumwidth \@plus 1fil}%
   \tpSetProperty{list-of-margin-left}{auto}%
