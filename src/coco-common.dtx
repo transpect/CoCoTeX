@@ -569,28 +569,24 @@
 % \end{macro}
 %
 % \begin{macro}{\tp@det@margin@left}
-%   determines the left margin of the current level by adding the left
-%   margin of the next-higher level to the absolute indent of the
-%   current level. ``Next-higher'' meaning hierarchical, i.e., the
-%   level counter is \textit{lower}.
+%   determines the left margin of the current level by subtracting the
+%   current level's indent from the left margin of the next-higher
+%   level. ``Next-higher'' meaning ``hierarchically'', i.e., the level
+%   counter is \textit{lower}. Remember that for hang indent, the
+%   indent is negative, so \lstinline{margin-left} grows larger.
 %
 %   \#1 is the Property prefix, \#2 is the current numerical list
 %   level.
 %    \begin{macrocode}
 \def\tp@det@margin@left#1#2{%
   \@tempcnta\numexpr#2-1\relax
-  \ifdim\tpUseProperty{#1indent}<\z@\relax
-    \@tempdimb=-\tpUseProperty{#1indent}\relax
+  \expandafter\ifx\csname tp-\tp@cur@cont-#1\the\@tempcnta-margin-left\endcsname\relax
+    \@tempdima=\tpUseProperty{#1indent}\relax%
   \else
-    \@tempdimb=\tpUseProperty{#1indent}\relax
+    \@tempdima=\dimexpr\csname tp-\tp@cur@cont-#1\the\@tempcnta-margin-left\endcsname-\tpUseProperty{#1indent}\relax
   \fi
-  \expandafter\ifx\csname tp-\tp@cur@cont-#1\the\@tempcnta-indent\endcsname\relax
-    \@tempdima=\@tempdimb\relax%
-  \else
-    \@tempdima\dimexpr \csname tp-\tp@cur@cont-#1\the\@tempcnta-indent\endcsname+\@tempdimb\relax
-  \fi
-  \tp@store@maxwd{#1#2-indent}{\the\@tempdima}%
-  \tpSetProperty{#1margin-left}{\csname tp-\tp@cur@cont-#1#2-indent\endcsname}}
+  \tp@store@maxwd{#1#2-margin-left}{\the\@tempdima}%
+  \tpSetProperty{#1margin-left}{\the\@tempdima}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tp@get@indent}
@@ -599,9 +595,15 @@
 %   internal property prefix, \#2 is the numerical list level.
 %    \begin{macrocode}
 \def\tp@get@indent#1#2{%
+%    \end{macrocode}
+% First, we need to store the initial values for both
+% \lstinline{#1margin-left} and \lstinline{#1indent} since, first
+% their values might be non-dimensional, and second, they will be
+% altered during macro expansion to ultimatly being passed to
+% \lstinline{\hskip}.
+%    \begin{macrocode}
   \tpPropertyLetX{int-#1margin-left}{#1margin-left}%
   \tpPropertyLetX{int-#1indent}{#1indent}%
-  \edef\tp@tmp@numwd{\tpUseProperty{#1number-width-level-max}}%
   \tpIfPropVal{#1indent}{auto-global}
 %    \end{macrocode}
 % If \lstinline{#1indent} is set to \lstinline{auto-global}, the item
@@ -611,8 +613,7 @@
 % \lstinline{margin-left}.
 %    \begin{macrocode}
     {\tpSetPropertyX{#1indent}{-\tpUseProperty{#1number-width-max}}%
-     \@tempdima=\dimexpr\tpUseProperty{#1number-width-max}+\tpUseProperty{int-#1margin-left}\relax
-     \tpSetPropertyX{#1margin-left}{\the\@tempdima}}
+     \tpSetPropertyX{#1margin-left}{\dimexpr\tpUseProperty{#1number-width-max}+\tpUseProperty{int-#1margin-left}\relax}}
     {\tpIfPropVal{int-#1margin-left}{auto}
 %    \end{macrocode}
 % If \lstinline{#1margin-left} is set to \lstinline{auto}, all
@@ -625,7 +626,7 @@
 % \lstinline{indent} of the current item is set to the wides Number of
 % the same level.
 %    \begin{macrocode}
-          {\tpSetProperty{#1indent}{-\tp@tmp@numwd}}
+          {\tpSetPropertyX{#1indent}{-\tpUseProperty{#1number-width-level-max}}}
 %    \end{macrocode}
 % otherwise it is set to the value of indent, or \lstinline{0pt} if it
 % was not set at all.
@@ -634,28 +635,54 @@
              {\tpSetPropertyX{#1indent}{\tpUseProperty{int-#1indent}}}
              {\tpSetProperty{#1indent}{\z@}}}%
 %    \end{macrocode}
-% the final left margin for the item is determined by the
-% \lstinline{\tp@det@margin@left} macro, above.
+% the final value for \lstinline{margin-left} is determined by the
+% \lstinline{\tp@det@margin@left} macro, above. It will be set to the sum of indent and
 %    \begin{macrocode}
         \tp@det@margin@left{#1}{#2}}
 %    \end{macrocode}
-% 
+% This branch is reached when the left margin is not set to \lstinline{auto}.
 %    \begin{macrocode}
        {\tpIfProp{int-#1margin-left}
           {\tpIfPropVal{int-#1indent}{auto}
-            {\tpSetProperty{#1indent}{-\tp@tmp@numwd}}
+%    \end{macrocode}
+% If \lstinline{margin-left} is set to a specific value and
+% \lstinline{indent} is set to \lstinline{auto}, set the actual indent
+% to the width of the level's widest Number.
+%    \begin{macrocode}
+            {\tpSetPropertyX{#1indent}{-\tpUseProperty{#1number-width-level-max}}}
             {\tpIfProp{int-#1indent}
+%    \end{macrocode}
+% Otherwise, if \lstinline{indent} is set to a specific width, apply that value, or else set the inden to \lstinline{0pt}.
+%    \begin{macrocode}
                {\tpSetPropertyX{#1indent}{\tpUseProperty{int-#1indent}}}
                {\tpSetProperty{#1indent}{\z@}}}}
+%    \end{macrocode}
+% If \lstinline{margin-left} is not set,
+%    \begin{macrocode}
          {\tpIfPropVal{int-#1indent}{auto}
-            {\tpSetProperty{#1margin-left}{\tp@tmp@numwd}%
-             \tpSetProperty{#1indent}{-\tp@tmp@numwd}}
+%    \end{macrocode}
+% and \lstinline{indent} is set to \lstinline{auto}, set
+% \lstinline{margin-left} to the width of the level's widest Number
+% and the actual \lstinline{indent} to the negative of that.
+%    \begin{macrocode}
+            {\tpPropertyLetX{#1margin-left}{#1number-width-level-max}%
+             \tpSetPropertyX{#1indent}{-\tpUseProperty{#1number-width-level-max}}}
             {\tpIfProp{int-#1indent}
+%    \end{macrocode}
+% If \lstinline{margin-left} is not set, and \lstinline{indent} is set
+% to a specific value, apply that value for \lstinline{indent} and set
+% \lstinline{margin-left} to \lstinline{0pt}. In this branch,
+% \lstinline{indent} should have a positive value, otherwise the
+% content would probably lap over the left edge of the type area.
+%    \begin{macrocode}
                {\tpSetPropertyX{#1indent}{\tpUseProperty{int-#1indent}}%
                 \tpSetProperty{#1margin-left}{\z@}}
+%    \end{macrocode}
+% otherwise set both \lstinline{indent} nad \lstinline{margin-left} to
+% \lstinline{0pt}.
+%    \begin{macrocode}
                {\tpSetProperty{#1indent}{\z@}%
-                \tpSetProperty{#1margin-left}{\z@}}}}}}%
-    }
+                \tpSetProperty{#1margin-left}{\z@}}}}}}}
 %    \end{macrocode}
 % \end{macro}
 %
