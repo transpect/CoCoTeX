@@ -346,8 +346,6 @@
     \expandafter\global\expandafter\newcount\csname c@#2depth\endcsname
     \expandafter\global\csname c@#2depth\endcsname=0\relax
   \fi
-  \expandafter\tp@store@latest\expandafter{\tp@cur@cont}{#1\if!#1!#2\fi-number-#3-maxwd}%
-  \expandafter\tp@store@latest\expandafter{\tp@cur@cont}{#1\if!#1!#2\fi-#3-indent}%
   \expandafter\ifx\csname tp@#2@extract@data\endcsname\relax
     \expandafter\let\csname tp@#2@extract@data\endcsname\tp@extract@generic
   \fi
@@ -438,7 +436,7 @@
 % values are available immediately and can be used to fortify those
 % parameters.
 %
-% \begin{macro}{\tp@store@maxwd}
+% \begin{macro}{\tp@store@latest}
 %   low-level macro that stores the maximum value of a dimension
 %   Property \#1. An internal Property \lstinline{\#1-local} is
 %   constantly updated whenever the macro is called and the previously
@@ -448,12 +446,12 @@
 %   addendum to the \lstinline{\@enddocumenthook} which causes the
 %   last value for that dimension to be stored in the .aux file. If
 %   the Property hasn't been set from a previous {\LaTeX} run or a
-%   previous call to the \lstinline{\tp@store@maxwd} macro for the
+%   previous call to the \lstinline{\tp@store@latest} macro for the
 %   same Property and the same level, it is set to \#2.
 %
 %   \#1 is the internal name of the property, \#2 is the check value.
 %    \begin{macrocode}
-\def\tp@store@maxwd#1#2{%
+\def\tp@store@latest#1#2{%
   \expandafter\ifx\csname tp-\tp@cur@cont-#1\endcsname\relax\csxdef{tp-\tp@cur@cont-#1}{#2}\fi
   \expandafter\ifx\csname tp-\tp@cur@cont-#1-local\endcsname\relax
     \csxdef{tp-\tp@cur@cont-#1-local}{#2}%
@@ -478,16 +476,13 @@
 % before the values stabilize.
 %    \begin{macrocode}
   \ifcsdef{tp-\tp@cur@cont-#1-stored-trigger}{}
-    {%
-      \edef\@tempa{%
-        \noexpand\write\noexpand\@auxout{%
-          \noexpand\string\noexpand\csgdef{tp-\tp@cur@cont-#1}{%
-            \noexpand\csname\noexpand\space tp-\tp@cur@cont-#1-local\noexpand\endcsname}}}%
+    {\edef\@tempa{%
+       \noexpand\immediate\noexpand\write\noexpand\@auxout{%
+         \noexpand\string\noexpand\csgdef{tp-\tp@cur@cont-#1}{%
+           \noexpand\csname tp-\tp@cur@cont-#1-local\noexpand\endcsname}}}%
      \expandafter\AtEndDocument\expandafter{\@tempa}%
 \message{^^J===>added {\meaning\@tempa} to the @enddocumenthook (now: \meaning\@enddocumenthook). Setting tp-\tp@cur@cont-#1-stored-trigger.}%
-     \csgdef{tp-\tp@cur@cont-#1-stored-trigger}{\@empty}%
-   }%
- }
+     \csgdef{tp-\tp@cur@cont-#1-stored-trigger}{\@empty}}}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -512,8 +507,8 @@
 % \lstinline{\@enddocumenthook}. We do the same for the maximum across
 % \textit{all} levels of the same Container Type.
 %    \begin{macrocode}
-  \tp@store@maxwd{#1number-#3-maxwd}{\the\wd\z@}%
-  \tp@store@maxwd{#1number-maxwd}{\the\wd\z@}%
+  \tp@store@latest{#1number-#3-maxwd}{\the\wd\z@}%
+  \tp@store@latest{#1number-maxwd}{\the\wd\z@}%
 %    \end{macrocode}
 % We provide the maximum level as a user-level Property
 % \lstinline{#1number-width-level-max}, the global maximum across all
@@ -585,7 +580,7 @@
   \else
     \@tempdima=\dimexpr\csname tp-\tp@cur@cont-#1\the\@tempcnta-margin-left\endcsname-\tpUseProperty{#1indent}\relax
   \fi
-  \tp@store@maxwd{#1#2-margin-left}{\the\@tempdima}%
+  \tp@store@latest{#1#2-margin-left}{\the\@tempdima}%
   \tpSetProperty{#1margin-left}{\the\@tempdima}}
 %    \end{macrocode}
 % \end{macro}

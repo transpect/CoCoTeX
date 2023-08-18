@@ -924,12 +924,12 @@
     \egroup}
   \tpSetProperty{toc-page-sep}{\dotfill}% between TocTitle and the page counter
   \tpSetProperty{toc-page-face}{}% appearance of the page value
-  \tpSetProperty{toc-page-format}{%
+  \tpSetProperty{toc-page-format}{% format of the page value
     \tpUseProperty{toc-page-sep}%
     \bgroup
       \tpUseProperty{toc-page-face}%
       \tpUseComp{TocPage}%
-    \egroup}% format of the page value
+    \egroup}%
   \tpSetProperty{toc-link}{none}% should toc entries be linked? values: none,title,page,all
   \tpSetProperty{toc-level}{}% override heading level for ToC, name!
   \tpSetProperty{toc-before-entry}{% stuff before anything is output; used to setup margins, alignment, line-breaking rules, etc.
