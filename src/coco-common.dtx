@@ -456,7 +456,13 @@
 %   \#1 is the internal name of the property, \#2 is the check value.
 %    \begin{macrocode}
 \def\tp@store@latest#1#2{%
-  \expandafter\ifx\csname tp-\tp@cur@cont-#1\endcsname\relax\csxdef{tp-\tp@cur@cont-#1}{#2}\fi
+  \expandafter\ifx\csname tp-\tp@cur@cont-#1\endcsname\relax
+    \csxdef{tp-\tp@cur@cont-#1}{#2}%
+  \else
+    \expandafter\ifdim\csname tp-\tp@cur@cont-#1\endcsname<#2\relax
+      \csxdef{tp-\tp@cur@cont-#1}{#2}%
+    \fi
+  \fi
   \expandafter\ifx\csname tp-\tp@cur@cont-#1-local\endcsname\relax
     \csxdef{tp-\tp@cur@cont-#1-local}{#2}%
   \else
@@ -566,7 +572,7 @@
 % (\lstinline{#1number-format}) we set in the first step.
 % \end{macro}
 %
-% \begin{macro}{\tp@det@margin@left}
+% \begin{macro}{\tp@calc@margin@left}
 %   determines the left margin of the current level by subtracting the
 %   current level's indent from the left margin of the next-higher
 %   level. ``Next-higher'' meaning ``hierarchically'', i.e., the level
@@ -576,10 +582,10 @@
 %   \#1 is the Property prefix, \#2 is the current numerical list
 %   level.
 %    \begin{macrocode}
-\def\tp@det@margin@left#1#2{%
+\def\tp@calc@margin@left#1#2{%
   \@tempcnta\numexpr#2-1\relax
   \expandafter\ifx\csname tp-\tp@cur@cont-#1\the\@tempcnta-margin-left\endcsname\relax
-    \@tempdima=\tpUseProperty{#1indent}\relax%
+    \@tempdima=-\tpUseProperty{#1indent}\relax%
   \else
     \@tempdima=\dimexpr\csname tp-\tp@cur@cont-#1\the\@tempcnta-margin-left\endcsname-\tpUseProperty{#1indent}\relax
   \fi
@@ -633,10 +639,10 @@
              {\tpSetPropertyX{#1indent}{\tpUseProperty{int-#1indent}}}
              {\tpSetProperty{#1indent}{\z@}}}%
 %    \end{macrocode}
-% the final value for \lstinline{margin-left} is determined by the
-% \lstinline{\tp@det@margin@left} macro, above. It will be set to the sum of indent and
+% the final value for \lstinline{margin-left} is calculated by the
+% \lstinline{\tp@calc@margin@left} macro, above. It will be set to the sum of indent and
 %    \begin{macrocode}
-        \tp@det@margin@left{#1}{#2}}
+        \tp@calc@margin@left{#1}{#2}}
 %    \end{macrocode}
 % This branch is reached when the left margin is not set to \lstinline{auto}.
 %    \begin{macrocode}

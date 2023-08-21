@@ -529,7 +529,7 @@
   \bgroup
     \tpUseHook{toc-before-hook-#1}%
     \tpUseProperty{toc-before-entry}%
-    \tpUseProperty{toc-heading}%
+    \tpUseProperty{toc-format}%
     \tpUseHook{toc-after-hook-#1}%
     \tpUseProperty{toc-after-entry}%
   \egroup}
@@ -942,7 +942,7 @@
     \leftskip\tpUseProperty{toc-margin-left}%
   }%
   \tpSetProperty{toc-after-entry}{\par\addvspace{\tpUseProperty{toc-margin-bottom}}}% Thing at the end of the entry, after the page number
-  \tpSetProperty{toc-heading}{% Order and formatting of the entry itself
+  \tpSetProperty{toc-format}{% Order and formatting of the entry itself
     \tpUseProperty{toc-title-face}%
     \tpIfComp{TocNumber}
       {\tpUseProperty{toc-hang-number}}
