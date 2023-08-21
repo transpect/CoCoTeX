@@ -21,6 +21,7 @@
 % internal switch for endnotes (\lstinline{\endnotestrue}) or footnotes (\lstinline{\endnotesfalse}, default).
 %    \begin{macrocode}
 \newif\ifendnotes \endnotesfalse
+\newif\ifendnotelinks \endnotelinksfalse
 %    \end{macrocode}
 % package options:
 % \begin{itemize}
@@ -40,6 +41,7 @@
 \DeclareOption{ennotoc}{\global\let\tp@ennotoc\relax}
 \DeclareOption{resetnotesperchapter}{\global\let\reset@notes@per@chapter\relax}
 \DeclareOption{endnoteswithchapters}{\global\endnotestrue\global\let\endnotes@with@chapters\relax}
+\DeclareOption{endnotelinks}{\global\endnotelinkstrue}
 \ProcessOptions
 %    \end{macrocode}
 % footnote package is mandatory since it provides the \lstinline{\savenotes} and \lstinline{\spewnotes} macros:
@@ -53,12 +55,36 @@
 \ifendnotes
   \RequirePackage{endnotes}
   \@ifpackageloaded{coco-headings}{\let\tp@useTeXHeading\relax}{}
+  % Allow linking endnotes to their respective occurrence in the document.
+  \ifendnotelinks
+    % Counters are global across all chapters; no reset.
+    \newcount\endnoteanchor \global\endnoteanchor\z@
+    \newcount\endnoteref \global\endnoteref\z@
+    \def\endnote{%
+      \@ifnextchar[%
+        \@xendnote{%
+          \stepcounter{endnote}%
+          \phantomsection%
+          \label{endnote-\the\endnoteanchor}%
+          \global\advance\endnoteanchor\@ne%
+          \protected@xdef\@theenmark{\theendnote}%
+          \@endnotemark\@endnotetext%
+        }%
+    }
+  \fi
   \let\footnote=\endnote
   \def\enotesize{\normalsize}%
   \def\enoteformat{%
     \noindent
     \leavevmode
-    \hskip-2em\hb@xt@2em{\@theenmark\hss}%
+    \hskip-2em\hb@xt@2em{%
+      \ifendnotelinks
+        \hyperref[endnote-\the\endnoteref]{\@theenmark}\hss%
+      \else
+        \@theenmark\hss%
+      \fi%
+    }%
+    \ifendnotelinks\global\advance\endnoteref\@ne\fi%
     \expandafter\parindent\tpfn@parindent\relax\expandafter}%
   \gdef\enoteheading{%
     \leftskip2em
