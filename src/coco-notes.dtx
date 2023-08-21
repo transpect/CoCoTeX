@@ -75,6 +75,11 @@
   \let\footnote=\endnote
   \def\enotesize{\normalsize}%
   \def\enoteformat{%
+    % Create the label right at the start of the endnote text to prevent erroneous pointing to the next page.
+    \ifendnotelinks%
+      \phantomsection%
+      \label{endnotetext-\the\endnoteref}%
+    \fi
     \noindent
     \leavevmode
     \hskip-2em\hb@xt@2em{%
@@ -85,8 +90,6 @@
       \fi%
     }%
     \ifendnotelinks%
-      \phantomsection%
-      \label{endnotetext-\the\endnoteref}%
       \global\advance\endnoteref\@ne%
     \fi%
     \expandafter\parindent\tpfn@parindent\relax\expandafter}%
