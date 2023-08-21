@@ -68,7 +68,7 @@
           \label{endnote-\the\endnoteanchor}%
           \global\advance\endnoteanchor\@ne%
           \protected@xdef\@theenmark{\theendnote}%
-          \@endnotemark\@endnotetext%
+          \hyperref[endnotetext-\the\endnoteanchor]{\@endnotemark}\@endnotetext%
         }%
     }
   \fi
@@ -84,7 +84,11 @@
         \@theenmark\hss%
       \fi%
     }%
-    \ifendnotelinks\global\advance\endnoteref\@ne\fi%
+    \ifendnotelinks%
+      \phantomsection%
+      \label{endnotetext-\the\endnoteref}%
+      \global\advance\endnoteref\@ne%
+    \fi%
     \expandafter\parindent\tpfn@parindent\relax\expandafter}%
   \gdef\enoteheading{%
     \leftskip2em
