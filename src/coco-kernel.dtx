@@ -656,6 +656,13 @@
 \long\def\tpPropertyLet#1#2{\long\csdef{tp@\tp@cur@cont @#1}{\csuse{tp@\tp@cur@cont @#2}}}
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{\tpPropertyLetX} creates a Property \#1 with the fully
+%   expanded value of another Property \#2 Is is equivalent to
+%   \lstinline|\tpSetPropertyX{\#1}{\tpUseProperty{\#2}}|.
+%    \begin{macrocode}
+\long\def\tpPropertyLetX#1#2{\long\csedef{tp@\tp@cur@cont @#1}{\csuse{tp@\tp@cur@cont @#2}}}
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\tpSetValProp}
 %   is a variant of \lstinline{\tpSetProperty} that expands the value
 %   \#2 \textit{once} before assigning it to the Property macro with

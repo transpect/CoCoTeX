@@ -302,46 +302,6 @@
 %
 % \subsection{Keeping .aux-Files Up-to-Date}
 %
-% \begin{macro}{\tp@restore@init}
-%   The transpec-tex macro family provides a feature that allows the
-%   indention of counted elements to be just as wide as the widest
-%   counter that element needs to be printed.
-%
-%   During compilation the width of each counter is written into the
-%   aux-files if it is bigger than previously calculated width for
-%   that same counter. So, for the next run, the widest instance of
-%   each counter can be retrieved from the project's \lstinline{.aux}
-%   file(s).
-%
-%   This simple approach, however, has a major problem: if the aux
-%   file is updated only if the current width of a counter is wider
-%   than the maximum, then the aux-file is left empty after the second
-%   run, which yields wrong indents after the third run when the
-%   maximums are newly written. This process repeats indefinitely with
-%   alternating output every two runs.
-%
-%   Alternatively, the aux-file could be updated iff the the current
-%   width is greater \textit{or equal} to the maximum. This, however,
-%   leads to .aux-files with lots of identical entries if the number
-%   of counters is large whose widths are the same as the maximmm.
-%
-%   To prevent this, this macro can be used to write the maximum value
-%   established in the previous run into the aux-file exactly once at
-%   the beginnnig of the document environment.
-%
-%   It checks if a macro that stores the maximum value is already
-%   defined, and re-writes its definition towards the maximum value
-%   into the .aux-file.
-%
-%   \#1 is the container name, \#2 is the counter to be stored.
-%    \begin{macrocode}
-\def\tp@restore@init#1#2{%
-  \AtBeginDocument{%
-    \expandafter\ifx\csname tp-#1-#2\endcsname\relax\else
-      \immediate\write\@auxout{\string\expandafter\string\gdef\string\csname\space tp-#1-#2\string\endcsname{\csname tp-#1-#2\endcsname}}%
-    \fi}}
-%    \end{macrocode}
-% \end{macro}
 % \begin{macro}{\tpBreak}
 %   is a general line break macro intended to be re-defined if
 %   necessary without touching LaTeX's kernel page and line breaking
@@ -386,8 +346,6 @@
     \expandafter\global\expandafter\newcount\csname c@#2depth\endcsname
     \expandafter\global\csname c@#2depth\endcsname=0\relax
   \fi
-  \expandafter\tp@restore@init\expandafter{\tp@cur@cont}{#1\if!#1!#2\fi-number-#3-maxwd}%
-  \expandafter\tp@restore@init\expandafter{\tp@cur@cont}{#1\if!#1!#2\fi-number-#3-indent}%
   \expandafter\ifx\csname tp@#2@extract@data\endcsname\relax
     \expandafter\let\csname tp@#2@extract@data\endcsname\tp@extract@generic
   \fi
@@ -435,113 +393,204 @@
 % \begin{macro}{\tp@expand@l@contents}
 %   expands the content of the \lstinline{tp@l@<level>} macro and contains some code
 %   to catch and handle standard \LaTeX\ headings. \#1 is the content
-%   of the \lstinline{tp@l@-macro}, \#2 is the namespace, and \#3 is the Component
-%   prefix.
+%   of the \lstinline{tp@l@-macro}, \#2 is the namespace, \#3 is the Component
+%   prefix and \#4 is the name of the Content component.
 %    \begin{macrocode}
 \def\tp@expand@l@contents#1#2#3#4{%
-  \sbox\z@{\def\numberline##1{\expandafter\gdef\csname tp@#2@#3Number\endcsname{##1}}#1}%
+  \global\let\tp@tempa\relax
+  \sbox\z@{\def\numberline##1{\xdef\tp@tempa{\noexpand\csdef{tp@#2@#3Number}{##1}}}#1}%
   \ifdim\wd\z@>\z@
     \let\numberline\@gobble%
-    \protected@csxdef{tp@#2@#3#4}{#1}%
+    \protected@csedef{tp@#2@#3#4}{#1}%
+    \tp@tempa
   \else
     #1%
-  \fi}
+  \fi
+  \global\let\tp@tempa\relax
+}
 %    \end{macrocode}
 % \end{macro}
+%
+% \subsection{Indentation and Left Margins of Potentially Numbered Items}
+%
+% The \textbf{left margin} means the space between the left border of
+% the page area and the imaginary line that multi-line text aligns
+% to. The \textbf{indent} is the offset of the very first line of that
+% block of text relative to that value.
+%
+% If the \lstinline{indent} is a negative value you'll get a hanging
+% indent; if it is positive, you get a paragraph style indent, and if
+% it is set to \lstinline{0pt}, you get a clean alignment of the whole
+% item.
+%
+% CoCoTeX provides a feature that allows the indention of counted
+% elements to be just as wide as the widest Number of the same level
+% (if \lstinline{indent} is set to \lstinline{auto}), as well as a
+% feature that allows the indent to be as wide as all Numbers of the
+% same cotainer type (if \lstinline{indent} is set to
+% \lstinline{auto-global}).
+%
+% The approach to set the \lstinline{indent}, \lstinline{margin-left}
+% and the position of the Number Component in numbered items such as
+% Headings, entries in ToC and listof-X, captions, etc. is to store
+% the maximum width for each level and the maximum width across all
+% Numbers of a Container Type in the .aux file at the very end of the
+% compilation after it has been constantly updated during the entire
+% {\LaTeX} runtime. That way, for the next {\LaTeX} run, the maximum
+% values are available immediately and can be used to fortify those
+% parameters.
+%
+% \begin{macro}{\tp@store@latest}
+%   low-level macro that stores the maximum value of a dimension
+%   Property \#1. An internal Property \lstinline{\#1-local} is
+%   constantly updated whenever the macro is called and the previously
+%   stored value is lower than the one given in \lstinline{#2}.
+%
+%   The first call of the macro for a given Property triggers an
+%   addendum to the \lstinline{\@enddocumenthook} which causes the
+%   last value for that dimension to be stored in the .aux file. If
+%   the Property hasn't been set from a previous {\LaTeX} run or a
+%   previous call to the \lstinline{\tp@store@latest} macro for the
+%   same Property and the same level, it is set to \#2.
+%
+%   \#1 is the internal name of the property, \#2 is the check value.
+%    \begin{macrocode}
+\def\tp@store@latest#1#2{%
+  \expandafter\ifx\csname tp-\tp@cur@cont-#1\endcsname\relax
+    \csxdef{tp-\tp@cur@cont-#1}{#2}%
+  \else
+    \expandafter\ifdim\csname tp-\tp@cur@cont-#1\endcsname<#2\relax
+      \csxdef{tp-\tp@cur@cont-#1}{#2}%
+    \fi
+  \fi
+  \expandafter\ifx\csname tp-\tp@cur@cont-#1-local\endcsname\relax
+    \csxdef{tp-\tp@cur@cont-#1-local}{#2}%
+  \else
+    \expandafter\ifdim\csname tp-\tp@cur@cont-#1-local\endcsname<#2\relax
+      \csxdef{tp-\tp@cur@cont-#1-local}{#2}%
+    \fi
+  \fi
+%    \end{macrocode}
+% The second step is to store the highest values in the .aux file for
+% later LaTeX runs. A \lstinline{\write\@auxout} command for the
+% storage macro is therefore added to the
+% \lstinline{\@enddocumenthook} and a flag is set that indicates that
+% the write command has already been added to the hook, since that
+% needs to be done only once for each to-be-stored dimension.
+%
+% Note that the value that is eventually stored, is the updated
+% \textit{local} maximum, not the value that is retrieved at the
+% beginning of the run. This allows the values to be down-graded if
+% the LaTeX source changed during two consecutive runs. However, if
+% values change, you still need to do at least two more {\LaTeX} runs
+% before the values stabilize.
+%    \begin{macrocode}
+  \ifcsdef{tp-\tp@cur@cont-#1-stored-trigger}{}
+    {\edef\@tempa{%
+       \noexpand\immediate\noexpand\write\noexpand\@auxout{%
+         \noexpand\string\noexpand\csgdef{tp-\tp@cur@cont-#1}{%
+           \noexpand\csname tp-\tp@cur@cont-#1-local\noexpand\endcsname}}}%
+     \expandafter\AtEndDocument\expandafter{\@tempa}%
+     \csgdef{tp-\tp@cur@cont-#1-stored-trigger}{\@empty}}}
+%    \end{macrocode}
+% \end{macro}
+%
 % \begin{macro}{\tp@format@number}
 %   calculates number widths and prepares macros to be used by the
 %   user. \#1 is the internal Property prefix, \#2 is the user-level
 %   Component prefix, \#3 is the numerical list level.
 %    \begin{macrocode}
 \def\tp@format@number#1#2#3{%
-  \tpSetProperty{#1formatted-number}{}%
   \tpSetValProp{#1curr-number-level}{#3}%
-  \tpIfComp{#2Number}{%
-    \tpSetProperty{#1formatted-number}{%
-      \bgroup
-        \tpUseProperty{#1title-format}%
-        \tpUseProperty{#1number-format}%
-        \tpUseComp{#2Number}%
-        \tpUseProperty{#1number-sep}%
-      \egroup}%
-    \sbox\z@{\tpUseProperty{#1formatted-number}}%
-  }{%
-    \sbox\z@{}%
-  }%
-  \tp@store@maxwd{#1number-#3-maxwd}{\the\wd\z@}%
-  \tpSetValProp{#1number-width-level-max}{\csname tp-heading-#1number-#3-maxwd\endcsname}%
-  \tp@store@maxwd{#1number-maxwd}{\the\wd\z@}%
-  \tpSetValProp{#1number-width-max}{\csname tp-heading-#1number-#3-maxwd\endcsname}%
+%    \end{macrocode}
+% First step: measuring the natural width of the Number if it exists
+% for the current item.
+%    \begin{macrocode}
+  \tpIfComp{#2Number}
+    {\sbox\z@{\tpUseProperty{#1number-format}}}
+    {\sbox\z@{}}%
+%    \end{macrocode}
+% Second step: we store the width of \lstinline{\box0} if it is wider
+% than the previously stored width for that level. The end value will
+% be written into the .aux file during expansion of the
+% \lstinline{\@enddocumenthook}. We do the same for the maximum across
+% \textit{all} levels of the same Container Type.
+%    \begin{macrocode}
+  \tp@store@latest{#1number-#3-maxwd}{\the\wd\z@}%
+  \tp@store@latest{#1number-maxwd}{\the\wd\z@}%
+%    \end{macrocode}
+% We provide the maximum level as a user-level Property
+% \lstinline{#1number-width-level-max}, the global maximum across all
+% levels as \lstinline{#1number-width-max}, and the width of the
+% current number as \lstinline{#1number-width}.
+%    \begin{macrocode}
+  \tpSetValProp{#1number-width-level-max}{\csname tp-\tp@cur@cont-#1number-#3-maxwd\endcsname}%
+  \tpSetValProp{#1number-width-max}{\csname tp-\tp@cur@cont-#1number-maxwd\endcsname}%
   \tpSetValProp{#1number-width}{\the\wd\z@}%
+%    \end{macrocode}
+% Third step: we calculate and fortify the actual
+% \lstinline{#1margin-left} (i.e., the overall left indent of the
+% whole item) and \lstinline{#1indent} (offset of the first line) of
+% the entry.
+%    \begin{macrocode}
   \tp@get@indent{#1}{#3}%
   \tp@set@hang{#1}%
 }
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsection{Indentation}
+% \begin{macro}{\tp@set@hang} determines and sets the hanging indent
+%   of a counter. \#1 is the internal Property prefix.
 %
-% \begin{macro}{\tp@set@hang}
-%   determines and sets the hanging indent of a counter. \#1 is the
-%   internal Property prefix.
 %    \begin{macrocode}
 \def\tp@set@hang#1{%
-  \tpSetProperty{#1hang-number}{\tpUseProperty{#1formatted-number}}%
+%    \end{macrocode}
+% First, we set the \lstinline{#1hang-number} to be an alias of
+% \lstinline{#1number-format} as fallback.
+%    \begin{macrocode}
+  \tpPropertyLet{#1hang-number}{#1number-format}%
+%    \end{macrocode}
+% Then, we check for \lstinline{#1indent}.
+%    \begin{macrocode}
   \tpIfProp{#1indent}
     {\ifdim\tpUseProperty{#1indent}<\z@
-        \tpSetProperty{#1hang-number}{%
-          \hskip\tpUseProperty{#1indent}%
-          \hbox to -\tpUseProperty{#1indent}{%
-            \tpIfPropVal{#1number-align}{left}{}{\hss}%
-            \tpUseProperty{#1formatted-number}%
-            \tpIfPropVal{#1number-align}{right}{}{\hss}}}%
-      \fi}{}}
 %    \end{macrocode}
+% If it is set and negative, we alter the \lstinline{#1hang-number}
+% Property in such a way that it is shifted to the left by
+% \lstinline{#1indent} amount and put into a hbox of
+% -\lstinline{#1indent} width (remember that the value is negative).
+%    \begin{macrocode}
+       \tpSetProperty{#1hang-number}{%
+         \hskip\tpUseProperty{#1indent}%
+         \hbox to -\tpUseProperty{#1indent}{%
+           \tpIfPropVal{#1number-align}{left}{}{\hss}%
+           \tpUseProperty{#1number-format}%
+           \tpIfPropVal{#1number-align}{right}{}{\hss}}}%
+     \fi}{}}
+%    \end{macrocode}
+% In all other cases, we stick to the default
+% (\lstinline{#1number-format}) we set in the first step.
 % \end{macro}
-% \begin{macro}{\tp@det@prev@indent}
-%   determines the indent of the next higher level of the
-%   list. ``Higher'' meaning hierarchical, i.e. the index is
-%   lower. \#1 is the Property prefix, \#2 is the numerical list
+%
+% \begin{macro}{\tp@calc@margin@left}
+%   determines the left margin of the current level by subtracting the
+%   current level's indent from the left margin of the next-higher
+%   level. ``Next-higher'' meaning ``hierarchically'', i.e., the level
+%   counter is \textit{lower}. Remember that for hang indent, the
+%   indent is negative, so \lstinline{margin-left} grows larger.
+%
+%   \#1 is the Property prefix, \#2 is the current numerical list
 %   level.
 %    \begin{macrocode}
-\def\tp@det@prev@indent#1#2{%
+\def\tp@calc@margin@left#1#2{%
   \@tempcnta\numexpr#2-1\relax
-  \ifdim\tpUseProperty{#1indent}<\z@\relax
-    \@tempdimb=-\tpUseProperty{#1indent}\relax
+  \expandafter\ifx\csname tp-\tp@cur@cont-#1\the\@tempcnta-margin-left\endcsname\relax
+    \@tempdima=-\tpUseProperty{#1indent}\relax%
   \else
-    \@tempdimb=\tpUseProperty{#1indent}\relax
+    \@tempdima=\dimexpr\csname tp-\tp@cur@cont-#1\the\@tempcnta-margin-left\endcsname-\tpUseProperty{#1indent}\relax
   \fi
-  \expandafter\ifx\csname tp-\tp@cur@cont-#1\the\@tempcnta-indent\endcsname\relax
-    \@tempdima=\@tempdimb\relax%
-  \else
-    \@tempdima\dimexpr \csname tp-\tp@cur@cont-#1\the\@tempcnta-indent\endcsname+\@tempdimb\relax
-  \fi
-  \tp@store@maxwd{#1#2-indent}{\the\@tempdima}%
-  \tpSetProperty{#1margin-left}{\csname tp-\tp@cur@cont-#1#2-indent\endcsname}}
-%    \end{macrocode}
-% \end{macro}
-% \begin{macro}{\tp@store@maxwd}
-%   low-level macro to take the csname of an unprefixed dimension and
-%   store its value in the aux files iff the previous value of that
-%   conrol structure is lower than the current value.
-%
-%   \#1 is the internal name of the property, \#2
-%   is the value.
-%    \begin{macrocode}
-\def\tp@store@maxwd#1#2{%
-  \expandafter\ifx\csname tp-\tp@cur@cont-#1\endcsname\relax
-    \immediate\write\@auxout{\string\expandafter\string\gdef\string\csname\space tp-\tp@cur@cont-#1\string\endcsname{#2}}
-    \expandafter\xdef\csname tp-\tp@cur@cont-#1\endcsname{#2}%
-  \else
-    \expandafter\ifdim\csname tp-\tp@cur@cont-#1\endcsname>#2\relax
-    \else
-      % Store the value in case of <= #2. In case of < instead of <=,
-      % used values might alternate between TeX runs due to not
-      % having been stored in the run before.
-      \immediate\write\@auxout{\string\expandafter\string\gdef\string\csname\space tp-\tp@cur@cont-#1\string\endcsname{#2}}%
-      \expandafter\xdef\csname tp-\tp@cur@cont-#1\endcsname{#2}%
-    \fi
-  \fi}
+  \tp@store@latest{#1#2-margin-left}{\the\@tempdima}%
+  \tpSetProperty{#1margin-left}{\the\@tempdima}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tp@get@indent}
@@ -550,34 +599,94 @@
 %   internal property prefix, \#2 is the numerical list level.
 %    \begin{macrocode}
 \def\tp@get@indent#1#2{%
-  \tpSetPropertyX{int-#1margin-left}{\tpUseProperty{#1margin-left}}%
-  \tpSetPropertyX{int-#1indent}{\tpUseProperty{#1indent}}%
-  \expandafter\let\expandafter\tp@tmp@numwd\csname tp-\tp@cur@cont-#1number-#2-maxwd\endcsname\relax
-  \tpIfPropVal{int-#1margin-left}{auto-global}
-    {\tpSetProperty{#1indent}{-\csname tp-\tp@cur@cont-#1number-maxwd\endcsname}%
-     \tpSetProperty{#1margin-left}{\csname tp-\tp@cur@cont-#1number-maxwd\endcsname}}
+%    \end{macrocode}
+% First, we need to store the initial values for both
+% \lstinline{#1margin-left} and \lstinline{#1indent} since, first
+% their values might be non-dimensional, and second, they will be
+% altered during macro expansion to ultimatly being passed to
+% \lstinline{\hskip}.
+%    \begin{macrocode}
+  \tpPropertyLetX{int-#1margin-left}{#1margin-left}%
+  \tpPropertyLetX{int-#1indent}{#1indent}%
+  \tpIfPropVal{#1indent}{auto-global}
+%    \end{macrocode}
+% If \lstinline{#1indent} is set to \lstinline{auto-global}, the item
+% gets an \lstinline{indent} that is set to the negative value of the
+% maximum width of all numbers across all Levels of the same Container
+% Type. The same maximum is added to the user-set value of
+% \lstinline{margin-left}.
+%    \begin{macrocode}
+    {\tpSetPropertyX{#1indent}{-\tpUseProperty{#1number-width-max}}%
+     \tpSetPropertyX{#1margin-left}{\dimexpr\tpUseProperty{#1number-width-max}+\tpUseProperty{int-#1margin-left}\relax}}
     {\tpIfPropVal{int-#1margin-left}{auto}
+%    \end{macrocode}
+% If \lstinline{#1margin-left} is set to \lstinline{auto}, all
+% items of the same level get the same left margin that is determined
+% by the sums of the indents of all higher levels.
+%    \begin{macrocode}
        {\tpIfPropVal{int-#1indent}{auto}
-          {\tpSetProperty{#1indent}{-\tp@tmp@numwd}}
+%    \end{macrocode}
+% if \lstinline{#1indent} is also set to \lstinline{auto}, the
+% \lstinline{indent} of the current item is set to the wides Number of
+% the same level.
+%    \begin{macrocode}
+          {\tpSetPropertyX{#1indent}{-\tpUseProperty{#1number-width-level-max}}}
+%    \end{macrocode}
+% otherwise it is set to the value of indent, or \lstinline{0pt} if it
+% was not set at all.
+%    \begin{macrocode}
           {\tpIfProp{int-#1indent}
              {\tpSetPropertyX{#1indent}{\tpUseProperty{int-#1indent}}}
              {\tpSetProperty{#1indent}{\z@}}}%
-        \tp@det@prev@indent{#1}{#2}}
+%    \end{macrocode}
+% the final value for \lstinline{margin-left} is calculated by the
+% \lstinline{\tp@calc@margin@left} macro, above. It will be set to the sum of indent and
+%    \begin{macrocode}
+        \tp@calc@margin@left{#1}{#2}}
+%    \end{macrocode}
+% This branch is reached when the left margin is not set to \lstinline{auto}.
+%    \begin{macrocode}
        {\tpIfProp{int-#1margin-left}
           {\tpIfPropVal{int-#1indent}{auto}
-            {\tpSetProperty{#1indent}{-\tp@tmp@numwd}}
+%    \end{macrocode}
+% If \lstinline{margin-left} is set to a specific value and
+% \lstinline{indent} is set to \lstinline{auto}, set the actual indent
+% to the width of the level's widest Number.
+%    \begin{macrocode}
+            {\tpSetPropertyX{#1indent}{-\tpUseProperty{#1number-width-level-max}}}
             {\tpIfProp{int-#1indent}
+%    \end{macrocode}
+% Otherwise, if \lstinline{indent} is set to a specific width, apply that value, or else set the inden to \lstinline{0pt}.
+%    \begin{macrocode}
                {\tpSetPropertyX{#1indent}{\tpUseProperty{int-#1indent}}}
                {\tpSetProperty{#1indent}{\z@}}}}
+%    \end{macrocode}
+% If \lstinline{margin-left} is not set,
+%    \begin{macrocode}
          {\tpIfPropVal{int-#1indent}{auto}
-            {\tpSetProperty{#1margin-left}{\tp@tmp@numwd}%
-             \tpSetProperty{#1indent}{-\tp@tmp@numwd}}
+%    \end{macrocode}
+% and \lstinline{indent} is set to \lstinline{auto}, set
+% \lstinline{margin-left} to the width of the level's widest Number
+% and the actual \lstinline{indent} to the negative of that.
+%    \begin{macrocode}
+            {\tpPropertyLetX{#1margin-left}{#1number-width-level-max}%
+             \tpSetPropertyX{#1indent}{-\tpUseProperty{#1number-width-level-max}}}
             {\tpIfProp{int-#1indent}
+%    \end{macrocode}
+% If \lstinline{margin-left} is not set, and \lstinline{indent} is set
+% to a specific value, apply that value for \lstinline{indent} and set
+% \lstinline{margin-left} to \lstinline{0pt}. In this branch,
+% \lstinline{indent} should have a positive value, otherwise the
+% content would probably lap over the left edge of the type area.
+%    \begin{macrocode}
                {\tpSetPropertyX{#1indent}{\tpUseProperty{int-#1indent}}%
                 \tpSetProperty{#1margin-left}{\z@}}
+%    \end{macrocode}
+% otherwise set both \lstinline{indent} nad \lstinline{margin-left} to
+% \lstinline{0pt}.
+%    \begin{macrocode}
                {\tpSetProperty{#1indent}{\z@}%
-                \tpSetProperty{#1margin-left}{\z@}}}}}}%
-    }
+                \tpSetProperty{#1margin-left}{\z@}}}}}}}
 %    \end{macrocode}
 % \end{macro}
 %
