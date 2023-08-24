@@ -60,16 +60,16 @@
     % Counters are global across all chapters; no reset.
     \newcount\endnoteanchor \global\endnoteanchor\z@
     \newcount\endnoteref \global\endnoteref\z@
-    \def\endnote{%
-      \@ifnextchar[%
-        \@xendnote{%
-          \stepcounter{endnote}%
-          \phantomsection%
-          \label{endnote-\the\endnoteanchor}%
-          \global\advance\endnoteanchor\@ne%
-          \protected@xdef\@theenmark{\theendnote}%
-          \hyperref[endnotetext-\the\endnoteanchor]{\@endnotemark}\@endnotetext%
-        }%
+    \def\@endnotemark{%
+      \leavevmode
+      \ifhmode\edef\@x@sf{\the\spacefactor}\nobreak\fi
+      \phantomsection%
+      \label{endnote-\the\endnoteanchor}%
+      \hyperref[endnotetext-\the\endnoteanchor]{\makeenmark}
+      \wlog{+++++ Setting endnote anchor; endnoteanchor: \the\endnoteanchor; endnoteref: \the\endnoteref}
+      \global\advance\endnoteanchor\@ne%
+      \ifhmode\spacefactor\@x@sf\fi
+      \relax%
     }
   \fi
   \let\footnote=\endnote
@@ -89,6 +89,7 @@
         \@theenmark\hss%
       \fi%
     }%
+    \wlog{+++++ Outputting endnote text; endnoteanchor: \the\endnoteanchor; endnoteref: \the\endnoteref}
     \ifendnotelinks%
       \global\advance\endnoteref\@ne%
     \fi%
