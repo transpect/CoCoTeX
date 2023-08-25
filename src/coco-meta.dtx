@@ -85,6 +85,7 @@
     \tpDeclareCountedComp{FullName}%
     \tpDeclareCountedComp{CiteName}%
     \tpDeclareCountedComp{ShortCiteName}%
+    \tpDeclareCountedComp{PDFInfoName}%
     \tpDeclareCountedComp{Initial}%
     \tpDeclareCountedComp{LastName}%
     \tpDeclareCountedComp{FirstName}%
@@ -95,14 +96,16 @@
     \tpDeclareCountedComp{Email}%
   }%
   \tpGroupHandler{tp#2}{%
-    \tpIfComp{FullName}{}{\tpFullName{\tpUseProperty{name-format}}}%
+    \tpIfComp{FullName}{}{\tpFullName{\tpUseProperty{#1-full-name-format}}}%
     \tpIfComp{Initial}{}{\tpInitial{\tpUseProperty{initials-format}}}%
-    \tpIfComp{CiteName}{}{\tpCiteName{\tpUseProperty{cite-name-format}}}%
-    \tpIfComp{ShortCiteName}{}{\tpShortCiteName{\tpUseProperty{short-cite-name-format}}}%
+    \tpIfComp{CiteName}{}{\tpCiteName{\tpUseProperty{#1-cite-name-format}}}%
+    \tpIfComp{ShortCiteName}{}{\tpShortCiteName{\tpUseProperty{#1-short-cite-name-format}}}%
+    \tpIfComp{PDFInfoName}{}{\tpPDFInfoName{\tpUseProperty{#1-pdfinfo-name-format}}}%
   }%
-  \tpDeclareRoleBlock{#2}{NameList}{#1-list-format}%
-  \tpDeclareRoleBlock{#2}{CitationList}{#1-citation-format}%
-  \tpDeclareRoleBlock{#2}{ShortCitationList}{#1-short-citation-format}%
+  \tpDeclareRoleBlock{#2}{NameList}{#1-list-print-format}%
+  \tpDeclareRoleBlock{#2}{CitationList}{#1-list-cite-format}%
+  \tpDeclareRoleBlock{#2}{ShortCitationList}{#1-list-short-cite-format}%
+  \tpDeclareRoleBlock{#2}{PDFInfo}{#1-list-pdfinfo-format}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -123,49 +126,66 @@
   \csgdef{tp@meta@role@#1@#2}{#3}}
 %    \end{macrocode}
 % \end{macro}
-%
 % \begin{macro}{\tp@meta@role@eval} creates the name lists for the
 %   role. \#1 is the name of the role.
 %    \begin{macrocode}
 \def\tp@meta@role@eval#1{{%
-    \@tp@meta@role@eval{#1}{NameList}%
-    \@tp@meta@role@eval{#1}{CitationList}%
-    \@tp@meta@role@eval{#1}{ShortCitationList}%
+    \tp@meta@role@compose{#1}{NameList}%
+    \tp@meta@role@compose{#1}{CitationList}%
+    \tp@meta@role@compose{#1}{ShortCitationList}%
+    \tp@meta@role@apply{#1}{PDFInfo}%
   }}
 %    \end{macrocode}
 % \end{macro}
-%
-% \begin{macro}{\@tp@meta@role@eval} \#1 is the name of the role and
-%   \#2 is the name of the list. The access Component is
-%   \lstinline{#1#2}, i.e., both argumets together.
-%
+% \begin{macro}{\@tp@meta@role@compose} \#1 is the name of the macro
+%   used to compose the Collection (either
+%   \lstinline{tpComposeCollection}, or
+%   \lstinline{tpApplyCollection}), \#2 is the name of the role and
+%   \#3 is the name of the list. The access Component is
+%   \lstinline{#2#3}, i.e., both argumets together.
 %    \begin{macrocode}
-\def\@tp@meta@role@eval#1#2{%
+\def\@tp@meta@role@eval#1#2#3{%
 %    \end{macrocode}
 % First, we check if the Component has already been set in the
 % input. if so, nothing is done since this counts as global override
 % before any automatic list creation.
 %    \begin{macrocode}
-  \tpIfComp{#1#2}{}{%
+  \tpIfComp{#2#3}{}{%
 %    \end{macrocode}
 % Second, we check if the counter for the Role is defined and greater
 % than 0. If neither is the case, this means that the Group does not
 % occur in the input, at all, so we don't need to do anything.
 %    \begin{macrocode}
-    \ifcsdef{tp#1Cnt}
-      {\expandafter\ifnum\csname tp#1Cnt\endcsname>\z@
+    \ifcsdef{tp#2Cnt}
+      {\expandafter\ifnum\csname tp#2Cnt\endcsname>\z@
 %    \end{macrocode}
 % otherwise, we evaluate the attributes on the Group's Container
 %    \begin{macrocode}
-          \tp@eval@role@attrs{#1}%
+          \tp@eval@role@attrs{#2}%
 %    \end{macrocode}
 % and call the Property that is stored in
-% \lstinline{\tp@meta@role@#1@#2} and store teh result in the
-% Component \lstinline{#1#2}.
+% \lstinline{\tp@meta@role@#2@#3} and store the result in the
+% Component \lstinline{#2#3}.
 %    \begin{macrocode}
-          \tpApplyCollection{tp#1}{\csname tp@meta@role@#1@#2\endcsname}{#1#2}%
+          #1{tp#2}{\csname tp@meta@role@#2@#3\endcsname}{#2#3}%
         \fi
       }{}}}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tp@meta@role@apply} \#1 is the name of the role and
+%   \#2 is the name of the composition. This macro applies
+%   (i.e. \textit{fully expands}) the \lstinline{\tp@meta@role@#1@#2}
+%   Property and stores the result in the \lstinline{#1#2} Component.
+%    \begin{macrocode}
+\def\tp@meta@role@apply#1#2{\@tp@meta@role@eval\tpApplyCollection{#1}{#2}}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tp@meta@role@compose} \#1 is the name of the role and
+%   \#2 is the name of the composition. This stores the
+%   \textit{unexpaded} contents of the \lstinline{\tp@meta@role@#1@#2}
+%   Property in the \lstinline{#1#2} Component.
+%    \begin{macrocode}
+\def\tp@meta@role@compose#1#2{\@tp@meta@role@eval\tpComposeCollection{#1}{#2}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tp@eval@role@attrs} evaluates the attributes that are
@@ -194,7 +214,9 @@
   \tpDeclareComp{#2}{\expandafter\global}{}%
   \tpDeclareComp{#2Label}{\expandafter\global}{}%
   \csxdef{labeled-meta-property-infix-\tp@cur@cont-#2}{#3}%
-  \if!#1!\else\expandafter\long\expandafter\def\csname tp@\tp@cur@cont @#2Label\endcsname{#1}\fi
+  \if!#1!\else
+    \long\csgdef{tp@\tp@cur@cont @#2Label}{#1}%
+  \fi
 }
 %    \end{macrocode}
 % \end{macro}
@@ -280,7 +302,7 @@
   \tpSetProperty{initials-format}{%
     \expandafter\ifx\csname tp@\tp@cur@cont @\tp@cnt@grp-FirstName-\the\tpCurCount\endcsname\long@empty\else
       \expandafter\ifx\csname tp@\tp@cur@cont @\tp@cnt@grp-FirstName-\the\tpCurCount\endcsname\relax\else
-        \expandafter\expandafter\expandafter\@car\csname tp@\tp@cur@cont @\tp@cnt@grp-FirstName-\the\tpCurCount\endcsname\relax\@nil\tpUseProperty{initials-period}
+        \expandafter\expandafter\expandafter\@car\csname tp@\tp@cur@cont @\tp@cnt@grp-FirstName-\the\tpCurCount\endcsname\relax\@nil\tpUseProperty{initials-period}%
       \expandafter\ifx\csname tp@\tp@cur@cont @\tp@cnt@grp-MidName-\the\tpCurCount\endcsname\long@empty\else
         \expandafter\ifx\csname tp@\tp@cur@cont @\tp@cnt@grp-MidName-\the\tpCurCount\endcsname\relax\else
           \tpUseProperty{initials-sep}%
@@ -290,34 +312,65 @@
   }
   \tpSetProperty{initials-sep}{~}
   \tpSetProperty{initials-period}{.}
-  \tpSetProperty{name-format}{\tpUseComp{FirstName}\space\tpUseComp{LastName}}%
-  \tpSetProperty{cite-name-format}{\tpUseComp{LastName}}%
-  \tpSetProperty{short-cite-name-format}{\tpUseComp{LastName},~\tpUseComp{Initial}}%
-  \tpSetProperty{name-list-format}{\tpUseComp{FullName}\ifnum\tpCurCount<\tpTotalCount\tpUseProperty{counted-name-sep}\fi}%
-  \tpSetProperty{name-citation-format}{\tpUseComp{CiteName}}%
-  \tpSetProperty{name-short-citation-format}{\tpUseComp{ShortCiteName}}%
+  %
+  %% Properties that control how the composed compoents WITHIN each item in a Role are formatted:
+  %
+  \tpSetProperty{role-full-name-format}{\tpUseComp{FirstName}\space\tpUseComp{LastName}}% How FullName for each name is built
+  \tpSetProperty{role-cite-name-format}{\tpUseComp{LastName},~\tpUseComp{Initial}}% How CiteName for each name is built
+  \tpSetProperty{role-short-cite-name-format}{\tpUseComp{LastName}}% how ShortCiteName for each name is built
+  \tpPropertyLet{role-pdfinfo-name-format}{role-cite-name-format}% How PDFInfoName for each item is built
+  %% Properties that control how the single items in a compoent list are formatted:
+  \tpSetProperty{role-block-print-format}{\tpUseComp{FullName}\ifnum\tpCurCount<\tpTotalCount\tpUseProperty{counted-name-sep}\fi}% How <Role>NameList for each name is build
+  \tpSetProperty{role-block-cite-format}{\tpUseComp{CiteName}\ifnum\tpCurCount<\tpTotalCount\tpUseProperty{counted-name-sep}\fi}% How each item in Component <Role>CitationList is formatted
+  \tpSetProperty{role-block-short-cite-format}{\tpUseComp{ShortCiteName}\ifnum\tpCurCount<\tpTotalCount\tpUseProperty{counted-name-sep}\fi}%  How each item in the Component <Role>ShortCitationList is formatted
+  \tpSetProperty{role-block-pdfinfo-format}{\tpUseComp{PDFInfoName}\ifnum\tpCurCount<\tpTotalCount\tpUseProperty{counted-name-sep}\fi}% How each item in the Component <Role>PDFInfo is formatted
   % Aliasses
-  \tpPropertyLet{author-format}{name-format}% Override for single author names
-  \tpPropertyLet{author-list-format}            {name-list-format}% Override for single author names
-  \tpPropertyLet{author-citation-format}        {name-citation-format}% Override for single author names
-  \tpPropertyLet{author-short-citation-format}  {name-short-citation-format}% Override for single author names
+  % for Role "Author":
+  \tpPropertyLet{author-cite-name-format}            {role-cite-name-format}%
+  \tpPropertyLet{author-short-cite-name-format}      {role-short-cite-name-format}%
+  \tpPropertyLet{author-full-name-format}            {role-full-name-format}%
+  \tpPropertyLet{author-pdfinfo-name-format}         {role-pdfinfo-name-format}%
+  %
+  \tpPropertyLet{author-list-print-format}      {role-block-print-format}%
+  \tpPropertyLet{author-list-cite-format}       {role-block-cite-format}%
+  \tpPropertyLet{author-list-short-cite-format} {role-block-short-cite-format}%
+  \tpPropertyLet{author-list-pdfinfo-format}    {role-block-pdfinfo-format}%
   %
   \tpSetProperty{counted-name-sep}{,\space}%
   \tpSetProperty{name-and}{\space and\space}%
   \tpSetProperty{name-etal}{\space et~al.}%
   \tpSetProperty{name-sep}{,\space}%
   \tpSetProperty{corresp-mark}{*}%
+  %
   % Affiliation Properties
+  %
   \tpSetProperty{affiliation-format}{% Format of the  affiliation block
     \tpIfComp{Institute}{\tpUseComp{Institute}}{}%
     \tpIfComp{Department}{, \tpUseComp{Department}}{}%
     \tpIfComp{Address}{, \tpUseComp{Address}}{}%
-    \tpUseProperty{affil-sep}%
   }%
   \tpSetProperty{affil-sep}{\par}
-  \tpSetProperty{affil-block-format}{\textsuperscript{\tpUseComp{AffilID}}\tpUseComp{Affiliation}}
-  \tpSetProperty{affil-block-face}{\small\normalfont}
+  \tpSetProperty{affil-block-item-face}{}% Font of a single item in the affiliation list
+  \tpSetProperty{affil-block-item-format}{% Format of a single item in the affiliation list
+    \textsuperscript{\tpUseComp{AffilID}}%
+    \bgroup
+      \tpUseProperty{affil-block-item-face}%
+      \tpUseComp{Affiliation}
+    \egroup%
+    \ifnum\tpCurCount<\tpTotalCount\relax\tpUseProperty{affil-sep}\fi%
+  }
+  \tpSetProperty{affil-block-face}{\small\normalfont}%
+  \tpSetProperty{affil-block-format}{%
+    \tpIfComp{AffilBlock}
+      {\bgroup
+         \tpUseProperty{affil-block-face}%
+         \tpUseComp{AffilBlock}%
+       \egroup
+       \par
+     }{}}
+  %
   % Labeled Meta Properties
+  %
   \tpSetProperty{labeled-meta-format}{%
     \tpIfProp{labeled-meta-before-\tpCurInfix}
       {\tpUseProperty{labeled-meta-before-\tpCurInfix}}
@@ -338,11 +391,12 @@
   \tpSetProperty{labeled-meta-label-format}{%
     \tpIfComp{\tpCurComp Label}{%
       \bgroup
+        \tpUseProperty{labeled-meta-before-\tpCurInfix-label}%
         \tpIfProp{labeled-meta-\tpCurInfix-label-face}
           {\tpUseProperty{labeled-meta-\tpCurInfix-label-face}}
           {\tpUseProperty{labeled-meta-label-face}}%
         \tpUseComp{\tpCurComp Label}%
-        \tpIfProp{meta-labeled-\tpCurInfix-sep}
+        \tpIfProp{labeled-meta-\tpCurInfix-label-sep}
           {\tpUseProperty{labeled-meta-\tpCurInfix-label-sep}}
           {\tpUseProperty{labeled-meta-label-sep}}%
       \egroup

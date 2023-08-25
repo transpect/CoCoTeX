@@ -66,9 +66,9 @@
     \tpDeclareCountedComp{Bio}%
     \tpDeclareCountedComp{BioBlock}%
   }%
-  \tpDeclareRoleBlock{#2}{BioBlock}{#1-bio-block-format}%
+  \tpDeclareRoleBlock{#2}{BioBlock}{#1-bio-format}%
   \tpGroupHandler{tp#2}{%
-    \tpIfComp{BioBlock}{}{\tpIfComp{Bio}{\tpBioBlock{\tpUseProperty{#1-bio-format}}}{}}%
+    \tpIfComp{BioBlock}{}{\tpIfComp{Bio}{\tpBioBlock{\tpUseProperty{#1-list-bio-format}}}{}}%
   }%
 }
 %    \end{macrocode}
@@ -104,6 +104,7 @@
   \tp@maketitle
   \tp@meta@role@eval{Author}%
   \tpApplyCollection{tpAuthor}{\tp@meta@role@Author@BioBlock}{AuthorBioBlock}%
+  \tpApplyCollection{tpAffil}{affil-block-item-format}{AffilBlock}%
   \tp@title@eds@eval{Editor}%
   \tp@title@eds@eval{SeriesEditor}%
   \tp@meta@generic@eval
@@ -160,10 +161,10 @@
     \renewcommand\foreignlanguage[2]{{##2}}%
     \ifnum\tpAuthorCnt>\z@
       \@setpar{\@@par}%
-      \tpCompGDef\tpRunBookName{tpAuthor}{author-list-format}%
+      \tpCompGDef\tpRunBookName{tpAuthor}{author-list-pdfinfo-format}%
     \else
       \ifnum\tpEditorCnt>\z@
-        \tpCompGDef\tpRunBookName{tpEditor}{editor-list-format}%
+        \tpCompGDef\tpRunBookName{tpEditor}{editor-list-pdfinfo-format}%
       \else
         \tpPackageWarning{transcript-title}{Meta Data}{No author or editor given!}%
         \@tempswafalse
@@ -606,8 +607,8 @@
     \tpGetComp{PubWeb}%
   }%
   % Name Formats
-  \tpSetProperty{counted-meta-sep}{\ifnum\tpCurCount<\tpTotalCount\relax\vskip\baselineskip\fi}%
-  \tpSetProperty{counted-name-sep}{%
+  \tpSetProperty{counted-meta-sep}{\ifnum\tpCurCount<\tpTotalCount\relax\vskip\baselineskip\fi}% separator between multiple instances of the same meta datum
+  \tpSetProperty{counted-name-sep}{% Separator between multiple names; titlepage-specific override of the same Property in coco-meta!
     \ifnum\tpTotalCount>1\relax
       \ifnum\tpCurCount<\tpTotalCount\relax
         \ifnum\tpCurCount<\numexpr\tpTotalCount-1\relax
@@ -618,26 +619,28 @@
       \fi
     \fi
   }%
-  \tpSetProperty{name-bio-block-format}{\tpUseComp{BioBlock}\par}
-  \tpSetProperty{name-bio-format}{%
-    {\bfseries\tpUseComp{FullName}:}\space%
-    \tpUseComp{Bio}%
-  }%
-  \tpPropertyLet{author-bio-format}             {name-bio-format}% Override for single author meta info (this one is titlepage specific and may look different in other places where tpAuthor is used!)
-  \tpPropertyLet{author-bio-block-format}       {name-bio-block-format}% Override for single author meta info (this one is titlepage specific and may look different in other places where tpAuthor is used!)
-  \tpPropertyLet{editor-format}                 {name-format}% Override for single editor names
-  \tpPropertyLet{editor-list-format}            {name-list-format}% Override for single editor names
-  \tpPropertyLet{editor-citation-format}        {name-citation-format}% Override for single author names
-  \tpPropertyLet{editor-short-citation-format}  {name-short-citation-format}% Override for single author names
-  \tpPropertyLet{editor-bio-format}             {name-bio-format}% Override for single editor meta info
-  \tpPropertyLet{editor-bio-block-format}       {name-bio-block-format}% Override for single editor meta info
-  \tpPropertyLet{series-editor-format}          {name-format}% Override for single series editor names
-  \tpPropertyLet{series-editor-list-format}     {name-list-format}% Override for single editor names
-  \tpPropertyLet{series-editor-citation-format}        {name-citation-format}% Override for single author names
-  \tpPropertyLet{series-editor-short-citation-format}  {name-short-citation-format}% Override for single author names
-  \tpPropertyLet{series-editor-bio-format}      {name-bio-format}% Override for single series editor meta info
-  \tpPropertyLet{series-editor-bio-block-format}{name-bio-block-format}% Override for single series editor meta info
-  % name Separators
+  % Aliasses for different Roles, see coco-meta.sty for the actual Property values:
+  %% editors:
+  \tpPropertyLet{editor-cite-name-format}                 {role-cite-name-format}%
+  \tpPropertyLet{editor-short-cite-name-format}           {role-short-cite-name-format}%
+  \tpPropertyLet{editor-full-name-format}                 {role-full-name-format}%
+  \tpPropertyLet{editor-pdfinfo-name-format}              {role-pdfinfo-name-format}%
+  %
+  \tpPropertyLet{editor-list-print-format}                {role-block-print-format}%
+  \tpPropertyLet{editor-list-cite-format}                 {role-block-cite-format}%
+  \tpPropertyLet{editor-list-short-cite-format}           {role-block-short-cite-format}%
+  \tpPropertyLet{editor-list-pdfinfo-format}              {role-block-pdfinfo-format}%
+  %% series-editors:
+  \tpPropertyLet{series-editor-cite-name-format}          {role-cite-name-format}%
+  \tpPropertyLet{series-editor-short-cite-name-format}    {role-short-cite-name-format}%
+  \tpPropertyLet{series-editor-full-name-format}          {role-full-name-format}%
+  \tpPropertyLet{series-editor-pdfinfo-name-format}       {role-pdfinfo-name-format}%
+  %
+  \tpPropertyLet{series-editor-list-print-format}         {role-block-print-format}%
+  \tpPropertyLet{series-editor-list-cite-format}          {role-block-cite-format}%
+  \tpPropertyLet{series-editor-list-short-cite-format}    {role-block-short-cite-format}%
+  \tpPropertyLet{series-editor-list-pdfinfo-format}       {role-block-pdfinfo-format}%
+  %% name Separators
   \tpSetProperty{editor-suffix-sgl}{(Ed.)}%
   \tpSetProperty{editor-suffix-pl}{(Eds.)}%
   \tpSetProperty{editor-suffix}{%
@@ -648,7 +651,15 @@
       \tpUseProperty{editor-suffix-pl}%
     \fi
   }%
-  % Bio
+  % Biography
+  \tpSetProperty{role-block-bio-format}{\tpUseComp{BioBlock}\par}
+  \tpSetProperty{role-bio-format}{{\bfseries\tpUseComp{FullName}:}\space\tpUseComp{Bio}}%
+  \tpPropertyLet{author-bio-format}             {role-bio-format}%
+  \tpPropertyLet{author-list-bio-format}        {role-block-bio-format}%
+  \tpPropertyLet{editor-bio-format}             {role-bio-format}% Override for single series editor meta info
+  \tpPropertyLet{editor-list-bio-format}        {role-bio-block-format}% Override for single series editor meta info
+  \tpPropertyLet{series-editor-bio-format}      {role-bio-format}% Override for single series editor meta info
+  \tpPropertyLet{series-editor-list-bio-format} {role-bio-block-format}% Override for single series editor meta info
   \tpSetProperty{bio-block}{%
     \tpGetComp{AuthorBioBlock}%
     \tpGetComp{EditorBioBlock}%

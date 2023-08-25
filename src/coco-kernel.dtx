@@ -292,7 +292,7 @@
 % \end{macro}
 % \begin{macro}{\tpGetComp} is a high level command to return the
 %   contents stored in a Component of name \#1 as a paragraph iff the
-%   Component is non-empty or \lstinline{\relax}.
+%   Component is neither empty nor \lstinline{\relax}.
 %    \begin{macrocode}
 \def\tpGetComp#1{\tpIfComp{#1}{\tpUseComp{#1}\par}{}}
 %    \end{macrocode}
@@ -503,7 +503,12 @@
   \endgroup
 }
 %    \end{macrocode}
-% 
+% \begin{macro}[\tp@comp@def] is used to pass a Counted Component into
+%   a TeX macro. \#1 is a prefix to the def command, e.g.,
+%   \lstinline{\global} or \lstinline{\protected}; \#2 is the name of
+%   the TeX macro, \#3 is the Name of the Counted Component (incl. the
+%   tp-prefix), and \#4 is the Property that should be applied to all
+%   Members of the Counted Component.
 %    \begin{macrocode}
 \def\tp@comp@def[#1]#2#3#4{%
   \tp@apply@collection{#3}{#4}%
@@ -514,10 +519,18 @@
     \expandafter\@tempa\expandafter{\tp@iterate@res}%
   \fi
 }
-\def\tpCompDef{\tp@comp@def[]}
-\def\tpCompGDef{\tp@comp@def[\global]}
-
 %    \end{macrocode}
+% \end{macro}
+% \begin{macro}[\tpCompDef] is the User-level command for \textit{local} \lstinline{\tp@comp@def}.
+%    \begin{macrocode}
+\def\tpCompDef{\tp@comp@def[]}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}[\tpCompDef] is the User-level command for \textit{global} \lstinline{\tp@comp@def}.
+%    \begin{macrocode}
+\def\tpCompGDef{\tp@comp@def[\global]}
+%    \end{macrocode}
+% \end{macro}
 %
 % \subsubsection{Declaring Counted Component}
 %
@@ -759,9 +772,9 @@
 %   checks if a Property with the name \#1 is defined and
 %   non-empty. If so, do \#2, otherwise do \#3.
 %    \begin{macrocode}
-\long\def\tpIfProp#1#2#3{\long\def\@tempa{}%
+\long\def\tpIfProp#1#2#3{%
   \expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\relax#3\else
-    \expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\@tempa #3\else#2\fi
+    \expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\long@empty #3\else#2\fi
   \fi
 \ignorespaces}
 %    \end{macrocode}
@@ -769,6 +782,9 @@
 % \begin{macro}{\tpIfPropVal}
 %   checks if a Property \#1 expands to \#2.  If so, do \#3, otherwise
 %   do \#4.
+%
+%   \textbf{Warning}: Do not use this conditional in Properties that
+%   are used in \lstinline{\tpApplyCollection}!
 %    \begin{macrocode}
 \long\def\tpIfPropVal#1#2#3#4{\long\def\@tempa{#2}%
   \expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\@tempa\relax#3\else#4\fi\ignorespaces}
