@@ -111,7 +111,9 @@
 % \end{macro}
 % \begin{macro}{\tpAddToRole} appends another Component declaration block \#2 to a pre-defined Role \#1.
 %    \begin{macrocode}
-\def\tpAddToRole#1#2{\csgappto{tp#1}{#2}}
+\def\tpAddToRole#1#2{%
+  \csgappto{@tp#1@hook}{#2}%
+}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tpDeclareRoleBlock} is used to create a new output

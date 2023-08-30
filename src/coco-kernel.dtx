@@ -363,13 +363,13 @@
 %    \begin{macrocode}
 \def\tpDeclareComponentGroup#1#2{%
   \csnumgdef{#1Cnt}{\z@}%
-  \csdef{#1}{\expandafter\tp@opt@empty\csname @#1\endcsname}%
+  \csdef{#1}{\tp@opt@empty{\csname @#1\endcsname}}%
   \csdef{@#1}[##1]{%
     \def\tp@cnt@grp{#1}%
     \csxdef{#1Cnt}{\expandafter\the\expandafter\numexpr\csname #1Cnt\endcsname+\@ne\relax}%
-    \if!##1!\else
-      \csgdef{tp@\tp@cur@cont @#1-\csname #1Cnt\endcsname @attrs}{##1}\fi
+    \if!##1!\else\csgdef{tp@\tp@cur@cont @#1-\csname #1Cnt\endcsname @attrs}{##1}\fi
     #2%
+    \csname @#1@hook\endcsname
   }%
   \csdef{end#1}{{\tpToggleCountedCond\csname tp@compose@group@#1\endcsname}}%
 }
@@ -387,7 +387,6 @@
       {\csgdef{tp@compose@group@#1}{#2}}}
     {\tpPackageError{Kernel}{Type}{Component Group `#1' unknown!}{You tried to declare a Group Handler for a Component Group that has not been declared, yet! Use \string\tpDeclareComponentGroup{#1}{} to declare the Component Group first.}}%
 }
-%\@onlypreamble\tpDeclareComponentGroup
 %    \end{macrocode}
 % \end{macro}
 %
@@ -888,6 +887,42 @@
   \fi}
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{\tpGetAttr} returns the value of an attribute.
+%
+%   \#1 is the attribute node, \#2 is the attribute name.
+%    \begin{macrocode}
+\def\tpGetAttr#1#2{\csuse{tp@#1@attr@#2}}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tpIfAttr} can be used to call macros depending on
+%   whether an attribute is set.
+%
+%   \#1 is the attribute node, \#2 is the attribute name, \#3 and \#4 are the true and false
+%   branch, respectively.
+%    \begin{macrocode}
+\def\tpIfAttr#1#2#3#4{\ifcsdef{tp@#1@attr@#2}{#3}{#4}}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tpIfAttrStr} can be used to call macros depending if
+%   an attribute is set to the current (sub)container or group and what value it has.
+%
+%   \#1 is the attribute node, \#2 is the attribute name, \#3 is the
+%   comparision value (a string!), \#4 and \#5 are the true and false
+%   branch, respectively.
+%    \begin{macrocode}
+\def\tpIfAttrStr#1#2#3#4#5{\tpIfAttr{#1}{#2}{\ifcsstring{tp@#1@attr@#2}{#3}{#4}{#5}}{#5}}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tpIfAttrIsset} can be used to check of a value-less
+%   attribute has been set (i.e., it expands to \lstinline{\@empty}).
+%
+%   \#1 is the attribute node, \#2 is the attribute name, \#3 and \#4
+%   are the true and false branch, respectively.
+%    \begin{macrocode}
+\def\tpIfAttrIsset#1#2#3#4{\tpIfAttr{#1}{#2}{\expandafter\ifx\csname tp@#1@attr@#2\endcsname\@empty#3\else#4\fi}{#4}}
+%    \end{macrocode}
+% \end{macro}
+%
 % \subsection{Style Classes}
 %
 % Style Classes are locally usable sub-Containers.

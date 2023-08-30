@@ -64,8 +64,7 @@
 \def\tp@title@role@handlers#1#2{%
   \tpAddToRole{#2}{%
     \tpDeclareCountedComp{Bio}%
-    \tpDeclareCountedComp{BioBlock}%
-  }%
+    \tpDeclareCountedComp{BioBlock}}%
   \tpDeclareRoleBlock{#2}{BioBlock}{#1-bio-format}%
   \tpGroupHandler{tp#2}{%
     \tpIfComp{BioBlock}{}{\tpIfComp{Bio}{\tpBioBlock{\tpUseProperty{#1-list-bio-format}}}{}}%
@@ -211,6 +210,7 @@
         \tpEvalType{Properties}%
         \tpUseProperty{article-title}%
       \egroup
+      \tpUseHook[titlepage]{after-maketitle-hook}%
     }%
   \else
     \gdef\tpMaketitle{%
@@ -262,7 +262,9 @@
 %   Corresponding Author
 %    \begin{macrocode}
 \def\tp@title@eval@corresp#1#2{%
-  \expandafter\ifx\csname tp@#1-#2@attr@corresp\endcsname\relax\else\tpUseProperty{corresp-mark}\fi}
+  \tpIfAttr{#1-#2}{corresp}
+    {\tpUseProperty{corresp-mark}}
+    {}}
 %    \end{macrocode}
 % \end{macro}
 %

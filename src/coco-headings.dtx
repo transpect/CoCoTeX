@@ -378,17 +378,16 @@
 \def\tp@auto@number#1#2{%
   \tpIfPropVal{numbering}{auto}
     {\expandafter\ifx\csname c@#2\endcsname\relax\tp@init@cnt{#2}\fi
-     \expandafter\ifx\csname tp@heading@attr@nonumber\endcsname\@empty
-     \else
-       \tpIfComp{Number}
+     \tpIfAttrIsset{heading}{nonumber}
+       {}
+       {\tpIfComp{Number}
          {}
          {\ifnum #1>\c@secnumdepth\relax\else
             \stepcounter{#2}%
             \edef\@tempa{\csname the#2\endcsname}%
             \expandafter\tpNumber\expandafter{\@tempa}%
-          \fi}%
-     \fi}{}%
-}
+          \fi}}
+     }{}}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -411,10 +410,8 @@
     \Hy@MakeCurrentHrefAuto{tp.#1}%
     \Hy@raisedlink{\hyper@anchorstart{\@currentHref}\hyper@anchorend}%
   \fi
-  \expandafter\ifx\csname tp@heading@attr@label\endcsname\relax\else
-    \expandafter\@tp@heading@parse@label\tp@heading@attr@label,,\@nil
-  \fi
-}
+  \tpIfAttr{heading}{label}
+    {\expandafter\@tp@heading@parse@label\tp@heading@attr@label,,\@nil}{}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\@tp@heading@create@labels} generates the labels to be
@@ -486,18 +483,19 @@
   \tp@check@empty{heading}{Number}{Toc}%
   \tp@check@empty{heading}{Subtitle}{Toc}%
   \tp@check@author{Toc}%
-  \expandafter\ifx\csname tp@heading@attr@notoc\endcsname\@empty\else
-    \protected@edef\tp@heading@toc@entry{%
-      \tpIfComp{TocTitle}{\string\tpTocTitle{\string\ignorespaces\space\expandonce{\tp@heading@TocTitle}}}{}%
-      \tpIfComp{TocNumber}{\string\tpTocNumber{\string\ignorespaces\space\expandonce{\tp@heading@TocNumber}}}{}%
-      \tpIfComp{TocAuthorNameList}{\string\tpTocAuthorNameList{\string\ignorespaces\space\expandonce{\tp@heading@TocAuthorNameList}}}{}%
-      \tpIfComp{TocSubtitle}{\string\tpTocSubtitle{\string\ignorespaces\space\expandonce{\tp@heading@TocSubtitle}}}{}%
-    }%
-    \tpIfProp{toc-level}{\edef\tp@heading@name{\tpUseProperty{toc-level}}}{}%
-    \protected@write\@auxout
-      {\tpGobble}%
-      {\string\@writefile{toc}{\protect\tpContentsline{\tp@heading@name}{\tp@heading@toc@entry}{\thepage}{\@currentHref}\protected@file@percent}}\relax
-  \fi
+  \tpIfAttrIsset{heading}{notoc}
+    {}
+    {\protected@edef\tp@heading@toc@entry{%
+       \tpIfComp{TocTitle}{\string\tpTocTitle{\string\ignorespaces\space\expandonce{\tp@heading@TocTitle}}}{}%
+       \tpIfComp{TocNumber}{\string\tpTocNumber{\string\ignorespaces\space\expandonce{\tp@heading@TocNumber}}}{}%
+       \tpIfComp{TocAuthorNameList}{\string\tpTocAuthorNameList{\string\ignorespaces\space\expandonce{\tp@heading@TocAuthorNameList}}}{}%
+       \tpIfComp{TocSubtitle}{\string\tpTocSubtitle{\string\ignorespaces\space\expandonce{\tp@heading@TocSubtitle}}}{}%
+     }%
+     \tpIfProp{toc-level}{\edef\tp@heading@name{\tpUseProperty{toc-level}}}{}%
+     \protected@write\@auxout
+       {\tpGobble}%
+       {\string\@writefile{toc}{\protect\tpContentsline{\tp@heading@name}{\tp@heading@toc@entry}{\thepage}{\@currentHref}\protected@file@percent}}\relax
+    }
 }
 %    \end{macrocode}
 % \end{macro}
@@ -586,15 +584,15 @@
   \tp@check@empty[Toc]{heading}{Number}{BM}%
   \tp@check@empty[Toc]{heading}{AuthorNameList}{BM}%
   \tp@check@empty[Toc]{heading}{Subtitle}{BM}%
-  \expandafter\ifx\csname tp@heading@attr@noBM\endcsname\@empty\else
-    \tpIfProp{bookmark-level}{\edef\Hy@toclevel{\tpUseProperty{bookmark-level}}}{}%
-    \begingroup
-      \tpGobble
-      \protected@edef\@tempa{\csname tp@heading@bookmark\endcsname}%
-      \bookmark[level=\Hy@toclevel,dest=\@currentHref]{\expandonce{\@tempa}}%
-    \endgroup
-  \fi
-}
+  \tpIfAttrIsset{heading}{noBM}
+    {}
+    {\tpIfProp{bookmark-level}{\edef\Hy@toclevel{\tpUseProperty{bookmark-level}}}{}%
+     \begingroup
+       \tpGobble
+       \protected@edef\@tempa{\csname tp@heading@bookmark\endcsname}%
+       \bookmark[level=\Hy@toclevel,dest=\@currentHref]{\expandonce{\@tempa}}%
+     \endgroup
+   }}
 %    \end{macrocode}
 % \end{macro}
 %
