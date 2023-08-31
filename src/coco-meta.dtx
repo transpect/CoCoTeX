@@ -92,7 +92,8 @@
     \tpDeclareCountedComp{MidName}%
     \tpDeclareCountedComp{PersonPrefix}%
     \tpDeclareCountedComp{ORCID}%
-    \tpDeclareCountedComp{Affil}%
+    \tpDeclareCountedComp{AffilRef}% for references to the tpAffil Group
+    \tpDeclareCountedComp{Affiliation}% for affiliations  as direct tpAuthor meta data
     \tpDeclareCountedComp{Email}%
   }%
   \tpGroupHandler{tp#2}{%
@@ -101,6 +102,10 @@
     \tpIfComp{CiteName}{}{\tpCiteName{\tpUseProperty{#1-cite-name-format}}}%
     \tpIfComp{ShortCiteName}{}{\tpShortCiteName{\tpUseProperty{#1-short-cite-name-format}}}%
     \tpIfComp{PDFInfoName}{}{\tpPDFInfoName{\tpUseProperty{#1-pdfinfo-name-format}}}%
+    \tpIfComp{AffilRef}{\tpIfComp{Affiliation}{%
+        \tpPackageError{Meta}{Ambiguity}
+          {You cannot use both Containers \string\tpAffilRef\space and \string\tpAffiliation\space in the same `tpAuthor' Sub-Container}
+          {At least one `tpAuthor' Sub-Container contains both \string\tpAffilRef\space and \string\tpAffiliation. This is not allowed. Please decide for one affiliation strategy: Either two lists with cross-references, or affiliations directly as an author's meta-data.}}{}}{}%
   }%
   \tpDeclareRoleBlock{#2}{NameList}{#1-list-print-format}%
   \tpDeclareRoleBlock{#2}{CitationList}{#1-list-cite-format}%
