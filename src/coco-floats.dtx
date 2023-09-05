@@ -361,7 +361,7 @@
     \tpMakeFltCompL{Legend}%
     \tpMakeFltCompL{Source}%
     \tpMakeFltCompL{Number}%
-    \tpMakeFltComp{label}%
+    \tpMakeFltComp{RefLabel}%
     \tpMakeFltComp{AltText}% neu: 2023-06-08; TODO: muss noch implementiert werden
   }%
   \tpDeclareType{Properties}{\tp@float@default}%
@@ -661,16 +661,16 @@
 \def\tp@make@anchor#1{%
   \bgroup
     \tpSubFloatCnt#1\relax
-    \tpIfComp{Label}
+    \tpIfComp{RefLabel}
       {\expandafter\let\expandafter\@currentlabel\csname tp@\tp@cur@cont @number-\the\tpSubFloatCnt\endcsname}
       {\edef\@currentlabel{tp-\tp@cur@cont-number-\the\tp@int@flt@cnt}}%
     \expandafter\H@refstepcounter\expandafter{\tp@captype}%
     \expandafter\hyper@makecurrent\expandafter{\tp@captype}%
     \global\let\Hy@tempa\Hy@float@caption
     \expandafter\hyper@@anchor\expandafter{\@currentHref}{\relax}%
-    \tpIfComp{Label}
+    \tpIfComp{RefLabel}
       {\expandafter\let\expandafter\@currentlabel\csname tp@\tp@cur@cont @number-\the\tpSubFloatCnt\endcsname
-       \edef\@tempa{\tpUseComp{Label}}%
+       \edef\@tempa{\tpUseComp{RefLabel}}%
        \expandafter\tpltx@label\expandafter{\@tempa}}{\relax}%
   \egroup}
 %    \end{macrocode}
