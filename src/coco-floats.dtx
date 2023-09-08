@@ -90,8 +90,8 @@
 % and \lstinline{float-skip} Properties to the render engine for
 % spacing above and below the float, respectively.
 %    \begin{macrocode}
-\newdimen\tp@flt@sep@top      \tp@flt@sep@top=\z@\relax
-\newdimen\tp@flt@sep@bottom   \tp@flt@sep@bottom=\z@\relax
+\newskip\tp@flt@sep@top      \tp@flt@sep@top=\z@\relax
+\newskip\tp@flt@sep@bottom   \tp@flt@sep@bottom=\z@\relax
 %    \end{macrocode}
 % Internal dimensions for the horizontal margins (right, left, inner
 % and outer, respectively)
@@ -222,10 +222,13 @@
   \ifx\tp@do@dblfloat\relax
     \ifx\tp@fps\@empty\def\tp@fps{htpb!}\fi% 11514
     \linewidth\dimexpr2\columnwidth+\columnsep\relax
+    \hsize\linewidth\relax
   \fi
   \tpIfAttrStr{#1}{orientation}{landscape}
-  {\linewidth\textheight
-   \def\tp@fps{p}}{}}
+    {\linewidth\textheight
+     \hsize\linewidth
+     \def\tp@fps{p}}
+    {}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tp@set@flt@env} determines the low-level {\LaTeX}
@@ -237,6 +240,7 @@
   \ifx\tp@fps\@empty
     \let\tp@b@float\relax
     \let\tp@e@float\relax
+    \ifhmode\par\fi
   \else
     \let\tp@b@float\tp@captype%
     \tpIfAttrStr{\tp@captype}{orientation}{landscape}
@@ -285,8 +289,7 @@
   \else
     \expandafter\tp@flt@sep@top\dimexpr\tpUseProperty{float-skip-top}\relax%
   \fi
-    \tpIfAttrStr{\tp@captype}{orientation}{landscape}
-      {}
+    \tpIfAttrStr{\tp@captype}{orientation}{landscape}{}
       {\ifx\tp@fps\@empty
          \expandafter\tp@flt@sep@bottom\dimexpr\tpUseProperty{intext-skip-bottom}\relax%
        \else
@@ -379,8 +382,8 @@
 %   \item[\#5] Property list
 %   \end{description}
 %    \begin{macrocode}
-\long\def\tpDeclareFloat{\tp@opt@empty\@tpDeclareFloat}
-\def\@tpDeclareFloat[#1]#2#3#4#5{%
+\def\tpDeclareFloat{\tp@opt@empty\@tpDeclareFloat}
+\long\def\@tpDeclareFloat[#1]#2#3#4#5{%
   \def\tp@float@parent{#1}%
 %    \end{macrocode}
 % If the Float Container has already been declared, we only load its
@@ -426,7 +429,7 @@
 % two-column mode.
 %    \begin{macrocode}
         \tpDeclareEnv[#2]{\tp@float}{\endtp@float}%
-        \tpDeclareEnv[#2*]{\let\tp@do@dblfloat\relax\tp@float}{\let\tp@do@dblfloat\relax\endtp@float}%
+        \tpDeclareEnv[#2*]{\if@twocolumn\let\tp@do@dblfloat\relax\else\fi\tp@float}{\if@twocolumn\let\tp@do@dblfloat\relax\fi\endtp@float}%
         \tpDeclareType{Components}{%
           \tpUseProperty{float-handler}%
         }%

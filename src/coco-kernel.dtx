@@ -145,7 +145,7 @@
 % \end{macro}
 % \begin{macro}{\tpAddToType} add additional content \#3 to a Type \#1 of a previously declared Container \#2.
 %    \begin{macrocode}
-\def\tpAddToType#1#2#3{\csgappto{tp@type@#1@#2}{#3}}
+\def\tpAddToType#1#2{\csgappto{tp@type@#1@#2}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tpEvalType}
@@ -304,7 +304,26 @@
 \long\def\tpIfComp#1#2#3{\expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\relax#3\else#2\fi}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tpIfGComp} Global variant of \lstinline{\tpIfComp}.
+% \begin{macro}{\tpWhenComp} is a high level variant of
+%   \lstinline{\tpIfComp} that omits the \lstinline{else}-branch. \#2
+%   is code that is expanded when the Component \#1 is used in a
+%   container (empty or non-empty).
+%    \begin{macrocode}
+\long\def\tpWhenComp#1#2{\expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\relax\else#2\fi}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tpUnlessComp} is a high level variant of
+%   \lstinline{\tpIfComp} that omits the \lstinline{then}-branch. \#2
+%   is the code that is expanded when a Container \#1 is \textit{not}
+%   used in a Container (neither empty nor non-empty).
+%    \begin{macrocode}
+\long\def\tpUnlessComp#1#2{\expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\relax#2\fi}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tpIfGComp} Global variant of
+%   \lstinline{\tpIfComp}. \#1 is the name of the Container, \#2 is
+%   the name of the Component, \#3 is the \lstinline{then}-branch, \#4
+%   is the \lstinline{else}-branch.
 %    \begin{macrocode}
 \long\def\tpIfGComp#1#2#3#4{\expandafter\ifx\csname tp@#1@#2\endcsname\relax#4\else#3\fi}
 %    \end{macrocode}
@@ -317,7 +336,10 @@
 \long\def\tpIfCompEmpty#1#2#3{\expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\long@empty#2\else#3\fi}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tpIfGCompEmpty} is a global variant of \lstinline{\tpIfCompEmpty}.
+% \begin{macro}{\tpIfGCompEmpty} is a global variant of
+%   \lstinline{\tpIfCompEmpty}. \#1 is the name of the Container, \#2
+%   is the name of the Component, \#3 is the \lstinline{then}-branch,
+%   \#4 is the \lstinline{else}-branch.
 %    \begin{macrocode}
 \long\def\tpIfGCompEmpty#1#2#3#4{\expandafter\ifx\csname tp@#1@#2\endcsname\long@empty#3\else#4\fi}
 %    \end{macrocode}
