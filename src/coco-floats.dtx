@@ -98,6 +98,10 @@
 \newdimen\tp@flt@marg@i       \tp@flt@marg@i=\z@\relax
 \newdimen\tp@flt@marg@o       \tp@flt@marg@o=\z@\relax
 %    \end{macrocode}
+% Locally adjustable switch to allow captions to break across pages
+%    \begin{macrocode}
+\newif\if@tp@flt@break@capt   \@tp@flt@break@captfalse
+%    \end{macrocode}
 % String definitions for Property value comparisons
 %    \begin{macrocode}
 \def\tp@str@figure{figure}
@@ -194,6 +198,7 @@
       \tpUseClass{default}{\tp@captype}%
       \expandafter\tpUseClass\expandafter{\csname tp@#2@attr@class\endcsname}{\tp@captype}%
     \fi
+    \ifcsdef{tp@#2@attr@break-caption}{\@tp@flt@break@capttrue}{}%
   \fi
   \tp@get@flt@pos{#2}}
 %    \end{macrocode}
@@ -389,7 +394,11 @@
   \ifcsdef{tp@container@#2}{%
     \tpPackageInfo{Floats}{}{Appending to `#2'}%
     \ifx\tp@float@parent\@empty\else
-      \tpInherit {Properties,Components} from \tp@float@parent;
+      \tpPackageError{Float}{Type}
+        {Attempt to change parent of pre-existing float^^JContainer `#2'}
+        {You cannot use the optional argument of \string\tpDeclareFloat\space for pre-existing^^J%
+float containers!^^J^^J%
+Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
     \fi
     \tpAddToType{Properties}{#2}{#5}%
 %    \end{macrocode}
@@ -407,40 +416,40 @@
 %    \begin{macrocode}
     \tpDeclareContainer{#2}{%
       \tpPackageInfo{Floats}{}{Declaring float `#2'}%
-        \ifx\tp@float@parent\@empty
-          \tpInherit {Properties,Components} from tpFloat;
-        \else
-          \tpInherit {Properties,Components} from \tp@float@parent;
-        \fi
-        \tpDeclareType{FloatEnvInfo}{%
-          \tpNamespace{#2}%
-          \def\tp@captype{#3}%
-          \def\tp@caplisttype{#4}%
-        }% /FloatEnvInfo
+      \ifx\tp@float@parent\@empty
+        \tpInherit {Properties,Components} from tpFloat;
+      \else
+        \tpInherit {Properties,Components} from \tp@float@parent;
+      \fi
+      \tpDeclareType{FloatEnvInfo}{%
+        \tpNamespace{#2}%
+        \def\tp@captype{#3}%
+        \def\tp@caplisttype{#4}%
+      }% /FloatEnvInfo
 %    \end{macrocode}
 % The macro actually defines two {\LaTeX} environments; a normal one
 % for one-column floats, and a starred one for page-wide floats in
 % two-column mode.
 %    \begin{macrocode}
-        \tpDeclareEnv[#2]{\tp@float}{\endtp@float}%
-        \tpDeclareEnv[#2*]{\let\tp@do@dblfloat\relax\tp@float}{\let\tp@do@dblfloat\relax\endtp@float}%
-        \tpDeclareType{Components}{%
-          \tpUseProperty{float-handler}%
-        }%
+      \tpDeclareEnv[#2]{\tp@float}{\endtp@float}%
+      \tpDeclareEnv[#2*]{\let\tp@do@dblfloat\relax\tp@float}{\let\tp@do@dblfloat\relax\endtp@float}%
+      \tpDeclareType{Components}{%
+        \tpUseProperty{float-handler}%
+      }%
 %    \end{macrocode}
 % Generating the Handlers for the list-of entries and define the
 % corresponding \lstinline{l@} macros
 %    \begin{macrocode}
-        \tp@flt@generate@listof@handlers{#4}{#3}{#2}%
-        \bgroup
-          \def\tp@cur@cont{#2}%
-          \tp@init@l@[Listof]{#4}{0}{#3}% Generate listof-Entries for first level floats
-          \tp@restore@init{#4}{number-0-maxwd}%
-          \tp@init@l@[Listof]{#4}{1}{sub#3}% Generate listof-Entries for sub-floats
-          \tp@restore@init{#4}{number-1-maxwd}%
-        \egroup
-        \tpDeclareType{Properties}{#5}%
-      }% /container
+      \tp@flt@generate@listof@handlers{#4}{#3}{#2}%
+      \bgroup
+        \def\tp@cur@cont{#2}%
+        \tp@init@l@[Listof]{#4}{0}{#3}% Generate listof-Entries for first level floats
+        \tp@restore@init{#4}{number-0-maxwd}%
+        \tp@init@l@[Listof]{#4}{1}{sub#3}% Generate listof-Entries for sub-floats
+        \tp@restore@init{#4}{number-1-maxwd}%
+      \egroup
+      \tpDeclareType{Properties}{#5}%
+    }% /container
   }% /ifcsdef{tp@app@container@#2}
 }
 %    \end{macrocode}
@@ -817,11 +826,25 @@
 %     (\lstinline{capt}) or a sub-float (\lstinline{subcapt})
 %   \item[\#1] \lstinline{top} or \lstinline{bottom}
 %   \end{description}
+%   We compare the caption of the current \lstinline{\SubFloatCnt}
+%   level with a caption of a non-existing Float level in case there
+%   is non-expandable material hard-coded into the
+%   \lstinline{caption-#3} Property. If we were to compare the width
+%   of the \lstinline{\hbox} with \lstinline{\z@}, this scenario would
+%   give us false positives.
+%
+%   \textbf{Warning:} Long captions can cause the hbox's width to
+%   exceed \lstinline{\maxdimen}. To avoid \LaTeX\ errors in this
+%   case, we compare \lstinline{sp} instead of \lstinline{pt}. This,
+%   however, means that if the difference is less than 1pt, the test
+%   fails and no caption is printed!
 %    \begin{macrocode}
 \def\tp@test@caption#1#2#3{%
-  \setbox\tp@tempboxa\hbox{\tpGobble\tpSubFloatCnt#1\relax\tpUseProperty{caption-#3}\relax}%
+  \setbox\tp@tempboxa\hbox{\tpGobble\tpSubFloatCnt#10\relax\tpUseProperty{caption-#3}\relax}%
   \setbox\tp@tempboxb\hbox{\tpGobble\tpSubFloatCnt\m@ne\relax\tpUseProperty{caption-#3}\relax}%
-  \ifdim\wd\tp@tempboxa>\wd\tp@tempboxb\relax
+  \edef\my@wda{\expandafter\strip@pt\wd\tp@tempboxa sp}%
+  \edef\my@wdb{\expandafter\strip@pt\wd\tp@tempboxb sp}%
+  \ifdim\my@wda>\my@wdb\relax
     \expandafter\global\expandafter\let\csname tp@has@#2@#3\endcsname\@empty
   \fi
 }
@@ -844,9 +867,10 @@
 \def\tp@capt@top@offset{%
   \ifx\@argi\tp@str@top
   \else
-    \par\nopagebreak
+    \par\if@tp@flt@break@capt\else\nopagebreak\fi%
     \expandafter\@tempskipa\tpUseProperty{\tp@prefix caption-sep-bottom}\relax%
     \advance\@tempskipa\dimexpr-\topskip+\dp\strutbox\relax
+    \if@tp@flt@break@capt\advance\@tempskipa\dimexpr-\baselineskip-\ht\strutbox+\topskip\relax\fi
     \ifx\tp@has@subcapt@bottom\@empty
       \ifnum\tpSubFloatCnt=\z@
         %% subcapt-bot exists and capt-bot is rendered
@@ -878,7 +902,7 @@
       \fi
     \fi
     \vskip\@tempskipa
-    \par\nopagebreak
+    \par\if@tp@flt@break@capt\else\nopagebreak\fi
   \else
     \ifnum\tpSubFloatCnt>\z@
       \vskip\dp\strutbox
@@ -899,22 +923,23 @@
   \ifnum\tpSubFloatCnt=\z@
     \def\next{%
       \ifcsstring{tp@\tp@captype @attr@orientation}{landscape}
-        {\vbox\bgroup\hsize\textheight}
+        {\setbox\@tempboxa\vbox\bgroup\hsize\textheight}
         {\hskip\tp@flt@marg@l%
-        \vbox\bgroup\advance\hsize-\tp@flt@marg@l}%
+         \setbox\@tempboxa\vbox\bgroup\advance\hsize-\tp@flt@marg@l}%
     }%
   \else
     \expandafter\tp@tempskipa\csname tp@flt@capt@row@height@#1\endcsname\relax
     \expandafter\advance\expandafter\tp@tempskipa\dimexpr-\baselineskip+\topskip\relax
-    \def\next{\vbox to \tp@tempskipa\bgroup}%
+    \def\next{\setbox\@tempboxa\vbox to \tp@tempskipa\bgroup}%
   \fi
   \next%
-    \ifx\@argii\tp@str@top\else\vss\fi
+    \ifx\@argii\tp@str@top\else\if@tp@flt@break@capt\else\vss\fi\fi
     \tpUseProperty{\tp@prefix caption-face}%
     \tpUseProperty{\tp@prefix caption-format-#1}%
     \tp@topstrut\tpUseProperty{caption-#1}\strut%
-    \ifx\@argii\tp@str@bottom\else\vss\fi%
+    \ifx\@argii\tp@str@bottom\else\if@tp@flt@break@capt\else\vss\fi\fi%
   \egroup%
+  \if@tp@flt@break@capt\unvbox\@tempboxa\else\box\@tempboxa\fi%
   \tp@capt@bottom@offset
 }
 %    \end{macrocode}
@@ -933,12 +958,12 @@
     \immediate\write\@auxout{\string\expandafter\string\gdef\string\csname\space tpFloat\the\tp@int@flt@cnt Cap#1\string\endcsname{\the\dimexpr \ht\z@+\dp\z@\relax}}%
     \bgroup
       \savenotes
-      \nopagebreak
+      \if@tp@flt@break@capt\else\nopagebreak\fi
       \tpSubFloatCnt\z@
       \tp@make@caption{#1}{top}%
       \spewnotes
     \egroup
-    \ifx\@argi\tp@str@top\nopagebreak\fi
+    \ifx\@argi\tp@str@top\if@tp@flt@break@capt\else\nopagebreak\fi\fi
   \fi
 }
 %    \end{macrocode}
@@ -1230,7 +1255,7 @@
   \tpGetTableContent
   \tpContent{\unvbox\tp@floatbox}%
   \tpUseComp{Content}%
-  \par\nopagebreak
+  \par\if@tp@flt@break@capt\else\nopagebreak\fi
   \vskip\dp\strutbox
 }
 %    \end{macrocode}

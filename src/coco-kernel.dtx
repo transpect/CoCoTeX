@@ -88,7 +88,7 @@
     {\tpPackageWarning{Kernel}{}{`#1' has already been declared!^^J
 \tp@warningspaces Properties from the original Declaration may be^^J
 \tp@warningspaces overridden by the global defaults. Use \string\tpAddToType^^J
-\tp@warningspaces to add new Properties to pre-existing Containers!^^J
+\tp@warningspaces to alter pre-existing Containers!^^J
 }}
     {\csdef{tp@container@#1}{}}%
   \csdef{tp@cur@cont}{#1}%
@@ -143,7 +143,7 @@
 \@onlypreamble\tpDeclareContainer
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tpAddToType} add additional content \#3 to a Type \#1 of a previously declared Container \#2.
+% \begin{macro}{\tpAddToType} add additional content (i.e., the next token) to a Type \#1 of a previously declared Container \#2.
 %    \begin{macrocode}
 \def\tpAddToType#1#2#3{\csgappto{tp@type@#1@#2}{#3}}
 %    \end{macrocode}
