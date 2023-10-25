@@ -398,9 +398,12 @@
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tpGroupHandler} is used to declare a new group
-%   handler. A Group Handler is a hook that is expanded at the end of
-%   a Component Group's environment. \#1 is the name of the Group, \#2
-%   is the content of the hook.
+%   handler. A Group Handler is a hook for code \#2 that is expanded
+%   at the end of a Component Group \#1's environment. It is mostly
+%   used to process Components within a Group instance and store the
+%   result in their own components. For instance, a Group Handler can
+%   be used to combine a First Name and a Surname to a combined
+%   Component ``FullName''.
 %    \begin{macrocode}
 \def\tpGroupHandler#1#2{%
   \ifcsdef{@#1}
