@@ -93,6 +93,15 @@
   \tpEvalType{Components}%
 }
 %    \end{macrocode}
+% \begin{macro}{\tpAddTitleRole} is a user-level macro to add both a
+%   new Role with the name \#2 and a controlling Property \#1 to the
+%   \lstinline{titlepage} container.
+%    \begin{macrocode}
+\def\tpAddTitleRole#1#2{%
+  \tpAddToType{Components}{titlepage}{\tp@titlepage@role{#1}{#2}}%
+  \tpAddTitleEval{\tp@title@eds@eval{#2}}%
+}
+%    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tpAddTitleEval} is a User-level macro to add
 %   additional Material titlepage evaluators (the next token).
