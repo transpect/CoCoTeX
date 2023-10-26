@@ -95,6 +95,18 @@
 }
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{\tpAddTitleEval} is a User-level macro to add
+%   additional Material titlepage evaluators (the next token).
+%    \begin{macrocode}
+\def\tpAddTitleEval{\csgappto{tp@title@add@eval}}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tp@title@add@eval} is a hook for additional titlepage
+%   evaluators
+%    \begin{macrocode}
+\def\tp@title@add@eval{}
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\tp@endMeta} is the code executed at the end of the \lstinline{tpMeta} Container
 %    \begin{macrocode}
 \def\tp@endMeta{%
@@ -108,6 +120,7 @@
   \tp@title@eds@eval{SeriesEditor}%
   \tp@meta@generic@eval
   \tp@title@fundings@eval
+  \tp@title@add@eval
   \tp@title@set@pdfmeta
   \let\tp@cur@cont\@empty
 }
