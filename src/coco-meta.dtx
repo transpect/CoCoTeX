@@ -26,6 +26,7 @@
   \tpDeclareType{Components}{%
     \tpDeclareRole[author]{Author}%
     \tp@declare@meta@comp
+    \tp@extended@meta@macros
     \tp@declare@meta@affils
   }%
   \tpDeclareType{Properties}{%
@@ -251,6 +252,7 @@
 \def\tp@declare@meta@comp{%
     \tpDeclareComp{Copyright}{\expandafter\global}{}% Copyright text
     \tpDeclareComp{DOI}{\expandafter\global}{}%         DOI
+
 }%
 %    \end{macrocode}
 % \begin{macro}{\tp@extended@meta@macros}
