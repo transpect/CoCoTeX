@@ -462,6 +462,16 @@
 \newcount\tpCurCount
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{\tp@assign@res} assignes the result of the Component
+%   collection to a~control sequence with the name \#1 and resets
+%   the temporary storage.
+%    \begin{macrocode}
+\def\tp@assign@res#1{%
+  \expandafter\csname #1\expandafter\endcsname\expandafter{\tp@iterate@res}%
+  \global\let\tp@iterate@res\relax
+}
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\tpComposeCollection} is used to create an unexpanded
 %   Collection Component \#3 from all instances of Component Group \#1
 %   using the instructions given by property \#2.
@@ -490,7 +500,7 @@
             \expandafter\expandafter\expandafter{\expandafter\tp@iterate@res\@tempb}%
           }%
           \expandafter\def\expandafter\tp@iterate@res\expandafter{\tp@iterate@res\egroup}%
-        \expandafter\csname tp#3\expandafter\endcsname\expandafter{\tp@iterate@res}%
+          \tp@assign@res{tp#3}%
       \fi
     }{}}%
 }
@@ -503,7 +513,7 @@
 \def\tpApplyCollection#1#2#3{%
   \tpIfComp{#3}{}
     {\tp@apply@collection{#1}{#2}%
-     \expandafter\csname tp#3\expandafter\endcsname\expandafter{\tp@iterate@res}%
+     \tp@assign@res{tp#3}%
    }%
 }
 %    \end{macrocode}
@@ -543,7 +553,7 @@
     #1\let#2\relax%
   \else
     \def\@tempa{#1\def#2}%
-    \expandafter\@tempa\expandafter{\tp@iterate@res}%
+    \tp@assign@res{@tempa}%
   \fi
 }
 %    \end{macrocode}
