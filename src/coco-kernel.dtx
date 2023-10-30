@@ -284,6 +284,28 @@
 \def\tpUseComp#1{\csname tp@\tp@cur@cont @#1\endcsname}
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{\tpStoreComp} is a high level command to store the
+%   value of a Component \#3 into a TeX macro \#2 with the optional
+%   scope prefix \#1.
+%    \begin{macrocode}
+\def\tpStoreComp{\tp@opt@empty\tp@store@comp}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tpGStoreComp} is the global variant of
+%   \lstinline{\tpStoreComp}.
+%    \begin{macrocode}
+\def\tpGStoreComp{\tpStoreComp[\global]}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tp@store@comp} low-level macro that is called by both
+%   \lstinline{\tpStoreComp} and \lstinline{\tpGStoreComp}. The
+%   Component control sequence is expanded once before assignment.
+%    \begin{macrocode}
+\def\tp@store@comp[#1]#2#3{%
+  \def\@tempa{#1\edef#2}%
+  \expandafter\@tempa\expandafter{\expandafter\expandafter\expandafter\relax\csname tp@\tp@cur@cont @#3\endcsname}}%
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\tpUseGComp} is a high level command to return (or
 %   print) the material stored as a global Component from the Container \#1 with the name \#2.
 %    \begin{macrocode}
