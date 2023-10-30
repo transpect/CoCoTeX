@@ -467,7 +467,11 @@
 %   the temporary storage.
 %    \begin{macrocode}
 \def\tp@assign@res#1{%
-  \expandafter\csname #1\expandafter\endcsname\expandafter{\tp@iterate@res}%
+  \ifx\tp@iterate@res\relax
+    \cslet{#1}\relax
+  \else
+    \expandafter\csname #1\expandafter\endcsname\expandafter{\tp@iterate@res}%
+  \fi
   \global\let\tp@iterate@res\relax
 }
 %    \end{macrocode}
@@ -724,11 +728,11 @@
 % \end{macro}
 % \begin{macro}{\tpSetPropertyX}
 %   is another variant of \lstinline{\tpSetProperty}, but it
-%   \textit{fully expands} the value defined in \#2 before the
-%   Property is stored in the Property macro named \#1. Use this if
-%   you need to use conditionals to determine the actual values of
-%   Properties that otherwise expect fixed named or dimensional
-%   values.
+%   \textit{fully expands} the value (using \lstinline{\edef}) defined
+%   in \#2 before the Property is stored in the Property macro named
+%   \#1. Use this if you need to use conditionals to determine the
+%   actual values of Properties that otherwise expect fixed named or
+%   dimensional values.
 %    \begin{macrocode}
 \long\def\tpSetPropertyX#1#2{\long\csedef{tp@\tp@cur@cont @#1}{#2}}
 %    \end{macrocode}
