@@ -617,7 +617,16 @@
 % \lstinline{margin-left}.
 %    \begin{macrocode}
     {\tpSetPropertyX{#1indent}{-\tpUseProperty{#1number-width-max}}%
+%    \end{macrocode}
+% If the user has not set \lstinline{margin-left}, we set it to \lstinline{\z@}.
+%    \begin{macrocode}
+     \tpIfPropVal{#1margin-left}{}
+       {\tpSetProperty{int-#1margin-left}{\z@}}
+       {\tpPropertyLetX{int-#1margin-left}{#1margin-left}}%
      \tpSetPropertyX{#1margin-left}{\dimexpr\tpUseProperty{#1number-width-max}+\tpUseProperty{int-#1margin-left}\relax}}
+%    \end{macrocode}
+% Next, we check if \lstinline{#1margin-left} is set to \lstinline{auto}.
+%    \begin{macrocode}
     {\tpIfPropVal{int-#1margin-left}{auto}
 %    \end{macrocode}
 % If \lstinline{#1margin-left} is set to \lstinline{auto}, all
