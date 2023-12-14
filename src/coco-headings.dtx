@@ -243,11 +243,7 @@
 % Here, the actual construction of the heading begins.
 %    \begin{macrocode}
     \tpUseProperty{heading-par}%
-    \expandafter\ifx\csname tp@parent@#2\endcsname\relax\else
-      \edef\@@parent{before-hook-\csname tp@parent@#2\endcsname}%
-      \expandafter\tpUseHook\expandafter{\@@parent}%
-    \fi
-    \tpUseHook{before-hook-\tp@heading@name}%
+    \tp@hd@use@hook{before-hook}{#2}%
     \tpUseProperty{before-heading}%
 %    \end{macrocode}
 % Add vertical space before the heading
@@ -265,6 +261,7 @@
 % fallback.
 %    \begin{macrocode}
     \tpIfProp{after-skip}{\expandafter\global\expandafter\@tempskipa\expandafter=\tpUseProperty{after-skip}\relax}{\global\@tempskipa=1sp\relax}%
+    \tp@hd@use@hook{before-print-hook}{#2}%
     \def\@svsec{%
 %    \end{macrocode}
 % The \lstinline{heading block} is the composition of all of the
@@ -324,6 +321,18 @@
 % \end{macro}
 % \end{macro}
 % 
+% \begin{macro}{\tp@hd@use@hook} recursively includes a hook \#1 from the heading \#2's parent before expanding its own version.
+%    \begin{macrocode}
+\def\tp@hd@use@hook#1#2{%
+  \expandafter\ifx\csname tp@parent@#2\endcsname\relax\else
+    \edef\@@parent{#1-\csname tp@parent@#2\endcsname}%
+    \expandafter\tpUseHook\expandafter{\@@parent}%
+  \fi
+  \tpUseHook{#1-\tp@heading@name}%
+}
+%    \end{macrocode}
+% \end{macro}
+% 
 % \begin{macro}{\tp@do@before@skip} is a routine that determins the skip that is inserted before a heading.
 %    \begin{macrocode}
 \def\tp@do@before@skip{%
@@ -349,9 +358,10 @@
 %   level \#1.
 %    \begin{macrocode}
 \def\tp@init@hooks#1{%
-  \tpDeclareHook{toc-before-hook-#1}%
-  \tpDeclareHook{toc-after-hook-#1}%
-  \tpDeclareHook{before-hook-#1}%
+  \tpDeclareHook{toc-before-hook-#1}% Expanded before the toc entry is printed
+  \tpDeclareHook{toc-after-hook-#1}% Expanded after the toc entry is printed
+  \tpDeclareHook{before-hook-#1}% Expanded before before-heading property is expanded
+  \tpDeclareHook{before-print-hook-#1}% Expanded at the very beginning of the local definition of \@svsec
 }
 %    \end{macrocode}
 % \end{macro}

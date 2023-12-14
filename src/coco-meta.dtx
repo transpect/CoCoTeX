@@ -141,16 +141,16 @@
 % \begin{macro}{\tp@meta@role@eval} creates the name lists for the
 %   role. \#1 is the name of the role.
 %    \begin{macrocode}
-\def\tp@meta@role@eval#1{{%
+\def\tp@meta@role@eval#1{%
     \tp@meta@role@compose{#1}{NameList}%
     \tp@meta@role@compose{#1}{CitationList}%
     \tp@meta@role@compose{#1}{ShortCitationList}%
     \tp@meta@role@compose{#1}{Correspondence}%
     \tp@meta@role@apply{#1}{PDFInfo}%
-  }}
+  }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\@tp@meta@role@compose} \#1 is the name of the macro
+% \begin{macro}{\@tp@meta@role@eval} \#1 is the name of the macro
 %   used to compose the Collection (either
 %   \lstinline{tpComposeCollection}, or
 %   \lstinline{tpApplyCollection}), \#2 is the name of the role and
@@ -159,11 +159,11 @@
 %    \begin{macrocode}
 \def\@tp@meta@role@eval#1#2#3{%
 %    \end{macrocode}
-% First, we check if the Component has already been set in the
-% input. if so, nothing is done since this counts as global override
-% before any automatic list creation.
+% First, we check if the Collection Component has already been set in
+% the input. If so, we set an internal flag to indicate that the
+% Collection Component has been filled manually.
 %    \begin{macrocode}
-  \tpIfComp{#2#3}{}{%
+  \tpIfComp{#2#3}{\cslet{tp@used@#2#3@override}\@empty}{%
 %    \end{macrocode}
 % Second, we check if the counter for the Role is defined and greater
 % than 0. If neither is the case, this means that the Group does not

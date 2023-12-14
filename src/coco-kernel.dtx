@@ -494,12 +494,19 @@
 }
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{\tpIfCompOverride} is a switch to apply \#2 if the
+%   Collection Component \#1 has been set manually within a container
+%   or \#3 if it has been generated from Counted Components.
+%    \begin{macrocode}
+\def\tpIfCompOverride#1#2#3{\expandafter\ifx\csname tp@used@#1@override\endcsname\@empty#2\else#3\fi}
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\tpComposeCollection} is used to create an unexpanded
 %   Collection Component \#3 from all instances of Component Group \#1
 %   using the instructions given by property \#2.
 %    \begin{macrocode}
 \def\tpComposeCollection#1#2#3{%
-  \tpIfComp{#3}{}{%
+  \tpIfComp{#3}{\cslet{tp@used@#3@override}\@empty}{%
     \ifcsdef{#1Cnt}{%
       \expandafter\ifnum\csname #1Cnt\endcsname > \z@\relax
         \edef\tp@iterate@res{%
@@ -533,7 +540,7 @@
 %   expands the Property \#2 before it is stored inside the Component \#3.
 %    \begin{macrocode}
 \def\tpApplyCollection#1#2#3{%
-  \tpIfComp{#3}{}
+  \tpIfComp{#3}{\cslet{tp@used@#3@override}\@empty}
     {\tp@apply@collection{#1}{#2}%
      \tp@assign@res{tp#3}%
    }%
