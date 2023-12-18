@@ -18,6 +18,21 @@
     [\filedate \fileversion CoCoTeX common module]
 \RequirePackage{iftex}
 %    \end{macrocode}
+% \section{Package options}
+%
+% \subsection{Accessibility Features}
+%
+% The option \lstinline{a11y} triggers loading of the {\CoCoTeX}
+% Accessibility Module and its features.
+%    \begin{macrocode}
+%% \RequirePackage{kvoptions-patch}
+%% \RequirePackage{xkeyval}
+\DeclareOptionX{a11y}{\let\tp@do@ally\relax}
+\ProcessOptionsX
+\ifx\tp@do@ally\relax
+  \RequirePackage{coco-accessibility}
+\fi
+%    \end{macrocode}
 %
 % \section{Commonly Used Low-Level Macros and Registers}
 % Contains common macros used in the {\CoCoTeX} modules and that
@@ -28,12 +43,12 @@
 % \subsection{Hard Dependencies}
 % Hard requirements for all {\CoCoTeX} modules:
 %    \begin{macrocode}
-\usepackage{xcolor}
+\RequirePackage{xcolor}
 %    \end{macrocode}
 % Including the \lstinline{graphicx} package and catching case-insensitive
 % graphics file's endings from Word:
 %    \begin{macrocode}
-\usepackage{graphicx}
+\RequirePackage{graphicx}
 \DeclareGraphicsRule{.EPS}{eps}{.EPS}{}
 %    \end{macrocode}
 %

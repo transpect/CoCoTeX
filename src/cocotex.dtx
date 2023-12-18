@@ -23,21 +23,6 @@
 \RequirePackage{kvoptions-patch}
 \RequirePackage{xkeyval}
 \PassOptionsToPackage{cmyk}{xcolor}
-\RequirePackage{coco-common}
-%    \end{macrocode}
-% Passing options down to the \LaTeX\space standard packages
-%    \begin{macrocode}
-\DeclareOptionX{main}{\PassOptionsToPackage{\CurrentOption}{babel}}
-\DeclareOption{es-noindentfirst}{\PassOptionsToPackage{es-noindentfirst}{babel}}
-\DeclareOption{es-noshorthands}{\PassOptionsToPackage{es-noshorthands}{babel}}
-\PassOptionsToPackage{shorthands=off}{babel}
-%    \end{macrocode}
-% Passing options down to the \lstinline{coco-notes} package
-%    \begin{macrocode}
-\DeclareOptionX{ennotoc}{\PassOptionsToPackage{\CurrentOption}{coco-notes}}
-\DeclareOptionX{endnotes}{\PassOptionsToPackage{\CurrentOption}{coco-notes}}
-\DeclareOptionX{resetnotesperchapter}{\PassOptionsToPackage{\CurrentOption}{coco-notes}}
-\DeclareOptionX{endnotesperchapter}{\PassOptionsToPackage{\CurrentOption}{coco-notes}}
 %    \end{macrocode}
 % The option \lstinline{pubtype} (short for ``publication type'') has
 % possible four values: \lstinline{mono}, \lstinline{collection},
@@ -77,14 +62,12 @@
 }
 \DeclareOptionX*{\PassOptionsToClass{\CurrentOption}{article}}
 \DeclareOptionX*{\PassOptionsToClass{\CurrentOption}{book}}
-\DeclareOptionX{debug}{\PassOptionsToPackage{\CurrentOption}{coco-kernel}}
-\DeclareOptionX{usescript}{\PassOptionsToPackage{\CurrentOption}{coco-script}}
-\DeclareOptionX{nofigs}{\PassOptionsToPackage{\CurrentOption}{coco-floats}}
 \ProcessOptionsX
 %    \end{macrocode}
 % All publication types supported by {\CoCoTeX} are based on one of
 % \LaTeX's default classes \lstinline{book} or \lstinline{article}:
 %    \begin{macrocode}
+\RequirePackage{coco-common}
 \ifarticle
   \LoadClass[10pt,a4paper]{article}
 \else

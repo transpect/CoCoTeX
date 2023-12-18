@@ -13,8 +13,8 @@
 \BeforePackage{doc}{\let\oldmaketitle\maketitle}
 \documentclass[a4paper]{ltxdoc}
 \makeatletter
-\let\tp@fileversion\fileversion
-\let\tp@filedate\filedate
+\def\tp@fileversion{\fileversion}
+\def\tp@filedate{\filedate}
 \frenchspacing
 \parindent0pt
 \parskip\medskipamount
