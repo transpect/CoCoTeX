@@ -24,6 +24,13 @@
 \RequirePackage{xkeyval}
 \PassOptionsToPackage{cmyk}{xcolor}
 %    \end{macrocode}
+% Passing options down to the \LaTeX\space standard packages
+%    \begin{macrocode}
+\DeclareOptionX{main}{\PassOptionsToPackage{\CurrentOption}{babel}}
+\DeclareOption{es-noindentfirst}{\PassOptionsToPackage{es-noindentfirst}{babel}}
+\DeclareOption{es-noshorthands}{\PassOptionsToPackage{es-noshorthands}{babel}}
+\PassOptionsToPackage{shorthands=off}{babel}
+%    \end{macrocode}
 % The option \lstinline{pubtype} (short for ``publication type'') has
 % possible four values: \lstinline{mono}, \lstinline{collection},
 % \lstinline{journal}, and \lstinline{article}. \lstinline{mono} (also
@@ -62,6 +69,17 @@
 }
 \DeclareOptionX*{\PassOptionsToClass{\CurrentOption}{article}}
 \DeclareOptionX*{\PassOptionsToClass{\CurrentOption}{book}}
+%    \end{macrocode}
+% Passing options down to various {\CoCoTeX} modules:
+%    \begin{macrocode}
+\DeclareOptionX{debug}{\PassOptionsToPackage{\CurrentOption}{coco-kernel}}
+\DeclareOptionX{a11y}{\PassOptionsToPackage{\CurrentOption}{coco-common}}
+\DeclareOptionX{usescript}{\PassOptionsToPackage{\CurrentOption}{coco-script}}
+\DeclareOptionX{nofigs}{\PassOptionsToPackage{\CurrentOption}{coco-floats}}
+\DeclareOptionX{ennotoc}{\PassOptionsToPackage{\CurrentOption}{coco-notes}}
+\DeclareOptionX{endnotes}{\PassOptionsToPackage{\CurrentOption}{coco-notes}}
+\DeclareOptionX{resetnotesperchapter}{\PassOptionsToPackage{\CurrentOption}{coco-notes}}
+\DeclareOptionX{endnotesperchapter}{\PassOptionsToPackage{\CurrentOption}{coco-notes}}
 \ProcessOptionsX
 %    \end{macrocode}
 % All publication types supported by {\CoCoTeX} are based on one of
@@ -160,6 +178,14 @@
 \RequirePackage{index}
 \makeindex
 \RequirePackage{hyperref}
+%    \end{macrocode}
+% Since \lstinline{ltpdfa} messes with a lot of {\LaTeX} Kernel macros
+% (like \lstinline{\begin} and \lstinline{\end}) as well as external
+% package (\lstinline{hyperref}), it must be loaded last:
+%    \begin{macrocode}
+\ifx\tp@do@ally\relax
+  \RequirePackage{coco-accessibility}
+\fi
 %    \end{macrocode}
 %    \begin{macrocode}[gobble=1]
 %</class>

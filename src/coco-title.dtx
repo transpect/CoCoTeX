@@ -145,10 +145,18 @@
 \def\tp@title@set@pdfmeta{%
 %    \end{macrocode}
 % \begin{macro}{\tp@write@pdf@meta} is used to transfer the fully
-%   expanded meta data via the pdfinfo interface provided by the
-%   hyperref package into the pdf.
+%   expanded meta data either via the \lstinline{pdfinfo} interface
+%   provided by the \lstinline{hyperref} package, or via the
+%   \lstinline{setDocInfo()} method from the \lstinline{ltpdfa}
+%   package into the pdf.
+%
+%   \##1 is the pdfinfo name of the property, \##2 is the docInfo key, \##3 is the value
 %    \begin{macrocode}
-  \def\tp@write@pdf@meta##1##2{\protected\def\@tempa{##2}\edef\x{\noexpand\hypersetup{##1={\expandonce{\@tempa}}}}\x}%
+  \def\tp@write@pdf@meta##1##2##3{%
+    \protected\def\@tempa{##3}%
+    \edef\x{\noexpand\hypersetup{##1={\expandonce{\@tempa}}}}%
+    \x
+  }%
 %    \end{macrocode}
 % \end{macro}
 %    \begin{macrocode}
@@ -164,7 +172,7 @@
 \def\tp@title@process@bkt{%
   \let\tpBreak\space
   \protected@xdef\@title{\tpUseComp{Title}}%
-  \tp@write@pdf@meta{pdftitle}{\tpUseComp{Title}}%
+  \tp@write@pdf@meta{pdftitle}{Title}{\tpUseComp{Title}}%
   \protected@edef\tp@run@book@title{\tpUseProperty{run-book-title}}%
   \expandafter\gdef\expandafter\tpRunBookTitle\expandafter{\tp@run@book@title}%
 }
@@ -192,7 +200,7 @@
     \fi
     \if@tempswa
       \expandafter\author\expandafter{\tpRunBookName}%
-      \tp@write@pdf@meta{pdfauthor}{\tpRunBookName}%
+      \tp@write@pdf@meta{pdfauthor}{Author}{\tpRunBookName}%
     \fi
   \endgroup
 }
@@ -202,8 +210,9 @@
 %   creator
 %    \begin{macrocode}
 \def\tp@title@process@bkc{%
-  \tp@write@pdf@meta{pdfcreator}{\tpIfComp{PDFCreator}{\tpUseComp{PDFCreator}}{\tpUseComp{Publisher}\tpIfComp{PubPlace}{, \tpUseComp{PubPlace}}{}}}%
-  \tp@write@pdf@meta{pdfproducer}{\tpUseComp{PDFProducer}}%
+  \tp@write@pdf@meta{pdfcreator}{Creator}{\tpIfComp{PDFCreator}{\tpUseComp{PDFCreator}}{\tpUseComp{Publisher}\tpIfComp{PubPlace}{, \tpUseComp{PubPlace}}{}}}%
+  \tp@write@pdf@meta{pdfproducer}{Producer}{\tpUseComp{PDFProducer}}%
+  \tp@write@pdf@meta{pdfkeywords}{Keywords}{\tpUseComp{Keywords}}%
 }
 %    \end{macrocode}
 % \end{macro}
