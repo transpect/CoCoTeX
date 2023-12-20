@@ -144,18 +144,25 @@
 %    \begin{macrocode}
 \def\tp@title@set@pdfmeta{%
 %    \end{macrocode}
-% \begin{macro}{\tp@write@pdf@meta} is used to transfer the fully
-%   expanded meta data either via the \lstinline{pdfinfo} interface
-%   provided by the \lstinline{hyperref} package, or via the
-%   \lstinline{setDocInfo()} method from the \lstinline{ltpdfa}
-%   package into the pdf.
+% \begin{macro}{\tp@write@pdf@meta} is used to transfer the pdf
+%   DocumentInfo meta date to the pdf writer. If {\LuaTeX} is used,
+%   \lstinline{coco-accessibility.sty} is loaded and it exists an
+%   \jobname.xmp, the Document Info is extracted from the xmp file. If
+%   neither of those conditions is met, the DocumentInfo meta data are
+%   generated from the Components in the \lstinline{tpMeta} Container.
 %
-%   \##1 is the pdfinfo name of the property, \##2 is the docInfo key, \##3 is the value
+%   \##1 is the pdfinfo name of the property, \##2 is the
+%   \lstinline[language=Lua]{cocotex.ally.meta} key, \##3 is the value
 %    \begin{macrocode}
   \def\tp@write@pdf@meta##1##2##3{%
-    \protected\def\@tempa{##3}%
-    \edef\x{\noexpand\hypersetup{##1={\expandonce{\@tempa}}}}%
-    \x
+\message{^^J===> Writing ##1 (##2): }
+    \@ifpackageloaded{coco-accessibility}
+      {\edef\@tempa{\directlua{tex.print(cocotex.ally.meta.##2)}}}
+      {\protected\def\@tempa{##3}}%
+\message{\meaning\@tempa }
+    \ifx\@tempa\@empty\else
+      \edef\x{\noexpand\hypersetup{##1={\expandonce{\@tempa}}}}\message{^^J====>\meaning\x}\x
+    \fi
   }%
 %    \end{macrocode}
 % \end{macro}

@@ -36,8 +36,16 @@
 % PDF Document Information data are read from the xmp file, if one exists.
 %    \begin{macrocode}
 \addToConfig{metadata}{xmpfile=\jobname.xmp}
-\directlua{cocotex = require('coco-accessibility')}
-\directlua{cocotex.extract_meta()}
+
+%    \end{macrocode}
+% Accessible PDFs must not be compressed:
+%    \begin{macrocode}
+ %\edef\pdfobjcompresslevel{\pdfvariable objcompresslevel}
+ %\pdfcompresslevel=0
+ %\pdfobjcompresslevel=0
+
+\directlua{ally = require('coco-accessibility')}
+\directlua{ally.extract_meta()}
  % \setDocInfo{conformance}{pdfaid=2;level=A;pdfuaid=1}%
 %    \end{macrocode}
 % End of style source code.
@@ -45,19 +53,22 @@
 %</a11y-sty>
 %    \end{macrocode}
 %
-%
-% \section{Lua code}
-%
 %    \begin{macrocode}[gobble=1]
 %<*a11y-lua>
 %    \end{macrocode}
-% \begin{macro}{ltpdfa} is an instance of the ltpdfa lua code.
+%
+% \section{Lua code}
+%
+% \subsection{Local Variables, Tables, and Methods}
+%
+% \begin{macro}{ltpdfa} is an instance of the \lstinline{ltpdfa} Lua
+%   table.
 %    \begin{macrocode}
 local ltpdfa = require('ltpdfa')
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{meta} is a table that holds the metadata we need to
-%   extract from the xmp file.
+% \begin{macro}{meta} is a table that holds the metadata that are
+%   extracted from the \lstinline{\jobname.xmp} file.
 %    \begin{macrocode}
 local meta = {
   Author = '',
@@ -80,25 +91,60 @@ local function extract_meta()
 
 
   if (content:find('<dc:title>')) then
-    meta.Title = content:gsub('.*<dc:title><rdf:Alt><rdf:li[^>]*>(.*)</rdf:li></rdf:Alt></dc:title>.*', "%1")
-    log(">>>" .. meta.Title)
+    meta.Title = content:gsub('.*<dc:title>[^<]*<rdf:Alt>[^<]*<rdf:li[^>]*>(.*)</rdf:li>[^<]*</rdf:Alt>[^<]*</dc:title>.*', "%1")
+    -- log(">>>" .. meta.Title)
   end
 
   local authors
   local author = {}
   if (content:find('<dc:creator>')) then
-    authors = content:gsub('.*<dc:creator><rdf:Seq>(.*)</rdf:Seq></dc:creator>.*', "%1")
+    authors = content:gsub('.*<dc:creator>[^<]*<rdf:Seq>(.*)</rdf:Seq>[^<]*</dc:creator>.*', "%1")
     for k in string.gmatch(authors, "<rdf:li>([^>]+)</rdf:li>") do
       table.insert(author , k)
     end
     meta.Author = table.concat(author, ', ')
   end
 end
-cocotex = {}
-cocotex.extract_meta = extract_meta
-return cocotex
 %    \end{macrocode}
 % \end{macro}
+%
+% \subsection{Public Methods}
+%
+% \begin{macro}{cocotex} is the base table that contains all public
+%   methods and sub-tables available in the {\CoCoTeX}
+%   framework. Here, it is defined unless it is already defined
+%   elsewhere.
+%    \begin{macrocode}
+if type(cocotex) ~= 'table' then
+  cocotex = {}
+end
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{cocotex.ally} is a globally available namespace for
+%   coco-accessibility specific lua tables.
+%    \begin{macrocode}
+cocotex.ally = {}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{cocotex.ally.extract_meta} is the globally available method to
+%   trigger extraction of meta information from the xmp meta file.
+%    \begin{macrocode}
+cocotex.ally.extract_meta = extract_meta
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{cocotex.ally.meta} is the globally available table that
+%   holds the extracted meta data.
+%    \begin{macrocode}
+cocotex.ally.meta = meta
+%    \end{macrocode}
+% \end{macro}
+%
+% After loading \lstinline{coco-accessibility.lua} via the
+% \lstinline[language=Lua]{require()} method, a
+% \lstinline[language=Lua]{cocotex.ally} table is returned.
+%    \begin{macrocode}
+return cocotex.ally
+%    \end{macrocode}
 % no more lua code.
 %    \begin{macrocode}[gobble=1]
 %</a11y-lua>
