@@ -222,7 +222,7 @@
     \tpPackageError{Kernel}{Type}{Type `#1' was not declared}{Type `#1' was not declared for Container `#2'.}%
   \else
     \edef\x{\noexpand\csgappto{tp@type@#1@#3}}%
-    \expandafter\expandafter\expandafter\x\expandafter\expandafter\expandafter{\csname tp@type@#1@#2\endcsname}%
+    \expandafter\x\expandafter{\csname tp@type@#1@#2\endcsname}%
     \tpKernelDebugMsg{value tp@type@#1@#3:^^J \expandafter\meaning\csname tp@type@#1@#3\endcsname}%
   \fi
 }
