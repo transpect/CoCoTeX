@@ -33,9 +33,38 @@
 %    \begin{macrocode}
 \RequirePackage[pdftex,pdflang=De,noautotag]{ltpdfa}%,nodetree,dospaces,doparas,,debug
 %    \end{macrocode}
+% The local setup for \CoCoTeX's accessibility features is done via
+% the \lstinline{tpMeta} environment. Therefore, we hook the
+% neccessary Components and Properties right into the \lstinline{titlepage}
+% container. Therefore, \lstinline{coco-title.sty} is a hard
+% requirement for the accessibility module.
+%    \begin{macrocode}
+\RequirePackage{coco-title}%
+\tpAddToType{Components}{titlepage}{\tp@ally@comps}
+%    \end{macrocode}
+%
+% \begin{macro}{\tp@ally@comps} collects Declarations for Components
+%   that represent data needed to create output that conforms to the
+%   PDF/UA standard.
+%    \begin{macrocode}
+\def\tp@ally@comps{%
+  %% ICC profiles
+  \tpDeclareGComp[suppl/cmyk.icc]{IccProfileFile}
+  \tpDeclareGComp[4]{IccComponents}
+  \tpDeclareGComp[Coated FOGRA39]{IccIdentifier}
+  %% XMP Meta
+  \tpDeclareGComp[\jobname]{XmpFile}
+}
+
+\def\tp@Ally{}
+\def\tp@endAlly{}
+
+
+%    \end{macrocode}
+% \end{macro}
 % PDF Document Information data are read from the xmp file, if one exists.
 %    \begin{macrocode}
-\addToConfig{metadata}{xmpfile=\jobname.xmp}
+\addToConfig{metadata}{xmpfile=\tpUseGComp{Meta}{XmpFile}.xmp}
 
  %\edef\pdfobjcompresslevel{\pdfvariable objcompresslevel}
  %\pdfcompresslevel=0
@@ -64,6 +93,24 @@
 \edef\pdfgentounicode{\pdfvariable gentounicode}
 \pdfgentounicode = 1
 
+
+%    \end{macrocode}
+%
+%
+% \subsection{ICC profiles}
+%
+% First, we check if the user has the default icc profiles installed:
+%    \begin{macrocode}
+
+\newif\if@tp@use@default@icc\@tp@use@default@iccfalse
+\IfFileExists{suppl/cmyk.icc}{\IfFileExists{suppl/srbg.icc}{\@tp@use@default@icctrue}{}}{}
+
+\ifx\tp@icc@profile\@undefined
+  \if@tp@use@default@icc
+    \addToConfig{intent}{profile=suppl/\tp@color@enc.icc;components=4;identifier=PSO Uncoated ISO12647 (ECI)}
+    \addToConfig{intent}{profile=suppl/srgb.icc;components=3;identifier=sRGB IEC61966-2.1}
+  \fi
+\fi
 
 %    \end{macrocode}
 % End of style source code.

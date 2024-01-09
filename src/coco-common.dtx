@@ -16,6 +16,8 @@
 \NeedsTeXFormat{LaTeX2e}[2018/12/01]
 \ProvidesPackage{coco-common}
     [\filedate \fileversion CoCoTeX common module]
+\RequirePackage{kvoptions-patch}
+\RequirePackage{xkeyval}
 \RequirePackage{iftex}
 %    \end{macrocode}
 % \section{Package options}
@@ -25,9 +27,24 @@
 % The option \lstinline{a11y} triggers loading of the {\CoCoTeX}
 % Accessibility Module and its features.
 %    \begin{macrocode}
-%% \RequirePackage{kvoptions-patch}
-%% \RequirePackage{xkeyval}
 \DeclareOptionX{a11y}{\let\tp@do@ally\relax}
+%    \end{macrocode}
+% Default color encoding passed as option to the \lstinline{xcolor}
+% package.
+%    \begin{macrocode}
+\def\tp@color@enc{natural}
+\define@choicekey{coco-common.sty}{color-enc}[\tp@color@enc\nr]{srgb,rgb,gray,cmy,cmyk,natural}[natural]{%
+  \let\@tp@color@enc\tp@color@enc
+  \ifcase\nr\relax% srgb
+    \def\@tp@color@enc{rgb}
+  \or% rgb
+  \or% gray
+  \or% cmy
+  \or% cmyk
+  \else% natural, i.e. no conversion of color spaces takes place
+  \fi
+  \PassOptionsToPackage{\@tp@color@enc}{xcolor}%
+}
 \ProcessOptionsX
 %    \end{macrocode}
 %

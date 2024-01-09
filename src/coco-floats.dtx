@@ -361,9 +361,9 @@
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{tpContainer}{tpFloat}
+% \begin{tpContainer}{float}
 %    \begin{macrocode}
-\tpDeclareContainer{tpFloat}{%
+\tpDeclareContainer{float}{%
   \tpDeclareType{Components}{%
     \tpMakeFltCompL{Caption}%
     \tpMakeFltCompL{Legend}%
@@ -372,7 +372,7 @@
     \tpMakeFltComp{RefLabel}%
     \tpMakeFltComp{AltText}% neu: 2023-06-08; TODO: muss noch implementiert werden
   }%
-  \tpDeclareType{Properties}{\tp@float@default}%
+  \tpDeclareType{Properties}{}%
 }
 %    \end{macrocode}
 % \begin{macro}{\tpDeclareFloat} is the user-level macro used to
@@ -391,7 +391,7 @@
 \long\def\@tpDeclareFloat[#1]#2#3#4#5{%
   \def\tp@float@parent{#1}%
 %    \end{macrocode}
-% If the Float Container has already been declared, we only load its
+% If the float Container has already been declared, we only load its
 % parent's Properties and Containers (if any), and add the override
 % Properties to the Container's Property List. Otherwise, we would
 % re-load the system's defaults and override the Properties of the
@@ -423,7 +423,7 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
     \tpDeclareContainer{#2}{%
       \tpPackageInfo{Floats}{}{Declaring float `#2'}%
       \ifx\tp@float@parent\@empty
-        \tpInherit {Properties,Components} from tpFloat;
+        \tpInherit {Properties,Components} from float;
       \else
         \tpInherit {Properties,Components} from \tp@float@parent;
       \fi
@@ -1292,8 +1292,6 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %
 % \section{Default Settings}
 %
-% \begin{macro}{\tp@float@default} provide the default values for the
-%   Properties all float-derived Containers.
 %    \begin{macrocode}
 \tpAddToDefault{float}{%
   \tpSetProperty{intext-skip-top}{\intextsep}%% non-float sep top
@@ -1390,7 +1388,6 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
   \tpSetProperty{list-of-after-entry}{\par}% list-of-float appearance
 }
 %    \end{macrocode}
-% \end{macro}
 % \begin{tpContainer}{tpFigure} defines the defaults for the
 %   \lstinline{tpFigure} Container.
 %    \begin{macrocode}

@@ -22,7 +22,7 @@
 % Declarator for the tpMaketitle macro.
 %    \begin{macrocode}
 \tpDeclareContainer{titlepage}{%
-  \tpInherit {Components,Properties} from Meta;
+  \tpInherit {Components,Properties} from CommonMeta;
   \tpDeclareType{Components}{%
     \tp@title@simple@comps
     \tp@meta@generic@comp
@@ -43,7 +43,7 @@
     \tp@titlepage@role{editor}{Editor}%
     \tp@titlepage@role{series-editor}{SeriesEditor}%
   }%
-  \tpDeclareType{Properties}{\tp@titlepage}%
+  \tpDeclareType{Properties}{}%
   \tpDeclareEnv[tpMeta]{\tp@Meta}{\tp@endMeta}%
 }
 %    \end{macrocode}
@@ -75,11 +75,8 @@
 %   declarator with \#1 being the titlepage's Property list.
 %    \begin{macrocode}
 \long\def\tpDeclareTitlepage#1{%
-  \gdef\tp@titlepage{%
-    \tpNamespace{titlepage}%
-    \tp@titlepage@default
-    #1%
-  }%
+  \tpNamespace{titlepage}%
+  #1%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -155,13 +152,11 @@
 %   \lstinline[language=Lua]{cocotex.ally.meta} key, \##3 is the value
 %    \begin{macrocode}
   \def\tp@write@pdf@meta##1##2##3{%
-\message{^^J===> Writing ##1 (##2): }
     \@ifpackageloaded{coco-accessibility}
       {\edef\@tempa{\directlua{tex.print(cocotex.ally.meta.##2)}}}
       {\protected\def\@tempa{##3}}%
-\message{\meaning\@tempa }
     \ifx\@tempa\@empty\else
-      \edef\x{\noexpand\hypersetup{##1={\expandonce{\@tempa}}}}\message{^^J====>\meaning\x}\x
+      \edef\x{\noexpand\hypersetup{##1={\expandonce{\@tempa}}}}\x
     \fi
   }%
 %    \end{macrocode}
@@ -186,8 +181,8 @@
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tp@title@process@bka} processes the document's main
-%   author or, if that doesn't exist, the main editor, or throws an
-%   error message if neither exist.
+%   author or, if that doesn't exist, the main editor, or throws a
+%   warning if neither exist.
 %    \begin{macrocode}
 \def\tp@title@process@bka{%
   \@tempswatrue
@@ -316,15 +311,10 @@
 %
 % \subsection{Simple Component Declarations}
 %
-% \begin{macro}{\tp@title@macro} is a shortcut to declare simple title
-%   Components with the name \#2. They are usually empty. Non-empty
-%   default value can be provided by the optional argument \#1.
+% \begin{macro}{\tp@title@macro} is an alias for
+%   \lstinline{\tpDeclareGComp} for backwards compatibility.
 %    \begin{macrocode}
-\def\tp@title@macro{\tp@opt@empty\@tp@title@macro}%
-\def\@tp@title@macro[#1]#2{%
-  \tpDeclareComp{#2}{\expandafter\global}{}%
-  \if!#1!\else\csname tp#2\endcsname{#1}\fi%
-}
+\let\tp@title@macro\tpDeclareGComp
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tp@title@simple@comps} wrapper for the Titlepage's simple Components.
@@ -430,10 +420,8 @@
 %
 % \section{Default Settings}
 %
-% \begin{macro}{\tp@titlepage@default} defines the default Properties
-%   for \lstinline{\tpMaketitle}
 %    \begin{macrocode}
-\def\tp@titlepage@default{%
+\tpAddToDefault{titlepage}{%
   \tpSetProperty{article-title}{}%
   % Title page hooks
   % Before \tpMaketitle and outside the group
@@ -727,7 +715,6 @@
   }%
 }
 %    \end{macrocode}
-% \end{macro}
 %    \begin{macrocode}[gobble=1]
 %</title>
 %    \end{macrocode}

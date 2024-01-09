@@ -255,6 +255,17 @@
 }
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{\tpDeclareGComp} is a shortcut to declare simple,
+%   globally available Components with the name \#2 and an optional
+%   initial value \#1. They are usually empty.
+%    \begin{macrocode}
+\def\tpDeclareGComp{\tp@opt@empty\tp@declare@global@comp}%
+\def\tp@declare@global@comp[#1]#2{%
+  \tpDeclareComp{#2}{\expandafter\global}{}%
+  \if!#1!\else\csname tp#2\endcsname{#1}\fi%
+}
+%    \end{macrocode}
+% \end{macro}
 % Once declared, a component can be set in two ways: The first way is
 % to use \lstinline{\tp<name>} with one argument for its value. The
 % second, preferred, way is to use the \lstinline{\tpComp} macro which
@@ -762,11 +773,10 @@
 \long\def\tpSetPropertyX#1#2{\long\csedef{tp@\tp@cur@cont @#1}{#2}}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tpAddToDefault}
-%   adds material to a Container's defaults; \#1 is the name of the
-%   Container, \#2 is a block of Property assignments.
+% \begin{macro}{\tpAddToDefault} adds the material in the next token
+%   to a Container of name \#1's \lstinline{Property} Type.
 %    \begin{macrocode}
-\long\def\tpAddToDefault#1#2{\csgappto{tp@#1@default}{#2}}
+\long\def\tpAddToDefault#1{\tpAddToType{Properties}{#1}}
 %    \end{macrocode}
 % \end{macro}
 %

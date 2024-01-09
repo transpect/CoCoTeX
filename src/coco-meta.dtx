@@ -19,19 +19,18 @@
     [\filedate \fileversion CoCoTeX meta module]
 \RequirePackage{coco-common}
 %    \end{macrocode}
-% \begin{tpContainer}{Meta} is the abstract Container for meta data,
-%   both for whole documents as well as parts of documents.
+% \begin{tpContainer}{CommonMeta} is an abstract Container for
+%   commonly used meta data, both for whole documents as well as parts
+%   of documents.
 %    \begin{macrocode}
-\tpDeclareContainer{Meta}{%
+\tpDeclareContainer{CommonMeta}{%
   \tpDeclareType{Components}{%
     \tpDeclareRole[author]{Author}%
-    \tp@declare@meta@comp
-    \tp@extended@meta@macros
+    \tp@declare@common@meta@comp
+    \tp@extended@common@meta@macros
     \tp@declare@meta@affils
   }%
-  \tpDeclareType{Properties}{%
-    \tp@Meta@default
-  }%
+  \tpDeclareType{Properties}{}%
 }
 %    \end{macrocode}
 % \end{tpContainer}
@@ -249,19 +248,21 @@
 %
 % \section{common meta data}
 %
+% \begin{macro}{\tp@declare@common@meta@comp} defines some commonly used meta Components
 %    \begin{macrocode}
-\def\tp@declare@meta@comp{%
+\def\tp@declare@common@meta@comp{%
     \tpDeclareComp{Copyright}{\expandafter\global}{}% Copyright text
     \tpDeclareComp{DOI}{\expandafter\global}{}%         DOI
 
 }%
 %    \end{macrocode}
-% \begin{macro}{\tp@extended@meta@macros}
+% \end{macro}
+% \begin{macro}{\tp@extended@common@meta@macros}
 %   provides some extended markup. Some headings use these Components
 %   for compilations of contributions by different authors. They are
 %   also loaded by article title pages.
 %    \begin{macrocode}
-\def\tp@extended@meta@macros{%
+\def\tp@extended@common@meta@macros{%
   \tpDeclareLabeledComp[Abstract]{Abstract}{abstract}%
   \tpDeclareLabeledComp[Keywords]{Keywords}{keyword}%
   \tpDeclareLabeledComp{DOI}{doi}%
@@ -297,7 +298,7 @@
 %
 % Defaut Property settings for the Meta Container.
 %    \begin{macrocode}
-\tpAddToDefault{Meta}{%
+\tpAddToDefault{CommonMeta}{%
   \tpSetProperty{initials-format}{%
     \expandafter\ifx\csname tp@\tp@cur@cont @\tp@cnt@grp-FirstName-\the\tpCurCount\endcsname\long@empty\else
       \expandafter\ifx\csname tp@\tp@cur@cont @\tp@cnt@grp-FirstName-\the\tpCurCount\endcsname\relax\else
