@@ -72,18 +72,11 @@
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tpDeclareTitlepage} is the default titlepage
-%   declarator with \#1 being the titlepage's Property list.
+%   declarator with the next token being added the titlepage's Property list.
 %    \begin{macrocode}
-\long\def\tpDeclareTitlepage#1{%
-  \tpNamespace{titlepage}%
-  #1%
-}
+\def\tpDeclareTitlepage{\tpAddToType{Properties}{titlepage}}
 %    \end{macrocode}
 % \end{macro}
-% which we call immediately
-%    \begin{macrocode}
-\tpDeclareTitlepage{}
-%    \end{macrocode}
 % \begin{macro}{\tp@Meta} is the code executed at the beginning of the \lstinline{tpMeta} Container
 %    \begin{macrocode}
 \def\tp@Meta{%
