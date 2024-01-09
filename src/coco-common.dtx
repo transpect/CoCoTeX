@@ -30,7 +30,7 @@
 % Default color encoding passed as option to the \lstinline{xcolor}
 % package.
 %    \begin{macrocode}
-\def\tp@color@enc{cmyk}
+\def\@tp@color@enc{cmyk}
 \define@choicekey{coco-common.sty}{color-enc}[\tp@color@enc\nr]{srgb,rgb,gray,cmy,cmyk,natural}[cmyk]{%
   \let\@tp@color@enc\tp@color@enc
   \ifcase\nr\relax% srgb
@@ -41,9 +41,9 @@
   \or% cmyk
   \else% natural, i.e. no conversion of color spaces takes place
   \fi
-  \PassOptionsToPackage{\@tp@color@enc}{xcolor}%
 }
 \ProcessOptionsX
+\PassOptionsToPackage{\@tp@color@enc}{xcolor}%
 %    \end{macrocode}
 %
 % \section{Commonly Used Low-Level Macros and Registers}
