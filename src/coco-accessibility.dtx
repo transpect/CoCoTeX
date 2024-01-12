@@ -31,6 +31,8 @@
 % The \lstinline{ltpdfa} package is a hard requirement for the
 % accessibility features of {\CoCoTeX}
 %    \begin{macrocode}
+\def\tp@if@ally{\expandafter\@firstoftwo}
+
 \RequirePackage[pdftex,pdflang=De,noautotag]{ltpdfa}%,nodetree,dospaces,doparas,,debug
 %    \end{macrocode}
 % The local setup for \CoCoTeX's accessibility features is done via
@@ -40,6 +42,9 @@
 % requirement for the accessibility module.
 %    \begin{macrocode}
 \RequirePackage{coco-title}%
+%    \end{macrocode}
+% The accessibility-specific new Components and Properties are added to the titlepage container:
+%    \begin{macrocode}
 \tpAddToType{Components}{titlepage}{\tp@ally@comps}
 %    \end{macrocode}
 %
@@ -53,7 +58,6 @@
   \tpDeclareGComp[4]{IccComponents}
   \tpDeclareGComp[Coated FOGRA39]{IccIdentifier}
   %% XMP Meta
-  \tpDeclareGComp[\jobname]{XmpFile}
 }
 
 \def\tp@Ally{}
@@ -62,16 +66,16 @@
 
 %    \end{macrocode}
 % \end{macro}
-% PDF Document Information data are read from the xmp file, if one exists.
+% \begin{macro}{\tp@title@insert@xmp} override of the same macro in
+%   the \lstinline{coco-title}. 
 %    \begin{macrocode}
-\addToConfig{metadata}{xmpfile=\tpUseGComp{Meta}{XmpFile}.xmp}
-
+\def\tp@title@insert@xmp{\addToConfig{metadata}{xmpfile=\tpUseGComp{Meta}{XmpFile}.xmp}}
  %\edef\pdfobjcompresslevel{\pdfvariable objcompresslevel}
  %\pdfcompresslevel=0
  %\pdfobjcompresslevel=0
 
-
 %    \end{macrocode}
+% \end{macro}
 % Loading lua modules for meta data processing.
 %
 % \textbf{Note:} \lstinline{ltpdfhyper.sty} deactivates all

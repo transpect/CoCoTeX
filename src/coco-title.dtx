@@ -119,7 +119,8 @@
   \tp@meta@generic@eval
   \tp@title@fundings@eval
   \tp@title@add@eval
-  \tp@title@set@pdfmeta
+  \tp@if@preamble\tp@title@set@pdfmeta\relax%
+  \tpUseHook{document-meta-hook}%
   \let\tp@cur@cont\@empty
 }
 %    \end{macrocode}
@@ -158,7 +159,7 @@
   \tp@title@process@bkt
   \tp@title@process@bka
   \tp@title@process@bkc
-  \tpUseHook{document-meta-hook}%
+  \tp@title@insert@xmp
 }
 %    \end{macrocode}
 % \end{macro}
@@ -211,6 +212,27 @@
 }
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{\tp@title@insert@xmp} inserts the contents of the XMP
+%   meta data file into the pdf, if it exists. This non-accessible
+%   varinat requires the PDF not being compressed.
+%    \begin{macrocode}
+\def\tp@title@insert@xmp{%
+  \edef\pdfobjcompresslevel{\pdfvariable objcompresslevel}%
+  \pdfcompresslevel=0
+  \pdfobjcompresslevel=0
+  \edef\include@xmp{\noexpand\@include@xmp{\tpUseComp{XmpFile}.xmp}}
+  \def\@include@xmp#1{\IfFileExists{#1}{\@@include@xmp{#1}}{}}
+  \def\@@include@xmp#1{%
+    \begingroup
+      \pdfcompresslevel=0
+      \immediate\pdfobj stream attr {/Type /Metadata /Subtype /XML}
+      file{#1}
+      \pdfcatalog{/Metadata \the\pdflastobj\space 0 R}
+    \endgroup}%
+  \include@xmp
+}
+%    \end{macrocode}
+% \end{macro}
 %
 % \section{Intermediate Level Interfaces}
 %
@@ -225,7 +247,6 @@
 %   collects the meta information and constructs the tpMaketitle macro
 %    \begin{macrocode}
 \def\tp@maketitle{%
-  %\csname tp@titlepage\endcsname
   \ifarticle
     \gdef\tpMaketitle{%
       \let\tp@cnt@grp\@empty
@@ -313,6 +334,7 @@
 % \begin{macro}{\tp@title@simple@comps} wrapper for the Titlepage's simple Components.
 %    \begin{macrocode}
 \def\tp@title@simple@comps{%
+  \tpDeclareGComp[\jobname]{XmpFile}             % File basename of the XMP file ('.xmp' is added automatically)
   %% Cover
   \tp@title@macro{Cover}                         % Path to Cover Image(!)
   %% Titles

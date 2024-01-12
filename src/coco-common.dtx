@@ -45,6 +45,15 @@
 \ProcessOptionsX
 \PassOptionsToPackage{\@tp@color@enc}{xcolor}%
 %    \end{macrocode}
+% \begin{macro}{\tpIfAlly} is a switch to distinct between compilation
+%   with (implicit \#1) or without (implicit \#2) activated accessibility features.
+%    \begin{macrocode}
+\def\tp@if@ally{\ifx\tp@do@ally\relax\expandafter\@firstoftwo\else\expandafter\@secondoftwo\fi}
+\let\tpIfAlly\tp@if@ally
+\def\tp@if@preamble{\ifx\@nodocument\relax\expandafter\@firstoftwo\else\expandafter\@secondoftwo\fi}
+\let\tpIfPreamble\tp@if@preamble
+%    \end{macrocode}
+% \end{macro}
 %
 % \section{Commonly Used Low-Level Macros and Registers}
 % Contains common macros used in the {\CoCoTeX} modules and that
