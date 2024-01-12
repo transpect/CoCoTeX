@@ -221,12 +221,12 @@
   \pdfcompresslevel=0
   \pdfobjcompresslevel=0
   \edef\include@xmp{\noexpand\@include@xmp{\tpUseComp{XmpFile}.xmp}}
-  \def\@include@xmp#1{\IfFileExists{#1}{\@@include@xmp{#1}}{}}
-  \def\@@include@xmp#1{%
+  \def\@include@xmp##1{\IfFileExists{##1}{\@@include@xmp{##1}}{}}
+  \def\@@include@xmp##1{%
     \begingroup
       \pdfcompresslevel=0
       \immediate\pdfobj stream attr {/Type /Metadata /Subtype /XML}
-      file{#1}
+      file{##1}
       \pdfcatalog{/Metadata \the\pdflastobj\space 0 R}
     \endgroup}%
   \include@xmp
