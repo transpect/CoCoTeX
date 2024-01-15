@@ -50,7 +50,7 @@
 %    \begin{macrocode}
 \def\tp@if@ally{\ifx\tp@do@ally\relax\expandafter\@firstoftwo\else\expandafter\@secondoftwo\fi}
 \let\tpIfAlly\tp@if@ally
-\def\tp@if@preamble{\ifx\@nodocument\relax\expandafter\@firstoftwo\else\expandafter\@secondoftwo\fi}
+\def\tp@if@preamble{\ifx\@nodocument\relax\expandafter\@secondoftwo\else\expandafter\@firstoftwo\fi}
 \let\tpIfPreamble\tp@if@preamble
 %    \end{macrocode}
 % \end{macro}
