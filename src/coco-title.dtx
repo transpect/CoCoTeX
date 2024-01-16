@@ -83,6 +83,7 @@
   \tpEvalType{Components}%
 }
 %    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\tpAddTitleRole} is a user-level macro to add both a
 %   new Role with the name \#2 and a controlling Property \#1 to the
 %   \lstinline{titlepage} container.
@@ -136,14 +137,14 @@
 \def\tp@title@set@pdfmeta{%
 %    \end{macrocode}
 % \begin{macro}{\tp@write@pdf@meta} is used to transfer the pdf
-%   DocumentInfo meta date to the pdf writer. If {\LuaTeX} is used,
+%   DocumentInfo meta date to the pdf writer. If {Lua\LaTeX} is used,
 %   \lstinline{coco-accessibility.sty} is loaded and it exists an
 %   \jobname.xmp, the Document Info is extracted from the xmp file. If
 %   neither of those conditions is met, the DocumentInfo meta data are
 %   generated from the Components in the \lstinline{tpMeta} Container.
 %
-%   \##1 is the pdfinfo name of the property, \##2 is the
-%   \lstinline[language=Lua]{cocotex.ally.meta} key, \##3 is the value
+%   \#\#1 is the pdfinfo name of the property, \#\#2 is the
+%   \lstinline[language={[5.3]Lua}]{cocotex.ally.meta} key, \#\#3 is the value
 %    \begin{macrocode}
   \def\tp@write@pdf@meta##1##2##3{%
     \@ifpackageloaded{coco-accessibility}

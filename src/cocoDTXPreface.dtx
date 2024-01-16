@@ -482,7 +482,6 @@
 \patchcmd{\lsthk@TextStyle}{\let\lst@DefEsc\@empty}{}{}{\errmessage{failed to patch}}
 \global\let\lst@doendpe\@empty
 \usepackage{multicol}
-\def\printdate#1-#2-#3§{#3/#2/#1}
 \renewcommand\tableofcontents{%
   \bgroup
     \let\noclearpage\relax
@@ -508,7 +507,7 @@
       \hfill\vbox{\hsize.5\textwidth\@subtitle\par}}%
     \par\vskip2\baselineskip
     {\large\sffamily Version~\tp@fileversion}\par
-    (\sffamily\expandafter\printdate\tp@filedate§)\par
+    (\sffamily \tp@filedate)\par
     \vfill
     {\large\sffamily\@author\par\href{mailto:\@authormail}{\@authormail}\par}%
   \egroup

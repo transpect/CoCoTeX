@@ -1,0 +1,517 @@
+\begin{heading}[label=chap:floats]{chapter}
+  \tpTitle{coco-floats.sty}
+\end{heading}
+\index{coco-floats|textbf}
+
+\begin{heading}{section}
+  \tpTitle{Using floats}
+\end{heading}
+
+\begin{heading}{subsection}
+  \tpTitle{Generic and pre-defined float environments}
+\end{heading}
+
+Generally, floats are used with the
+\lstinline{tpFloat}\index[tex]{float@\texttt{tpFloat}*} environment:
+\begin{lstlisting}[style=tex]
+\begin{tpFloat}[<options>]
+  <content>
+\end{tpFloat}
+\end{lstlisting}
+
+
+\begin{heading}[label=sec:flt:opts]{subsubsection}
+  \tpTitle{Options}
+\end{heading}
+
+\lstinline{<options>} are options that count only for the given float
+environment. The following options are currently implemented for all
+floats:
+\begin{description}
+\item[label=<label>] Label for the float. This can be used to
+  reference the heading with \LaTeX's crossref macros like
+  \lstinline{\ref}, \lstinline{\pageref}, etc.
+\item[class] This allows to further sub-categorize the properties of a
+  float environment, see~\ref{sec:flt:classes}.
+\item[float-pos] The preferred float position which LaTeX shoudl use
+  to place the float on the page, see \autoref{sec:flt:floatpos}.
+\item[orientation] If the value is \lstinline{landscape} the float
+  will be rotated by 90 degrees via the \lstinline{graphics} package's
+  rotating mechanism. The direction can be adjusted with package
+  options passed to the \lstinline{graphics} package, see the graphics
+  package's documentation for details.
+\item[nonumber] if the \lstinline{numbering} property is set to
+  \lstinline{auto} (see \autoref{sec:flt:numbering}), suppress the
+  numbering of that float. This attribute takes no value.
+\item[nolist] if present, this float will generate no entry in the
+  float family's contents list (like List of Figures, List of Tables,
+  etc).
+\item[subfloat] if the \lstinline{numbering} property is set to
+  \lstinline{auto} (see \autoref{sec:flt:numbering}), sub-floats of
+  this float instance are numbered separately from the overall caption
+  type counter and are reset to 1 with each new float environment.
+\end{description}
+
+
+\begin{heading}[label=sec:flt:comp]{subsection}
+  \tpTitle{Pre-Defined Components}
+\end{heading}
+
+\lstinline{<content>} is a list of Components (see~\ref{sec:enm}). All
+floats have the following components pre-defined:
+
+The pre-defined components of a heading are:
+\begin{description}
+\item[\string\tpCaption]\index[tex]{tpCaption@\texttt{\textbackslash tpCaption}}
+  the main caption of the float environment which explains what is to
+  be seen in the Content component.
+\item[\string\tpLegend]\index[tex]{tpLegend@\texttt{\textbackslash tpLegend}}
+  a legend, used to explain certain objects in the Content component.
+\item[\string\tpSource]\index[tex]{tpSource@\texttt{\textbackslash tpSource}}
+  a source line that described where the Content component is taken from.
+\item[\string\tpNumber]\index[tex]{tpNumber@\texttt{\textbackslash tpNumber}}
+  the counter of the float. If numbering is set to auto the use of
+  \lstinline{tpNumber} \textit{always} overries the automatically
+  generated counter. This also counts for sub-floats.
+\item[\string\label]\index[tex]{label@\texttt{\textbackslash label}}
+  the crossref target to be used with \LaTeX's
+  \lstinline{\label}/\lstinline{\ref} mechanism.
+\end{description}
+Note that floats can only be referred to with the \lstinline{label}
+mechanism, when they have a non-empty \lstinline{tpNumber} component.
+
+Note also that there are \textit{two ways} to indicate the target of a
+cross reference: with the \lstinline{\label} component, and with the
+label-Attribut in the optional Argument of the float
+environment. Since internally, the \lstinline{label} attribute sets
+the \lstinline{\label} component prior to the content of the
+environment is being read, the \lstinline{\label} component
+\textit{overrides} the \lstinline{label} attribute if both are used in
+the same environment.
+
+
+\begin{heading}[label=sec:flt:content]{subsection}
+  \tpTitle{Content Components}
+\end{heading}
+
+Each float environment needs to have a Component that serves as
+content container. Generic float environments provide a Component
+macro\lstinline{\tpContent}%
+\index[tex]{tpContent@\texttt{\textbackslash tpContent}} for that
+purpose.
+
+The pre-defined \lstinline{tpFigure} environment uses
+\lstinline{\tpFig}\index[tex]{tpFig@\texttt{\textbackslash tpFig}},
+which usually contains one call to the \lstinline{\includegraphics}
+macro.
+
+The pre-defined \lstinline{tpTable} environment works a bit
+differently. The package provides some minor re-definitions of the
+\lstinline{tabularx} and \lstinline{tabulary} environments, which make
+the tabular contents accessible via the \lstinline{\tpContent} macro.
+
+Since both \lstinline{tabularx} and \lstinline{tabulary} environemnts
+rely on the integrity of \LaTeX's \lstinline{tabular} environment,
+none such override exists for default \lstinline{tabular}. Therefore,
+the \lstinline{tabular} environment \textbf{cannot be used inside}
+\lstinline{tpTable}!
+
+The \lstinline{htmltabs} package is also supported (and preferred).
+
+
+\begin{heading}[label=sec:flt:subfloat]{subsection}
+  \tpTitle{Subfloats}
+\end{heading}
+
+Float environments can itselves contain several sub-float
+environments. Subfloats are coded with the \lstinline{tpSubFloat}
+environment:
+\begin{lstlisting}[style=tex]
+\begin{tpSubFloat}[<options>]
+<content>
+\end{tpSubFloat}
+\end{lstlisting}
+The \lstinline{<content>} Components and the options are the same as
+for non-subdivided floats.
+
+It is possible to have separate caption blocks for the overall float
+and the sub-floats simultaneously, e.g.:
+\begin{lstlisting}[style=tex]
+\begin{tpFigure}
+  \tpCaption{Two figures.}
+  \tpNumber{Fig. 2}
+  \begin{tpSubFloat}
+    \tpNumber{(a)}
+    \tpCaption{left figure}
+    \tpFig{\includegraphics{example1.eps}}
+  \end{tpSubFloat}
+  \begin{tpSubFloat}
+    \tpNumber{(b)}
+    \tpCaption{right figure}
+    \tpFig{\includegraphics{example2.eps}}
+  \end{tpSubFloat}
+\end{tpFigure}
+\end{lstlisting}
+When the property \lstinline{subfloat-same-height} is set to
+\lstinline{true}, the two sub figures are scaled to the same height
+and printed next to each other together with their captions in a float
+that itself has a caption which overspanns the whole width of both sub
+floats. By default, those subfloats are scaled proportionally by the
+amount it takes to fill the full width of the current
+\lstinline{\linewidth} minus the values of both the
+\lstinline{margin-left} and \lstinline{margin-right} properties.
+
+\begin{heading}[label=sec:flt:classes]{subsection}
+  \tpTitle{Classes}
+\end{heading}
+
+TODO
+
+\begin{heading}[label=sec:flt:floatpos]{subsection}
+  \tpTitle{Float position and fixed-position floats}
+\end{heading}
+
+Floats in the coco-floats package usually are \textit{floating}
+objects, i.e., they are placed in {\LaTeX} insert boxes outside the
+text typeface and may be placed in the printed output somewhere else
+than they are placed in the tex source file.
+
+The parameter \lstinline{float-pos} in an float enviromnent's option
+determins where a float should preferrably be placed. The values of
+this parameter correspond to the known float position of default LaTeX
+\lstinline{float} environments, with one exception:
+\begin{description}[5mm]
+\item[t] placement on the top of the page
+\item[b] placement on the bottom of the page
+\item[h] placement at the position where the float is in the source code, if possible
+\item[p] placement on a single page
+\end{description}
+Those values can be combined to leave {\LaTeX} more freedom to move
+floats around, e.g., \lstinline{float-pos=ht} tells the interpreter to
+place the float at the position where it is in the source, but top on
+the next page if the space doesn't fit for the whole float. If the
+float is displaced, the remaining text will continue to be printed
+until the current page is full. The float is then placed on the next
+page according to the \lstinline{float-pos} value.
+
+One exception from \LaTeX's default behaviour is the
+\lstinline{float-pos} value \lstinline{h!}. This forces LaTeX print
+the float next, no matter how much space is left on the current
+page. If the float object doesn't fit, a large portion of the page may
+be left empty and only the following page starts with the float.
+
+
+
+\begin{heading}{section}
+  \tpTitle{Declaring new and altering existing Float environments}
+\end{heading}
+
+New float environments can be defined with the
+\lstinline{\tpDeclareFloat} macro:
+\begin{lstlisting}[style=tex]
+\tpDeclareFloat[<parent>]{<name>}
+  {<caption-type>}
+  {<listof>}
+  {<properties>}
+\end{lstlisting}
+This macro creates two environments: a \lstinline{<name>} environment,
+and a starred \lstinline{<name>*} version to be used for page-wide
+floats in \LaTeX's \lstinline{twocolumn} mode.
+
+The \lstinline{\tpDeclareFloat} macro is also used to change the
+properties of pre-existing \lstinline{coco-float}
+environments. The package ships with two pre-defined float
+environments: \lstinline{tpFigure} and \lstinline{tpTable} for figures
+and tables, respectively.
+
+The first, optional, argument \lstinline{<parent>} indicates another
+float enviroment from which the properties should be inherited. All
+floats inherit the \textit{defaut float} properties first, then the
+\lstinline{<parent>}'s properties and finally the float environemnt's
+own property list is applied at the beginning of each instance of that
+float environment.
+
+The first mandatory argument \lstinline{<name>} indicated the name of the float
+environment.
+
+The second mandatory argument \lstinline{<caption-type>} indicates the
+internal counter that should be used for that float.
+
+The third mandatory argument \lstinline{<listof>} indicates the ending
+of the write stream for \LaTeX's list-of mechanism.
+
+The last argument \lstinline{<properties>} is the list of properties
+of the float, see~\autoref{sec:flt:props} on a description of all
+properties used with floats.
+
+As an example, the \lstinline{tpFigure} environment is defined as
+follows:
+\begin{lstlisting}[style=tex]
+\tpDeclareFloat{tpFigure}{figure}{lof}{%
+  \tpSetProperty{subfloat-same-height}{true}%
+  \tpSetProperty{content-handler}{\tpFigureHandler}%
+  \tpSetProperty{float-block}{\tpFigureFloat}%
+  \tpSetProperty{subfloat-block}{\tpFigureSubFloat}%
+}
+\end{lstlisting}
+
+
+
+Since float environments must be able to deal with subfloats,
+Components are declared with the macro \lstinline{\tpMakeFltComp}
+which takes three arguments:
+\begin{lstlisting}[style=tex]
+\tpMakeFltComp{<macro name>}{<internal name>}{<component name>}
+\end{lstlisting}
+\begin{description}[35mm]
+\item[\texttt{<macro name>}] is the name of the Component macro.
+\item[\texttt{<internal name>}] is the internally used name of the component. It must be different from the other two names.
+\item[\texttt{<component name>}] is the name used in \lstinline{\tpUseComp} to refer to that component as well as in the conditionals (see \autoref{sec:common:components}).
+\end{description}
+
+
+
+\begin{heading}[label=sec:flt:props]{section}
+  \tpTitle{Properties}
+\end{heading}
+\index{Floats!Properties}\index{Properties!Floats}
+
+
+\begin{heading}[label=sec:flt:props:undef]{subsection}
+  \tpTitle{Undefinable Properties}
+\end{heading}
+
+\describeUProp{float-number}
+
+The \lstinline{float-number} property contains the float counter
+accessible for usage inside the \lstinline{tpSubFloat} environment.
+
+\describeUProp{sub-number}
+
+This property contains the \lstinline{sub-number-before}, the
+sub-float counter, and the
+\lstinline{sub-number-after}. \lstinline{sub-number-format} is applied
+to all of that.
+
+
+
+\begin{heading}[label=sec:flt:spacing]{subsection}
+  \tpTitle{Spacing}
+\end{heading}
+\index{Floats!Spacing}
+
+\describeProp{intext-skip-top}{\lstinline{<dimen>}}{0pt}
+\describeProp{intext-skip-bottom}{\lstinline{<dimen>}}{0pt}
+
+Space above and below non-floating Floats.
+
+\describeProp{float-skip-top}{\lstinline{<dimen>}}{0pt}
+\describeProp{float-skip-bottom}{\lstinline{<dimen>}}{0pt}
+
+Space above and below floating Floats.
+
+\describeProp{sub-float-sep}{\lstinline{<dimen>}}{\texttt{\string\fboxsep}}
+
+Space between Subfloats
+
+\describeProp{margin-left}{\lstinline{<dimen>}}{0pt}
+\describeProp{margin-right}{\lstinline{<dimen>}}{0pt}
+
+Left and right margins within the floating environment.
+
+
+\begin{heading}[label=sec:flt:comp]{subsection}
+  \tpTitle{Composition}
+\end{heading}
+\index{Floats!composition}
+
+\describeProp{before-float}{\lstinline{<any>}}{\texttt{\string\parindent\string\z@}}
+
+Stuff to be executed before content is evaluated.
+
+\describeProp{content-handler}{\lstinline{<any>}}{\textit{see below}}
+
+The caption type specific content handler. The function behind the
+\lstinline{content-handler} provides the float's accepted components
+and tells the package how to handle the actual content (i.e.,
+everything apart from the captions) of the floating environment.
+
+The default value for any float is the \lstinline{\tpGenericHandler}
+macro. The \lstinline{tpFigure} float uses
+\texttt{\string\tpFigureHandler}, while \lstinline{tpTable} uses
+\texttt{\string\tpTableHandler}.
+
+\describeProp{float-block}{\lstinline{<any>}}{\textit{see below}}
+
+The caption type specific content printer. The function behind this
+property tells the package how to print the contents of the float
+environment. This is where the Content component or the macro that
+contains the contents is expanded and printed.
+
+The default value for any float is \lstinline{\tpGenericFloat} which
+simply expands to
+\lstinline|\tpUseComp{Content}|. \lstinline{tpTable}'s default value
+is \lstinline{\tpTableFloat}, \lstinline{tpFigure}'s default is
+\lstinline{\tpFigureFloat}.
+
+\describeProp{subfloat-block}{\lstinline{<any>}}{\textit{see below}}
+
+The caption type specific content printer for subfloats. If a float
+contains subfloats the Content Components of those subfloats may need
+to be handled differently than a single Content Component.
+
+By default, this property is only pre-defined for the \lstinline{tpFigure}
+environment, which uses
+\texttt{\string\tpFigureSubFloat}. \lstinline{tpTable} and the generic
+float use the same default value for \lstinline{subfloat-block} as is
+used for \lstinline{float-block}, i.e., \lstinline{\tpTableFloat} for
+\lstinline{tpTable}, and \lstinline{\tpGenericFloat} for any other
+float.
+
+\describeProp{subfloat-same-height}{\lstinline{<any>}}{}
+
+If non-empty, sub-floats are scaled to a common height. 
+
+By default, this property is set to empty for all floats, except for
+\lstinline{tpFigure}, whose default value is \lstinline{true}. 
+
+\textbf{Warning:} Use this property with a non-empty value only for
+float contents that are actually scalable. As of this version of
+coco-floats, this is only implemented for figures inserted using
+the \lstinline{\includegraphics} command.
+
+\begin{heading}[label=sec:flt:capt]{subsection}
+  \tpTitle{Captions}
+\end{heading}
+\index{Floats!Caption}
+
+\describeProp{caption-format}{\lstinline{<any>}}{}
+
+Format of the caption. This proeprty is applied to all parts of the
+caption, both below and above the float content.
+
+\describeProp{caption-format-top}{\lstinline{<any>}}{}
+\describeProp{caption-format-bottom}{\lstinline{<any>}}{}
+
+Format of the portions of the caption that are placed above or below
+the float content, respectively.
+
+\describeProp{caption-sep-top}{\lstinline{<dimen>}}{0pt}
+\describeProp{caption-sep-bottom}{\lstinline{<dimen>}}{0pt}
+
+Vertical space between the portion of the caption that is placed above
+or below the float content and the content itself. These properties
+are each only used when the respective top or bottom portions of the
+caption are non-empty.
+
+
+\describeProp{caption-top}{\lstinline{<any>}}{\textit{see below}}
+
+The format of the portion of the caption that is placed \textit{above}
+the float.
+
+The default value for all floats is:
+\begin{lstlisting}[style=tex]
+\tpIfComp{Number}
+  {\tpUseComp{Number}\tpUseProperty{number-sep}}
+  {}%
+\tpUseComp{Caption}%
+\end{lstlisting}
+
+\describeProp{caption-bottom}{\lstinline{<any>}}{\textit{see below}}
+
+The format of the portion of the caption that is placed \textit{below}
+the float.
+
+The default value for all floats is:
+\begin{lstlisting}[style=tex]
+\tpUseComp{Legend}\\
+\tpUseComp{Source}%
+\end{lstlisting}
+
+\describeProp{sub-caption-valign-top}{\texttt{t}, \texttt{b}, \texttt{m}}{\texttt{t}}
+\describeProp{sub-caption-valign-bottom}{\texttt{t}, \texttt{b}, \texttt{m}}{\texttt{t}}
+
+Vertical alignment of subfloat caption portions that are placed above
+and below the content, respectively.
+
+Captions are placed in \LaTeX's minipages and this property is directly
+passed to the first optional argument of the \lstinline{minipage}
+environment.
+
+The default value for \lstinline{tpTable} is \lstinline{b}.
+
+
+\begin{heading}[label=sec:flt:numbering]{subsection}
+  \tpTitle{Numbering}
+\end{heading}
+\index{Floats!Numbering}
+
+\describeProp{numbering}{\lstinline{auto}, \lstinline{<empty>}}{\lstinline{auto}}
+
+If set to \lstinline{auto}, floats are numbered automatically.
+
+\describeProp{number-sep}{\lstinline{<dimen>}}{\texttt{\string\enskip}}
+
+Separator between Label and Caption.
+
+\describeProp{sub-number-block}{\lstinline{<any>}}{\textit{see below}}
+
+Composition of sub-float counters.
+
+The defaut value is:
+\begin{lstlisting}[style=tex]
+\tpUseProperty{float-number}%
+\tpUseProperty{sub-number-sep}%
+\tpUseProperty{sub-number}%
+\end{lstlisting}
+Note that float-number and sub-number are undefinable properties that hold the flaot- and the subfloat counters, respectively; see \autoref{sec:flt:props:undef} for details.
+
+\describeProp{sub-number-sep}{\lstinline{<any>}}{\texttt{\string\,}}
+
+Separator between main float counter and sub-float counter in float
+environments with the \lstinline{subfloat} option.
+
+\describeProp{sub-number-style}{\lstinline{alph}, \lstinline{Alph}, \lstinline{arabic}, \lstinline{Roman}, \lstinline{roman}}{\lstinline{alph}}
+
+Counting style of sub-float counters.
+
+\describeProp{sub-number-before}{\lstinline{<any>}}{\texttt{(}}
+\describeProp{sub-number-after}{\lstinline{<any>}}{\texttt{)}}
+
+Material that is printed immediately \textit{before} and
+\textit{after} the sub-number counter, respectively.
+\lstinline{sub-number-format} is applied to the whole triade:
+\begin{lstlisting}[style=tex]
+\begingroup
+  \tpUseProperty{sub-number-format}%
+  \tpUseProperty{sub-number-before}%
+  \csname @\tpUseProperty{sub-number-style}\endcsname
+    {<sub-number counter>}%
+ \tpUseProperty{sub-number-after}%
+\endgroup
+\end{lstlisting}
+\describeProp{list-of-block}{\lstinline{<any>}}{\texttt{\string\tpUseComp{Caption}}}
+
+The content that is passed to \LaTeX's list of <float> mechanism.
+
+
+\describeProp{number-format}{\lstinline{<any>}}{\texttt{\string\bfseries}}
+
+Format of the float counter, additional to \lstinline{caption-format}.
+
+\describeProp{source-format}{\lstinline{<any>}}{}
+
+Format of the \lstinline{Source} component.
+
+\describeProp{legend-format}{\lstinline{<any>}}{}
+
+Format of the \lstinline{Legend} component.
+
+\describeProp{sub-number-format}{\lstinline{<any>}}{}
+
+Format of the sub-float counter.
+
+
+
+

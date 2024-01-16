@@ -129,15 +129,14 @@
 %
 % \subsection{Local Variables, Tables, and Methods}
 %
-% \begin{macro}{ltpdfa} is an instance of the \lstinline{ltpdfa} Lua
+% \lstinline{ltpdfa} is an instance of the \lstinline{ltpdfa} Lua
 %   table.
-%    \begin{macrocode}
+%    \begin{macrocode}[language={[5.3]Lua}]
 local ltpdfa = require('ltpdfa')
 %    \end{macrocode}
-% \end{macro}
-% \begin{macro}{meta} is a table that holds the metadata that are
+% \lstinline{meta} is a table that holds the metadata that are
 %   extracted from the \lstinline{\jobname.xmp} file.
-%    \begin{macrocode}
+%    \begin{macrocode}[language={[5.3]Lua}]
 local meta = {
   Author = '',
   Title = '',
@@ -146,11 +145,10 @@ local meta = {
   Keywords = ''
 }
 %    \end{macrocode}
-% \end{macro}
-% \begin{macro}{cocotex.extract_meta()}
-%   This method loads the meta data from the
-%   \lstinline{\jobname.xmp} and stores certain values to be accessed by LaTeX.
-%    \begin{macrocode}
+% \lstinline{cocotex.extract_meta()} loads the meta data from the
+% \lstinline{\jobname.xmp} and stores certain values to be accessed by
+% LaTeX.
+%    \begin{macrocode}[language={[5.3]Lua}]
 local function extract_meta()
   local xmpfile = ltpdfa.metadata.xmphandler.fromFile(ltpdfa.config.metadata.xmpfile)
   local f = io.open(xmpfile, "r")
@@ -174,43 +172,38 @@ local function extract_meta()
   end
 end
 %    \end{macrocode}
-% \end{macro}
 %
 % \subsection{Public Methods}
 %
-% \begin{macro}{cocotex} is the base table that contains all public
+% \lstinline{cocotex} is the base table that contains all public
 %   methods and sub-tables available in the {\CoCoTeX}
 %   framework. Here, it is defined unless it is already defined
 %   elsewhere.
-%    \begin{macrocode}
+%    \begin{macrocode}[language={[5.3]Lua}]
 if type(cocotex) ~= 'table' then
   cocotex = {}
 end
 %    \end{macrocode}
-% \end{macro}
-% \begin{macro}{cocotex.ally} is a globally available namespace for
+% \lstinline{cocotex.ally} is a globally available namespace for
 %   coco-accessibility specific lua tables.
-%    \begin{macrocode}
+%    \begin{macrocode}[language={[5.3]Lua}]
 cocotex.ally = {}
 %    \end{macrocode}
-% \end{macro}
-% \begin{macro}{cocotex.ally.extract_meta} is the globally available method to
+% \lstinline{cocotex.ally.extract-meta} is the globally available method to
 %   trigger extraction of meta information from the xmp meta file.
-%    \begin{macrocode}
+%    \begin{macrocode}[language={[5.3]Lua}]
 cocotex.ally.extract_meta = extract_meta
 %    \end{macrocode}
-% \end{macro}
-% \begin{macro}{cocotex.ally.meta} is the globally available table that
+% \lstinline{cocotex.ally.meta} is the globally available table that
 %   holds the extracted meta data.
-%    \begin{macrocode}
+%    \begin{macrocode}[language={[5.3]Lua}]
 cocotex.ally.meta = meta
 %    \end{macrocode}
-% \end{macro}
 %
 % After loading \lstinline{coco-accessibility.lua} via the
-% \lstinline[language=Lua]{require()} method, a
-% \lstinline[language=Lua]{cocotex.ally} table is returned.
-%    \begin{macrocode}
+% \lstinline[language={[5.3]Lua}]{require()} method, a
+% \lstinline[language={[5.3]Lua}]{cocotex.ally} table is returned.
+%    \begin{macrocode}[language={[5.3]Lua}]
 return cocotex.ally
 %    \end{macrocode}
 % no more lua code.

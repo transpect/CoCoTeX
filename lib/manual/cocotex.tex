@@ -1,0 +1,38 @@
+%% pdflatex texlive 2019
+% pdflatex cocotex.tex ; pdflatex cocotex.tex ; ./index.sh cocotex  ; ./index.sh cocotex t ; ./index.sh cocotex p ; pdflatex cocotex.tex ; pdflatex cocotex.tex ;
+\documentclass[UKenglish,a4paper,oneside]{cocotex}
+\usepackage{cocotex-doc}
+
+\Fileversion{\fileversion}
+\Filedate{\filedate}
+\title{CoCoTeX}
+\subtitle{A Commmon {\LaTeX} Stylesheet Framework}
+\author{le-tex publishing services GmbH}
+
+\includeonly{%
+  coco-overview,%
+  % coco-common,%
+  % coco-headings,%
+  % coco-floats,%
+  % coco-scripts,%
+  % coco-notes,%
+  % coco-title%
+}
+
+\begin{document}
+\maketitle
+\mainmatter
+
+\include{coco-overview}
+\include{coco-common}
+\include{coco-headings}
+\include{coco-floats}
+\include{coco-script}
+\include{coco-notes}
+\include{coco-title}
+\clearpage
+\backmatter
+\printindex
+\printindex[prp]
+\printindex[tex]
+\end{document}

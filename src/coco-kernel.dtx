@@ -580,7 +580,7 @@
   \endgroup
 }
 %    \end{macrocode}
-% \begin{macro}[\tp@comp@def] is used to pass a Counted Component into
+% \begin{macro}{\tp@comp@def} is used to pass a Counted Component into
 %   a TeX macro. \#1 is a prefix to the def command, e.g.,
 %   \lstinline{\global} or \lstinline{\protected}; \#2 is the name of
 %   the TeX macro, \#3 is the Name of the Counted Component (incl. the
@@ -598,12 +598,12 @@
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}[\tpCompDef] is the User-level command for \textit{local} \lstinline{\tp@comp@def}.
+% \begin{macro}{\tpCompDef} is the User-level command for \textit{local} \lstinline{\tp@comp@def}.
 %    \begin{macrocode}
 \def\tpCompDef{\tp@comp@def[]}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}[\tpCompDef] is the User-level command for \textit{global} \lstinline{\tp@comp@def}.
+% \begin{macro}{\tpCompDef} is the User-level command for \textit{global} \lstinline{\tp@comp@def}.
 %    \begin{macrocode}
 \def\tpCompGDef{\tp@comp@def[\global]}
 %    \end{macrocode}

@@ -1,0 +1,45 @@
+\begin{heading}[label=chap:scripts]{chapter}
+  \tpTitle{coco-scripts.sty}
+\end{heading}
+\index{coco-scripts|textbf}
+
+The \lstinline{coco-script} module provides the facilities to
+render non-Standard Average European script systems (henceforth:
+nSAE).
+
+Those fonts can only be used upright (\textit{not} italic!), and only
+regular or bold font weights are pre-defined.
+
+The nSAE script systems that are supported by the module so far are listed in Table~\ref{tab:fonts}:
+
+\begin{tpTable}
+  \label{tab:fonts}
+  \tpCaption{Script systems supported in the \texttt{coco-script} module}
+  \tpLegend{Type \textit{otf} means that the font is included as an Open Type Font; \textit{ttf} means it is a TrueType font}
+  \begin{htmltab}[width=\textwidth]
+    \begin{colgroup}
+      \HTcol[width={20}]
+      \HTcol[width={30}]
+      \HTcol[width={30}]
+      \HTcol[style={text-align:center},width={10}]
+      \HTcol[width={25}]
+      \HTcol[style={font-style:italic},width={20}]
+    \end{colgroup}
+    \begin{thead}
+      \HTtr{%
+        \HTtd{Language}
+        \HTtd{Serif Font}
+        \HTtd{Sans Font}
+        \HTtd{Type}
+        \HTtd{\texttt{\color{white} usescript} parameter}
+        \HTtd[style={font-style:normal;}]{Notes}}%
+    \end{thead}
+    \begin{tbody}
+      \HTtr{\HTtd{Arabic}     \HTtd{NotoNaskhArabic}   \HTtd{NotoSansArabic}   \HTtd{ttf} \HTtd[style={font-family: monospace;}]{arabic}     \HTtd{}}%
+      \HTtr{\HTtd{Armenian}   \HTtd{NotoSerifArmenian} \HTtd{NotoSansArmenian} \HTtd{ttf} \HTtd[style={font-family: monospace;}]{armenian}   \HTtd{(see below)}}%
+      \HTtr{\HTtd{Chinese}    \HTtd{NotoSerifSC}       \HTtd{NotoSansSC}       \HTtd{otf} \HTtd[style={font-family: monospace;}]{chinese}    \HTtd{}}%
+      \HTtr{\HTtd{Hebrew}     \HTtd{NotoSerifHebrew}   \HTtd{NotoSansHebrew}   \HTtd{ttf} \HTtd[style={font-family: monospace;}]{hebrew}     \HTtd{}}%
+      \HTtr{\HTtd{Japanese}   \HTtd{NotoSerifJP}       \HTtd{NotoSansJP}       \HTtd{otf} \HTtd[style={font-family: monospace;}]{japanese}   \HTtd{}}%
+    \end{tbody}
+  \end{htmltab}
+\end{tpTable}

@@ -1,0 +1,23 @@
+(markup-index :open "\clearpage\begin{theindex}"
+	      :close "\end{theindex}"
+	      :tree)
+(define-attributes (("texttt")))
+
+(markup-locref :attr "default" :open "\hyperpage{" :close "}")
+(markup-locref :attr "textbf"  :open "\textbf{\hyperpage{" :close "}}")
+(markup-locref :attr "textit"  :open "\textit{\hyperpage{" :close "}}")
+(markup-locref :attr "texttt"  :open "\texttt{\hyperpage{" :close "}}")
+
+(markup-crossref-list :class "see" :open "\see{" :sep "; " :close "}{}")
+(markup-crossref-list :class "see" :open "\see{" :sep "; " :close "}{}")
+
+(markup-letter-group :open "{\bfseries\sffamily\color{spot!75}\small\nobreak " :close-head "}\nobreak" :close "\goodbreak")
+(markup-locclass-list :open "\dotfill " :sep ", ")
+(markup-indexentry :open "~n \item --\enskip")
+(define-location-class-order ("roman-page-numbers"
+                              "Roman-page-numbers"
+                              "arabic-page-numbers"
+                              "alpha-page-numbers"
+                              "Alpha-page-numbers"
+                              "see"
+                              "seealso"))
