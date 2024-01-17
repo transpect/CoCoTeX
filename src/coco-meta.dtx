@@ -331,7 +331,7 @@
       \space\tpUseComp{Lineage}%
     \fi%
   }% How FullName for each name is built
-  \tpSetProperty{role-cite-name-format}{\tpUseComp{LastName},~\tpUseComp{Initial}}% How CiteName for each name is built
+  \tpSetProperty{role-cite-name-format}{\tpIfComp{LastName}{\tpUseComp{LastName},~\tpUseComp{Initial}}{\tpUseComp{FullName}}}% How CiteName for each name is built
   \tpSetProperty{role-short-cite-name-format}{\tpUseComp{LastName}}% how ShortCiteName for each name is built
   \tpPropertyLet{role-pdfinfo-name-format}{role-cite-name-format}% How PDFInfoName for each item is built
   \tpSetProperty{role-correspondence-as-format}{\tpUseComp{Email}}% How PDFInfoName for each item is built
