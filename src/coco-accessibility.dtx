@@ -43,7 +43,8 @@
 %    \begin{macrocode}
 \RequirePackage{coco-title}%
 %    \end{macrocode}
-% The accessibility-specific new Components and Properties are added to the titlepage container:
+% The new, accessibility-specific Components and Properties are added
+% to the \lstinline{titlepage} container:
 %    \begin{macrocode}
 \tpAddToType{Components}{titlepage}{\tp@ally@comps}
 %    \end{macrocode}
@@ -58,18 +59,21 @@
   \tpDeclareGComp[4]{IccComponents}
   \tpDeclareGComp[Coated FOGRA39]{IccIdentifier}
 }
-
-\def\tp@Ally{}
-\def\tp@endAlly{}
-
-
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@title@insert@xmp} override of the same macro in
-%   the \lstinline{coco-title}. 
+% 
+% \begin{macro}{\tp@set@ally@conf} passes the accessibility specific
+%   parameters that were set via the \lstinline{titlepage} container
+%   to the \lstinline{ltpdfa} package.
 %    \begin{macrocode}
-\def\tp@title@insert@xmp{\addToConfig{metadata}{xmpfile=\tpUseGComp{Meta}{XmpFile}.xmp}}
-
+\def\tp@set@ally@conf{%
+  \addToConfig{intent}{profile=\tpUseComp{IccProfileFile};components=\tpUseComp{IccComponents};identifier=\tpUseComp{IccIdentifier}}%
+}
+%    \end{macrocode}
+% the \lstinline{\tp@set@ally@conf} macro is added to the
+% \lstinline{document-meta-hook}:
+%    \begin{macrocode}
+\tpAddToHook[titlepage]{document-meta-hook}{\tp@set@ally@conf}
 %    \end{macrocode}
 % \end{macro}
 % Loading lua modules for meta data processing.
@@ -77,14 +81,21 @@
 % \textbf{Note:} \lstinline{ltpdfhyper.sty} deactivates all
 % DocumentInfo processing (l. 367\,ff.), so the mechanism that passes
 % the XMP meta data down to \lstinline{\hypersetup} has actually no
-% practical effect at the moment.)
+% practical effect at the moment.
 %    \begin{macrocode}
 \directlua{ally = require('coco-accessibility')}
-\directlua{ally.extract_meta()}
-
  % \setDocInfo{conformance}{pdfaid=2;level=A;pdfuaid=1}%
+%    \end{macrocode}
+% \begin{macro}{\tp@title@insert@xmp} override of the same macro in
+%   the \lstinline{coco-title}. 
+%    \begin{macrocode}
+\def\tp@title@insert@xmp{%
+  \addToConfig{metadata}{xmpfile=\tpUseGComp{titlepage}{XmpFile}.xmp}%
+  \directlua{ally.extract_meta()}%
+}
 
 %    \end{macrocode}
+% \end{macro}
 % transformation of common combined glyphs (e.g. ligatures) into
 % distinct unicode characters (cf. \lstinline{texdoc glyphtounicode}):
 %    \begin{macrocode}
@@ -112,6 +123,10 @@
   \fi
 \fi
 
+\AtBeginShipout{\directlua{ltpdfa.pageprocessor(tex.box["AtBeginShipoutBox"])}}%
+\addRolemap{document}{Document}
+\AtBeginDocument{\structStart{document}}
+\AtEndDocument{\structEnd{document}}
 %    \end{macrocode}
 % End of style source code.
 %    \begin{macrocode}[gobble=1]
