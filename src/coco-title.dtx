@@ -136,31 +136,53 @@
 %    \begin{macrocode}
 \def\tp@title@set@pdfmeta{%
 %    \end{macrocode}
-% \begin{macro}{\tp@write@pdf@meta} is used to transfer the pdf
-%   DocumentInfo meta date to the pdf writer. If {Lua\LaTeX} is used,
-%   \lstinline{coco-accessibility.sty} is loaded and it exists an
-%   \jobname.xmp, the Document Info is extracted from the xmp file. If
-%   neither of those conditions is met, the DocumentInfo meta data are
-%   generated from the Components in the \lstinline{tpMeta} Container.
+% \begin{macro}{\tp@write@pdf@meta} is used to transfer the
+%   DocumentInfo meta date to the pdf writer.
 %
-%   \#\#1 is the pdfinfo name of the property, \#\#2 is the
-%   \lstinline[language={[5.3]Lua}]{cocotex.ally.meta} key, \#\#3 is the value
+%   First we check, whether \lstinline{coco-accessibility.sty} is
+%   used. If so, we check if the User has provided an \lstinline{xmp}
+%   file by reading the required meta data field given in \#\#2 from
+%   that xmp file. If the temporary storage \lstinline{\@tempa} is
+%   empty, this means that either that
+%   \lstinline{coco-accessibility.sty} isn't loaded, that the user has
+%   not provided an \lstinline{xmp} file, or that the specific field
+%   was empty or missing.
+%
+%   In this case, we take the value given in \lstinline{\#\#3} and
+%   store it in \lstinline{\@tempa}. If the storage is still empty
+%   (i.e. the field is also missing in the \lstinline{tpMeta}
+%   environment), we do nothing.
+%
+%   If the user has provided the meta datum in the \lstinline{tpMeta}
+%   environment, we pass it either to \lstinline{hyperref}'s
+%   hypersetup variable given in \lstinline{\#\#1} (when
+%   \lstinline{coco-accessibility.sty} is \textit{not} used), or we
+%   pass it to \lstinline{\setDocInfo} from the \lstinline{ltpdfa}
+%   package using the data field given in \lstinline{\#\#2}. In this
+%   case, the ltpdfa automatically creates a \lstinline{\jobname.xmp}
+%   with the given meta data will be generated for the next {\LaTeX}
+%   run.
 %    \begin{macrocode}
   \def\tp@write@pdf@meta##1##2##3{%
+    \let\@tempa\@empty
     \@ifpackageloaded{coco-accessibility}
-      {\edef\@tempa{\directlua{tex.print(cocotex.ally.meta.##2)}}}
-      {\protected\def\@tempa{##3}}%
-    \ifx\@tempa\@empty\else
-      \edef\x{\noexpand\hypersetup{##1={\expandonce{\@tempa}}}}\x
+      {\edef\@tempa{\directlua{tex.print(cocotex.ally.meta.##2)}}}{}%
+    \ifx\@tempa\@empty
+      \protected\def\@tempa{##3}%
+      \ifx\@tempa\@empty\else
+        \@ifpackageloaded{coco-accessibility}
+          {\pdfstringdef\x{##3}\setDocInfo{##2}{\x}}
+          {\edef\x{\noexpand\hypersetup{##1={\expandonce\@tempa}}}\x}%
+      \fi
     \fi
   }%
 %    \end{macrocode}
 % \end{macro}
 %    \begin{macrocode}
+  \tp@title@insert@xmp
   \tp@title@process@bkt
   \tp@title@process@bka
   \tp@title@process@bkc
-  \tp@title@insert@xmp
 }
 %    \end{macrocode}
 % \end{macro}
