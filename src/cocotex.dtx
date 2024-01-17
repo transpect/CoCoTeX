@@ -73,6 +73,7 @@
 %    \begin{macrocode}
 \DeclareOptionX{debug}{\PassOptionsToPackage{\CurrentOption}{coco-kernel}}
 \DeclareOptionX{a11y}{\PassOptionsToPackage{\CurrentOption}{coco-common}}
+\DeclareOptionX{no-compress}{\let\tp@no@pdf@compression\relax}
 \DeclareOptionX{color-enc}{\PassOptionsToPackage{\CurrentOption}{coco-common}}
 \DeclareOptionX{usescript}{\PassOptionsToPackage{\CurrentOption}{coco-script}}
 \DeclareOptionX{nofigs}{\PassOptionsToPackage{\CurrentOption}{coco-floats}}
@@ -81,6 +82,17 @@
 \DeclareOptionX{resetnotesperchapter}{\PassOptionsToPackage{\CurrentOption}{coco-notes}}
 \DeclareOptionX{endnotesperchapter}{\PassOptionsToPackage{\CurrentOption}{coco-notes}}
 \ProcessOptionsX
+%    \end{macrocode}
+% Disables PDF compression when the \lstinline{no-compress} document
+% option is set:
+%    \begin{macrocode}
+\ifx\tp@no@pdf@compression\relax
+  \ifx\pdfobjcompresslevel\@undefined
+    \edef\pdfobjcompresslevel{\pdfvariable objcompresslevel}%
+  \fi
+  \pdfcompresslevel=0
+  \pdfobjcompresslevel=0
+\fi
 %    \end{macrocode}
 % All publication types supported by {\CoCoTeX} are based on one of
 % \LaTeX's default classes \lstinline{book} or \lstinline{article}:
