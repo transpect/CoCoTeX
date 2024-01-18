@@ -1,4 +1,4 @@
-% \chapter{coco-title.dtx}
+% \chapter{coco-title.dtx}\label{chap:coco-title}
 % This file provides macros and facilities for title pages.
 %
 %    \begin{macrocode}[gobble=1]
@@ -127,7 +127,7 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \section{PDF Meta Data}
+% \section{Procesing of PDF Meta Data}\label{sect:coco-title:pdf-meta-data}
 %
 % The next few macros handle the content that is written directly
 % into the pdf as meta data.
@@ -186,6 +186,7 @@
 }
 %    \end{macrocode}
 % \end{macro}
+% \subsection{Processing of the Document's Title}
 % \begin{macro}{\tp@title@process@bkt} processes the document's main title
 %    \begin{macrocode}
 \def\tp@title@process@bkt{%
@@ -197,6 +198,7 @@
 }
 %    \end{macrocode}
 % \end{macro}
+% \subsection{Processing of the Document's Author}
 % \begin{macro}{\tp@title@process@bka} processes the document's main
 %   author or, if that doesn't exist, the main editor, or throws a
 %   warning if neither exist.
@@ -225,6 +227,7 @@
 }
 %    \end{macrocode}
 % \end{macro}
+% \subsection{Processing of  the PDF's Creator, Producer, and Keywords Meta Data}
 % \begin{macro}{\tp@title@process@bkc} processes the metadata for the pdf
 %   creator
 %    \begin{macrocode}
@@ -235,7 +238,8 @@
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@title@insert@xmp} inserts the contents of the XMP
+% \subsection{Including the XMP Meta Data}\label{sec:title:xmp}
+% \begin{macro}{\tp@title@insert@xmp}\label{} inserts the contents of the XMP
 %   meta data file into the pdf, if it exists.
 %    \begin{macrocode}
 \def\tp@title@insert@xmp{%

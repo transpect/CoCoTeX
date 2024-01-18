@@ -62,11 +62,14 @@
   \DoNotIndex{#1}%
 }
 \let\endmacro\relax
+
+ %% Environment for CoCoTeX Containers:
 \def\tpContainer{\begingroup
    \catcode`\\12
    \let\is@m@cro@\relax
    \MakePrivateLetters\tp@doc@container%
 }
+\let\endtpContainer\relax%
 \def\tp@doc@container#1{\endgroup \topsep\MacroTopsep%
   \edef\saved@macroname{\string#1}%
   \let\saved@indexname\saved@macroname
@@ -78,15 +81,53 @@
   \SpecialContIndex{#1}\nobreak
   \DoNotIndex{#1}%
 }
-\let\endtpContainer\relax%
+
+ % Environment for CoCoTeX Property definitions: #1 is the name of the
+ % parent container, #2 is the name of the Property, BODY is the
+ % documentation for that Property.
+\def\tpPropertyDoc#1#2{%
+  \propertysection{Property #1::#2}\ignorespaces
+  \edef\saved@macroname{#1::#2}%
+  \let\saved@indexname\saved@macroname
+  \SpecialPropIndex{#1::#2}%
+  \DoNotIndex{#1::#2}%
+  \nobreak
+}
+\let\endtpProperty\relax
+
+ % Environment for CoCoTeX Component definitions: #1 is the name of the
+ % parent container, #2 is the name of the Component, BODY is the
+ % documentation for that Component.
+\def\tpComponent#1#2{%
+  \componentsection{Compoent #1::#2}\ignorespaces
+  \edef\saved@macroname{#1::#2}%
+  \let\saved@indexname\saved@macroname
+  \SpecialCompIndex{#1::#2}%
+  \DoNotIndex{#1::#2}%
+  \nobreak
+}
+\let\endtpComponent
+
  %% no longer working with TL>2022 *grrrr*
  %\def\SpecialMainIndex#1{\@bsphack
  %    \SpecialIndex@{#1}{\encapchar main}%
  %  \@esphack}
 \def\SpecialContIndex#1{\@bsphack
   \index{#1\actualchar{\protect\ttfamily#1}
-    (container)\encapchar usage}%
-  \index{containers:\levelchar#1\actualchar
+    (Container)\encapchar usage}%
+  \index{Containers:\levelchar#1\actualchar
+    {\protect\ttfamily#1}\encapchar usage}%
+  \@esphack}
+\def\SpecialPropIndex#1{\@bsphack
+  \index{#1\actualchar{\protect\ttfamily#1}
+    (Property)\encapchar usage}%
+  \index{Properties:\levelchar#1\actualchar
+    {\protect\ttfamily#1}\encapchar usage}%
+  \@esphack}
+\def\SpecialCompIndex#1{\@bsphack
+  \index{#1\actualchar{\protect\ttfamily#1}
+    (Component)\encapchar usage}%
+  \index{Components:\levelchar#1\actualchar
     {\protect\ttfamily#1}\encapchar usage}%
   \@esphack}
 
@@ -462,6 +503,15 @@
   {0.5\baselineskip}%
   {-.5em}%
   {\small\ttfamily\mybfseries\color{spot!50}}*}
+
+\newcommand\propertysection{\@startsection{propsec}{99}{\z@}%
+  {0.5\baselineskip}%
+  {-.5em}%
+  {\small\ttfamily\mybfseries\color{mpurp!75}}*}
+\newcommand\componentsection{\@startsection{compsec}{99}{\z@}%
+  {0.5\baselineskip}%
+  {-.5em}%
+  {\small\ttfamily\mybfseries\color{mblue!75}}*}
 
 \lstdefinestyle{macrocode}{language=[AlLaTeX]TeX,
   keepspaces=false,                   % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)

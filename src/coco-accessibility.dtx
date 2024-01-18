@@ -10,12 +10,15 @@
 % \lstinline{coco-accrssibility.lua}.
 %
 %
-% \section{TeX code}
+% \section{LaTeX code}
 %
 %    \begin{macrocode}[gobble=1]
 %<*a11y-sty>
 %    \end{macrocode}
-% File preamble
+% \subsection{General Processing}
+%
+% The coco-accessibility.sty starts with some general package
+% information like name, current version and date of last changes.
 %    \begin{macrocode}
 %%
 %% Accessibility features for \textit{xerif} projects.
@@ -28,62 +31,51 @@
 \ProvidesPackage{coco-common}
     [\filedate \fileversion CoCoTeX common module]
 %    \end{macrocode}
-% The \lstinline{ltpdfa} package is a hard requirement for the
-% accessibility features of {\CoCoTeX}
+% \begin{macro}{\tp@if@ally} If the \lstinline{coco-ally} package is
+%   loaded, the conditional from the \lstinline{coco-common} module is
+%   re-defined to always expand the \texttt{true} branch and discard
+%   the \texttt{false} branch:
 %    \begin{macrocode}
 \def\tp@if@ally{\expandafter\@firstoftwo}
-
+%    \end{macrocode}
+% \end{macro}
+% The \lstinline{ltpdfa} package is a hard requirement for the
+% accessibility features of {\CoCoTeX}:
+%    \begin{macrocode}
 \RequirePackage[pdftex,pdflang=De,noautotag]{ltpdfa}%,nodetree,dospaces,doparas,,debug
 %    \end{macrocode}
-% The local setup for \CoCoTeX's accessibility features is done via
-% the \lstinline{tpMeta} environment. Therefore, we hook the
-% neccessary Components and Properties right into the \lstinline{titlepage}
-% container. Therefore, \lstinline{coco-title.sty} is a hard
-% requirement for the accessibility module.
+% The local preferences for \CoCoTeX's accessibility features is done
+% via the \lstinline{tpMeta} environment. Therefore, we hook the
+% neccessary Components and Properties right into the
+% \lstinline{titlepage} container. Therefore,
+% \lstinline{coco-title.sty} is a hard requirement for \CoCoTeX's
+% accessibility module:
 %    \begin{macrocode}
 \RequirePackage{coco-title}%
 %    \end{macrocode}
-% The new, accessibility-specific Components and Properties are added
-% to the \lstinline{titlepage} container:
-%    \begin{macrocode}
-\tpAddToType{Components}{titlepage}{\tp@ally@comps}
-%    \end{macrocode}
 %
-% \begin{macro}{\tp@ally@comps} collects Declarations for Components
-%   that represent data needed to create output that conforms to the
-%   PDF/UA standard.
-%    \begin{macrocode}
-\def\tp@ally@comps{%
-  %% ICC profiles
-  \tpDeclareGComp[suppl/cmyk.icc]{IccProfileFile}
-  \tpDeclareGComp[4]{IccComponents}
-  \tpDeclareGComp[Coated FOGRA39]{IccIdentifier}
-}
-%    \end{macrocode}
-% \end{macro}
-% 
-% \begin{macro}{\tp@set@ally@conf} passes the accessibility specific
-%   parameters that were set via the \lstinline{titlepage} container
-%   to the \lstinline{ltpdfa} package.
-%    \begin{macrocode}
-\def\tp@set@ally@conf{%
-  \addToConfig{intent}{profile=\tpUseComp{IccProfileFile};components=\tpUseComp{IccComponents};identifier=\tpUseComp{IccIdentifier}}%
-}
-%    \end{macrocode}
-% the \lstinline{\tp@set@ally@conf} macro is added to the
-% \lstinline{document-meta-hook}:
-%    \begin{macrocode}
-\tpAddToHook[titlepage]{document-meta-hook}{\tp@set@ally@conf}
-%    \end{macrocode}
-% \end{macro}
-% Loading lua modules for meta data processing.
+% \subsection{Lua injection}
+%
+% Some features are realized by Lua code, so we tell LuaLaTeX to
+% include the code that is generated from material later in this
+% source file:
 %    \begin{macrocode}
 \directlua{ally = require('coco-accessibility')}
 %    \end{macrocode}
+%
+%
+% \subsection{XMP Integration}
+%
+% The first feature of \lstinline{coco-ally} is the integration of XMP
+% meta data into the output PDF. Note that XMP integration is also a
+% built-in feature of the \lstinline{coco-title} module. The following
+% code provides a superior alternative to that via the
+% \lstinline{ltpdfa} package.
+%
 % \begin{macro}{\tp@title@insert@xmp} is an override of the same macro
-%   in the \lstinline{coco-title}. If the \lstinline{ally} document
-%   option is set, XMP inclusion is done via the \lstinline{ltpdfa}
-%   package.
+%   in \lstinline{coco-title.sty} (see. Sect.~\ref{sec:title:xmp}). If
+%   the \lstinline{ally} document option is set, XMP inclusion is done
+%   via the \lstinline{ltpdfa} package.
 %
 %   First we check if the specified xmp file exists. If it exists, the
 %   \lstinline{DocumentInfo} is extracted from the XMP
@@ -102,40 +94,114 @@ Note that the ltpdfa package will create one^^J
 from the Components given in the tpMeta Container.}}}
 %    \end{macrocode}
 % \end{macro}
-% transformation of common combined glyphs (e.g. ligatures) into
-% distinct unicode characters (cf. \lstinline{texdoc glyphtounicode}):
+%
+% \subsection{Output Intent and ICC Profiles}
+%
+%
+% First, we declare some Components that represent the three necessary
+% parameters for the output intent:
+%    \begin{macrocode}
+\tpAddToType{Components}{titlepage}{%
+%    \end{macrocode}
+% \begin{tpComponent}{titlepage}{IccProfileFile} holds the path
+%   (relative to the main tex file) and name of the .icc file.
+%    \begin{macrocode}
+  \tpDeclareGComp{IccProfileFile}
+%    \end{macrocode}
+% \end{tpComponent}
+% \begin{tpComponent}{titlepage}{IccComponents} holds the number of
+%   components in the color profile
+%    \begin{macrocode}
+  \tpDeclareGComp{IccComponents}
+%    \end{macrocode}
+% \end{tpComponent}
+% \begin{tpComponent}{titlepage}{IccIdentifier} holds the identifier
+%   of the color profile
+%    \begin{macrocode}
+  \tpDeclareGComp{IccIdentifier}}
+%    \end{macrocode}
+% \end{tpComponent}
+% The Components are composed via a new Property
+% \lstinline{output-intent} which we add to \lstinline{coco-title}'s
+% Properties list:
+%    \begin{macrocode}
+\tpAddToType{Properties}{titlepage}{%
+%    \end{macrocode}
+% \begin{tpProperty}{titlepage}{output-intent} sends the output
+%   intent information to the ltpdfa package. It must contain of three
+%   data fields:
+%   \begin{description}
+%   \item[profile] with the name of the to-be-embedded
+%     \lstinline{.icc} file,
+%   \item[componetns] with an integer telling the pdfwriter how many
+%     values are coded by each color (e.g., \lstinline{4} for cmyk,
+%     \lstinline{3} for rgb)
+%   \item[identifier] with the identifying name of the profile (e.g.,
+%     \lstinline{Coated FOGRA39} for the included cmyk
+%     profile, etc.)
+% \end{description}
+%    \begin{macrocode}
+  \tpSetProperty{output-intent}{%
+    profile=\tpIfComp{IccProfileFile}{\tpUseComp{IccProfileFile}}{suppl/\tp@color@enc.icc};%
+    components=\tpIfComp{IccComponents}{\tpUseComp{IccComponents}}{\ifdefstring\tp@color@enc{cmyk}{4}{3}};%
+    identifier=\tpIfComp{IccIdentifier}{\tpUseComp{IccIdentifier}}{\ifdefstring\tp@color@enc{cmyk}{Coated FOGRA39}{sRGB IEC61966-2.1}}%
+  }}
+%    \end{macrocode}
+% \end{tpProperty}
+% The Component Handler which links the new Components to that
+% Property is added to titlepage's \lstinline{document-meta-hook}:
+%    \begin{macrocode}
+\tpAddToHook[titlepage]{document-meta-hook}{\edef\x{\noexpand\addToConfig{intent}{\tpUseProperty{output-intent}}}\x}
+%    \end{macrocode}
+%
+% \subsection{Transformation of  Typographic Unicode characters}
+%
+% In order for screen readers to work correctly, some unicode
+% characters that mask purely typographic glyphs (e.g., ligatures)
+% need to be mapped to their underlaying orthographic characters. This
+% is done via pdftex's \lstinline{glyphtounicode} tables:
 %    \begin{macrocode}
 \protected\def\pdfglyphtounicode{\pdfextension glyphtounicode}
 \input glyphtounicode
 \edef\pdfgentounicode{\pdfvariable gentounicode}
 \pdfgentounicode = 1
-
-
 %    \end{macrocode}
 %
-%
-% \subsection{ICC profiles}
-%
-% First, we check if the user has the default icc profiles installed:
+% \subsection{Encoding of the PDF-A Conformance}
+% As before, the parameters for the PDF conformity level are encoded
+% via specific Components in the titlepage Container:
 %    \begin{macrocode}
-
- % \setDocInfo{conformance}{pdfaid=2;level=A;pdfuaid=1}%
-\newif\if@tp@use@default@icc\@tp@use@default@iccfalse
-\IfFileExists{suppl/cmyk.icc}{\IfFileExists{suppl/srbg.icc}{\@tp@use@default@icctrue}{}}{}
-
-\ifx\tp@icc@profile\@undefined
-  \if@tp@use@default@icc
-    \addToConfig{intent}{profile=suppl/\tp@color@enc.icc;components=4;identifier=PSO Uncoated ISO12647 (ECI)}
-    \addToConfig{intent}{profile=suppl/srgb.icc;components=3;identifier=sRGB IEC61966-2.1}
-  \fi
-\fi
-
+\tpAddToType{Components}{titlepage}{%
+%    \end{macrocode}
+%
+% \begin{tpContainer}{PDFStandard} defines the PDF standard (Default: A2A meaning: PDF/A-2A)
+  \tpDeclareGComp[A2A]{PDFStandard}
+%    \end{macrocode}
+% \end{tpContainer}
+% The checking if the values are valid, and the separation of the
+% various parts of the standard is done via a lua script in the
+% \lstinline{document-meta-hook}:
+%    \begin{macrocode}
+ %\setDocInfo{conformance}{pdfaid=2;level=A;pdfuaid=1}%
+\tpAddToHook[titlepage]{document-meta-hook}{%
+  \directlua{cocotex.ally.parse_pdf_standard(\tpUseComp{PDFStandard})}
+  \edef\x{\noexpand\setDocInfo{conformance}{\directlua{cocotex.ally.pdf.standard}=\directlua{cocotex.ally.pdf.id};level=\directlua{cocotex.ally.pdf.level}}}\x}
+%    \end{macrocode}
+%
+% \subsection{Automatic PDF Tagging}
+%
+% \subsubsection{Document Root Node}
+%
+% The following code causes the ltpdfa package to tag the
+% \lstinline{document} environmant as the structural representation's
+% root node:
+%    \begin{macrocode}
 \AtBeginShipout{\directlua{ltpdfa.pageprocessor(tex.box["AtBeginShipoutBox"])}}%
 \addRolemap{document}{Document}
 \AtBeginDocument{\structStart{document}}
 \AtEndDocument{\structEnd{document}}
 %    \end{macrocode}
-% End of style source code.
+% End of {\TeX} source code.
 %    \begin{macrocode}[gobble=1]
 %</a11y-sty>
 %    \end{macrocode}
@@ -146,7 +212,7 @@ from the Components given in the tpMeta Container.}}}
 %
 % \section{Lua code}
 %
-% \subsection{Local Variables, Tables, and Methods}
+% \subsection{Local Variables and Tables}
 %
 % \lstinline{ltpdfa} is an instance of the \lstinline{ltpdfa} Lua
 %   table.
@@ -164,9 +230,15 @@ local meta = {
   Keywords = ''
 }
 %    \end{macrocode}
-% \lstinline{cocotex.extract_meta()} loads the meta data from the
-% \lstinline{\jobname.xmp} and stores certain values to be accessed by
-% LaTeX.
+%
+% \subsection{Meta Data Extraction}
+%
+% The method \lstinline{cocotex.extract_meta()} reads the meta data
+% from the \lstinline{\jobname.xmp} and stores certain values to be
+% accessed by LaTeX. This is used to fill the DocumentInfo when a xmp
+% file is available during the expansion of
+% \lstinline{\tp@write@pdf@meta} from the coco-title module (see
+% Sect.~\ref{sect:coco-title:pdf-meta-data}).
 %    \begin{macrocode}[language={[5.3]Lua}]
 local function extract_meta()
   local xmpfile = ltpdfa.metadata.xmphandler.fromFile(ltpdfa.config.metadata.xmpfile)
@@ -189,6 +261,17 @@ local function extract_meta()
     end
     meta.Author = table.concat(author, ', ')
   end
+end
+%    \end{macrocode}
+% \subsection{Parser and Table for the PDF Standard}
+%    \begin{macrocode}
+local pdf = {
+  standard = '',
+  id = '',
+  level = ''
+}
+local function parse_pdf_standard(str)
+  log(">>>" .. str )
 end
 %    \end{macrocode}
 %

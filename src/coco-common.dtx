@@ -34,10 +34,11 @@
 \define@choicekey{coco-common.sty}{color-enc}[\tp@color@enc\nr]{srgb,rgb,gray,cmy,cmyk,natural}[cmyk]{%
   \let\@tp@color@enc\tp@color@enc
   \ifcase\nr\relax% srgb
-    \def\@tp@color@enc{rgb}
+    \def\@tp@color@enc{rgb}%
   \or% rgb
   \or% gray
   \or% cmy
+    \def\@tp@color@enc{cmyk}%
   \or% cmyk
   \else% natural, i.e. no conversion of color spaces takes place
   \fi
