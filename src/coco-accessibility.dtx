@@ -77,14 +77,8 @@
 %    \end{macrocode}
 % \end{macro}
 % Loading lua modules for meta data processing.
-%
-% \textbf{Note:} \lstinline{ltpdfhyper.sty} deactivates all
-% DocumentInfo processing (l. 367\,ff.), so the mechanism that passes
-% the XMP meta data down to \lstinline{\hypersetup} has actually no
-% practical effect at the moment.
 %    \begin{macrocode}
 \directlua{ally = require('coco-accessibility')}
- % \setDocInfo{conformance}{pdfaid=2;level=A;pdfuaid=1}%
 %    \end{macrocode}
 % \begin{macro}{\tp@title@insert@xmp} is an override of the same macro
 %   in the \lstinline{coco-title}. If the \lstinline{ally} document
@@ -102,8 +96,10 @@
   \IfFileExists{\tp@xmp@file@name}
     {\addToConfig{metadata}{xmpfile=\tp@xmp@file@name}%
      \directlua{ally.extract_meta()}}
-    {\tpPackageError{A11y}{File}{\tp@xmp@file@name\space not found!}
-      {Please make sure that the \tp@xmp@file@name\space exists.}}}
+    {\tpPackageWarning{A11y}{File}{%
+\tp@xmp@file@name\space not found.^^J
+Note that the ltpdfa package will create one^^J
+from the Components given in the tpMeta Container.}}}
 %    \end{macrocode}
 % \end{macro}
 % transformation of common combined glyphs (e.g. ligatures) into
@@ -123,6 +119,7 @@
 % First, we check if the user has the default icc profiles installed:
 %    \begin{macrocode}
 
+ % \setDocInfo{conformance}{pdfaid=2;level=A;pdfuaid=1}%
 \newif\if@tp@use@default@icc\@tp@use@default@iccfalse
 \IfFileExists{suppl/cmyk.icc}{\IfFileExists{suppl/srbg.icc}{\@tp@use@default@icctrue}{}}{}
 
