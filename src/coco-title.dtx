@@ -166,7 +166,7 @@
   \def\tp@write@pdf@meta##1##2##3{%
     \let\@tempa\@empty
     \@ifpackageloaded{coco-accessibility}
-      {\edef\@tempa{\directlua{tex.print(cocotex.ally.meta.##2)}}}{}%
+      {\edef\@tempa{\expandonce{\directlua{tex.print(cocotex.ally.meta.##2)}}}}{}%
     \ifx\@tempa\@empty
       \protected\def\@tempa{##3}%
       \ifx\@tempa\@empty\else

@@ -30,21 +30,21 @@
 % Default color encoding passed as option to the \lstinline{xcolor}
 % package.
 %    \begin{macrocode}
-\def\@tp@color@enc{cmyk}
-\define@choicekey{coco-common.sty}{color-enc}[\tp@color@enc\nr]{srgb,rgb,gray,cmy,cmyk,natural}[cmyk]{%
-  \let\@tp@color@enc\tp@color@enc
+\def\tp@color@enc{cmyk}
+\define@choicekey{coco-common.sty}{color-enc}[\@tp@color@enc\nr]{srgb,rgb,gray,cmy,cmyk,natural}[cmyk]{%
+  \let\tp@color@enc\@tp@color@enc
   \ifcase\nr\relax% srgb
-    \def\@tp@color@enc{rgb}%
+    \def\tp@color@enc{rgb}%
   \or% rgb
   \or% gray
   \or% cmy
-    \def\@tp@color@enc{cmyk}%
+    \def\tp@color@enc{cmyk}%
   \or% cmyk
   \else% natural, i.e. no conversion of color spaces takes place
   \fi
 }
 \ProcessOptionsX
-\PassOptionsToPackage{\@tp@color@enc}{xcolor}%
+\PassOptionsToPackage{\tp@color@enc}{xcolor}%
 %    \end{macrocode}
 % \begin{macro}{\tpIfAlly} is a switch to distinct between compilation
 %   with (implicit \#1) or without (implicit \#2) activated accessibility features.
