@@ -28,8 +28,8 @@
 %% lualatex  -  texlive > 2018
 %%
 \NeedsTeXFormat{LaTeX2e}[2018/12/01]
-\ProvidesPackage{coco-common}
-    [\filedate \fileversion CoCoTeX common module]
+\ProvidesPackage{coco-accessibility}
+    [\filedate \fileversion CoCoTeX accessibility module]
 %    \end{macrocode}
 % \begin{macro}{\tp@if@ally} If the \lstinline{coco-ally} package is
 %   loaded, the conditional from the \lstinline{coco-common} module is
@@ -42,7 +42,7 @@
 % The \lstinline{ltpdfa} package is a hard requirement for the
 % accessibility features of {\CoCoTeX}:
 %    \begin{macrocode}
-\RequirePackage[pdftex,pdflang=De,noautotag]{ltpdfa}%,nodetree,dospaces,doparas,,debug
+\RequirePackage[pdftex,pdflang=De]{ltpdfa}%,nodetree,dospaces,doparas,,debug
 %    \end{macrocode}
 % The local preferences for \CoCoTeX's accessibility features is done
 % via the \lstinline{tpMeta} environment. Therefore, we hook the

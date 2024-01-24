@@ -61,7 +61,11 @@
      \if@ignore\@ignorefalse\ignorespaces\fi
    }
 \else
+  \RequirePackage{etoolbox}%% LUP
+  \ifundef\UseHook{\def\UseHook#1{\csuse{#1}}}{}%% LUP
+  \ifundef\AddToHook{\def\AddToHook#1#2{\csgappto{#1}{#2}}}{}%% LUP
   \def\begin#1{%
+      \UseHook{env/#1/before}%% LUP
       \@ifundefined{#1}%
       {\def\reserved@a{\@latex@error{Environment #1 undefined}\@eha}}%
       {\def\reserved@a{\def\@currenvir{#1}%
@@ -71,6 +75,7 @@
       \begingroup%
       \@endpefalse\reserved@a}%%\directlua{ltpdfa.tagger.vstructStart('\luaescapestring{#1}')}
     \def\end#1{%
+        \UseHook{env/#1/end}% LUP
         \@lt@endBhook{#1}\csname end#1\endcsname\@lt@endEhook\@checkend{#1}%
         \expandafter\endgroup\if@endpe\@doendpe\fi
         \if@ignore\@ignorefalse\ignorespaces\fi}

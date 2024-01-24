@@ -164,12 +164,6 @@
 \else
 \RequirePackage{babel}
 \fi
-%    \end{macrocode}
-% In the \lstinline{coco-headings.sty}, we include the
-% \lstinline{bookmark} package, which within calls the
-% \lstinline{hyperref} package.
-%    \begin{macrocode}
-\PassOptionsToPackage{breaklinks,linktoc=none,pdfborder={0 0 0},pdfencoding=auto,bookmarksnumbered=true}{hyperref}
 \RequirePackage{coco-headings}
 %    \end{macrocode}
 % Inclusion of the float module
@@ -193,9 +187,40 @@
 \makeindex
 \RequirePackage{hyperref}
 %    \end{macrocode}
+% Finally, some \lstinline{hyperref} settings (TODO: check, which of
+% those are better placed inside the local publisher's styles)
+%    \begin{macrocode}
+\AtBeginDocument{%
+  \hypersetup{%
+%    \end{macrocode}
+% first, we want links to be breakable
+%    \begin{macrocode}
+    breaklinks%
+%    \end{macrocode}
+% and the table of contents not to be automatically linked, as this
+% causes problems with the \lstinline{ltpdfa} package and we add the
+% links via the \lstinline{coco-common} module, anyways.
+%    \begin{macrocode}
+   ,linktoc=none%
+%    \end{macrocode}
+% pdf broders are controlled via the coco-frame module, if necessary
+%    \begin{macrocode}
+   ,pdfborder={0 0 0}%
+%    \end{macrocode}
+% The next option causes hyperref to calculate the encoding of
+% DocumentInfo and other direct-to-PDF data (bookmarks, etc.)
+% automatically
+%    \begin{macrocode}
+   ,pdfencoding=auto%
+%    \end{macrocode}
+% Bookmarks are numbered by default.
+%    \begin{macrocode}
+   ,bookmarksnumbered=true%
+}}
+%    \end{macrocode}
 % Since \lstinline{ltpdfa} messes with a lot of {\LaTeX} Kernel macros
 % (like \lstinline{\begin} and \lstinline{\end}) as well as external
-% package (\lstinline{hyperref}), it must be loaded last:
+% packages (\lstinline{hyperref}), it must be loaded last:
 %    \begin{macrocode}
 \ifx\tp@do@ally\relax
   \RequirePackage{coco-accessibility}

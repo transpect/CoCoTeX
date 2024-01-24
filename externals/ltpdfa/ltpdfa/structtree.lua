@@ -865,7 +865,7 @@ local function finalizeDoc(head)
    if config.dospaces then
       ltpdfa.spaceprocessor.cleanUp()      
    end
-   postProcessFigs() -- Fig BBoxes
+   -- postProcessFigs() -- Fig BBoxes
    log("List of environments:")
    dumpArray(config.bdcs)
    if config.debug then
