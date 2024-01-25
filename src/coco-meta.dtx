@@ -113,7 +113,7 @@
   \tpDeclareRoleBlock{#2}{NameList}{#1-list-print-format}%
   \tpDeclareRoleBlock{#2}{CitationList}{#1-list-cite-format}%
   \tpDeclareRoleBlock{#2}{ShortCitationList}{#1-list-short-cite-format}%
-  \tpDeclareRoleBlock{#2}{PDFInfo}{#1-list-pdfinfo-format}%
+  \tpDeclareRoleBlock[apply]{#2}{PDFInfo}{#1-list-pdfinfo-format}%
   \tpDeclareRoleBlock{#2}{Correspondence}{#1-list-correspondence-format}%
 }
 %    \end{macrocode}
@@ -126,33 +126,37 @@
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tpDeclareRoleBlock} is used to create a new output
-%   container (named \lstinline{\tp#1#2}) for a given Role \#1. A Role
+%   container (named \lstinline{\tp#2#3}) for a given Role \#2. A Role
 %   Block is a Component of the parent Container which contains
 %   certain Components of all members of the Role within its parent
-%   Container. Format and selection of the utilised Components are specified
-%   via the Property given in \#3.
+%   Container. Format and selection of the utilised Components are
+%   specified via the Property given in \#4. The optional argument \#1
+%   tells the evaluator in the Container's \lstinline{end} macro how
+%   the collector is to be composed. Valid values are
+%   \lstinline{compose} (default) or \lstinline{apply}.
 %    \begin{macrocode}
-\def\tpDeclareRoleBlock#1#2#3{%
-  \tpDeclareComp{#1#2}{\expandafter\global}{}%
-  \csgdef{tp@meta@role@#1@#2}{#3}}
+\def\tpDeclareRoleBlock{\@ifnextchar[\tp@declare@role@block{\tp@declare@role@block[compose]}}%]
+\def\tp@declare@role@block[#1]#2#3#4{%
+  \ifcsdef{tp@meta@role@#1}
+    {\tpDeclareComp{#2#3}{\expandafter\global}{}%
+     \csgdef{tp@meta@role@\tp@cur@cont @#2@#3}{#4}%
+     \csappto{@tp@meta@role@eval@\tp@cur@cont @#2}
+        {\csname tp@meta@role@#1\endcsname{#2}{#3}}}
+    {\tpPackageError{Meta}{Argument}
+      {Invalid optional argument in \string\tpDeclareRoleBlock!}
+      {Only `apply' or `compose' are allowed as values^^Jin the optional argument of \string\tpDeclareRoleBlock!}}}%
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tp@meta@role@eval} creates the name lists for the
 %   role. \#1 is the name of the role.
 %    \begin{macrocode}
-\def\tp@meta@role@eval#1{%
-    \tp@meta@role@compose{#1}{NameList}%
-    \tp@meta@role@compose{#1}{CitationList}%
-    \tp@meta@role@compose{#1}{ShortCitationList}%
-    \tp@meta@role@compose{#1}{Correspondence}%
-    \tp@meta@role@apply{#1}{PDFInfo}%
-  }
+\def\tp@meta@role@eval#1{\csname @tp@meta@role@eval@\tp@cur@cont @#1\endcsname}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\@tp@meta@role@eval} \#1 is the name of the macro
 %   used to compose the Collection (either
-%   \lstinline{tpComposeCollection}, or
-%   \lstinline{tpApplyCollection}), \#2 is the name of the role and
+%   \lstinline{\tpComposeCollection}, or
+%   \lstinline{\tpApplyCollection}), \#2 is the name of the role and
 %   \#3 is the name of the list. The access Component is
 %   \lstinline{#2#3}, i.e., both argumets together.
 %    \begin{macrocode}
@@ -172,17 +176,17 @@
       {\expandafter\ifnum\csname tp#2Cnt\endcsname>\z@
 %    \end{macrocode}
 % otherwise, we call the Property that is stored in
-% \lstinline{\tp@meta@role@#2@#3} and store the result in the
+% \lstinline{\tp@meta@role@\tp@cur@cont @#2@#3} and store the result in the
 % Component \lstinline{#2#3}.
 %    \begin{macrocode}
-          #1{tp#2}{\csname tp@meta@role@#2@#3\endcsname}{#2#3}%
+          #1{tp#2}{\csname tp@meta@role@\tp@cur@cont @#2@#3\endcsname}{#2#3}%
         \fi
       }{}}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tp@meta@role@apply} \#1 is the name of the role and
 %   \#2 is the name of the composition. This macro applies
-%   (i.e. \textit{fully expands}) the \lstinline{\tp@meta@role@#1@#2}
+%   (i.e. \textit{fully expands}) the \lstinline{\tp@meta@role@\tp@cur@cont @#1@#2}
 %   Property and stores the result in the \lstinline{#1#2} Component.
 %    \begin{macrocode}
 \def\tp@meta@role@apply#1#2{\@tp@meta@role@eval\tpApplyCollection{#1}{#2}}
@@ -190,7 +194,7 @@
 % \end{macro}
 % \begin{macro}{\tp@meta@role@compose} \#1 is the name of the role and
 %   \#2 is the name of the composition. This stores the
-%   \textit{unexpaded} contents of the \lstinline{\tp@meta@role@#1@#2}
+%   \textit{unexpaded} contents of the \lstinline{\tp@meta@role@\tp@cur@cont @#1@#2}
 %   Property in the \lstinline{#1#2} Component.
 %    \begin{macrocode}
 \def\tp@meta@role@compose#1#2{\@tp@meta@role@eval\tpComposeCollection{#1}{#2}}
