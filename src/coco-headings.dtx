@@ -42,7 +42,7 @@
 % \begin{tpContainer}{heading}
 %    \begin{macrocode}
 \tpDeclareContainer{heading}{%
-  \tpInherit {Components,Properties} from CommonMeta;
+  \tpInherit{Components,Properties}{CommonMeta}%
   \tpDeclareType{Components}{%
 %    \end{macrocode}
 % We already have the Author Component inherited from the
@@ -133,18 +133,13 @@
       \edef\@argi{#1}%
       \tpDeclareType{Parent}{\tp@heading@create@parent{#1}{#3}}
 %    \end{macrocode}
-% in case someone has altered the CommonMeta container, we inherit its
-% properties and containers (again):
-%    \begin{macrocode}
-      \tpInherit {Components,Properties} from CommonMeta;
-%    \end{macrocode}
 % We inherit everything from the heading levels parent, or from the
 % default heading if no parent is present.
 %    \begin{macrocode}
       \ifx\@argi\@empty
-        \tpInherit {Components,Properties} from heading;
+        \tpInherit{Components,Properties}{heading}%
       \else
-        \tpInherit {Components,Properties,Parent} from #1;
+        \tpInherit{Components,Properties,Parent}{#1}%
       \fi
 %    \end{macrocode}
 % The main body of the heading Declaration is a list of Property

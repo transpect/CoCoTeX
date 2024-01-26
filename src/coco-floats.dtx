@@ -423,9 +423,9 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
     \tpDeclareContainer{#2}{%
       \tpPackageInfo{Floats}{}{Declaring float `#2'}%
       \ifx\tp@float@parent\@empty
-        \tpInherit {Properties,Components} from float;
+        \tpInherit{Properties,Components}{float}
       \else
-        \tpInherit {Properties,Components} from \tp@float@parent;
+        \tpInherit{Properties,Components}{\tp@float@parent}
       \fi
       \tpDeclareType{FloatEnvInfo}{%
         \tpNamespace{#2}%

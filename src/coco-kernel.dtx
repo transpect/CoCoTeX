@@ -101,7 +101,7 @@
 % The inherit mechanism is dynamic, i.e., we can load multiple type
 % declarations from multiple containers at once.
 %    \begin{macrocode}
-    \def\tpInherit ##1 from ##2;{\@tp@inherit{##1}{##2}{#1}}%
+    \def\tpInherit##1##2{\@tp@inherit{##1}{##2}{#1}}%
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tpDeclareType}
