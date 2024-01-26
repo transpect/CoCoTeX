@@ -218,9 +218,18 @@ from the Components given in the tpMeta Container.}}}
 % root node:
 %    \begin{macrocode}
 \AtBeginShipout{\directlua{ltpdfa.pageprocessor(tex.box["AtBeginShipoutBox"])}}%
-\addRolemap{document}{Document}
-\AtBeginDocument{\structStart{document}}
-\AtEndDocument{\structEnd{document}}
+%    \end{macrocode}
+% Some environments must \textit{not} be auto-tagged by ltpdfa!
+%    \begin{macrocode}
+\tpIfAlly{%
+  \ltOmitEnv{tpMeta}
+  \ltOmitEnv{tpAuthor}
+  \ltOmitEnv{tpEditor}
+  \ltOmitEnv{tpSeriesEditor}
+  \ltOmitEnv{tpAffil}
+  \ltOmitEnv{tpFunding}
+  \ltOmitEnv{heading}
+}{}
 %    \end{macrocode}
 % End of {\TeX} source code.
 %    \begin{macrocode}[gobble=1]

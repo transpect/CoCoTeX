@@ -16,8 +16,10 @@
 %%%%% latex stuff %%%%%
 \let\@ltpdfa@org@begin\begin
 \let\@ltpdfa@org@end\end
-\def\@@lt@beginBhook#1{\vstructStart{#1}}
-\def\@@lt@endBhook#1{\vstructEnd{#1}}
+%% NEW: macro to exclude certain environments from being auto-tagged. Usage: \ltOmitEnv{<name of environment>}
+\def\ltOmitEnv#1{\expandafter\let\csname lt@omit@env@#1\endcsname\@empty}
+\def\@@lt@beginBhook#1{\expandafter\ifx\csname lt@omit@env@#1\endcsname\@empty\else\vstructStart{#1}\fi}
+\def\@@lt@endBhook#1{\expandafter\ifx\csname lt@omit@env@#1\endcsname\@empty\else\vstructEnd{#1}\fi}
 %% before and after command
 \let\@lt@beginBhook\@@lt@beginBhook
 \let\@lt@endBhook\@@lt@endBhook
@@ -61,11 +63,7 @@
      \if@ignore\@ignorefalse\ignorespaces\fi
    }
 \else
-  \RequirePackage{etoolbox}%% LUP
-  \ifundef\UseHook{\def\UseHook#1{\csuse{#1}}}{}%% LUP
-  \ifundef\AddToHook{\def\AddToHook#1#2{\csgappto{#1}{#2}}}{}%% LUP
   \def\begin#1{%
-      \UseHook{env/#1/before}%% LUP
       \@ifundefined{#1}%
       {\def\reserved@a{\@latex@error{Environment #1 undefined}\@eha}}%
       {\def\reserved@a{\def\@currenvir{#1}%
@@ -75,7 +73,6 @@
       \begingroup%
       \@endpefalse\reserved@a}%%\directlua{ltpdfa.tagger.vstructStart('\luaescapestring{#1}')}
     \def\end#1{%
-        \UseHook{env/#1/end}% LUP
         \@lt@endBhook{#1}\csname end#1\endcsname\@lt@endEhook\@checkend{#1}%
         \expandafter\endgroup\if@endpe\@doendpe\fi
         \if@ignore\@ignorefalse\ignorespaces\fi}

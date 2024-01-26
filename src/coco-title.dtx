@@ -49,14 +49,6 @@
 }
 %    \end{macrocode}
 % \end{tpContainer}
-% If the accessibility module is used, do \textit{not} auto-tag the
-% \lstinline{tpMeta} environment!
-%    \begin{macrocode}
-\tpIfAlly{%
-  \AtBeginEnvironment{tpMeta}{\let\@lt@beginBhook\@gobble}
-  \AtEndEnvironment{tpMeta}{\let\@lt@endBhook\@gobble}
-}{}
-%    \end{macrocode}
 % \begin{macro}{\tp@titlepage@role} declares the roles for editors and
 %   series editors and initializes the biography meta block for both.
 %    \begin{macrocode}
@@ -754,7 +746,6 @@
        \else
          \tpIfComp{EditorNameList}
            {\tpUseComp{EditorNameList}}
-           %{\tpUseProperty{editor-string}}
            {no editor defined!}%
        \fi}%
   }%
