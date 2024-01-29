@@ -45,18 +45,18 @@ like this:
 
 ```
 <your_project_dir>
-  <your_main>.tex
-  cocotex.cls
-  coco-common.sty
-  (further coco-modules)
-  env.sh
-  fonts
-    Noto
-	Junicode
-  ltpdfa
-    ltpdfa.sty
-	ltpdfa.lua
-	...
+  ├─ <your_main>.tex
+  ├─ cocotex.cls
+  ├─ coco-common.sty
+  ├─ ... (further coco-modules)
+  ├─ env.sh
+  ├─ fonts
+      ├─ Noto
+      └─ Junicode
+  └─ ltpdfa
+      ├─ ltpdfa.sty
+      ├─ ltpdfa.lua
+      └─ ...
 ```
 
 ### Additional Recommendations ###
