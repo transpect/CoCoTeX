@@ -85,7 +85,7 @@
  % Environment for CoCoTeX Property definitions: #1 is the name of the
  % parent container, #2 is the name of the Property, BODY is the
  % documentation for that Property.
-\def\tpPropertyDoc#1#2{%
+\def\tpProperty#1#2{%
   \propertysection{Property #1::#2}\ignorespaces
   \edef\saved@macroname{#1::#2}%
   \let\saved@indexname\saved@macroname
@@ -106,7 +106,7 @@
   \DoNotIndex{#1::#2}%
   \nobreak
 }
-\let\endtpComponent
+\let\endtpComponent\relax
 
  %% no longer working with TL>2022 *grrrr*
  %\def\SpecialMainIndex#1{\@bsphack

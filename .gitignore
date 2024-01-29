@@ -12,12 +12,21 @@
 *.hd
 
 
-# ignore the build folder
+# ignore the build, temp and log folders
 ./build
 build/*
+./temp
+temp/*
+./log
+log/*
 
-# backup files
-backup/*
+source.sh
 
-# xindy only internal
+# ruby gems locally
+lib/ruby/vendor
+lib/ruby/.bundle
+lib/ruby/Gemfile.lock
+
+
+# xindy locally
 externals/xindy
