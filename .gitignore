@@ -15,9 +15,17 @@
 # ignore the build folder
 ./build
 build/*
+./temp
+temp/*
+source.sh
 
-# backup files
-backup/*
+# ruby gems locally
+lib/ruby/vendor
+lib/ruby/.bundle
+lib/ruby/Gemfile.lock
+./log
+log/*
 
-# xindy only internal
+
+# xindy locally
 externals/xindy
