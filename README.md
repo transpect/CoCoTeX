@@ -18,6 +18,13 @@ overloading of functionalities.
 
 ## Installation ##
 
+### Dependencies ###
+
+You need the following additional items to run CoCoTeX:
+* [xerif-fonts](https://subversion.le-tex.de/common/xerif-fonts/) if you want to use `coco-scripts.sty`
+* `htmltabs.sty` (working pre-alpha version inside the `externals/htmltabs` folder) if you want to use tables with a html-like syntax
+* `ltpdfa` (pre-alpha version inside the `externals/ltpdfa` folder) if you want to use `coco-accessibility.sty`
+
 TBD
 
 ## Usage ##
