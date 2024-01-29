@@ -9,7 +9,7 @@ module CoCoTeX
     def initialize(options: {})
       super
       @source_dir = File.join(BASE_DIR, "src")
-      @build_dir = File.join(BASE_DIR, "build")
+      @out_dir = resolve_path(@options.out)
     end
 
     def exec
@@ -24,7 +24,7 @@ module CoCoTeX
     private
     def check_or_create_folders
       create_or_exist(dir: @temp_dir)
-      create_or_exist(dir: @build_dir)
+      create_or_exist(dir: @out_dir)
     end
 
     def build_kernel
@@ -52,9 +52,9 @@ module CoCoTeX
     end
 
     def move_kernel
-      shell_command("mv #{File.join(@temp_dir, "cocotex.cls")} #{@build_dir}")
-      shell_command("mv #{File.join(@temp_dir, "coco-*.sty")} #{@build_dir}")
-      shell_command("mv #{File.join(@temp_dir, "coco-*.lua")} #{@build_dir}")
+      shell_command("mv #{File.join(@temp_dir, "cocotex.cls")} #{@out_dir}")
+      shell_command("mv #{File.join(@temp_dir, "coco-*.sty")} #{@out_dir}")
+      shell_command("mv #{File.join(@temp_dir, "coco-*.lua")} #{@out_dir}")
     end
   end
 end

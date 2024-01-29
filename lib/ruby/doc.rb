@@ -5,7 +5,7 @@ module CoCoTeX
 
     private
     def create_doc(options: )
-      require File.join(SCRIPT_DIR, "doc.rb")
+      require File.join(RUBY_DIR, "build_doc.rb")
       @doc = BuildDoc.new(options: options)
       @doc.exec
     end

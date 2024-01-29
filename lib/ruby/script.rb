@@ -108,8 +108,13 @@ module CoCoTeX
     def run_while_status(str, log_level: "info")
       col = $log.format_color(log_level)
       print Kernel::sprintf("%-#{@color ? "26" : "15"}s%-72s", col, str)
-      yield
-      puts Kernel::sprintf(" [%#{@color ? "15" : "4"}s]", $log.color_str("done", color: 32))
+      begin
+        yield
+      rescue StandardError => e
+        puts Kernel::sprintf(" [%#{@color ? "15" : "4"}s]:\n%s", $log.color_str("ERROR", color: 31), e.message)
+      else
+        puts Kernel::sprintf(" [%#{@color ? "15" : "4"}s]", $log.color_str("done", color: 32))
+      end
     end
 
     # iterates through a list while printing a status message with a
@@ -153,6 +158,15 @@ module CoCoTeX
     def clear_temp
       return if @debug or @options.keep_temp or !Dir.exists?(@temp_dir)
       shell_command("rm -rf #{@temp_dir} ")
+    end
+
+    def resolve_path(dir)
+      ## check directories
+      _dest_path = Pathname.new(dir)
+      if _dest_path.relative?
+        _dest_path = File.expand_path(File.join(@current_path, _dest_path))
+      end
+      _dest_path
     end
   end
 end
