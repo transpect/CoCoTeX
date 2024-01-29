@@ -1,0 +1,20 @@
+# Ignore TeX's temporary and auxiliary files.
+
+*.aux
+*.*~
+*.dvi
+*.log
+*.toc
+*.idx
+*.*_idx
+*.ilg
+*.out
+*.hd
+
+
+# ignore the build folder
+./build
+build/*
+
+# backup files
+backup/*
