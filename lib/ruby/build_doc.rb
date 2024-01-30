@@ -78,7 +78,7 @@ module CoCoTeX
 
     def resolve_dependencies
       shell_command("cd #{@temp_dir} ; ln -s #{File.join(EXT_DIR, "htmltabs", "htmltabs.sty")} .") unless File.exists?(File.join(@temp_dir, "htmltabs.sty"))
-      xf = resolve_path(@options.xerif_fonts)
+      xf = resolve_path(@options.xerif_fonts) if @options.xerif_fonts
       if xf && Dir.exists?(xf)
         $log.info("using #{xf}.")
         shell_command("cd #{@temp_dir} ; ln -s #{xf} fonts")
