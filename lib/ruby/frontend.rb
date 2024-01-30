@@ -60,6 +60,7 @@ module CoCoTeX
     option :log_file, required: false, desc: "path to the log file", default: "doc", banner: "PATH"
     option :out, aliases: :o, type: :string, required: false, desc: "output directory", group: "Output", default: DEFAULT_DOC_DIR
     option :xerif_fonts, aliases: :f, type: :string, required: false, desc: "Path to the xerif-fonts repo", group: "Input", default: nil
+    option :quick, aliases: :q, type: :boolean, required: false, desc: "do only one single LaTeX run", group: "Other", default: false
     subcommand "doc", Doc
 
     default_task :build

@@ -5,13 +5,12 @@ module CoCoTeX
     # ctor
     def initialize(options: {})
       super
-      @index_script = 
       @doc_dir = resolve_path(@options.out)
     end
 
     # @override
     def exec
-      clear_temp
+      clear_temp unless @options.quick
       check_or_create_folders
       build_kernel
     end
@@ -28,7 +27,7 @@ module CoCoTeX
       build_manual
       create_or_exist(dir: @doc_dir)
       shell_command("mv #{@manual_out} #{@doc_dir}") if File.exists?(@manual_out)
-      clear_temp unless @debug
+      clear_temp unless @debug or @options.quick
     end
 
     # creates the source code documentation
@@ -40,7 +39,7 @@ module CoCoTeX
       build_doc
       create_or_exist(dir: @doc_dir)
       shell_command("mv #{@source_doc_out} #{@doc_dir}") if File.exists?(@source_doc_out)
-      clear_temp unless @debug
+      clear_temp unless @debug or @options.quick
     end
 
     private
@@ -59,26 +58,31 @@ module CoCoTeX
     # runs LaTeX for the end usere manual
     def build_manual
       run_while_status("1st TeX run") do do_tex_run end
-      run_while_status("2nd TeX run") do do_tex_run end
-      run_while_status("Generating general index") do do_index end
-      run_while_status("Property Index") do do_index(target: "p") end
-      run_while_status("TeX Index") do do_index(target: "t") end
-      run_while_status("3rd TeX run") do do_tex_run end
-      run_while_status("4th TeX run") do do_tex_run end
+      unless @options.quick
+        run_while_status("2nd TeX run") do do_tex_run end
+        run_while_status("Generating general index") do do_index end
+        run_while_status("Property Index") do do_index(target: "p") end
+        run_while_status("TeX Index") do do_index(target: "t") end
+        run_while_status("3rd TeX run") do do_tex_run end
+        run_while_status("4th TeX run") do do_tex_run end
+      end
       @manual_out = File.join(@temp_dir, "manual.pdf")
     end
 
     # runs LaTeX for the source code documentation
     def build_doc
       run_while_status("1st TeX run") do do_tex_run end
-      run_while_status("2nd TeX run") do do_tex_run end
-      run_while_status("3rd TeX run") do do_tex_run end
+      unless @options.quick
+        run_while_status("2nd TeX run") do do_tex_run end
+        run_while_status("3rd TeX run") do do_tex_run end
+      end
       @source_doc_out = File.join(@temp_dir, "cocotex.pdf")
     end
 
     def resolve_dependencies
+      return if @options.quick
       shell_command("cd #{@temp_dir} ; ln -s #{File.join(EXT_DIR, "htmltabs", "htmltabs.sty")} .") unless File.exists?(File.join(@temp_dir, "htmltabs.sty"))
-      xf = resolve_path(@options.xerif_fonts)
+      xf = resolve_path(@options.xerif_fonts) if @options.xerif_fonts
       if xf && Dir.exists?(xf)
         $log.info("using #{xf}.")
         shell_command("cd #{@temp_dir} ; ln -s #{xf} fonts")
@@ -101,12 +105,16 @@ module CoCoTeX
       Open3.popen2e("umask 002 ; #{_cmd}") do |i,o,s|
         cnt = 0
         o.each do |l|
-          if l =~ /^! /
-            cnt = 3
-          end
-          if cnt != 0
-            err += l
-            cnt = cnt - 1
+          if @options.quick
+            puts l
+          else
+            if l =~ /^! /
+              cnt = 3
+            end
+            if cnt != 0
+              err += l
+              cnt = cnt - 1
+            end
           end
         end
         if err != ""
@@ -120,6 +128,11 @@ module CoCoTeX
       cmd = "cd #{@temp_dir} ; ./index.sh #{@doc_main} #{target}"
       _cmd = check_shell_command(cmd)
       Open3.popen2e("umask 002 ; #{_cmd}") do |i,o,s|
+        if @options.quick
+          o.each do |l|
+            puts l
+          end
+        end
         raise StandardError.new("Xindy run failed: #{o}") unless s.value.success?
       end
     end
