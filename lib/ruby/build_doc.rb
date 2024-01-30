@@ -59,20 +59,24 @@ module CoCoTeX
     # runs LaTeX for the end usere manual
     def build_manual
       run_while_status("1st TeX run") do do_tex_run end
-      run_while_status("2nd TeX run") do do_tex_run end
-      run_while_status("Generating general index") do do_index end
-      run_while_status("Property Index") do do_index(target: "p") end
-      run_while_status("TeX Index") do do_index(target: "t") end
-      run_while_status("3rd TeX run") do do_tex_run end
-      run_while_status("4th TeX run") do do_tex_run end
+      unless @options.quick
+        run_while_status("2nd TeX run") do do_tex_run end
+        run_while_status("Generating general index") do do_index end
+        run_while_status("Property Index") do do_index(target: "p") end
+        run_while_status("TeX Index") do do_index(target: "t") end
+        run_while_status("3rd TeX run") do do_tex_run end
+        run_while_status("4th TeX run") do do_tex_run end
+      end
       @manual_out = File.join(@temp_dir, "manual.pdf")
     end
 
     # runs LaTeX for the source code documentation
     def build_doc
       run_while_status("1st TeX run") do do_tex_run end
-      run_while_status("2nd TeX run") do do_tex_run end
-      run_while_status("3rd TeX run") do do_tex_run end
+      unless @options.quick
+        run_while_status("2nd TeX run") do do_tex_run end
+        run_while_status("3rd TeX run") do do_tex_run end
+      end
       @source_doc_out = File.join(@temp_dir, "cocotex.pdf")
     end
 
