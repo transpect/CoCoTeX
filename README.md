@@ -121,7 +121,12 @@ to set the underlying document class. Valid values `<publication_type>` for are:
 
 The latter three types use LaTeX's standard `book` document class.
 
-For further options, see read the End-User manual.
+For further information, read the [End-User
+manual](https://github.com/transpect/CoCoTeX/blob/main/doc/manual.pdf)
+or look into the manual's source files (inside the
+[lib/manual/](https://github.com/transpect/CoCoTeX/tree/main/lib/manual)
+folder) and its main style file
+([cocotex-doc.sty](https://github.com/transpect/CoCoTeX/blob/main/lib/manual/cocotex-doc.sty)).
 
 # LICENSE #
 
