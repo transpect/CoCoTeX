@@ -24,7 +24,7 @@ module CoCoTeX
       @color = true unless @options.no_color
       @user = `whoami`.gsub(/\n/, "")
       File.umask(0002)
-      clear_temp
+      clear_temp unless @options.quick
     end
 
     # @abstract
