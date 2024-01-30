@@ -105,12 +105,16 @@ module CoCoTeX
       Open3.popen2e("umask 002 ; #{_cmd}") do |i,o,s|
         cnt = 0
         o.each do |l|
-          if l =~ /^! /
-            cnt = 3
-          end
-          if cnt != 0
-            err += l
-            cnt = cnt - 1
+          if @options.quick
+            pp l
+          else
+            if l =~ /^! /
+              cnt = 3
+            end
+            if cnt != 0
+              err += l
+              cnt = cnt - 1
+            end
           end
         end
         if err != ""
@@ -124,6 +128,11 @@ module CoCoTeX
       cmd = "cd #{@temp_dir} ; ./index.sh #{@doc_main} #{target}"
       _cmd = check_shell_command(cmd)
       Open3.popen2e("umask 002 ; #{_cmd}") do |i,o,s|
+        if @options.quick
+          o.each do |l|
+            pp l
+          end
+        end
         raise StandardError.new("Xindy run failed: #{o}") unless s.value.success?
       end
     end
