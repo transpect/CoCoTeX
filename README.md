@@ -1,3 +1,5 @@
+![GitHub Release](https://img.shields.io/github/v/release/transpect/CoCoTeX?include_prereleases) ![GitHub (Pre-)Release Date](https://img.shields.io/github/release-date-pre/transpect/CoCoTeX) ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/transpect/cocotex/total)
+
 # CoCoTeX Kernel #
 
 This repository contains the source files (including code
