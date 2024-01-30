@@ -5,13 +5,12 @@ module CoCoTeX
     # ctor
     def initialize(options: {})
       super
-      @index_script = 
       @doc_dir = resolve_path(@options.out)
     end
 
     # @override
     def exec
-      clear_temp
+      clear_temp unless @options.quick
       check_or_create_folders
       build_kernel
     end
@@ -28,7 +27,7 @@ module CoCoTeX
       build_manual
       create_or_exist(dir: @doc_dir)
       shell_command("mv #{@manual_out} #{@doc_dir}") if File.exists?(@manual_out)
-      clear_temp unless @debug
+      clear_temp unless @debug or @options.quick
     end
 
     # creates the source code documentation
@@ -40,7 +39,7 @@ module CoCoTeX
       build_doc
       create_or_exist(dir: @doc_dir)
       shell_command("mv #{@source_doc_out} #{@doc_dir}") if File.exists?(@source_doc_out)
-      clear_temp unless @debug
+      clear_temp unless @debug or @options.quick
     end
 
     private
