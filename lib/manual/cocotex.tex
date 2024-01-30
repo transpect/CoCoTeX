@@ -5,7 +5,7 @@
 
 \Fileversion{\fileversion}
 \Filedate{\filedate}
-\title{CoCoTeX}
+\title{\CoCoTeX}
 \subtitle{A Commmon {\LaTeX} Stylesheet Framework}
 \author{le-tex publishing services GmbH}
 
@@ -24,12 +24,21 @@
 \mainmatter
 
 \include{coco-overview}
+\begin{heading}{part}
+  \tpNumber{I}
+  \tpBMTitle{CoCoTeX Core Modules}
+  \tpTitle{{\CoCoTeX} Core Modules}
+\end{heading}
 \include{coco-common}
 \include{coco-headings}
 \include{coco-floats}
 \include{coco-script}
 \include{coco-notes}
 \include{coco-title}
+\begin{heading}{part}
+  \tpNumber{II}
+  \tpTitle{Customization}
+\end{heading}
 \clearpage
 \backmatter
 \printindex

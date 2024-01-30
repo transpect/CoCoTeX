@@ -243,9 +243,21 @@
       \fi
       ##1}}}
 
-\pagestyle{headings}
+\def\ps@part{%
+  \let\@oddfoot\@empty\let\@evenfoot\@empty
+  \let\@evenhead\@empty\let\@oddhead\@empty%
+}
 
-\tpAddToDefault{heading}{%
+
+\pagestyle{headings}
+\csdef{tp:partautorefname}{Part}
+\csdef{tp:chapterautorefname}{Chapter}
+\csdef{tp:sectionautorefname}{Sect.}
+\csdef{tp:subsectionautorefname}{Sect.}
+\csdef{tp:subsubsectionautorefname}{Sect.}
+\c@secnumdepth=4\relax
+
+\tpAddToType{Properties}{heading}{%
   \tpSetProperty{before-heading-block}{\parindent\z@ \parskip\z@ \leftskip\z@}
   \tpSetProperty{heading-block}{%
     \tpUseProperty{title-face}%
@@ -263,6 +275,27 @@
   \tpSetProperty{number-sep}{\enskip}
 }
 
+\tpDeclareHeading{-1}{part}{%
+  \tpSetProperty{heading-par}{\cleardoublepage}
+  \tpSetProperty{before-heading}{%
+    \thispagestyle{part}%
+    \setcounter{section}{0}%
+  }
+  \tpSetProperty{title-face}{\Huge\titlefont}
+  \tpSetProperty{after-skip}{1\fill}%
+  \tpSetProperty{heading-block}{%
+    \tpUseProperty{title-face}%
+    \tpIfComp{Number}{Part~\tpUseComp{Number}\par}{}%
+    \tpUseComp{Title}\par
+  }
+  \tpSetProperty{toc-title-face}{\bfseries\sffamily}%
+  \tpSetProperty{toc-margin-top}{2\baselineskip}
+  \tpSetProperty{toc-page-sep}{\hfill}
+  \tpSetProperty{toc-number-format}{Part~\tpUseComp{TocNumber}:\enskip}
+  \tpSetProperty{toc-indent}{\z@}
+  \tpSetProperty{numbering}{}%
+}
+
 \tpDeclareHeading{0}{chapter}{%
   \tpSetProperty{heading-par}{\ifx\noclearpage\relax\else\cleardoublepage\fi
     \par
@@ -276,7 +309,7 @@
   }
   \tpSetProperty{title-face}{\huge\titlefont}
   \tpSetProperty{after-skip}{3\baselineskip}%
-  \tpSetProperty{indent}{}
+  \tpSetProperty{indent}{auto}
   \tpSetProperty{toc-margin-top}{1\baselineskip}
   \tpSetProperty{toc-title-face}{\bfseries\sffamily}
 }
@@ -575,4 +608,9 @@
 }
 
 \hypersetup{hyperindex=false,breaklinks,pdfborder={0 0 0},colorlinks=true,linkcolor=spot}
-\newcommand*{\fullref}[1]{\hyperref[{#1}]{\autoref*{#1} “\nameref*{#1}”}}
+\newcommand*{\fullref}[1]{\hyperref[{#1}]{\autoref*{#1}, ``\nameref*{#1}''}}
+\urlstyle{same}
+
+\RequirePackage{newunicodechar}
+\newunicodechar{“}{``}
+\newunicodechar{”}{''}
