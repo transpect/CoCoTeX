@@ -106,7 +106,7 @@ module CoCoTeX
         cnt = 0
         o.each do |l|
           if @options.quick
-            pp l
+            puts l
           else
             if l =~ /^! /
               cnt = 3
@@ -130,7 +130,7 @@ module CoCoTeX
       Open3.popen2e("umask 002 ; #{_cmd}") do |i,o,s|
         if @options.quick
           o.each do |l|
-            pp l
+            puts l
           end
         end
         raise StandardError.new("Xindy run failed: #{o}") unless s.value.success?
