@@ -411,7 +411,7 @@
 %    \begin{macrocode}
 \def\tp@heading@create@labels#1{%
   \ifx\Hy@MakeCurrentHrefAuto\@undefined\else
-    \Hy@MakeCurrentHrefAuto{tp.#1}%
+    \Hy@MakeCurrentHrefAuto{tp:#1}%
     \Hy@raisedlink{\hyper@anchorstart{\@currentHref}\hyper@anchorend}%
   \fi
   \tpIfAttr{heading}{label}
