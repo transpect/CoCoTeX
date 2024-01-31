@@ -394,7 +394,9 @@
     \expandafter\ifnum \csname c@#2depth\endcsname<#3\relax
     \else
       \bgroup
-        \long\def\tpTocLink####1{\hyper@linkstart{link}{\Hy@tocdestname}{####1}\hyper@linkend}%
+        \tp@if@ally
+          {\long\def\tpTocLink####1{\hyper@linkstart[####1]{link}{\Hy@tocdestname}{####1}\hyper@linkend}}
+          {\long\def\tpTocLink####1{\hyper@linkstart{link}{\Hy@tocdestname}{####1}\hyper@linkend}}%
         \csname tp@#2@extract@data\endcsname{#3}{#4}{##1}{##2}%
         \csname tp@#2@print@entry\endcsname{#4}%
       \egroup
