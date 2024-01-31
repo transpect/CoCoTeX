@@ -175,26 +175,26 @@ from the Components given in the tpMeta Container.}}}
 \tpAddToType{Components}{titlepage}{%
 %    \end{macrocode}
 %
-% \begin{tpContainer}{PDFAID} defines the PDF/A ID (Default: 2,
+% \begin{tpComponent}{PDFAID} defines the PDF/A ID (Default: 2,
 %   meaning: PDF/A-2)
 %    \begin{macrocode}
   \tpDeclareGComp[2]{PDFAID}%
 %    \end{macrocode}
-% \end{tpContainer}
-% \begin{tpContainer}{PDFALevel} defines the PDF/A Level (Default: A,
+% \end{tpComponent}
+% \begin{tpComponent}{PDFALevel} defines the PDF/A Level (Default: A,
 %   meaning PDF/A-2A)
 %    \begin{macrocode}
   \tpDeclareGComp[A]{PDFALevel}%
 %    \end{macrocode}
-% \end{tpContainer}
-% \begin{tpContainer}{PDFUAID} defines the PDF standard (Default: 1,
+% \end{tpComponent}
+% \begin{tpComponent}{PDFUAID} defines the PDF standard (Default: 1,
 %   meaning: PDF/UA-1). Use \lstinline{\tpPDFUAID{}} (i.e. set it to
 %   nothing) to make the document conform to the PDF/A standard, but
 %   \textbf{not} to the PDF/UA standard.
 %    \begin{macrocode}
   \tpDeclareGComp[1]{PDFUAID}}%
 %    \end{macrocode}
-% \end{tpContainer}
+% \end{tpComponent}
 % The checking if the values are valid, and the separation of the
 % various parts of the standard is done via a lua script in the
 % \lstinline{document-meta-hook}. The \lstinline{conformance}
