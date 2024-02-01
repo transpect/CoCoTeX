@@ -14,7 +14,7 @@ stand-alone as a LaTeX package.
 
 CoCoTeX is developed to "simplify" common requirements by various
 publishers like complex headings, floats with more than one caption,
-foreign language support, titlepages, etc. It adpots some principles
+foreign language support, titlepages, etc. It adopts some principles
 from object-oriented programming like inheritance, mixins, and
 overloading of functionalities.
 
