@@ -31,6 +31,7 @@ module CoCoTeX
       $log.set_logger(level: options[:debug], issuer: log_file)
       $log.set_color(color: !options[:no_color])
       $log.stdout.level = "FATAL" if options[:silent]
+      File.umask(0002)
     end
     check_unknown_options!
 
