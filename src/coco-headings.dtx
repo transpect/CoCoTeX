@@ -191,6 +191,13 @@
       \tp@declare@heading{#2}{#3}%
     }% \DeclareContainer{#3}
   }% \ifcsdef tp@container@#3 fi
+%    \end{macrocode}
+% Finally, each newly assigned heading level needs some configuration
+% with the \lstinline{ltpdfa} package. Here, we assign the sectioning
+% tag and the tag for the heading itself to the \lstinline{Sect} and
+% \lstinline{H} tags, respectively and add hooks to
+% \lstinline{ltpdfa}'s \lstinline{autoclose} mechanism.
+%    \begin{macrocode}
   \tpIfAlly{%
     \AtBeginDocument{%
       \addRolemap{#3}{Sect}%
@@ -696,11 +703,6 @@
 %
 % \subsection{Environment Macros}
 %
-%    \begin{macrocode}
- %\ifnum\luatexversion>111
- %  \tpIfAlly{\AddToHook{env/heading/before}{\message{^^J===> structStart{#2}}\structStart{#2}}}{}%
- %\fi
-%    \end{macrocode}
 %
 % \begin{macro}{\heading} is the macro called at the begin of the
 %   \lstinline{heading} environment. Optional \#1 stores the headings
@@ -709,9 +711,34 @@
 \def\heading{\tp@opt@empty\@heading}%
 \def\@heading[#1]#2{%
 %    \end{macrocode}
-% Adding tagging for the section 
+% Adding start tags for the contents that ``belong'' to a
+% heading. \textbf{Warning}, the following code is incredibly ugly. In
+% principle, we close the semi-group opened by \lstinline{begin}, add
+% the tagging, and then re-build the rest of the code from older and
+% more modern \LaTeX's standard definitions of \lstinline{begin}.
+%
+% This is necessary, because otherwise we would need to either
+% manually add the starting sectioning tag outside the
+% \lstinline{heading} environment, or, if we want to keep
+% \lstinline{ltpdfa}'s \lstinline{autoclose} mechanism, the sectioning
+% tag is auto-ended at \lstinline|\end{heading}|. Using the
+% \lstinline{env/heading/before} hook won't work either, because at
+% the time of its expansion, the level of the heading isn't known, yet. So, we
+% need to take the ugly road, for now.
 %    \begin{macrocode}
-    \tpIfAlly{\structStart{#2}}{}%
+    \tpIfAlly{%
+      \endgroup
+      \structStart{#2}%
+      \ifnum\luatexversion>111\relax\UseHook{env/heading/before}\fi
+      \@ignorefalse
+      \begingroup
+        \@endpefalse
+        \def\@currenvir{heading}%
+        \edef\@currenvline{\on@line}%
+        \ifnum\luatexversion>111\relax
+          \@execute@begin@hook{heading}%
+        \fi
+      }{}%
 %    \end{macrocode}
 % Some {\LaTeX} kernel macros are saved, the namespace is
 % set and counted groups from previous headings are reset.

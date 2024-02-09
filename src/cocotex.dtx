@@ -71,7 +71,9 @@
 %    \end{macrocode}
 % Passing options down to various {\CoCoTeX} modules:
 %    \begin{macrocode}
-\DeclareOptionX{debug}{\PassOptionsToPackage{\CurrentOption}{coco-kernel}}
+\DeclareOptionX{debug}{%
+  \PassOptionsToPackage{\CurrentOption}{coco-kernel}%
+  \PassOptionsToPackage{\CurrentOption}{ltpdfa}}
 \DeclareOptionX{a11y}{\PassOptionsToPackage{\CurrentOption}{coco-common}}
 \DeclareOptionX{no-compress}{\let\tp@no@pdf@compression\relax}
 \DeclareOptionX{color-enc}{\PassOptionsToPackage{\CurrentOption}{coco-common}}
