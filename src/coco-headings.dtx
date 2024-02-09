@@ -199,21 +199,30 @@
 % \lstinline{ltpdfa}'s \lstinline{autoclose} mechanism.
 %    \begin{macrocode}
   \tpIfAlly{%
-    \AtBeginDocument{%
-      \addRolemap{#3}{Sect}%
-      \addRolemap{#3head}{H}%
-      \@tempcnta=#2\relax
-      \advance\@tempcnta\m@ne\relax
-      \ifcsdef{tp@hdg@\the\@tempcnta @names}
-        {\def\do##1{%
-          \if!##1!\else
-            \tpKernelDebugMsg{Adding autoclose for #3 to ##1}%
-            \addToConfig{autoclose}{##1={Type:Sectioning}{Child:#3}{Egroup: true}}%
-          \fi%
-         \dolistcsloop{tp@hdg@\the\@tempcnta @names}}}
-        {\tpKernelDebugMsg{Adding autoclose for #3 to document}%
-         \addToConfig{autoclose}{document={Type:Sectioning}{Child:#3}{Egroup: false}}}}}{}%
-}% \@tpDeclareHeading
+    \expandafter\ifnum\csname tp@hdg@#3@level\endcsname <\tp@hdg@highest@level\relax\else
+      \AtBeginDocument{%
+        \addRolemap{#3}{Sect}%
+        \addRolemap{#3head}{H}%
+        \@tempcnta=#2\relax
+        \advance\@tempcnta\m@ne\relax
+        \ifcsdef{tp@hdg@\the\@tempcnta @names}
+          {\def\do##1{%
+              \if!##1!\else
+                \expandafter\ifnum\csname tp@hdg@#3@level\endcsname =\tp@hdg@highest@level\relax
+                  %% the lowest, actually used, heading level must not insert an endgroup.
+                  \addToConfig{autoclose}{##1={Type:Sectioning}{Child:#3}{Egroup: false}}%
+                \else
+                  \addToConfig{autoclose}{##1={Type:Sectioning}{Child:#3}{Egroup: true}}%
+                \fi
+              \fi%
+              \dolistcsloop{tp@hdg@\the\@tempcnta @names}}}
+          {\addToConfig{autoclose}{document={Type:Sectioning}{Child:#3}{Egroup: false}}}}%
+      \fi
+    }{}%
+  }% \@tpDeclareHeading
+  \newcount\tp@hdg@used \tp@hdg@used=99\relax
+\ifx\tp@hdg@highest@level\@undefined \def\tp@hdg@highest@level{99}\fi
+\AtEndDocument{\write\@auxout{}{\gdef\tp@hdg@highest@level{\the\tp@hdg@used}}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tp@heading@create@parent} stores the heading level's name and its
@@ -740,6 +749,15 @@
         \fi
       }{}%
 %    \end{macrocode}
+% \begin{macro}{\tp@hdg@used} stores the level number of the highest
+%   heading level that is actually used in the document (i.e. the
+%   lowest level).
+%    \begin{macrocode}
+    \expandafter\ifnum\csname tp@hdg@#2@level\endcsname<\tp@hdg@used\relax
+      \global\tp@hdg@used=\csname tp@hdg@#2@level\endcsname\relax
+    \fi
+%    \end{macrocode}
+% \end{macro}
 % Some {\LaTeX} kernel macros are saved, the namespace is
 % set and counted groups from previous headings are reset.
 %    \begin{macrocode}
