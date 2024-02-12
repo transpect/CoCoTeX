@@ -41,8 +41,10 @@
 \newcommand*{\@lt@nop@ignoreNext}[1]{\relax}
 \newcommand*{\@lt@nop@pushStruct}[1]{\relax}
 \newcommand*{\@lt@nop@setLang}[1]{\relax}
+\newcommand*{\@lt@nop@ltOmitEnv}[1]{\relax}
 
 \newcommand*{\@disableLtpdfa}{%
+  \global\let\ltOmitEnv\@lt@nop@ltOmitEnv
   \global\let\addToConfig\@lt@nop@addToConfig
   \global\let\structStart\@lt@nop@structStart
   \global\let\structEnd\@lt@nop@structEnd

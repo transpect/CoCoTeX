@@ -198,8 +198,10 @@
 \let\@lt@save@ignoreNext\ignoreNext
 \let\@lt@save@pushStruct\pushStruct
 \let\@lt@save@setLang\setLang
+\let\@lt@save@ltOmitEnv\ltOmitEnv
 
 \newcommand*{\@restoreLtpdfa}{%
+  \global\let\ltOmitEnv\@lt@save@ltOmitEnv
   \global\let\structStart\@lt@save@structStart
   \global\let\structEnd\@lt@save@structEnd
   \global\let\vstructStart\@lt@save@vstructStart

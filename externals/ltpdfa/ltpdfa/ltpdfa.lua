@@ -274,4 +274,5 @@ ltpdfa.addToUnicode = addToUnicode
 ltpdfa.setDocInfo   = setDocInfo
 --
 ltpdfa.pageprocessor = ltpdfa.structtree.pageprocessor -- called from \AtBeginShipout
+ltpdfa.configAutoclose = configAutoclose
 return ltpdfa
