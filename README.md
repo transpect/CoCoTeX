@@ -1,7 +1,5 @@
 ![GitHub Release](https://img.shields.io/github/v/release/transpect/CoCoTeX?include_prereleases) ![GitHub (Pre-)Release Date](https://img.shields.io/github/release-date-pre/transpect/CoCoTeX) ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/transpect/cocotex/total)
 
-# CoCoTeX Kernel #
-
 > [!WARNING]  
 > The end-user documentation (`doc/manual.pdf`) is incomplete and to
 > be considered a Work in Progress!
@@ -9,6 +7,8 @@
 > If you feel valiant, read the source code documentation, instead
 > (`doc/cocotex.pdf`). We try to keep this one as up-to-date as
 > possible.
+
+# CoCoTeX Kernel #
 
 This repository contains the source files (including code
 documentation) and the user manual for the CoCoTeX framework.
