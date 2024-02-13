@@ -25,9 +25,8 @@ overloading of functionalities.
 Simply copy the `cocotex.dtx` and `cocotex.ins` from the
 `releases/current` folder to your local project directory and run
 
-```
-latex cocotex.ins
-```
+	latex cocotex.ins
+
 this will unpack the necessary files.
 
 ### Co-Dependencies ###
@@ -52,12 +51,16 @@ like this:
   ├─ coco-common.sty
   ├─ ... (further coco-modules)
   ├─ env.sh
+  ├─ htmltabs.sty
   ├─ fonts
       ├─ Noto
       └─ Junicode
-  └─ ltpdfa
+  ├─ ltpdfa
       ├─ ltpdfa.sty
       ├─ ltpdfa.lua
+      └─ ...
+  └─ suppl
+      ├─ cmyk.icc
       └─ ...
 ```
 
@@ -67,38 +70,34 @@ like this:
   `externals/htmltabs` folder) if you want to use tables with a
   html-like syntax.
 
-## Installation from sources ##
+## Installation from Sources ##
 
 If you want to use the included `build.sh` bash script (recommended),
 you need Ruby, at least version 3.1!
 
 Clone the git Repository:
 
-```
-git clone https://github.com/transpect/CoCoTeX.git
-```
+	git clone https://github.com/transpect/CoCoTeX.git
 
 copy the `source.sh.example` as `source.sh` and adjust the environment
 variables to your liking. Then, run
 
-```
-./build.sh
-```
+	./build.sh
 
 This script creates a temporary folder `temp`, merges the `.dtx` files
 in the `src` directory into a single `temp/cocotex.dtx`, and runs the
 installation script. The resulting .sty, .cls, and lua files are
-stores inside the `build` folder.
+stored inside the `build` folder.
 
 Run
-```
-./build.sh doc
-```
+
+	./build.sh doc
+
 to create the User Manual and the source code documentation, or
-```
-./build.sh doc man
-./build.sh doc source
-```
+
+	./build.sh doc man
+	./build.sh doc source
+
 to create either separately.
 
 
@@ -106,13 +105,13 @@ to create either separately.
 
 Once the cls, sty and lua files have been unpacked and stored in a
 location usable by LaTeX, the framework's modules can be used with
-```
-\usepackage{coco-<module>}
-```
+
+	\usepackage{coco-<module>}
+
 If you want to utilize all (non-experimental) modules, you can use the included document class:
-```
-\documentclass[pubtype=<publication_type>]{cocotex}
-```
+
+	\documentclass[pubtype=<publication_type>]{cocotex}
+
 to set the underlying document class. Valid values `<publication_type>` for are:
 * `article` for single articles (this uses LaTeX's standard `article` class).
 * `mono` for books where all parts are written by the same author(s),
