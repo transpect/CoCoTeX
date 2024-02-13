@@ -78,7 +78,7 @@ Clone the git Repository:
 git clone https://github.com/transpect/CoCoTeX.git
 ```
 
-copy the `source.sh`.example as `source.sh` and adjust the environment
+copy the `source.sh.example` as `source.sh` and adjust the environment
 variables to your liking. Then, run
 
 ```
