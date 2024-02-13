@@ -2,6 +2,14 @@
 
 # CoCoTeX Kernel #
 
+> [!WARNING]  
+> The end-user documentation (`doc/manual.pdf`) is incomplete and to
+> be considered a Work in Progress!
+>
+> If you feel valiant, read the source code documentation, instead
+> (`doc/cocotex.pdf`). We try to keep this one as up-to-date as
+> possible.
+
 This repository contains the source files (including code
 documentation) and the user manual for the CoCoTeX framework.
 
