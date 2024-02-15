@@ -61,29 +61,39 @@ end
 -- helper work backwards up and build the hierarchy
 local function autoFinalize(key, val)
    -- put type in config.autoclose v.Type
-   -- v.Type key => Child, Parent, 
+   -- v.Type key => Child, Parent,
+   -- reject levelaliases
+   if (val.Alias) then
+      return false
+   end
    local reversed = {}
    local atype = {}
    local level = 0
    for k,v in pairs(config.autoclose) do
-      if (v.Type == val.Type) then 
-         reversed[v.Child] = k
-         level = level + 1
+      if (v.Type == val.Type) then
+         if (v.Alias == nil) then
+            reversed[v.Child] = k
+            level = level + 1
+         end
       end
    end
    for k,v in pairs(config.autoclose) do
       atype[k] = {}
       config.autoclose[k]['Self'] = k
-      atype[k]['Parent'] = config.autoclose[reversed[k]]
-      atype[k]['Child'] = config.autoclose[v.Child]
-      atype[k]['Self'] = k
+      if (v.Alias == nil) then
+         atype[k]['Parent'] = config.autoclose[reversed[k]]
+         atype[k]['Child'] = config.autoclose[v.Child]
+         atype[k]['Self'] = k
+      else
+         atype[k]['Alias'] = v.Alias
+      end
    end
    local parent = atype[key]
    repeat
       parent['Level'] = level
       config.autoclose[parent.Self]['Level'] = level
       level = level - 1
-      parent = parent['Parent'] or {}
+      parent = parent['Parent'] or {} -- nothing points to aliased entries (no 'Parent')
       parent = atype[parent.Self]
    until (parent == nil)
    config.autoclose[val.Type] = atype
@@ -162,6 +172,16 @@ local function addToConfig(key, value, enc)
       if (v and v:sub(1,1) == '{') then
          local new = {}
          for ka, va in v:gmatch('{([^:]+):([^}]*)}') do
+            -- -- check for 'list' in [val1,val2]
+            -- local tmp = va:match("%[(.*)%]")
+            -- if (tmp) then
+            --    -- split on comma
+            --    local t={}
+            --    for str in tmp:gmatch("([^,]+)") do
+            --       t[str] = p:sub(1,k-1)
+            --    end
+            --    va = t
+            -- end
             if va == 'true' then va = true end
             if va == 'false' then va = false end
             new[ka] = va

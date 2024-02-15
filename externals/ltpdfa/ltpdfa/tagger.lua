@@ -41,6 +41,11 @@ local function autoClose(name, optparent)
    if #openedarray == 0 then return end
    local htype = config.autoclose[name].Type
    local hierarchy = config.autoclose[htype]
+   -- resolve Alias
+   if (hierarchy[name].Alias) then
+      if config.debug then log("autoClosing Changing aliased %s to %s", name, hierarchy[name].Alias) end
+      name = hierarchy[name].Alias
+   end
    local level = hierarchy[name].Level
    -- search backwards in openedarray and close every elem with higher level
    for i = #openedarray,1,-1 do
