@@ -195,49 +195,10 @@
     }% \DeclareContainer{#3}
   }% \ifcsdef tp@container@#3 fi
 %    \end{macrocode}
-% Each newly assigned heading level needs some configuration with the
-% \lstinline{ltpdfa} package in order to automatically close heading
-% tags with the beginning of a new heading. First, we assign the
-% sectioning tag and the tag for the heading itself to the
-% \lstinline{Sect} and \lstinline{H} tags, respectively.%    \begin{macrocode}
-  \tpIfAlly{%
-    \AtBeginDocument{%
-      \addRolemap{#3}{Sect}%
-      \addRolemap{#3head}{H}%
-%    \end{macrocode}
-% Next, we tell \lstinline{ltpdfa} for each heading level which other
-% heading level is the next up the hierarchy. Since ltpdfa doesn't
-% support autoclosing tags with multiple child nodes, we chose one
-% unique tag per heading level (more precicely, the one defined first).
+% If \CoCoTeX's accessibility features are active, we need to register
+% each new heading with \lstinline{ltpdfa}'s autoclose mechanism.
 %    \begin{macrocode}
-      \@tempcnta=#2\relax
-      \ifnum\@tempcnta=\tp@hdg@highest@level
-        \tpPackageInfo{Accessibility}{Info}{Setting document to autoclose \csuse{tp@hdg@#2@unique}}%%
-        \addToConfig{autoclose}{document={Type:Sectioning}{Child:\csname tp@hdg@#2@unique\endcsname}{Egroup: false}}%
-      \else
-        \ifnum\@tempcnta=\tp@hdg@lowest@level\relax
-          \tpPackageInfo{Accessibility}{Info}{Setting #3 to autoclose none.}
-          \addToConfig{autoclose}{#3={Type:Sectioning}{Child:none}{Egroup: true}}%
-        \fi
-        \@tempswatrue
-        \loop
-          \advance\@tempcnta\m@ne\relax
-        \if@tempswa
-          \ifnum\@tempcnta<\tp@hdg@highest@level\relax
-            \@tempswafalse
-          \else
-            \expandafter\ifx\csname tp@hdg@\the\@tempcnta @unique\endcsname\relax
-              \@tempswatrue
-            \else
-              \tpPackageInfo{Accessibility}{Info}{Setting \csuse{tp@hdg@\the\@tempcnta @unique} to autoclose \csuse{tp@hdg@#2@unique}}%%
-              \addToConfig{autoclose}{\csname tp@hdg@\the\@tempcnta @unique\endcsname={Type:Sectioning}{Child:\csname tp@hdg@#2@unique\endcsname}{Egroup: true}}%
-              \@tempswafalse
-            \fi
-          \fi
-        \repeat
-      \fi
-      \directlua{ltpdfa.configAutoclose()}%
-    }}{}% \AtBeginDocument
+  \tpIfAlly{\tp@hdg@add@autoclose{#2}{#3}}{}% \AtBeginDocument\tpIfAlly
 %    \end{macrocode}
 % Finally, we check and update the counters for the lowest and highest
 % heading levels, resp.
@@ -250,6 +211,102 @@
   \fi
 }% \@tpDeclareHeading
 %    \end{macrocode}
+% \begin{macro}{\tp@hdg@add@autoclose} adds the autoclose
+%   configuration for the new heading level. \#1 is the numeric level,
+%   \#2 is the name of the heading.
+%    \begin{macrocode}
+\def\tp@hdg@add@autoclose#1#2{%
+  \AtBeginDocument{%
+%    \end{macrocode}
+% Each newly assigned heading level needs some configuration with
+% the \lstinline{ltpdfa} package in order to automatically close
+% heading tags with the beginning of a new heading. First, we assign
+% the sectioning tag and the tag for the heading itself to the
+% \lstinline{Sect} and \lstinline{H} tags, respectively.
+%    \begin{macrocode}
+    \addRolemap{#2}{Sect}%
+    \addRolemap{#2head}{H}%
+%    \end{macrocode}
+% Next, we tell \lstinline{ltpdfa} for each heading level which other
+% heading level is the next down the hierarchy. For that, we first put
+% the current heading level in a calculable counter.
+%    \begin{macrocode}
+    \@tempcnta=#1\relax
+%    \end{macrocode}
+% Then we catch the heading with the highest level (from the aux file)
+% and set the \lstinline{document} layer in the \lstinline{ltpdfa}'s
+% \lstinline{Sectioning} table to have that heading as its child
+%    \begin{macrocode}
+    \ifnum\@tempcnta=\tp@hdg@highest@level
+      \edef\x{\noexpand\addToConfig{autoclose}{document={Type:Sectioning}{Child:\csname tp@hdg@#1@unique\endcsname}{Egroup: false}}}\x%
+    \fi
+%    \end{macrocode}
+% Then, we catch the lowest level to tell \lstinline{ltpdfa}'s
+% \lstinline{Sectioning} table that this level has no
+% children. Another switch is made to distinguish first-born heading
+% levels from aliases, since the \lstinline{Sectioning} table can only
+% hold one heading per level. All other hadings of the same level are,
+% per definition, Aliases of the one that has been defined first.
+%    \begin{macrocode}
+    \ifnum\@tempcnta=\tp@hdg@lowest@level\relax
+      \ifcsstring{tp@hdg@#1@unique}{#2}
+        {\edef\x{\noexpand\addToConfig{autoclose}{#2={Type:Sectioning}{Child:none}{Egroup: true}}}\x}
+        {\edef\x{\noexpand\addToConfig{autoclose}{#2={Type:Sectioning}{Child:none}{Egroup: true}{Alias:\csname tp@hdg@#1@unique\endcsname}}}\x}%
+    \else
+%    \end{macrocode}
+% For all higher heading levels, we look for the next lower heading
+%    \begin{macrocode}
+      \@tempswatrue
+      \loop
+%    \end{macrocode}
+% by incrementing the heading level counter by one
+%    \begin{macrocode}
+        \advance\@tempcnta\@ne\relax
+%    \end{macrocode}
+% and checking the variable \lstinline{repeat} condition:
+%    \begin{macrocode}
+      \if@tempswa
+%    \end{macrocode}
+% We don't go further when the current loop counter is already larger
+% than the heading level with the highest level counter.
+%    \begin{macrocode}
+        \ifnum\@tempcnta>\tp@hdg@lowest@level\relax
+          \@tempswafalse
+        \else
+%    \end{macrocode}
+% If we are below the highest level, we check if a heading with the current level is defined
+%    \begin{macrocode}
+          \expandafter\ifx\csname tp@hdg@\the\@tempcnta @unique\endcsname\relax
+%    \end{macrocode}
+% if not, we continue. This is the case, when heading levels are not
+% sequentially numbered. Which does (and did) happen. For reasons...
+%    \begin{macrocode}
+            \@tempswatrue
+          \else
+%    \end{macrocode}
+% If the heading level is defined, we configure \lstinline{autoclose}
+% such that the level with the iterator counter is set to be the child
+% of the current heading level in \lstinline{ltpdfa}'s
+% \lstinline{Sectioning} table. As above, we distinguish between
+% original headings and Aliases.
+%    \begin{macrocode}
+            \ifcsstring{tp@hdg@#1@unique}{#2}
+              {\edef\x{\noexpand\addToConfig{autoclose}{#2={Type:Sectioning}{Child:\csname tp@hdg@\the\@tempcnta @unique\endcsname}{Egroup: true}}}\x}
+              {\edef\x{\noexpand\addToConfig{autoclose}{#2={Type:Sectioning}{Child:\csname tp@hdg@\the\@tempcnta @unique\endcsname}{Egroup: true}{Alias:\csname tp@hdg@#1@unique\endcsname}}}\x}%
+            \@tempswafalse
+          \fi
+        \fi
+      \repeat
+    \fi
+%    \end{macrocode}
+% Afterwards, we command \lstinline{ltpdfa} to re-build the
+% \lstinline{Sectioning} table.
+%    \begin{macrocode}
+    \directlua{ltpdfa.configAutoclose()}%
+    \relax
+  }}
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\tp@hdg@min@level, \tp@hdg@max@level,
 %   \tp@hdg@highest@level, \tp@hdg@lowest@level} store the level
 %   numbers of the highest and lowest defined heading levels,
@@ -777,10 +834,11 @@
 %    \begin{macrocode}
     \tpIfAlly{%
       \endgroup
-      \letcs\tp@hdg@cur@lvl{tp@hdg@#2@level}%
-      \ifcsdef{tp@hdg@\tp@hdg@cur@lvl @unique}
-        {\expandafter\structStart\expandafter{\csname tp@hdg@\tp@hdg@cur@lvl @unique\endcsname}}
-        {\structStart{#2}}%
+      % \letcs\tp@hdg@cur@lvl{tp@hdg@#2@level}%
+      % \ifcsdef{tp@hdg@\tp@hdg@cur@lvl @unique}
+      %   {\expandafter\structStart\expandafter{\csname tp@hdg@\tp@hdg@cur@lvl @unique\endcsname}}
+      %   {\structStart{#2}}%
+      \structStart{#2}%
       \ifnum\luatexversion>111\relax\UseHook{env/heading/before}\fi
       \@ignorefalse
       \begingroup

@@ -51,6 +51,12 @@ local function autoClose(name, optparent)
    for i = #openedarray,1,-1 do
       local selem = openedarray[i]
       local elemconf = hierarchy[selem.type]
+      -- if the next element in the openedarray is an Alias, we need to get the Level from the original:
+      if (elemconf.Alias) then
+	 local alias_name = hierarchy[selem.type].Alias
+	 if config.debug then log("autoClosing Changing level from %s (Alias of %s) to %s", selem.type, elemconf.Alias, hierarchy[alias_name].Level) end
+	 elemconf.Level = hierarchy[alias_name].Level
+      end
       -- hierarchy has it and level greater or equal 
       if (elemconf and elemconf.Level >= level) then
          local egroup = config.autoclose[selem.type].Egroup

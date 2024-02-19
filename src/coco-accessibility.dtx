@@ -43,6 +43,15 @@
 % accessibility features of {\CoCoTeX}:
 %    \begin{macrocode}
 \RequirePackage[pdftex,pdflang=De]{ltpdfa}%,nodetree,dospaces,doparas,,debug
+%    \end{macrocode}
+% Reset the house-definitions
+%    \begin{macrocode}
+\directlua{ltpdfa.config.autoclose = {}}
+%    \end{macrocode}
+% And we link ToC entries ourselves (with \lstinline{\tpTocLink}), so
+% we need to override \lstinline{ltpdfa}'s \lstinline{hyperref}
+% settings, at least partially...
+%    \begin{macrocode}
 \hypersetup{linktoc=none}
 %    \end{macrocode}
 % The local preferences for \CoCoTeX's accessibility features is done
