@@ -640,7 +640,7 @@
      \edef\@tempb{\noexpand\csgundef{tp@\noexpand\tp@cur@cont @#1}}%
      \expandafter\expandafter\expandafter\csgappto\expandafter\@tempa\expandafter{\@tempb}%
      \egroup}%
-  #4\expandafter\long\expandafter\def\csname tp@\tp@cur@cont @#2\endcsname{\csname tp@\tp@cur@cont @#1\endcsname}%
+  #4\expandafter\long\expandafter\edef\csname tp@\tp@cur@cont @#2\endcsname{\expandafter\noexpand\csname tp@\tp@cur@cont @#1\endcsname}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -690,12 +690,11 @@
 % undefined, the condition for the outer one would be reset
 % before it can be expanded by \lstinline{\ifx}.
 %    \begin{macrocode}
-  \long\def\tpIfComp##1##2##3{%
-    \expandafter\expandafter\expandafter\let\expandafter\csname tp@comp@name\expandafter\endcsname\csname tp@\tp@cur@cont @##1\endcsname%
-    \expandafter\expandafter\expandafter\ifx\tp@comp@name\relax##3\else##2\fi%
+  \long\def\tpIfComp##1{%
+    \expandafter\expandafter\expandafter\ifx\csname tp@\tp@cur@cont @##1\endcsname\relax\expandafter\@secondoftwo\else\expandafter\@firstoftwo\fi%
   }%
-  \long\def\tpIfCompEmpty##1##2##3{%
-    \expandafter\expandafter\expandafter\ifx\csname tp@\tp@cur@cont @##1\endcsname\long@empty ##2\else ##3\fi}}
+  \long\def\tpIfCompEmpty##1{%
+    \expandafter\expandafter\expandafter\ifx\csname tp@\tp@cur@cont @##1\endcsname\long@empty\expandafter\@firstoftwo\else\expandafter\@secondoftwo\fi}}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -751,14 +750,14 @@
 %   Property \#1 of a given Property \#2. Is is equivalent to
 %   \lstinline|\tpSetProperty{\#1}{\tpUseProperty{\#2}}|.
 %    \begin{macrocode}
-\long\def\tpPropertyLet#1#2{\long\csdef{tp@\tp@cur@cont @#1}{\csuse{tp@\tp@cur@cont @#2}}}
+\long\def\tpPropertyLet#1#2{\long\csedef{tp@\tp@cur@cont @#1}{\expandonce{\csname tp@\tp@cur@cont @#2\endcsname}}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tpPropertyLetX} creates a Property \#1 with the fully
 %   expanded value of another Property \#2 Is is equivalent to
 %   \lstinline|\tpSetPropertyX{\#1}{\tpUseProperty{\#2}}|.
 %    \begin{macrocode}
-\long\def\tpPropertyLetX#1#2{\long\csedef{tp@\tp@cur@cont @#1}{\csuse{tp@\tp@cur@cont @#2}}}
+\long\def\tpPropertyLetX#1#2{\long\csedef{tp@\tp@cur@cont @#1}{\csname tp@\tp@cur@cont @#2\endcsname}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tpSetValProp}

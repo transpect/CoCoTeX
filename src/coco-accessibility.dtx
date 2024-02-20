@@ -36,24 +36,92 @@
 %   re-defined to always expand the \texttt{true} branch and discard
 %   the \texttt{false} branch:
 %    \begin{macrocode}
-\def\tp@if@ally{\expandafter\@firstoftwo}
+\def\cc@if@ally{\expandafter\@firstoftwo}
 %    \end{macrocode}
 % \end{macro}
-% The \lstinline{ltpdfa} package is a hard requirement for the
-% accessibility features of {\CoCoTeX}:
+% The \lstinline{ltpdfa} package re-defines too many LaTeX kernel macros, so we only use its lua code:
 %    \begin{macrocode}
-\RequirePackage[pdftex,pdflang=De]{ltpdfa}%,nodetree,dospaces,doparas,,debug
+\DeclareOptionX{nodetree}{\let\cca@do@nodetree\relax}
+\DeclareOptionX{showspaces}{\let\cca@do@showspaces\relax}
+\ProcessOptionsX
+\RequirePackage{luatexbase-attr}
+\RequirePackage{atveryend}
 %    \end{macrocode}
-% Reset the house-definitions
+% starting up the lua code facility
 %    \begin{macrocode}
-\directlua{ltpdfa.config.autoclose = {}}
+\directlua{ltpdfa = require('ltpdfa')}
+\directlua{ltpdfa.config.final = true}
+\directlua{ltpdfa.config.debug = \if@tp@debug true\else false\fi}
+\directlua{ltpdfa.config.nodetree = \ifx\cca@do@nodetree\relax true\else false\fi}
+\directlua{ltpdfa.config.showspaces = \ifx\cca@do@showspaces\relax true\else false\fi}
+\directlua{ltpdfa.config.dospaces = false}
+\directlua{ltpdfa.config.doparas = false}
+\directlua{ltpdfa.config.headnums = false}
+\directlua{ltpdfa.config.driver = "\luaescapestring{pdftex}"}
+\directlua{ltpdfa.config.lang = "\luaescapestring{de}"}
+\directlua{ltpdfa.init()}%
 %    \end{macrocode}
-% And we link ToC entries ourselves (with \lstinline{\tpTocLink}), so
-% we need to override \lstinline{ltpdfa}'s \lstinline{hyperref}
-% settings, at least partially...
+% Initial setup of ltpdfa
 %    \begin{macrocode}
-\hypersetup{linktoc=none}
+\edef\@ltpdfa@pattr{\directlua{ltpdfa.getAttribute('\luaescapestring{parentattr}')}}
+\edef\@ltpdfa@tattr{\directlua{ltpdfa.getAttribute('\luaescapestring{typeattr}')}}
+\attributedef\@ltpdfa@typeattr=\@ltpdfa@tattr
+\attributedef\@ltpdfa@parentattr=\@ltpdfa@pattr
+\def\ltpdfa@last@page{\ifx\r@LTLastPage\undefined\@empty\else\expandafter\@secondoftwo\r@LTLastPage\fi}
 %    \end{macrocode}
+% We need the absolute last page of the document
+%    \begin{macrocode}
+\AfterLastShipout{\immediate\write\@mainaux{\string\newlabel{LTLastPage}{{LTLastPage}{\directlua{ltpdfa.getPageNum()}}}}}
+%    \end{macrocode}
+% Some macros from \lstinline{ltpdfa.sty}:
+%    \begin{macrocode}
+\newcommand*{\ccaAddToConfig}[2]{\directlua{ltpdfa.addToConfig('\luaescapestring{#1}','\luaescapestring{#2}')}}
+\@onlypreamble\ccaAddToConfig
+%    \end{macrocode}
+% \begin{macro}{\ccaStructStart, \ccaStructEnd} inserts a structural
+%   tag with the name \#2. Optional \#1 is the name of a forced
+%   parent.
+%
+%   This tagging macro inserts \lstinline{\bgroup} and
+%     \lstinline{\egroup} around the tagged area.
+%    \begin{macrocode}
+\newcommand*{\ccaStructStart}[2][]{\directlua{ltpdfa.tagger.structStart('\luaescapestring{#2}','\luaescapestring{#1}')}}
+\newcommand*{\ccaStructEnd}[1]{\directlua{ltpdfa.tagger.structEnd('\luaescapestring{#1}')}} %% \ignorespaces ????
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccaVstructStart, \ccaVstructEnd} are the same as
+%   \lstinline{\ccaStructStart} and \lstinline{\ccaStructEnd} but
+%   without grouping the area.
+%    \begin{macrocode}
+\newcommand*{\ccaVstructStart}[2][]{\directlua{ltpdfa.tagger.vstructStart('\luaescapestring{#2}','\luaescapestring{#1}')}}
+\newcommand*{\ccaVstructEnd}[1]{\directlua{ltpdfa.tagger.vstructEnd('\luaescapestring{#1}')}}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccaPstructStart, \ccaPstructEnd} same as
+%   \lstinline{\ccaStructStart} and \lstinline{\ccaStructEnd} but no
+%   grouping and not setting any attributes. Implies that the element
+%   has no content children, at all.
+%    \begin{macrocode}
+\newcommand*{\ccaPstructStart}[2][]{\directlua{ltpdfa.tagger.pstructStart('\luaescapestring{#2}','\luaescapestring{#1}')}}
+\newcommand*{\ccaPstructEnd}[1]{\directlua{ltpdfa.tagger.pstructEnd('\luaescapestring{#1}')}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\cca@set@docinfo} sets the PDF docinfo. \#2 is a key,
+%   \#3 is the value, optional \#1 is an encoding.
+%    \begin{macrocode}
+\newcommand*{\ccaSetDocinfo}[3][]{\directlua{ltpdfa.setDocInfo('\luaescapestring{#2}','\luaescapestring{#3}','\luaescapestring{#1}')}}
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{\ccaAddRolemap} is used to map a custom LaTeX tag to
+%   a well-defined PDF tag. \#1 is the name of the LateX Tag, \#2 is
+%   the name of the PDF role.
+%    \begin{macrocode}
+\newcommand*{\ccaAddRolemap}[2]{\directlua{ltpdfa.tagger.addRolemap('\luaescapestring{#1}','\luaescapestring{#2}')}}
+%    \end{macrocode}
+% \end{macro}
+% 
 % The local preferences for \CoCoTeX's accessibility features is done
 % via the \lstinline{tpMeta} environment. Therefore, we hook the
 % neccessary Components and Properties right into the
@@ -93,10 +161,10 @@
 %   contents of the \lstinline{titlepage} Container and let
 %   \lstinline{ltpdfa} generate the \lstinline{xmp} file.
 %    \begin{macrocode}
-\def\tp@title@insert@xmp{%
+\def\cct@title@insert@xmp{%
   \edef\tp@xmp@file@name{\tpUseGComp{titlepage}{XmpFile}.xmp}%
   \IfFileExists{\tp@xmp@file@name}
-    {\addToConfig{metadata}{xmpfile=\tp@xmp@file@name}%
+    {\ccaAddToConfig{metadata}{xmpfile=\tp@xmp@file@name}%
      \directlua{ally.meta.extract()}}
     {\tpPackageWarning{A11y}{File}{%
 \tp@xmp@file@name\space not found.^^J
@@ -161,7 +229,7 @@ from the Components given in the tpMeta Container.}}}
 % The Component Handler which links the new Components to that
 % Property is added to titlepage's \lstinline{document-meta-hook}:
 %    \begin{macrocode}
-\tpAddToHook[titlepage]{document-meta-hook}{\edef\x{\noexpand\addToConfig{intent}{\tpUseProperty{output-intent}}}\x}
+\tpAddToHook[titlepage]{document-meta-hook}{\edef\x{\noexpand\ccaAddToConfig{intent}{\tpUseProperty{output-intent}}}\x}
 %    \end{macrocode}
 %
 % \subsection{Transformation of  Typographic Unicode characters}
@@ -212,7 +280,7 @@ from the Components given in the tpMeta Container.}}}
 %    \begin{macrocode}
 \tpAddToHook[titlepage]{document-meta-hook}{%
   \tpIfCompEmpty{PDFAID}{}{\tpIfCompEmpty{PDFALevel}{}{%
-      \edef\x{\noexpand\setDocInfo{conformance}{%
+      \edef\x{\noexpand\ccaSetDocinfo{conformance}{%
           pdfaid=\tpUseComp{PDFAID};%
           level=\tpUseComp{PDFALevel}%
           \tpIfCompEmpty{PDFUAID}{}{;pdfuaid=\tpUseComp{PDFUAID}}}}%
@@ -227,19 +295,23 @@ from the Components given in the tpMeta Container.}}}
 % \lstinline{document} environmant as the structural representation's
 % root node:
 %    \begin{macrocode}
-\AtBeginShipout{\directlua{ltpdfa.pageprocessor(tex.box["AtBeginShipoutBox"])}}%
+\tpDeclareHook[document]{cca/at/begin/document}
+\AtBeginDocument{%
+  \directlua{ltpdfa.beginDocument('\luaescapestring{\ltpdfa@last@page}')}
+  \tpUseHook[document]{cca/at/begin/document}%
+  \directlua{ltpdfa.configAutoclose()}
+  \ccaVstructStart{document}%
+}
+\AtEndDocument{%
+  \ccaVstructEnd{document}
+  \directlua{ltpdfa.endDocument()}%
+}
+\ccaAddRolemap{document}{Document}
 %    \end{macrocode}
-% Some environments must \textit{not} be auto-tagged by ltpdfa!
+% Finally, we hook \lstinline{ltpdfa}'s page processor into
+% \lstinline{AtBeginShipoutBox}:
 %    \begin{macrocode}
-\tpIfAlly{%
-  \ltOmitEnv{tpMeta}
-  \ltOmitEnv{tpAuthor}
-  \ltOmitEnv{tpEditor}
-  \ltOmitEnv{tpSeriesEditor}
-  \ltOmitEnv{tpAffil}
-  \ltOmitEnv{tpFunding}
-  \ltOmitEnv{heading}
-}{}
+\AtBeginShipout{\directlua{ltpdfa.pageprocessor(tex.box["AtBeginShipoutBox"])}}%
 %    \end{macrocode}
 % End of {\TeX} source code.
 %    \begin{macrocode}[gobble=1]

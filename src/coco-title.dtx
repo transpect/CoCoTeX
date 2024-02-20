@@ -121,7 +121,7 @@
   \tp@meta@generic@eval
   \tp@title@fundings@eval
   \tp@title@add@eval
-  \tp@if@preamble\tp@title@set@pdfmeta\relax
+  \cc@if@preamble\cct@set@pdfmeta\relax
   \tpUseHook{document-meta-hook}%
   \let\tp@cur@cont\@empty
 }
@@ -133,11 +133,11 @@
 % The next few macros handle the content that is written directly
 % into the pdf as meta data.
 %
-% \begin{macro}{\tp@title@set@pdfmeta} is the wrapper for the whole meta data handling.
+% \begin{macro}{\cct@set@pdfmeta} is the wrapper for the whole meta data handling.
 %    \begin{macrocode}
-\def\tp@title@set@pdfmeta{%
+\def\cct@set@pdfmeta{%
 %    \end{macrocode}
-% \begin{macro}{\tp@write@pdf@meta} is used to transfer the
+% \begin{macro}{\cct@write@pdf@meta} is used to transfer the
 %   DocumentInfo meta date to the pdf writer.
 %
 %   First we check, whether \lstinline{coco-accessibility.sty} is
@@ -158,21 +158,19 @@
 %   environment, we pass it either to \lstinline{hyperref}'s
 %   hypersetup variable given in \lstinline{\#\#1} (when
 %   \lstinline{coco-accessibility.sty} is \textit{not} used), or we
-%   pass it to \lstinline{\setDocInfo} from the \lstinline{ltpdfa}
-%   package using the data field given in \lstinline{\#\#2}. In this
-%   case, the ltpdfa automatically creates a \lstinline{\jobname.xmp}
-%   with the given meta data will be generated for the next {\LaTeX}
-%   run.
+%   pass it to \lstinline{ltpdfa.setDocInfo} using the data field
+%   given in \lstinline{\#\#2}. In this case, the ltpdfa automatically
+%   creates a \lstinline{\jobname.xmp} with the given meta data will
+%   be generated for the next {\LaTeX} run.
 %    \begin{macrocode}
-  \def\tp@write@pdf@meta##1##2##3{%
+  \def\cct@write@pdf@meta##1##2##3{%
     \let\@tempa\@empty
-    \@ifpackageloaded{coco-accessibility}
-      {\edef\@tempa{\expandonce{\directlua{tex.print(cocotex.ally.meta.##2)}}}}{}%
+    \ccIfAlly{\edef\@tempa{\expandonce{\directlua{tex.print(cocotex.ally.meta.##2)}}}}{}%
     \ifx\@tempa\@empty
       \protected\def\@tempa{##3}%
       \ifx\@tempa\@empty\else
-        \@ifpackageloaded{coco-accessibility}
-          {\pdfstringdef\x{##3}\setDocInfo{##2}{\x}}
+        \ccIfAlly
+          {\pdfstringdef\x{##3}\ccaSetDocinfo{##2}{\x}}
           {\edef\x{\noexpand\hypersetup{##1={\expandonce\@tempa}}}\x}%
       \fi
     \fi
@@ -180,31 +178,31 @@
 %    \end{macrocode}
 % \end{macro}
 %    \begin{macrocode}
-  \tp@title@insert@xmp
-  \tp@title@process@bkt
-  \tp@title@process@bka
-  \tp@title@process@bkc
+  \cct@title@insert@xmp
+  \cct@title@process@bkt
+  \cct@title@process@bka
+  \cct@title@process@bkc
 }
 %    \end{macrocode}
 % \end{macro}
 % \subsection{Processing of the Document's Title}
-% \begin{macro}{\tp@title@process@bkt} processes the document's main title
+% \begin{macro}{\cct@title@process@bkt} processes the document's main title
 %    \begin{macrocode}
-\def\tp@title@process@bkt{%
+\def\cct@title@process@bkt{%
   \let\tpBreak\space
-  \protected@xdef\@title{\tpUseComp{Title}}%
-  \tp@write@pdf@meta{pdftitle}{Title}{\tpUseComp{Title}}%
+  \pdfstringdef\@title{\tpUseComp{Title}}%
+  \cct@write@pdf@meta{pdftitle}{Title}{\tpUseComp{Title}}%
   \protected@edef\tp@run@book@title{\tpUseProperty{run-book-title}}%
   \expandafter\gdef\expandafter\tpRunBookTitle\expandafter{\tp@run@book@title}%
 }
 %    \end{macrocode}
 % \end{macro}
 % \subsection{Processing of the Document's Author}
-% \begin{macro}{\tp@title@process@bka} processes the document's main
+% \begin{macro}{\cct@title@process@bka} processes the document's main
 %   author or, if that doesn't exist, the main editor, or throws a
 %   warning if neither exist.
 %    \begin{macrocode}
-\def\tp@title@process@bka{%
+\def\cct@title@process@bka{%
   \@tempswatrue
   \begingroup
     \tpGobble
@@ -222,28 +220,28 @@
     \fi
     \if@tempswa
       \expandafter\author\expandafter{\tpRunBookName}%
-      \tp@write@pdf@meta{pdfauthor}{Author}{\tpRunBookName}%
+      \cct@write@pdf@meta{pdfauthor}{Author}{\tpRunBookName}%
     \fi
   \endgroup
 }
 %    \end{macrocode}
 % \end{macro}
 % \subsection{Processing of  the PDF's Creator, Producer, and Keywords Meta Data}
-% \begin{macro}{\tp@title@process@bkc} processes the metadata for the pdf
+% \begin{macro}{\cct@title@process@bkc} processes the metadata for the pdf
 %   creator
 %    \begin{macrocode}
-\def\tp@title@process@bkc{%
-  \tp@write@pdf@meta{pdfcreator}{Creator}{\tpIfComp{PDFCreator}{\tpUseComp{PDFCreator}}{\tpUseComp{Publisher}\tpIfComp{PubPlace}{, \tpUseComp{PubPlace}}{}}}%
-  \tp@write@pdf@meta{pdfproducer}{Producer}{\tpUseComp{PDFProducer}}%
-  \tp@write@pdf@meta{pdfkeywords}{Keywords}{\tpUseComp{Keywords}}%
+\def\cct@title@process@bkc{%
+  \cct@write@pdf@meta{pdfcreator}{Creator}{\tpIfComp{PDFCreator}{\tpUseComp{PDFCreator}}{\tpUseComp{Publisher}\tpIfComp{PubPlace}{, \tpUseComp{PubPlace}}{}}}%
+  \cct@write@pdf@meta{pdfproducer}{Producer}{\tpUseComp{PDFProducer}}%
+  \cct@write@pdf@meta{pdfkeywords}{Keywords}{\tpUseComp{Keywords}}%
 }
 %    \end{macrocode}
 % \end{macro}
 % \subsection{Including the XMP Meta Data}\label{sec:title:xmp}
-% \begin{macro}{\tp@title@insert@xmp}\label{} inserts the contents of the XMP
+% \begin{macro}{\cct@title@insert@xmp}\label{} inserts the contents of the XMP
 %   meta data file into the pdf, if it exists.
 %    \begin{macrocode}
-\def\tp@title@insert@xmp{%
+\def\cct@title@insert@xmp{%
   \edef\include@xmp{\noexpand\@include@xmp{\tpUseComp{XmpFile}.xmp}}
   \def\@include@xmp##1{\IfFileExists{##1}{\@@include@xmp{##1}}{}}
   \def\@@include@xmp##1{%

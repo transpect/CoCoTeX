@@ -41,7 +41,7 @@ local function autoClose(name, optparent)
    if #openedarray == 0 then return end
    local htype = config.autoclose[name].Type
    local hierarchy = config.autoclose[htype]
-   -- resolve Alias
+   -- resolve Alias to 'real' e.g. chapalias to chapter
    if (hierarchy[name].Alias) then
       if config.debug then log("autoClosing Changing aliased %s to %s", name, hierarchy[name].Alias) end
       name = hierarchy[name].Alias
@@ -50,12 +50,11 @@ local function autoClose(name, optparent)
    -- search backwards in openedarray and close every elem with higher level
    for i = #openedarray,1,-1 do
       local selem = openedarray[i]
-      local elemconf = hierarchy[selem.type]
-      -- if the next element in the openedarray is an Alias, we need to get the Level from the original:
-      if (elemconf.Alias) then
-	 local alias_name = hierarchy[selem.type].Alias
-	 if config.debug then log("autoClosing Changing level from %s (Alias of %s) to %s", selem.type, elemconf.Alias, hierarchy[alias_name].Level) end
-	 elemconf.Level = hierarchy[alias_name].Level
+      local elemconf = nil
+      if (hierarchy[selem.type].Alias) then
+         elemconf = hierarchy[hierarchy[selem.type].Alias]
+      else
+         elemconf = hierarchy[selem.type]
       end
       -- hierarchy has it and level greater or equal 
       if (elemconf and elemconf.Level >= level) then

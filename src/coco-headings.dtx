@@ -88,11 +88,11 @@
 % the pre-existing one. We start with the heading level.
 %    \begin{macrocode}
     \tpPackageInfo{Headings}{}{Appending to `#3'}%
-    \ifcsstring{tp@hdg@#3@level}{#2}{}{%
+    \ifcsstring{cch@#3@level}{#2}{}{%
         \tpPackageError{Headings}
           {Level Mismatch}
           {Level of heading `#3' cannot be altered!}
-          {The already existing heading `#3' has toc level `\csname tp@hdg@#3@level\endcsname', but your^^J%
+          {The already existing heading `#3' has toc level `\csname cch@#3@level\endcsname', but your^^J%
            re-declaration states `#2'.^^J%
            ^^J%
            Consider declaring a new heading alltogether with `#3' as parent,^^J%
@@ -133,16 +133,16 @@
     \tpDeclareContainer{#3}{%
 %    \end{macrocode}
 % 
-% \begin{macro}{\tp@hdg@#3@level} stores the numeric heading level for the heading
+% \begin{macro}{\cch@#3@level} stores the numeric heading level for the heading
 %    \begin{macrocode}
-      \csgdef{tp@hdg@#3@level}{#2}%
+      \csgdef{cch@#3@level}{#2}%
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}
-%    \begin{macrocode}{\tp@hdg@#2@unique} is a unique name for the
+%    \begin{macrocode}{\cch@#2@unique} is a unique name for the
 %      heading's level. Is is always the name of the \textit{first}
 %      heading that is defined with a given heading level counter.
-      \ifcsdef{tp@hdg@#2@unique}{}{\csgdef{tp@hdg@#2@unique}{#3}}%%
+      \ifcsdef{cch@#2@unique}{}{\csgdef{cch@#2@unique}{#3}}%%
 %    \end{macrocode}
 % \end{macro}
 % 
@@ -198,38 +198,49 @@
 % If \CoCoTeX's accessibility features are active, we need to register
 % each new heading with \lstinline{ltpdfa}'s autoclose mechanism.
 %    \begin{macrocode}
-  \tpIfAlly{\tp@hdg@add@autoclose{#2}{#3}}{}% \AtBeginDocument\tpIfAlly
+  \ccIfAlly{\cch@add@autoclose{#2}{#3}}{}% \AtBeginDocument\ccIfAlly
 %    \end{macrocode}
 % Finally, we check and update the counters for the lowest and highest
 % heading levels, resp.
 %    \begin{macrocode}
-  \ifnum#2<\tp@hdg@min@level\relax
-    \global\tp@hdg@min@level=\csname tp@hdg@#3@level\endcsname\relax
+  \ifnum#2<\cch@min@level\relax
+    \global\cch@min@level=\csname cch@#3@level\endcsname\relax
   \fi
-  \ifnum#2>\tp@hdg@max@level\relax
-    \global\tp@hdg@max@level=\csname tp@hdg@#3@level\endcsname\relax
+  \ifnum#2>\cch@max@level\relax
+    \global\cch@max@level=\csname cch@#3@level\endcsname\relax
   \fi
 }% \@tpDeclareHeading
 %    \end{macrocode}
-% \begin{macro}{\tp@hdg@add@autoclose} adds the autoclose
-%   configuration for the new heading level. \#1 is the numeric level,
-%   \#2 is the name of the heading.
+% Each new heading level needs some configuration with the
+% \lstinline{ltpdfa} package in order to automatically close heading
+% tags with the beginning of a new heading.
+%
+% \begin{macro}{\cch@add@autoclose} adds the new heading level to
+%   \lstinline{ltpdfa}'s autoclose mechanism. \#1 is the numeric
+%   level, \#2 is the name of the heading. We do this inside the
+%   \lstinline{cca/before/begin/document} hook, since we need to know
+%   \textit{all} locally defined heading levels beforehand in order to
+%   build the Sectioning tree correctly.
 %    \begin{macrocode}
-\def\tp@hdg@add@autoclose#1#2{%
-  \AtBeginDocument{%
+\def\cch@add@autoclose#1#2{%
+  \tpAddToHook[document]{cca/at/begin/document}{%
 %    \end{macrocode}
-% Each newly assigned heading level needs some configuration with
-% the \lstinline{ltpdfa} package in order to automatically close
-% heading tags with the beginning of a new heading. First, we assign
-% the sectioning tag and the tag for the heading itself to the
-% \lstinline{Sect} and \lstinline{H} tags, respectively.
+% First, we assign the Sectioning tag and the tag for the section's
+% head itself to the \lstinline{Sect} and \lstinline{H} tags,
+% respectively.
+%
+% Note that PDF Tags allow for enumerated heading tags (H1, H2, etc.)
+% to be used. However, there are only six (H1 through H6) possible
+% headings, which, by experinece, is too few for most CoCoTeX
+% projects. Therefore, we use the ``nested-H'' approach, instead which
+% has no such restriction.
 %    \begin{macrocode}
-    \addRolemap{#2}{Sect}%
-    \addRolemap{#2head}{H}%
+    \ccaAddRolemap{#2}{Sect}%
+    \ccaAddRolemap{#2head}{H}%
 %    \end{macrocode}
 % Next, we tell \lstinline{ltpdfa} for each heading level which other
-% heading level is the next down the hierarchy. For that, we first put
-% the current heading level in a calculable counter.
+% heading level is the next down the Sectioning hierarchy. For that,
+% we first put the current heading level in a calculable counter.
 %    \begin{macrocode}
     \@tempcnta=#1\relax
 %    \end{macrocode}
@@ -237,8 +248,8 @@
 % and set the \lstinline{document} layer in the \lstinline{ltpdfa}'s
 % \lstinline{Sectioning} table to have that heading as its child
 %    \begin{macrocode}
-    \ifnum\@tempcnta=\tp@hdg@highest@level
-      \edef\x{\noexpand\addToConfig{autoclose}{document={Type:Sectioning}{Child:\csname tp@hdg@#1@unique\endcsname}{Egroup: false}}}\x%
+    \ifnum\@tempcnta=\cch@highest@level
+      \edef\x{\noexpand\ccaAddToConfig{autoclose}{document={Type:Sectioning}{Child:\csname cch@#1@unique\endcsname}{Egroup:false}}}\x%
     \fi
 %    \end{macrocode}
 % Then, we catch the lowest level to tell \lstinline{ltpdfa}'s
@@ -248,10 +259,10 @@
 % hold one heading per level. All other hadings of the same level are,
 % per definition, Aliases of the one that has been defined first.
 %    \begin{macrocode}
-    \ifnum\@tempcnta=\tp@hdg@lowest@level\relax
-      \ifcsstring{tp@hdg@#1@unique}{#2}
-        {\edef\x{\noexpand\addToConfig{autoclose}{#2={Type:Sectioning}{Child:none}{Egroup: true}}}\x}
-        {\edef\x{\noexpand\addToConfig{autoclose}{#2={Type:Sectioning}{Child:none}{Egroup: true}{Alias:\csname tp@hdg@#1@unique\endcsname}}}\x}%
+    \ifnum\@tempcnta=\cch@lowest@level\relax
+      \ifcsstring{cch@#1@unique}{#2}
+        {\edef\x{\noexpand\ccaAddToConfig{autoclose}{#2={Type:Sectioning}{Child:none}{Egroup:false}}}\x}
+        {\edef\x{\noexpand\ccaAddToConfig{autoclose}{#2={Type:Sectioning}{Child:none}{Egroup:false}{Alias:\csname cch@#1@unique\endcsname}}}\x}%
     \else
 %    \end{macrocode}
 % For all higher heading levels, we look for the next lower heading
@@ -270,16 +281,17 @@
 % We don't go further when the current loop counter is already larger
 % than the heading level with the highest level counter.
 %    \begin{macrocode}
-        \ifnum\@tempcnta>\tp@hdg@lowest@level\relax
+        \ifnum\@tempcnta>\cch@lowest@level\relax
           \@tempswafalse
         \else
 %    \end{macrocode}
 % If we are below the highest level, we check if a heading with the current level is defined
 %    \begin{macrocode}
-          \expandafter\ifx\csname tp@hdg@\the\@tempcnta @unique\endcsname\relax
+          \expandafter\ifx\csname cch@\the\@tempcnta @unique\endcsname\relax
 %    \end{macrocode}
 % if not, we continue. This is the case, when heading levels are not
-% sequentially numbered. Which does (and did) happen. For reasons...
+% sequentially numbered. Which does (and did) happen. For reasons
+% unknown\dots
 %    \begin{macrocode}
             \@tempswatrue
           \else
@@ -290,35 +302,34 @@
 % \lstinline{Sectioning} table. As above, we distinguish between
 % original headings and Aliases.
 %    \begin{macrocode}
-            \ifcsstring{tp@hdg@#1@unique}{#2}
-              {\edef\x{\noexpand\addToConfig{autoclose}{#2={Type:Sectioning}{Child:\csname tp@hdg@\the\@tempcnta @unique\endcsname}{Egroup: true}}}\x}
-              {\edef\x{\noexpand\addToConfig{autoclose}{#2={Type:Sectioning}{Child:\csname tp@hdg@\the\@tempcnta @unique\endcsname}{Egroup: true}{Alias:\csname tp@hdg@#1@unique\endcsname}}}\x}%
+            \ifcsstring{cch@#1@unique}{#2}
+              {\edef\x{\noexpand\ccaAddToConfig{autoclose}{#2={Type:Sectioning}{Child:\csname cch@\the\@tempcnta @unique\endcsname}{Egroup:false}}}\x}
+              {\edef\x{\noexpand\ccaAddToConfig{autoclose}{#2={Type:Sectioning}{Child:\csname cch@\the\@tempcnta @unique\endcsname}{Egroup:false}{Alias:\csname cch@#1@unique\endcsname}}}\x}%
             \@tempswafalse
           \fi
         \fi
+%    \end{macrocode}
+% We repeat this as long as \lstinline{\@tempswa} is false. This
+% ensures that all heading levels have exactly one child assigned to
+% them.
+%    \begin{macrocode}
       \repeat
     \fi
-%    \end{macrocode}
-% Afterwards, we command \lstinline{ltpdfa} to re-build the
-% \lstinline{Sectioning} table.
-%    \begin{macrocode}
-    \directlua{ltpdfa.configAutoclose()}%
-    \relax
   }}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@hdg@min@level, \tp@hdg@max@level,
-%   \tp@hdg@highest@level, \tp@hdg@lowest@level} store the level
+% \begin{macro}{\cch@min@level, \cch@max@level,
+%   \cch@highest@level, \cch@lowest@level} store the level
 %   numbers of the highest and lowest defined heading levels,
 %   respectively.  \lstinline|\begin{document}|.
 %    \begin{macrocode}
-\newcount\tp@hdg@min@level \tp@hdg@min@level=99\relax
-\newcount\tp@hdg@max@level \tp@hdg@max@level=-99\relax
-\ifx\tp@hdg@highest@level\@undefined \def\tp@hdg@highest@level{99}\fi
-\ifx\tp@hdg@lowest@level\@undefined  \def\tp@hdg@lowest@level{-99}\fi
+\newcount\cch@min@level \cch@min@level=99\relax
+\newcount\cch@max@level \cch@max@level=-99\relax
+\ifx\cch@highest@level\@undefined \def\cch@highest@level{99}\fi
+\ifx\cch@lowest@level\@undefined  \def\cch@lowest@level{-99}\fi
 \AtEndDocument{%
-  \write\@auxout{\string\gdef\string\tp@hdg@highest@level{\the\tp@hdg@min@level}}%
-  \write\@auxout{\string\gdef\string\tp@hdg@lowest@level{\the\tp@hdg@max@level}}%
+  \write\@auxout{\string\gdef\string\cch@highest@level{\the\cch@min@level}}%
+  \write\@auxout{\string\gdef\string\cch@lowest@level{\the\cch@max@level}}%
 }%
 %    \end{macrocode}
 % \end{macro}
@@ -770,9 +781,9 @@
         {\setbox\z@\lastbox}%
         \clubpenalty\@M
         \begingroup
-          \tpIfAlly{\structStart{#1head}}{}%
+          \ccIfAlly{\ccaVstructStart{#1head}}{}%
           \unhbox\tp@inlinesecbox
-          \tpIfAlly{\structEnd{#1head}}{}%
+          \ccIfAlly{\ccaVstructEnd{#1head}}{}%
         \endgroup
         \unskip
         \hskip -\@tempskipa
@@ -792,9 +803,9 @@
 %   \#1 is the name of the heading and used for tagging.
 %    \begin{macrocode}
 \def\tp@block@heading#1{%
-  \tpIfAlly{\vstructStart{#1head}}{}%
+  \ccIfAlly{\ccaVstructStart{#1head}}{}%
   \@svsec
-  \tpIfAlly{\vstructEnd{#1head}}{}%
+  \ccIfAlly{\ccaVstructEnd{#1head}}{}%
   \tpUseProperty{after-heading-par}%
   \tpIfProp{after-indent}{\global\@afterindenttrue}{\global\@afterindentfalse}%
   \gdef\next{%
@@ -832,13 +843,9 @@
 % the time of its expansion, the level of the heading isn't known, yet. So, we
 % need to take the ugly road, for now.
 %    \begin{macrocode}
-    \tpIfAlly{%
+    \ccIfAlly{%
       \endgroup
-      % \letcs\tp@hdg@cur@lvl{tp@hdg@#2@level}%
-      % \ifcsdef{tp@hdg@\tp@hdg@cur@lvl @unique}
-      %   {\expandafter\structStart\expandafter{\csname tp@hdg@\tp@hdg@cur@lvl @unique\endcsname}}
-      %   {\structStart{#2}}%
-      \structStart{#2}%
+      \ccaVstructStart{#2}%
       \ifnum\luatexversion>111\relax\UseHook{env/heading/before}\fi
       \@ignorefalse
       \begingroup
