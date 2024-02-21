@@ -203,6 +203,12 @@ from the Components given in the tpMeta Container.}}}
 % \lstinline{output-intent} which we add to \lstinline{coco-title}'s
 % Properties list:
 %    \begin{macrocode}
+\ifdefstring\tp@color@enc{cmyk}
+  {\def\cca@default@icc@comp{4}}
+  {\def\cca@default@icc@comp{3}}
+\ifdefstring\tp@color@enc{cmyk}
+  {\def\cca@default@icc@iden{Coated FOGRA39}}
+  {\def\cca@default@icc@iden{sRGB IEC61966-2.1}}
 \tpAddToType{Properties}{titlepage}{%
 %    \end{macrocode}
 % \begin{tpProperty}{titlepage}{output-intent} sends the output
@@ -221,8 +227,8 @@ from the Components given in the tpMeta Container.}}}
 %    \begin{macrocode}
   \tpSetProperty{output-intent}{%
     profile=\tpIfComp{IccProfileFile}{\tpUseComp{IccProfileFile}}{suppl/\tp@color@enc.icc};%
-    components=\tpIfComp{IccComponents}{\tpUseComp{IccComponents}}{\ifdefstring\tp@color@enc{cmyk}{4}{3}};%
-    identifier=\tpIfComp{IccIdentifier}{\tpUseComp{IccIdentifier}}{\ifdefstring\tp@color@enc{cmyk}{Coated FOGRA39}{sRGB IEC61966-2.1}}%
+    components=\tpIfComp{IccComponents}{\tpUseComp{IccComponents}}{\cca@default@icc@comp};%
+    identifier=\tpIfComp{IccIdentifier}{\tpUseComp{IccIdentifier}}{\cca@default@icc@iden}%
   }}
 %    \end{macrocode}
 % \end{tpProperty}

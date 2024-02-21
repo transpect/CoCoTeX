@@ -170,7 +170,9 @@
       \protected\def\@tempa{##3}%
       \ifx\@tempa\@empty\else
         \ccIfAlly
-          {\pdfstringdef\x{##3}\ccaSetDocinfo{##2}{\x}}
+          {\pdfstringdef\x{##3}%
+           \edef\@tempa{\noexpand\ccaSetDocinfo{##2}}%
+           \expandafter\@tempa\expandafter{\x}}
           {\edef\x{\noexpand\hypersetup{##1={\expandonce\@tempa}}}\x}%
       \fi
     \fi
