@@ -57,13 +57,19 @@
   \expandafter\pdfpageattr\expandafter{\@tempa}
 \fi
 %    \end{macrocode}
-% Setting PDF boundaries
+% Apparently, the crop package relies on old pdf dimension macros. If
+% they aren't defined, we load the \lstinline{luatex85} package and
+% set the values of the type area by hand:
 %    \begin{macrocode}
-\ifx\tp@frame n\relax
+\@ifundefined{pdfpagewidth}{%
   \RequirePackage{luatex85}
   \pdfpagewidth\paperwidth
   \pdfpageheight\paperheight
-\else
+}{}
+%    \end{macrocode}
+% Setting PDF boundaries
+%    \begin{macrocode}
+\ifx\tp@frame n\relax\else
   \ifx\tp@frame p\relax
     \edef\stockwidth{\the\dimexpr\paperwidth+\tp@frame@offset+\tp@frame@offset\relax}
     \edef\stockheight{\the\dimexpr\paperheight+\tp@frame@offset+\tp@frame@offset\relax}
