@@ -59,8 +59,10 @@ local function autoClose(name, optparent)
       -- hierarchy has it and level greater or equal 
       if (elemconf and elemconf.Level >= level) then
          local egroup = config.autoclose[selem.type].Egroup
-         log("autoClosing %s (%s) openedarray=%d/%s", name, htype, #openedarray, openedarray[#openedarray].type)
-         log("CLOSING %s at %d with idx=%d level=%d/%d with egroup=%s", selem.type, i, selem.idx, elemconf.Level, level, egroup)
+	 if config.debug then
+	    log("autoClosing %s (%s) openedarray=%d/%s", name, htype, #openedarray, openedarray[#openedarray].type)
+	    log("CLOSING %s at %d with idx=%d level=%d/%d with egroup=%s", selem.type, i, selem.idx, elemconf.Level, level, egroup)
+	 end
          structtree.structEnd(selem.type)
          -- pop/remove
          openedarray[i] = nil -- correct ???

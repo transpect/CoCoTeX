@@ -211,7 +211,7 @@ end
 local function roleMap(stree, head)
    local nstr = ""
    for k,v in pairs(stree.rolemap) do
-      log("\t %s => %s",k, v)
+      if (config.debug) then log("\t %s => %s",k, v) end
       nstr = nstr .. '/' .. k .. ' /' .. v .. '\n'
    end
    return head, nstr

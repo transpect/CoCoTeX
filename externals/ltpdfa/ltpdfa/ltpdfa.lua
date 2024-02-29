@@ -244,9 +244,6 @@ local function beginDocument(page)
       pdf.setcompresslevel(0)
       pdf.setobjcompresslevel(0)
       log("voffset=%.2fbp\npagebottomoffset=%.2fbp\npageheight=%.2fbp\npagetopoffset=%.2fbp\n", ltpdfa.structtree.sptobp(tex.voffset), ltpdfa.structtree.sptobp(tex.pagebottomoffset), ltpdfa.structtree.sptobp(tex.pageheight), ltpdfa.structtree.sptobp(tex.pagetopoffset))
-   else
-      log("dump of ltpdfa.config:")
-      dumpArray(ltpdfa.config)
    end
    -- later initialization if too early in init
    if config.dospaces then
