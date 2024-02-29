@@ -141,6 +141,76 @@
 \directlua{ally = require('coco-accessibility')}
 %    \end{macrocode}
 %
+% \subsection{Hyperlink handling}
+%
+% To tag hyperlinks, we define some ltpdfa interface macros.
+%
+% \begin{macro}{\ccaAddAltText} is used to add an Alternative Text
+%   node, given in \#1, to the PDF structTree.
+%    \begin{macrocode}
+\def\ccaAddAltText#1{\directlua{ltpdfa.tagger.addAltText('\luaescapestring{#1}')}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\ccaAddLastLink} adds the last Link node to the PDF
+%   structTree.
+%    \begin{macrocode}
+\def\ccaAddLastLink{\directlua{ltpdfa.tagger.addLastLink()}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\ccaGetStructParent} returns the current parent
+%   structure. This is needed in case a link breaks across columns (or
+%   pages).
+%    \begin{macrocode}
+\def\ccaGetStructParent{\directlua{ltpdfa.tagger.getStructParent()}}
+%    \end{macrocode}
+% \end{macro}
+% Now, we patch them into \lstinline{hyperref}.
+%
+% First we add the start tag for a Link node.
+%    \begin{macrocode}
+\patchcmd\Hy@StartlinkName
+  {\pdfstartlink}
+  {\ccaVstructStart{Link}\ccaAddAltText{#2}\edef\@ltpdfmy@parent{\ccaGetStructParent}%
+   \pdfstartlink}{}{\ERROR}
+%    \end{macrocode}
+% and the parent node inside the link attribute:
+%    \begin{macrocode}
+\patchcmd\Hy@StartlinkName
+  {#1}
+  {#1 /StructParent \@ltpdfmy@parent}{}{\ERROR}
+%    \end{macrocode}
+% then we patch hyperref's general link macro, twice. Once for the Link's start tag
+%    \begin{macrocode}
+\patchcmd\hyper@linkurl
+  {\pdfstartlink}
+  {\ccaVstructStart{Link}\ccaAddAltText{#1}\edef\@ltpdfmy@parent{\ccaGetStructParent}%
+   \pdfstartlink}
+  {}{\ERROR}
+%    \end{macrocode}
+% and secondly for the Parent:
+%    \begin{macrocode}
+\patchcmd\hyper@linkurl
+  {/C[\@urlbordercolor]%
+        \fi
+  }
+  {/C[\@urlbordercolor]%
+        \fi
+        /StructParent \@ltpdfmy@parent%
+  }{}{\ERROR}
+%    \end{macrocode}
+% finally, we patch the end tag for the link node into the
+% \lstinline{\close@pdflink} macro:
+%    \begin{macrocode}
+\patchcmd\close@pdflink
+  {\pdfendlink}
+  {\pdfendlink
+   \ccaAddLastLink\ccaVstructEnd{Link}}
+  {}
+  {\ERROR}
+%    \end{macrocode}
+%
 %
 % \subsection{XMP Integration}
 %
