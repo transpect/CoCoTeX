@@ -210,6 +210,61 @@
   {}
   {\ERROR}
 %    \end{macrocode}
+% \subsection{Tagging Page Styles as Artifacts}
+%
+% Page styles, i.e., headers and footers need to be tagged as
+% artifacts unless they contain semantic information. To avoid
+% inserting the tagging by hand into each publisher's page style
+% definitions, we inject the tagging automatically by using
+% \lstinline{etoolbox}'s patch commands to insert the start and end
+% tags inside the internal header and footer macros, respectively.
+%
+% \begin{macro}{\ccaPagestyleArtifacts} contains the code to patch the
+%   \lstinline{\@oddhead}, \lstinline{\@evenhead},
+%   \lstinline{\@oddfoot} and \lstinline{\@evenfoot} macros.
+%    \begin{macrocode}
+\def\ccaPagestyleArtifacts{%
+  \ifx\@oddhead\@empty\else
+    \pretocmd\@oddhead{\ccaStructStart[document]{header}}{}{}%
+    \apptocmd\@oddhead{\ccaStructEnd{header}}{}{}%
+  \fi
+  \ifx\@evenhead\@empty\else
+    \pretocmd\@evenhead{\ccaStructStart[document]{header}}{}{}%
+    \apptocmd\@evenhead{\ccaStructEnd{header}}{}{}%
+  \fi
+  \ifx\@oddfoot\@empty\else
+    \pretocmd\@oddfoot{\ccaStructStart[document]{footer}}{}{}%
+    \apptocmd\@oddfoot{\ccaStructEnd{footer}}{}{}%
+  \fi
+  \ifx\@evenfoot\@empty\else
+    \pretocmd\@evenfoot{\ccaStructStart[document]{footer}}{}{}%
+    \apptocmd\@evenfoot{\ccaStructEnd{footer}}{}{}%
+  \fi}
+%    \end{macrocode}
+% \end{macro}
+% The \lstinline{\ccaPagestyleArtifacts} itself is patched into the
+% \lstinline{\pagestyle} and \lstinline{\thispagestyle} macros, so the
+% internal header and footer macros are patched whenever the pagestyle
+% changes and the internal macros are themselves re-defined.
+%    \begin{macrocode}
+\apptocmd\pagestyle{\ccaPagestyleArtifacts}{}{}
+\apptocmd\thispagestyle{\ccaPagestyleArtifacts}{}{}
+%    \end{macrocode}
+% Finally, we register the \lstinline{footer} and \lstinline{header}
+% PDF tags as \lstinline{artifacts} with \lstinline{ltpdfa}:
+%    \begin{macrocode}
+\ccaAddToConfig{artifact}{header={Type:Pagination}{Subtype:Header}}
+\ccaAddToConfig{artifact}{footer={Type:Pagination}{Subtype:Footer}}
+%    \end{macrocode}
+%
+%\subsection{generic artifacts}
+%
+%    \begin{macrocode}
+\ccaAddToConfig{artifact}{leaders={Type:Layout}}
+\ccaAddToConfig{artifact}{footnoterule={Type:Layout}}
+\ccaAddToConfig{artifact}{Artifact={Type:Layout}}
+
+%    \end{macrocode}
 %
 %
 % \subsection{XMP Integration}
