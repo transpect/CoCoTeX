@@ -54,6 +54,43 @@ local hyphnode = nil
 hyphnode = node.new(a_whatsit_node, subtype_special)
 hyphnode.data = 'ps::markLine'
 
+-- scales can be empty, scales have meaning of target width/height after scaling
+-- 0 @llx -1 @lly 813 @urx 436 @ury 1165 @rwi 2834 @rhi @setspecial
+local function scaleFigure(llx, lly, urx, ury, rwi, rhi, clip, transform_)
+   local tx = 0
+   local ty = 0
+   local xscale, yscale
+   -- rwi etc. handling is from special.pro
+   -- 1. translate (ho/vo <- @hoffset,@voffset)
+   -- 2. scale (hsc/vsc <- @hscale,@vscale)
+   -- 3. rotate (ang)
+   if (rwi) then
+      xscale = (rwi/10.0)/(urx - llx)
+      if (rhi) then
+         yscale = (rhi/10.0)/(ury - lly)
+      else
+         yscale = xscale
+      end
+      tx = -llx
+      ty = -lly
+   else
+      if (rhi) then
+         yscale = (rhi/10.0)/(ury - lly); xscale = yscale
+         tx = -llx
+         ty = -lly
+      end
+   end
+   --log("scaleFigure llx=%s, lly=%s, urx=%s, ury=%s rwi=%s rhi=%s clip=%s", llx, lly, urx, ury, rwi, rhi, clip)
+   local x1,y1 = transform_(llx, lly, xscale, 0, 0, yscale, tx, ty)
+   local x2,y2 = transform_(urx, ury, xscale, 0, 0, yscale, tx, ty)
+   local fbox = {}
+   fbox['x1'] = x1
+   fbox['x2'] = x2
+   fbox['y1'] = y1
+   fbox['y2'] = y2
+   return fbox
+end
+
 local function getChildString(arr)
    if (#arr == 0) then
       return nil
@@ -508,6 +545,36 @@ local writer = {
    addLastLink  = addLastLink,
    IDTree       = IDTree,
    finalize     = finalize,
+   scaleFigure  = scaleFigure,
    -- savepos      = savepos
 }
 return writer
+
+--[[
+/@setspecial    % to setup user specified offsets, scales, sizes (for clipping)
+  {
+    CLIP 1 eq
+      { newpath 0 0 moveto hs 0 rlineto 0 vs rlineto hs neg 0 rlineto
+        closepath clip }
+    if
+    ho vo TR
+    hsc vsc scale
+    ang rotate
+    rwiSeen {
+       rwi urx llx sub div
+       rhiSeen { rhi ury lly sub div } { dup } ifelse
+       scale llx neg lly neg TR
+    } {
+       rhiSeen { rhi ury lly sub div dup scale llx neg lly neg TR } if
+    } ifelse
+    CLIP 2 eq
+    { newpath llx lly moveto urx lly lineto urx ury lineto llx ury lineto
+      closepath clip }
+    if
+    /showpage {} N
+    /erasepage {} N
+    /setpagedevice { pop } N
+    /copypage {} N
+    newpath
+  } N
+--]]

@@ -462,7 +462,11 @@
     \addFigure{\Gin@llx}{\Gin@lly}{\Gin@urx}{\Gin@ury}%
     {\ifx\Gin@scalex\@tempa\else \number\dimen@\fi}%
     {\ifx\Gin@scaley\@tempa\else \number\@tempdima\fi}{\ifGin@clip true\else false\fi}%rwi/rhi
-    \egroup}
+    \egroup}%
+  \global\let\@lt@save@Ginclude@graphics\Ginclude@graphics%
+  \renewcommand{\Ginclude@graphics}[1]{%
+    \figureStart{}\@lt@save@Ginclude@graphics{#1}\figureEnd{}%
+  }%
 }{\relax}
 \futurelet\@ltpdfa@tmp\endinput%% added due to 'can't use `macro parameter character #' in vertical mode' from below with dvi
 \fi
@@ -513,7 +517,12 @@
       \addFigure{\Gin@llx}{\Gin@lly}{\Gin@urx}{\Gin@ury}%
       {\ifx\Gin@scalex\@tempa\else \Gin@scalex\fi}%
       {\ifx\Gin@scaley\@tempa\else \Gin@scaley\fi}{\ifGin@clip true\else false\fi}%rwi/rhi
-    }
+    }%
+    %% TODO check
+    \global\let\@lt@save@Ginclude@graphics\Ginclude@graphics%
+    \renewcommand{\Ginclude@graphics}[1]{%
+      \figureStart{}\@lt@save@Ginclude@graphics{#1}\figureEnd{}%
+    }%
   }{\relax}
 \fi
 

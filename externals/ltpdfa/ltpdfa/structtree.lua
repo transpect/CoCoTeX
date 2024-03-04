@@ -59,7 +59,8 @@ local lastattr = unsetattr
 local lastnode = nil -- last 'interesting' node with currattr == lastattr
 local nextparent = nil -- for extra (nonpage) entries in parenttree
 local figures = {}     -- convention always sp
-local posfile = tex.jobname .. '.lua' -- posfile in bp
+-- posfile voodoo just needed if figure(s) on last page
+local posfile = tex.jobname .. '.lua' -- posfile in sp
 local posoutfile = nil
 local positions = {}   -- convention always sp
 -- Grouping elements
@@ -320,9 +321,7 @@ local function process_node(parentbox, curr, level) -- standard processing, mayb
    else
       -- check if parent changed and open new element of same type!!!
       if (pattr ~= lastnode[3]) then
-	 if config.debug then
-	    log("Split env due to new Parent! %s %s", pattr, lastnode[3])
-	 end
+	 if config.debug then log("Split env due to new Parent! %s %s", pattr, lastnode[3]) end
          head = writer.endMC(head, curr, node.get_attribute(lastnode[2], typeattr), false) -- head, node, typeattr, after
          head = markElement(head,curr,sparent,currattr)
          parentbox.head = head
@@ -398,18 +397,18 @@ end
 processNode[a_glue] = process_glue -- TODO check, want to only handle leaders
 
 -- deprecate ??, internal use, TODO
-local function addFigure_(width, height, depth, parent)
-   table.insert(figures, { parent = parent, fbox = {}, ppos = {}} )
-   local fig = figures[#figures]['fbox']
-   if positions ~= nil and positions[#figures] then
-      local pos = positions[#figures]
-      local fig = figures[#figures]
-      fig['x1'] = pos['x1']
-      fig['x2'] = pos['x2']
-      fig['y1'] = pos['y1']
-      fig['y2'] = pos['y2']
-   end
-end
+-- local function addFigure_(width, height, depth, parent)
+--    table.insert(figures, { parent = parent, fbox = {}, ppos = {}} )
+--    local fig = figures[#figures]['fbox']
+--    if positions ~= nil and positions[#figures] then
+--       local pos = positions[#figures]
+--       local fig = figures[#figures]
+--       fig['x1'] = pos['x1']
+--       fig['x2'] = pos['x2']
+--       fig['y1'] = pos['y1']
+--       fig['y2'] = pos['y2']
+--    end
+-- end
 
 local function transform_(x,y,a,b,c,d,tx,ty)
    local xn = a*x + c*y + tx
@@ -417,44 +416,19 @@ local function transform_(x,y,a,b,c,d,tx,ty)
    return xn,yn
 end
 
--- TODO maybe delegate to engine specific module!!!
+-- delegate to engine specific module!!!
 -- \addFigure{\Gin@llx}{\Gin@lly}{\Gin@urx}{\Gin@ury}, in bp
 -- to inject from TeX (graphics), args is bounding box, not BBox :-(
 -- let readPosStart and readPosEnd save their values in subkey 'ppos'
--- mimic pscode from special.lpro, origin of painting is 0,0
---
--- luatex
--- - llx, lly, urx, ury are native size of figure
--- - rwi, rhi are caluculated scales
--- - clip obvious
 local function addFigure(llx, lly, urx, ury, xscale, yscale, clip)
-   if config.debug then
-      log("addFigure llx=%s, lly=%s, urx=%s, ury=%s xscale=%s yscale=%s clip=%s", llx, lly, urx, ury, xscale, yscale, clip)
-   end
+   if config.debug then log("addFigure llx=%s, lly=%s, urx=%s, ury=%s xscale=%s yscale=%s clip=%s", llx, lly, urx, ury, xscale, yscale, clip) end
    local parent = stree.current.idx
    local xscale = tonumber(xscale)
    local yscale = tonumber(yscale)
+   -- get figure dimensions from engine
    local fbox = writer.scaleFigure(llx, lly, urx, ury, xscale, yscale, clip, transform_) -- driver dependent scale to embedsize
    dumpArray(fbox)
-   -- TODO implement this in dvi/distwriter
-   -- rwi etc. handling is from special.pro => not for other drivers
-   -- if (rwi) then
-   --    local xscale = (rwi/10)/(urx - llx)
-   --    if (rhi) then
-   --       yscale = (rhi/10)/(ury - lly)
-   --    else
-   --       yscale = xscale
-   --    end
-   --    tx = -llx
-   --    ty = -lly
-   -- else
-   --    if (rhi) then
-   --       yscale = (rhi/10)/(ury - lly); xscale = yscale
-   --       tx = -llx
-   --       ty = -lly
-   --    end
-   -- end
-   -- now we have real size after scaling
+   -- fix origin at 0,0 and convert to sp
    fbox['x2'] = (fbox['x2']-fbox['x1']) * bpsp_sc
    fbox['x1'] = 0.0
    fbox['y2'] = (fbox['y2']-fbox['y1']) * bpsp_sc
@@ -462,7 +436,11 @@ local function addFigure(llx, lly, urx, ury, xscale, yscale, clip)
    table.insert(figures, { parent = parent, fbox = fbox, ppos = {}} )
    if config.debug then
       log("addCFigure %s idx=%d", parent, #figures)
-      log("\t%s idx=%d scale:%.2f/%.2f urx=%s / ury=%s ", parent, #figures, xscale, yscale, urx, ury)
+      if (xscale == nil or yscale == nil) then
+         log("\t%s idx=%d scale:%s/%s urx=%s / ury=%s ", parent, #figures, xscale, yscale, urx, ury)
+      else
+         log("\t%s idx=%d scale:%.2f/%.2f urx=%s / ury=%s ", parent, #figures, xscale, yscale, urx, ury)
+      end
       log("\ttransformed %.2f,%.2f/%.2f,%.2f", fbox['x1'], fbox['y1'], fbox['x2'], fbox['y2'])
       dumpArray(fbox)
    end
@@ -509,10 +487,6 @@ local function process_whatsit(parentbox, curr, level)
       if str ~= nil then
          local tail = node.tail(parentbox.list)
          if config.debug then log("Figure: page %d at %d data=%s match=%s", status.total_pages + 1, tex.inputlineno, curr.data, str) end
-         -- must have been called before !!! addFigure_(0, 0, 0, pattr)
-         -- local head, new = writer.savepos(parentbox.list, curr, #figures, true) -- true means start
-         -- head, new = writer.savepos(parentbox.list, curr, #figures, false) -- false means end
-         -- parentbox.head = head
          process_node(parentbox, curr, level)
       end
    end
@@ -542,16 +516,23 @@ processNode[a_math] = process_math
 local function postProcessFigs()
    for k,v in pairs(figures) do
       local fbox = v.fbox; local ppos = v.ppos
+      if (ppos.x1 == nil or ppos.x2 == nil or ppos.y1 == nil or ppos.y2 == nil) then
+         -- try from posfile
+         --log("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ %s %s %s", ppos.x1, k, positions[k])
+         --dumpArray(positions[k].ppos)
+         if positions ~= nil and positions[k].ppos then
+            ppos = positions[k].ppos
+         end
+         if (ppos.x1 == nil or ppos.x2 == nil or ppos.y1 == nil or ppos.y2 == nil) then
+            tex.error("Error: incomplete figure (ppos)" .. k .. " " .. v.parent)
+            return false
+         end
+      end
       -- fbox checks
       if (fbox.x1 == nil or fbox.x2 == nil or fbox.y1 == nil or fbox.y2 == nil) then
          tex.error("Error: incomplete figure (fbox)" .. k .. " " .. v.parent)
          return false
       end
-      if (ppos.x1 == nil or ppos.x2 == nil or ppos.y1 == nil or ppos.y2 == nil) then
-         tex.error("Error: incomplete figure (ppos)" .. k .. " " .. v.parent)
-         return false
-      end
-
       -- normalize
       local tmp;
       if fbox.x1 > fbox.x2 then
@@ -567,7 +548,7 @@ local function postProcessFigs()
          tmp = ppos.y1; ppos.y1 = ppos.y2; ppos.y2 = tmp;
       end
       
-      -- small figures
+      -- small figures, -- normal for dviwriters
       if ( ((fbox.x2 - fbox.x1) < 100) or ((fbox.y2 - fbox.y1) < 100)) then
          log("Warning: very small figure %d", v.parent)
       end
@@ -591,14 +572,10 @@ local function postProcessFigs()
    end
 end
 
--- manually add figure TODO move down, do we need \savepos
-local function savePosStart(create)
-   if create then
-      addFigure_(0, 0, 0, stree.current.idx)
-      tex.sprint(config.ltpdfCatcode, '\\latelua{ltpdfa.structtree.readPosStart(' .. #figures .. ')}')
-   else
-      tex.sprint(config.ltpdfCatcode, '\\latelua{ltpdfa.structtree.readPosStart(' .. #figures + 1 .. ')}')
-   end
+-- inserts latelua getpos for next(!) element in figures{}
+-- addFigure must be called before shipout
+local function savePosStart()
+   tex.sprint(config.ltpdfCatcode, '\\latelua{ltpdfa.structtree.readPosStart(' .. #figures + 1 .. ')}')
 end
 
 local function savePosEnd()
@@ -871,7 +848,7 @@ local function finalizeDoc(head)
    if config.dospaces then
       ltpdfa.spaceprocessor.cleanUp()      
    end
-   -- postProcessFigs() -- Fig BBoxes
+   postProcessFigs() -- Fig BBoxes
    if config.debug then
       log("List of environments:")
       dumpArray(config.bdcs)
@@ -895,9 +872,7 @@ local function finalizeDoc(head)
    end
    removeArtifacts()
    removeEmptyStructs()
-   if config.debug then
-      log("==== finalizeDoc: at line %d of %s", tex.inputlineno, tex.jobname)
-   end
+   if config.debug then log("==== finalizeDoc: at line %d of %s", tex.inputlineno, tex.jobname) end
    head = writer.finalize(head)
    if (config.intent ~= nil) then
       writer.intent(head)
@@ -938,9 +913,7 @@ local currtexstruct = nil
 local function buildpage( pagebox )
    if (nextparent == nil) then nextparent = ltpdfa.lastpage end
    currtexstruct = stree.current
-   if config.debug then
-      log("**** shipout: page=%d at %d lastattr=%d input selem=%s/%d", status.total_pages + 1, tex.inputlineno, lastattr, currtexstruct.type, currtexstruct.idx)
-   end
+   if config.debug then log("**** shipout: page=%d at %d lastattr=%d input selem=%s/%d", status.total_pages + 1, tex.inputlineno, lastattr, currtexstruct.type, currtexstruct.idx) end
    mcidcnt = 0
    lastattr = unsetattr -- unset or beginning of page
    stree.parenttree[status.total_pages + 1] = {}
@@ -965,9 +938,7 @@ local function buildpage( pagebox )
    end
    -- reset open struct to view of input
    stree.current = currtexstruct
-   if config.debug then
-      log("==== end shipout: at line %d opened=%d pg=%d(%d) current=%s/%d", tex.inputlineno, lastattr, status.total_pages + 1, ltpdfa.lastpage, stree.current.type, stree.current.idx)
-   end
+   if config.debug then log("==== end shipout: at line %d opened=%d pg=%d(%d) current=%s/%d", tex.inputlineno, lastattr, status.total_pages + 1, ltpdfa.lastpage, stree.current.type, stree.current.idx) end
    -- ltpdfa.finishOutput depends on ltpdfa.lastpage, this ist not especially robust
    -- maybe we need to remember head, tail in odriver
    -- last page is not shipped out yet
@@ -1065,9 +1036,7 @@ end
 local function structEnd(type)
    local x = stree.current
    if removed and type == removed.type then
-      if config.debug then
-	 log("Ignoring following %s once because removed/ignored before!", removed.type)
-      end
+      if config.debug then log("Ignoring following %s once because removed/ignored before!", removed.type) end
       removed = false
       ignore = false
       return
@@ -1109,9 +1078,7 @@ local function getStructParent()
    if (nextparent == nil) then
       -- try the same as in buildpage
       nextparent = ltpdfa.lastpage
-      if config.debug then
-	 log("GETSTRUCTPARENT CALLED BEFORE ANY PAGE-PARENT EXISTS line %d/-1\n", tex.inputlineno)
-      end
+      if config.debug then log("GETSTRUCTPARENT CALLED BEFORE ANY PAGE-PARENT EXISTS line %d/-1\n", tex.inputlineno) end
    end
    -- increment nextparent
    nextparent = nextparent + 1
@@ -1127,12 +1094,12 @@ local function posToFile(fig, index)
    local fbox = fig.fbox ; local ppos = fig.ppos
    for k,v in pairs(fbox) do
       if k ~= "parent" then
-         tmp = tmp .. k .. "=" .. v * spbp_sc .. ", "
+         tmp = tmp .. k .. "=" .. v .. ", "
       end
    end
    tmpa = "ppos = {"
    for k,v in pairs(ppos) do
-      tmpa = tmpa .. k .. "=" .. string.format("%.2f",(v * spbp_sc)) .. ", "
+      tmpa = tmpa .. k .. "=" .. string.format("%.2f",(v)) .. ", "
    end
    tmpa = tmpa .. "}"
    posoutfile:write(tmp, "\n\t  ", tmpa , "}\n")
@@ -1146,14 +1113,11 @@ local function readPosStart(index)
    posmax = tex.pageheight
    local x, y = pdf.getpos()
    local fig = figures[index]
-   if config.debug then
-      log("READPOS TA %.2f", sptobp(posmax - y))
-   end
+   --log("READPOS TA %.2f", sptobp(posmax - y))
    if fig then -- could be from artifact
        fig['ppos'] = {}
        fig['ppos']['x1'] = x;
        fig['ppos']['y1'] = y;
-       -- fig['ppos']['y1'] = posmax - y
    end
    if config.debug then
       log("READPOS START on page %d => %f/%f for image %d posmax=%.2f", status.total_pages + 1, x/65536.0, y/65536.0, index, sptobp(posmax))
@@ -1164,9 +1128,7 @@ end
 local function readPosEnd(index)
    local x, y = pdf.getpos()
    local fig = figures[index]
-   if config.debug then
-      log("READPOS TE %.2f", sptobp(posmax - y))
-   end
+   --log("READPOS TE %.2f", sptobp(posmax - y))
    if fig then -- could be from artifact
        fig['ppos']['x2'] = x;
        fig['ppos']['y2'] = y;
@@ -1188,7 +1150,6 @@ local function readPosFile()
    else
       x = f()
    end
-   -- TODO convert to sp
    positions = x
    return true
 end
@@ -1199,9 +1160,7 @@ local function closePosFile()
 end
 
 local function markPara(head, context)
-   if config.debug then
-      log("markPara groupcode=%s", context)
-   end
+   if config.debug then log("markPara groupcode=%s", context) end
    local tail = node.tail(head)
    return writer.markPara(head, tail, context)
 end
@@ -1226,9 +1185,7 @@ local function structRemove()
    else
       stree.current = x.parent
    end
-   if config.debug then
-      log("removed current: %s now %s", x.type, stree.current.type)
-   end
+   if config.debug then log("removed current: %s now %s", x.type, stree.current.type) end
 end
 
 local function getCurrentStruct(key)

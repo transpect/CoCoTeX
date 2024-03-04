@@ -263,7 +263,27 @@
 \ccaAddToConfig{artifact}{leaders={Type:Layout}}
 \ccaAddToConfig{artifact}{footnoterule={Type:Layout}}
 \ccaAddToConfig{artifact}{Artifact={Type:Layout}}
-
+%    \end{macrocode}
+%
+% \subsection{Tagging for Floats}
+%
+% \subsubsection{Taggin for Figures}
+%
+% \begin{macro}{\ccaFigureStart} injects the starting tag for images to the pdf
+%    \begin{macrocode}
+\newcommand*{\ccaFigureStart}[1]{\directlua{ltpdfa.tagger.figureStart('\luaescapestring{#1}')}}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccaFigureEnd} injects the ending tag for images
+%    \begin{macrocode}
+\newcommand*{\ccaFigureEnd}[1]{\directlua{ltpdfa.tagger.figureEnd('\luaescapestring{#1}')}}
+%    \end{macrocode}
+% \end{macro}
+% which we add to the beginning and the end of \lstinline{graphics}
+% package's \lstinline{\Ginclude@graphics} macro, respectively:
+%    \begin{macrocode}
+\pretocmd\Ginclude@graphics{\ccaFigureStart{}}{}{}
+\apptocmd\Ginclude@graphics{\ccaFigureEnd{}}{}{}
 %    \end{macrocode}
 %
 %

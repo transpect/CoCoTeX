@@ -214,22 +214,12 @@ local function addNumbering(name)
    stree.current:addToAttributes('List','/ListNumbering/' .. name)
 end
 
-local function figureStart(env)
-   env = env or 'no'
-   if env == 'start' then
-      -- structStart -> structStart_ -> executed only after both calls (savePosStart)
-      -- -> wrong parent !!!!
-      structStart('Figure', nil)
-   end
-   structtree.savePosStart(false)
+local function figureStart()
+   structtree.savePosStart()
 end
 
-local function figureEnd(env)
+local function figureEnd()
    structtree.savePosEnd(false)
-   env = env or 'no'
-   if env == 'close' then
-      structEnd('Figure', false)
-   end
 end
 
 local function figureSet(key, value, unit)

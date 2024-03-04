@@ -370,7 +370,7 @@ local writer = {
    roleMap        = roleMap,
    addLastLink    = addLastLink,
    intent         = intent,
-   savepos        = savepos,
+   -- savepos        = savepos,
    finalize       = finalize,
    scaleFigure    = scaleFigure,
 }
