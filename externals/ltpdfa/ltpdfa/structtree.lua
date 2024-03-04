@@ -321,7 +321,7 @@ local function process_node(parentbox, curr, level) -- standard processing, mayb
    else
       -- check if parent changed and open new element of same type!!!
       if (pattr ~= lastnode[3]) then
-	 if config.debug then log("Split env due to new Parent! %s %s", pattr, lastnode[3]) end
+         log("Split env due to new Parent! %s %s", pattr, lastnode[3])
          head = writer.endMC(head, curr, node.get_attribute(lastnode[2], typeattr), false) -- head, node, typeattr, after
          head = markElement(head,curr,sparent,currattr)
          parentbox.head = head
@@ -421,13 +421,13 @@ end
 -- to inject from TeX (graphics), args is bounding box, not BBox :-(
 -- let readPosStart and readPosEnd save their values in subkey 'ppos'
 local function addFigure(llx, lly, urx, ury, xscale, yscale, clip)
-   if config.debug then log("addFigure llx=%s, lly=%s, urx=%s, ury=%s xscale=%s yscale=%s clip=%s", llx, lly, urx, ury, xscale, yscale, clip) end
+   log("addFigure llx=%s, lly=%s, urx=%s, ury=%s xscale=%s yscale=%s clip=%s", llx, lly, urx, ury, xscale, yscale, clip)
    local parent = stree.current.idx
    local xscale = tonumber(xscale)
    local yscale = tonumber(yscale)
    -- get figure dimensions from engine
    local fbox = writer.scaleFigure(llx, lly, urx, ury, xscale, yscale, clip, transform_) -- driver dependent scale to embedsize
-   if config.debug then dumpArray(fbox) end
+   dumpArray(fbox)
    -- fix origin at 0,0 and convert to sp
    fbox['x2'] = (fbox['x2']-fbox['x1']) * bpsp_sc
    fbox['x1'] = 0.0
@@ -460,10 +460,8 @@ local function process_rule(parentbox, curr, level)
       if (curr.height == 0 and curr.depth == 0) then return end
    elseif (curr.subtype == 2) then    --subtype 2 are images ONLY FOR PDFOUTPUT
       -- could be artifact
-      if config.debug then
-	 log("Figure (rule): page %d at %d index=%d\n\t %d %d %d", status.total_pages + 1, tex.inputlineno, curr.index, curr.width, curr.height, curr.depth)
-	 log("Figure (rule): width=%f height=%f depth=%s matrix=%s", curr.width/65536.0, curr.height/65536.0, curr.depth/65536.0, pdf.hasmatrix())
-      end
+      log("Figure (rule): page %d at %d index=%d\n\t %d %d %d", status.total_pages + 1, tex.inputlineno, curr.index, curr.width, curr.height, curr.depth)
+      log("Figure (rule): width=%f height=%f depth=%s matrix=%s", curr.width/65536.0, curr.height/65536.0, curr.depth/65536.0, pdf.hasmatrix())
       -- DEPRECATE addFigure_(curr.width, curr.height, curr.depth, pattr)
       --insert a savepos before and after and read values back => latelua
       -- local head, new = writer.savepos(parentbox.list, curr, #figures, true) -- true means start
@@ -517,57 +515,57 @@ local function postProcessFigs()
    for k,v in pairs(figures) do
       local fbox = v.fbox; local ppos = v.ppos
       if (ppos.x1 == nil or ppos.x2 == nil or ppos.y1 == nil or ppos.y2 == nil) then
-	 -- try from posfile
-	 --log("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ %s %s %s", ppos.x1, k, positions[k])
-	 --dumpArray(positions[k].ppos)
-	 if positions ~= nil and positions[k].ppos then
-	    ppos = positions[k].ppos
-	 end
-	 if (ppos.x1 == nil or ppos.x2 == nil or ppos.y1 == nil or ppos.y2 == nil) then
-	    tex.error("Error: incomplete figure (ppos)" .. k .. " " .. v.parent)
-	    return false
-	 end
+         -- try from posfile
+         --log("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ %s %s %s", ppos.x1, k, positions[k])
+         --dumpArray(positions[k].ppos)
+         if positions ~= nil and positions[k].ppos then
+            ppos = positions[k].ppos
+         end
+         if (ppos.x1 == nil or ppos.x2 == nil or ppos.y1 == nil or ppos.y2 == nil) then
+            tex.error("Error: incomplete figure (ppos)" .. k .. " " .. v.parent)
+            return false
+         end
       end
       -- fbox checks
       if (fbox.x1 == nil or fbox.x2 == nil or fbox.y1 == nil or fbox.y2 == nil) then
-	 tex.error("Error: incomplete figure (fbox)" .. k .. " " .. v.parent)
-	 return false
+         tex.error("Error: incomplete figure (fbox)" .. k .. " " .. v.parent)
+         return false
       end
       -- normalize
       local tmp;
       if fbox.x1 > fbox.x2 then
-	 tmp = fbox.x1; fbox.x1 = fbox.x2; fbox.x2 = tmp;
+         tmp = fbox.x1; fbox.x1 = fbox.x2; fbox.x2 = tmp;
       end
       if fbox.y1 > fbox.y2 then
-	 tmp = fbox.y1; fbox.y1 = fbox.y2; fbox.y2 = tmp;
+         tmp = fbox.y1; fbox.y1 = fbox.y2; fbox.y2 = tmp;
       end
       if ppos.x1 > ppos.x2 then
-	 tmp = ppos.x1; ppos.x1 = ppos.x2; ppos.x2 = tmp;
+         tmp = ppos.x1; ppos.x1 = ppos.x2; ppos.x2 = tmp;
       end
       if ppos.y1 > ppos.y2 then
-	 tmp = ppos.y1; ppos.y1 = ppos.y2; ppos.y2 = tmp;
+         tmp = ppos.y1; ppos.y1 = ppos.y2; ppos.y2 = tmp;
       end
-
+      
       -- small figures, -- normal for dviwriters
       if ( ((fbox.x2 - fbox.x1) < 100) or ((fbox.y2 - fbox.y1) < 100)) then
-	 log("Warning: very small figure %d", v.parent)
+         log("Warning: very small figure %d", v.parent)
       end
       -- ppos checks
       if ( (ppos.x2 - ppos.x1) < 100) then
-	 log("Warning: very small x-ppos %d", v.parent)
+         log("Warning: very small x-ppos %d", v.parent)
       end
       if ( (ppos.y2 - ppos.y1) < 100) then
-	 log("Warning: very small y-ppos %d (%d/%d)(%.2f/%.2f)\n => %.2f", v.parent, ppos.y1, ppos.y2, fbox.y1, fbox.y2, (fbox.y2 - fbox.y1))
-	 dumpArray(v,true)
-	 -- set y2 from fpos
-	 ppos.y2 = ppos.y1 + (fbox.y2 - fbox.y1) 
+         log("Warning: very small y-ppos %d (%d/%d)(%.2f/%.2f)\n => %.2f", v.parent, ppos.y1, ppos.y2, fbox.y1, fbox.y2, (fbox.y2 - fbox.y1))
+         dumpArray(v,true)
+         -- set y2 from fpos
+         ppos.y2 = ppos.y1 + (fbox.y2 - fbox.y1) 
       end
 
       if v.parent then
-	 local s = stree.structarray[v.parent]
-	 local bboxA = string.format("/BBox [%.2f %.2f %.2f %.2f]", sptobp(ppos.x1), sptobp(ppos.y1), sptobp(ppos.x2), sptobp(ppos.y2))
-	 local bbox = string.format("/BBox [%.2f %.2f %.2f %.2f]", sptobp(fbox.x1), sptobp(fbox.y1), sptobp(fbox.x2), sptobp(fbox.y2))
-	 s:addToAttributes('Layout', bboxA)
+         local s = stree.structarray[v.parent]
+         local bboxA = string.format("/BBox [%.2f %.2f %.2f %.2f]", sptobp(ppos.x1), sptobp(ppos.y1), sptobp(ppos.x2), sptobp(ppos.y2))
+         local bbox = string.format("/BBox [%.2f %.2f %.2f %.2f]", sptobp(fbox.x1), sptobp(fbox.y1), sptobp(fbox.x2), sptobp(fbox.y2))
+         s:addToAttributes('Layout', bboxA)
       end
    end
 end
@@ -849,9 +847,9 @@ local function finalizeDoc(head)
       ltpdfa.spaceprocessor.cleanUp()      
    end
    postProcessFigs() -- Fig BBoxes
+   log("List of environments:")
+   dumpArray(config.bdcs)
    if config.debug then
-      log("List of environments:")
-      dumpArray(config.bdcs)
       log("ParentTree:")
       dumpParentTree()
       log("StructTree:")
@@ -872,7 +870,7 @@ local function finalizeDoc(head)
    end
    removeArtifacts()
    removeEmptyStructs()
-   if config.debug then log("==== finalizeDoc: at line %d of %s", tex.inputlineno, tex.jobname) end
+   log("==== finalizeDoc: at line %d of %s", tex.inputlineno, tex.jobname)
    head = writer.finalize(head)
    if (config.intent ~= nil) then
       writer.intent(head)
@@ -899,10 +897,8 @@ local function finalizeDoc(head)
    head = writer.roleMap(ltpdfa.structtree.stree, head)
    head = writer.IDTree(ltpdfa.structtree.stree, head)
    head = writer.docLang(ltpdfa.config.lang, head)
-   if config.debug then
-      log("dump of opened")
-      dumpArray(ltpdfa.structtree.stree.openedarray)
-   end
+   log("dump of opened")
+   dumpArray(ltpdfa.structtree.stree.openedarray)
 end
 --[[
    public/exported part
@@ -913,7 +909,7 @@ local currtexstruct = nil
 local function buildpage( pagebox )
    if (nextparent == nil) then nextparent = ltpdfa.lastpage end
    currtexstruct = stree.current
-   if config.debug then log("**** shipout: page=%d at %d lastattr=%d input selem=%s/%d", status.total_pages + 1, tex.inputlineno, lastattr, currtexstruct.type, currtexstruct.idx) end
+   log("**** shipout: page=%d at %d lastattr=%d input selem=%s/%d", status.total_pages + 1, tex.inputlineno, lastattr, currtexstruct.type, currtexstruct.idx)
    mcidcnt = 0
    lastattr = unsetattr -- unset or beginning of page
    stree.parenttree[status.total_pages + 1] = {}
@@ -938,7 +934,7 @@ local function buildpage( pagebox )
    end
    -- reset open struct to view of input
    stree.current = currtexstruct
-   if config.debug then log("==== end shipout: at line %d opened=%d pg=%d(%d) current=%s/%d", tex.inputlineno, lastattr, status.total_pages + 1, ltpdfa.lastpage, stree.current.type, stree.current.idx) end
+   log("==== end shipout: at line %d opened=%d pg=%d(%d) current=%s/%d", tex.inputlineno, lastattr, status.total_pages + 1, ltpdfa.lastpage, stree.current.type, stree.current.idx)
    -- ltpdfa.finishOutput depends on ltpdfa.lastpage, this ist not especially robust
    -- maybe we need to remember head, tail in odriver
    -- last page is not shipped out yet
@@ -1036,14 +1032,14 @@ end
 local function structEnd(type)
    local x = stree.current
    if removed and type == removed.type then
-      if config.debug then log("Ignoring following %s once because removed/ignored before!", removed.type) end
+      log("Ignoring following %s once because removed/ignored before!", removed.type)
       removed = false
       ignore = false
       return
    end
    if (x.idx == 1) then
       -- never close idx=1
-      if config.debug then log("Keeping idx=1 open (%s)", x.type) end
+      log("Keeping idx=1 open (%s)", x.type)
       return
    end
    x.endpage = status.total_pages + 1
@@ -1078,7 +1074,7 @@ local function getStructParent()
    if (nextparent == nil) then
       -- try the same as in buildpage
       nextparent = ltpdfa.lastpage
-      if config.debug then log("GETSTRUCTPARENT CALLED BEFORE ANY PAGE-PARENT EXISTS line %d/-1\n", tex.inputlineno) end
+      log("GETSTRUCTPARENT CALLED BEFORE ANY PAGE-PARENT EXISTS line %d/-1\n", tex.inputlineno)
    end
    -- increment nextparent
    nextparent = nextparent + 1
@@ -1128,7 +1124,7 @@ end
 local function readPosEnd(index)
    local x, y = pdf.getpos()
    local fig = figures[index]
-   --log("END READPOS TE %.2f", sptobp(posmax - y))
+   --log("READPOS TE %.2f", sptobp(posmax - y))
    if fig then -- could be from artifact
        fig['ppos']['x2'] = x;
        fig['ppos']['y2'] = y;
@@ -1160,7 +1156,7 @@ local function closePosFile()
 end
 
 local function markPara(head, context)
-   if config.debug then log("markPara groupcode=%s", context) end
+   log("markPara groupcode=%s", context)
    local tail = node.tail(head)
    return writer.markPara(head, tail, context)
 end
@@ -1185,7 +1181,7 @@ local function structRemove()
    else
       stree.current = x.parent
    end
-   if config.debug then log("removed current: %s now %s", x.type, stree.current.type) end
+   log("removed current: %s now %s", x.type, stree.current.type)
 end
 
 local function getCurrentStruct(key)

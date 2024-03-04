@@ -211,7 +211,7 @@ end
 local function roleMap(stree, head)
    local nstr = ""
    for k,v in pairs(stree.rolemap) do
-      if (config.debug) then log("\t %s => %s",k, v) end
+      log("\t %s => %s",k, v)
       nstr = nstr .. '/' .. k .. ' /' .. v .. '\n'
    end
    return head, nstr
@@ -370,7 +370,7 @@ local writer = {
    roleMap        = roleMap,
    addLastLink    = addLastLink,
    intent         = intent,
-   -- savepos        = savepos,
+--   savepos        = savepos,
    finalize       = finalize,
    scaleFigure    = scaleFigure,
 }
