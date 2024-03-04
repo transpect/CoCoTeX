@@ -72,6 +72,15 @@
 }
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{\if@cc@is@final} is a boolean switch that indicates
+%     whether or not a process is final. This is mainly used in the
+%     accessibility module where it matters if a macro is actually
+%     used to print struff, or if it is just processed.
+%    \begin{macrocode}
+\newif\if@cc@is@final \@cc@is@finalfalse
+\AtBeginDocument{\@cc@is@finaltrue}
+%    \end{macrocode}
+% \end{macro}
 % \section{Containers}
 %
 % Containers are the package's core data structure. They are basicly

@@ -39,26 +39,95 @@
 \def\cc@if@ally{\expandafter\@firstoftwo}
 %    \end{macrocode}
 % \end{macro}
-% The \lstinline{ltpdfa} package re-defines too many LaTeX kernel macros, so we only use its lua code:
+% The \lstinline{ltpdfa} package re-defines too many standard LaTeX
+% macros, so we only use its lua code and define the interface
+% ourself. For that, we use \lstinline{etoolbox}'s patch commands to
+% inject our tagging code into the standard macros rather than to
+% create hard copies. This should increase compatibility with other
+% packages and make all our lifes easier.
+%
+% We start with ltpdfa's package options.
+% 
+% \begin{macro}{\cca@lang@id} is the ISO 639-2 code for the document's
+%   main language. As default, we assume Modern English.
+%    \begin{macrocode}
+\def\cca@lang@id{eng}%
+\DeclareOptionX{lang-id}{\gdef\cca@lang@id{#1}}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\cca@do@nodetree} if \lstinline{\relax}, show the node tree in
+%   the log and in the shell output.
 %    \begin{macrocode}
 \DeclareOptionX{nodetree}{\let\cca@do@nodetree\relax}
-\DeclareOptionX{showspaces}{\let\cca@do@showspaces\relax}
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{\cca@do@showspaces} if \lstinline{\relax}, show spaces
+%   in the pdf.
+%    \begin{macrocode}
+\DeclareOptionX{show-spaces}{\let\cca@do@showspaces\relax}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\cca@do@dospaces} if \lstinline{\relax}, add
+%   ASCII space characters to the PDF. {\LaTeX} doesn't write physical
+%   spaces into the output document but moves letters via skips, which
+%   allows variable word spacing beyond a font's space width
+%   definition, but it is a hard barrier for screen readers which rely
+%   on real space characters. This options causes the
+%   \lstinline{ltpdfa} package to insert real space characters that
+%   are immediately followed by a negative skip by the font-dependend
+%   width of that space to keep \LaTeX's typeface intact. This is
+%   activated by default.
+%    \begin{macrocode}
+\let\cca@do@dospaces\relax
+\DeclareOptionX{no-spaces}{\let\cca@do@dospaces\@undefined}
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{\cca@do@doparas} if \lstinline{\relax}, add paragraph
+%   tagging.
+%    \begin{macrocode}
+\let\cca@do@doparas\relax
+\DeclareOptionX{no-paras}{\let\cca@do@doparas\@undefined}
+%    \end{macrocode}
+% \end{macro}
+% Process the options.
+%    \begin{macrocode}
 \ProcessOptionsX
+%    \end{macrocode}
+% then we need to packages. \lstinline{luatexbase-attr} (possibly
+% deprecated?) provides an interface to add attributes to lua code;
+% \lstinline{atveryend} provides a hook to inject code to the final
+% steps of rendering.
+%    \begin{macrocode}
 \RequirePackage{luatexbase-attr}
 \RequirePackage{atveryend}
 %    \end{macrocode}
-% starting up the lua code facility
+% Now, we set the configuration of the \lstinline{ltpdfa} lua facility
+% by passing some of the \lstinline{coco-accessibility} package
+% options:
 %    \begin{macrocode}
 \directlua{ltpdfa = require('ltpdfa')}
 \directlua{ltpdfa.config.final = true}
 \directlua{ltpdfa.config.debug = \if@tp@debug true\else false\fi}
 \directlua{ltpdfa.config.nodetree = \ifx\cca@do@nodetree\relax true\else false\fi}
 \directlua{ltpdfa.config.showspaces = \ifx\cca@do@showspaces\relax true\else false\fi}
-\directlua{ltpdfa.config.dospaces = false}
-\directlua{ltpdfa.config.doparas = false}
+\directlua{ltpdfa.config.dospaces = \ifx\cca@do@dospaces\relax true\else false\fi}
+\directlua{ltpdfa.config.doparas = \ifx\cca@do@doparas\relax true\else false\fi}
+%    \end{macrocode}
+% \lstinline{ltpdfa} provides two ways to tag heading heads. One by
+% tagging headers as \lstinline{H1..H6}, and one where all headings
+% are tagged as \lstinline{H} and a heading's depth is implied by
+% nesting. Since most of our projects require way more than 6 heading
+% levels, we hard-code the nesting approach:
+%    \begin{macrocode}
 \directlua{ltpdfa.config.headnums = false}
+%    \end{macrocode}
+% CoCoTeX with accessibility support is \lstinline{\luaTeX} only, so
+% we hard-code \lstinline{pdftex} as render engine:
+%    \begin{macrocode}
 \directlua{ltpdfa.config.driver = "\luaescapestring{pdftex}"}
-\directlua{ltpdfa.config.lang = "\luaescapestring{de}"}
+\directlua{ltpdfa.config.lang = '\luaescapestring{\cca@lang@id}'}
 \directlua{ltpdfa.init()}%
 %    \end{macrocode}
 % Initial setup of ltpdfa
@@ -269,6 +338,17 @@
 %
 % \subsubsection{Taggin for Figures}
 %
+%    \begin{macrocode}
+\newcommand*{\ccaAddFigure}[7]{\directlua{ltpdfa.tagger.addFigure(
+    '\luaescapestring{#1}',
+    '\luaescapestring{#2}',
+    '\luaescapestring{#3}',
+    '\luaescapestring{#4}',
+    '\luaescapestring{#5}',
+    '\luaescapestring{#6}',
+    '\luaescapestring{#7}')}}
+%    \end{macrocode}
+%
 % \begin{macro}{\ccaFigureStart} injects the starting tag for images to the pdf
 %    \begin{macrocode}
 \newcommand*{\ccaFigureStart}[1]{\directlua{ltpdfa.tagger.figureStart('\luaescapestring{#1}')}}
@@ -282,8 +362,22 @@
 % which we add to the beginning and the end of \lstinline{graphics}
 % package's \lstinline{\Ginclude@graphics} macro, respectively:
 %    \begin{macrocode}
-\pretocmd\Ginclude@graphics{\ccaFigureStart{}}{}{}
-\apptocmd\Ginclude@graphics{\ccaFigureEnd{}}{}{}
+\@ifpackageloaded{grffile}
+  {\pretocmd\grffile@Ginclude@graphics{\if@cc@is@final\ccaFigureStart{}\fi}{}{}%
+   \apptocmd\grffile@Ginclude@graphics{\if@cc@is@final\ccaFigureEnd{}\fi}{}{}}
+  {\pretocmd\Ginclude@graphics{\if@cc@is@final\ccaFigureStart{}\fi}{}{}%
+   \apptocmd\Ginclude@graphics{\if@cc@is@final\ccaFigureEnd{}\fi}{}{}}
+
+%    \end{macrocode}
+% 
+%    \begin{macrocode}
+\apptocmd\Ginclude@@pdftex{\if@cc@is@final%
+  \def\@tempa{!}%
+  \ccaAddFigure{\Gin@llx}{\Gin@lly}{\Gin@urx}{\Gin@ury}
+    {\ifx\Gin@scalex\@tempa\else \Gin@scalex\fi}
+    {\ifx\Gin@scaley\@tempa\else \Gin@scaley\fi}
+    {\ifGin@clip true\else false\fi}\fi%rwi/rhi
+}{}{}
 %    \end{macrocode}
 %
 %

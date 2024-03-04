@@ -427,7 +427,7 @@ local function addFigure(llx, lly, urx, ury, xscale, yscale, clip)
    local yscale = tonumber(yscale)
    -- get figure dimensions from engine
    local fbox = writer.scaleFigure(llx, lly, urx, ury, xscale, yscale, clip, transform_) -- driver dependent scale to embedsize
-   dumpArray(fbox)
+   if config.debug then dumpArray(fbox) end
    -- fix origin at 0,0 and convert to sp
    fbox['x2'] = (fbox['x2']-fbox['x1']) * bpsp_sc
    fbox['x1'] = 0.0
@@ -517,57 +517,57 @@ local function postProcessFigs()
    for k,v in pairs(figures) do
       local fbox = v.fbox; local ppos = v.ppos
       if (ppos.x1 == nil or ppos.x2 == nil or ppos.y1 == nil or ppos.y2 == nil) then
-         -- try from posfile
-         --log("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ %s %s %s", ppos.x1, k, positions[k])
-         --dumpArray(positions[k].ppos)
-         if positions ~= nil and positions[k].ppos then
-            ppos = positions[k].ppos
-         end
-         if (ppos.x1 == nil or ppos.x2 == nil or ppos.y1 == nil or ppos.y2 == nil) then
-            tex.error("Error: incomplete figure (ppos)" .. k .. " " .. v.parent)
-            return false
-         end
+	 -- try from posfile
+	 --log("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ %s %s %s", ppos.x1, k, positions[k])
+	 --dumpArray(positions[k].ppos)
+	 if positions ~= nil and positions[k].ppos then
+	    ppos = positions[k].ppos
+	 end
+	 if (ppos.x1 == nil or ppos.x2 == nil or ppos.y1 == nil or ppos.y2 == nil) then
+	    tex.error("Error: incomplete figure (ppos)" .. k .. " " .. v.parent)
+	    return false
+	 end
       end
       -- fbox checks
       if (fbox.x1 == nil or fbox.x2 == nil or fbox.y1 == nil or fbox.y2 == nil) then
-         tex.error("Error: incomplete figure (fbox)" .. k .. " " .. v.parent)
-         return false
+	 tex.error("Error: incomplete figure (fbox)" .. k .. " " .. v.parent)
+	 return false
       end
       -- normalize
       local tmp;
       if fbox.x1 > fbox.x2 then
-         tmp = fbox.x1; fbox.x1 = fbox.x2; fbox.x2 = tmp;
+	 tmp = fbox.x1; fbox.x1 = fbox.x2; fbox.x2 = tmp;
       end
       if fbox.y1 > fbox.y2 then
-         tmp = fbox.y1; fbox.y1 = fbox.y2; fbox.y2 = tmp;
+	 tmp = fbox.y1; fbox.y1 = fbox.y2; fbox.y2 = tmp;
       end
       if ppos.x1 > ppos.x2 then
-         tmp = ppos.x1; ppos.x1 = ppos.x2; ppos.x2 = tmp;
+	 tmp = ppos.x1; ppos.x1 = ppos.x2; ppos.x2 = tmp;
       end
       if ppos.y1 > ppos.y2 then
-         tmp = ppos.y1; ppos.y1 = ppos.y2; ppos.y2 = tmp;
+	 tmp = ppos.y1; ppos.y1 = ppos.y2; ppos.y2 = tmp;
       end
-      
+
       -- small figures, -- normal for dviwriters
       if ( ((fbox.x2 - fbox.x1) < 100) or ((fbox.y2 - fbox.y1) < 100)) then
-         log("Warning: very small figure %d", v.parent)
+	 log("Warning: very small figure %d", v.parent)
       end
       -- ppos checks
       if ( (ppos.x2 - ppos.x1) < 100) then
-         log("Warning: very small x-ppos %d", v.parent)
+	 log("Warning: very small x-ppos %d", v.parent)
       end
       if ( (ppos.y2 - ppos.y1) < 100) then
-         log("Warning: very small y-ppos %d (%d/%d)(%.2f/%.2f)\n => %.2f", v.parent, ppos.y1, ppos.y2, fbox.y1, fbox.y2, (fbox.y2 - fbox.y1))
-         dumpArray(v,true)
-         -- set y2 from fpos
-         ppos.y2 = ppos.y1 + (fbox.y2 - fbox.y1) 
+	 log("Warning: very small y-ppos %d (%d/%d)(%.2f/%.2f)\n => %.2f", v.parent, ppos.y1, ppos.y2, fbox.y1, fbox.y2, (fbox.y2 - fbox.y1))
+	 dumpArray(v,true)
+	 -- set y2 from fpos
+	 ppos.y2 = ppos.y1 + (fbox.y2 - fbox.y1) 
       end
 
       if v.parent then
-         local s = stree.structarray[v.parent]
-         local bboxA = string.format("/BBox [%.2f %.2f %.2f %.2f]", sptobp(ppos.x1), sptobp(ppos.y1), sptobp(ppos.x2), sptobp(ppos.y2))
-         local bbox = string.format("/BBox [%.2f %.2f %.2f %.2f]", sptobp(fbox.x1), sptobp(fbox.y1), sptobp(fbox.x2), sptobp(fbox.y2))
-         s:addToAttributes('Layout', bboxA)
+	 local s = stree.structarray[v.parent]
+	 local bboxA = string.format("/BBox [%.2f %.2f %.2f %.2f]", sptobp(ppos.x1), sptobp(ppos.y1), sptobp(ppos.x2), sptobp(ppos.y2))
+	 local bbox = string.format("/BBox [%.2f %.2f %.2f %.2f]", sptobp(fbox.x1), sptobp(fbox.y1), sptobp(fbox.x2), sptobp(fbox.y2))
+	 s:addToAttributes('Layout', bboxA)
       end
    end
 end
@@ -1128,7 +1128,7 @@ end
 local function readPosEnd(index)
    local x, y = pdf.getpos()
    local fig = figures[index]
-   --log("READPOS TE %.2f", sptobp(posmax - y))
+   --log("END READPOS TE %.2f", sptobp(posmax - y))
    if fig then -- could be from artifact
        fig['ppos']['x2'] = x;
        fig['ppos']['y2'] = y;
