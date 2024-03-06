@@ -405,7 +405,7 @@
   \IfFileExists{\tp@xmp@file@name}
     {\ccaAddToConfig{metadata}{xmpfile=\tp@xmp@file@name}%
      \directlua{ally.meta.extract()}}
-    {\tpPackageWarning{A11y}{File}{%
+    {\ccPackageWarning{A11y}{File}{%
 \tp@xmp@file@name\space not found.^^J
 Note that the ltpdfa package will create one^^J
 from the Components given in the tpMeta Container.}}}

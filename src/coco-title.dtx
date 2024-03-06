@@ -22,7 +22,7 @@
 % \begin{tpContainer}{titlepage} is the main Container for the
 %   document's locally defined meta data.
 %    \begin{macrocode}
-\tpDeclareContainer{titlepage}{%
+\DeclareContainer{titlepage}{%
   \tpInherit {Components,Properties}{CommonMeta}%
   \tpDeclareType{Components}{%
     \tp@title@simple@comps
@@ -216,7 +216,7 @@
       \ifnum\tpEditorCnt>\z@
         \tpCompGDef\tpRunBookName{tpEditor}{editor-list-pdfinfo-format}%
       \else
-        \tpPackageWarning{transcript-title}{Meta Data}{No author or editor given!}%
+        \ccPackageWarning{transcript-title}{Meta Data}{No author or editor given!}%
         \@tempswafalse
       \fi
     \fi

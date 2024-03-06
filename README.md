@@ -1,6 +1,12 @@
 ![GitHub Release](https://img.shields.io/github/v/release/transpect/CoCoTeX?include_prereleases) ![GitHub (Pre-)Release Date](https://img.shields.io/github/release-date-pre/transpect/CoCoTeX) ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/transpect/cocotex/total)
 
 > [!WARNING]  
+> This is a pre-release!
+>
+> The end user interface is currently being
+> refactored, so expect code-breaking changes in the next few weeks!
+
+> [!WARNING]  
 > The end-user documentation (`doc/manual.pdf`) is incomplete and to
 > be considered a Work in Progress!
 >

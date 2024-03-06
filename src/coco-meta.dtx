@@ -23,7 +23,7 @@
 %   commonly used meta data, both for whole documents as well as parts
 %   of documents.
 %    \begin{macrocode}
-\tpDeclareContainer{CommonMeta}{%
+\DeclareContainer{CommonMeta}{%
   \tpDeclareType{Components}{%
     \tpDeclareRole[author]{Author}%
     \tp@declare@common@meta@comp
@@ -106,7 +106,7 @@
     \tpIfComp{PDFInfoName}{}{\tpPDFInfoName{\tpUseProperty{#1-pdfinfo-name-format}}}%
     \tpIfComp{CorrespondenceAs}{}{\tpCorrespondenceAs{\tpUseProperty{#1-correspondence-as-format}}}%
     \tpIfComp{AffilRef}{\tpIfComp{Affiliation}{%
-        \tpPackageError{Meta}{Ambiguity}
+        \ccPackageError{Meta}{Ambiguity}
           {You cannot use both Containers \string\tpAffilRef\space and \string\tpAffiliation\space in the same `tp#2' Sub-Container}
           {At least one `tp#2' Sub-Container contains both \string\tpAffilRef\space and \string\tpAffiliation. This is not allowed. Please decide for one affiliation strategy: Either two lists with cross-references, or affiliations directly as an author's meta-data.}}{}}{}%
   }%
@@ -142,7 +142,7 @@
      \csgdef{tp@meta@role@\tp@cur@cont @#2@#3}{#4}%
      \csappto{@tp@meta@role@eval@\tp@cur@cont @#2}
         {\csname tp@meta@role@#1\endcsname{#2}{#3}}}
-    {\tpPackageError{Meta}{Argument}
+    {\ccPackageError{Meta}{Argument}
       {Invalid optional argument in \string\tpDeclareRoleBlock!}
       {Only `apply' or `compose' are allowed as values^^Jin the optional argument of \string\tpDeclareRoleBlock!}}}%
 %    \end{macrocode}

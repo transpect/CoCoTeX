@@ -23,19 +23,19 @@
 %    \end{macrocode}
 % \section{Exception handlers}
 %
-% \begin{macro}{\tpKernelDebugMsg}
+% \begin{macro}{\ccKernelDebugMsg}
 %   is used to print debug messages iff the \lstinline{debug} class
 %   option is set.
 %    \begin{macrocode}
-\def\tpKernelDebugMsg#1{\if@tp@debug\message{[tp Kernel Debug]\space\space#1^^J}\fi}
+\def\ccKernelDebugMsg#1{\if@tp@debug\message{[tp Kernel Debug]\space\space#1^^J}\fi}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tpPackageError}
+% \begin{macro}{\ccPackageError}
 %   is a macro to create error messages specific to the Framework. \#1
 %   is the module, \#2 is the type of error, \#3 is the immediate
 %   error message, \#4 is the help string.
 %    \begin{macrocode}
-\def\tpPackageError#1#2#3#4{%
+\def\ccPackageError#1#2#3#4{%
    \GenericError{%
       (#1)\@spaces\@spaces\@spaces\@spaces
    }{%
@@ -44,12 +44,12 @@
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tpPackageWarning}
+% \begin{macro}{\ccPackageWarning}
 %   is a macro to create warnings specific to the Framework. \#1
 %   is the module, \#2 is the type of error, \#3 is the immediate
 %   warning message.
 %    \begin{macrocode}
-\def\tpPackageWarning#1#2#3{%
+\def\ccPackageWarning#1#2#3{%
    \GenericWarning{%
       (#1)\@spaces\@spaces\@spaces\@spaces
    }{%
@@ -58,12 +58,12 @@
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tpPackageInfo}
+% \begin{macro}{\ccPackageInfo}
 %   is a macro to create shell output specific to the Framework. \#1
 %   is the module, \#2 is the type of message, \#3 is the immediate
 %   info string.
 %    \begin{macrocode}
-\def\tpPackageInfo#1#2#3{%
+\def\ccPackageInfo#1#2#3{%
    \GenericInfo{%
       (#1)\@spaces\@spaces\@spaces\@spaces
    }{%
@@ -86,23 +86,23 @@
 % Containers are the package's core data structure. They are basicly
 % sets of properties that are processed in the same way.
 %
-% \begin{macro}{\tpDeclareContainer}
+% \begin{macro}{\DeclareContainer}
 %   is the constructor for new Containers. \#1 is the Container's
 %   name, \#2 its body which conists of Inheritance instructions, Type
 %   and Env declarations.
 %    \begin{macrocode}
-\def\tp@warningspaces{\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space}%
-\long\def\tpDeclareContainer#1#2{%
+\def\cc@warning@spaces{\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space}%
+\long\def\DeclareContainer#1#2{%
   \ifcsdef{tp@container@#1}
-    {\tpPackageWarning{Kernel}{}{`#1' has already been declared!^^J
-\tp@warningspaces Properties from the original Declaration may be^^J
-\tp@warningspaces overridden by the global defaults. Use \string\tpAddToType^^J
-\tp@warningspaces to alter pre-existing Containers!^^J
+    {\ccPackageWarning{Kernel}{}{`#1' has already been declared!^^J
+\cc@warning@spaces Properties from the original Declaration may be^^J
+\cc@warning@spaces overridden by the global defaults. Use \string\tpAddToType^^J
+\cc@warning@spaces to alter pre-existing Containers!^^J
 }}
     {\csdef{tp@container@#1}{}}%
   \csdef{tp@cur@cont}{#1}%
 %    \end{macrocode}
-% We want the declarator macros to be only allowed inside the \lstinline{\tpDeclareContainer} macro.
+% We want the declarator macros to be only allowed inside the \lstinline{\DeclareContainer} macro.
 %    \begin{macrocode}
   \begingroup
 %    \end{macrocode}
@@ -149,7 +149,8 @@
     }%
   \expandafter\x\endgroup
 }
-\@onlypreamble\tpDeclareContainer
+\let\tpDeclareContainer\DeclareContainer%legacy
+\@onlypreamble\DeclareContainer
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tpAddToType} add additional content (i.e., the next token) to a Type \#1 of a previously declared Container \#2.
@@ -164,11 +165,11 @@
 \def\tpEvalType{\tp@opt@curcont\tp@eval@type}
 \def\tp@eval@type[#1]#2{%
   \expandafter\ifx\csname tp@type@#2@#1\endcsname\relax
-    \tpPackageError{Kernel}{Class}
+    \ccPackageError{Kernel}{Class}
     {Data Type #2 in Container #1 undefined!}
     {You try to evaluate a data type `#2' from container `#1', but that data type has not been declared.}%
   \else
-    \tpKernelDebugMsg{Evaluating tp@type@#2@#1:^^J \csmeaning{tp@type@#2@#1}}%
+    \ccKernelDebugMsg{Evaluating tp@type@#2@#1:^^J \csmeaning{tp@type@#2@#1}}%
     \csname tp@type@#2@#1\endcsname
   \fi
 }
@@ -180,7 +181,7 @@
 %    \begin{macrocode}
 \def\tpCheckParent#1#2{%
   \expandafter\ifx\csname tp@container@#1\endcsname\relax
-    \tpPackageError{Kernel}{Class}
+    \ccPackageError{Kernel}{Class}
     {Parent Container `#1' undeclared}
     {You tried to make a Container named `#2' inherit from a Container named `#1', but a Container with that name does not exist.\MessageBreak
      Please make sure that parent Containers are declared before their descendents.}%
@@ -225,14 +226,14 @@
 % combination invoked by the \lstinline{\tpInherit} macro.
 %    \begin{macrocode}
 \def\tp@do@inherit#1#2#3{%
-  \tpKernelDebugMsg{#3 inherits #1 from #2.}%
+  \ccKernelDebugMsg{#3 inherits #1 from #2.}%
   \tpCheckParent{#2}{#3}%
   \expandafter\ifx\csname tp@type@#1@#2\endcsname\relax
-    \tpPackageError{Kernel}{Type}{Type `#1' was not declared}{Type `#1' was not declared for Container `#2'.}%
+    \ccPackageError{Kernel}{Type}{Type `#1' was not declared}{Type `#1' was not declared for Container `#2'.}%
   \else
     \edef\x{\noexpand\csgappto{tp@type@#1@#3}}%
     \expandafter\x\expandafter{\csname tp@type@#1@#2\endcsname}%
-    \tpKernelDebugMsg{value tp@type@#1@#3:^^J \expandafter\meaning\csname tp@type@#1@#3\endcsname}%
+    \ccKernelDebugMsg{value tp@type@#1@#3:^^J \expandafter\meaning\csname tp@type@#1@#3\endcsname}%
   \fi
 }
 %    \end{macrocode}
@@ -448,7 +449,7 @@
     {\ifcsdef{tp@compose@group@#1}
       {\csgappto{tp@compose@group@#1}{#2}}
       {\csgdef{tp@compose@group@#1}{#2}}}
-    {\tpPackageError{Kernel}{Type}{Component Group `#1' unknown!}{You tried to declare a Group Handler for a Component Group that has not been declared, yet! Use \string\tpDeclareComponentGroup{#1}{} to declare the Component Group first.}}%
+    {\ccPackageError{Kernel}{Type}{Component Group `#1' unknown!}{You tried to declare a Group Handler for a Component Group that has not been declared, yet! Use \string\tpDeclareComponentGroup{#1}{} to declare the Component Group first.}}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -649,7 +650,7 @@
      \edef\@tempb{\noexpand\csgundef{tp@\noexpand\tp@cur@cont @#1}}%
      \expandafter\expandafter\expandafter\csgappto\expandafter\@tempa\expandafter{\@tempb}%
      \egroup}%
-  #4\expandafter\long\expandafter\edef\csname tp@\tp@cur@cont @#2\endcsname{\expandafter\noexpand\csname tp@\tp@cur@cont @#1\endcsname}%
+   #4\expandafter\long\expandafter\def\csname tp@\tp@cur@cont @#2\endcsname{\csname tp@\tp@cur@cont @#1\endcsname}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -700,7 +701,8 @@
 % before it can be expanded by \lstinline{\ifx}.
 %    \begin{macrocode}
   \long\def\tpIfComp##1{%
-    \expandafter\expandafter\expandafter\ifx\csname tp@\tp@cur@cont @##1\endcsname\relax\expandafter\@secondoftwo\else\expandafter\@firstoftwo\fi%
+    %% Why 7 expandafter's?!?
+    \expandafter\expandafter\expandafter\expandafter\expandafter\expandafter\expandafter\ifx\csname tp@\tp@cur@cont @##1\endcsname\relax\expandafter\@secondoftwo\else\expandafter\@firstoftwo\fi%
   }%
   \long\def\tpIfCompEmpty##1{%
     \expandafter\expandafter\expandafter\ifx\csname tp@\tp@cur@cont @##1\endcsname\long@empty\expandafter\@firstoftwo\else\expandafter\@secondoftwo\fi}}
@@ -792,7 +794,7 @@
 % \begin{macro}{\tpAddToDefault} adds the material in the next token
 %   to a Container of name \#1's \lstinline{Property} Type.
 %    \begin{macrocode}
-\long\def\tpAddToDefault#1{\tpAddToType{Properties}{#1}}
+\long\def\tpAddToDefault#1#2{\tpAddToType{Properties}{#1}{#2}}
 %    \end{macrocode}
 % \end{macro}
 %
