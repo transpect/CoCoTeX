@@ -72,6 +72,9 @@
 }
 %    \end{macrocode}
 % \end{macro}
+%
+% \section{Global Switches}
+%
 % \begin{macro}{\if@cc@is@final} is a boolean switch that indicates
 %     whether or not a process is final. This is mainly used in the
 %     accessibility module where it matters if a macro is actually
@@ -81,6 +84,18 @@
 \AtBeginDocument{\@cc@is@finaltrue}
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{\if@cc@modern} is a switch to distinguish older
+%     versions of the {\LaTeX} Kernel from newer versions. The pivot
+%     date is defined to be 2020/06/01.
+%    \begin{macrocode}
+\ifx\IfFormatAtLeastTF\@undefined
+  \providecommand\IfFormatAtLeastTF{\@ifl@t@r\fmtversion}%
+\fi
+\newif\if@cc@modern
+\IfFormatAtLeastTF{2020/06/01}{\@cc@moderntrue}{\@cc@modernfalse}
+%    \end{macrocode}
+% \end{macro}
+%
 % \section{Containers}
 %
 % Containers are the package's core data structure. They are basicly

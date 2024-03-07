@@ -139,8 +139,11 @@
 %    \end{macrocode}
 % \begin{macro}{\cct@write@pdf@meta} is used to transfer the
 %   DocumentInfo meta date to the pdf writer.
-%
-%   First we check, whether \lstinline{coco-accessibility.sty} is
+%    \begin{macrocode}
+  \def\cct@write@pdf@meta##1##2##3{%
+    \let\@tempa\@empty
+%    \end{macrocode}
+%   First, we check, whether \lstinline{coco-accessibility.sty} is
 %   used. If so, we check if the User has provided an \lstinline{xmp}
 %   file by reading the required meta data field given in \#\#2 from
 %   that xmp file. If the temporary storage \lstinline{\@tempa} is
@@ -148,12 +151,22 @@
 %   \lstinline{coco-accessibility.sty} isn't loaded, that the user has
 %   not provided an \lstinline{xmp} file, or that the specific field
 %   was empty or missing.
-%
+%    \begin{macrocode}
+    \ccIfAlly{\edef\@tempa{\expandonce{\directlua{tex.print(cocotex.ally.meta.##2)}}}}{}%
+    \ifx\@tempa\@empty
+%    \end{macrocode}
 %   In this case, we take the value given in \lstinline{\#\#3} and
-%   store it in \lstinline{\@tempa}. If the storage is still empty
-%   (i.e. the field is also missing in the \lstinline{tpMeta}
-%   environment), we do nothing.
-%
+%   store it in \lstinline{\@tempa}.
+%    \begin{macrocode}
+      \edef\@tempa{##3}%
+      \expandafter\expandafter\expandafter\ifx\@tempa\relax
+      \else
+%    \end{macrocode}
+% If the storage is still empty (i.e. the field is also missing in the
+% \lstinline{tpMeta} environment), we do nothing.
+%    \begin{macrocode}
+        \ifx\@tempa\@empty\else
+%    \end{macrocode}
 %   If the user has provided the meta datum in the \lstinline{tpMeta}
 %   environment, we pass it either to \lstinline{hyperref}'s
 %   hypersetup variable given in \lstinline{\#\#1} (when
@@ -163,17 +176,13 @@
 %   creates a \lstinline{\jobname.xmp} with the given meta data will
 %   be generated for the next {\LaTeX} run.
 %    \begin{macrocode}
-  \def\cct@write@pdf@meta##1##2##3{%
-    \let\@tempa\@empty
-    \ccIfAlly{\edef\@tempa{\expandonce{\directlua{tex.print(cocotex.ally.meta.##2)}}}}{}%
-    \ifx\@tempa\@empty
-      \protected\def\@tempa{##3}%
-      \ifx\@tempa\@empty\else
-        \ccIfAlly
-          {\pdfstringdef\x{##3}%
-           \edef\@tempa{\noexpand\ccaSetDocinfo{##2}}%
-           \expandafter\@tempa\expandafter{\x}}
-          {\edef\x{\noexpand\hypersetup{##1={\expandonce\@tempa}}}\x}%
+          \ccIfAlly
+            {\def\slash{/}%
+             \pdfstringdef\x{##3}%
+             \edef\@tempa{\noexpand\ccaSetDocinfo{##2}}%
+             \expandafter\@tempa\expandafter{\x}}%
+            {\edef\x{\noexpand\hypersetup{##1={\expandonce\@tempa}}}\x}%
+        \fi
       \fi
     \fi
   }%

@@ -182,7 +182,7 @@
 \newcommand*{\ccaSetDocinfo}[3][]{\directlua{ltpdfa.setDocInfo('\luaescapestring{#2}','\luaescapestring{#3}','\luaescapestring{#1}')}}
 %    \end{macrocode}
 % \end{macro}
-% 
+%
 % \begin{macro}{\ccaAddRolemap} is used to map a custom LaTeX tag to
 %   a well-defined PDF tag. \#1 is the name of the LateX Tag, \#2 is
 %   the name of the PDF role.
@@ -190,7 +190,7 @@
 \newcommand*{\ccaAddRolemap}[2]{\directlua{ltpdfa.tagger.addRolemap('\luaescapestring{#1}','\luaescapestring{#2}')}}
 %    \end{macrocode}
 % \end{macro}
-% 
+%
 % The local preferences for \CoCoTeX's accessibility features is done
 % via the \lstinline{tpMeta} environment. Therefore, we hook the
 % neccessary Components and Properties right into the
