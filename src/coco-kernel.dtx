@@ -177,7 +177,7 @@
 %   calls the Declaration list for data Type \#2. With optional \#1
 %   the Container Class can be overriden.
 %    \begin{macrocode}
-\def\tpEvalType{\tp@opt@curcont\tp@eval@type}
+\def\tpEvalType{\cc@opt@curcont\tp@eval@type}
 \def\tp@eval@type[#1]#2{%
   \expandafter\ifx\csname tp@type@#2@#1\endcsname\relax
     \ccPackageError{Kernel}{Class}
@@ -272,7 +272,7 @@
 % \item[\#4] is code that is executed \textit{after} assignment of the user's value
 % \end{description}
 %    \begin{macrocode}
-\def\tpDeclareComp{\tp@opt@second\@tpDeclareComp}
+\def\tpDeclareComp{\cc@opt@second\@tpDeclareComp}
 \def\@tpDeclareComp[#1]#2#3#4{%
   \ltx@LocalExpandAfter\global\expandafter\let\csname tp@\tp@cur@cont @#1\endcsname\relax
   \expandafter\long\expandafter\def\csname tp#2\endcsname##1{%
@@ -284,7 +284,7 @@
 %   globally available Components with the name \#2 and an optional
 %   initial value \#1. They are usually empty.
 %    \begin{macrocode}
-\def\tpDeclareGComp{\tp@opt@empty\tp@declare@global@comp}%
+\def\tpDeclareGComp{\cc@opt@empty\tp@declare@global@comp}%
 \def\tp@declare@global@comp[#1]#2{%
   \tpDeclareComp{#2}{\expandafter\global}{}%
   \if!#1!\else\csname tp#2\endcsname{#1}\fi%
@@ -413,7 +413,7 @@
 %   Container name, \#3 is the name of the Component, \#4 is the
 %   Override's prefix.
 %    \begin{macrocode}
-\def\tp@check@empty{\tp@opt@empty\@tp@check@empty}%]
+\def\tp@check@empty{\cc@opt@empty\@tp@check@empty}%]
 \def\@tp@check@empty[#1]#2#3#4{%
    \tpIfComp{#4#3}
      {\tpIfCompEmpty{#4#3}
@@ -439,7 +439,7 @@
 %    \begin{macrocode}
 \def\tpDeclareComponentGroup#1#2{%
   \csnumgdef{#1Cnt}{\z@}%
-  \csdef{#1}{\tp@opt@empty{\csname @#1\endcsname}}%
+  \csdef{#1}{\cc@opt@empty{\csname @#1\endcsname}}%
   \csdef{@#1}[##1]{%
     \def\tp@cnt@grp{#1}%
     \csxdef{#1Cnt}{\expandafter\the\expandafter\numexpr\csname #1Cnt\endcsname+\@ne\relax}%
@@ -612,7 +612,7 @@
 %   tp-prefix), and \#4 is the Property that should be applied to all
 %   Members of the Counted Component.
 %    \begin{macrocode}
-\def\tp@comp@def{\tp@opt@empty\@tp@comp@def}
+\def\tp@comp@def{\cc@opt@empty\@tp@comp@def}
 \def\@tp@comp@def[#1]#2#3#4{%
   \tp@apply@collection{#3}{#4}%
   \ifx\tp@iterate@res\relax
@@ -733,7 +733,7 @@
 %   defaults to \lstinline{\tp@cur@cont}. \#2 is the Hook's user-level
 %   name. Hooks always default to an empty string.
 %    \begin{macrocode}
-\def\tpDeclareHook{\tp@opt@curcont\tp@declare@hook}
+\def\tpDeclareHook{\cc@opt@curcont\tp@declare@hook}
 \def\tp@declare@hook[#1]#2{\expandafter\global\expandafter\let\csname tp@hook@#1@#2\endcsname\@empty}
 %    \end{macrocode}
 % \end{macro}
@@ -744,7 +744,7 @@
 %   current Container is used. \#2 is the name of the hook the
 %   material in \#3 is to be appended to.
 %    \begin{macrocode}
-\def\tpAddToHook{\tp@opt@curcont\tp@add@to@hook}
+\def\tpAddToHook{\cc@opt@curcont\tp@add@to@hook}
 \def\tp@add@to@hook[#1]#2#3{%
   \expandafter\ifx\csname tp@hook@#1@#2\endcsname\relax
     \tpDeclareHook[#1]{#2}%
@@ -756,7 +756,7 @@
 % \begin{macro}{\tpUseHook} expands the current state of the hook with
 %   the name \#2 from Container \#1 (current Container if omitted).
 %    \begin{macrocode}
-\def\tpUseHook{\tp@opt@curcont\tp@use@hook}
+\def\tpUseHook{\cc@opt@curcont\tp@use@hook}
 \def\tp@use@hook[#1]#2{\csuse{tp@hook@#1@#2}}
 %    \end{macrocode}
 % \end{macro}
@@ -819,6 +819,30 @@
 %   is a user-level command to directly access a previously set Property.
 %    \begin{macrocode}
 \def\tpUseProperty#1{\csuse{tp@\tp@cur@cont @#1}}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\cc@store@prop} stores the result of the application
+%   of property \#3 in the control sequence \#2. The optional \#1 can
+%   hold a definition modifier like \lstinline{\global} or
+%   \lstinline{\long}.
+%    \begin{macrocode}
+\def\cc@store@prop{\cc@opt@empty\@cc@store@prop}%
+\long\def\@cc@store@prop[#1]#2#3{%
+  \protected@edef\@tempa{\tpUseProperty{#3}}%
+  #1\expandafter\def\expandafter#2\expandafter{\@tempa}%
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccStoreProp} expands an (implicit) Property \#2 and
+%   stores the result in (implicit) control sequence \#1.
+%    \begin{macrocode}
+\def\ccStoreProp{\cc@store@prop}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccStorePropGlobal} is the \lstinline{\global} variant
+%   of \lstinline{\ccStoreProp}.
+%    \begin{macrocode}
+\def\ccStorePropGlobal{\cc@store@prop[\global]}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -904,20 +928,20 @@
 % \subsection{Handling of Optional Arguments}
 % Two simple internal macros to ease up the handling of optional
 % arguments.
-% \begin{macro}{\tp@opt@curcont} overrides Container Names with the optional argument.
+% \begin{macro}{\cc@opt@curcont} overrides Container Names with the optional argument.
 %    \begin{macrocode}
-\long\def\tp@opt@curcont#1{\@ifnextchar[{#1}{#1[\tp@cur@cont]}}%]
+\long\def\cc@opt@curcont#1{\@ifnextchar[{#1}{#1[\tp@cur@cont]}}%]
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@opt@empty} passes an empty string if the optional argument is missing.
+% \begin{macro}{\cc@opt@empty} passes an empty string if the optional argument is missing.
 %    \begin{macrocode}
-\long\def\tp@opt@empty#1{\@ifnextchar[{#1}{#1[]}}%]
+\long\def\cc@opt@empty#1{\@ifnextchar[{#1}{#1[]}}%]
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@opt@second} passes the first mandatory argument to
+% \begin{macro}{\cc@opt@second} passes the first mandatory argument to
 %   the optional argument if the latter is missing.
 %    \begin{macrocode}
-\let\tp@opt@second\@dblarg
+\let\cc@opt@second\@dblarg
 %    \end{macrocode}
 % \end{macro}
 % \subsection{Iterators}
@@ -1049,7 +1073,7 @@
 %   property values, as in CSS.
 %    \begin{macrocode}
 \long\def\tpDeclareClass{\@ifnextchar [{\@tp@set@class}{\@tp@set@class[default]}}%]
-\long\def\@tp@set@class[#1]#2{\tp@opt@empty{\tp@set@class[#1]{#2}}}%
+\long\def\@tp@set@class[#1]#2{\cc@opt@empty{\tp@set@class[#1]{#2}}}%
 \long\gdef\tp@default@class@default{}
 \long\def\tp@set@class[#1]#2[#3]#4{%
   \def\@argii{#2}\ifx\@argii\@empty\let\@argii\tp@str@default\fi%

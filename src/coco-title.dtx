@@ -141,58 +141,71 @@
 %   DocumentInfo meta date to the pdf writer.
 %    \begin{macrocode}
   \def\cct@write@pdf@meta##1##2##3{%
-    \let\@tempa\@empty
+    \let\cct@cur@data\@empty
 %    \end{macrocode}
-%   First, we check, whether \lstinline{coco-accessibility.sty} is
-%   used. If so, we check if the User has provided an \lstinline{xmp}
-%   file by reading the required meta data field given in \#\#2 from
-%   that xmp file. If the temporary storage \lstinline{\@tempa} is
-%   empty, this means that either that
-%   \lstinline{coco-accessibility.sty} isn't loaded, that the user has
-%   not provided an \lstinline{xmp} file, or that the specific field
-%   was empty or missing.
+% First, we check, whether \lstinline{coco-accessibility.sty} is
+% used. If so, we check if the User has provided an \lstinline{xmp}
+% file by reading the required meta data field given in \#\#2 from
+% that xmp file. If there is an xmp file and the data field is
+% non-empty, we do nothing, because in this case, the PDF DocInfo is
+% auto-generated from the data in the xmp file by the
+% \lstinline{ltpdfa} package.
 %    \begin{macrocode}
-    \ccIfAlly{\edef\@tempa{\expandonce{\directlua{tex.print(cocotex.ally.meta.##2)}}}}{}%
-    \ifx\@tempa\@empty
+    \ccIfAlly{\edef\cct@cur@data{\expandonce{\directlua{tex.print(cocotex.ally.meta.##2)}}}}{}%
+    \ifx\cct@cur@data\@empty
 %    \end{macrocode}
-%   In this case, we take the value given in \lstinline{\#\#3} and
-%   store it in \lstinline{\@tempa}.
+% If the temporary storage \lstinline{\cct@cur@data} is still empty,
+% we take the value given in \lstinline{\#\#3} and store its plain
+% text in \lstinline{\cct@cur@data}. Data conversion is done with
+% \lstinline{hyperref}'s \lstinline{\pdfstringdef} macro.
 %    \begin{macrocode}
-      \edef\@tempa{##3}%
-      \expandafter\expandafter\expandafter\ifx\@tempa\relax
-      \else
+      \pdfstringdef\cct@cur@data{##3}%
 %    \end{macrocode}
 % If the storage is still empty (i.e. the field is also missing in the
 % \lstinline{tpMeta} environment), we do nothing.
 %    \begin{macrocode}
-        \ifx\@tempa\@empty\else
+      \ifx\cct@cur@data\@empty\else
 %    \end{macrocode}
-%   If the user has provided the meta datum in the \lstinline{tpMeta}
-%   environment, we pass it either to \lstinline{hyperref}'s
-%   hypersetup variable given in \lstinline{\#\#1} (when
-%   \lstinline{coco-accessibility.sty} is \textit{not} used), or we
-%   pass it to \lstinline{ltpdfa.setDocInfo} using the data field
-%   given in \lstinline{\#\#2}. In this case, the ltpdfa automatically
-%   creates a \lstinline{\jobname.xmp} with the given meta data will
-%   be generated for the next {\LaTeX} run.
+% If the user has provided the data Component in the \lstinline{Meta}
+% environment, we pass it either to \lstinline{hyperref}'s
+% \lstinline{hypersetup} variable given in \lstinline{\#\#1} (when
+% \lstinline{coco-accessibility.sty} is \textit{not} used), or we pass
+% it to \lstinline{ltpdfa.setDocInfo} using the data field given in
+% \lstinline{\#\#2}. In this case, the ltpdfa automatically creates a
+% \lstinline{\jobname.xmp} from which the DocInfo will be generated during
+% subsequent {\LaTeX} run(s).
 %    \begin{macrocode}
-          \ccIfAlly
-            {\def\slash{/}%
-             \pdfstringdef\x{##3}%
-             \edef\@tempa{\noexpand\ccaSetDocinfo{##2}}%
-             \expandafter\@tempa\expandafter{\x}}%
-            {\edef\x{\noexpand\hypersetup{##1={\expandonce\@tempa}}}\x}%
-        \fi
+        \ccIfAlly
+%    \end{macrocode}
+% If we use coco-accessibility, we invoke
+% \lstinline|\ccaSetDocinfo{\#\#2}{\#\#3}|,
+%    \begin{macrocode}
+          {\edef\x{\noexpand\ccaSetDocinfo{##2}}%
+           \expandafter\x\expandafter{\cct@cur@data}}%
+%    \end{macrocode}
+% or \lstinline{hyperref}'s \lstinline|\hypersetup{\#\#1=\#\#3}|, if
+% not. Note that we need to feed \lstinline{\#\#3} directly into
+% \lstinline{hypersetup} since it passes the values of pdf meta data
+% keys through \lstinline{pdfstringdef}. If we were to pass
+% \lstinline{\cct@cur@data}, which already went through
+% \lstinline{pdfstringdef}, the octal byte sequences from the first
+% run are interpreted a second time, which leeds to weird glyphs in
+% the final PDF'S DocInfo. Therefore, we stick with the original
+% input.
+%    \begin{macrocode}
+          {\protected@edef\x{\noexpand\hypersetup{##1={\expandonce{##3}}}}\x}%
       \fi
     \fi
   }%
 %    \end{macrocode}
 % \end{macro}
+% After we decided how we want to process the PDF meta data, we now
+% start to collect the necessary data points:
 %    \begin{macrocode}
   \cct@title@insert@xmp
+  \cct@title@process@bkc
   \cct@title@process@bkt
   \cct@title@process@bka
-  \cct@title@process@bkc
 }
 %    \end{macrocode}
 % \end{macro}
@@ -203,8 +216,7 @@
   \let\tpBreak\space
   \pdfstringdef\@title{\tpUseComp{Title}}%
   \cct@write@pdf@meta{pdftitle}{Title}{\tpUseComp{Title}}%
-  \protected@edef\tp@run@book@title{\tpUseProperty{run-book-title}}%
-  \expandafter\gdef\expandafter\tpRunBookTitle\expandafter{\tp@run@book@title}%
+  \ccStorePropGlobal\tpRunBookTitle{run-book-title}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -230,7 +242,7 @@
       \fi
     \fi
     \if@tempswa
-      \expandafter\author\expandafter{\tpRunBookName}%
+      \pdfstringdef\@author{\tpRunBookName}%
       \cct@write@pdf@meta{pdfauthor}{Author}{\tpRunBookName}%
     \fi
   \endgroup
@@ -394,7 +406,7 @@
   \tp@title@macro{PubWeb}                        % Publisher URL
   %% Pubication Meta
   \tp@title@macro{PDFCreator}                    % Creator for pdf metadata
-  \tp@title@macro[le-tex xerif]{PDFProducer}     % PDF producer for pdf metadata
+  \tp@title@macro[le-tex xerif with CoCoTeX v.\fileversion]{PDFProducer}     % PDF producer for pdf metadata
   \tp@title@macro{Dedication}                    % Dedication
   \tp@title@macro{Acknowledgements}              % Acknowledgements
   \tp@title@macro{Statement}                     % Acknowledgements

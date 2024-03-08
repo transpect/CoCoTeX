@@ -387,7 +387,7 @@
 %   \item[\#5] Property list
 %   \end{description}
 %    \begin{macrocode}
-\def\tpDeclareFloat{\tp@opt@empty\@tpDeclareFloat}
+\def\tpDeclareFloat{\cc@opt@empty\@tpDeclareFloat}
 \long\def\@tpDeclareFloat[#1]#2#3#4#5{%
   \def\tp@float@parent{#1}%
 %    \end{macrocode}
@@ -700,7 +700,7 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %   \item[\#1] float position (optional)
 %   \end{description}
 %    \begin{macrocode}
-\def\tp@float{\tp@opt@empty\@tp@float}
+\def\tp@float{\cc@opt@empty\@tp@float}
 \def\@tp@float[#1]{%
   \par
   \begingroup

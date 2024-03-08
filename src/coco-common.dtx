@@ -377,7 +377,7 @@
 %   is a number that indicated the nesting depth, \#4 is the nested
 %   level's unique name.
 %    \begin{macrocode}
-\def\tp@init@l@{\tp@opt@empty\@tp@init@l@}%
+\def\tp@init@l@{\cc@opt@empty\@tp@init@l@}%
 \def\@tp@init@l@[#1]#2#3#4{%
   \expandafter\ifx\csname c@#2depth\endcsname\relax
     \expandafter\global\expandafter\newcount\csname c@#2depth\endcsname

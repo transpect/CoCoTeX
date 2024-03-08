@@ -77,7 +77,7 @@
 % \item[\#4] Property definitions and switches
 % \end{description}
 %    \begin{macrocode}
-\long\def\tpDeclareHeading{\tp@opt@empty\@tpDeclareHeading}
+\long\def\tpDeclareHeading{\cc@opt@empty\@tpDeclareHeading}
 \long\def\@tpDeclareHeading[#1]#2#3#4{%
 %    \end{macrocode}
 % First, we check if the heading has already been declared.
@@ -825,7 +825,7 @@
 %   \lstinline{heading} environment. Optional \#1 stores the headings
 %   local parameters, \#2 is the level of the heading.
 %    \begin{macrocode}
-\def\heading{\tp@opt@empty\@heading}%
+\def\heading{\cc@opt@empty\@heading}%
 \def\@heading[#1]#2{%
 %    \end{macrocode}
 % Adding start tags for the contents that ``belong'' to a

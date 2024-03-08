@@ -79,7 +79,7 @@
 %   conventions, the role names for a Component and its respective
 %   Property do not necessarily need to be identical.
 %    \begin{macrocode}
-\def\tpDeclareRole{\tp@opt@second\tp@declare@role}%
+\def\tpDeclareRole{\cc@opt@second\tp@declare@role}%
 \def\tp@declare@role[#1]#2{%
   \tpDeclareComponentGroup{tp#2}{%
     \tpDeclareCountedComp{FullName}%
@@ -210,7 +210,7 @@
 %   corresponding label. \#3 is used for property overrides. The
 %   optional Argument \#1 allows to set a default value for the Label.
 %    \begin{macrocode}
-\def\tpDeclareLabeledComp{\tp@opt@empty\tp@declare@labeled@comp}
+\def\tpDeclareLabeledComp{\cc@opt@empty\tp@declare@labeled@comp}
 \def\tp@declare@labeled@comp[#1]#2#3{%
   \tpDeclareComp{#2}{\expandafter\global}{}%
   \tpDeclareComp{#2Label}{\expandafter\global}{}%
