@@ -50,10 +50,16 @@ You need the following **additional** items to run certain CoCoTeX modules:
   [xerif-fonts](https://subversion.le-tex.de/common/xerif-fonts/). Copy
   or sym-link the whole folder as `fonts` inside your project
   directory
-* `coco-accessibility.sty` requires `ltpdfa` (pre-alpha version inside
-  the `externals/ltpdfa/` folder). Copy or sym-link the whole folder
-  as `ltpdfa` inside your project directory, and source the `env.sh`
-  to tell LuaLaTeX where the .lua files are located.
+* `coco-accessibility.sty` requires the lua files from the `ltpdfa`
+  package (pre-alpha version inside the `externals/ltpdfa/`
+  folder). Copy or sym-link the contents of the folder to your project
+  directory, which should now contain both a `suppl` and `ltpdfa`
+  folder and a `env.sh` file.  Source the `env.sh` to tell LuaLaTeX
+  where the `.lua` files are located.
+* **Recommended:** Copy or symlink the `htmltabs.sty` (working
+  pre-alpha version inside the `externals/htmltabs` folder) to your
+  project directory, if you want to use tables with a html-like
+  syntax.
 
 If you use all externals, your project directory should look something
 like this:
@@ -62,8 +68,9 @@ like this:
 <your_project_dir>
   ├─ <your_main>.tex
   ├─ cocotex.cls
+  ├─ coco-kernel.sty
   ├─ coco-common.sty
-  ├─ ... (further coco-modules)
+  ├─ ... (further CoCoTeX modules)
   ├─ env.sh
   ├─ htmltabs.sty
   ├─ fonts
@@ -77,12 +84,6 @@ like this:
       ├─ cmyk.icc
       └─ ...
 ```
-
-### Additional Recommendations ###
-
-* `htmltabs.sty` (working pre-alpha version inside the
-  `externals/htmltabs` folder) if you want to use tables with a
-  html-like syntax.
 
 ## Installation from Sources ##
 
