@@ -226,7 +226,7 @@
 %    \begin{macrocode}
     \tp@meta@role@eval{Author}%
     \tpComposeCollection{tpAuthor}{author-contact-block-format}{AuthorContactBlock}%
-    \tpComposeCollection{tpAffil}{affil-block-format}{AffilBlock}%
+    \tpComposeCollection{tpAffil}{affil-block-item-format}{AffilBlock}%
 %    \end{macrocode}
 % Processing the \lstinline{tpQuote} environments, if any.
 %    \begin{macrocode}
@@ -452,25 +452,39 @@
 %
 % \subsection{Common Stuff}
 %
-% \begin{macro}{\tp@check@author} checks if the
-%   \lstinline{AuthorNameList} override Component is given in the
-%   input for any given output override prefixed by \#1. If not, it is
-%   built if there are any Author subcontainers, at all.
+% \begin{macro}{\cch@set@author@name@list} sets the
+%   \lstinline{#1AuthorNameList} Component.
 %    \begin{macrocode}
-
-\def\tp@check@author#1{%
-  \tpIfComp{#1AuthorNameList}{}{%
-    \tpIfComp{AuthorNameList}{%
+\def\cch@set@author@name@list#1{%
+%    \end{macrocode}
+% first, we look if the Override was given in the \lstinline{heading}
+% Container. If so, we do nothing.
+%    \begin{macrocode}
+  \tpUnlessComp{#1AuthorNameList}{%
+%    \end{macrocode}
+% If not, we look whether or not the general
+% \lstinline{AuthorNameList} override was given in the \lstinline{heading}
+% Container.
+%    \begin{macrocode}
+    \ifx\tp@used@AuthorNameList@override\@empty
+%    \end{macrocode}
+% If yes, then we copy its value to \lstinline{tp#1AuthorNameList}.
+%    \begin{macrocode}
       \expandafter\csname tp#1AuthorNameList\expandafter\endcsname\expandafter{\tp@heading@AuthorNameList}%
-    }{\ifnum\tpAuthorCnt>\z@
-        \tpCompDef\tp@tempa{tpAuthor}{author-list-format}%
-        \ifx\tp@tempa\relax
-        \else
-          \expandafter\csname tp#1AuthorNameList\expandafter\endcsname\expandafter{\tp@tempa}%
+    \else
+%    \end{macrocode}
+% Or else, we re-build the \lstinline{#1AuthorNameList} from the raw
+% \lstinline{Author} Subcontainers by using the
+% \lstinline{author-list-print-format} Property.
+%    \begin{macrocode}
+      \ifnum\tpAuthorCnt>\z@
+        \tpCompDef\cch@tempa{tpAuthor}{author-list-print-format}%
+        \ifx\cch@tempa\relax\else
+          \expandafter\csname tp#1AuthorNameList\expandafter\endcsname\expandafter{\cch@tempa}%
         \fi
       \fi
-    }}}%
-
+    \fi
+  }}%
 %    \end{macrocode}
 % \end{macro}
 %
@@ -486,7 +500,7 @@
   \tp@check@empty{heading}{Title}{Toc}%
   \tp@check@empty{heading}{Number}{Toc}%
   \tp@check@empty{heading}{Subtitle}{Toc}%
-  \tp@check@author{Toc}%
+  \cch@set@author@name@list{Toc}%
   \tpIfAttrIsset{heading}{notoc}
     {}
     {\protected@edef\tp@heading@toc@entry{%
@@ -554,8 +568,8 @@
 \def\tp@make@run{%
   \tp@check@empty{heading}{Title}{Run}%
   \tp@check@empty{heading}{Number}{Run}%
-  \tp@check@author{Run}%
   \tp@check@empty{heading}{Subtitle}{Run}%
+  \cch@set@author@name@list{Run}%
   \tpUseProperty{running-extra}%
   \tpIfProp{running-level}
     {\letcs\tp@mark@name{\tpUseProperty{running-level}mark}}
@@ -913,13 +927,10 @@
   }%
   %% a single Author's contact infomration block
   \tpSetProperty{author-contact-format}{%Format of a single author's contact information
-    \tpUseComp{FullName}\tpIfComp{Affil}{\textsuperscript{\tpUseComp{Affil}}}{}%
+    \tpUseComp{FullName}\tpWhenComp{RefAffil}{\textsuperscript{\tpUseComp{AffilRef}}}%
     \tpUseProperty{orcid-link}%
-    %
   }%
-  \tpSetProperty{author-list-format}{% Format of the whole contact information block
-    \tpUseComp{FullName}\ifnum\tpCurCount<\tpTotalCount\tpUseProperty{counted-name-sep}\fi
-  }%
+  \tpPropertyLet{author-list-format}{author-list-print-format}%
   \tpSetProperty{author-contact-block-format}{% Format of the whole contact information block
     \tpUseComp{AuthorContact}\ifnum\tpCurCount<\tpTotalCount\tpUseProperty{counted-name-sep}\fi
   }%
