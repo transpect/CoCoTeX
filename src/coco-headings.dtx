@@ -568,21 +568,13 @@
 % first, we look if the Override was given in the \lstinline{heading}
 % Container. If so, we do nothing.
 %    \begin{macrocode}
-<<<<<<< HEAD
   \ccUnlessComp{#1AuthorNameList}{%
-=======
-  \tpUnlessComp{#1AuthorNameList}{%
->>>>>>> b97784e (FIX: building of author contact)
 %    \end{macrocode}
 % If not, we look whether or not the general
 % \lstinline{AuthorNameList} override was given in the \lstinline{heading}
 % Container.
 %    \begin{macrocode}
-<<<<<<< HEAD
     \ifx\cc@used@AuthorNameList@override\@empty
-=======
-    \ifx\tp@used@AuthorNameList@override\@empty
->>>>>>> b97784e (FIX: building of author contact)
 %    \end{macrocode}
 % If yes, then we copy its value to \lstinline{tp#1AuthorNameList}.
 %    \begin{macrocode}
@@ -594,11 +586,7 @@
 % \lstinline{author-list-print-format} Property.
 %    \begin{macrocode}
       \ifnum\tpAuthorCnt>\z@
-<<<<<<< HEAD
         \ccdefFromCountedComp\cch@tempa{tpAuthor}{author-list-print-format}%
-=======
-        \tpCompDef\cch@tempa{tpAuthor}{author-list-print-format}%
->>>>>>> b97784e (FIX: building of author contact)
         \ifx\cch@tempa\relax\else
           \expandafter\csname tp#1AuthorNameList\expandafter\endcsname\expandafter{\cch@tempa}%
         \fi
@@ -617,19 +605,11 @@
 %   consists of Components that are written into the .toc file.
 %    \begin{macrocode}
 \def\tp@make@toc{%
-<<<<<<< HEAD
   \cc@check@empty{heading}{Title}{Toc}%
   \cc@check@empty{heading}{Number}{Toc}%
   \cc@check@empty{heading}{Subtitle}{Toc}%
   \cch@set@author@name@list{Toc}%
   \ccIfAttrIsSet{heading}{notoc}
-=======
-  \tp@check@empty{heading}{Title}{Toc}%
-  \tp@check@empty{heading}{Number}{Toc}%
-  \tp@check@empty{heading}{Subtitle}{Toc}%
-  \cch@set@author@name@list{Toc}%
-  \tpIfAttrIsset{heading}{notoc}
->>>>>>> b97784e (FIX: building of author contact)
     {}
     {\protected@edef\tp@heading@toc@entry{%
        \ccIfComp{TocTitle}{\string\tpTocTitle{\string\ignorespaces\space\expandonce{\tp@heading@TocTitle}}}{}%
@@ -694,7 +674,6 @@
 %   iff they exist.
 %    \begin{macrocode}
 \def\tp@make@run{%
-<<<<<<< HEAD
   \cc@check@empty{heading}{Title}{Run}%
   \cc@check@empty{heading}{Number}{Run}%
   \cc@check@empty{heading}{Subtitle}{Run}%
@@ -704,17 +683,6 @@
     {\letcs\tp@mark@name{\ccUseProperty{running-level}mark}}
     {\letcs\tp@mark@name{\cch@sec@name mark}}%
     \letcs\tp@heading@parent{cc@parent@\cch@sec@name}%
-=======
-  \tp@check@empty{heading}{Title}{Run}%
-  \tp@check@empty{heading}{Number}{Run}%
-  \tp@check@empty{heading}{Subtitle}{Run}%
-  \cch@set@author@name@list{Run}%
-  \tpUseProperty{running-extra}%
-  \tpIfProp{running-level}
-    {\letcs\tp@mark@name{\tpUseProperty{running-level}mark}}
-    {\letcs\tp@mark@name{\tp@heading@name mark}}%
-    \letcs\tp@heading@parent{tp@parent@\tp@heading@name}%
->>>>>>> b97784e (FIX: building of author contact)
     \ifx\tp@mark@name\@undefined
       \ifx\tp@heading@parent\relax\else
         \letcs\tp@mark@name{\tp@heading@parent mark}%
@@ -1104,7 +1072,6 @@
     \ccIfComp{ORCID}{\def\tp@Linkimg{\includegraphics[height=1em]{logos/ORCID.pdf}}\tpCompLink{ORCID}{\tp@Linkimg}}{}%
   }%
   %% a single Author's contact infomration block
-<<<<<<< HEAD
   \ccSetProperty{author-contact-format}{%Format of a single author's contact information
     \tpUseComp{FullName}\ccWhenComp{RefAffil}{\textsuperscript{\tpUseComp{AffilRef}}}%
     \ccUseProperty{orcid-link}%
@@ -1112,15 +1079,6 @@
   \ccPropertyLet{author-list-format}{author-list-print-format}%
   \ccSetProperty{author-contact-block-format}{% Format of the whole contact information block
     \tpUseComp{AuthorContact}\ifnum\tpCurCount<\tpTotalCount\ccUseProperty{counted-name-sep}\fi
-=======
-  \tpSetProperty{author-contact-format}{%Format of a single author's contact information
-    \tpUseComp{FullName}\tpWhenComp{RefAffil}{\textsuperscript{\tpUseComp{AffilRef}}}%
-    \tpUseProperty{orcid-link}%
-  }%
-  \tpPropertyLet{author-list-format}{author-list-print-format}%
-  \tpSetProperty{author-contact-block-format}{% Format of the whole contact information block
-    \tpUseComp{AuthorContact}\ifnum\tpCurCount<\tpTotalCount\tpUseProperty{counted-name-sep}\fi
->>>>>>> b97784e (FIX: building of author contact)
   }%
 }
 %    \end{macrocode}
