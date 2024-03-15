@@ -2029,8 +2029,8 @@
   \ht@debugmsg{colspan}{Setting contents of cell \ht@thecell.}%
   \SetCellProp{class}{\htTdClass}%
   \SetCellContent{%
-    \if@ht@no@init@strut\strut\hrule \@height\z@\vskip-\baselineskip\vskip\z@skip\else\strut\fi
-    \if@ht@hyph@first@word\hskip\z@\fi
+    \if@ht@no@init@strut\strut\vskip-\baselineskip\vskip\z@skip\else\strut\fi
+    \if@ht@hyph@first@word\ifhmode\hskip\z@\fi\fi
     \ignorespaces
     #1%
     \if@ht@hyph@first@word\kern\z@\fi% to ensure hyphenation is applied when there is only a single word in the cell.
