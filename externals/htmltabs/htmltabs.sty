@@ -759,9 +759,8 @@
   \let\ht@is@left\relax
   \hbox{%
     #2\csname ht@border@style@#3\endcsname{#1}{\dimexpr\vsize\relax}}}}%
-\RequirePackage{everysel}
 \newif\if@ht@spaceskip
-\newcommand{\@ht@everyselectfont}{%
+\def\@ht@setspaceskip{%
   \if@ht@spaceskip
     \ifdim\fontdimen\thr@@\font=\z@\relax
       \spaceskip\z@
@@ -771,7 +770,6 @@
   \else
     \spaceskip\z@
   \fi}
-\EverySelectfont{\@ht@everyselectfont}
 \let\@ht@savedcr\\
 \let\@ht@saved@gnewline\@gnewline
 \def\@ht@gnewline#1{%
@@ -810,7 +808,7 @@
   \rightskip\@rightskip
   \parfillskip\z@skip\relax
   \@ht@spaceskiptrue
-  \@ht@everyselectfont
+  \@ht@setspaceskip
   }
 \def\ht@halign@left@none{%
   \leftskip\z@\relax
@@ -825,7 +823,7 @@
   \rightskip\@rightskip
   \parfillskip\@flushglue\relax
   \@ht@spaceskiptrue
-  \@ht@everyselectfont
+  \@ht@setspaceskip
 }
 \def\ht@halign@right@none{%
   \leftskip\@flushglue\relax
@@ -841,7 +839,7 @@
   \rightskip\@rightskip
   \parfillskip\z@skip\relax
   \@ht@spaceskiptrue
-  \@ht@everyselectfont
+  \@ht@setspaceskip
 }
 \def\ht@halign@justified@auto{%
   \let\\\@raggedtwoe@savedcr
@@ -851,7 +849,7 @@
   \rightskip\@rightskip
   \parfillskip\@flushglue
   \@ht@spaceskipfalse
-  \@ht@everyselectfont
+  \@ht@setspaceskip
 }
 \let\ht@halign@justified@none\ht@halign@justified@auto
 \def\ht@valign@box#1{%
