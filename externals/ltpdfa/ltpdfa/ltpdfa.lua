@@ -46,6 +46,11 @@ end
 function log( ... )
    texio.write_nl(string.format(...))
 end
+function debug_log( ... )
+   if config.debug then 
+      texio.write_nl(string.format(...))
+   end
+end
 function dumpArray(P, recurse, level)
    local level = level or 1
    local indent = string.rep("  ", level)
@@ -143,7 +148,7 @@ local function init()
       log("dump of config (init):")
       dumpArray(config)
       if (config.nodetree == true) then
-         nodetree = require("nodetree/nodetree")
+         nodetree = require("nodetree")
          nodetree.set_option('engine', 'lualatex')
          if (tex.luatexversion < 112) then nodetree.set_default_options() end
       end
@@ -262,9 +267,7 @@ local function beginDocument(page)
    --log("READ POSFILE %s", f)
 end
 local function endDocument()
-   if config.debug then
-      log("ltpdfa.endDocument lastpage=%d for %s", ltpdfa.lastpage, tex.jobname)
-   end
+   debug_log("ltpdfa.endDocument lastpage=%d for %s", ltpdfa.lastpage, tex.jobname)
    -- try to autoclose
    -- TODO CHECK ltpdfa.tagger.autoClose('document', nil, true)
 end
