@@ -95,6 +95,13 @@
 %    \begin{macrocode}
 \ProcessOptionsX
 %    \end{macrocode}
+% 
+%    \begin{macrocode}
+\def\cca@patch@error#1{%
+  \ccPackageError{a11y}{compatibility}
+  {Could not patch \noexpand#1}
+  {You probably use a LaTeX package that re-defines hyperref's \noexpand#1 macro. It is apparently not compatbile with coco-accessibility.sty. Sorry}}
+%    \end{macrocode}
 % then we need to packages. \lstinline{luatexbase-attr} (possibly
 % deprecated?) provides an interface to add attributes to lua code;
 % \lstinline{atveryend} provides a hook to inject code to the final
@@ -155,7 +162,7 @@
 %     \lstinline{\egroup} around the tagged area.
 %    \begin{macrocode}
 \newcommand*{\ccaStructStart}[2][]{\directlua{ltpdfa.tagger.structStart('\luaescapestring{#2}','\luaescapestring{#1}')}}
-\newcommand*{\ccaStructEnd}[1]{\directlua{ltpdfa.tagger.structEnd('\luaescapestring{#1}')}} %% \ignorespaces ????
+\newcommand*{\ccaStructEnd}[1]{\directlua{ltpdfa.tagger.structEnd('\luaescapestring{#1}')}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccaVstructStart, \ccaVstructEnd} are the same as
@@ -242,13 +249,15 @@
 \patchcmd\Hy@StartlinkName
   {\pdfstartlink}
   {\ccaVstructStart{Link}\ccaAddAltText{#2}\edef\@ltpdfmy@parent{\ccaGetStructParent}%
-   \pdfstartlink}{}{\ERROR}
+   \pdfstartlink}
+  {}{\cca@patch@error\Hy@StartlinkName}
 %    \end{macrocode}
 % and the parent node inside the link attribute:
 %    \begin{macrocode}
 \patchcmd\Hy@StartlinkName
   {#1}
-  {#1 /StructParent \@ltpdfmy@parent}{}{\ERROR}
+  {#1 /StructParent \@ltpdfmy@parent}
+  {}{\cca@patch@error\Hy@StartlinkName}
 %    \end{macrocode}
 % then we patch hyperref's general link macro, twice. Once for the Link's start tag
 %    \begin{macrocode}
@@ -256,7 +265,7 @@
   {\pdfstartlink}
   {\ccaVstructStart{Link}\ccaAddAltText{#1}\edef\@ltpdfmy@parent{\ccaGetStructParent}%
    \pdfstartlink}
-  {}{\ERROR}
+  {}{\cca@patch@error\hyper@linkurl}
 %    \end{macrocode}
 % and secondly for the Parent:
 %    \begin{macrocode}
@@ -267,7 +276,7 @@
   {/C[\@urlbordercolor]%
         \fi
         /StructParent \@ltpdfmy@parent%
-  }{}{\ERROR}
+  }{}{\cca@patch@error\hyper@linkurl}
 %    \end{macrocode}
 % finally, we patch the end tag for the link node into the
 % \lstinline{\close@pdflink} macro:
@@ -276,9 +285,37 @@
   {\pdfendlink}
   {\pdfendlink
    \ccaAddLastLink\ccaVstructEnd{Link}}
-  {}
-  {\ERROR}
+  {}{\cca@patch@error\close@pdflink}
 %    \end{macrocode}
+% For internal references, we patch the tagging into the
+% \lstinline{\@setref} macro. Unfortunately, hyperref redefines this
+% macro and links to both the original version (when \lstinline{\ref*}
+% is used), and its own re-definition (else), so we need to patch both
+% versions. We start by resetting \lstinline{\@setref} to its vanilla
+% state and inject our tagging:
+%    \begin{macrocode}
+\let\cca@hy@setref\@setref
+\let\@setref\real@setref
+\patchcmd\@setref
+  {\expandafter#2#1\null}
+  {\ccaStructStart{Reference}\expandafter#2#1\null\ccaStructEnd{Reference}}
+  {}{\cca@patch@error\@setref}
+%    \end{macrocode}
+% Now, we restore hyperref's version and inject the tagging there as
+% well:
+%    \begin{macrocode}
+\let\real@setref\@setref
+\let\@setref\cca@hy@setref
+\patchcmd\@setref
+  {\expandafter\Hy@setref@link}
+  {\ccaStructStart{Reference}\expandafter\Hy@setref@link}
+  {}{\cca@patch@error\@setref}
+\patchcmd\@setref
+  {{#2}}
+  {{#2}\ccaStructEnd{Reference}}
+  {}{\cca@patch@error\@setref}
+%    \end{macrocode}
+%
 % \subsection{Tagging Page Styles as Artifacts}
 %
 % Page styles, i.e., headers and footers need to be tagged as

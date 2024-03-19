@@ -49,16 +49,17 @@
 % \lstinline{CommonMeta} Container. We therefore just need to declare the
 % overrides.
 %    \begin{macrocode}
-    \tp@heading@authors%
+    \cch@provide@authors%
 %    \end{macrocode}
 % The remaining Components are built as usual.
 %    \begin{macrocode}
-    \tp@provide@hd@macros{Title}%
-    \tp@provide@hd@macros{Subtitle}%
-    \tp@provide@hd@macros{Number}%
-    \tp@provide@hd@macros{LicenceLogo}%
-    \tp@provide@hd@macros{LicenceName}%
-    \tp@heading@quotes
+    \cch@provide@comp{Title}%
+    \cch@provide@comp{Subtitle}%
+    \cch@provide@comp{Number}%
+    \cch@provide@comp{LicenceLogo}%
+    \cch@provide@comp{LicenceName}%
+    \tpDeclareComp{RefLabel}{}{}%
+    \cch@provide@quotes
   }%
   \tpDeclareType{Properties}{}%
   \tpDeclareEnv{\heading}{\endheading}%
@@ -122,7 +123,7 @@
 % account for all dependend constructions like list-ofs and
 % toc-entries.
 %    \begin{macrocode}
-    \tp@declare@heading{#2}{#3}%
+    \cch@declare@heading{#2}{#3}%
   }{% ifcsdef tp@container@#3 else
 %    \end{macrocode}
 % If the heading does not already exist, we build a new one.
@@ -183,7 +184,7 @@
 % Unlike other Sub-Containers, headings form no own {\LaTeX}
 % environment.  Instead, headings are specifications of one common
 % \lstinline{heading} environment. Is is outsourced into the internal
-% \lstinline{\tp@declare@heading} macro, which is defined below.
+% \lstinline{\cch@declare@heading} macro, which is defined below.
 %
 % The reason for that is that we don't want to define versions of the
 % same property macros for each and every single heading
@@ -191,7 +192,7 @@
 % that represent the heading's properties for each instance of the
 % generalised \lstinline{heading} container.
 %    \begin{macrocode}
-      \tp@declare@heading{#2}{#3}%
+      \cch@declare@heading{#2}{#3}%
     }% \DeclareContainer{#3}
   }% \ifcsdef tp@container@#3 fi
 %    \end{macrocode}
@@ -337,20 +338,20 @@
 %   parent, if it exists.
 %    \begin{macrocode}
 \def\tp@heading@create@parent#1#2{%
-  \def\tp@heading@name{#2}%
+  \def\cch@sec@name{#2}%
   \if!#1!\else
     \tpCheckParent{#1}{#2}%
   \fi%
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@declare@heading} consists of two parts: In the
+% \begin{macro}{\cch@declare@heading} consists of two parts: In the
 %   first part, the inheritance mechanism and the initializers for
 %   each new heading level are triggered.
 %
 %   \#1 is the numeric heading level, \#2 is the name of the heading.
 %    \begin{macrocode}
-\def\tp@declare@heading#1#2{%
+\def\cch@declare@heading#1#2{%
   \tpEvalType{Parent}%
   \tpEvalType{Init}%
 %    \end{macrocode}
@@ -399,7 +400,7 @@
 % Here, the actual construction of the heading begins.
 %    \begin{macrocode}
     \tpUseProperty{heading-par}%
-    \tp@hd@use@hook{before-hook}{#2}%
+    \cch@use@hook{before-hook}{#2}%
     \tpUseProperty{before-heading}%
 %    \end{macrocode}
 % Add vertical space before the heading
@@ -417,7 +418,7 @@
 % fallback.
 %    \begin{macrocode}
     \tpIfProp{after-skip}{\expandafter\global\expandafter\@tempskipa\expandafter=\tpUseProperty{after-skip}\relax}{\global\@tempskipa=1sp\relax}%
-    \tp@hd@use@hook{before-print-hook}{#2}%
+    \cch@use@hook{before-print-hook}{#2}%
     \def\@svsec{%
 %    \end{macrocode}
 % The \lstinline{heading block} is the composition of all of the
@@ -428,7 +429,7 @@
 %    \end{macrocode}
 % Labels to be used with LaTeX's cross reference mechanism are defined
 %    \begin{macrocode}
-      \tp@heading@create@labels{#2}% label facility
+      \ccCreateLabel{#2}% label facility
       \leftskip\tpUseProperty{margin-left}%
       \rightskip\tpUseProperty{margin-right}%
       \bgroup
@@ -476,15 +477,15 @@
 %    \end{macrocode}
 % \end{macro}
 % \end{macro}
-% 
-% \begin{macro}{\tp@hd@use@hook} recursively includes a hook \#1 from the heading \#2's parent before expanding its own version.
+%
+% \begin{macro}{\cch@use@hook} recursively includes a hook \#1 from the heading \#2's parent before expanding its own version.
 %    \begin{macrocode}
-\def\tp@hd@use@hook#1#2{%
+\def\cch@use@hook#1#2{%
   \expandafter\ifx\csname tp@parent@#2\endcsname\relax\else
-    \edef\@@parent{#1-\csname tp@parent@#2\endcsname}%
-    \expandafter\tpUseHook\expandafter{\@@parent}%
+    \edef\@cch@parent{#1-\csname tp@parent@#2\endcsname}%
+    \expandafter\tpUseHook\expandafter{\@cch@parent}%
   \fi
-  \tpUseHook{#1-\tp@heading@name}%
+  \tpUseHook{#1-\cch@sec@name}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -550,54 +551,6 @@
      }{}}
 %    \end{macrocode}
 % \end{macro}
-%
-% \subsection{Label mechanism}
-% \begin{macro}{\@tp@heading@parse@label} separates multiple
-%   comma-separated values within the same \lstinline{label} attribute.
-%    \begin{macrocode}
-\def\@tp@heading@parse@label#1,#2,\@nil{%
-  \@tp@heading@create@labels{#1}%
-  \if!#2!\else
-    \@tp@heading@parse@label#2,\@nil
-  \fi}
-%    \end{macrocode}
-% \end{macro}
-% \begin{macro}{\tp@heading@create@labels} is the wrapper to handle
-%   multiple values in the \lstinline{label} Attribute.
-%    \begin{macrocode}
-\def\tp@heading@create@labels#1{%
-  \ifx\Hy@MakeCurrentHrefAuto\@undefined\else
-    \Hy@MakeCurrentHrefAuto{tp:#1}%
-    \Hy@raisedlink{\hyper@anchorstart{\@currentHref}\hyper@anchorend}%
-  \fi
-  \tpIfAttr{heading}{label}
-    {\expandafter\@tp@heading@parse@label\tp@heading@attr@label,,\@nil}{}}
-%    \end{macrocode}
-% \end{macro}
-% \begin{macro}{\@tp@heading@create@labels} generates the labels to be
-%   used with \LaTeX's cross reference and \lstinline{hyperref}'s
-%   hyperlink mechanisms, simultanuously. This macro locally redefines
-%   LaTeX's \lstinline{\label} macro and sets both \lstinline{\@currentlabel} as
-%   well as a~\lstinline{\hyperlink} target.
-%    \begin{macrocode}
-\def\@tp@heading@create@labels#1{%
-  \if!#1!\else
-    \tpIfComp{Number}
-      {\edef\@tempa{\expandonce{\tp@heading@Number}}%
-       \let\@currentlabel\@tempa\relax
-       \let\@currentlabelname\tp@heading@Title}
-%    \end{macrocode}
-% in case, un-numbered headings receive a \lstinline{label} to be
-% accessed via \lstinline{\pageref} or something:
-%    \begin{macrocode}
-      {\phantomsection}%
-    \expandafter\hypertarget\expandafter{#1}{}%
-    \expandafter\tpltx@label\expandafter{#1}%
-  \fi
-  \global\let\label\tpltx@label}
-%    \end{macrocode}
-% \end{macro}
-%
 %
 % \section{Externalisation of Heading Compoents}
 %
@@ -665,10 +618,10 @@
        \tpIfComp{TocAuthorNameList}{\string\tpTocAuthorNameList{\string\ignorespaces\space\expandonce{\tp@heading@TocAuthorNameList}}}{}%
        \tpIfComp{TocSubtitle}{\string\tpTocSubtitle{\string\ignorespaces\space\expandonce{\tp@heading@TocSubtitle}}}{}%
      }%
-     \tpIfProp{toc-level}{\edef\tp@heading@name{\tpUseProperty{toc-level}}}{}%
+     \tpIfProp{toc-level}{\edef\cch@sec@name{\tpUseProperty{toc-level}}}{}%
      \protected@write\@auxout
        {\tpGobble}%
-       {\string\@writefile{toc}{\protect\tpContentsline{\tp@heading@name}{\tp@heading@toc@entry}{\thepage}{\@currentHref}\protected@file@percent}}\relax
+       {\string\@writefile{toc}{\protect\tpContentsline{\cch@sec@name}{\tp@heading@toc@entry}{\thepage}{\@currentHref}\protected@file@percent}}\relax
     }
 }
 %    \end{macrocode}
@@ -729,8 +682,8 @@
   \tpUseProperty{running-extra}%
   \tpIfProp{running-level}
     {\letcs\tp@mark@name{\tpUseProperty{running-level}mark}}
-    {\letcs\tp@mark@name{\tp@heading@name mark}}%
-    \letcs\tp@heading@parent{tp@parent@\tp@heading@name}%
+    {\letcs\tp@mark@name{\cch@sec@name mark}}%
+    \letcs\tp@heading@parent{tp@parent@\cch@sec@name}%
     \ifx\tp@mark@name\@undefined
       \ifx\tp@heading@parent\relax\else
         \letcs\tp@mark@name{\tp@heading@parent mark}%
@@ -874,7 +827,7 @@
 % Some {\LaTeX} kernel macros are saved, the namespace is
 % set and counted groups from previous headings are reset.
 %    \begin{macrocode}
-  \tp@heading@reserve
+  \cch@reserve
 %    \end{macrocode}
 % Handling of the optional argument
 %    \begin{macrocode}
@@ -885,7 +838,7 @@
 % \lstinline{part} is \lstinline{-1}, \lstinline{chapter} is
 % \lstinline{0}, \lstinline{section} is \lstinline{1}, etc.
 %    \begin{macrocode}
-  \edef\tp@heading@name{#2}%
+  \edef\cch@sec@name{#2}%
 %    \end{macrocode}
 % The cascaded Properties of the heading level are expanded. This is
 % excluded into its own macro to simplify re-definition if necessary.
@@ -899,28 +852,27 @@
 %   environment.
 %    \begin{macrocode}
 \def\endheading{%
-  \expandafter\ifx\csname tpUseHeading\tp@heading@name\endcsname\relax
-    \PackageError{coco-headings.sty}{Heading level \tp@heading@name\space unknown!}{A Heading with level \tp@heading@name\space is unknown. Use the \string\tpDeclareHeading\space macro to declare heading levels.}%
+  \expandafter\ifx\csname tpUseHeading\cch@sec@name\endcsname\relax
+    \PackageError{coco-headings.sty}{Heading level \cch@sec@name\space unknown!}{A Heading with level \cch@sec@name\space is unknown. Use the \string\tpDeclareHeading\space macro to declare heading levels.}%
   \else
-    \csname tpUseHeading\tp@heading@name\endcsname%
+    \csname tpUseHeading\cch@sec@name\endcsname%
   \fi
-  \tp@heading@reset
+  \cch@reset
 }
 %    \end{macrocode}
 % \end{macro}
 %
 % \subsection{Content Handlers}
 %
-% \begin{macro}{\tp@heading@reserve}
+% \begin{macro}{\cch@reserve}
 %   re-directs some of \LaTeX's kernel macros and makes sure that some
 %   other macros have their default values:
 %    \begin{macrocode}
-\def\tp@heading@reserve{%
+\def\cch@reserve{%
   \tpNamespace{heading}%
-  \let\tpltx@dbl@backslash\\
+  \let\cch@ltx@dbl@backslash\\
   \let\\\tpBreak
-  \let\tpltx@label\label
-  \let\tp@heading@label\relax
+  \let\cc@ltx@label\label
   \def\tpAuthorCnt{\z@}%
   \def\tpAffilCnt{\z@}%
   \tp@reset@components{\tp@cur@cont}%
@@ -931,19 +883,18 @@
 %   should be unnecessary since \lstinline{heading} is an environment
 %   and therefore constitutes a closed group).
 %    \begin{macrocode}
-\def\tp@heading@reset{%
+\def\cch@reset{%
   \let\tp@cur@cont\relax
-  \let\\\tpltx@dbl@backslash
-  \let\label\tpltx@label
-  \let\tp@heading@name\relax
-  \let\tp@heading@label\relax
+  \let\\\cch@ltx@dbl@backslash
+  \let\label\cc@ltx@label
+  \let\cch@sec@name\relax
   }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@heading@quotes} covers multiple quotation blocks
+% \begin{macro}{\cch@provide@quotes} covers multiple quotation blocks
 %   assocciated with a heading.
 %    \begin{macrocode}
-\def\tp@heading@quotes{%
+\def\cch@provide@quotes{%
   \tpDeclareComp{QuoteBlock}{}{}%
   \tpDeclareComponentGroup{tpQuote}{%
     \tpDeclareCountedComp{QuoteText}%
@@ -954,7 +905,7 @@
 % \end{macro}
 % \begin{macro}{\tp@heading@role@handlers} sets up the additional Components for the Author Role specific to headings.
 %    \begin{macrocode}
-\def\tp@heading@authors{%
+\def\cch@provide@authors{%
   \tpAddToRole{Author}{%
     \tpDeclareCountedComp{AuthorContact}%
   }%
@@ -962,28 +913,28 @@
   \tpGroupHandler{tpAuthor}{%
     \tpIfComp{AuthorContact}{}{\csname tpAuthorContact\endcsname{\tpUseProperty{author-contact-format}}}{}%
   }%
-  \tp@provide@hd@overrides{AuthorNameList}%
+  \cc@provide@overrides{AuthorNameList}%
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@provide@hd@macros} is a wrapper that creates the
+% \begin{macro}{\cch@provide@comp} is a wrapper that creates the
 %   user-level macros for the Component itself and its overrides. \#1
 %   is the Component name.
 %    \begin{macrocode}
-\def\tp@provide@hd@macros#1{%
+\def\cch@provide@comp#1{%
   \tpDeclareComp{#1}{}{}%
-  \tp@provide@hd@overrides{#1}%
+  \cc@provide@overrides{#1}%
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@provide@hd@overrides} declares the Component
+% \begin{macro}{\cc@provide@overrides} declares the Component
 %   macros for a heading Component's overrides. \#1 is the Component
 %   name. The overrides allow a four-way distinction between
 %   \textit{i} the data printed in-situ (\lstinline{\tp#1}), \textit{ii} data sent
 %   to toc (\lstinline{\tpToc#1}), (iii) data sent to the page styles (\lstinline{\tpRun#1}), and (iv) the data sent
 %   to the PDF bookmarks (\lstinline{\tpBM#1}).
 %    \begin{macrocode}
-\def\tp@provide@hd@overrides#1{%
+\def\cc@provide@overrides#1{%
   \tpDeclareComp{Toc#1}{}{}% toc overrides
   \tpDeclareComp{Run#1}{}{}% running overrides
   \tpDeclareComp{BM#1}{}{}% bookmark overrides

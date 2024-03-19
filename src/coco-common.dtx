@@ -119,11 +119,11 @@
 \def\afterfi#1\fi{\fi#1}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@topstrut} is a \lstinline{\strut} that has the
+% \begin{macro}{\cc@topstrut} is a \lstinline{\strut} that has the
 %   height of \lstinline{\topskip} and the depth of the difference
 %   between the \lstinline{\baselineskip} and \lstinline{\topskip}.
 %    \begin{macrocode}
-\def\tp@topstrut{\vrule\@width\z@\@height\topskip\@depth\dimexpr\baselineskip-\topskip\relax}
+\def\cc@topstrut{\vrule\@width\z@\@height\topskip\@depth\dimexpr\baselineskip-\topskip\relax}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\afterbox}
@@ -738,7 +738,70 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsection{Label generation and selection}
+% \subsection{Labelling and Cross referencing}
+%
+% {\CoCoTeX} provides two ways to put labels on Container instances:
+% one via the label attribute at the begin of a (Sub-)Containers
+% corresponding environment, or via the \lstinline{RefLabel} Component
+% inside the (Sub-)Container.
+%
+%    \begin{macrocode}
+\AtBeginDocument{%
+%    \end{macrocode}
+% Storing the final definitions of \lstinline{\label}
+% \begin{macro}{\cc@ltx@label} stores the definition of LaTeX's
+%   \lstinline{\label} macro at the beginning of the document.
+%    \begin{macrocode}
+  \global\let\cc@ltx@label\label
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\ccCreateLabel} is a high level macro to generate
+%   hyperref anchors and/or ref targets. \#1 is the type of
+%   anchor. This macro looks for both the label attribute in the begin
+%   of a Container's environment, as well as for a
+%   \lstinline{RefLabel} Components inside the environment. If both
+%   exist, both apply. If none exists, a generic label and/or anchor
+%   point is generated.
+%    \begin{macrocode}
+\def\ccCreateLabel#1{%
+  \ifx\Hy@MakeCurrentHrefAuto\@undefined\else
+    \Hy@MakeCurrentHrefAuto{cc:#1}%
+    \Hy@raisedlink{\hyper@anchorstart{\@currentHref}\hyper@anchorend}%
+  \fi
+  \tpWhenComp{RefLabel}
+    {\edef\cc@ref@label{\tpUseComp{RefLabel}}%
+     \expandafter\cc@create@label\expandafter{\cc@ref@label}}%
+  \tpIfAttr{\tp@cur@cont}{label}
+    {\cc@parse@csv\cc@create@label{tp@\top@cur@cont @attr@label}}%
+    {\cc@create@label{}}}
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{\@cc@create@label}
+%    \begin{macrocode}
+\def\cc@create@label#1{%
+  \ifblank{#1}
+    {}
+    {\tpIfComp{Number}
+      {\protected@edef\@tempa{\csname tp@\tp@cur@cont @Number\endcsname}%
+       \ifx\cc@labelname@comp\@undefined
+         \def\cc@labelname@comp{Title}%
+       \fi
+       \let\@currentlabel\@tempa\relax
+       \protected@edef\@currentlabelname{\csname tp@\tp@cur@cont @\cc@labelname@comp\endcsname}%
+     }%
+      {\phantomsection}%
+      \expandafter\hypertarget\expandafter{#1}{}%
+      \expandafter\label\expandafter{#1}%
+  }
+}
+%    \end{macrocode}
+% \end{macro}
+%
+%
+% \subsection{Linguistic Name generation and selection}
 %
 % \begin{macro}{\tpSetBabelLabel} defined a language-dependent string
 %   macro for German and English varieties.  \#1 is the language, \#2
@@ -746,19 +809,20 @@
 %   label.
 %    \begin{macrocode}
 \def\tpSetBabelLabel#1#2#3{%
-  \def\@lang{#1}%
-  \expandafter\def\expandafter\@tempa\expandafter{\expandafter\def\csname #2name\endcsname{#3}}%
-  \ifdefstring\@lang{german}{%
-    \expandafter\addto\expandafter\captionsgerman\expandafter{\@tempa}%
-    \expandafter\addto\expandafter\captionsngerman\expandafter{\@tempa}%
-  }{%
-    \ifdefstring\@lang{english}{%
-      \expandafter\addto\expandafter\captionsbritish\expandafter{\@tempa}%
-      \expandafter\addto\expandafter\captionsUKenglish\expandafter{\@tempa}%
-      \expandafter\addto\expandafter\captionsenglish\expandafter{\@tempa}%
-      \expandafter\addto\expandafter\captionsamerican\expandafter{\@tempa}%
-      \expandafter\addto\expandafter\captionsUSenglish\expandafter{\@tempa}%
-    }{}}}
+  \def\ccc@lang{#1}%
+  \expandafter\def\expandafter\ccc@tempa\expandafter{\expandafter\def\csname #2name\endcsname{#3}}%
+  \ifdefstring\ccc@lang{german}{%
+    \expandafter\addto\expandafter\captionsgerman\expandafter{\ccc@tempa}%
+    \expandafter\addto\expandafter\captionsngerman\expandafter{\ccc@tempa}%
+  }\relax%
+  \ifdefstring\ccc@lang{english}{%
+    \expandafter\addto\expandafter\captionsbritish\expandafter{\ccc@tempa}%
+    \expandafter\addto\expandafter\captionsUKenglish\expandafter{\ccc@tempa}%
+    \expandafter\addto\expandafter\captionsenglish\expandafter{\ccc@tempa}%
+    \expandafter\addto\expandafter\captionsamerican\expandafter{\ccc@tempa}%
+    \expandafter\addto\expandafter\captionsUSenglish\expandafter{\ccc@tempa}%
+  }\relax%
+}
 %    \end{macrocode}
 % \end{macro}
 % \subsection{Link Generation}

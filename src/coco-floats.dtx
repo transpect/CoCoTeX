@@ -118,10 +118,6 @@
 %    \begin{macrocode}
 \AtBeginDocument{%
 %    \end{macrocode}
-% Storing the final definitions of \lstinline{\label}
-%    \begin{macrocode}
-  \global\let\tpltx@label\label
-%    \end{macrocode}
 % implementing the \lstinline{nofigs} option, doing some minor
 % adjustments to the \lstinline{htmltabs} package and store the final
 % definition of includegraphics.
@@ -179,7 +175,7 @@
   \global\let\tp@has@capt@bottom\@undefined
   \global\let\tp@has@subcapt@top\@undefined
   \global\let\tp@has@subcapt@bottom\@undefined
-  \global\let\tp@sub@contentsline@store\@empty
+  \global\let\ccf@sub@contentsline@store\@empty
   \global\tp@subflt@maxheight=\z@\relax
   \@tempcnta=\z@\relax
   \tp@reset@components{\tp@cur@cont}%
@@ -527,15 +523,15 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
       \tpIfComp{ListofSource}{\csgappto{@tp@listof@entry}{\string\tpListofSource{\tpUseComp{ListofSource}}}}{}%
       \ifx\@tp@listof@entry\relax
         \ifx\tp@is@subflt\relax\else
-          \tp@restore@contentsline
+          \ccf@restore@contentsline
         \fi
       \else
         \protected@edef\tp@listof@entry{\@tp@listof@entry}%
         \ifx\tp@is@subflt\relax
-          \tp@store@sub@contentsline{#1}{\tp@captype}{\expandonce{\tp@listof@entry}}%
+          \ccf@store@sub@contentsline{#1}{\tp@captype}{\expandonce{\tp@listof@entry}}%
         \else
-          \tp@flt@addcontentsline{#1}{\tp@captype}{\expandonce{\tp@listof@entry}}%
-          \tp@restore@contentsline
+          \ccf@addcontentsline{#1}{\tp@captype}{\expandonce{\tp@listof@entry}}%
+          \ccf@restore@contentsline
         \fi
       \fi
     }%
@@ -544,7 +540,7 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %    \end{macrocode}
 % \end{macro}
 % \end{macro}
-% \begin{macro}{\tp@store@sub@contentsline} saves the contentsline macros
+% \begin{macro}{\ccf@store@sub@contentsline} saves the contentsline macros
 %   for prematurely expanded captions.
 %
 %   If we immediatetly write the list-of entries for sub-floats into
@@ -552,32 +548,32 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %   parent entry. This is because sub-floats are processed before
 %   their parent floats. To avoid the wrong order in the list-of, we
 %   progressively store the sub-float's addcontentsline commands in
-%   the \lstinline{\tp@sub@contentsline@store} macro and expand it
+%   the \lstinline{\ccf@sub@contentsline@store} macro and expand it
 %   after the list-of for the parent float has been processed.
 %    \begin{macrocode}
-\def\tp@store@sub@contentsline#1#2#3{%
-  \protected@xdef\tp@sub@contentsline@store{\expandonce{\tp@sub@contentsline@store}\noexpand\tp@flt@addcontentsline{#1}{#2}{#3}\relax}}
+\def\ccf@store@sub@contentsline#1#2#3{%
+  \protected@xdef\ccf@sub@contentsline@store{\expandonce{\ccf@sub@contentsline@store}\noexpand\ccf@addcontentsline{#1}{#2}{#3}\relax}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tp@restore@contetnsline} restores and expands the
 %   list of sub-float addcontentsline commands, if there are any.
 %    \begin{macrocode}
-\def\tp@restore@contentsline{%
-  \ifx\tp@sub@contentsline@store\@empty\else
-    \tp@sub@contentsline@store
-    \global\let\tp@sub@contentsline@store\@empty
+\def\ccf@restore@contentsline{%
+  \ifx\ccf@sub@contentsline@store\@empty\else
+    \ccf@sub@contentsline@store
+    \global\let\ccf@sub@contentsline@store\@empty
   \fi
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@flt@addcontentsline} fork of \LaTeX's \lstinline{\addtocontents} macro
+% \begin{macro}{\ccf@addcontentsline} fork of \LaTeX's \lstinline{\addtocontents} macro
 %   \begin{description}
 %   \item[\#1] extension of the list file
 %   \item[\#2] caption type; passed to the first argument of \LaTeX's \lstinline{\contentsline}
 %   \item[\#3] the entry itself; passed to the second argument of \LaTeX's \lstinline{\contentsline}
 %   \end{description}
 %    \begin{macrocode}
-\def\tp@flt@addcontentsline#1#2#3{%
+\def\ccf@addcontentsline#1#2#3{%
   \protected@write\@auxout
     {\tpGobble}%
     {\string\@writefile{#1}{\protect\tpContentsline{#2}{#3}{\thepage}{\@currentHref}\protected@file@percent}}\relax
@@ -599,12 +595,12 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %
 % \section{Label and Referencing mechanisms}
 %
-% \begin{macro}{\tp@flt@create@counters} creates auto-numbered
+% \begin{macro}{\ccf@create@counters} creates auto-numbered
 %   counters. We advance the caption type only locally since they are
 %   automatically and globally updated when
 %   \lstinline{\tp@make@anchors} is called.
 %    \begin{macrocode}
-\def\tp@flt@create@counters{%
+\def\ccf@create@counters{%
   \tpIfAttrIsset{\tp@captype}{nonumber}{}
     {\tpIfPropVal{numbering}{auto}
       {\tpIfComp{number-0}
@@ -683,8 +679,23 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
     \tpIfComp{RefLabel}
       {\expandafter\let\expandafter\@currentlabel\csname tp@\tp@cur@cont @number-\the\tpSubFloatCnt\endcsname
        \edef\@tempa{\tpUseComp{RefLabel}}%
-       \expandafter\tpltx@label\expandafter{\@tempa}}{\relax}%
+       \expandafter\cc@ltx@label\expandafter{\@tempa}}{\relax}%
   \egroup}
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{\ccfCreateLabel} creates
+%    \begin{macrocode}
+\def\ccfCreateLabel{%
+  %\tpIfComp{Number}
+  %  {\letcs\@currentlabel{tp@\tp@cur@cont @number-\the\tpSubFloatCnt}}
+  %  {\letcs\@currentlabel{tp-\tp@cur@cont-number-\the\@tp@int@flt@cnt}}%
+  %\expandafter\H@refstepcounter\expandafter{\tp@captype}%
+  %\let\Hy@tempa\Hy@float@caption
+  \def\cc@labelname@comp{Caption}
+  %\expandafter\hyper@@anchor\expandafter{\@currentHref}{\relax}%
+  \expandafter\ccCreateLabel\expandafter{\tp@captype}%
+}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -725,9 +736,9 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 \def\endtp@float{%
     \tp@b@float
     \tp@set@top@sep
-    \tp@test@caption{0}{capt}{top}%
-    \tp@test@caption{0}{capt}{bottom}%
-    \tp@flt@create@counters%
+    \ccf@test@caption{0}{capt}{top}%
+    \ccf@test@caption{0}{capt}{bottom}%
+    \ccf@create@counters%
     \tp@flt@compose
     \tp@save@page
     \tp@set@bot@sep
@@ -817,7 +828,8 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
   \bgroup
     \hsize\tp@total@flt@width
     \tp@flt@process
-    \tp@make@anchors%
+    %\tp@make@anchors%
+    %% TODO: move to where the caption(s) are built
     \csname tp@make@listof@\tp@captype\endcsname{\tp@captype}% single float
     \par
   \egroup}
@@ -829,7 +841,7 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 % \subsection{Caption mechanism}
 %
 %
-% \begin{macro}{\tp@test@caption} tests if the current sub-float has
+% \begin{macro}{\ccf@test@caption} tests if the current sub-float has
 %   any top or bottom caption that needs to be printed.
 %   \begin{description}
 %   \item[\#1] is the value of the sub-float counter
@@ -850,7 +862,7 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %   however, means that if the difference is less than 1pt, the test
 %   fails and no caption is printed!
 %    \begin{macrocode}
-\def\tp@test@caption#1#2#3{%
+\def\ccf@test@caption#1#2#3{%
   \setbox\tp@tempboxa\hbox{\tpGobble\tpSubFloatCnt0#1\relax\tpUseProperty{caption-#3}\relax}%
   \setbox\tp@tempboxb\hbox{\tpGobble\tpSubFloatCnt\m@ne\relax\tpUseProperty{caption-#3}\relax}%
   \edef\my@wda{\expandafter\strip@pt\wd\tp@tempboxa sp}%
@@ -866,8 +878,8 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %    \begin{macrocode}
 \def\tp@test@subcapt{%
   \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
-    \tp@test@caption{\the\@tempcnta}{subcapt}{top}%
-    \tp@test@caption{\the\@tempcnta}{subcapt}{bottom}%
+    \ccf@test@caption{\the\@tempcnta}{subcapt}{top}%
+    \ccf@test@caption{\the\@tempcnta}{subcapt}{bottom}%
   }%
 }
 %    \end{macrocode}
@@ -929,7 +941,7 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 % \end{description}
 %    \begin{macrocode}
 \long\def\tp@make@caption#1#2{%
-  \edef\@argi{#1}\edef\@argii{#2}%
+  \protected@edef\@argi{#1}\protected@edef\@argii{#2}%
   \tp@capt@top@offset
   \ifnum\tpSubFloatCnt=\z@
     \def\next{%
@@ -947,9 +959,10 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
     \ifx\@argii\tp@str@top\else\if@tp@flt@break@capt\else\vss\fi\fi
     \tpUseProperty{\tp@prefix caption-face}%
     \tpUseProperty{\tp@prefix caption-face-#1}%
-    \tp@topstrut\tpUseProperty{caption-#1}\strut%
+    \cc@topstrut\tpUseProperty{caption-#1}\strut%
     \ifx\@argii\tp@str@bottom\else\if@tp@flt@break@capt\else\vss\fi\fi%
   \egroup%
+  \ccfCreateLabel
   \if@tp@flt@break@capt\unvbox\@tempboxa\else\box\@tempboxa\fi%
   \tp@capt@bottom@offset
 }

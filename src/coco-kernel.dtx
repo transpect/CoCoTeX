@@ -997,7 +997,6 @@
     \if!#2!\else
       \@tp@parse@attributes#2,\@nil
     \fi\fi}
-\endgroup
 %    \end{macrocode}
 % \end{macro}
 % and
@@ -1015,6 +1014,38 @@
   \fi}
 %    \end{macrocode}
 % \end{macro}
+%
+% \begin{macro}{\cc@parse@csv} takes a fallback macro \#1 and feeds it
+%   as argument to each item of the comma-separated list in the
+%   control sequence \#2. The macro \#1 is stored internally as
+%   \lstinline{\cc@parser@callback}.
+%    \begin{macrocode}
+\gdef\cc@parse@csv#1#2{%
+  \if!#1!\else
+    \let\cc@parser@callback#1%
+    \edef\cc@tempa{\csname #2\endcsname}%
+    \ifx\cc@tempa\@empty\else
+      \expandafter\@cc@parse@csv\cc@tempa,,\@nil
+    \fi
+  \fi}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@cc@parse@csv} applies \cc@parser@callback to the
+%   first item of a comma-separated pair and feeds the second item to
+%   itself.
+%    \begin{macrocode}
+\gdef\@cc@parse@csv #1,#2,\@nil{%
+  \if!#1!\else
+    \cc@parser@callback{#1}%
+  \fi
+  \if!#2!\else
+    \@cc@parse@csv#2,\@nil
+  \fi
+}
+\endgroup
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\tpGetAttr} returns the value of an attribute.
 %
 %   \#1 is the attribute node, \#2 is the attribute name.
@@ -1023,7 +1054,7 @@
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tpIfAttr} can be used to call macros depending on
-%   whether an attribute is set.
+%   whether an attribute is set, or not.
 %
 %   \#1 is the attribute node, \#2 is the attribute name, \#3 and \#4 are the true and false
 %   branch, respectively.
@@ -1031,6 +1062,14 @@
 \def\tpIfAttr#1#2#3#4{\ifcsdef{tp@#1@attr@#2}{#3}{#4}}
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{\tpWhenAttr} is a variant of \lstinline{\tpIfAttr}
+%   that omits the else branch.
+%
+%   \#1 is the attribute node, \#2 is the attribute name, \#3 is what
+%   happens if the attribute is set.
+%    \begin{macrocode}
+\def\tpWhenAttr#1#2#3{\ifcsdef{tp@#1@attr@#2}{#3}{}}
+%    \end{macrocode}
 % \begin{macro}{\tpIfAttrStr} can be used to call macros depending if
 %   an attribute is set to the current (sub)container or group and what value it has.
 %
