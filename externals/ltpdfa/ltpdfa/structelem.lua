@@ -102,7 +102,7 @@ function StructElem:addMCID(mcid)
    selem.lastUsed = selem.childs[idx]
    selem:adjustInsert()
    --dumpStructs(self, 0)
-   if config.debug then log("ADDMCID %s mcid=%d idx=%d type=%s lastUsed=%s",selem.childs, mcid, selem.idx, selem.type, selem.lastUsed) end
+   debug_log("ADDMCID %s mcid=%d idx=%d type=%s lastUsed=%s",selem.childs, mcid, selem.idx, selem.type, selem.lastUsed)
    return idx
 end
 function StructElem:forceParent(optparent)

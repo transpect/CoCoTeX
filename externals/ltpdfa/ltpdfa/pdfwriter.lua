@@ -68,7 +68,7 @@ local function space(head, lastglyph, spacetemplate, spacekern)
 end
 
 local function hyphenation(head, curr)
-   if config.debug then log("\tpdf: hyphenation") end
+   debug_log("\tpdf: hyphenation")
    local n = node.new(a_whatsit_node, subtype_pdfliteral) --- .attr + mode(setorigin,page,direct) + .data fields
    local hyphen = "<00AD>"
    node.setfield(n,"data"," /Span <</ActualText <FEFF00AD> >> BDC ")

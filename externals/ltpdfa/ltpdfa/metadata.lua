@@ -478,10 +478,10 @@ local function getDocInfo()
          local enc = val[2]
          local str = val[1]
          if (enc == 'utf-8' or enc == 'utf-16') then
-            -- if config.debug then log("RECODE %s, %s => %s", enc, name, str) end
+            -- debug_log("RECODE %s, %s => %s", enc, name, str)
             info[name] = utf8ToUtf16(str)
          elseif (enc == 'pdfdoc' or enc == 'literal') then
-            -- if config.debug then log("NO RECODE %s, %s => %s", enc, name, str) end
+            -- debug_log("NO RECODE %s, %s => %s", enc, name, str)
             info[name] = str
          else
             info[name] = str -- and hope the best

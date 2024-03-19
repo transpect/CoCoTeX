@@ -209,7 +209,7 @@ local function addToUnicode(str)
    end
 end
 local function createStruct(head, curr, sparent)
-   if config.debug then log("\tps: createStruct") end
+   debug_log("\tps: createStruct")
 end
 
 local function beginMC(head, curr, attrval, mcid, isArtifact, attributes, sparent, at)
@@ -268,7 +268,7 @@ local function structParent(head, curr, number)
 end
 
 local function closeElem(selem)
-   if config.debug then log("ps: closeElem") end
+   debug_log("ps: closeElem")
 end
 
 local function structTree(stree, head)
@@ -503,7 +503,7 @@ local function addLastLink(parts)
       annsubcounter = annsubcounter + 1
       tmp = 'LinkAnn' .. anncounter .. '_' .. annsubcounter      
    end
-   if config.debug then log("addLastLink %s", tmp) end
+   debug_log("addLastLink %s", tmp)
    tex.sprint(tmp)
    return tmp
 end

@@ -159,8 +159,10 @@
   {\edef\@lt@seclevel{#1}\@ssect{#3}{#4}{#5}{#6}}%
   {\@dblarg{\@sect{#1}{#2}{#3}{#4}{#5}{#6}}}}
 
-%% TODO variants using \@svsechd 'execute' following structuring commands
-%% before the heading commands :-( \@xsect + \everypar
+%% runin headings use \@svsechd are executed in everypar
+%% if followed by \structStart or friends before next input
+%% starting horizontal mode these are interpreted 'too early'
+%% => so move sectionhead up to its parent at position 1
 \def\@sect#1#2#3#4#5#6[#7]#8{%
   \edef\@lt@seclevel{#1}\ifx\@lt@faked@seclevel\@empty\else\let\@lt@seclevel\@lt@faked@seclevel\global\let\@lt@faked@seclevel\@empty\fi%
   \ifnum #2>\c@secnumdepth
@@ -185,7 +187,7 @@
   \else
   \def\@svsechd{%
     \structStart{\@lt@seclevel head}#6{\hskip #3\relax
-      \@svsec #8}\structEnd{\@lt@seclevel head}%
+      \@svsec #8}\setNewParent{\@lt@seclevel[1][A]/[1]}\structEnd{\@lt@seclevel head}%
     \csname #1mark\endcsname{#7}%
     \addcontentsline{toc}{#1}{%
       \ifnum #2>\c@secnumdepth \else
@@ -195,6 +197,7 @@
   \fi
   \@xsect{#5}%
 }
+
 %section*
 \def\@ssect#1#2#3#4#5{%
   \@tempskipa #3\relax

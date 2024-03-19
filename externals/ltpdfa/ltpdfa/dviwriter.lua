@@ -390,7 +390,7 @@ local function markLine(pbox, curr)
    local n = node.new(a_whatsit_node, subtype_special)
    node.setfield(n,"attr", curr.attr)
    node.setfield(n,"data",'ps:markLine')
-   if config.debug then log("markLine\npbox=%s\ncurr=%s\n", pbox, curr) end
+   debug_log("markLine\npbox=%s\ncurr=%s\n", pbox, curr)
    pbox.list = node.insert_before(pbox.list, curr, n)
 end
 
@@ -447,7 +447,7 @@ end
 local function addLastLink()
    anncounter = anncounter + 1
    local tmp = 'LinkAnn'.. anncounter
-   if config.debug then log("addLastLink %s", tmp) end
+   debug_log("addLastLink %s", tmp)
    tex.sprint(tmp)
    return tmp
 end

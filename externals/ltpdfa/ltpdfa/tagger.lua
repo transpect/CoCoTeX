@@ -43,7 +43,7 @@ local function autoClose(name, optparent)
    local hierarchy = config.autoclose[htype]
    -- resolve Alias to 'real' e.g. chapalias to chapter
    if (hierarchy[name].Alias) then
-      if config.debug then log("autoClosing Changing aliased %s to %s", name, hierarchy[name].Alias) end
+      debug_log("autoClosing Changing aliased %s to %s", name, hierarchy[name].Alias)
       name = hierarchy[name].Alias
    end
    local level = hierarchy[name].Level
@@ -114,7 +114,7 @@ local function structStart_(name, optparent, doattr, doclose)
       -- push to openedarray
       table.insert(openedarray, stree.current)
    end
-   if config.debug then log("structStart_ %s(%s)(%d/%d) optparent=%s(%s) at line=%d  at nest %d", name, stree.current.parent.type, tex.attribute[ltpdfa.typeattr], tex.attribute[ltpdfa.parentattr], optparent, bdcs[optparent], tex.inputlineno, tex.currentgrouplevel) end
+   debug_log("structStart_ %s(%s)(%d/%d) optparent=%s(%s) at line=%d  at nest %d", name, stree.current.parent.type, tex.attribute[ltpdfa.typeattr], tex.attribute[ltpdfa.parentattr], optparent, bdcs[optparent], tex.inputlineno, tex.currentgrouplevel)
    if (optparent and bdcs[optparent] == nil) then  
       log("WARN: unknown optional parent %s", optparent)
    end
@@ -134,7 +134,7 @@ local function structStart(name, optparent)
    end
    ftable[ltpdfa1Idx] = function() structStart_(name, optparent, true, false) end -- do not autoclose again
    tex.sprint(config.ltpdfCatcode, ltpdf1call) -- without {} sometimes eats next arg
-   if config.debug then log("structStart at %d with %s", tex.inputlineno, name) end
+   debug_log("structStart at %d with %s", tex.inputlineno, name)
 end
 
 local function structEnd_(name)
@@ -143,7 +143,7 @@ local function structEnd_(name)
       -- structtree.structEnd already happened in autoclose
    else
       structtree.structEnd(name)
-      if config.debug then log("structEnd_ %s => %s at nest %d", name, stree.current.type, tex.currentgrouplevel) end
+      debug_log("structEnd_ %s => %s at nest %d", name, stree.current.type, tex.currentgrouplevel)
    end
 end
 

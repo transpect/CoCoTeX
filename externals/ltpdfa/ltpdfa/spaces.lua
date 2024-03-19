@@ -126,7 +126,7 @@ local function processLine(head, hmode, lastbox)
    -- what about tabskip(12), xspaceskip(14) ???
    -- break at lineskip ??
    -- log("\t\tprocessLine %s %d", head, line)
-   if config.debug then log("\tspaceprocessor.processLine %s %d", head, line) end
+   debug_log("\tspaceprocessor.processLine %s %d", head, line)
    for curr in node.traverse(head) do
       -- check if lastGlyph left and new line
       if (lastGlyph.node and lastGlyph.line ~= line) then
@@ -156,7 +156,7 @@ local function processLine(head, hmode, lastbox)
          end
       elseif (curr.subtype == 3 and curr.id == a_disc and curr.pre == nil and curr.post == nil and curr.replace == nil) then
          -- hyphenation is glyph follwed by disc subtype regular no pre,post,replace
-         if config.debug then log("\t\t\tHYPHENATION") end
+         debug_log("\t\t\tHYPHENATION")
       elseif (curr.id == a_hlist or curr.id == a_vlist) then
          local hmode = 1
          if (curr.id == a_vlist) then hmode = 0 end
@@ -207,7 +207,7 @@ end
 -- box should be a vlist or hlist
 local function spaceprocessor(box)
    local head = box.list
-   if config.debug then log("spaceprocessor.spaceprocessor\n\tbox=%s\n\thead=%s", box, head) end
+   debug_log("spaceprocessor.spaceprocessor\n\tbox=%s\n\thead=%s", box, head)
    for curr in node.traverse(head) do
       if (curr.id == a_hlist) then
          if (curr.subtype == 1) then
@@ -235,7 +235,7 @@ end
 -- unfortunately the lua callbacks do not cover footer and header ;-(
 -- so atbegshi back again
 function processpage(box)
-   if config.debug then log("spaceprocessor.processpage!!! %s", box) end
+   debug_log("spaceprocessor.processpage!!! %s", box)
    line = 0
    lastGlyph = {cumulated = 0}
    spaceprocessor(box)

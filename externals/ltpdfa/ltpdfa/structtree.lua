@@ -202,18 +202,16 @@ end
 --       if we recurse we must move
 --    --]]
 --    if (tparent == sparent and sparent.parent.ltype == 2 and (not sparent.parent:hasContentChilds())) then
---       if config.debug then log("%scheckAutoPara recursion for parent=%s(%s/%s)", indent, sparent.parent.type, sparent.parent.ltype, sparent.type) end
+--       debug_log("%scheckAutoPara recursion for parent=%s(%s/%s)", indent, sparent.parent.type, sparent.parent.ltype, sparent.type)
 --       -- recursion
 --       local ttparent = checkAutoPara(sparent.parent, config.bdcs[sparent.parent.type], level + 1)
 --       if (ttparent and ttparent.ltype == 1) then
 --          --create para here sparent.parent has to become child of para
 --          -- TODO what if sparent.parent is not direct child of ttparent
 --          local idx = ttparent:removeChild(sparent.parent)
---          --if config.debug then log("%scheckAutoPara removing %s from %s idx=%s lastUsed=%s", indent, sparent.parent.type, ttparent.type, idx, ttparent.lastUsed) end
+--          --debug_log("%scheckAutoPara removing %s from %s idx=%s lastUsed=%s", indent, sparent.parent.type, ttparent.type, idx, ttparent.lastUsed)
 --          idx = ttparent:addPara(sparent.parent.forced)
---          if config.debug then
---             log("%sadded AP %s with %s into %s idx=%s", indent, ttparent.actpara, sparent.parent.type, ttparent.type, idx)
---          end
+--          debug_log("%sadded AP %s with %s into %s idx=%s", indent, ttparent.actpara, sparent.parent.type, ttparent.type, idx)
 --          sparent.parent.parent = ttparent.actpara
 --          table.insert(ttparent.actpara.childs, sparent.parent)
 --          sparent.parent:adjustInsert()
@@ -221,7 +219,7 @@ end
 --    end
 --    -- return if sparent or some parent of it is block
 --    if tparent and tparent.ltype == 0 then
---       if config.debug then log("%scheckAutoPara NOPARA for PARENTROLE=%s(%s) ELEMENTROLE=%s(%s)", indent, prole, sparent.type, erole, config.bdcs[currattr]) end
+--       debug_log("%scheckAutoPara NOPARA for PARENTROLE=%s(%s) ELEMENTROLE=%s(%s)", indent, prole, sparent.type, erole, config.bdcs[currattr])
 --       return false
 --    end
 --    -- no block parent, try next grouping
@@ -254,7 +252,7 @@ end
 --]]
 local function markElement(head,curr,sparent,currattr)
    if (sparent.created == false) then
-      if config.debug then log("writer create StructElem %s %s",sparent.type, head) end
+      debug_log("writer create StructElem %s %s",sparent.type, head)
       writer.createStruct(head, curr, sparent)
       sparent.created = true
    end
@@ -272,7 +270,7 @@ local function markElement(head,curr,sparent,currattr)
    --local blockparent = checkAutoPara(sparent,currattr)
    -- if blockparent and config.doparas then
    --    idx = addPara(blockparent, sparent.forced)
-   --    if config.debug then log("markElement addPara %s %s", blockparent.type, idx) end
+   --    debug_log("markElement addPara %s %s", blockparent.type, idx)
    --    head = writer.beginMC(head, curr, config.bdcs['autopara'], mcidcnt, sparent.isArtifact, directattr, sparent, idx)
    --    sparent:addMCID(mcidcnt)
    -- else
@@ -343,18 +341,13 @@ processNode[a_adjust] = noop -- ignore vadjust nodes
 local function processBox( parentbox, level )
    local indent = string.rep(" ", level)
    local head = parentbox.list
-   if config.debug then
-      log("%s** prBox parent=%s(%s) (l=%d) (%s) lastattr=%d", indent, (node.types())[parentbox.id], NodeNumber(parentbox), level, head, lastattr)
-   end
+   debug_log("%s** prBox parent=%s(%s) (l=%d) (%s) lastattr=%d", indent, (node.types())[parentbox.id], NodeNumber(parentbox), level, head, lastattr)
    for curr in node.traverse(head) do
       local pattr = node.get_attribute(curr, parentattr)
       local currattr = node.get_attribute(curr, typeattr)
-      if (debug) then
-         --log("%s => %s %s => %s/%s/%s (l=%d) (%s)", indent, curr.id, (node.types())[curr.id], lastattr, currattr, pattr, level, NodeNumber(curr))
-      end
       processNode[curr.id](parentbox, curr, level)
    end
-   if config.debug then log("%s## prBoxEnd parent=%s (l=%d) %s(%s/%s)", indent, (node.types())[parentbox.id], level, NodeNumber(parentbox), NodeNumber(head), NodeNumber(parentbox.head)) end
+   debug_log("%s## prBoxEnd parent=%s (l=%d) %s(%s/%s)", indent, (node.types())[parentbox.id], level, NodeNumber(parentbox), NodeNumber(head), NodeNumber(parentbox.head))
 end
 
 local function process_vlist(parentbox, curr, level)
@@ -434,16 +427,14 @@ local function addFigure(llx, lly, urx, ury, xscale, yscale, clip)
    fbox['y2'] = (fbox['y2']-fbox['y1']) * bpsp_sc
    fbox['y1'] = 0.0
    table.insert(figures, { parent = parent, fbox = fbox, ppos = {}} )
-   if config.debug then
-      log("addCFigure %s idx=%d", parent, #figures)
-      if (xscale == nil or yscale == nil) then
-         log("\t%s idx=%d scale:%s/%s urx=%s / ury=%s ", parent, #figures, xscale, yscale, urx, ury)
-      else
-         log("\t%s idx=%d scale:%.2f/%.2f urx=%s / ury=%s ", parent, #figures, xscale, yscale, urx, ury)
-      end
-      log("\ttransformed %.2f,%.2f/%.2f,%.2f", fbox['x1'], fbox['y1'], fbox['x2'], fbox['y2'])
-      dumpArray(fbox)
+   debug_log("addCFigure %s idx=%d", parent, #figures)
+   if (xscale == nil or yscale == nil) then
+      debug_log("\t%s idx=%d scale:%s/%s urx=%s / ury=%s ", parent, #figures, xscale, yscale, urx, ury)
+   else
+      debug_log("\t%s idx=%d scale:%.2f/%.2f urx=%s / ury=%s ", parent, #figures, xscale, yscale, urx, ury)
    end
+   log("\ttransformed %.2f,%.2f/%.2f,%.2f", fbox['x1'], fbox['y1'], fbox['x2'], fbox['y2'])
+   --dumpArray(fbox)
 end
 
 -- try to ignore empty rules
@@ -480,11 +471,11 @@ local function process_whatsit(parentbox, curr, level)
    if curr.subtype == subtype_special then
       local currattr = node.get_attribute(curr, typeattr)
       local pattr = node.get_attribute(curr, parentattr)
-      if config.debug then log("WHATSIT: page %d at %d data=%s currattr=%s", status.total_pages + 1, tex.inputlineno, curr.data, currattr) end
+      debug_log("WHATSIT: page %d at %d data=%s currattr=%s", status.total_pages + 1, tex.inputlineno, curr.data, currattr)
       local str = curr.data:match('^PSfile=".+%.[eE][pP][sS]"')
       if str ~= nil then
          local tail = node.tail(parentbox.list)
-         if config.debug then log("Figure: page %d at %d data=%s match=%s", status.total_pages + 1, tex.inputlineno, curr.data, str) end
+         debug_log("Figure: page %d at %d data=%s match=%s", status.total_pages + 1, tex.inputlineno, curr.data, str)
          process_node(parentbox, curr, level)
       end
    end
@@ -504,7 +495,7 @@ local function process_math(parentbox, curr, level)
    elseif curr.subtype == 1 then
       inmath = inmath - 1
    end
-   if config.debug then log("MATH: page %d at %d currattr=%s inmath=%d", status.total_pages + 1, tex.inputlineno, currattr, inmath) end
+   debug_log("MATH: page %d at %d currattr=%s inmath=%d", status.total_pages + 1, tex.inputlineno, currattr, inmath)
 end
 processNode[a_math] = process_math
 
@@ -606,7 +597,7 @@ local function removeArtifacts_(parent)
       local i=1
       while i <= #parent.childs do
          if (parent.childs[i].isArtifact) then
-            if config.debug then log("Removing artifact %s %s", parent.type, parent.childs[i].ID) end
+            debug_log("Removing artifact %s %s", parent.type, parent.childs[i].ID)
             table.remove(parent.childs, i)
          else
             i = i + 1
@@ -633,10 +624,10 @@ local function removeEmptyStructs_(parent)
          -- 2. must generally have to be removed for rowspan ;-(
          if (child.idx and #child.childs == 0) then
             if (child.keep) then -- let empty tablecells persist or make artifact
-               if config.debug then log("Removing empty Struct let TD in place %s(%d) from parent %s(%d)", child.type, child.idx, parent.type, parent.idx) end
+               debug_log("Removing empty Struct let TD in place %s(%d) from parent %s(%d)", child.type, child.idx, parent.type, parent.idx)
                i = i + 1
             else
-               if config.debug then log("Removing empty Struct %s(%d) from parent %s(%d)", child.type, child.idx, parent.type, parent.idx) end
+               debug_log("Removing empty Struct %s(%d) from parent %s(%d)", child.type, child.idx, parent.type, parent.idx)
                table.remove(parent.childs, i)
             end
          else
@@ -667,6 +658,23 @@ local function splitPath(nstr, delimiter)
    return result
 end
 
+local function findAncestor(ctype, elnum, context)
+   local parent = context.cnode.parent
+   local num = elnum
+   while parent and parent ~= 0 do
+      debug_log("Search for Ancestor %s act is %s %s", ctype, parent.type, parent)
+      if (ctype == parent.type) then
+         debug_log("Found Ancestor %s/%s %s/%s", ctype, parent.type, num, elnum)
+         num = num - 1
+         if (num == 0) then
+            context.match = parent
+            break
+         end
+      end
+      parent = parent.parent
+   end
+end
+
 -- step forward/backward in childs of context node to find elnum-th occurrence of ctype
 local function findChild(ctype, elnum, context)
    local inc = 1
@@ -687,7 +695,7 @@ local function findChild(ctype, elnum, context)
       if (num == 0) then
          context.cnode = val
          context.match = val
-         if config.debug then log("findChild: setting %s %s %s/%s (%s)", ctype, val.type, i, elnum, context.cnode.ID) end
+         debug_log("findChild: setting %s %s %s/%s (%s)", ctype, val.type, i, elnum, context.cnode.ID)
          break
       end
    end
@@ -710,15 +718,18 @@ local function buildSteps(context)
    for k,v in pairs(steps) do
       local nstr = v:sub(1,-2) -- remove trailing ']'
       local s = splitPath(nstr, "%[")
-      -- axis
-      local num= s[2]:match("([^,]+),?([^,]?)") -- local num, axis = s[2]:match("([^,]+),?([^,]+)?")
+      local num = s[2]:match("([^,%]]+)")
+      local axis = 'C'
+      if (#s == 3) then
+         axis = s[3]:match("([^%]]+)")
+      end
       table.insert(context.steps, {s[1], num, axis})
    end
 end
 
 local function findElem(context)
    buildSteps(context)
-   dumpArray(context.steps,1)
+   if config.debug then dumpArray(context.steps,1) end
    for k,v in pairs(context.steps) do
       -- one step - starts with context.cnode
       context.match = nil
@@ -726,16 +737,16 @@ local function findElem(context)
       local elnum = tonumber(v[2])
       local axis = v[3]
       if elnum == 0 then tex.error("Invalid step in %s!\n", context.path) end
-      if config.debug then log("Search for %s starting at %s", ctype, (context.cnode.ID and context.cnode.ID or context.cnode.type)) end
+      debug_log("Search for %s starting at %s", ctype, (context.cnode.ID and context.cnode.ID or context.cnode.type))
       -- rel. up
       if (ctype == '..') then
          for x = 1, elnum do
-            if config.debug then log("  Searching switch from %s to %s\n", context.cnode.ID, context.cnode.parent.ID) end
+            debug_log("  Searching switch from %s to %s\n", context.cnode.ID, context.cnode.parent.ID)
             context.cnode = context.cnode.parent
          end
          context.match = context.cnode
       elseif (ctype == '.') then -- keep current does this make sense??? Maybe one up and then only start at current ???
-         if config.debug then log("  Searching keep current %s\n", curr.ID) end
+         debug_log("  Searching keep current %s\n", curr.ID)
          context.match = context.cnode
       else
          -- axis ancestor(A), child(C), following-sibling(S), preceding-sibling(P)
@@ -808,7 +819,7 @@ local function setNewParent(childsarray)
          if (v.newParent) then
             -- rel. or absolut '/', '..', '.' and none of them
             local context = {rel = false, cnode = nil, path = nil, selem = v, steps = nil, cpos = nil}
-            if config.debug then log("setNewParent of %s to %s\n", v.ID, v.newParent) end
+            debug_log("setNewParent of %s to %s\n", v.ID, v.newParent)
             if (v.newParent:find('/') == 1) then
                -- remove '/' at start
                v.newParent = v.newParent:sub(2)
@@ -825,9 +836,7 @@ local function setNewParent(childsarray)
                tex.error("Target of move operation not found " .. v.newParent .. "!\n")
                break
             else
-               if config.debug then
-                  log("Moving " .. v.ID .. " from " .. v.parent.ID .." to " .. context.match.ID .. " (" .. v.newParent .. ")" .. " at " .. context.cpos .. ". position")
-               end
+               debug_log("Moving " .. v.ID .. " from " .. v.parent.ID .." to " .. context.match.ID .. " (" .. v.newParent .. ")" .. " at " .. context.cpos .. ". position")
                local idx = moveElem(context) -- this eventually removes newParent
                k = k - 1
             end
@@ -1003,7 +1012,7 @@ local function structStart(type, structnum, optparent, doattr) -- structnum unus
    if ignore and ignore == type then
       ignore = false
       removed = StructElem:new(type)
-      if config.debug then log("Ignoring start of %s", type) end
+      debug_log("Ignoring start of %s", type)
       return
    end
    local x = StructElem:new(type)
@@ -1014,7 +1023,7 @@ local function structStart(type, structnum, optparent, doattr) -- structnum unus
       if (x:forceParent(optparent)) then
          -- x.parent changed
          x.restoreParent = stree.current
-         if config.debug then log("ZZZ FORCEDPARENT for idx=%d %s => %s == %s(idx=%d)", x.idx, type, optparent, x.parent.type, x.parent.idx) end
+         debug_log("ZZZ FORCEDPARENT for idx=%d %s => %s == %s(idx=%d)", x.idx, type, optparent, x.parent.type, x.parent.idx)
       end
    end
    table.insert(x.parent.childs, x)
@@ -1044,14 +1053,14 @@ local function structEnd(type)
    end
    x.endpage = status.total_pages + 1
    currtype = x.type
-   if config.debug then log("structtree.structEnd closing!!! arg=%s current has=%s)", type, currtype) end
+   debug_log("structtree.structEnd closing!!! arg=%s current has=%s)", type, currtype)
    if (currtype ~= type) then
       log("WARN: closing wrong type!!! (%s/%s) newcurrent=%s(%s) line %d", currtype, type, x.parent, x.parent.type, tex.inputlineno)
       dumpArray(x)
    end
    writer.closeElem(x)
    if (x.restoreParent) then
-      if config.debug then log("ZZZ Restoring PARENT for idx=%d %s => %s == %s(idx=%d)", x.idx, type, x.restoreParent, x.parent.type, x.parent.idx) end
+      debug_log("ZZZ Restoring PARENT for idx=%d %s => %s == %s(idx=%d)", x.idx, type, x.restoreParent, x.parent.type, x.parent.idx)
       stree.current = x.restoreParent
       x.restoreParent = nil
    else
@@ -1078,7 +1087,7 @@ local function getStructParent()
    end
    -- increment nextparent
    nextparent = nextparent + 1
-   if config.debug then log("GETSTRUCTPARENT line %d/%d", tex.inputlineno, nextparent) end
+   debug_log("GETSTRUCTPARENT line %d/%d", tex.inputlineno, nextparent)
    stree.parenttree[nextparent] = stree.current
    stree.current.discrete = true
    tex.print(nextparent)
@@ -1115,10 +1124,8 @@ local function readPosStart(index)
        fig['ppos']['x1'] = x;
        fig['ppos']['y1'] = y;
    end
-   if config.debug then
-      log("READPOS START on page %d => %f/%f for image %d posmax=%.2f", status.total_pages + 1, x/65536.0, y/65536.0, index, sptobp(posmax))
-      -- log("pageheight=%.2f voffset=%.2f", sptobp(tex.pageheight), sptobp(tex.voffset))
-   end
+   debug_log("READPOS START on page %d => %f/%f for image %d posmax=%.2f", status.total_pages + 1, x/65536.0, y/65536.0, index, sptobp(posmax))
+   -- log("pageheight=%.2f voffset=%.2f", sptobp(tex.pageheight), sptobp(tex.voffset))
 end
 
 local function readPosEnd(index)
@@ -1131,7 +1138,7 @@ local function readPosEnd(index)
        -- fig['ppos']['y2'] = posmax - y
    posToFile(fig, index)
    end
-   if config.debug then log("READPOS END on page %d => %f/%f for image %d", status.total_pages + 1, x/65536.0, y/65536.0, index) end
+   debug_log("READPOS END on page %d => %f/%f for image %d", status.total_pages + 1, x/65536.0, y/65536.0, index)
 end
 
 local function readPosFile()
@@ -1209,10 +1216,7 @@ end
 local function pushStruct(idx)
    local idx = tonumber(idx)
    stree.current = stree.structarray[idx]
-   if config.debug then
-      log("pushStruct %s", idx)
-      dumpArray(stree.current)
-   end
+   debug_log("pushStruct %s", idx)
 end
 
 local structtree = { -- module table
