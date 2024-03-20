@@ -66,9 +66,7 @@
 }
 %    \end{macrocode}
 % \end{tpContainer}
-% 
-%    \begin{macrocode}
-%    \end{macrocode}
+%
 % \begin{macro}{\tpDeclareHeading} is the user-level macro to declare
 %   new headings.
 % \begin{description}[2em]
@@ -134,15 +132,15 @@
     \DeclareContainer{#3}{%
 %    \end{macrocode}
 % 
-% \begin{macro}{\cch@#3@level} stores the numeric heading level for the heading
+% \begin{macro}{\cch@<3>@level} stores the numeric heading level for the heading
 %    \begin{macrocode}
       \csgdef{cch@#3@level}{#2}%
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}
-%    \begin{macrocode}{\cch@#2@unique} is a unique name for the
+% \begin{macro}{\cch@2@unique} is a unique name for the
 %      heading's level. Is is always the name of the \textit{first}
 %      heading that is defined with a given heading level counter.
+%    \begin{macrocode}
       \ifcsdef{cch@#2@unique}{}{\csgdef{cch@#2@unique}{#3}}%%
 %    \end{macrocode}
 % \end{macro}
@@ -212,9 +210,10 @@
   \fi
 }% \@tpDeclareHeading
 %    \end{macrocode}
-% Each new heading level needs some configuration with the
+%   Each new heading level needs some configuration with the
 % \lstinline{ltpdfa} package in order to automatically close heading
 % tags with the beginning of a new heading.
+% \end{macro}
 %
 % \begin{macro}{\cch@add@autoclose} adds the new heading level to
 %   \lstinline{ltpdfa}'s autoclose mechanism. \#1 is the numeric
@@ -569,7 +568,7 @@
 % first, we look if the Override was given in the \lstinline{heading}
 % Container. If so, we do nothing.
 %    \begin{macrocode}
-  \tpUnlessComp{#1AuthorNameList}{%
+  \ccUnlessComp{#1AuthorNameList}{%
 %    \end{macrocode}
 % If not, we look whether or not the general
 % \lstinline{AuthorNameList} override was given in the \lstinline{heading}
@@ -879,7 +878,7 @@
   }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro} restores \LaTeX's default definitions (however, this
+% \begin{macro}{\cch@reset} restores \LaTeX's default definitions (however, this
 %   should be unnecessary since \lstinline{heading} is an environment
 %   and therefore constitutes a closed group).
 %    \begin{macrocode}

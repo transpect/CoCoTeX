@@ -790,13 +790,13 @@
          \def\cc@labelname@comp{Title}%
        \fi
        \let\@currentlabel\@tempa\relax
-       \protected@edef\@currentlabelname{\csname tp@\tp@cur@cont @\cc@labelname@comp\endcsname}%
-     }%
-      {\phantomsection}%
+       \protected@edef\@currentlabelname{\csname tp@\tp@cur@cont @\cc@labelname@comp\endcsname}}%
+      {\cc@fallback@label}%
       \expandafter\hypertarget\expandafter{#1}{}%
       \expandafter\label\expandafter{#1}%
   }
 }
+\let\cc@fallback@label\phantomsection
 %    \end{macrocode}
 % \end{macro}
 %

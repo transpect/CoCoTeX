@@ -366,12 +366,12 @@
 \long\def\tpWhenComp#1#2{\expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\relax\else#2\fi}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tpUnlessComp} is a high level variant of
+% \begin{macro}{\ccUnlessComp} is a high level variant of
 %   \lstinline{\tpIfComp} that omits the \lstinline{then}-branch. \#2
 %   is the code that is expanded when a Container \#1 is \textit{not}
 %   used in a Container (neither empty nor non-empty).
 %    \begin{macrocode}
-\long\def\tpUnlessComp#1#2{\expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\relax#2\fi}
+\long\def\ccUnlessComp#1#2{\expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\relax#2\fi}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tpIfGComp} Global variant of
@@ -386,8 +386,8 @@
 %   the Component macro \#1 is empty (or \lstinline|{}|) within its
 %   Container, and \#3 if it is either not existant or non-empty.
 %    \begin{macrocode}
-\long\def\long@empty{}
-\long\def\tpIfCompEmpty#1#2#3{\expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\long@empty#2\else#3\fi}
+\long\def\cc@long@empty{}
+\long\def\tpIfCompEmpty#1#2#3{\expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\cc@long@empty#2\else#3\fi}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tpIfGCompEmpty} is a global variant of
@@ -395,7 +395,7 @@
 %   is the name of the Component, \#3 is the \lstinline{then}-branch,
 %   \#4 is the \lstinline{else}-branch.
 %    \begin{macrocode}
-\long\def\tpIfGCompEmpty#1#2#3#4{\expandafter\ifx\csname tp@#1@#2\endcsname\long@empty#3\else#4\fi}
+\long\def\tpIfGCompEmpty#1#2#3#4{\expandafter\ifx\csname tp@#1@#2\endcsname\cc@long@empty#3\else#4\fi}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tp@check@empty} handles the distinction between empty
@@ -720,7 +720,7 @@
     \expandafter\expandafter\expandafter\expandafter\expandafter\expandafter\expandafter\ifx\csname tp@\tp@cur@cont @##1\endcsname\relax\expandafter\@secondoftwo\else\expandafter\@firstoftwo\fi%
   }%
   \long\def\tpIfCompEmpty##1{%
-    \expandafter\expandafter\expandafter\ifx\csname tp@\tp@cur@cont @##1\endcsname\long@empty\expandafter\@firstoftwo\else\expandafter\@secondoftwo\fi}}
+    \expandafter\expandafter\expandafter\ifx\csname tp@\tp@cur@cont @##1\endcsname\cc@long@empty\expandafter\@firstoftwo\else\expandafter\@secondoftwo\fi}}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -907,7 +907,7 @@
 %    \begin{macrocode}
 \long\def\tpIfProp#1#2#3{%
   \expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\relax#3\else
-    \expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\long@empty #3\else#2\fi
+    \expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\cc@long@empty #3\else#2\fi
   \fi
 \ignorespaces}
 %    \end{macrocode}
@@ -1031,9 +1031,9 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\@cc@parse@csv} applies \cc@parser@callback to the
-%   first item of a comma-separated pair and feeds the second item to
-%   itself.
+% \begin{macro}{\@cc@parse@csv} applies
+%   \lstinline{\cc@parser@callback} to the first item of a
+%   comma-separated pair and feeds the second item to itself.
 %    \begin{macrocode}
 \gdef\@cc@parse@csv #1,#2,\@nil{%
   \if!#1!\else
@@ -1070,6 +1070,7 @@
 %    \begin{macrocode}
 \def\tpWhenAttr#1#2#3{\ifcsdef{tp@#1@attr@#2}{#3}{}}
 %    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\tpIfAttrStr} can be used to call macros depending if
 %   an attribute is set to the current (sub)container or group and what value it has.
 %

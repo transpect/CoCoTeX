@@ -216,19 +216,19 @@
 %    \begin{macrocode}
 \def\tp@get@flt@pos#1{%
   \tpIfAttr{#1}{float-pos}
-    {\letcs\tp@fps{tp@#1@attr@float-pos}}
-    {\let\tp@fps\@empty}%
-  \def\@tempa{h!}\ifx\tp@fps\@tempa\let\tp@fps\@empty\fi
-  \def\@tempa{h}\ifx\tp@fps\@tempa\def\tp@fps{htbp!}\fi
+    {\letcs\ccf@floatpos{tp@#1@attr@float-pos}}
+    {\let\ccf@floatpos\@empty}%
+  \def\@tempa{h!}\ifx\ccf@floatpos\@tempa\let\ccf@floatpos\@empty\fi
+  \def\@tempa{h}\ifx\ccf@floatpos\@tempa\def\ccf@floatpos{htbp!}\fi
   \ifx\tp@do@dblfloat\relax
-    \ifx\tp@fps\@empty\def\tp@fps{htpb!}\fi% 11514
+    \ifx\ccf@floatpos\@empty\def\ccf@floatpos{htpb!}\fi% 11514
     \linewidth\dimexpr2\columnwidth+\columnsep\relax
     \hsize\linewidth\relax
   \fi
   \tpIfAttrStr{#1}{orientation}{landscape}
     {\linewidth\textheight
      \hsize\linewidth
-     \def\tp@fps{p}}
+     \def\ccf@floatpos{p}}
     {}}
 %    \end{macrocode}
 % \end{macro}
@@ -238,27 +238,27 @@
 %   the object is not treated as a float at all.
 %    \begin{macrocode}
 \def\tp@set@flt@env{%
-  \ifx\tp@fps\@empty
-    \let\tp@b@float\relax
-    \let\tp@e@float\relax
+  \ifx\ccf@floatpos\@empty
+    \let\ccf@begin@env\relax
+    \let\ccf@end@env\relax
     \ifhmode\par\fi
   \else
-    \let\tp@b@float\tp@captype%
+    \let\ccf@begin@env\tp@captype%
     \tpIfAttrStr{\tp@captype}{orientation}{landscape}
-      {\edef\@tp@b@float{sideways\tp@b@float}%
-       \edef\tp@b@float{\noexpand\begin{\@tp@b@float\ifx\tp@do@dblfloat\relax*\fi}}%
-       \edef\tp@e@float{\noexpand\end{\@tp@b@float\ifx\tp@do@dblfloat\relax*\fi}}}
+      {\edef\@tp@b@float{sideways\ccf@begin@env}%
+       \edef\ccf@begin@env{\noexpand\begin{\@tp@b@float\ifx\tp@do@dblfloat\relax*\fi}}%
+       \edef\ccf@end@env{\noexpand\end{\@tp@b@float\ifx\tp@do@dblfloat\relax*\fi}}}
       {\edef\tp@flt@env{\ifx\tp@do@dblfloat\relax dbl\fi}%
-       \edef\tp@b@float{\expandafter\noexpand\csname @x\tp@flt@env float\endcsname {\tp@captype}[\tp@fps]}%
-       \edef\tp@e@float{\expandafter\noexpand\csname end@\tp@flt@env float\endcsname}}%
+       \edef\ccf@begin@env{\expandafter\noexpand\csname @x\tp@flt@env float\endcsname {\tp@captype}[\ccf@floatpos]}%
+       \edef\ccf@end@env{\expandafter\noexpand\csname end@\tp@flt@env float\endcsname}}%
    \fi}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@flt@debug} prints some debug information to
+% \begin{macro}{\ccf@debug} prints some debug information to
 %   \lstinline{stdout} for a single float that has the Attribute
 %   \lstinline{debug} set.
 %    \begin{macrocode}
-\def\tp@flt@debug#1{%
+\def\ccf@debug#1{%
   \tpIfAttr{#1}{debug}
   {\message{^^J[tp Float Debug]^^J
       Textheight:\space\the\textheight^^J
@@ -267,8 +267,8 @@
       Path: \space\space\space\space\space\space\@tp@fig@path^^J
 \fi
       Class:\space\space\space\space\space\space\tp@current@class^^J
-      Floatpos:\space\space\space\tp@fps^^J
-      Environ:\space\space\space\space\expandafter\noexpand\tp@b@float...\expandafter\noexpand\tp@e@float^^J
+      Floatpos:\space\space\space\ccf@floatpos^^J
+      Environ:\space\space\space\space\expandafter\noexpand\ccf@begin@env...\expandafter\noexpand\ccf@end@env^^J
       Subfloat:\space\space\space               \the\tpSubFloatCnt^^J
 \ifnum\tpSubFloatCnt=\z@
       Width:\space\space\space\space\space\space\the\tp@total@flt@width^^J
@@ -285,13 +285,13 @@
 %   dependent on float position and orientation
 %    \begin{macrocode}
 \def\tp@get@seps{%
-  \ifx\tp@fps\@empty
+  \ifx\ccf@floatpos\@empty
     \expandafter\tp@flt@sep@top\dimexpr\tpUseProperty{intext-skip-top}\relax%
   \else
     \expandafter\tp@flt@sep@top\dimexpr\tpUseProperty{float-skip-top}\relax%
   \fi
     \tpIfAttrStr{\tp@captype}{orientation}{landscape}{}
-      {\ifx\tp@fps\@empty
+      {\ifx\ccf@floatpos\@empty
          \expandafter\tp@flt@sep@bottom\dimexpr\tpUseProperty{intext-skip-bottom}\relax%
        \else
          \expandafter\tp@flt@sep@bottom\dimexpr\tpUseProperty{float-skip-bottom}\relax%
@@ -301,8 +301,8 @@
 % \begin{macro}{\tp@set@*@sep} Hooks to apply top and bottom skips,
 %   respectively.
 %    \begin{macrocode}
-\def\tp@set@top@sep{\addvspace{\tp@flt@sep@top}}
-\def\tp@set@bot@sep{\addvspace{\tp@flt@sep@bottom}}
+\def\ccf@set@top@sep{\addvspace{\tp@flt@sep@top}}
+\def\ccf@set@bot@sep{\addvspace{\tp@flt@sep@bottom}}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -595,49 +595,40 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %
 % \section{Label and Referencing mechanisms}
 %
-% \begin{macro}{\ccf@create@counters} creates auto-numbered
-%   counters. We advance the caption type only locally since they are
-%   automatically and globally updated when
-%   \lstinline{\tp@make@anchors} is called.
+% \begin{macro}{\ccf@create@counter} creates an auto-numbered counter
+%   if it is not given in the input via the \lstinline{Number}
+%   Component. With optional \#1 the internal subfloat counter can
+%   be overridden.
 %    \begin{macrocode}
-\def\ccf@create@counters{%
-  \tpIfAttrIsset{\tp@captype}{nonumber}{}
-    {\tpIfPropVal{numbering}{auto}
-      {\tpIfComp{number-0}
-         {}%
-         {\expandafter\advance\csname c@\tp@captype\endcsname\@ne\relax
-          \tp@set@label{0}%
-          \expandafter\advance\csname c@\tp@captype\endcsname\m@ne\relax
-         }%
-       \ifnum\tpSubFloatCnt=\z@\relax\else
-         \@tempcnta\z@
-         \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
-           \tpIfComp{number-\the\@tempcnta}
-             {}%
-             {\tpIfAttr{\tp@captype}{subfloat}
-                {\tp@set@sublabel{\the\@tempcnta}}
-                {\expandafter\advance\csname c@\tp@captype\endcsname\@ne\relax
-                 \tp@set@label{\the\@tempcnta}%
-                 \expandafter\advance\csname c@\tp@captype\endcsname\m@ne\relax}}}%
-       \fi}
-      {}%
-   }}
+\def\ccf@create@counter{\cc@opt@empty\@ccf@create@counter}
+\def\@ccf@create@counter[#1]{%
+  \ifblank{#1}
+    {\@tempcnta\tpSubFloatCnt\relax}
+    {\@tempcnta#1\relax}%
+  \tpIfAttrIsset{\tp@captype}{nonumber}
+    {}
+    {\ccUnlessComp{Number}
+      {\tpIfPropVal{numbering}{auto}
+        {\tpIfAttr{\tp@captype}{subfloat}
+          {\ccf@set@subcounter{\the\@tempcnta}}
+          {\global\expandafter\advance\csname c@\tp@captype\endcsname\@ne\relax
+            \ccf@set@counter{\the\@tempcnta}}}
+      {}}}}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@set@label} generates the first level float counter. \#1 is the sub-float counter.
+% \begin{macro}{\ccf@set@counter} generates the first level float
+%   counter. \#1 is the sub-float counter.
 %    \begin{macrocode}
-\def\tp@set@label#1{%
-  \expandafter\expandafter\expandafter\edef\expandafter\csname tp@\tp@cur@cont @number-#1\expandafter\endcsname\expandafter{\csname the\tp@captype\endcsname}%
-}
+\def\ccf@set@counter#1{%
+  \edef\@tempa{\csname the\tp@captype\endcsname}%
+  \expandafter\tpNumber\@tempa}
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\tp@set@sublabel} generates second level counters for
+% \begin{macro}{\ccf@set@subcounter} generates second level counters for
 %   numbered sub-floats. \#1 is the sub-float counter
-%
-% TODO: float-number und sub-number sollten beides Components sein, nicht Properties!
 %    \begin{macrocode}
-\def\tp@set@sublabel#1{%
+\def\ccf@set@subcounter#1{%
   \tpSetValProp{float-number}{\csname tp@\tp@cur@cont @number-0\endcsname}%
   \tpSetValProp{sub-number}{%
     \begingroup
@@ -646,7 +637,7 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
       \csname @\tpUseProperty{sub-number-style}\endcsname{#1}%
       \tpUseProperty{sub-number-after}%
     \endgroup}%
-  \expandafter\expandafter\expandafter\edef\expandafter\csname tp@\tp@cur@cont @number-#1\expandafter\endcsname\expandafter{\tpUseProperty{sub-number-format}}%
+  \tpNumber{\tpUseProperty{sub-number-format}}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -689,9 +680,11 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 \def\ccfCreateLabel{%
   %\tpIfComp{Number}
   %  {\letcs\@currentlabel{tp@\tp@cur@cont @number-\the\tpSubFloatCnt}}
-  %  {\letcs\@currentlabel{tp-\tp@cur@cont-number-\the\@tp@int@flt@cnt}}%
+  %  {\letcs\@currentlabel{tp-\tp@cur@cont-number-\the\tp@int@flt@cnt}}%
   %\expandafter\H@refstepcounter\expandafter{\tp@captype}%
   %\let\Hy@tempa\Hy@float@caption
+  \message{^^J===>\csmeaning{tp@\tp@cur@cont @number-\the\tpSubFloatCnt}}
+  \def\cc@fallback@label{\letcs\@currentlabel{tp@\tp@cur@cont @number-\the\tpSubFloatCnt}}%
   \def\cc@labelname@comp{Caption}
   %\expandafter\hyper@@anchor\expandafter{\@currentHref}{\relax}%
   \expandafter\ccCreateLabel\expandafter{\tp@captype}%
@@ -726,7 +719,7 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
     \tpEvalType{Components}%
     \tpUseProperty{before-float}%
     \tp@set@flt@env
-    \ifx\tp@fps\@empty\else\savenotes\fi
+    \ifx\ccf@floatpos\@empty\else\savenotes\fi
 }
 %    \end{macrocode}
 % \end{macro}
@@ -734,17 +727,17 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %   environment.
 %    \begin{macrocode}
 \def\endtp@float{%
-    \tp@b@float
-    \tp@set@top@sep
+    \ccf@begin@env
+    \ccf@set@top@sep
     \ccf@test@caption{0}{capt}{top}%
     \ccf@test@caption{0}{capt}{bottom}%
-    \ccf@create@counters%
-    \tp@flt@compose
+    \ccf@create@counter%
+    \ccf@compose
     \tp@save@page
-    \tp@set@bot@sep
-    \tp@e@float
-    \tp@flt@debug{\tp@captype}%
-    \ifx\tp@fps\@empty\else\spewnotes\fi
+    \ccf@set@bot@sep
+    \ccf@end@env
+    \ccf@debug{\tp@captype}%
+    \ifx\ccf@floatpos\@empty\else\spewnotes\fi
   \endgroup
   \immediate\write\@auxout
     {\string\expandafter\string\gdef\string\csname\space tp-float-\the\tp@int@flt@cnt-dimens\string\endcsname{%
@@ -774,6 +767,7 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %    \begin{macrocode}
 \def\endtpSubFloat{%
   \tpUseProperty{subfloat-handler}%
+  \ccf@create@counter%
   \expandafter\xdef\csname tp@\tp@cur@cont @width-\the\tpSubFloatCnt\endcsname{\the\wd\tp@subfltbox}%
   \expandafter\xdef\csname tp@\tp@cur@cont @height-\the\tpSubFloatCnt\endcsname{\the\ht\tp@subfltbox}%
   \expandafter\xdef\csname tp@\tp@cur@cont @depth-\the\tpSubFloatCnt\endcsname{\the\dp\tp@subfltbox}%
@@ -821,10 +815,10 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@flt@compose}
+% \begin{macro}{\ccf@compose}
 % This macro prints the entire float object.
 %    \begin{macrocode}
-\def\tp@flt@compose{%
+\def\ccf@compose{%
   \bgroup
     \hsize\tp@total@flt@width
     \tp@flt@process
@@ -1225,8 +1219,8 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 \AtBeginDocument{%
   \@ifpackageloaded{htmltabs}{%
     \def\@tp@reserve@htmltab{%
-      \let\tp@addstyle\@empty
-      \ifx\tp@fps\@empty
+      \let\ccf@add@style\@empty
+      \ifx\ccf@floatpos\@empty
         \expandafter\ifx\csname tpFloat\the\tp@int@flt@cnt Captop\endcsname\relax\else
           \htInitSkip\csname tpFloat\the\tp@int@flt@cnt Captop\endcsname
           \advance\htInitSkip\tp@flt@sep@top%
@@ -1236,9 +1230,9 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
           \advance\htAddToBottom\tp@flt@sep@bottom%
         \fi
       \else
-        \def\tp@addstyle{;break-table:false;}%
+        \def\ccf@add@style{;break-table:false;}%
       \fi
-      \edef\tp@tempa{margin-left:\tp@flt@marg@l\tp@addstyle}%
+      \edef\tp@tempa{margin-left:\tp@flt@marg@l\ccf@add@style}%
       \expandafter\htAddStyle\expandafter{\tp@tempa}%
       \global\setbox\htTableBox\box\voidb@x
       \let\htOutputTable\relax
