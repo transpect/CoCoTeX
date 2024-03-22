@@ -22,9 +22,9 @@
 % \begin{tpContainer}{titlepage} is the main Container for the
 %   document's locally defined meta data.
 %    \begin{macrocode}
-\DeclareContainer{titlepage}{%
-  \tpInherit {Components,Properties}{CommonMeta}%
-  \tpDeclareType{Components}{%
+\ccDeclareContainer{titlepage}{%
+  \ccInherit {Components,Properties}{CommonMeta}%
+  \ccDeclareType{Components}{%
     \tp@title@simple@comps
     \tp@meta@generic@comp
 %    \end{macrocode}
@@ -44,8 +44,8 @@
     \tp@titlepage@role{editor}{Editor}%
     \tp@titlepage@role{series-editor}{SeriesEditor}%
   }%
-  \tpDeclareType{Properties}{}%
-  \tpDeclareEnv[tpMeta]{\tp@Meta}{\tp@endMeta}%
+  \ccDeclareType{Properties}{}%
+  \ccDeclareEnv[tpMeta]{\tp@Meta}{\tp@endMeta}%
 }
 %    \end{macrocode}
 % \end{tpContainer}
@@ -64,10 +64,10 @@
 %    \begin{macrocode}
 \def\tp@title@role@handlers#1#2{%
   \tpAddToRole{#2}{%
-    \tpDeclareCountedComp{Bio}%
-    \tpDeclareCountedComp{Biography}}%
-  \tpGroupHandler{tp#2}{%
-    \tpIfComp{Biography}{}{\tpIfComp{Bio}{\tpBiography{\tpUseProperty{#1-biography-format}}}{}}%
+    \ccDeclareCountedComponent{Bio}%
+    \ccDeclareCountedComponent{Biography}}%
+  \ccDeclareGroupHandler{tp#2}{%
+    \ccIfComp{Biography}{}{\ccIfComp{Bio}{\tpBiography{\ccUseProperty{#1-biography-format}}}{}}%
   }%
   \tpDeclareRoleBlock[apply]{#2}{BioBlock}{#1-bio-block-format}%
 }
@@ -76,13 +76,13 @@
 % \begin{macro}{\tpDeclareTitlepage} is the default titlepage
 %   declarator with the next token being added the titlepage's Property list.
 %    \begin{macrocode}
-\def\tpDeclareTitlepage{\tpAddToType{Properties}{titlepage}}
+\def\tpDeclareTitlepage{\ccAddToType{Properties}{titlepage}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tp@Meta} is the code executed at the beginning of the \lstinline{tpMeta} Container
 %    \begin{macrocode}
 \def\tp@Meta{%
-  \tpEvalType{Components}%
+  \ccEvalType{Components}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -91,7 +91,7 @@
 %   \lstinline{titlepage} container.
 %    \begin{macrocode}
 \def\tpAddTitleRole#1#2{%
-  \tpAddToType{Components}{titlepage}{\tp@titlepage@role{#1}{#2}}%
+  \ccAddToType{Components}{titlepage}{\tp@titlepage@role{#1}{#2}}%
   \tpAddTitleEval{\tp@title@eds@eval{#2}}%
 }
 %    \end{macrocode}
@@ -111,18 +111,18 @@
 % \begin{macro}{\tp@endMeta} is the code executed at the end of the \lstinline{tpMeta} Container
 %    \begin{macrocode}
 \def\tp@endMeta{%
-  \tpNamespace{titlepage}%
-  \tpEvalType{Properties}%
+  \ccSetContainer{titlepage}%
+  \ccEvalType{Properties}%
   \tp@maketitle
   \tp@meta@role@eval{Author}%
-  \tpApplyCollection{tpAffil}{affil-block-item-format}{AffilBlock}%
+  \ccApplyCollection{tpAffil}{affil-block-item-format}{AffilBlock}%
   \tp@title@eds@eval{Editor}%
   \tp@title@eds@eval{SeriesEditor}%
   \tp@meta@generic@eval
   \tp@title@fundings@eval
   \tp@title@add@eval
   \cc@if@preamble\cct@set@pdfmeta\relax
-  \tpUseHook{document-meta-hook}%
+  \ccUseHook{document-meta-hook}%
   \let\tp@cur@cont\@empty
 }
 %    \end{macrocode}
@@ -216,7 +216,7 @@
   \let\tpBreak\space
   \pdfstringdef\@title{\tpUseComp{Title}}%
   \cct@write@pdf@meta{pdftitle}{Title}{\tpUseComp{Title}}%
-  \ccStorePropGlobal\tpRunBookTitle{run-book-title}%
+  \ccgdefFromProperty\tpRunBookTitle{run-book-title}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -232,10 +232,10 @@
     \renewcommand\foreignlanguage[2]{{##2}}%
     \ifnum\tpAuthorCnt>\z@
       \@setpar{\@@par}%
-      \tpCompGDef\tpRunBookName{tpAuthor}{author-list-pdfinfo-format}%
+      \ccgdefFromCountedComp\tpRunBookName{tpAuthor}{author-list-pdfinfo-format}%
     \else
       \ifnum\tpEditorCnt>\z@
-        \tpCompGDef\tpRunBookName{tpEditor}{editor-list-pdfinfo-format}%
+        \ccgdefFromCountedComp\tpRunBookName{tpEditor}{editor-list-pdfinfo-format}%
       \else
         \ccPackageWarning{transcript-title}{Meta Data}{No author or editor given!}%
         \@tempswafalse
@@ -254,7 +254,7 @@
 %   creator
 %    \begin{macrocode}
 \def\cct@title@process@bkc{%
-  \cct@write@pdf@meta{pdfcreator}{Creator}{\tpIfComp{PDFCreator}{\tpUseComp{PDFCreator}}{\tpUseComp{Publisher}\tpIfComp{PubPlace}{, \tpUseComp{PubPlace}}{}}}%
+  \cct@write@pdf@meta{pdfcreator}{Creator}{\ccIfComp{PDFCreator}{\tpUseComp{PDFCreator}}{\tpUseComp{Publisher}\ccIfComp{PubPlace}{, \tpUseComp{PubPlace}}{}}}%
   \cct@write@pdf@meta{pdfproducer}{Producer}{\tpUseComp{PDFProducer}}%
   \cct@write@pdf@meta{pdfkeywords}{Keywords}{\tpUseComp{Keywords}}%
 }
@@ -283,8 +283,8 @@
 % \begin{macro}{before-maketitle-hook}
 %   Hook that is expanded right before the titlepage is printed.
 %    \begin{macrocode}
-\tpDeclareHook[titlepage]{before-maketitle-hook}
-\tpDeclareHook[titlepage]{document-meta-hook}
+\ccDeclareHook[titlepage]{before-maketitle-hook}
+\ccDeclareHook[titlepage]{document-meta-hook}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tp@maketitle}
@@ -294,28 +294,28 @@
   \ifarticle
     \gdef\tpMaketitle{%
       \let\tp@cnt@grp\@empty
-      \tpUseHook[titlepage]{before-maketitle-hook}%
+      \ccUseHook[titlepage]{before-maketitle-hook}%
       \bgroup
-        \tpNamespace{titlepage}%
-        \tpEvalType{Properties}%
-        \tpUseProperty{article-title}%
+        \ccSetContainer{titlepage}%
+        \ccEvalType{Properties}%
+        \ccUseProperty{article-title}%
       \egroup
-      \tpUseHook[titlepage]{after-maketitle-hook}%
+      \ccUseHook[titlepage]{after-maketitle-hook}%
     }%
   \else
     \gdef\tpMaketitle{%
       \let\tp@cnt@grp\@empty
-      \tpUseHook[titlepage]{before-maketitle-hook}%
+      \ccUseHook[titlepage]{before-maketitle-hook}%
       \bgroup
-        \tpNamespace{titlepage}%
-        \tpEvalType{Properties}%
-        \tpUseProperty{before-titlepage}%
-        \tpIfComp{Cover}{%
-          \tpUseProperty{coverpage}%
+        \ccSetContainer{titlepage}%
+        \ccEvalType{Properties}%
+        \ccUseProperty{before-titlepage}%
+        \ccIfComp{Cover}{%
+          \ccUseProperty{coverpage}%
         }{}%
-        \tpUseProperty{before-titlepage-roman}%
-        \tpUseProperty{titlepage-roman}%
-        \tpUseProperty{after-titlepage}%
+        \ccUseProperty{before-titlepage-roman}%
+        \ccUseProperty{titlepage-roman}%
+        \ccUseProperty{after-titlepage}%
       \egroup
       }%
   \fi
@@ -330,11 +330,11 @@
 % \begin{macro}{\tp@title@fundings@comp} wrapper to set up the Subcontainer
 %    \begin{macrocode}
 \def\tp@title@fundings@comp{%
-  \tpDeclareComp{FundingBlock}{\expandafter\global}{}%
-  \tpDeclareComponentGroup{tpFunding}{%
-    \tpDeclareCountedComp{FundName}%
-    \tpDeclareCountedComp{FundLogo}%
-    \tpDeclareCountedComp{FundID}%
+  \ccDeclareComponent{FundingBlock}{\expandafter\global}{}%
+  \ccDeclareComponentGroup{tpFunding}{%
+    \ccDeclareCountedComponent{FundName}%
+    \ccDeclareCountedComponent{FundLogo}%
+    \ccDeclareCountedComponent{FundID}%
   }{}%
 }
 %    \end{macrocode}
@@ -344,7 +344,7 @@
 %    \begin{macrocode}
 \def\tp@title@fundings@eval{{%
     \def\tp@cur@cont{titlepage}%
-    \tpComposeCollection{tpFunding}{fund-format}{FundingBlock}%
+    \ccComposeCollection{tpFunding}{fund-format}{FundingBlock}%
 }}
 %    \end{macrocode}
 % \end{macro}
@@ -360,7 +360,7 @@
 %    \begin{macrocode}
 \def\tp@create@editor@string#1{%
   \expandafter\ifx\csname tp@\tp@cur@cont @#1NameList\endcsname\relax\else
-    \csgappto{tp@\tp@cur@cont @#1NameList}{{\letcs\tpTotalCount{tp#1Cnt}\tpUseProperty{editor-suffix}}}%
+    \csgappto{tp@\tp@cur@cont @#1NameList}{{\letcs\tpTotalCount{tp#1Cnt}\ccUseProperty{editor-suffix}}}%
   \fi
 }%
 %    \end{macrocode}
@@ -369,15 +369,15 @@
 % \subsection{Simple Component Declarations}
 %
 % \begin{macro}{\tp@title@macro} is an alias for
-%   \lstinline{\tpDeclareGComp} for backwards compatibility.
+%   \lstinline{\ccDeclareGlobalComponent} for backwards compatibility.
 %    \begin{macrocode}
-\let\tp@title@macro\tpDeclareGComp
+\let\tp@title@macro\ccDeclareGlobalComponent
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tp@title@simple@comps} wrapper for the Titlepage's simple Components.
 %    \begin{macrocode}
 \def\tp@title@simple@comps{%
-  \tpDeclareGComp[\jobname]{XmpFile}             % File basename of the XMP file ('.xmp' is added automatically)
+  \ccDeclareGlobalComponent[\jobname]{XmpFile}             % File basename of the XMP file ('.xmp' is added automatically)
   %% Cover
   \tp@title@macro{Cover}                         % Path to Cover Image(!)
   %% Titles
@@ -480,19 +480,19 @@
 % \section{Default Settings}
 %
 %    \begin{macrocode}
-\tpAddToDefault{titlepage}{%
-  \tpSetProperty{article-title}{}%
+\ccAddToProperties{titlepage}{%
+  \ccSetProperty{article-title}{}%
   % Title page hooks
   % Before \tpMaketitle and outside the group
-  \tpSetProperty{before-titlepage}{%
+  \ccSetProperty{before-titlepage}{%
     \pagestyle{empty}%
     \parindent\z@
     \parskip\z@
   }%
-  \tpSetProperty{after-titlepage}{\pagestyle{headings}}%
+  \ccSetProperty{after-titlepage}{\pagestyle{headings}}%
   % Pages of title
   %% Cover page
-  \tpSetProperty{coverpage}{%
+  \ccSetProperty{coverpage}{%
     \bgroup
       \def\thepage{\@alph\c@page}%
       \smash{\rlap{%
@@ -501,174 +501,174 @@
             \hskip-\oddsidemargin
             \includegraphics[width=\paperwidth,height=\paperheight]{\tpUseComp{Cover}}%
           }}}%
-      \tpUseProperty{after-coverpage}%
+      \ccUseProperty{after-coverpage}%
     \egroup
   }%
-  \tpSetProperty{after-coverpage}{\cleardoublepage}%
-  \tpSetProperty{titlepage-roman}{%
-    \tpUsePropEnv{titlepage-i}%
+  \ccSetProperty{after-coverpage}{\cleardoublepage}%
+  \ccSetProperty{titlepage-roman}{%
+    \ccUsePropertyEnv{titlepage-i}%
     \clearpage
-    \tpUsePropEnv{titlepage-ii}%
+    \ccUsePropertyEnv{titlepage-ii}%
     \clearpage
-    \tpUsePropEnv{titlepage-iii}%
+    \ccUsePropertyEnv{titlepage-iii}%
     \clearpage
-    \tpUsePropEnv{titlepage-iv}%
+    \ccUsePropertyEnv{titlepage-iv}%
     \clearpage
   }%
   %% Generic meta blocks
-  \tpSetProperty{generic-meta-heading-face}{\large}% format of the heading of a generic meta block
-  \tpSetProperty{generic-meta-format}{% Format of a single generic meta-block
-    \tpIfComp{Heading}{{\tpUseProperty{generic-meta-heading-face}\tpUseComp{Heading}\par}\vskip\baselineskip}{}%
+  \ccSetProperty{generic-meta-heading-face}{\large}% format of the heading of a generic meta block
+  \ccSetProperty{generic-meta-format}{% Format of a single generic meta-block
+    \ccIfComp{Heading}{{\ccUseProperty{generic-meta-heading-face}\tpUseComp{Heading}\par}\vskip\baselineskip}{}%
     \tpUseComp{Content}%
     \par%
   }%
   %% Funding
-  \tpSetProperty{funding-columns}{2}
-  \tpSetProperty{funding-format}{}%
+  \ccSetProperty{funding-columns}{2}
+  \ccSetProperty{funding-format}{}%
 %    \end{macrocode}
 % Fallback for the width in case someone sets up a fixed value for a fund's width.
 %    \begin{macrocode}
-  \tpSetProperty{fund-width}{.5\textwidth}
-  \tpSetProperty{fund-vertical-sep}{\baselineskip}%
-  \tpSetProperty{fund-sep}{%
-    \expandafter\@tempcnta\CalcModulo{\tpCurCount}{\tpUseProperty{funding-columns}}%
+  \ccSetProperty{fund-width}{.5\textwidth}
+  \ccSetProperty{fund-vertical-sep}{\baselineskip}%
+  \ccSetProperty{fund-sep}{%
+    \expandafter\@tempcnta\CalcModulo{\tpCurCount}{\ccUseProperty{funding-columns}}%
     \ifnum\@tempcnta=\z@
       \par
       \ifnum\tpCurCount<\tpTotalCount\relax
-        \vskip\tpUseProperty{fund-vertical-sep}%
+        \vskip\ccUseProperty{fund-vertical-sep}%
       \fi
     \else
       \hfill
     \fi}
-  \tpSetProperty{fund-format}{% Format of a single fund/grant/sponsor
+  \ccSetProperty{fund-format}{% Format of a single fund/grant/sponsor
     \strut\vtop{%
-      \hsize\tpUseProperty{fund-width}%
-      \tpIfComp{FundName}{\tpUseComp{FundName}\\[1ex]}{}%
-      \includegraphics[width=\tpUseProperty{fund-width}]{\tpUseComp{FundLogo}}}%
-    \tpUseProperty{fund-sep}%
+      \hsize\ccUseProperty{fund-width}%
+      \ccIfComp{FundName}{\tpUseComp{FundName}\\[1ex]}{}%
+      \includegraphics[width=\ccUseProperty{fund-width}]{\tpUseComp{FundLogo}}}%
+    \ccUseProperty{fund-sep}%
   }%
-  \tpSetProperty{funding-sep}{4mm}%
-  \tpSetProperty{funding-block}{%
+  \ccSetProperty{funding-sep}{4mm}%
+  \ccSetProperty{funding-block}{%
     \bgroup
 %    \end{macrocode}
 % We set \lstinline{fund-width} here so that the value is calculated only once and only the result is stored in the \lstinline{fund-width} Property.
 %    \begin{macrocode}
-      \tpSetPropertyX{fund-width}{\dimexpr(\textwidth/\tpUseProperty{funding-columns})-(\tpUseProperty{funding-sep}/\tpUseProperty{funding-columns})\relax}
-      \tpUseProperty{funding-format}%
-      \tpGetComp{FundingPreText}%
-      \tpGetComp{FundingBlock}%
-      \tpGetComp{FundingPostText}%
+      \ccSetPropertyX{fund-width}{\dimexpr(\textwidth/\ccUseProperty{funding-columns})-(\ccUseProperty{funding-sep}/\ccUseProperty{funding-columns})\relax}
+      \ccUseProperty{funding-format}%
+      \ccGetComp{FundingPreText}%
+      \ccGetComp{FundingBlock}%
+      \ccGetComp{FundingPostText}%
       \par
     \egroup
   }
   %% before the roman part of the title pages but after cover page
-  \tpSetProperty{before-titlepage-roman}{%
+  \ccSetProperty{before-titlepage-roman}{%
     \setcounter{page}{1}%
     \def\thepage{\roman{page}}%
   }%
-  \tpSetProperty{titlepage-i}{%
+  \ccSetProperty{titlepage-i}{%
     \ifmonograph
       \tpUseComp{AuthorNameList}%
     \else
-      \tpUseProperty{EditorNameList}%
+      \ccUseProperty{EditorNameList}%
     \fi%
     \vskip\baselineskip
     \bgroup
-      \tpUseProperty{title-face}\tpUseComp{Title}%
+      \ccUseProperty{title-face}\tpUseComp{Title}%
     \egroup
     %\expandafter\meaning\csname tp@titlepage@editor-2@FullName\endcsname
   }%
-  \tpSetProperty{titlepage-ii}{%
-    \tpGetComp{Editorial}%
-    \tpGetComp{SeriesNote}%
-    \tpGetComp{GenericMetaBlock}%
+  \ccSetProperty{titlepage-ii}{%
+    \ccGetComp{Editorial}%
+    \ccGetComp{SeriesNote}%
+    \ccGetComp{GenericMetaBlock}%
     \vfill
-    \tpUseProperty{bio-output}%
+    \ccUseProperty{bio-output}%
   }%
-  \tpSetProperty{titlepage-iii}{%
+  \ccSetProperty{titlepage-iii}{%
     \ifmonograph
       \tpUseComp{AuthorNameList}%
     \else
-      \tpUseProperty{EditorNameList}%
+      \ccUseProperty{EditorNameList}%
     \fi%
     \par
-    \tpUseProperty{title-format}
-    \tpGetComp{Edition}%
-    \tpGetComp{EditionNote}%
+    \ccUseProperty{title-format}
+    \ccGetComp{Edition}%
+    \ccGetComp{EditionNote}%
     \vfill
     \clearpage
   }%
-  \tpSetProperty{titlepage-iv}{%
-    \tpGetComp{Dedication}%   Dedication
-    \tpGetComp{Acknowledgements}%   Dedication
-    \tpUseProperty{imprint-format}%
-    \tpUseProperty{funding-block}%
+  \ccSetProperty{titlepage-iv}{%
+    \ccGetComp{Dedication}%   Dedication
+    \ccGetComp{Acknowledgements}%   Dedication
+    \ccUseProperty{imprint-format}%
+    \ccUseProperty{funding-block}%
     \vfill
     \bgroup
-      \tpUseProperty{imprint-face}%
-      \tpIfComp{Biblio}{{\bfseries\tpGetComp{BiblioTitle}}\tpGetComp{Biblio}}{}%
-      \tpUseProperty{imprint-sep}%
-      \tpUseProperty{imprint}%
+      \ccUseProperty{imprint-face}%
+      \ccIfComp{Biblio}{{\bfseries\ccGetComp{BiblioTitle}}\ccGetComp{Biblio}}{}%
+      \ccUseProperty{imprint-sep}%
+      \ccUseProperty{imprint}%
     \egroup
     \clearpage
   }%
   %% predefined face and format Properties
-  \tpSetProperty{title-face}{\Huge\sffamily\bfseries}%
-  \tpSetProperty{title-format}{%
+  \ccSetProperty{title-face}{\Huge\sffamily\bfseries}%
+  \ccSetProperty{title-format}{%
     \bgroup
-      \tpUseProperty{title-face}%
+      \ccUseProperty{title-face}%
       \tpUseComp{Title}\par
     \egroup
-    \tpWhenComp{Subtitle}{\tpUseProperty{subtitle-format}}%
-    \tpWhenComp{TitleNote}{\tpUseProperty{title-note-format}}%
-    \tpGetComp{Statement}%
+    \ccWhenComp{Subtitle}{\ccUseProperty{subtitle-format}}%
+    \ccWhenComp{TitleNote}{\ccUseProperty{title-note-format}}%
+    \ccGetComp{Statement}%
     \vskip\baselineskip
   }%
-  \tpSetProperty{title-note-face}{\large\sffamily}%
-  \tpSetProperty{title-note-format}{%
+  \ccSetProperty{title-note-face}{\large\sffamily}%
+  \ccSetProperty{title-note-format}{%
     \bgroup
-      \tpUseProperty{title-note-face}%
+      \ccUseProperty{title-note-face}%
       \tpUseComp{TitleNote}%
     \egroup
     \par
   }%
-  \tpSetProperty{subtitle-face}{\Large\sffamily\bfseries}%
-  \tpSetProperty{subtitle-format}{%
+  \ccSetProperty{subtitle-face}{\Large\sffamily\bfseries}%
+  \ccSetProperty{subtitle-format}{%
     \bgroup
-      \tpUseProperty{subtitle-face}%
+      \ccUseProperty{subtitle-face}%
       \tpUseComp{Subtitle}%
     \egroup
     \par
   }%
   %% Imprint
-  \tpSetProperty{imprint-face}{\footnotesize}%
-  \tpSetProperty{imprint-sep}{\ifhmode\par\fi\addvspace{\baselineskip}}%
-  \tpSetProperty{imprint}{%
-    \tpUseProperty{publisher}%
-    \tpGetComp{Qualification}%%
-    \tpGetComp{Conversion}%%
-    \tpGetComp{CoverDesign}%%
-    \tpGetComp{CoverImage}%%
-    \tpGetComp{Lectorate}%%
-    \tpGetComp{QA}%%
-    \tpGetComp{Translator}%%
-    \tpGetComp{Appraiser}%%
-    \tpGetComp{Discussion}%%
-    \tpGetComp{Typesetter}%%
-    \tpGetComp{Print}%%
-    \tpGetComp{UsedFont}%%
-    \tpGetComp{DOI}%%
-    \tpGetComp{Keywords}%%
-    \tpUseProperty{imprint-sep}%
-    \tpGetComp{ISBNPreText}%
-    \tpGetComp{ISBN}%
-    \tpGetComp{EpubPreText}%
-    \tpGetComp{EISBN}%
-    \tpGetComp{EpubISBN}%
-    \tpUseProperty{imprint-sep}%
-    \tpGetComp{EnvDisclaimer}%
+  \ccSetProperty{imprint-face}{\footnotesize}%
+  \ccSetProperty{imprint-sep}{\ifhmode\par\fi\addvspace{\baselineskip}}%
+  \ccSetProperty{imprint}{%
+    \ccUseProperty{publisher}%
+    \ccGetComp{Qualification}%%
+    \ccGetComp{Conversion}%%
+    \ccGetComp{CoverDesign}%%
+    \ccGetComp{CoverImage}%%
+    \ccGetComp{Lectorate}%%
+    \ccGetComp{QA}%%
+    \ccGetComp{Translator}%%
+    \ccGetComp{Appraiser}%%
+    \ccGetComp{Discussion}%%
+    \ccGetComp{Typesetter}%%
+    \ccGetComp{Print}%%
+    \ccGetComp{UsedFont}%%
+    \ccGetComp{DOI}%%
+    \ccGetComp{Keywords}%%
+    \ccUseProperty{imprint-sep}%
+    \ccGetComp{ISBNPreText}%
+    \ccGetComp{ISBN}%
+    \ccGetComp{EpubPreText}%
+    \ccGetComp{EISBN}%
+    \ccGetComp{EpubISBN}%
+    \ccUseProperty{imprint-sep}%
+    \ccGetComp{EnvDisclaimer}%
   }%
-  \tpSetProperty{journal-meta}{%
+  \ccSetProperty{journal-meta}{%
     \tpUseLabeledComp{Submitted}%
     \tpUseLabeledComp{Received}%
     \tpUseLabeledComp{Revised}%
@@ -678,104 +678,104 @@
     \tpUseLabeledComp{COIStatement}%
     \tpUseLabeledComp{Keywords}
   }%
-  \tpSetProperty{licence}{%
-    \tpIfComp{LicenceLogo}{\includegraphics{\tpUseComp{LicenceLogo}}\par}{}%
-    \tpGetComp{LicenceText}%
+  \ccSetProperty{licence}{%
+    \ccIfComp{LicenceLogo}{\includegraphics{\tpUseComp{LicenceLogo}}\par}{}%
+    \ccGetComp{LicenceText}%
   }%
-  \tpSetProperty{copyright}{%
-    \tpIfComp{Copyright}
+  \ccSetProperty{copyright}{%
+    \ccIfComp{Copyright}
       {\tpUseComp{Copyright}\par}
       {\textcopyright\space\tpUseComp{Year}\space\tpUseComp{Publisher},\space\tpUseComp{PubPlace}\par}%
     }%
-  \tpSetProperty{publisher}{%
-    \tpGetComp{PubDivInfo}%
-    \tpUseProperty{copyright}%
-    \tpGetComp{PubNote}%
-    \tpGetComp{PubWeb}%
+  \ccSetProperty{publisher}{%
+    \ccGetComp{PubDivInfo}%
+    \ccUseProperty{copyright}%
+    \ccGetComp{PubNote}%
+    \ccGetComp{PubWeb}%
   }%
   % Name Formats
-  \tpSetProperty{counted-meta-sep}{\ifnum\tpCurCount<\tpTotalCount\relax\vskip\baselineskip\fi}% separator between multiple instances of the same meta datum
-  \tpSetProperty{counted-name-sep}{% Separator between multiple names; titlepage-specific override of the same Property in coco-meta!
+  \ccSetProperty{counted-meta-sep}{\ifnum\tpCurCount<\tpTotalCount\relax\vskip\baselineskip\fi}% separator between multiple instances of the same meta datum
+  \ccSetProperty{counted-name-sep}{% Separator between multiple names; titlepage-specific override of the same Property in coco-meta!
     \ifnum\tpTotalCount>1\relax
       \ifnum\tpCurCount<\tpTotalCount\relax
         \ifnum\tpCurCount<\numexpr\tpTotalCount-1\relax
-          \tpUseProperty{name-sep}%
+          \ccUseProperty{name-sep}%
         \else
-          \tpUseProperty{name-and}%
+          \ccUseProperty{name-and}%
         \fi
       \fi
     \fi
   }%
   % Aliasses for different Roles, see coco-meta.sty for the actual Property values:
   %% editors:
-  \tpPropertyLet{editor-cite-name-format}                   {role-cite-name-format}%
-  \tpPropertyLet{editor-short-cite-name-format}             {role-short-cite-name-format}%
-  \tpPropertyLet{editor-full-name-format}                   {role-full-name-format}%
-  \tpPropertyLet{editor-pdfinfo-name-format}                {role-pdfinfo-name-format}%
-  \tpPropertyLet{editor-correspondence-as-format}           {role-correspondence-string-format}%
+  \ccPropertyLet{editor-cite-name-format}                   {role-cite-name-format}%
+  \ccPropertyLet{editor-short-cite-name-format}             {role-short-cite-name-format}%
+  \ccPropertyLet{editor-full-name-format}                   {role-full-name-format}%
+  \ccPropertyLet{editor-pdfinfo-name-format}                {role-pdfinfo-name-format}%
+  \ccPropertyLet{editor-correspondence-as-format}           {role-correspondence-string-format}%
   %
-  \tpPropertyLet{editor-list-print-format}                  {role-block-print-format}%
-  \tpPropertyLet{editor-list-cite-format}                   {role-block-cite-format}%
-  \tpPropertyLet{editor-list-short-cite-format}             {role-block-short-cite-format}%
-  \tpPropertyLet{editor-list-pdfinfo-format}                {role-block-pdfinfo-format}%
-  \tpPropertyLet{editor-list-correspondence-format}         {role-block-correspondence-format}%
+  \ccPropertyLet{editor-list-print-format}                  {role-block-print-format}%
+  \ccPropertyLet{editor-list-cite-format}                   {role-block-cite-format}%
+  \ccPropertyLet{editor-list-short-cite-format}             {role-block-short-cite-format}%
+  \ccPropertyLet{editor-list-pdfinfo-format}                {role-block-pdfinfo-format}%
+  \ccPropertyLet{editor-list-correspondence-format}         {role-block-correspondence-format}%
   %% series-editors:
-  \tpPropertyLet{series-editor-cite-name-format}            {role-cite-name-format}%
-  \tpPropertyLet{series-editor-short-cite-name-format}      {role-short-cite-name-format}%
-  \tpPropertyLet{series-editor-full-name-format}            {role-full-name-format}%
-  \tpPropertyLet{series-editor-pdfinfo-name-format}         {role-pdfinfo-name-format}%
-  \tpPropertyLet{series-editor-correspondence-as-format}    {role-correspondence-as-format}%
+  \ccPropertyLet{series-editor-cite-name-format}            {role-cite-name-format}%
+  \ccPropertyLet{series-editor-short-cite-name-format}      {role-short-cite-name-format}%
+  \ccPropertyLet{series-editor-full-name-format}            {role-full-name-format}%
+  \ccPropertyLet{series-editor-pdfinfo-name-format}         {role-pdfinfo-name-format}%
+  \ccPropertyLet{series-editor-correspondence-as-format}    {role-correspondence-as-format}%
   %
-  \tpPropertyLet{series-editor-list-print-format}           {role-block-print-format}%
-  \tpPropertyLet{series-editor-list-cite-format}            {role-block-cite-format}%
-  \tpPropertyLet{series-editor-list-short-cite-format}      {role-block-short-cite-format}%
-  \tpPropertyLet{series-editor-list-pdfinfo-format}         {role-block-pdfinfo-format}%
-  \tpPropertyLet{series-editor-list-correspondence-format}  {role-block-correspondence-format}%
+  \ccPropertyLet{series-editor-list-print-format}           {role-block-print-format}%
+  \ccPropertyLet{series-editor-list-cite-format}            {role-block-cite-format}%
+  \ccPropertyLet{series-editor-list-short-cite-format}      {role-block-short-cite-format}%
+  \ccPropertyLet{series-editor-list-pdfinfo-format}         {role-block-pdfinfo-format}%
+  \ccPropertyLet{series-editor-list-correspondence-format}  {role-block-correspondence-format}%
   %% name Separators
-  \tpSetProperty{editor-suffix-sgl}{(Ed.)}%
-  \tpSetProperty{editor-suffix-pl}{(Eds.)}%
-  \tpSetProperty{editor-suffix}{%
+  \ccSetProperty{editor-suffix-sgl}{(Ed.)}%
+  \ccSetProperty{editor-suffix-pl}{(Eds.)}%
+  \ccSetProperty{editor-suffix}{%
     \space
     \ifnum\tpTotalCount=\@ne\relax
-      \tpUseProperty{editor-suffix-sgl}%
+      \ccUseProperty{editor-suffix-sgl}%
     \else
-      \tpUseProperty{editor-suffix-pl}%
+      \ccUseProperty{editor-suffix-pl}%
     \fi
   }%
   % Biography
   % those Properties control how (Role specific) Biography Blocks are formatted, i.e. the list of all Biographies of a specific Role:
-  \tpSetProperty{role-bio-block-face}{}% face for the entire, role-specific, Biography Block
-  \tpSetProperty{role-bio-block-format}{{\tpUseProperty{role-bio-block-face}\tpUseComp{Biography}}\par}% Format of the whole, Role specific, Biography Block
-  \tpPropertyLet{author-bio-block-format}        {role-bio-block-format}% Override for single author meta info
-  \tpPropertyLet{editor-bio-block-format}        {role-bio-block-format}% Override for single editor meta info
-  \tpPropertyLet{series-editor-bio-block-format} {role-bio-block-format}% Override for single series editor meta info
+  \ccSetProperty{role-bio-block-face}{}% face for the entire, role-specific, Biography Block
+  \ccSetProperty{role-bio-block-format}{{\ccUseProperty{role-bio-block-face}\tpUseComp{Biography}}\par}% Format of the whole, Role specific, Biography Block
+  \ccPropertyLet{author-bio-block-format}        {role-bio-block-format}% Override for single author meta info
+  \ccPropertyLet{editor-bio-block-format}        {role-bio-block-format}% Override for single editor meta info
+  \ccPropertyLet{series-editor-bio-block-format} {role-bio-block-format}% Override for single series editor meta info
   % those Properties control how a (Role specific) Biography is formatted:
-  \tpSetProperty{role-biography-format}{{\bfseries\tpUseComp{FullName}:}\space\tpUseComp{Bio}\par}% Format of a single entry in the Role specific Biography
-  \tpPropertyLet{author-biography-format}        {role-biography-format}% Override for single author meta info
-  \tpPropertyLet{editor-biography-format}        {role-biography-format}% Override for single editor meta info
-  \tpPropertyLet{series-editor-biography-format} {role-biography-format}% Override for single series editor meta info
-  \tpSetProperty{bio-output-format}{%
-    \tpGetComp{AuthorBioBlock}%
-    \tpGetComp{EditorBioBlock}%
-    \tpGetComp{SeriesEditorBioBlock}%
+  \ccSetProperty{role-biography-format}{{\bfseries\tpUseComp{FullName}:}\space\tpUseComp{Bio}\par}% Format of a single entry in the Role specific Biography
+  \ccPropertyLet{author-biography-format}        {role-biography-format}% Override for single author meta info
+  \ccPropertyLet{editor-biography-format}        {role-biography-format}% Override for single editor meta info
+  \ccPropertyLet{series-editor-biography-format} {role-biography-format}% Override for single series editor meta info
+  \ccSetProperty{bio-output-format}{%
+    \ccGetComp{AuthorBioBlock}%
+    \ccGetComp{EditorBioBlock}%
+    \ccGetComp{SeriesEditorBioBlock}%
   }%
   % Running headers
-  \tpSetProperty{run-book-title}{%
-    \tpIfComp{RunTitle}
+  \ccSetProperty{run-book-title}{%
+    \ccIfComp{RunTitle}
       {\tpUseComp{RunTitle}}
-      {\tpIfComp{ShortTitle}
+      {\ccIfComp{ShortTitle}
         {\tpUseComp{ShortTitle}}
-        {\tpIfComp{Title}{\tpUseComp{Title}}{No title given!}}}%
+        {\ccIfComp{Title}{\tpUseComp{Title}}{No title given!}}}%
   }%
-  \tpSetProperty{run-book-name}{%
-    \tpIfComp{RunNames}
+  \ccSetProperty{run-book-name}{%
+    \ccIfComp{RunNames}
       {\tpUseComp{RunNames}}
       {\ifmonograph
-         \tpIfComp{AuthorNameList}
+         \ccIfComp{AuthorNameList}
            {\tpUseComp{AuthorNameList}}
            {no author defined!}%
        \else
-         \tpIfComp{EditorNameList}
+         \ccIfComp{EditorNameList}
            {\tpUseComp{EditorNameList}}
            {no editor defined!}%
        \fi}%

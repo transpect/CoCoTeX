@@ -112,14 +112,14 @@
 \newcount\realchap \realchap\z@
 \ifx\endnotes@with@chapters\relax
   \AtBeginDocument{%
-    \tpAddToHook[heading]{before-hook-chapter}{%
+    \ccAddToHook[heading]{before-hook-chapter}{%
       \ifnum\c@endnote>\z@\relax
         \expandafter\global\expandafter\let\csname enotes@in@\the\realchap\endcsname\@empty
       \fi
       \global\advance\realchap\@ne
       \global\c@endnote\z@
-      \def\tp@par@title{\tpIfComp{TocTitle}{\tpUseComp{TocTitle}}{\tpUseComp{Title}}}%
-      \def\tp@par@runtitle{\tpIfComp{RunTitle}{\tpUseComp{RunTitle}}{\tpUseComp{Title}}}%
+      \def\tp@par@title{\ccIfComp{TocTitle}{\tpUseComp{TocTitle}}{\tpUseComp{Title}}}%
+      \def\tp@par@runtitle{\ccIfComp{RunTitle}{\tpUseComp{RunTitle}}{\tpUseComp{Title}}}%
       \addtoendnotes{%
         \noexpand\expandafter\noexpand\ifx\noexpand\csname enotes@in@\the\realchap\noexpand\endcsname\noexpand\@empty
           \bgroup
@@ -136,7 +136,7 @@
 
 \ifx\reset@notes@per@chapter\relax
   \AtBeginDocument{%
-    \tpAddToHook[heading]{before-hook-chapter}{%
+    \ccAddToHook[heading]{before-hook-chapter}{%
       \global\c@footnote\z@
       \global\c@endnote\z@
     }%

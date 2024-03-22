@@ -540,13 +540,13 @@
 %   Component prefix, \#3 is the numerical list level.
 %    \begin{macrocode}
 \def\tp@format@number#1#2#3{%
-  \tpSetValProp{#1curr-number-level}{#3}%
+  \ccSetPropertyVal{#1curr-number-level}{#3}%
 %    \end{macrocode}
 % First step: measuring the natural width of the Number if it exists
 % for the current item.
 %    \begin{macrocode}
-  \tpIfComp{#2Number}
-    {\sbox\z@{\tpUseProperty{#1number-format}}}
+  \ccIfComp{#2Number}
+    {\sbox\z@{\ccUseProperty{#1number-format}}}
     {\sbox\z@{}}%
 %    \end{macrocode}
 % Second step: we store the width of \lstinline{\box0} if it is wider
@@ -563,9 +563,9 @@
 % levels as \lstinline{#1number-width-max}, and the width of the
 % current number as \lstinline{#1number-width}.
 %    \begin{macrocode}
-  \tpSetValProp{#1number-width-level-max}{\csname tp-\tp@cur@cont-#1number-#3-maxwd\endcsname}%
-  \tpSetValProp{#1number-width-max}{\csname tp-\tp@cur@cont-#1number-maxwd\endcsname}%
-  \tpSetValProp{#1number-width}{\the\wd\z@}%
+  \ccSetPropertyVal{#1number-width-level-max}{\csname tp-\tp@cur@cont-#1number-#3-maxwd\endcsname}%
+  \ccSetPropertyVal{#1number-width-max}{\csname tp-\tp@cur@cont-#1number-maxwd\endcsname}%
+  \ccSetPropertyVal{#1number-width}{\the\wd\z@}%
 %    \end{macrocode}
 % Third step: we calculate and fortify the actual
 % \lstinline{#1margin-left} (i.e., the overall left indent of the
@@ -587,24 +587,24 @@
 % First, we set the \lstinline{#1hang-number} to be an alias of
 % \lstinline{#1number-format} as fallback.
 %    \begin{macrocode}
-  \tpPropertyLet{#1hang-number}{#1number-format}%
+  \ccPropertyLet{#1hang-number}{#1number-format}%
 %    \end{macrocode}
 % Then, we check for \lstinline{#1indent}.
 %    \begin{macrocode}
-  \tpIfProp{#1indent}
-    {\ifdim\tpUseProperty{#1indent}<\z@
+  \ccIfProp{#1indent}
+    {\ifdim\ccUseProperty{#1indent}<\z@
 %    \end{macrocode}
 % If it is set and negative, we alter the \lstinline{#1hang-number}
 % Property in such a way that it is shifted to the left by
 % \lstinline{#1indent} amount and put into a hbox of
 % -\lstinline{#1indent} width (remember that the value is negative).
 %    \begin{macrocode}
-       \tpSetProperty{#1hang-number}{%
-         \hskip\tpUseProperty{#1indent}%
-         \hbox to -\tpUseProperty{#1indent}{%
-           \tpIfPropVal{#1number-align}{left}{}{\hss}%
-           \tpUseProperty{#1number-format}%
-           \tpIfPropVal{#1number-align}{right}{}{\hss}}}%
+       \ccSetProperty{#1hang-number}{%
+         \hskip\ccUseProperty{#1indent}%
+         \hbox to -\ccUseProperty{#1indent}{%
+           \ccIfPropVal{#1number-align}{left}{}{\hss}%
+           \ccUseProperty{#1number-format}%
+           \ccIfPropVal{#1number-align}{right}{}{\hss}}}%
      \fi}{}}
 %    \end{macrocode}
 % In all other cases, we stick to the default
@@ -624,12 +624,12 @@
 \def\tp@calc@margin@left#1#2{%
   \@tempcnta\numexpr#2-1\relax
   \expandafter\ifx\csname tp-\tp@cur@cont-#1\the\@tempcnta-margin-left\endcsname\relax
-    \@tempdima=-\tpUseProperty{#1indent}\relax%
+    \@tempdima=-\ccUseProperty{#1indent}\relax%
   \else
-    \@tempdima=\dimexpr\csname tp-\tp@cur@cont-#1\the\@tempcnta-margin-left\endcsname-\tpUseProperty{#1indent}\relax
+    \@tempdima=\dimexpr\csname tp-\tp@cur@cont-#1\the\@tempcnta-margin-left\endcsname-\ccUseProperty{#1indent}\relax
   \fi
   \tp@store@latest{#1#2-margin-left}{\the\@tempdima}%
-  \tpSetProperty{#1margin-left}{\the\@tempdima}}
+  \ccSetProperty{#1margin-left}{\the\@tempdima}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tp@get@indent}
@@ -645,9 +645,9 @@
 % altered during macro expansion to ultimatly being passed to
 % \lstinline{\hskip}.
 %    \begin{macrocode}
-  \tpPropertyLetX{int-#1margin-left}{#1margin-left}%
-  \tpPropertyLetX{int-#1indent}{#1indent}%
-  \tpIfPropVal{#1indent}{auto-global}
+  \ccPropertyLetX{int-#1margin-left}{#1margin-left}%
+  \ccPropertyLetX{int-#1indent}{#1indent}%
+  \ccIfPropVal{#1indent}{auto-global}
 %    \end{macrocode}
 % If \lstinline{#1indent} is set to \lstinline{auto-global}, the item
 % gets an \lstinline{indent} that is set to the negative value of the
@@ -655,37 +655,37 @@
 % Type. The same maximum is added to the user-set value of
 % \lstinline{margin-left}.
 %    \begin{macrocode}
-    {\tpSetPropertyX{#1indent}{-\tpUseProperty{#1number-width-max}}%
+    {\ccSetPropertyX{#1indent}{-\ccUseProperty{#1number-width-max}}%
 %    \end{macrocode}
 % If the user has not set \lstinline{margin-left}, we set it to \lstinline{\z@}.
 %    \begin{macrocode}
-     \tpIfPropVal{#1margin-left}{}
-       {\tpSetProperty{int-#1margin-left}{\z@}}
-       {\tpPropertyLetX{int-#1margin-left}{#1margin-left}}%
-     \tpSetPropertyX{#1margin-left}{\dimexpr\tpUseProperty{#1number-width-max}+\tpUseProperty{int-#1margin-left}\relax}}
+     \ccIfPropVal{#1margin-left}{}
+       {\ccSetProperty{int-#1margin-left}{\z@}}
+       {\ccPropertyLetX{int-#1margin-left}{#1margin-left}}%
+     \ccSetPropertyX{#1margin-left}{\dimexpr\ccUseProperty{#1number-width-max}+\ccUseProperty{int-#1margin-left}\relax}}
 %    \end{macrocode}
 % Next, we check if \lstinline{#1margin-left} is set to \lstinline{auto}.
 %    \begin{macrocode}
-    {\tpIfPropVal{int-#1margin-left}{auto}
+    {\ccIfPropVal{int-#1margin-left}{auto}
 %    \end{macrocode}
 % If \lstinline{#1margin-left} is set to \lstinline{auto}, all
 % items of the same level get the same left margin that is determined
 % by the sums of the indents of all higher levels.
 %    \begin{macrocode}
-       {\tpIfPropVal{int-#1indent}{auto}
+       {\ccIfPropVal{int-#1indent}{auto}
 %    \end{macrocode}
 % if \lstinline{#1indent} is also set to \lstinline{auto}, the
 % \lstinline{indent} of the current item is set to the wides Number of
 % the same level.
 %    \begin{macrocode}
-          {\tpSetPropertyX{#1indent}{-\tpUseProperty{#1number-width-level-max}}}
+          {\ccSetPropertyX{#1indent}{-\ccUseProperty{#1number-width-level-max}}}
 %    \end{macrocode}
 % otherwise it is set to the value of indent, or \lstinline{0pt} if it
 % was not set at all.
 %    \begin{macrocode}
-          {\tpIfProp{int-#1indent}
-             {\tpSetPropertyX{#1indent}{\tpUseProperty{int-#1indent}}}
-             {\tpSetProperty{#1indent}{\z@}}}%
+          {\ccIfProp{int-#1indent}
+             {\ccSetPropertyX{#1indent}{\ccUseProperty{int-#1indent}}}
+             {\ccSetProperty{#1indent}{\z@}}}%
 %    \end{macrocode}
 % the final value for \lstinline{margin-left} is calculated by the
 % \lstinline{\tp@calc@margin@left} macro, above. It will be set to the sum of indent and
@@ -694,32 +694,32 @@
 %    \end{macrocode}
 % This branch is reached when the left margin is not set to \lstinline{auto}.
 %    \begin{macrocode}
-       {\tpIfProp{int-#1margin-left}
-          {\tpIfPropVal{int-#1indent}{auto}
+       {\ccIfProp{int-#1margin-left}
+          {\ccIfPropVal{int-#1indent}{auto}
 %    \end{macrocode}
 % If \lstinline{margin-left} is set to a specific value and
 % \lstinline{indent} is set to \lstinline{auto}, set the actual indent
 % to the width of the level's widest Number.
 %    \begin{macrocode}
-            {\tpSetPropertyX{#1indent}{-\tpUseProperty{#1number-width-level-max}}}
-            {\tpIfProp{int-#1indent}
+            {\ccSetPropertyX{#1indent}{-\ccUseProperty{#1number-width-level-max}}}
+            {\ccIfProp{int-#1indent}
 %    \end{macrocode}
 % Otherwise, if \lstinline{indent} is set to a specific width, apply that value, or else set the inden to \lstinline{0pt}.
 %    \begin{macrocode}
-               {\tpSetPropertyX{#1indent}{\tpUseProperty{int-#1indent}}}
-               {\tpSetProperty{#1indent}{\z@}}}}
+               {\ccSetPropertyX{#1indent}{\ccUseProperty{int-#1indent}}}
+               {\ccSetProperty{#1indent}{\z@}}}}
 %    \end{macrocode}
 % If \lstinline{margin-left} is not set,
 %    \begin{macrocode}
-         {\tpIfPropVal{int-#1indent}{auto}
+         {\ccIfPropVal{int-#1indent}{auto}
 %    \end{macrocode}
 % and \lstinline{indent} is set to \lstinline{auto}, set
 % \lstinline{margin-left} to the width of the level's widest Number
 % and the actual \lstinline{indent} to the negative of that.
 %    \begin{macrocode}
-            {\tpPropertyLetX{#1margin-left}{#1number-width-level-max}%
-             \tpSetPropertyX{#1indent}{-\tpUseProperty{#1number-width-level-max}}}
-            {\tpIfProp{int-#1indent}
+            {\ccPropertyLetX{#1margin-left}{#1number-width-level-max}%
+             \ccSetPropertyX{#1indent}{-\ccUseProperty{#1number-width-level-max}}}
+            {\ccIfProp{int-#1indent}
 %    \end{macrocode}
 % If \lstinline{margin-left} is not set, and \lstinline{indent} is set
 % to a specific value, apply that value for \lstinline{indent} and set
@@ -727,14 +727,14 @@
 % \lstinline{indent} should have a positive value, otherwise the
 % content would probably lap over the left edge of the type area.
 %    \begin{macrocode}
-               {\tpSetPropertyX{#1indent}{\tpUseProperty{int-#1indent}}%
-                \tpSetProperty{#1margin-left}{\z@}}
+               {\ccSetPropertyX{#1indent}{\ccUseProperty{int-#1indent}}%
+                \ccSetProperty{#1margin-left}{\z@}}
 %    \end{macrocode}
 % otherwise set both \lstinline{indent} nad \lstinline{margin-left} to
 % \lstinline{0pt}.
 %    \begin{macrocode}
-               {\tpSetProperty{#1indent}{\z@}%
-                \tpSetProperty{#1margin-left}{\z@}}}}}}}
+               {\ccSetProperty{#1indent}{\z@}%
+                \ccSetProperty{#1margin-left}{\z@}}}}}}}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -762,41 +762,47 @@
 %   anchor. This macro looks for both the label attribute in the begin
 %   of a Container's environment, as well as for a
 %   \lstinline{RefLabel} Components inside the environment. If both
-%   exist, both apply. If none exists, a generic label and/or anchor
-%   point is generated.
+%   exist, both apply. If none exists, we adopt the generic anchor
+%   point generated by the \lstinline{hyperref} package.
+%
+%   TODO: Check if the hyperref macros need to be configured in any
+%   way for various reference types!
 %    \begin{macrocode}
 \def\ccCreateLabel#1{%
   \ifx\Hy@MakeCurrentHrefAuto\@undefined\else
     \Hy@MakeCurrentHrefAuto{cc:#1}%
     \Hy@raisedlink{\hyper@anchorstart{\@currentHref}\hyper@anchorend}%
   \fi
-  \tpWhenComp{RefLabel}
-    {\edef\cc@ref@label{\tpUseComp{RefLabel}}%
+  \let\cc@ref@label\relax
+  \ccWhenComp{RefLabel}
+    {\ccgdefFromComp\cc@ref@label{RefLabel}%
      \expandafter\cc@create@label\expandafter{\cc@ref@label}}%
-  \tpIfAttr{\tp@cur@cont}{label}
+  \ccIfAttr{\tp@cur@cont}{label}
     {\cc@parse@csv\cc@create@label{tp@\top@cur@cont @attr@label}}%
-    {\cc@create@label{}}}
+    {\ifx\cc@ref@label\relax\cc@create@label{\@currentHref}\fi}}
 %    \end{macrocode}
 % \end{macro}
-% 
-% \begin{macro}{\@cc@create@label}
+% \begin{macro}{\@cc@create@label} generates the actual anchor for
+%   document-internal cross-references (i.e.,
+%   a~\LaTeX\space\lstinline{\label}). \#1 is the label ID.
 %    \begin{macrocode}
 \def\cc@create@label#1{%
-  \ifblank{#1}
-    {}
-    {\tpIfComp{Number}
-      {\protected@edef\@tempa{\csname tp@\tp@cur@cont @Number\endcsname}%
-       \ifx\cc@labelname@comp\@undefined
-         \def\cc@labelname@comp{Title}%
-       \fi
-       \let\@currentlabel\@tempa\relax
-       \protected@edef\@currentlabelname{\csname tp@\tp@cur@cont @\cc@labelname@comp\endcsname}}%
-      {\cc@fallback@label}%
-      \expandafter\hypertarget\expandafter{#1}{}%
-      \expandafter\label\expandafter{#1}%
-  }
+  \ccIfComp{Number}
+  {\ifx\cc@labelname@comp\@undefined
+      \def\cc@labelname@comp{Title}%
+    \fi
+    \begingroup
+      \tpGobble
+      \ccgdefFromComp\@currentlabel{Number}%
+      \ccgdefFromComp\@currentlabelname{\cc@labelname@comp}%
+    \endgroup}%
+  {\cc@fallback@anchor}%
+  %% leaving this will generate lots of "duplicate destination"
+  %% messages from pdfbackend
+  %\expandafter\hypertarget\expandafter{#1}{}%
+  \expandafter\label\expandafter{#1}%
 }
-\let\cc@fallback@label\phantomsection
+\def\cc@fallback@anchor{\phantomsection}%
 %    \end{macrocode}
 % \end{macro}
 %

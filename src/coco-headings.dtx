@@ -41,9 +41,9 @@
 % \section{Facility for declaring heading levels and their layouts}%
 % \begin{tpContainer}{heading}
 %    \begin{macrocode}
-\DeclareContainer{heading}{%
-  \tpInherit{Components,Properties}{CommonMeta}%
-  \tpDeclareType{Components}{%
+\ccDeclareContainer{heading}{%
+  \ccInherit{Components,Properties}{CommonMeta}%
+  \ccDeclareType{Components}{%
 %    \end{macrocode}
 % We already have the Author Component inherited from the
 % \lstinline{CommonMeta} Container. We therefore just need to declare the
@@ -58,11 +58,11 @@
     \cch@provide@comp{Number}%
     \cch@provide@comp{LicenceLogo}%
     \cch@provide@comp{LicenceName}%
-    \tpDeclareComp{RefLabel}{}{}%
+    \ccDeclareComponent{RefLabel}{}{}%
     \cch@provide@quotes
   }%
-  \tpDeclareType{Properties}{}%
-  \tpDeclareEnv{\heading}{\endheading}%
+  \ccDeclareType{Properties}{}%
+  \ccDeclareEnv{\heading}{\endheading}%
 }
 %    \end{macrocode}
 % \end{tpContainer}
@@ -81,7 +81,7 @@
 %    \end{macrocode}
 % First, we check if the heading has already been declared.
 %    \begin{macrocode}
-  \ifcsdef{tp@container@#3}{%
+  \ifcsdef{cc@container@#3}{%
 %    \end{macrocode}
 % If yes, then we check if the new declaration's parameters match with
 % the pre-existing one. We start with the heading level.
@@ -95,17 +95,17 @@
            re-declaration states `#2'.^^J%
            ^^J%
            Consider declaring a new heading alltogether with `#3' as parent,^^J%
-           or add Properties to `#3' using \string\tpAddToType\string{Properties\string}\string{#3\string}.}%
+           or add Properties to `#3' using \string\ccAddToType\string{Properties\string}\string{#3\string}.}%
        }%
 %    \end{macrocode}
 % we also check the parent.
 %    \begin{macrocode}
     \if!#1!\else
-      \ifcsstring{tp@parent@#3}{#1}{}{%
+      \ifcsstring{cc@parent@#3}{#1}{}{%
         \ccPackageError{Headings}
           {Parent Mismatch}
           {Parent of heading `#3'^^J cannot be altered!}
-          {The already existing heading `#3' inherits from `\csname tp@parent@#3\endcsname',^^J%
+          {The already existing heading `#3' inherits from `\csname cc@parent@#3\endcsname',^^J%
            but your re-declaration sets Parent to `#1'.^^J%
            ^^J%
            Consider declaring a new heading alltogether with `#1' as parent.}%
@@ -114,7 +114,7 @@
 %    \end{macrocode}
 % and finally pass the new Properties to the existing heading.
 %    \begin{macrocode}
-    \tpAddToType{Properties}{#3}{#4}%
+    \ccAddToType{Properties}{#3}{#4}%
 %    \end{macrocode}
 % Finally, we need to re-define the \lstinline{\tpUseHeading} macro so
 % that changes to the heading's Property list will be taken into
@@ -122,14 +122,14 @@
 % toc-entries.
 %    \begin{macrocode}
     \cch@declare@heading{#2}{#3}%
-  }{% ifcsdef tp@container@#3 else
+  }{% ifcsdef cc@container@#3 else
 %    \end{macrocode}
 % If the heading does not already exist, we build a new one.
 %
 % Each new heading constitutes its own Sub-Container of the heading
 % Container. The name of this Sub-Container is the headings name.
 %    \begin{macrocode}
-    \DeclareContainer{#3}{%
+    \ccDeclareContainer{#3}{%
 %    \end{macrocode}
 % 
 % \begin{macro}{\cch@<3>@level} stores the numeric heading level for the heading
@@ -148,29 +148,29 @@
 %    \begin{macrocode}
       \ccPackageInfo{Headings}{}{Declaring heading `#3'}%
       \edef\@argi{#1}%
-      \tpDeclareType{Parent}{\tp@heading@create@parent{#1}{#3}}
+      \ccDeclareType{Parent}{\tp@heading@create@parent{#1}{#3}}
 %    \end{macrocode}
 % We inherit everything from the heading levels parent, or from the
 % default heading if no parent is present.
 %    \begin{macrocode}
       \ifx\@argi\@empty
-        \tpInherit{Components,Properties}{heading}%
+        \ccInherit{Components,Properties}{heading}%
       \else
-        \tpInherit{Components,Properties,Parent}{#1}%
+        \ccInherit{Components,Properties,Parent}{#1}%
       \fi
 %    \end{macrocode}
 % The main body of the heading Declaration is a list of Property
 % definitions which we append to the Sub-Container's ``Property''
 % Type.
 %    \begin{macrocode}
-      \tpDeclareType{Properties}{%
+      \ccDeclareType{Properties}{%
         #4%
       }%
 %    \end{macrocode}
 % For each heading we declare some common macros like the ToC entry
 % handlers, the heading's counters and its hooks.
 %    \begin{macrocode}
-      \tpDeclareType{Init}{%
+      \ccDeclareType{Init}{%
         \tp@init@hooks{#3}%
         \let\@tp@cur@cont\tp@cur@cont
         \def\tp@cur@cont{heading}%
@@ -191,8 +191,8 @@
 % generalised \lstinline{heading} container.
 %    \begin{macrocode}
       \cch@declare@heading{#2}{#3}%
-    }% \DeclareContainer{#3}
-  }% \ifcsdef tp@container@#3 fi
+    }% \ccDeclareContainer{#3}
+  }% \ifcsdef cc@container@#3 fi
 %    \end{macrocode}
 % If \CoCoTeX's accessibility features are active, we need to register
 % each new heading with \lstinline{ltpdfa}'s autoclose mechanism.
@@ -223,7 +223,7 @@
 %   build the Sectioning tree correctly.
 %    \begin{macrocode}
 \def\cch@add@autoclose#1#2{%
-  \tpAddToHook[document]{cca/at/begin/document}{%
+  \ccAddToHook[document]{cca/at/begin/document}{%
 %    \end{macrocode}
 % First, we assign the Sectioning tag and the tag for the section's
 % head itself to the \lstinline{Sect} and \lstinline{H} tags,
@@ -339,7 +339,7 @@
 \def\tp@heading@create@parent#1#2{%
   \def\cch@sec@name{#2}%
   \if!#1!\else
-    \tpCheckParent{#1}{#2}%
+    \ccCheckParent{#1}{#2}%
   \fi%
 }
 %    \end{macrocode}
@@ -351,8 +351,8 @@
 %   \#1 is the numeric heading level, \#2 is the name of the heading.
 %    \begin{macrocode}
 \def\cch@declare@heading#1#2{%
-  \tpEvalType{Parent}%
-  \tpEvalType{Init}%
+  \ccEvalType{Parent}%
+  \ccEvalType{Init}%
 %    \end{macrocode}
 %
 % \begin{macro}{\tpUseHeading} is defined as second step. It is called
@@ -365,7 +365,7 @@
 % Since heading levels don't define their own environments, we make
 % sure that \lstinline{heading} is the namespace we are working in.
 %    \begin{macrocode}
-    \tpNamespace{heading}%
+    \ccSetContainer{heading}%
     \@setpar{\@@par}%
 %    \end{macrocode}
 % Properties are stored in macros specific to the current heading
@@ -376,17 +376,17 @@
 % list.
 %    \begin{macrocode}
     \def\tpHeadingLevel{#1}%
-    \tpEvalType[#2]{Properties}%
+    \ccEvalType[#2]{Properties}%
 %    \end{macrocode}
 % Processing the author name list (from coco-meta.sty).
 %    \begin{macrocode}
     \tp@meta@role@eval{Author}%
-    \tpComposeCollection{tpAuthor}{author-contact-block-format}{AuthorContactBlock}%
-    \tpComposeCollection{tpAffil}{affil-block-item-format}{AffilBlock}%
+    \ccComposeCollection{tpAuthor}{author-contact-block-format}{AuthorContactBlock}%
+    \ccComposeCollection{tpAffil}{affil-block-item-format}{AffilBlock}%
 %    \end{macrocode}
 % Processing the \lstinline{tpQuote} environments, if any.
 %    \begin{macrocode}
-    \tpComposeCollection{tpQuote}{quote-block-format}{QuoteBlock}%
+    \ccComposeCollection{tpQuote}{quote-block-format}{QuoteBlock}%
 %    \end{macrocode}
 % Hyperref related stuff.
 %    \begin{macrocode}
@@ -398,9 +398,9 @@
 %    \end{macrocode}
 % Here, the actual construction of the heading begins.
 %    \begin{macrocode}
-    \tpUseProperty{heading-par}%
+    \ccUseProperty{heading-par}%
     \cch@use@hook{before-hook}{#2}%
-    \tpUseProperty{before-heading}%
+    \ccUseProperty{before-heading}%
 %    \end{macrocode}
 % Add vertical space before the heading
 %    \begin{macrocode}
@@ -416,7 +416,7 @@
 % heading definition omits setting a proper value, we build a
 % fallback.
 %    \begin{macrocode}
-    \tpIfProp{after-skip}{\expandafter\global\expandafter\@tempskipa\expandafter=\tpUseProperty{after-skip}\relax}{\global\@tempskipa=1sp\relax}%
+    \ccIfProp{after-skip}{\expandafter\global\expandafter\@tempskipa\expandafter=\ccUseProperty{after-skip}\relax}{\global\@tempskipa=1sp\relax}%
     \cch@use@hook{before-print-hook}{#2}%
     \def\@svsec{%
 %    \end{macrocode}
@@ -424,15 +424,15 @@
 % heading's Components that are to be printed where the
 % \lstinline{heading} environment is in the source.
 %    \begin{macrocode}
-      \tpUseProperty{before-heading-block}%
+      \ccUseProperty{before-heading-block}%
 %    \end{macrocode}
 % Labels to be used with LaTeX's cross reference mechanism are defined
 %    \begin{macrocode}
       \ccCreateLabel{#2}% label facility
-      \leftskip\tpUseProperty{margin-left}%
-      \rightskip\tpUseProperty{margin-right}%
+      \leftskip\ccUseProperty{margin-left}%
+      \rightskip\ccUseProperty{margin-right}%
       \bgroup
-        \tpUseProperty{heading-block}%
+        \ccUseProperty{heading-block}%
 %    \end{macrocode}
 % Generate entries for ToC, bookmarks and page headers. This has to be
 % here because in rare cases, abstracts could cause the whole heading
@@ -442,13 +442,13 @@
 % \textbf{Style progammers need to make sure that no page breaks are
 % allowed within the \lstinline{heading-block}!}
 %    \begin{macrocode}
-        \tpIfPropVal{no-toc}{true}{}{\tp@make@toc}% ToC entries
-        \tpIfPropVal{no-BM}{true}{}{\tp@make@bookmarks}% Bookmarks
-        \tpUseProperty{toc-hook}%
-        \tpIfProp{extended}{\tpUseProperty{extended-heading}}{}%
+        \ccIfPropVal{no-toc}{true}{}{\tp@make@toc}% ToC entries
+        \ccIfPropVal{no-BM}{true}{}{\tp@make@bookmarks}% Bookmarks
+        \ccUseProperty{toc-hook}%
+        \ccIfProp{extended}{\ccUseProperty{extended-heading}}{}%
       \egroup%
       \tp@make@run% Running headers
-      \tpUseProperty{after-heading-block}%
+      \ccUseProperty{after-heading-block}%
     }%
 %    \end{macrocode}
 % Finally, we decide whether the printable material we stored in
@@ -480,11 +480,11 @@
 % \begin{macro}{\cch@use@hook} recursively includes a hook \#1 from the heading \#2's parent before expanding its own version.
 %    \begin{macrocode}
 \def\cch@use@hook#1#2{%
-  \expandafter\ifx\csname tp@parent@#2\endcsname\relax\else
-    \edef\@cch@parent{#1-\csname tp@parent@#2\endcsname}%
-    \expandafter\tpUseHook\expandafter{\@cch@parent}%
+  \expandafter\ifx\csname cc@parent@#2\endcsname\relax\else
+    \edef\@cch@parent{#1-\csname cc@parent@#2\endcsname}%
+    \expandafter\ccUseHook\expandafter{\@cch@parent}%
   \fi
-  \tpUseHook{#1-\cch@sec@name}%
+  \ccUseHook{#1-\cch@sec@name}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -492,7 +492,7 @@
 % \begin{macro}{\tp@do@before@skip} is a routine that determins the skip that is inserted before a heading.
 %    \begin{macrocode}
 \def\tp@do@before@skip{%
-  \setlength\@tempskipa{\tpUseProperty{before-skip}}%
+  \setlength\@tempskipa{\ccUseProperty{before-skip}}%
   \ifdim\@tempskipa<\z@\relax
     \def\do@skip{\minusvspace{-\@tempskipa}}%
   \else
@@ -514,10 +514,10 @@
 %   level \#1.
 %    \begin{macrocode}
 \def\tp@init@hooks#1{%
-  \tpDeclareHook{toc-before-hook-#1}% Expanded before the toc entry is printed
-  \tpDeclareHook{toc-after-hook-#1}% Expanded after the toc entry is printed
-  \tpDeclareHook{before-hook-#1}% Expanded before before-heading property is expanded
-  \tpDeclareHook{before-print-hook-#1}% Expanded at the very beginning of the local definition of \@svsec
+  \ccDeclareHook{toc-before-hook-#1}% Expanded before the toc entry is printed
+  \ccDeclareHook{toc-after-hook-#1}% Expanded after the toc entry is printed
+  \ccDeclareHook{before-hook-#1}% Expanded before before-heading property is expanded
+  \ccDeclareHook{before-print-hook-#1}% Expanded at the very beginning of the local definition of \@svsec
 }
 %    \end{macrocode}
 % \end{macro}
@@ -536,11 +536,11 @@
 %   the heading, \#2 is the name of the heading's counter.
 %    \begin{macrocode}
 \def\tp@auto@number#1#2{%
-  \tpIfPropVal{numbering}{auto}
+  \ccIfPropVal{numbering}{auto}
     {\expandafter\ifx\csname c@#2\endcsname\relax\tp@init@cnt{#2}\fi
-     \tpIfAttrIsset{heading}{nonumber}
+     \ccIfAttrIsSet{heading}{nonumber}
        {}
-       {\tpIfComp{Number}
+       {\ccIfComp{Number}
          {}
          {\ifnum #1>\c@secnumdepth\relax\else
             \stepcounter{#2}%
@@ -574,7 +574,7 @@
 % \lstinline{AuthorNameList} override was given in the \lstinline{heading}
 % Container.
 %    \begin{macrocode}
-    \ifx\tp@used@AuthorNameList@override\@empty
+    \ifx\cc@used@AuthorNameList@override\@empty
 %    \end{macrocode}
 % If yes, then we copy its value to \lstinline{tp#1AuthorNameList}.
 %    \begin{macrocode}
@@ -586,7 +586,7 @@
 % \lstinline{author-list-print-format} Property.
 %    \begin{macrocode}
       \ifnum\tpAuthorCnt>\z@
-        \tpCompDef\cch@tempa{tpAuthor}{author-list-print-format}%
+        \ccdefFromCountedComp\cch@tempa{tpAuthor}{author-list-print-format}%
         \ifx\cch@tempa\relax\else
           \expandafter\csname tp#1AuthorNameList\expandafter\endcsname\expandafter{\cch@tempa}%
         \fi
@@ -605,19 +605,19 @@
 %   consists of Components that are written into the .toc file.
 %    \begin{macrocode}
 \def\tp@make@toc{%
-  \tp@check@empty{heading}{Title}{Toc}%
-  \tp@check@empty{heading}{Number}{Toc}%
-  \tp@check@empty{heading}{Subtitle}{Toc}%
+  \cc@check@empty{heading}{Title}{Toc}%
+  \cc@check@empty{heading}{Number}{Toc}%
+  \cc@check@empty{heading}{Subtitle}{Toc}%
   \cch@set@author@name@list{Toc}%
-  \tpIfAttrIsset{heading}{notoc}
+  \ccIfAttrIsSet{heading}{notoc}
     {}
     {\protected@edef\tp@heading@toc@entry{%
-       \tpIfComp{TocTitle}{\string\tpTocTitle{\string\ignorespaces\space\expandonce{\tp@heading@TocTitle}}}{}%
-       \tpIfComp{TocNumber}{\string\tpTocNumber{\string\ignorespaces\space\expandonce{\tp@heading@TocNumber}}}{}%
-       \tpIfComp{TocAuthorNameList}{\string\tpTocAuthorNameList{\string\ignorespaces\space\expandonce{\tp@heading@TocAuthorNameList}}}{}%
-       \tpIfComp{TocSubtitle}{\string\tpTocSubtitle{\string\ignorespaces\space\expandonce{\tp@heading@TocSubtitle}}}{}%
+       \ccIfComp{TocTitle}{\string\tpTocTitle{\string\ignorespaces\space\expandonce{\tp@heading@TocTitle}}}{}%
+       \ccIfComp{TocNumber}{\string\tpTocNumber{\string\ignorespaces\space\expandonce{\tp@heading@TocNumber}}}{}%
+       \ccIfComp{TocAuthorNameList}{\string\tpTocAuthorNameList{\string\ignorespaces\space\expandonce{\tp@heading@TocAuthorNameList}}}{}%
+       \ccIfComp{TocSubtitle}{\string\tpTocSubtitle{\string\ignorespaces\space\expandonce{\tp@heading@TocSubtitle}}}{}%
      }%
-     \tpIfProp{toc-level}{\edef\cch@sec@name{\tpUseProperty{toc-level}}}{}%
+     \ccIfProp{toc-level}{\edef\cch@sec@name{\ccUseProperty{toc-level}}}{}%
      \protected@write\@auxout
        {\tpGobble}%
        {\string\@writefile{toc}{\protect\tpContentsline{\cch@sec@name}{\tp@heading@toc@entry}{\thepage}{\@currentHref}\protected@file@percent}}\relax
@@ -632,14 +632,14 @@
 %   toc entry (which holds the Components), \#4 is the page number.
 %    \begin{macrocode}
 \def\tp@toc@extract@data#1#2#3#4{%
-  \tpNamespace{heading}%
-  \tpEvalType[#2]{Properties}%
-  \tpDeclareComp{TocPage}{}{}%
-  \tpTocPage{\tpUseProperty{toc-page-face}#4}%
-  \tpDeclareComp{TocTitle}{}{}%
-  \tpDeclareComp{TocSubtitle}{}{}%
-  \tpDeclareComp{TocNumber}{}{}%
-  \tpDeclareComp{TocAuthorNameList}{}{}%
+  \ccSetContainer{heading}%
+  \ccEvalType[#2]{Properties}%
+  \ccDeclareComponent{TocPage}{}{}%
+  \tpTocPage{\ccUseProperty{toc-page-face}#4}%
+  \ccDeclareComponent{TocTitle}{}{}%
+  \ccDeclareComponent{TocSubtitle}{}{}%
+  \ccDeclareComponent{TocNumber}{}{}%
+  \ccDeclareComponent{TocAuthorNameList}{}{}%
   \tp@expand@l@contents{#3}{heading}{Toc}{Title}%%
   \tp@format@number{toc-}{Toc}{#1}%
 }
@@ -651,11 +651,11 @@
 %    \begin{macrocode}
 \def\tp@toc@print@entry#1{%
   \bgroup
-    \tpUseHook{toc-before-hook-#1}%
-    \tpUseProperty{toc-before-entry}%
-    \tpUseProperty{toc-format}%
-    \tpUseHook{toc-after-hook-#1}%
-    \tpUseProperty{toc-after-entry}%
+    \ccUseHook{toc-before-hook-#1}%
+    \ccUseProperty{toc-before-entry}%
+    \ccUseProperty{toc-format}%
+    \ccUseHook{toc-after-hook-#1}%
+    \ccUseProperty{toc-after-entry}%
   \egroup}
 %    \end{macrocode}
 % \end{macro}
@@ -674,15 +674,15 @@
 %   iff they exist.
 %    \begin{macrocode}
 \def\tp@make@run{%
-  \tp@check@empty{heading}{Title}{Run}%
-  \tp@check@empty{heading}{Number}{Run}%
-  \tp@check@empty{heading}{Subtitle}{Run}%
+  \cc@check@empty{heading}{Title}{Run}%
+  \cc@check@empty{heading}{Number}{Run}%
+  \cc@check@empty{heading}{Subtitle}{Run}%
   \cch@set@author@name@list{Run}%
-  \tpUseProperty{running-extra}%
-  \tpIfProp{running-level}
-    {\letcs\tp@mark@name{\tpUseProperty{running-level}mark}}
+  \ccUseProperty{running-extra}%
+  \ccIfProp{running-level}
+    {\letcs\tp@mark@name{\ccUseProperty{running-level}mark}}
     {\letcs\tp@mark@name{\cch@sec@name mark}}%
-    \letcs\tp@heading@parent{tp@parent@\cch@sec@name}%
+    \letcs\tp@heading@parent{cc@parent@\cch@sec@name}%
     \ifx\tp@mark@name\@undefined
       \ifx\tp@heading@parent\relax\else
         \letcs\tp@mark@name{\tp@heading@parent mark}%
@@ -706,13 +706,13 @@
 %   the \lstinline{bookmark} package.
 %    \begin{macrocode}
 \def\tp@make@bookmarks{%
-  \tp@check@empty[Toc]{heading}{Title}{BM}%
-  \tp@check@empty[Toc]{heading}{Number}{BM}%
-  \tp@check@empty[Toc]{heading}{AuthorNameList}{BM}%
-  \tp@check@empty[Toc]{heading}{Subtitle}{BM}%
-  \tpIfAttrIsset{heading}{noBM}
+  \cc@check@empty[Toc]{heading}{Title}{BM}%
+  \cc@check@empty[Toc]{heading}{Number}{BM}%
+  \cc@check@empty[Toc]{heading}{AuthorNameList}{BM}%
+  \cc@check@empty[Toc]{heading}{Subtitle}{BM}%
+  \ccIfAttrIsSet{heading}{noBM}
     {}
-    {\tpIfProp{bookmark-level}{\edef\Hy@toclevel{\tpUseProperty{bookmark-level}}}{}%
+    {\ccIfProp{bookmark-level}{\edef\Hy@toclevel{\ccUseProperty{bookmark-level}}}{}%
      \begingroup
        \tpGobble
        \protected@edef\@tempa{\csname tp@heading@bookmark\endcsname}%
@@ -734,9 +734,9 @@
 %    \begin{macrocode}
 \newbox\tp@inlinesecbox
 \def\tp@inline@heading#1{%
-  \tpIfProp{after-indent}{\global\@afterindenttrue}{\global\@afterindentfalse}%
-  \tpIfProp{interline-para}
-    {\global\setbox\tp@inlinesecbox\hbox{\ifvoid\tp@inlinesecbox\else\unhbox\tp@inlinesecbox\tpUseProperty{interline-para-sep}\fi\@svsec}}%
+  \ccIfProp{after-indent}{\global\@afterindenttrue}{\global\@afterindentfalse}%
+  \ccIfProp{interline-para}
+    {\global\setbox\tp@inlinesecbox\hbox{\ifvoid\tp@inlinesecbox\else\unhbox\tp@inlinesecbox\ccUseProperty{interline-para-sep}\fi\@svsec}}%
     {\global\setbox\tp@inlinesecbox\hbox{\@svsec}}
   \@nobreakfalse
   \global\@noskipsectrue
@@ -772,8 +772,8 @@
   \ccIfAlly{\ccaVstructStart{#1head}}{}%
   \@svsec
   \ccIfAlly{\ccaVstructEnd{#1head}}{}%
-  \tpUseProperty{after-heading-par}%
-  \tpIfProp{after-indent}{\global\@afterindenttrue}{\global\@afterindentfalse}%
+  \ccUseProperty{after-heading-par}%
+  \ccIfProp{after-indent}{\global\@afterindenttrue}{\global\@afterindentfalse}%
   \gdef\next{%
     \ifdim\parskip>\z@\relax\advance\@tempskipa-\parskip\relax\fi
     \vskip \@tempskipa
@@ -830,7 +830,7 @@
 %    \end{macrocode}
 % Handling of the optional argument
 %    \begin{macrocode}
-  \tpParseAttributes{heading}{#1}%
+  \ccParseAttributes{heading}{#1}%
 %    \end{macrocode}
 % The mandatory argument contains the heading level. This corresponds
 % to \LaTeX's way of counting heading levels, where, by default,
@@ -842,7 +842,7 @@
 % The cascaded Properties of the heading level are expanded. This is
 % excluded into its own macro to simplify re-definition if necessary.
 %    \begin{macrocode}
-  \tpEvalType[#2]{Components}%
+  \ccEvalType[#2]{Components}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -868,13 +868,13 @@
 %   other macros have their default values:
 %    \begin{macrocode}
 \def\cch@reserve{%
-  \tpNamespace{heading}%
+  \ccSetContainer{heading}%
   \let\cch@ltx@dbl@backslash\\
   \let\\\tpBreak
   \let\cc@ltx@label\label
   \def\tpAuthorCnt{\z@}%
   \def\tpAffilCnt{\z@}%
-  \tp@reset@components{\tp@cur@cont}%
+  \cc@reset@components{\tp@cur@cont}%
   }
 %    \end{macrocode}
 % \end{macro}
@@ -894,10 +894,10 @@
 %   assocciated with a heading.
 %    \begin{macrocode}
 \def\cch@provide@quotes{%
-  \tpDeclareComp{QuoteBlock}{}{}%
-  \tpDeclareComponentGroup{tpQuote}{%
-    \tpDeclareCountedComp{QuoteText}%
-    \tpDeclareCountedComp{QuoteSource}%
+  \ccDeclareComponent{QuoteBlock}{}{}%
+  \ccDeclareComponentGroup{tpQuote}{%
+    \ccDeclareCountedComponent{QuoteText}%
+    \ccDeclareCountedComponent{QuoteSource}%
   }%
 }
 %    \end{macrocode}
@@ -906,11 +906,11 @@
 %    \begin{macrocode}
 \def\cch@provide@authors{%
   \tpAddToRole{Author}{%
-    \tpDeclareCountedComp{AuthorContact}%
+    \ccDeclareCountedComponent{AuthorContact}%
   }%
   \tpDeclareRoleBlock{Author}{ContactBlock}{author-contact-block-format}%
-  \tpGroupHandler{tpAuthor}{%
-    \tpIfComp{AuthorContact}{}{\csname tpAuthorContact\endcsname{\tpUseProperty{author-contact-format}}}{}%
+  \ccDeclareGroupHandler{tpAuthor}{%
+    \ccIfComp{AuthorContact}{}{\csname tpAuthorContact\endcsname{\ccUseProperty{author-contact-format}}}{}%
   }%
   \cc@provide@overrides{AuthorNameList}%
 }
@@ -921,7 +921,7 @@
 %   is the Component name.
 %    \begin{macrocode}
 \def\cch@provide@comp#1{%
-  \tpDeclareComp{#1}{}{}%
+  \ccDeclareComponent{#1}{}{}%
   \cc@provide@overrides{#1}%
 }
 %    \end{macrocode}
@@ -934,9 +934,9 @@
 %   to the PDF bookmarks (\lstinline{\tpBM#1}).
 %    \begin{macrocode}
 \def\cc@provide@overrides#1{%
-  \tpDeclareComp{Toc#1}{}{}% toc overrides
-  \tpDeclareComp{Run#1}{}{}% running overrides
-  \tpDeclareComp{BM#1}{}{}% bookmark overrides
+  \ccDeclareComponent{Toc#1}{}{}% toc overrides
+  \ccDeclareComponent{Run#1}{}{}% running overrides
+  \ccDeclareComponent{BM#1}{}{}% bookmark overrides
 }
 %    \end{macrocode}
 % \end{macro}
@@ -944,141 +944,141 @@
 % \section{Defaults}
 %
 %    \begin{macrocode}
-\tpAddToDefault{heading}{%
-  \tpSetProperty{interline-para}{}%
-  \tpSetProperty{interline-para-sep}{\space}
-  \tpSetProperty{heading-par}{%
-    \tpIfProp{interline-para}{\if@noskipsec \leavevmode \fi}{}%
+\ccAddToProperties{heading}{%
+  \ccSetProperty{interline-para}{}%
+  \ccSetProperty{interline-para-sep}{\space}
+  \ccSetProperty{heading-par}{%
+    \ccIfProp{interline-para}{\if@noskipsec \leavevmode \fi}{}%
     \par
     \global\@afterindenttrue
   }%
-  \tpSetProperty{after-heading-par}{\par \nobreak}% par commands at the end of non-inline headings
-  \tpSetProperty{before-heading}{}%
-  \tpSetProperty{title-face}{\bfseries}%
-  \tpSetProperty{subtitle-face}{\normalfont}%
-  \tpSetProperty{author-face}{\normalfont}%
-  \tpSetProperty{quote-face}{\raggedleft}%
-  \tpSetProperty{quote-source-face}{}%
-  \tpSetProperty{quote-block-format}{%
+  \ccSetProperty{after-heading-par}{\par \nobreak}% par commands at the end of non-inline headings
+  \ccSetProperty{before-heading}{}%
+  \ccSetProperty{title-face}{\bfseries}%
+  \ccSetProperty{subtitle-face}{\normalfont}%
+  \ccSetProperty{author-face}{\normalfont}%
+  \ccSetProperty{quote-face}{\raggedleft}%
+  \ccSetProperty{quote-source-face}{}%
+  \ccSetProperty{quote-block-format}{%
     \bgroup
-      \tpUseProperty{quote-face}%
+      \ccUseProperty{quote-face}%
       \tpUseComp{QuoteText}\par
-      \tpIfComp{QuoteSource}{{\tpUseProperty{quote-source-face}--\space\tpUseComp{QuoteSource}}\par}{}%
+      \ccIfComp{QuoteSource}{{\ccUseProperty{quote-source-face}--\space\tpUseComp{QuoteSource}}\par}{}%
     \egroup}
-  \tpSetProperty{heading-block}
-    {\tpUseProperty{title-face}%
-     \tpIfComp{Number}
-       {\tpUseProperty{hang-number}}
+  \ccSetProperty{heading-block}
+    {\ccUseProperty{title-face}%
+     \ccIfComp{Number}
+       {\ccUseProperty{hang-number}}
        {\leftskip0pt}%
      \tpUseComp{Title}\par%
-     \tpIfComp{Subtitle}{{\tpUseProperty{subtitle-face}\tpUseComp{Subtitle}}\par}{}%
-     \tpIfComp{AuthorNameList}{{\tpUseProperty{author-face}\tpUseComp{AuthorNameList}}\par}{}%
-     \tpIfComp{QuoteBlock}{\tpUseComp{QuoteBlock}}{}%
-     \tpIfComp{AffilBlock}{{\tpUseProperty{affil-block-face}\tpUseComp{AffilBlock}}\par}{}%
+     \ccIfComp{Subtitle}{{\ccUseProperty{subtitle-face}\tpUseComp{Subtitle}}\par}{}%
+     \ccIfComp{AuthorNameList}{{\ccUseProperty{author-face}\tpUseComp{AuthorNameList}}\par}{}%
+     \ccIfComp{QuoteBlock}{\tpUseComp{QuoteBlock}}{}%
+     \ccIfComp{AffilBlock}{{\ccUseProperty{affil-block-face}\tpUseComp{AffilBlock}}\par}{}%
     }%
-  \tpSetProperty{extended-heading}{%
-    \tpIfComp{Abstract}
+  \ccSetProperty{extended-heading}{%
+    \ccIfComp{Abstract}
       {\par\vskip\baselineskip
-       {\bfseries\tpIfComp{AbstractLabel}{\tpUseComp{AbstractLabel}}{Abstract}}\par
+       {\bfseries\ccIfComp{AbstractLabel}{\tpUseComp{AbstractLabel}}{Abstract}}\par
        {\itshape\small\tpUseComp{Abstract}}\par}
       {}%
-    \tpIfComp{Keywords}
+    \ccIfComp{Keywords}
       {\par\vskip\baselineskip
-       {\bfseries\tpIfComp{KeywordsLabel}{\tpUseComp{KeywordsLabel}}{Keywords}}\par
+       {\bfseries\ccIfComp{KeywordsLabel}{\tpUseComp{KeywordsLabel}}{Keywords}}\par
        {\itshape\small\tpUseComp{Keywords}\par}}
      {}%
    }%
-  \tpSetProperty{before-skip}{\z@skip}% TODOC: values < 0pt use \minusvspace, else \addvspace. LaTeX's default behaviour of @afterindent is relocated to the after-indent property.
-  \tpSetProperty{after-heading-block}{}%
-  \tpSetProperty{before-heading-block}{\parindent\z@ \parskip\z@}%
-  \tpSetProperty{toc-hook}{}% Called, after ToC and BM entries have been written to the .aux file
-  \tpSetProperty{after-indent}{}%
-  \tpSetProperty{margin-left}{}%
-  \tpSetProperty{margin-right}{\@flushglue}%
-  \tpSetProperty{after-skip}{1sp}%
-  \tpSetProperty{indent}{auto}%
-  \tpSetProperty{number-width}{}%
-  \tpSetProperty{number-sep}{\space}%
-  \tpSetProperty{number-align}{left}%
-  \tpSetProperty{number-format}{%
+  \ccSetProperty{before-skip}{\z@skip}% TODOC: values < 0pt use \minusvspace, else \addvspace. LaTeX's default behaviour of @afterindent is relocated to the after-indent property.
+  \ccSetProperty{after-heading-block}{}%
+  \ccSetProperty{before-heading-block}{\parindent\z@ \parskip\z@}%
+  \ccSetProperty{toc-hook}{}% Called, after ToC and BM entries have been written to the .aux file
+  \ccSetProperty{after-indent}{}%
+  \ccSetProperty{margin-left}{}%
+  \ccSetProperty{margin-right}{\@flushglue}%
+  \ccSetProperty{after-skip}{1sp}%
+  \ccSetProperty{indent}{auto}%
+  \ccSetProperty{number-width}{}%
+  \ccSetProperty{number-sep}{\space}%
+  \ccSetProperty{number-align}{left}%
+  \ccSetProperty{number-format}{%
     \bgroup
-      \tpUseProperty{title-face}%
-      \tpUseProperty{number-face}%
+      \ccUseProperty{title-face}%
+      \ccUseProperty{number-face}%
       \tpUseComp{Number}%
-      \tpUseProperty{number-sep}%
+      \ccUseProperty{number-sep}%
     \egroup}
-  \tpSetProperty{numbering}{auto}%
+  \ccSetProperty{numbering}{auto}%
   %% running header
-  \tpSetProperty{running-level}{}% override level for running title, name
-  \tpSetProperty{running-heading}{%
-    \tpIfComp{RunAuthorNameList}{\tpUseComp{RunAuthorNameList}:\space}{}%
+  \ccSetProperty{running-level}{}% override level for running title, name
+  \ccSetProperty{running-heading}{%
+    \ccIfComp{RunAuthorNameList}{\tpUseComp{RunAuthorNameList}:\space}{}%
     \tpUseComp{RunTitle}%
   }%
   %% ToC
-  \tpSetProperty{no-toc}{false}% toc entries are generally disabled iff true
-  \tpSetProperty{no-BM}{false}% bookmark entries are generally disabled, iff true
-  \tpSetProperty{toc-margin-top}{\z@}% left indent of the whole entry
-  \tpSetProperty{toc-margin-bottom}{\z@}% bottom margin of the whole entry
-  \tpSetProperty{toc-margin-left}{auto}% left indent of the whole entry
-  \tpSetProperty{toc-margin-right}{\@pnumwidth}% right margin of the whole entry
-  \tpSetProperty{toc-title-face}{}% appearance of title
-  \tpSetProperty{toc-indent}{auto}% offset of the first line of the entry. auto: hang indent by max-number-width for the level
-  \tpSetProperty{toc-number-width}{}% current width of the TocNumber
-  \tpSetProperty{toc-number-align}{left}% alignment of TocNumber within the hbox when hanging
-  \tpPropertyLet{toc-number-face}{toc-title-face}% appearance of the TocNumber
-  \tpSetProperty{toc-number-sep}{\enskip}% thing between TocNumber and TocTitle
-  \tpSetProperty{toc-number-format}{% Format of the TocNumber
+  \ccSetProperty{no-toc}{false}% toc entries are generally disabled iff true
+  \ccSetProperty{no-BM}{false}% bookmark entries are generally disabled, iff true
+  \ccSetProperty{toc-margin-top}{\z@}% left indent of the whole entry
+  \ccSetProperty{toc-margin-bottom}{\z@}% bottom margin of the whole entry
+  \ccSetProperty{toc-margin-left}{auto}% left indent of the whole entry
+  \ccSetProperty{toc-margin-right}{\@pnumwidth}% right margin of the whole entry
+  \ccSetProperty{toc-title-face}{}% appearance of title
+  \ccSetProperty{toc-indent}{auto}% offset of the first line of the entry. auto: hang indent by max-number-width for the level
+  \ccSetProperty{toc-number-width}{}% current width of the TocNumber
+  \ccSetProperty{toc-number-align}{left}% alignment of TocNumber within the hbox when hanging
+  \ccPropertyLet{toc-number-face}{toc-title-face}% appearance of the TocNumber
+  \ccSetProperty{toc-number-sep}{\enskip}% thing between TocNumber and TocTitle
+  \ccSetProperty{toc-number-format}{% Format of the TocNumber
     \bgroup
-      \tpUseProperty{toc-number-face}%
+      \ccUseProperty{toc-number-face}%
       \tpUseComp{TocNumber}%
-      \tpUseProperty{toc-number-sep}%
+      \ccUseProperty{toc-number-sep}%
     \egroup}
-  \tpSetProperty{toc-page-sep}{\dotfill}% between TocTitle and the page counter
-  \tpSetProperty{toc-page-face}{}% appearance of the page value
-  \tpSetProperty{toc-page-format}{% format of the page value
-    \tpUseProperty{toc-page-sep}%
+  \ccSetProperty{toc-page-sep}{\dotfill}% between TocTitle and the page counter
+  \ccSetProperty{toc-page-face}{}% appearance of the page value
+  \ccSetProperty{toc-page-format}{% format of the page value
+    \ccUseProperty{toc-page-sep}%
     \bgroup
-      \tpUseProperty{toc-page-face}%
+      \ccUseProperty{toc-page-face}%
       \tpUseComp{TocPage}%
     \egroup}%
-  \tpSetProperty{toc-link}{none}% should toc entries be linked? values: none,title,page,all
-  \tpSetProperty{toc-level}{}% override heading level for ToC, name!
-  \tpSetProperty{toc-before-entry}{% stuff before anything is output; used to setup margins, alignment, line-breaking rules, etc.
-    \addvspace{\tpUseProperty{toc-margin-top}}%
+  \ccSetProperty{toc-link}{none}% should toc entries be linked? values: none,title,page,all
+  \ccSetProperty{toc-level}{}% override heading level for ToC, name!
+  \ccSetProperty{toc-before-entry}{% stuff before anything is output; used to setup margins, alignment, line-breaking rules, etc.
+    \addvspace{\ccUseProperty{toc-margin-top}}%
     \parindent \z@
     \let\\\@centercr
     \hyphenpenalty=\@M
-    \rightskip \tpUseProperty{toc-margin-right} \@plus 1fil\relax
+    \rightskip \ccUseProperty{toc-margin-right} \@plus 1fil\relax
     \parfillskip -\rightskip
-    \leftskip\tpUseProperty{toc-margin-left}%
+    \leftskip\ccUseProperty{toc-margin-left}%
   }%
-  \tpSetProperty{toc-after-entry}{\par\addvspace{\tpUseProperty{toc-margin-bottom}}}% Thing at the end of the entry, after the page number
-  \tpSetProperty{toc-format}{% Order and formatting of the entry itself
-    \tpUseProperty{toc-title-face}%
-    \tpIfComp{TocNumber}
-      {\tpUseProperty{toc-hang-number}}
+  \ccSetProperty{toc-after-entry}{\par\addvspace{\ccUseProperty{toc-margin-bottom}}}% Thing at the end of the entry, after the page number
+  \ccSetProperty{toc-format}{% Order and formatting of the entry itself
+    \ccUseProperty{toc-title-face}%
+    \ccIfComp{TocNumber}
+      {\ccUseProperty{toc-hang-number}}
       {\leftskip0pt\leavevmode}%
-    \tpIfComp{TocAuthorNameList}{\tpUseComp{TocAuthorNameList}:\space}{}%
+    \ccIfComp{TocAuthorNameList}{\tpUseComp{TocAuthorNameList}:\space}{}%
     \tpUseComp{TocTitle}%
-    \tpUseProperty{toc-page-format}%
+    \ccUseProperty{toc-page-format}%
   }%
   %% PDF-Bookmarks
-  \tpSetProperty{bookmark-level}{}% override heading level for PDF bookmarks, numeric!
-  \tpSetProperty{bookmark}{%
-    \tpIfComp{BMNumber}{\tpUseComp{BMNumber}\space}{}%
+  \ccSetProperty{bookmark-level}{}% override heading level for PDF bookmarks, numeric!
+  \ccSetProperty{bookmark}{%
+    \ccIfComp{BMNumber}{\tpUseComp{BMNumber}\space}{}%
     \tpUseComp{BMTitle}%
   }%
-  \tpSetProperty{orcid-link}{% how the ORC-ID is rendered
-    \tpIfComp{ORCID}{\def\tp@Linkimg{\includegraphics[height=1em]{logos/ORCID.pdf}}\tpCompLink{ORCID}{\tp@Linkimg}}{}%
+  \ccSetProperty{orcid-link}{% how the ORC-ID is rendered
+    \ccIfComp{ORCID}{\def\tp@Linkimg{\includegraphics[height=1em]{logos/ORCID.pdf}}\tpCompLink{ORCID}{\tp@Linkimg}}{}%
   }%
   %% a single Author's contact infomration block
-  \tpSetProperty{author-contact-format}{%Format of a single author's contact information
-    \tpUseComp{FullName}\tpWhenComp{RefAffil}{\textsuperscript{\tpUseComp{AffilRef}}}%
-    \tpUseProperty{orcid-link}%
+  \ccSetProperty{author-contact-format}{%Format of a single author's contact information
+    \tpUseComp{FullName}\ccWhenComp{RefAffil}{\textsuperscript{\tpUseComp{AffilRef}}}%
+    \ccUseProperty{orcid-link}%
   }%
-  \tpPropertyLet{author-list-format}{author-list-print-format}%
-  \tpSetProperty{author-contact-block-format}{% Format of the whole contact information block
-    \tpUseComp{AuthorContact}\ifnum\tpCurCount<\tpTotalCount\tpUseProperty{counted-name-sep}\fi
+  \ccPropertyLet{author-list-format}{author-list-print-format}%
+  \ccSetProperty{author-contact-block-format}{% Format of the whole contact information block
+    \tpUseComp{AuthorContact}\ifnum\tpCurCount<\tpTotalCount\ccUseProperty{counted-name-sep}\fi
   }%
 }
 %    \end{macrocode}

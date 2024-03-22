@@ -67,31 +67,31 @@
 %    \end{macrocode}
 % Various dimension registers that store dimensions and spaces of floats and sub-floats:
 % \begin{itemize}
-% \item \lstinline{\tp@subflt@maxheight} stores and self-updates the
+% \item \lstinline{\ccf@sub@maxheight} stores and self-updates the
 %   height of the largest sub-float inside a float
-% \item \lstinline{\tp@subflt@sep} is the space between sub-floats
+% \item \lstinline{\ccf@sub@sep} is the space between sub-floats
 % \item \lstinline{\tp@total@flt@width} stores the cumulated overall
 %   width of the entire float
-% \item \lstinline{\tp@calc@flt@width} is an internal dimension used
+% \item \lstinline{\ccf@calc@width} is an internal dimension used
 %   to calculate the ratio between mutiple sub-floats that should be
 %   scaled to the same height
 % \item \lstinline{\tp@total@flt@height} is the overall height of a float
 % \item \lstinline{\tp@total@flt@depth} is the overall depth of a float
 % \end{itemize}
 %    \begin{macrocode}
-\newdimen\tp@subflt@maxheight \tp@subflt@maxheight=\z@\relax
-\newdimen\tp@subflt@sep       \tp@subflt@sep=\fboxsep\relax
+\newdimen\ccf@sub@maxheight   \ccf@sub@maxheight=\z@\relax
+\newdimen\ccf@sub@sep         \ccf@sub@sep=\fboxsep\relax
 \newdimen\tp@total@flt@width  \tp@total@flt@width=\textwidth\relax
-\newdimen\tp@calc@flt@width   \tp@calc@flt@width=\tp@total@flt@width\relax
 \newdimen\tp@total@flt@height \tp@total@flt@height=\textwidth\relax
 \newdimen\tp@total@flt@depth  \tp@total@flt@depth=\textwidth\relax
+\newdimen\ccf@calc@width      \ccf@calc@width=\tp@total@flt@width\relax
 %    \end{macrocode}
 % Those two dimensions are used to pass the \lstinline{intext-skip}
 % and \lstinline{float-skip} Properties to the render engine for
 % spacing above and below the float, respectively.
 %    \begin{macrocode}
-\newskip\tp@flt@sep@top      \tp@flt@sep@top=\z@\relax
-\newskip\tp@flt@sep@bottom   \tp@flt@sep@bottom=\z@\relax
+\newskip\ccf@sep@top      \ccf@sep@top=\z@\relax
+\newskip\ccf@sep@bottom   \ccf@sep@bottom=\z@\relax
 %    \end{macrocode}
 % Internal dimensions for the horizontal margins (right, left, inner
 % and outer, respectively)
@@ -103,7 +103,7 @@
 %    \end{macrocode}
 % Locally adjustable switch to allow captions to break across pages
 %    \begin{macrocode}
-\newif\if@tp@flt@break@capt   \@tp@flt@break@captfalse
+\newif\if@ccf@break@capt   \@ccf@break@captfalse
 %    \end{macrocode}
 % String definitions for Property value comparisons
 %    \begin{macrocode}
@@ -176,9 +176,9 @@
   \global\let\tp@has@subcapt@top\@undefined
   \global\let\tp@has@subcapt@bottom\@undefined
   \global\let\ccf@sub@contentsline@store\@empty
-  \global\tp@subflt@maxheight=\z@\relax
+  \global\ccf@sub@maxheight=\z@\relax
   \@tempcnta=\z@\relax
-  \tp@reset@components{\tp@cur@cont}%
+  \cc@reset@components{\tp@cur@cont}%
   \let\tp@prefix\@empty
   \let\ht@cur@element\tp@captype
   \global\let\tp@current@class\relax
@@ -197,13 +197,13 @@
 %    \begin{macrocode}
 \def\tp@get@flt@attr#1#2{%
   \if!#1!\else
-    \tpParseAttributes{#2}{#1}%
-    \tpIfAttr{#2}{class}
+    \ccParseAttributes{#2}{#1}%
+    \ccIfAttr{#2}{class}
       {\global\letcs\tp@current@class{tp@#2@attr@class}%
-       \tpUseClass{default}{\tp@captype}%
-       \expandafter\tpUseClass\expandafter{\csname tp@#2@attr@class\endcsname}{\tp@captype}}
+       \ccUseStyleClass{default}{\tp@captype}%
+       \expandafter\ccUseStyleClass\expandafter{\csname tp@#2@attr@class\endcsname}{\tp@captype}}
       {}%
-      \tpIfAttr{#2}{break-caption}{\@tp@flt@break@capttrue}{}%
+      \ccIfAttr{#2}{break-caption}{\@ccf@break@capttrue}{}%
   \fi
   \tp@get@flt@pos{#2}}
 %    \end{macrocode}
@@ -215,7 +215,7 @@
 %   page). \#1 is the caption type.
 %    \begin{macrocode}
 \def\tp@get@flt@pos#1{%
-  \tpIfAttr{#1}{float-pos}
+  \ccIfAttr{#1}{float-pos}
     {\letcs\ccf@floatpos{tp@#1@attr@float-pos}}
     {\let\ccf@floatpos\@empty}%
   \def\@tempa{h!}\ifx\ccf@floatpos\@tempa\let\ccf@floatpos\@empty\fi
@@ -225,7 +225,7 @@
     \linewidth\dimexpr2\columnwidth+\columnsep\relax
     \hsize\linewidth\relax
   \fi
-  \tpIfAttrStr{#1}{orientation}{landscape}
+  \ccIfAttrIsStr{#1}{orientation}{landscape}
     {\linewidth\textheight
      \hsize\linewidth
      \def\ccf@floatpos{p}}
@@ -244,7 +244,7 @@
     \ifhmode\par\fi
   \else
     \let\ccf@begin@env\tp@captype%
-    \tpIfAttrStr{\tp@captype}{orientation}{landscape}
+    \ccIfAttrIsStr{\tp@captype}{orientation}{landscape}
       {\edef\@tp@b@float{sideways\ccf@begin@env}%
        \edef\ccf@begin@env{\noexpand\begin{\@tp@b@float\ifx\tp@do@dblfloat\relax*\fi}}%
        \edef\ccf@end@env{\noexpand\end{\@tp@b@float\ifx\tp@do@dblfloat\relax*\fi}}}
@@ -259,7 +259,7 @@
 %   \lstinline{debug} set.
 %    \begin{macrocode}
 \def\ccf@debug#1{%
-  \tpIfAttr{#1}{debug}
+  \ccIfAttr{#1}{debug}
   {\message{^^J[tp Float Debug]^^J
       Textheight:\space\the\textheight^^J
       Type:\space\space\space\space\space\space\space\tp@cur@cont^^J
@@ -286,23 +286,23 @@
 %    \begin{macrocode}
 \def\tp@get@seps{%
   \ifx\ccf@floatpos\@empty
-    \expandafter\tp@flt@sep@top\dimexpr\tpUseProperty{intext-skip-top}\relax%
+    \expandafter\ccf@sep@top\dimexpr\ccUseProperty{intext-skip-top}\relax%
   \else
-    \expandafter\tp@flt@sep@top\dimexpr\tpUseProperty{float-skip-top}\relax%
+    \expandafter\ccf@sep@top\dimexpr\ccUseProperty{float-skip-top}\relax%
   \fi
-    \tpIfAttrStr{\tp@captype}{orientation}{landscape}{}
+    \ccIfAttrIsStr{\tp@captype}{orientation}{landscape}{}
       {\ifx\ccf@floatpos\@empty
-         \expandafter\tp@flt@sep@bottom\dimexpr\tpUseProperty{intext-skip-bottom}\relax%
+         \expandafter\ccf@sep@bottom\dimexpr\ccUseProperty{intext-skip-bottom}\relax%
        \else
-         \expandafter\tp@flt@sep@bottom\dimexpr\tpUseProperty{float-skip-bottom}\relax%
+         \expandafter\ccf@sep@bottom\dimexpr\ccUseProperty{float-skip-bottom}\relax%
        \fi}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tp@set@*@sep} Hooks to apply top and bottom skips,
 %   respectively.
 %    \begin{macrocode}
-\def\ccf@set@top@sep{\addvspace{\tp@flt@sep@top}}
-\def\ccf@set@bot@sep{\addvspace{\tp@flt@sep@bottom}}
+\def\ccf@set@top@sep{\addvspace{\ccf@sep@top}}
+\def\ccf@set@bot@sep{\addvspace{\ccf@sep@bottom}}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -312,7 +312,7 @@
 %   declarations. \#1 is the generic name of the Component.
 %    \begin{macrocode}
 \def\tpMakeFltComp#1{%
-  \tp@def@counted@comp{#1-\the\tpSubFloatCnt}{#1}{\ifx\tp@is@subflt\relax\else\tpSubFloatCnt=\z@\relax\fi}{}%
+  \cc@def@counted@comp{#1-\the\tpSubFloatCnt}{#1}{\ifx\tp@is@subflt\relax\else\tpSubFloatCnt=\z@\relax\fi}{}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -331,12 +331,12 @@
 %   properties.
 %    \begin{macrocode}
 \def\tp@flt@set@hsize{%
-  \expandafter\tp@subflt@sep\tpUseProperty{sub-float-sep}\relax%
+  \expandafter\ccf@sub@sep\ccUseProperty{sub-float-sep}\relax%
   \global\tp@total@flt@width=\hsize\relax
-  \expandafter\tp@flt@marg@l\tpUseProperty{margin-left}\relax
-  \expandafter\tp@flt@marg@r\tpUseProperty{margin-right}\relax
-  \expandafter\tp@flt@marg@i\tpUseProperty{margin-inner}\relax
-  \expandafter\tp@flt@marg@o\tpUseProperty{margin-outer}\relax
+  \expandafter\tp@flt@marg@l\ccUseProperty{margin-left}\relax
+  \expandafter\tp@flt@marg@r\ccUseProperty{margin-right}\relax
+  \expandafter\tp@flt@marg@i\ccUseProperty{margin-inner}\relax
+  \expandafter\tp@flt@marg@o\ccUseProperty{margin-outer}\relax
   \tp@flt@set@margins
   \global\advance\tp@total@flt@width-\tp@flt@marg@r\relax
   }
@@ -359,8 +359,8 @@
 % \end{macro}
 % \begin{tpContainer}{float}
 %    \begin{macrocode}
-\DeclareContainer{float}{%
-  \tpDeclareType{Components}{%
+\ccDeclareContainer{float}{%
+  \ccDeclareType{Components}{%
     \tpMakeFltCompL{Caption}%
     \tpMakeFltCompL{Legend}%
     \tpMakeFltCompL{Source}%
@@ -368,7 +368,7 @@
     \tpMakeFltComp{RefLabel}%
     \tpMakeFltComp{AltText}% neu: 2023-06-08; TODO: muss noch implementiert werden
   }%
-  \tpDeclareType{Properties}{}%
+  \ccDeclareType{Properties}{}%
 }
 %    \end{macrocode}
 % \begin{macro}{\tpDeclareFloat} is the user-level macro used to
@@ -393,21 +393,21 @@
 % re-load the system's defaults and override the Properties of the
 % earlier Declaration.
 %    \begin{macrocode}
-  \ifcsdef{tp@container@#2}{%
+  \ifcsdef{cc@container@#2}{%
     \ccPackageInfo{Floats}{}{Appending to `#2'}%
     \ifx\tp@float@parent\@empty\else
       \ccPackageError{Float}{Type}
         {Attempt to change parent of pre-existing float^^JContainer `#2'}
         {You cannot use the optional argument of \string\tpDeclareFloat\space for pre-existing^^J%
 float containers!^^J^^J%
-Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
+Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
     \fi
-    \tpAddToType{Properties}{#2}{#5}%
+    \ccAddToType{Properties}{#2}{#5}%
 %    \end{macrocode}
 % Other than Properties, the Float's default caption type or list-of
 % handler may also be overridden by a re-definition.
 %    \begin{macrocode}
-    \tpAddToType{FloatEnvInfo}{#2}{%
+    \ccAddToType{FloatEnvInfo}{#2}{%
       \def\tp@captype{#3}%
       \def\tp@caplisttype{#4}%
     }%
@@ -416,15 +416,15 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 % Otherwise, we declare a new Container and invoke all the
 % Initializers.
 %    \begin{macrocode}
-    \DeclareContainer{#2}{%
+    \ccDeclareContainer{#2}{%
       \ccPackageInfo{Floats}{}{Declaring float `#2'}%
       \ifx\tp@float@parent\@empty
-        \tpInherit{Properties,Components}{float}
+        \ccInherit{Properties,Components}{float}
       \else
-        \tpInherit{Properties,Components}{\tp@float@parent}
+        \ccInherit{Properties,Components}{\tp@float@parent}
       \fi
-      \tpDeclareType{FloatEnvInfo}{%
-        \tpNamespace{#2}%
+      \ccDeclareType{FloatEnvInfo}{%
+        \ccSetContainer{#2}%
         \def\tp@captype{#3}%
         \def\tp@caplisttype{#4}%
       }% /FloatEnvInfo
@@ -433,28 +433,28 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 % for one-column floats, and a starred one for page-wide floats in
 % two-column mode.
 %    \begin{macrocode}
-      \tpDeclareEnv[#2]{\tp@float}{\endtp@float}%
-      \tpDeclareEnv[#2*]{\if@twocolumn\let\tp@do@dblfloat\relax\else\fi\tp@float}{\if@twocolumn\let\tp@do@dblfloat\relax\fi\endtp@float}%
-      \tpDeclareType{Components}{%
-        \tpUseProperty{float-handler}%
+      \ccDeclareEnv[#2]{\tp@float}{\endtp@float}%
+      \ccDeclareEnv[#2*]{\if@twocolumn\let\tp@do@dblfloat\relax\else\fi\tp@float}{\if@twocolumn\let\tp@do@dblfloat\relax\fi\endtp@float}%
+      \ccDeclareType{Components}{%
+        \ccUseProperty{float-handler}%
       }%
 %    \end{macrocode}
 % Generating the Handlers for the list-of entries and define the
 % corresponding \lstinline{l@} macros
 %    \begin{macrocode}
-      \tp@flt@generate@listof@handlers{#4}{#3}{#2}%
+      \ccf@generate@listof@handlers{#4}{#3}{#2}%
       \bgroup
         \def\tp@cur@cont{#2}%
         \tp@init@l@[list-of]{#4}{0}{#3}% Generate listof-Entries for first level floats
         \tp@init@l@[list-of]{#4}{1}{sub#3}% Generate listof-Entries for sub-floats
       \egroup
-      \tpDeclareType{Properties}{#5}%
+      \ccDeclareType{Properties}{#5}%
     }% /container
-  }% /ifcsdef{tp@container@#2}
+  }% /ifcsdef{cc@container@#2}
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@flt@generate@listof@handlers} generates handlers
+% \begin{macro}{\ccf@generate@listof@handlers} generates handlers
 %   for listof-entries.
 %   \begin{description}
 %   \item[\#1] is the file ending
@@ -462,7 +462,7 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %   \item[\#3] is the Container name
 %   \end{description}
 %    \begin{macrocode}
-\def\tp@flt@generate@listof@handlers#1#2#3{%
+\def\ccf@generate@listof@handlers#1#2#3{%
 %    \end{macrocode}
 % \begin{macro}{tp@<list>@extract@data}
 %   The first macro that is dynamicly defined, is the Component
@@ -476,14 +476,14 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %   \end{description}
 %    \begin{macrocode}
   \expandafter\gdef\csname tp@#1@extract@data\endcsname##1##2##3##4{%
-    \tpNamespace{#3}%
-    \tpEvalType[#3]{Properties}%
-    \tpDeclareComp{ListofCaption}{}{}%
-    \tpDeclareComp{ListofLegend}{}{}%
-    \tpDeclareComp{ListofSource}{}{}%
-    \tpDeclareComp{ListofNumber}{}{}%
-    \tpDeclareComp{ListofPage}{}{}%
-    \tpListofPage{\tpUseProperty{list-of-page-face}##4}%
+    \ccSetContainer{#3}%
+    \ccEvalType[#3]{Properties}%
+    \ccDeclareComponent{ListofCaption}{}{}%
+    \ccDeclareComponent{ListofLegend}{}{}%
+    \ccDeclareComponent{ListofSource}{}{}%
+    \ccDeclareComponent{ListofNumber}{}{}%
+    \ccDeclareComponent{ListofPage}{}{}%
+    \tpListofPage{\ccUseProperty{list-of-page-face}##4}%
     \tp@expand@l@contents{##3}{#3}{Listof}{Caption}%%
     \tp@format@number{list-of-}{Listof}{##1}%
   }%
@@ -496,11 +496,11 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %    \begin{macrocode}
   \expandafter\gdef\csname tp@#1@print@entry\endcsname##1{%
     \bgroup
-      \tpUseHook{list-of-before-hook-##1}%
-      \tpUseProperty{list-of-before-entry}%
-      \tpUseProperty{list-of-block}%
-      \tpUseHook{list-of-after-hook-##1}%
-      \tpUseProperty{list-of-after-entry}%
+      \ccUseHook{list-of-before-hook-##1}%
+      \ccUseProperty{list-of-before-entry}%
+      \ccUseProperty{list-of-block}%
+      \ccUseHook{list-of-after-hook-##1}%
+      \ccUseProperty{list-of-after-entry}%
     \egroup}%
 %    \end{macrocode}
 % \end{macro}
@@ -510,32 +510,32 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %   system. \#\#1 is the name of the ``level'' for the entry.
 %    \begin{macrocode}
   \expandafter\gdef\csname tp@make@listof@#2\endcsname##1{%
-    \tpGobble
-    \tp@flt@check@empty{Number}{number}%
-    \tp@flt@check@empty{Caption}{caption}%
-    \tp@flt@check@empty{Legend}{legend}%
-    \tp@flt@check@empty{Source}{source}%
-    \tpIfAttrIsset{#2}{nolist}{}
-      {\let\@tp@listof@entry\relax
-      \tpIfComp{ListofCaption}{\csgappto{@tp@listof@entry}{\string\tpListofCaption{\tpUseComp{ListofCaption}}}}{}%
-      \tpIfComp{ListofNumber}{\csgappto{@tp@listof@entry}{\string\tpListofNumber{\tpUseComp{ListofNumber}}}}{}%
-      \tpIfComp{ListofLegend}{\csgappto{@tp@listof@entry}{\string\tpListofLegend{\tpUseComp{ListofLegend}}}}{}%
-      \tpIfComp{ListofSource}{\csgappto{@tp@listof@entry}{\string\tpListofSource{\tpUseComp{ListofSource}}}}{}%
-      \ifx\@tp@listof@entry\relax
-        \ifx\tp@is@subflt\relax\else
-          \ccf@restore@contentsline
-        \fi
-      \else
-        \protected@edef\tp@listof@entry{\@tp@listof@entry}%
-        \ifx\tp@is@subflt\relax
-          \ccf@store@sub@contentsline{#1}{\tp@captype}{\expandonce{\tp@listof@entry}}%
-        \else
-          \ccf@addcontentsline{#1}{\tp@captype}{\expandonce{\tp@listof@entry}}%
-          \ccf@restore@contentsline
-        \fi
-      \fi
-    }%
-  }%
+    \ccf@check@empty{Number}{number}%
+    \ccf@check@empty{Caption}{caption}%
+    \ccf@check@empty{Legend}{legend}%
+    \ccf@check@empty{Source}{source}%
+    \let\@tp@listof@entry\relax
+    \ccIfComp{ListofCaption}{\csgappto{@tp@listof@entry}{\string\tpListofCaption{\tpUseComp{ListofCaption}}}}{}%
+    \ccIfComp{ListofNumber}{\csgappto{@tp@listof@entry}{\string\tpListofNumber{\tpUseComp{ListofNumber}}}}{}%
+    \ccIfComp{ListofLegend}{\csgappto{@tp@listof@entry}{\string\tpListofLegend{\tpUseComp{ListofLegend}}}}{}%
+    \ccIfComp{ListofSource}{\csgappto{@tp@listof@entry}{\string\tpListofSource{\tpUseComp{ListofSource}}}}{}%
+    \ccUnlessAttr{#2}{nolist}
+      {\ifx\@tp@listof@entry\relax
+         \ifx\tp@is@subflt\relax\else
+           \ccf@restore@contentsline
+         \fi
+       \else
+         \begingroup
+           \tpGobble
+           \protected@edef\tp@listof@entry{\@tp@listof@entry}%
+           \ifx\tp@is@subflt\relax
+             \ccf@store@sub@contentsline{#1}{\tp@captype}{\expandonce{\tp@listof@entry}}%
+           \else
+             \ccf@addcontentsline{#1}{\tp@captype}{\expandonce{\tp@listof@entry}}%
+             \ccf@restore@contentsline
+           \fi
+         \endgroup
+       \fi}}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -580,13 +580,13 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@flt@check@empty} fork of CoCoTeX kernel's \lstinline{\tp@check@empty}, probably DEPRECATED(?)
+% \begin{macro}{\ccf@check@empty} fork of CoCoTeX kernel's \lstinline{\tp@check@empty}, probably DEPRECATED(?)
 %    \begin{macrocode}
-\def\tp@flt@check@empty#1#2{%
+\def\ccf@check@empty#1#2{%
   \ifx\tp@is@subflt\relax\else\tpSubFloatCnt\z@\fi
-  \tpIfComp{Listof#1}
+  \ccIfComp{Listof#1}
     {}
-    {\tpIfComp{#1}
+    {\ccIfComp{#1}
       {\csletcs{tp@\tp@cur@cont @Listof#1-\the\tpSubFloatCnt}{tp@\tp@cur@cont @#1-\the\tpSubFloatCnt}}
       {\csname Listof#1\endcsname{}}}}
 %    \end{macrocode}
@@ -605,11 +605,11 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
   \ifblank{#1}
     {\@tempcnta\tpSubFloatCnt\relax}
     {\@tempcnta#1\relax}%
-  \tpIfAttrIsset{\tp@captype}{nonumber}
+  \ccIfAttrIsSet{\tp@captype}{nonumber}
     {}
     {\ccUnlessComp{Number}
-      {\tpIfPropVal{numbering}{auto}
-        {\tpIfAttr{\tp@captype}{subfloat}
+      {\ccIfPropVal{numbering}{auto}
+        {\ccIfAttr{\tp@captype}{subfloat}
           {\ccf@set@subcounter{\the\@tempcnta}}
           {\global\expandafter\advance\csname c@\tp@captype\endcsname\@ne\relax
             \ccf@set@counter{\the\@tempcnta}}}
@@ -629,64 +629,28 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %   numbered sub-floats. \#1 is the sub-float counter
 %    \begin{macrocode}
 \def\ccf@set@subcounter#1{%
-  \tpSetValProp{float-number}{\csname tp@\tp@cur@cont @number-0\endcsname}%
-  \tpSetValProp{sub-number}{%
+  \ccSetPropertyVal{float-number}{\csname tp@\tp@cur@cont @number-0\endcsname}%
+  \ccSetPropertyVal{sub-number}{%
     \begingroup
-      \expandonce{\tpUseProperty{sub-number-face}}%
-      \relax\tpUseProperty{sub-number-before}%
-      \csname @\tpUseProperty{sub-number-style}\endcsname{#1}%
-      \tpUseProperty{sub-number-after}%
+      \expandonce{\ccUseProperty{sub-number-face}}%
+      \relax\ccUseProperty{sub-number-before}%
+      \csname @\ccUseProperty{sub-number-style}\endcsname{#1}%
+      \ccUseProperty{sub-number-after}%
     \endgroup}%
-  \tpNumber{\tpUseProperty{sub-number-format}}%
+  \tpNumber{\ccUseProperty{sub-number-format}}%
 }
 %    \end{macrocode}
 % \end{macro}
 %
-% The next two macros are a re-implementation of
-% \lstinline{hyperref}'s anchor mechanism to make labels work. If no
-% explicit label is given, the mechanism generates one, unique to each
-% (sub)float.
-% \begin{macro}{\tp@make@anchors} iterates through the (sub-)floats of
-%   a \lstinline{float} Container instance and generates the anchor
-%   (and hidden label, if necessary) for each of them
-%    \begin{macrocode}
-\def\tp@make@anchors{\@tempcnta\z@\tp@iterate{\@tempcnta}{\z@}{\tpSubFloatCnt}{\tp@make@anchor{\the\@tempcnta}}}
-%    \end{macrocode}
-% \end{macro}
-%
-% \begin{macro}{\tp@make@anchors} generates the anchor and label of a
-%   single (sub-)float. \#1 is the value of the internal sub-float counter.
-%    \begin{macrocode}
-\def\tp@make@anchor#1{%
-  \bgroup
-    \tpSubFloatCnt#1\relax
-    \tpIfComp{RefLabel}
-      {\expandafter\let\expandafter\@currentlabel\csname tp@\tp@cur@cont @number-\the\tpSubFloatCnt\endcsname}
-      {\edef\@currentlabel{tp-\tp@cur@cont-number-\the\tp@int@flt@cnt}}%
-    \expandafter\H@refstepcounter\expandafter{\tp@captype}%
-    \expandafter\hyper@makecurrent\expandafter{\tp@captype}%
-    \global\let\Hy@tempa\Hy@float@caption
-    \expandafter\hyper@@anchor\expandafter{\@currentHref}{\relax}%
-    \tpIfComp{RefLabel}
-      {\expandafter\let\expandafter\@currentlabel\csname tp@\tp@cur@cont @number-\the\tpSubFloatCnt\endcsname
-       \edef\@tempa{\tpUseComp{RefLabel}}%
-       \expandafter\cc@ltx@label\expandafter{\@tempa}}{\relax}%
-  \egroup}
-%    \end{macrocode}
-% \end{macro}
-% 
-% \begin{macro}{\ccfCreateLabel} creates
+% \begin{macro}{\ccfCreateLabel} creates labels
 %    \begin{macrocode}
 \def\ccfCreateLabel{%
-  %\tpIfComp{Number}
-  %  {\letcs\@currentlabel{tp@\tp@cur@cont @number-\the\tpSubFloatCnt}}
-  %  {\letcs\@currentlabel{tp-\tp@cur@cont-number-\the\tp@int@flt@cnt}}%
-  %\expandafter\H@refstepcounter\expandafter{\tp@captype}%
-  %\let\Hy@tempa\Hy@float@caption
-  \message{^^J===>\csmeaning{tp@\tp@cur@cont @number-\the\tpSubFloatCnt}}
-  \def\cc@fallback@label{\letcs\@currentlabel{tp@\tp@cur@cont @number-\the\tpSubFloatCnt}}%
-  \def\cc@labelname@comp{Caption}
-  %\expandafter\hyper@@anchor\expandafter{\@currentHref}{\relax}%
+  \def\cc@fallback@anchor{%
+    \tpGobble
+    \ccdefFromComp\@currentlabel{Number}%
+    \ccdefFromComp\@currentlabelname{ListofCaption}%
+  }%
+  \def\cc@labelname@comp{Caption}%
   \expandafter\ccCreateLabel\expandafter{\tp@captype}%
 }
 %    \end{macrocode}
@@ -709,15 +673,15 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
   \par
   \begingroup
     \global\advance\tp@int@flt@cnt\@ne
-    \tpEvalType{FloatEnvInfo}%
+    \ccEvalType{FloatEnvInfo}%
     \tp@flt@reset@defaults
-    \tpToggleCountedCond
-    \tpEvalType{Properties}%
+    \ccToggleCountedConditionals
+    \ccEvalType{Properties}%
     \tp@get@flt@attr{#1}{\tp@captype}%
     \tp@flt@set@hsize
     \tp@get@seps
-    \tpEvalType{Components}%
-    \tpUseProperty{before-float}%
+    \ccEvalType{Components}%
+    \ccUseProperty{before-float}%
     \tp@set@flt@env
     \ifx\ccf@floatpos\@empty\else\savenotes\fi
 }
@@ -731,7 +695,7 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
     \ccf@set@top@sep
     \ccf@test@caption{0}{capt}{top}%
     \ccf@test@caption{0}{capt}{bottom}%
-    \ccf@create@counter%
+    \ccf@create@counter[0]%
     \ccf@compose
     \tp@save@page
     \ccf@set@bot@sep
@@ -766,20 +730,17 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 % \begin{macro}{\endtpSubFloat} is the end of the sub-float environment
 %    \begin{macrocode}
 \def\endtpSubFloat{%
-  \tpUseProperty{subfloat-handler}%
+  \ccUseProperty{subfloat-handler}%
   \ccf@create@counter%
   \expandafter\xdef\csname tp@\tp@cur@cont @width-\the\tpSubFloatCnt\endcsname{\the\wd\tp@subfltbox}%
   \expandafter\xdef\csname tp@\tp@cur@cont @height-\the\tpSubFloatCnt\endcsname{\the\ht\tp@subfltbox}%
   \expandafter\xdef\csname tp@\tp@cur@cont @depth-\the\tpSubFloatCnt\endcsname{\the\dp\tp@subfltbox}%
   \@tempdima=\dimexpr\the\ht\tp@subfltbox+\the\dp\tp@subfltbox\relax
   \@tempdimb=\dimexpr\the\wd\tp@subfltbox\relax
-  \ifdim\@tempdima>\tp@subflt@maxheight\relax
-    \global\tp@subflt@maxheight=\@tempdima\relax
+  \ifdim\@tempdima>\ccf@sub@maxheight\relax
+    \global\ccf@sub@maxheight=\@tempdima\relax
   \fi
   \ignorespaces
-  \tpIfAttr{\tp@captype}{subfloat}
-    {\csname tp@make@listof@\tp@captype\endcsname{sub\tp@captype}}% real subfloats
-    {\csname tp@make@listof@\tp@captype\endcsname{\tp@captype}}% subfloats are counted separately
   \setbox\tp@subfltbox\box\voidb@x
   \let\tp@is@subflt\@undefined
 }
@@ -797,17 +758,17 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
   \tp@make@outer@caption{top}%
   \ifnum\tpSubFloatCnt=\z@\relax
     \bgroup\advance\hsize-\tp@flt@marg@l
-      \tpUseProperty{float-render}%
+      \ccUseProperty{float-render}%
     \egroup
   \else
     \let\tp@is@subflt\relax
     \@cc@is@finalfalse
-    \tp@flt@calc@sameheight
+    \ccf@calc@sameheight
     \ifx\tp@has@subcapt@top\@empty\tp@flt@calc@row@ht{top}\fi%
     \ifx\tp@has@subcapt@bottom\@empty\tp@flt@calc@row@ht{bottom}\fi%
     \def\tp@prefix{sub}%
     \@cc@is@finaltrue
-    \tpUseProperty{subfloat-render}%
+    \ccUseProperty{subfloat-render}%
     \let\tp@prefix\@empty
     \let\tp@is@subflt\@undefined
   \fi
@@ -822,9 +783,6 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
   \bgroup
     \hsize\tp@total@flt@width
     \tp@flt@process
-    %\tp@make@anchors%
-    %% TODO: move to where the caption(s) are built
-    \csname tp@make@listof@\tp@captype\endcsname{\tp@captype}% single float
     \par
   \egroup}
 
@@ -857,8 +815,8 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %   fails and no caption is printed!
 %    \begin{macrocode}
 \def\ccf@test@caption#1#2#3{%
-  \setbox\tp@tempboxa\hbox{\tpGobble\tpSubFloatCnt0#1\relax\tpUseProperty{caption-#3}\relax}%
-  \setbox\tp@tempboxb\hbox{\tpGobble\tpSubFloatCnt\m@ne\relax\tpUseProperty{caption-#3}\relax}%
+  \setbox\tp@tempboxa\hbox{\tpGobble\tpSubFloatCnt0#1\relax\ccUseProperty{caption-#3}\relax}%
+  \setbox\tp@tempboxb\hbox{\tpGobble\tpSubFloatCnt\m@ne\relax\ccUseProperty{caption-#3}\relax}%
   \edef\my@wda{\expandafter\strip@pt\wd\tp@tempboxa sp}%
   \edef\my@wdb{\expandafter\strip@pt\wd\tp@tempboxb sp}%
   \ifdim\my@wda>\my@wdb\relax
@@ -871,7 +829,7 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %   any top or bottom captions that need to be printed
 %    \begin{macrocode}
 \def\tp@test@subcapt{%
-  \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
+  \cc@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
     \ccf@test@caption{\the\@tempcnta}{subcapt}{top}%
     \ccf@test@caption{\the\@tempcnta}{subcapt}{bottom}%
   }%
@@ -884,15 +842,15 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 \def\tp@capt@top@offset{%
   \ifx\@argi\tp@str@top
   \else
-    \par\if@tp@flt@break@capt\else\nopagebreak\fi%
-    \expandafter\@tempskipa\tpUseProperty{\tp@prefix caption-sep-bottom}\relax%
+    \par\if@ccf@break@capt\else\nopagebreak\fi%
+    \expandafter\@tempskipa\ccUseProperty{\tp@prefix caption-sep-bottom}\relax%
     \advance\@tempskipa\dimexpr-\topskip+\dp\strutbox\relax
-    \if@tp@flt@break@capt\advance\@tempskipa\dimexpr-\baselineskip-\ht\strutbox+\topskip\relax\fi
+    \if@ccf@break@capt\advance\@tempskipa\dimexpr-\baselineskip-\ht\strutbox+\topskip\relax\fi
     \ifx\tp@has@subcapt@bottom\@empty
       \ifnum\tpSubFloatCnt=\z@
         %% subcapt-bot exists and capt-bot is rendered
         \advance\@tempskipa\dimexpr\dp\strutbox\relax
-        \expandafter\advance\expandafter\@tempskipa\tpUseProperty{subcaption-add-sep-bottom}\relax%
+        \expandafter\advance\expandafter\@tempskipa\ccUseProperty{subcaption-add-sep-bottom}\relax%
       \fi
     \fi
     \vskip\@tempskipa
@@ -907,19 +865,19 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 \def\tp@capt@bottom@offset{%
   \ifx\@argi\tp@str@top
     \@tempskipa\z@
-    \expandafter\advance\expandafter\@tempskipa\tpUseProperty{\tp@prefix caption-sep-top}%
+    \expandafter\advance\expandafter\@tempskipa\ccUseProperty{\tp@prefix caption-sep-top}%
     %
     \ifnum\tpSubFloatCnt=\z@
       \ifx\tp@has@subcapt@top\@empty
         %% subcapt-top exists and capt-top is rendered
         \advance\@tempskipa\dimexpr\ht\strutbox-\topskip-\p@\relax
-        \expandafter\advance\expandafter\@tempskipa\tpUseProperty{subcaption-add-sep-top}\relax%
+        \expandafter\advance\expandafter\@tempskipa\ccUseProperty{subcaption-add-sep-top}\relax%
       \else
         \advance\@tempskipa\dimexpr-\dp\strutbox\relax
       \fi
     \fi
     \vskip\@tempskipa
-    \par\if@tp@flt@break@capt\else\nopagebreak\fi
+    \par\if@ccf@break@capt\else\nopagebreak\fi
   \else
     \ifnum\tpSubFloatCnt>\z@
       \vskip\dp\strutbox
@@ -927,19 +885,17 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
   \fi}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@make@caption} prints the caption.
+% \begin{macro}{\ccf@make@caption} prints the caption.
 %   \begin{description}
 %   \item[\#1] is the placement (\texttt{top}, \texttt{bottom})
 %   \item[\#2] is the vertical alignment (\texttt{top}, \texttt{middle}, \texttt{bottom})
-%   \item[\#3] is the left margin.
 % \end{description}
 %    \begin{macrocode}
-\long\def\tp@make@caption#1#2{%
-  \protected@edef\@argi{#1}\protected@edef\@argii{#2}%
+\long\def\ccf@make@caption#1#2{%
   \tp@capt@top@offset
   \ifnum\tpSubFloatCnt=\z@
-    \def\next{%
-      \tpIfAttrStr{\tp@captype}{orientation}{landscape}
+    \def\ccf@caption@box{%
+      \ccIfAttrIsStr{\tp@captype}{orientation}{landscape}
         {\setbox\@tempboxa\vbox\bgroup\hsize\textheight}
         {\hskip\tp@flt@marg@l%
          \setbox\@tempboxa\vbox\bgroup\advance\hsize-\tp@flt@marg@l}%
@@ -947,46 +903,68 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
   \else
     \expandafter\tp@tempskipa\csname tp@flt@capt@row@height@#1\endcsname\relax
     \expandafter\advance\expandafter\tp@tempskipa\dimexpr-\baselineskip+\topskip\relax
-    \def\next{\setbox\@tempboxa\vbox to \tp@tempskipa\bgroup}%
+    \def\ccf@caption@box{\setbox\@tempboxa\vbox to \tp@tempskipa\bgroup}%
   \fi
-  \next%
-    \ifx\@argii\tp@str@top\else\if@tp@flt@break@capt\else\vss\fi\fi
-    \tpUseProperty{\tp@prefix caption-face}%
-    \tpUseProperty{\tp@prefix caption-face-#1}%
-    \cc@topstrut\tpUseProperty{caption-#1}\strut%
-    \ifx\@argii\tp@str@bottom\else\if@tp@flt@break@capt\else\vss\fi\fi%
+  \ccf@caption@box%
+    \ifstrequal{#2}{top}{}{\if@ccf@break@capt\else\vss\fi}%
+    \ccUseProperty{\tp@prefix caption-face}%
+    \ccUseProperty{\tp@prefix caption-face-#1}%
+    \cc@topstrut\ccUseProperty{caption-#1}\strut%
+    \ifstrequal{#2}{bottom}{}{\if@ccf@break@capt\else\vss\fi}%
   \egroup%
-  \ccfCreateLabel
-  \if@tp@flt@break@capt\unvbox\@tempboxa\else\box\@tempboxa\fi%
+  \if@ccf@break@capt\unvbox\@tempboxa\else\box\@tempboxa\fi%
   \tp@capt@bottom@offset
 }
+\let\tp@make@caption\ccf@make@caption% legacy
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tp@make@outer@caption} is a shell for the outer
 %   captions. \#1 is the placement (\texttt{top}, \texttt{bottom})
 %    \begin{macrocode}
 \def\tp@make@outer@caption#1{%
-  \def\@argi{#1}%
+%    \end{macrocode}
+% First, we need to determine, where the labels or targets for
+% internal hyperlinks should be positioned. Usually, this would be
+% where the float's Counter is printed, but since we don't know if the
+% counter is in the top or the bottom caption, nor if the float has a
+% (printed) counter, at all, we have to rely on specific Properties for
+% floats and sub-floats.
+%    \begin{macrocode}
+  \expandafter\ccIfPropVal\expandafter{\ifnum\tpSubFloatCnt=\z@ label-pos\else sublabel-pos\fi}{#1}
+    {\ifx\ccf@measure\relax\else
+        \ifnum\tpSubFloatCnt=\z@
+          \ccIfAttr{\tp@captype}{subfloat}
+            {\csname tp@make@listof@\tp@captype\endcsname{sub\tp@captype}}% real subfloats
+            {\csname tp@make@listof@\tp@captype\endcsname{\tp@captype}}% subfloats are counted separately
+        \else
+          \csname tp@make@listof@\tp@captype\endcsname{\tp@captype}% single float
+        \fi
+        \ccfCreateLabel
+      \fi}{}%
+%    \end{macrocode}
+% now, we print the actual captions, if they contain contents.
+%    \begin{macrocode}
   \expandafter\ifx\csname tp@has@capt@#1\endcsname\@empty
     \setbox\z@\vbox{%
+      \let\ccf@measure\relax
       \tpGobble
       \tpSubFloatCnt\z@
-      \tp@make@caption{#1}{top}%
+      \ccf@make@caption{#1}{top}%
     }%
     \immediate\write\@auxout{\string\expandafter\string\gdef\string\csname\space tpFloat\the\tp@int@flt@cnt Cap#1\string\endcsname{\the\dimexpr \ht\z@+\dp\z@\relax}}%
     \bgroup
       \savenotes
-      \if@tp@flt@break@capt\else\nopagebreak\fi
+      \if@ccf@break@capt\else\nopagebreak\fi
       \tpSubFloatCnt\z@
-      \tp@make@caption{#1}{top}%
+      \ccf@make@caption{#1}{top}%
       \spewnotes
     \egroup
-    \ifx\@argi\tp@str@top\if@tp@flt@break@capt\else\nopagebreak\fi\fi
+    \ifstrequal{#1}{top}{\if@ccf@break@capt\else\nopagebreak\fi}{}%
   \fi
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tpRenderSubFloats} iterates through the single
+% \begin{macro}{\ccfRenderSubFloats} iterates through the single
 %   sub-floats and renders them in a nice row.
 %   \begin{description}
 %   \item[\#1] is the subfloat counter,
@@ -995,30 +973,30 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %     \lstinline{tpTable} it is \lstinline{Content}.
 % \end{description}
 %    \begin{macrocode}
-\long\def\tpRenderSubFloats#1#2{%
+\long\def\ccfRenderSubFloats#1#2{%
   \leavevmode
   \savenotes
   \ifnum#1>\@ne\hfill\fi
   \vtop\bgroup
     \expandafter\hsize\csname tp@\tp@cur@cont @res@width-#1\endcsname\relax
     \let\includegraphics\tp@includesubgraphics
-    \tp@render@sub@float{#1}{#2}%
+    \ccf@render@sub{#1}{#2}%
   \egroup
   \spewnotes
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@render@sub@float} renders a single sub-float. For
-%   the arguments, see \lstinline{\tpRenderSubFloats}, above.
+% \begin{macro}{\ccf@render@sub} renders a single sub-float. For
+%   the arguments, see \lstinline{\ccfRenderSubFloats}, above.
 %    \begin{macrocode}
-\long\def\tp@render@sub@float#1#2{%
+\long\def\ccf@render@sub#1#2{%
   \tpSubFloatCnt=#1\relax
   \expandafter\ifx\csname tp@has@\tp@prefix capt@top\endcsname\@empty
-    \tp@make@caption{top}{\tpUseProperty{\tp@prefix caption-valign-top}}%
+    \ccf@make@caption{top}{\ccUseProperty{\tp@prefix caption-valign-top}}%
   \fi
   \bgroup\strut\tpUseComp{#2}\strut\par\egroup%
   \expandafter\ifx\csname tp@has@\tp@prefix capt@bottom\endcsname\@empty
-    \tp@make@caption{bottom}{\tpUseProperty{\tp@prefix caption-valign-bottom}}%
+    \ccf@make@caption{bottom}{\ccUseProperty{\tp@prefix caption-valign-bottom}}%
   \fi
 }
 %    \end{macrocode}
@@ -1031,15 +1009,15 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 \def\tp@flt@calc@row@ht#1{%
   \@tempcnta\z@
   \@tempdima\z@
-  \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
+  \cc@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
     \setbox\z@\vbox{%
       \tpSubFloatCnt\@tempcnta\relax
       \expandafter\hsize\expandafter\dimexpr\csname tp@\tp@cur@cont @res@width-\the\@tempcnta\endcsname\relax
       \tpGobble
-      \tpUseProperty{\tp@prefix caption-face}%
-      \tpUseProperty{\tp@prefix caption-face-#1}%
+      \ccUseProperty{\tp@prefix caption-face}%
+      \ccUseProperty{\tp@prefix caption-face-#1}%
       \leavevmode
-      \strut\tpUseProperty{caption-#1}\strut%
+      \strut\ccUseProperty{caption-#1}\strut%
       }%
     \expandafter\ifdim\dimexpr\ht\z@+\dp\z@\relax>\@tempdima \@tempdima\dimexpr\ht\z@+\dp\z@\relax\fi
   }%
@@ -1048,18 +1026,18 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\tp@flt@calc@sameheight} calculates the ratio between
+% \begin{macro}{\ccf@calc@sameheight} calculates the ratio between
 %   each sub-float's height and the height of the largest sub-float
 %    \begin{macrocode}
-\def\tp@flt@calc@sameheight{%
+\def\ccf@calc@sameheight{%
   \@tempdima=\z@\relax
   \@tempcnta=\z@\relax
-  \tp@calc@flt@width=\tp@total@flt@width\relax
-  \advance\tp@calc@flt@width-\tp@flt@marg@l\relax
-  \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
-    \edef\@tempa{\CalcRatio{\tp@subflt@maxheight}{\csname tp@\tp@cur@cont @height-\the\@tempcnta\endcsname}}%
+  \ccf@calc@width=\tp@total@flt@width\relax
+  \advance\ccf@calc@width-\tp@flt@marg@l\relax
+  \cc@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
+    \edef\@tempa{\CalcRatio{\ccf@sub@maxheight}{\csname tp@\tp@cur@cont @height-\the\@tempcnta\endcsname}}%
     \ifnum\@tempcnta>\@ne
-      \advance\tp@calc@flt@width-\tp@subflt@sep\relax%
+      \advance\ccf@calc@width-\ccf@sub@sep\relax%
     \fi
     \expandafter\@tempdimc\csname tp@\tp@cur@cont @width-\the\@tempcnta\endcsname\relax
     \@tempdimb=\@tempa\@tempdimc\relax
@@ -1069,9 +1047,9 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
   \@tempcnta=\z@\relax
   \@tempdimb=\z@\relax
   \@tempdimc=\z@\relax
-  \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
+  \cc@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
     \edef\@tempa{\CalcRatio{\csname tp@\tp@cur@cont @adj@width-\the\@tempcnta\endcsname}{\@tempdima}}%
-    \expandafter\edef\csname tp@\tp@cur@cont @res@width-\the\@tempcnta\endcsname{\dimexpr\@tempa\tp@calc@flt@width\relax}%
+    \expandafter\edef\csname tp@\tp@cur@cont @res@width-\the\@tempcnta\endcsname{\dimexpr\@tempa\ccf@calc@width\relax}%
     \@tempdimc\dimexpr\csname tp@\tp@cur@cont @height-\the\@tempcnta\endcsname\relax
     \@tempdimc\dimexpr\@tempa\@tempdimc\relax
     \ifdim\@tempa\@tempdimb<\@tempdimc\@tempdimb\@tempdimc\relax\fi
@@ -1136,7 +1114,7 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %    \begin{macrocode}
 \def\tpFigureRender{%
   \bgroup
-    \tpIfAttrStr{\tp@captype}{orientation}{landscape}
+    \ccIfAttrIsStr{\tp@captype}{orientation}{landscape}
       {\hsize\dimexpr\textwidth-\tp@flt@marg@r-\tp@flt@marg@l\relax}%
       {}%
     \let\includegraphics\tp@includesubgraphics
@@ -1150,8 +1128,8 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %    \begin{macrocode}
 \def\tpSubFigureRender{%
   \hskip\tp@flt@marg@l
-  \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
-    \tpRenderSubFloats{\the\@tempcnta}{Fig}%
+  \cc@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
+    \ccfRenderSubFloats{\the\@tempcnta}{Fig}%
   }}
 %    \end{macrocode}
 % \end{macro}
@@ -1167,7 +1145,7 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
     \def\@igopts{width=\hsize}%
   \fi
   \if!#1!\else
-    \def\@igopts{width=\hsize,#1}%
+    \def\@igopts{#1,width=\hsize}%
   \fi
   \gdef\@tp@fig@path{#2}%
   \expandafter\tpltx@includegraphics\expandafter[\@igopts]{#2}%
@@ -1179,13 +1157,13 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %
 %\subsection{Handlers for tables}
 %
-% \begin{macro}{\tp@reserve@tabular} is a shell macro that stores the
+% \begin{macro}{\ccf@reserve@tabular} is a shell macro that stores the
 %   default macro definitions for various tabular mechanisms
 %   (currently, only plain \lstinline{tabular}, \lstinline{tabulary},
 %   \lstinline{tabularx}, and \lstinline{htmltabs} are supported as
 %   content Component of \lstinline{tpTable})
 %    \begin{macrocode}
-\def\tp@reserve@tabular{%
+\def\ccf@reserve@tabular{%
   \@tp@reserve@tab{}%
   \@tp@reserve@tab{x}%
   \@tp@reserve@tab{y}%
@@ -1223,11 +1201,11 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
       \ifx\ccf@floatpos\@empty
         \expandafter\ifx\csname tpFloat\the\tp@int@flt@cnt Captop\endcsname\relax\else
           \htInitSkip\csname tpFloat\the\tp@int@flt@cnt Captop\endcsname
-          \advance\htInitSkip\tp@flt@sep@top%
+          \advance\htInitSkip\ccf@sep@top%
         \fi
         \expandafter\ifx\csname tpFloat\the\tp@int@flt@cnt Capbottom\endcsname\relax\else
           \htAddToBottom\csname tpFloat\the\tp@int@flt@cnt Capbottom\endcsname
-          \advance\htAddToBottom\tp@flt@sep@bottom%
+          \advance\htAddToBottom\ccf@sep@bottom%
         \fi
       \else
         \def\ccf@add@style{;break-table:false;}%
@@ -1244,7 +1222,7 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %    \begin{macrocode}
 \def\tpTableHandler{%
   \tpMakeFltComp{Content}%
-  \tp@reserve@tabular
+  \ccf@reserve@tabular
   }
 %    \end{macrocode}
 % \end{macro}
@@ -1273,7 +1251,7 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
   \tpGetTableContent
   \tpContent{\unvbox\tp@floatbox}%
   \tpUseComp{Content}%
-  \par\if@tp@flt@break@capt\else\nopagebreak\fi
+  \par\if@ccf@break@capt\else\nopagebreak\fi
   \vskip\dp\strutbox
 }
 %    \end{macrocode}
@@ -1281,10 +1259,10 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 % \begin{macro}{\tpSubTableRender} Is the Renderer for table sub-floats (which we don't allow yet, so this definition is un-used at the moment)
 %    \begin{macrocode}
 \def\tpSubTableRender{%
-  \tp@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
+  \cc@iterate{\@tempcnta}{\@ne}{\tpSubFloatCnt}{%
     \tpGetTableContent
     \tpContent{\unvbox\tp@floatbox}%
-    \tpRenderSubFloats{\the\@tempcnta}{Content}%
+    \ccfRenderSubFloats{\the\@tempcnta}{Content}%
   }}
 %    \end{macrocode}
 % \end{macro}
@@ -1302,110 +1280,113 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 % \section{Default Settings}
 %
 %    \begin{macrocode}
-\tpAddToType{Properties}{float}{%
-  \tpSetProperty{intext-skip-top}{\intextsep}%% non-float sep top
-  \tpSetProperty{intext-skip-bottom}{\intextsep}%% non-float sep bottom
-  \tpSetProperty{float-skip-top}{\z@}%% float sep top
-  \tpSetProperty{float-skip-bottom}{\z@}%% float sep bottom
-  \tpSetProperty{sub-float-sep}{\tp@subflt@sep}%% space between sub-floats
-  \tpSetProperty{margin-inner}{\z@}%% left margin on odd pages/right margin on even pages
-  \tpSetProperty{margin-outer}{\z@}%% right margin on odd pages/left margin on even pages
-  \tpSetProperty{margin-left}{\z@}%% left margin
-  \tpSetProperty{margin-right}{\z@}%% right margin
-  \tpSetProperty{before-float}{\parindent\z@}%% executed before content is evaluated
-  \tpSetProperty{float-handler}{\tpGenericHandler}% Alias for the caption type specific content handler
-  \tpSetProperty{subfloat-handler}{\tpSubGenericHandler}% Alias for the caption type specific content handler
-  \tpSetProperty{float-render}{\tpGenericRender}% Alias for the caption type specific content printer
-  \tpSetProperty{subfloat-render}{\tpGenericRender}% Alias for the caption type specific content printer for sub-floats
-  \tpSetProperty{subfloat-same-height}{}% if true, the subfloat must/can be adjusted to the same heights
+\ccAddToType{Properties}{float}{%
+  \ccSetProperty{intext-skip-top}{\intextsep}%% non-float sep top
+  \ccSetProperty{intext-skip-bottom}{\intextsep}%% non-float sep bottom
+  \ccSetProperty{float-skip-top}{\z@}%% float sep top
+  \ccSetProperty{float-skip-bottom}{\z@}%% float sep bottom
+  \ccSetProperty{sub-float-sep}{\ccf@sub@sep}%% space between sub-floats
+  \ccSetProperty{margin-inner}{\z@}%% left margin on odd pages/right margin on even pages
+  \ccSetProperty{margin-outer}{\z@}%% right margin on odd pages/left margin on even pages
+  \ccSetProperty{margin-left}{\z@}%% left margin
+  \ccSetProperty{margin-right}{\z@}%% right margin
+  \ccSetProperty{before-float}{\parindent\z@}%% executed before content is evaluated
+  \ccSetProperty{float-handler}{\tpGenericHandler}% Alias for the caption type specific content handler
+  \ccSetProperty{subfloat-handler}{\tpSubGenericHandler}% Alias for the caption type specific content handler
+  \ccSetProperty{float-render}{\tpGenericRender}% Alias for the caption type specific content printer
+  \ccSetProperty{subfloat-render}{\tpGenericRender}% Alias for the caption type specific content printer for sub-floats
+  \ccSetProperty{subfloat-same-height}{}% if true, the subfloat must/can be adjusted to the same heights
   %% captions
-  \tpSetProperty{caption-face}{}% style applied to top and bottom captions
-  \tpSetProperty{caption-face-top}{}%% style applied to top captions
-  \tpSetProperty{caption-face-bottom}{}%% style applied to bottom captions
-  \tpSetProperty{source-face}{}% Format of source, additional to caption-format
-  \tpSetProperty{legend-face}{}% Format of legend, additional to caption-format
-  \tpSetProperty{caption-sep-top}{\z@}%% vertical space between top caption and content
-  \tpSetProperty{caption-sep-bottom}{\z@}%% vertical space between content and bottom caption
-  \tpSetProperty{caption-top}{%
-    \tpIfComp{Number}{{\tpUseProperty{number-face}\tpUseComp{Number}\tpUseProperty{number-sep}}}{}%
+  \ccSetProperty{caption-face}{}% style applied to top and bottom captions
+  \ccSetProperty{caption-face-top}{}%% style applied to top captions
+  \ccSetProperty{caption-face-bottom}{}%% style applied to bottom captions
+  \ccSetProperty{source-face}{}% Format of source, additional to caption-format
+  \ccSetProperty{legend-face}{}% Format of legend, additional to caption-format
+  \ccSetProperty{caption-sep-top}{\z@}%% vertical space between top caption and content
+  \ccSetProperty{caption-sep-bottom}{\z@}%% vertical space between content and bottom caption
+  \ccSetProperty{caption-top}{%
+    \ccIfComp{Number}{{\ccUseProperty{number-face}\tpUseComp{Number}\ccUseProperty{number-sep}}}{}%
     \tpUseComp{Caption}%
   }%
-  \tpSetProperty{caption-bottom}{%
-    \tpIfComp{Legend}{{\tpUseProperty{legend-face}\tpUseComp{Legend}}}{}%
-    \tpIfComp{Source}{%
-      \tpIfComp{Legend}{\par\nopagebreak}{}%
-      {\tpUseProperty{source-face}%
+  \ccSetProperty{caption-bottom}{%
+    \ccIfComp{Legend}{{\ccUseProperty{legend-face}\tpUseComp{Legend}}}{}%
+    \ccIfComp{Source}{%
+      \ccIfComp{Legend}{\par\nopagebreak}{}%
+      {\ccUseProperty{source-face}%
        \tpUseComp{Source}}}{}}%
-  \tpPropertyLet{subcaption-face}{caption-face}% style applied to top and bottom captions
-  \tpSetProperty{subcaption-face-top}{\tpUseProperty{caption-face-top}}%% style applied to top captions
-  \tpSetProperty{subcaption-face-bottom}{\tpUseProperty{caption-face-bottom}}%% style applied to bottom captions
-  \tpSetProperty{subcaption-add-sep-top}{\z@}%% additional vertical space between top caption and top sub-caption
-  \tpSetProperty{subcaption-add-sep-bottom}{\z@}%% additional vertical space between bottom sub-caption and bottom caption
-  \tpSetProperty{subcaption-sep-top}{\tpUseProperty{caption-sep-top}}%% vertical space between top sub-caption and content
-  \tpSetProperty{subcaption-sep-bottom}{\tpUseProperty{caption-sep-bottom}}%% vertical space between content and bottom sub-caption
-  \tpSetProperty{subcaption-top}{\tpUseProperty{caption-top}}% in case, sub-float captions diverge from main caption
-  \tpSetProperty{subcaption-bottom}{\tpUseProperty{caption-bottom}}% in case, sub-float captions diverge from main caption
-  \tpSetProperty{subcaption-valign-top}{top}%% vertical alignment of neighboring top-placed sub-captions
-  \tpSetProperty{subcaption-valign-bottom}{top}%% vertical alignment of neighboring bottom-placed sub-captions
+  \ccPropertyLet{subcaption-face}{caption-face}% style applied to top and bottom captions
+  \ccSetProperty{subcaption-face-top}{\ccUseProperty{caption-face-top}}%% style applied to top captions
+  \ccSetProperty{subcaption-face-bottom}{\ccUseProperty{caption-face-bottom}}%% style applied to bottom captions
+  \ccSetProperty{subcaption-add-sep-top}{\z@}%% additional vertical space between top caption and top sub-caption
+  \ccSetProperty{subcaption-add-sep-bottom}{\z@}%% additional vertical space between bottom sub-caption and bottom caption
+  \ccSetProperty{subcaption-sep-top}{\ccUseProperty{caption-sep-top}}%% vertical space between top sub-caption and content
+  \ccSetProperty{subcaption-sep-bottom}{\ccUseProperty{caption-sep-bottom}}%% vertical space between content and bottom sub-caption
+  \ccSetProperty{subcaption-top}{\ccUseProperty{caption-top}}% in case, sub-float captions diverge from main caption
+  \ccSetProperty{subcaption-bottom}{\ccUseProperty{caption-bottom}}% in case, sub-float captions diverge from main caption
+  \ccSetProperty{subcaption-valign-top}{top}%% vertical alignment of neighboring top-placed sub-captions
+  \ccSetProperty{subcaption-valign-bottom}{top}%% vertical alignment of neighboring bottom-placed sub-captions
   %% Numbers
-  \tpSetProperty{numbering}{auto}%% automatic numbering for missing Number component
-  \tpSetProperty{number-sep}{\enskip}% Separator between label and caption
-  \tpSetProperty{number-face}{\bfseries}% Format of number, additional to caption-format
-  \tpSetProperty{sub-number-sep}{\,}%% when sub-captions, this is placed between the float counter and the sub-float counter
-  \tpSetProperty{sub-number-style}{alph}%% counting style of subcaption counters
-  \tpSetProperty{sub-number-face}{}%% format of subcaption counters
-  \tpSetProperty{sub-number-before}{(}% stuff that is put immediately before the sub counter
-  \tpSetProperty{sub-number-after}{)}% stuff that is put immediately after the sub counter
-  \tpSetProperty{sub-number-format}{% Format of the sub number
-    \tpUseProperty{float-number}%
-    \tpUseProperty{sub-number-sep}%
-    \tpUseProperty{sub-number}}%
+  \ccSetProperty{numbering}{auto}%% automatic numbering for missing Number component
+  \ccSetProperty{number-sep}{\enskip}% Separator between label and caption
+  \ccSetProperty{number-face}{\bfseries}% Format of number, additional to caption-format
+  \ccSetProperty{sub-number-sep}{\,}%% when sub-captions, this is placed between the float counter and the sub-float counter
+  \ccSetProperty{sub-number-style}{alph}%% counting style of subcaption counters
+  \ccSetProperty{sub-number-face}{}%% format of subcaption counters
+  \ccSetProperty{sub-number-before}{(}% stuff that is put immediately before the sub counter
+  \ccSetProperty{sub-number-after}{)}% stuff that is put immediately after the sub counter
+  \ccSetProperty{sub-number-format}{% Format of the sub number
+    \ccUseProperty{float-number}%
+    \ccUseProperty{sub-number-sep}%
+    \ccUseProperty{sub-number}}%
+  %% Labels
+  \ccSetProperty{label-pos}{top}% The position of the caption, before which the \ref{} target should be placed
+  \ccSetProperty{sublabel-pos}{top}% The position of the subcaption, before which the \ref{} target should be placed
   %% List-of entries
-  \tpSetProperty{list-of-page-sep}{\dotfill}%
-  \tpPropertyLet{list-of-number-face}{list-of-caption-face}%
-  \tpSetProperty{list-of-number-sep}{\enskip}%
-  \tpSetProperty{list-of-number-align}{left}%
-  \tpSetProperty{list-of-number-format}{%
+  \ccSetProperty{list-of-page-sep}{\dotfill}%
+  \ccPropertyLet{list-of-number-face}{list-of-caption-face}%
+  \ccSetProperty{list-of-number-sep}{\enskip}%
+  \ccSetProperty{list-of-number-align}{left}%
+  \ccSetProperty{list-of-number-format}{%
     \bgroup
-      \tpUseProperty{list-of-number-face}%
+      \ccUseProperty{list-of-number-face}%
       \tpUseComp{ListofNumber}%
-      \tpUseProperty{list-of-number-sep}%
+      \ccUseProperty{list-of-number-sep}%
     \egroup}%
-  \tpSetProperty{list-of-parfillskip}{-\rightskip}%
-  \tpSetProperty{list-of-margin-right}{\@pnumwidth \@plus 1fil}%
-  \tpSetProperty{list-of-margin-left}{auto}%
-  \tpSetProperty{list-of-indent}{auto}% list-of-float appearance
-  \tpSetProperty{list-of-block}{%
-    \tpUseProperty{list-of-caption-face}%
-    \tpIfComp{ListofNumber}
+  \ccSetProperty{list-of-parfillskip}{-\rightskip}%
+  \ccSetProperty{list-of-margin-right}{\@pnumwidth \@plus 1fil}%
+  \ccSetProperty{list-of-margin-left}{auto}%
+  \ccSetProperty{list-of-indent}{auto}% list-of-float appearance
+  \ccSetProperty{list-of-block}{%
+    \ccUseProperty{list-of-caption-face}%
+    \ccIfComp{ListofNumber}
       {\tpUseComp{list-of-hang-number}}
       {\leftskip0pt}%
     \tpUseComp{ListofCaption}%
-    \tpUseProperty{list-of-page-sep}\tpUseComp{ListofPage}%
+    \ccUseProperty{list-of-page-sep}\tpUseComp{ListofPage}%
   }% list-of-float appearance
-  \tpSetProperty{list-of-before-entry}{%
+  \ccSetProperty{list-of-before-entry}{%
     \tpGobble
-    \leftskip\tpUseProperty{list-of-margin-left}\relax%
-    \rightskip \tpUseProperty{list-of-margin-right}\relax%
-    \parfillskip \tpUseProperty{list-of-parfillskip}\relax
+    \leftskip\ccUseProperty{list-of-margin-left}\relax%
+    \rightskip \ccUseProperty{list-of-margin-right}\relax%
+    \parfillskip \ccUseProperty{list-of-parfillskip}\relax
     \parindent\z@
     \@afterindenttrue
     \interlinepenalty\@M
     \leavevmode
     \null\nobreak
   }% list-of-float appearance
-  \tpSetProperty{list-of-after-entry}{\par}% list-of-float appearance
+  \ccSetProperty{list-of-after-entry}{\par}% list-of-float appearance
 }
 %    \end{macrocode}
 % \begin{tpContainer}{tpFigure} defines the defaults for the
 %   \lstinline{tpFigure} Container.
 %    \begin{macrocode}
 \tpDeclareFloat{tpFigure}{figure}{lof}{%
-  \tpSetProperty{subfloat-same-height}{true}% if true, the subfloat must/can be adjusted to the same heights
-  \tpSetProperty{float-handler}{\tpFigureHandler}%
-  \tpSetProperty{subfloat-handler}{\tpSubFigureHandler}%
-  \tpSetProperty{float-render}{\tpFigureRender}%
-  \tpSetProperty{subfloat-render}{\tpSubFigureRender}%
+  \ccSetProperty{subfloat-same-height}{true}% if true, the subfloat must/can be adjusted to the same heights
+  \ccSetProperty{float-handler}{\tpFigureHandler}%
+  \ccSetProperty{subfloat-handler}{\tpSubFigureHandler}%
+  \ccSetProperty{float-render}{\tpFigureRender}%
+  \ccSetProperty{subfloat-render}{\tpSubFigureRender}%
 }
 %    \end{macrocode}
 % \end{tpContainer}
@@ -1413,11 +1394,11 @@ Use \string\tpAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %   \lstinline{tpTable} Container.
 %    \begin{macrocode}
 \tpDeclareFloat{tpTable}{table}{lot}{%
-  \tpSetProperty{sub-caption-valign-top}{bottom}%
-  \tpSetProperty{float-handler}{\tpTableHandler}%
-  \tpSetProperty{subfloat-handler}{\tpSubTableHandler}%
-  \tpSetProperty{float-render}{\tpTableRender}%
-  \tpSetProperty{subfloat-render}{\tpSubTableRender}%
+  \ccSetProperty{sub-caption-valign-top}{bottom}%
+  \ccSetProperty{float-handler}{\tpTableHandler}%
+  \ccSetProperty{subfloat-handler}{\tpSubTableHandler}%
+  \ccSetProperty{float-render}{\tpTableRender}%
+  \ccSetProperty{subfloat-render}{\tpSubTableRender}%
 }
 %    \end{macrocode}
 % \end{tpContainer}

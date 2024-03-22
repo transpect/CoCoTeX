@@ -19,12 +19,12 @@ Property handling.
 Properties are set up using one of either commands
 \begin{lstlisting}[style=tex]
 \tpSetProperty{<name>}{<val>}
-\tpSetValProp{<name>}{<val>}
+\ccSetPropVal{<name>}{<val>}
 \tpSetPropertyX{<name>}{<val>}
 \end{lstlisting}
 With
-\lstinline{\tpSetValProp}\index[tex]{SetValProp@\texttt{\textbackslash
-    tpSetValProp}}, the second argument is expanded \textit{once}
+\lstinline{\ccSetPropVal}\index[tex]{SetPropVal@\texttt{\textbackslash
+    ccSetPropVal}}, the second argument is expanded \textit{once}
 prior to the assignment. Use this if you want to assign the current
 value of a {\LaTeX} control sequence (e.g., a length register) to a
 property.

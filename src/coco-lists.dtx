@@ -155,22 +155,22 @@
   \char\count255%
 }
 
-\tpAddToDefault{list}{%
-  \tpSetProperty{after-skip}{\z@}% Vertical space after the list.
-  \tpSetProperty{before-skip}{\z@}% Vertical space before the list.
-  \tpSetProperty{item-indent}{0\p@}% Vertical difference from property left-margin.
-  \tpSetProperty{label-char}{} % Only applies with label-type »char« (or empty).
-  \tpSetProperty{label-prefix-delimiter}{} % The character/string between the prefix (inherited from list one level above) and the actual item’s label. Used for numbered lists.
-  \tpSetProperty{label-sep}{5mm}
-  \tpSetProperty{label-suffix}{}
-  \tpSetProperty{label-type}{char} % Label types: char (use label-char; default), number, Alpha, alpha, Roman, roman.
-  \tpSetProperty{label-width}{0\p@} % Label width is internally increased to width of label character.
-  \tpSetProperty{left-margin}{0\p@}
+\ccAddToProperties{list}{%
+  \ccSetProperty{after-skip}{\z@}% Vertical space after the list.
+  \ccSetProperty{before-skip}{\z@}% Vertical space before the list.
+  \ccSetProperty{item-indent}{0\p@}% Vertical difference from property left-margin.
+  \ccSetProperty{label-char}{} % Only applies with label-type »char« (or empty).
+  \ccSetProperty{label-prefix-delimiter}{} % The character/string between the prefix (inherited from list one level above) and the actual item’s label. Used for numbered lists.
+  \ccSetProperty{label-sep}{5mm}
+  \ccSetProperty{label-suffix}{}
+  \ccSetProperty{label-type}{char} % Label types: char (use label-char; default), number, Alpha, alpha, Roman, roman.
+  \ccSetProperty{label-width}{0\p@} % Label width is internally increased to width of label character.
+  \ccSetProperty{left-margin}{0\p@}
 }
 
 \long\def\tpDeclareList{\@ifnextchar[{\@tpDeclareList}{\@tpDeclareList[]}}%]
 \long\def\@tpDeclareList[#1]#2#3{%
-  \tpNamespace{list}%
+  \ccSetContainer{list}%
   \expandafter\def\csname tp@list@name\endcsname{#2}%
   %
   \if!#1!\else\expandafter\protect\expandafter\def\csname tp@list@#3@parent\endcsname{#1}\fi%
@@ -179,13 +179,13 @@
   % Define the macro for list with name/class #2.
   \expandafter\def\csname tpUseList#2\endcsname{%
     \if!#1!\else\edef\tp@list@parent{#1}\fi%
-    \tpNamespace{list}%
-    \tpCascadeProps{#2}{list} % Load the namespace defaults defined in \tpAddToDefault, the parent properties (if any), and the specific list properties.
+    \ccSetContainer{list}%
+    \tpCascadeProps{#2}{list} % Load the namespace defaults defined in \ccAddToProperties, the parent properties (if any), and the specific list properties.
   }
 }
 
-\DeclareContainer{tpList}{%
-  \tpDeclareType{Properties}{\tp@list@default}%
+\ccDeclareContainer{tpList}{%
+  \ccDeclareType{Properties}{\tp@list@default}%
 }
 
 \def\tpList{\@ifnextchar [{\tp@list}{\tp@list[]}}%]
@@ -204,7 +204,7 @@
       \expandafter\ifx\csname tp@maxLabelWidth@\the\tp@listNumber @\the\count255\endcsname\relax\else\repeat
     \fi      
     \csname tpUseList\tp@list@name\endcsname%
-    \vskip\tpUseProperty{after-skip}
+    \vskip\ccUseProperty{after-skip}
   \fi%
   \gdef\@doendpe{%
     \@endpetrue
@@ -235,65 +235,65 @@
   \tpCascadeProps{#2}{list} % Load the properties.
   % If the list has the keyword »inherit« and is enumerated, set its prefix according to the latest item label in the parent list.
   \tp@ifstring{#1}{inherit}%
-    \tpIfPropVal{label-type}{char}{}{\gdef\tp@inheritedPrefixAbove{\csname tp@inheritablePrefix\the\numexpr\the\tp@currListDepth-1\relax \endcsname}}%
+    \ccIfPropVal{label-type}{char}{}{\gdef\tp@inheritedPrefixAbove{\csname tp@inheritablePrefix\the\numexpr\the\tp@currListDepth-1\relax \endcsname}}%
   \fi
   
-  \vskip\tpUseProperty{before-skip}
+  \vskip\ccUseProperty{before-skip}
   
-  \tpIfPropVal{label-type}{char}{%
-    \tpSetProperty{label-prefix-delimiter}{}%
-    \tpSetProperty{label-suffix}{}%
+  \ccIfPropVal{label-type}{char}{%
+    \ccSetProperty{label-prefix-delimiter}{}%
+    \ccSetProperty{label-suffix}{}%
   }{%
-    \tpSetProperty{label-char}{}%
+    \ccSetProperty{label-char}{}%
   }%
-  \tpIfPropVal{label-type}{number}{\edef\tp@convertNumber##1{##1}}{}%
-  \tpIfPropVal{label-type}{Alpha}{\edef\tp@convertNumber##1{\tp@numToUCLetter{##1}}}{}%
-  \tpIfPropVal{label-type}{alpha}{\edef\tp@convertNumber##1{\tp@numToLCLetter{##1}}}{}%
-  \tpIfPropVal{label-type}{Roman}{\def\tp@convertNumber##1{\uppercase\expandafter{\romannumeral##1}}}{}%
-  \tpIfPropVal{label-type}{roman}{\def\tp@convertNumber##1{\romannumeral##1}}{}%
+  \ccIfPropVal{label-type}{number}{\edef\tp@convertNumber##1{##1}}{}%
+  \ccIfPropVal{label-type}{Alpha}{\edef\tp@convertNumber##1{\tp@numToUCLetter{##1}}}{}%
+  \ccIfPropVal{label-type}{alpha}{\edef\tp@convertNumber##1{\tp@numToLCLetter{##1}}}{}%
+  \ccIfPropVal{label-type}{Roman}{\def\tp@convertNumber##1{\uppercase\expandafter{\romannumeral##1}}}{}%
+  \ccIfPropVal{label-type}{roman}{\def\tp@convertNumber##1{\romannumeral##1}}{}%
   
   % Use the label prefix delimiter only if there actually is a label prefix.
   \ifx\empty\tp@inheritedPrefixAbove\empty
-    \tpSetProperty{label-prefix-delimiter}{}%
+    \ccSetProperty{label-prefix-delimiter}{}%
   \fi
   % Set the label width based on the potentially longest label string.
-  \setbox\tp@labelbox = \hbox{\tp@inheritedPrefixAbove\tpUseProperty{label-prefix-delimiter}\tpUseProperty{label-char}\tpUseProperty{label-suffix}}%
-  \ifdim\wd\tp@labelbox > \tpUseProperty{label-width}\relax%
-    \tpSetProperty{label-width}{\the\wd\tp@labelbox}%
+  \setbox\tp@labelbox = \hbox{\tp@inheritedPrefixAbove\ccUseProperty{label-prefix-delimiter}\ccUseProperty{label-char}\ccUseProperty{label-suffix}}%
+  \ifdim\wd\tp@labelbox > \ccUseProperty{label-width}\relax%
+    \ccSetProperty{label-width}{\the\wd\tp@labelbox}%
   \fi%
   
   % If the macro already exists (loaded from the aux file), …
   \expandafter\ifx\csname tp@maxLabelWidth@\the\tp@listNumber @\the\tp@currListDepth\endcsname\relax%
   \else%
     % … set the »label-width« property accordingly.
-    \tpSetProperty{label-width}{\csname tp@maxLabelWidth@\the\tp@listNumber @\the\tp@currListDepth\endcsname}%
+    \ccSetProperty{label-width}{\csname tp@maxLabelWidth@\the\tp@listNumber @\the\tp@currListDepth\endcsname}%
   \fi
   
   \list{%
     % Label. Uses [] in description items. Empty otherwise.%
   }{%
-    \labelwidth\tpUseProperty{label-width}%
-    \labelsep\dimexpr\tpUseProperty{label-sep}+\tpUseProperty{item-indent}\relax%
-    \leftmargin\dimexpr\tpUseProperty{left-margin}+\tpUseProperty{label-width}+\tpUseProperty{label-sep}\relax%
+    \labelwidth\ccUseProperty{label-width}%
+    \labelsep\dimexpr\ccUseProperty{label-sep}+\ccUseProperty{item-indent}\relax%
+    \leftmargin\dimexpr\ccUseProperty{left-margin}+\ccUseProperty{label-width}+\ccUseProperty{label-sep}\relax%
     \topsep0mm%
     \partopsep0mm%
-    \itemindent\tpUseProperty{item-indent}%
+    \itemindent\ccUseProperty{item-indent}%
     \def\makelabel##1{%
       % If the list is an enumerated one, increment the item counter and set the label accordingly.
-      \tpIfPropVal{label-type}{char}{}{%
+      \ccIfPropVal{label-type}{char}{}{%
         \global\expandafter\advance\csname tp@itemNumber\the\tp@currListDepth\endcsname by \@ne%
-        \tpSetProperty{label-char}{\tp@convertNumber{\the\csname tp@itemNumber\the\tp@currListDepth\endcsname}}%
+        \ccSetProperty{label-char}{\tp@convertNumber{\the\csname tp@itemNumber\the\tp@currListDepth\endcsname}}%
       }
       \ifx\empty##1\empty%
         % Checking this condition is not necessary by all means, but prevents inheriting and accumulating characters if »inherit« option is set in the TeX document.
-        \tpIfPropVal{label-type}{char}{}{%
-          \global\expandafter\edef\csname tp@inheritablePrefix\the\tp@currListDepth\endcsname{\tp@inheritedPrefixAbove\tpUseProperty{label-prefix-delimiter}\tpUseProperty{label-char}}%
+        \ccIfPropVal{label-type}{char}{}{%
+          \global\expandafter\edef\csname tp@inheritablePrefix\the\tp@currListDepth\endcsname{\tp@inheritedPrefixAbove\ccUseProperty{label-prefix-delimiter}\ccUseProperty{label-char}}%
         }
         % Measure the actual full label width.
-        \hbox to \tpUseProperty{label-width}{\tp@inheritedPrefixAbove\tpUseProperty{label-prefix-delimiter}\tpUseProperty{label-char}\tpUseProperty{label-suffix}\hss}%
-        \setbox\tp@labelbox = \hbox{\tp@inheritedPrefixAbove\tpUseProperty{label-prefix-delimiter}\tpUseProperty{label-char}\tpUseProperty{label-suffix}}%
+        \hbox to \ccUseProperty{label-width}{\tp@inheritedPrefixAbove\ccUseProperty{label-prefix-delimiter}\ccUseProperty{label-char}\ccUseProperty{label-suffix}\hss}%
+        \setbox\tp@labelbox = \hbox{\tp@inheritedPrefixAbove\ccUseProperty{label-prefix-delimiter}\ccUseProperty{label-char}\ccUseProperty{label-suffix}}%
       \else
-        \hbox to \tpUseProperty{label-width}{##1\hss}%
+        \hbox to \ccUseProperty{label-width}{##1\hss}%
         \setbox\tp@labelbox = \hbox{##1}%
       \fi
       % If the macro for the list and the according depth is not set yet, …

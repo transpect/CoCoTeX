@@ -116,7 +116,7 @@
 %    \begin{macrocode}
 \directlua{ltpdfa = require('ltpdfa')}
 \directlua{ltpdfa.config.final = true}
-\directlua{ltpdfa.config.debug = \if@tp@debug true\else false\fi}
+\directlua{ltpdfa.config.debug = \if@cc@debug true\else false\fi}
 \directlua{ltpdfa.config.nodetree = \ifx\cca@do@nodetree\relax true\else false\fi}
 \directlua{ltpdfa.config.showspaces = \ifx\cca@do@showspaces\relax true\else false\fi}
 \directlua{ltpdfa.config.dospaces = \ifx\cca@do@dospaces\relax true\else false\fi}
@@ -438,7 +438,7 @@
 %   \lstinline{ltpdfa} generate the \lstinline{xmp} file.
 %    \begin{macrocode}
 \def\cct@title@insert@xmp{%
-  \edef\tp@xmp@file@name{\tpUseGComp{titlepage}{XmpFile}.xmp}%
+  \edef\tp@xmp@file@name{\ccUseComponentFrom{titlepage}{XmpFile}.xmp}%
   \IfFileExists{\tp@xmp@file@name}
     {\ccaAddToConfig{metadata}{xmpfile=\tp@xmp@file@name}%
      \directlua{ally.meta.extract()}}
@@ -455,26 +455,26 @@ from the Components given in the tpMeta Container.}}}
 % First, we declare some Components that represent the three necessary
 % parameters for the output intent:
 %    \begin{macrocode}
-\tpAddToType{Components}{titlepage}{%
+\ccAddToType{Components}{titlepage}{%
 %    \end{macrocode}
-% \begin{tpComponent}{titlepage}{IccProfileFile} holds the path
+% \begin{ComponentDescr}{titlepage}{IccProfileFile} holds the path
 %   (relative to the main tex file) and name of the .icc file.
 %    \begin{macrocode}
-  \tpDeclareGComp{IccProfileFile}
+  \ccDeclareGlobalComponent{IccProfileFile}
 %    \end{macrocode}
-% \end{tpComponent}
-% \begin{tpComponent}{titlepage}{IccComponents} holds the number of
+% \end{ComponentDescr}
+% \begin{ComponentDescr}{titlepage}{IccComponents} holds the number of
 %   components in the color profile
 %    \begin{macrocode}
-  \tpDeclareGComp{IccComponents}
+  \ccDeclareGlobalComponent{IccComponents}
 %    \end{macrocode}
-% \end{tpComponent}
-% \begin{tpComponent}{titlepage}{IccIdentifier} holds the identifier
+% \end{ComponentDescr}
+% \begin{ComponentDescr}{titlepage}{IccIdentifier} holds the identifier
 %   of the color profile
 %    \begin{macrocode}
-  \tpDeclareGComp{IccIdentifier}}
+  \ccDeclareGlobalComponent{IccIdentifier}}
 %    \end{macrocode}
-% \end{tpComponent}
+% \end{ComponentDescr}
 % The Components are composed via a new Property
 % \lstinline{output-intent} which we add to \lstinline{coco-title}'s
 % Properties list:
@@ -485,7 +485,7 @@ from the Components given in the tpMeta Container.}}}
 \ifdefstring\tp@color@enc{cmyk}
   {\def\cca@default@icc@iden{Coated FOGRA39}}
   {\def\cca@default@icc@iden{sRGB IEC61966-2.1}}
-\tpAddToType{Properties}{titlepage}{%
+\ccAddToType{Properties}{titlepage}{%
 %    \end{macrocode}
 % \begin{tpProperty}{titlepage}{output-intent} sends the output
 %   intent information to the ltpdfa package. It must contain of three
@@ -501,17 +501,17 @@ from the Components given in the tpMeta Container.}}}
 %     profile, etc.)
 % \end{description}
 %    \begin{macrocode}
-  \tpSetProperty{output-intent}{%
-    profile=\tpIfComp{IccProfileFile}{\tpUseComp{IccProfileFile}}{suppl/\tp@color@enc.icc};%
-    components=\tpIfComp{IccComponents}{\tpUseComp{IccComponents}}{\cca@default@icc@comp};%
-    identifier=\tpIfComp{IccIdentifier}{\tpUseComp{IccIdentifier}}{\cca@default@icc@iden}%
+  \ccSetProperty{output-intent}{%
+    profile=\ccIfComp{IccProfileFile}{\tpUseComp{IccProfileFile}}{suppl/\tp@color@enc.icc};%
+    components=\ccIfComp{IccComponents}{\tpUseComp{IccComponents}}{\cca@default@icc@comp};%
+    identifier=\ccIfComp{IccIdentifier}{\tpUseComp{IccIdentifier}}{\cca@default@icc@iden}%
   }}
 %    \end{macrocode}
 % \end{tpProperty}
 % The Component Handler which links the new Components to that
 % Property is added to titlepage's \lstinline{document-meta-hook}:
 %    \begin{macrocode}
-\tpAddToHook[titlepage]{document-meta-hook}{\edef\x{\noexpand\ccaAddToConfig{intent}{\tpUseProperty{output-intent}}}\x}
+\ccAddToHook[titlepage]{document-meta-hook}{\edef\x{\noexpand\ccaAddToConfig{intent}{\ccUseProperty{output-intent}}}\x}
 %    \end{macrocode}
 %
 % \subsection{Transformation of  Typographic Unicode characters}
@@ -531,41 +531,41 @@ from the Components given in the tpMeta Container.}}}
 % As before, the parameters for the PDF conformity level are encoded
 % via specific Components in the titlepage Container:
 %    \begin{macrocode}
-\tpAddToType{Components}{titlepage}{%
+\ccAddToType{Components}{titlepage}{%
 %    \end{macrocode}
 %
-% \begin{tpComponent}{PDFAID} defines the PDF/A ID (Default: 2,
+% \begin{ComponentDescr}{PDFAID} defines the PDF/A ID (Default: 2,
 %   meaning: PDF/A-2)
 %    \begin{macrocode}
-  \tpDeclareGComp[2]{PDFAID}%
+  \ccDeclareGlobalComponent[2]{PDFAID}%
 %    \end{macrocode}
-% \end{tpComponent}
-% \begin{tpComponent}{PDFALevel} defines the PDF/A Level (Default: A,
+% \end{ComponentDescr}
+% \begin{ComponentDescr}{PDFALevel} defines the PDF/A Level (Default: A,
 %   meaning PDF/A-2A)
 %    \begin{macrocode}
-  \tpDeclareGComp[A]{PDFALevel}%
+  \ccDeclareGlobalComponent[A]{PDFALevel}%
 %    \end{macrocode}
-% \end{tpComponent}
-% \begin{tpComponent}{PDFUAID} defines the PDF standard (Default: 1,
+% \end{ComponentDescr}
+% \begin{ComponentDescr}{PDFUAID} defines the PDF standard (Default: 1,
 %   meaning: PDF/UA-1). Use \lstinline|\tpPDFUAID{}| (i.e. set it to
 %   nothing) to make the document conform to the PDF/A standard, but
 %   \textbf{not} to the PDF/UA standard.
 %    \begin{macrocode}
-  \tpDeclareGComp[1]{PDFUAID}}%
+  \ccDeclareGlobalComponent[1]{PDFUAID}}%
 %    \end{macrocode}
-% \end{tpComponent}
+% \end{ComponentDescr}
 % The checking if the values are valid, and the separation of the
 % various parts of the standard is done via a lua script in the
 % \lstinline{document-meta-hook}. The \lstinline{conformance}
 % DocumentInfo nodes are only written, if \textit{neither}
 % \lstinline{PDFAID}, \textit{nor} \lstinline{PDFALevel} is empty.
 %    \begin{macrocode}
-\tpAddToHook[titlepage]{document-meta-hook}{%
-  \tpIfCompEmpty{PDFAID}{}{\tpIfCompEmpty{PDFALevel}{}{%
+\ccAddToHook[titlepage]{document-meta-hook}{%
+  \ccIfCompEmpty{PDFAID}{}{\ccIfCompEmpty{PDFALevel}{}{%
       \edef\x{\noexpand\ccaSetDocinfo{conformance}{%
           pdfaid=\tpUseComp{PDFAID};%
           level=\tpUseComp{PDFALevel}%
-          \tpIfCompEmpty{PDFUAID}{}{;pdfuaid=\tpUseComp{PDFUAID}}}}%
+          \ccIfCompEmpty{PDFUAID}{}{;pdfuaid=\tpUseComp{PDFUAID}}}}%
       \x}}}
 %    \end{macrocode}
 %
@@ -577,10 +577,10 @@ from the Components given in the tpMeta Container.}}}
 % \lstinline{document} environmant as the structural representation's
 % root node:
 %    \begin{macrocode}
-\tpDeclareHook[document]{cca/at/begin/document}
+\ccDeclareHook[document]{cca/at/begin/document}
 \AtBeginDocument{%
   \directlua{ltpdfa.beginDocument('\luaescapestring{\ltpdfa@last@page}')}
-  \tpUseHook[document]{cca/at/begin/document}%
+  \ccUseHook[document]{cca/at/begin/document}%
   \directlua{ltpdfa.configAutoclose()}
   \ccaVstructStart{document}%
 }
