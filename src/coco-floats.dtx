@@ -927,15 +927,12 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
   \fi
   \expandafter\ccIfPropVal\expandafter{\ccf@propname}{#1}
     {\ifx\ccf@measure\relax\else
-        \ifnum\the\tpSubFloatCnt=\z@\relax
-          \ccIfAttr{\tp@captype}{subfloat}
-            {\csname tp@make@listof@\tp@captype\endcsname{sub\tp@captype}}% real subfloats
-            {\csname tp@make@listof@\tp@captype\endcsname{\tp@captype}}% subfloats are counted separately
-        \else
-          \csname tp@make@listof@\tp@captype\endcsname{\tp@captype}% single float
-        \fi
-        \ccfCreateLabel
-      \fi}{}%
+       \begingroup
+         \tpSubFloatCnt=\z@\relax
+         \csname tp@make@listof@\tp@captype\endcsname{\tp@captype}% single float
+         \ccfCreateLabel
+       \endgroup
+     \fi}{}%
 %    \end{macrocode}
 % now, we print the actual captions, if they contain contents.
 %    \begin{macrocode}
@@ -986,7 +983,11 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %    \begin{macrocode}
 \long\def\ccf@render@sub#1#2{%
   \tpSubFloatCnt=#1\relax
+  \ccIfAttr{\tp@captype}{subfloat}
+    {\csname tp@make@listof@\tp@captype\endcsname{sub\tp@captype}}% real subfloats
+    {\csname tp@make@listof@\tp@captype\endcsname{\tp@captype}}% subfloats are counted separately
   \expandafter\ifx\csname tp@has@\tp@prefix capt@top\endcsname\@empty
+    \ccfCreateLabel
     \ccf@make@caption{top}{\ccUseProperty{\tp@prefix caption-valign-top}}%
   \fi
   \bgroup\strut\tpUseComp{#2}\strut\par\egroup%

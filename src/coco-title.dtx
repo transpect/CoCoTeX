@@ -230,17 +230,21 @@
   \begingroup
     \tpGobble
     \renewcommand\foreignlanguage[2]{{##2}}%
-    \ifnum\tpAuthorCnt>\z@
-      \@setpar{\@@par}%
-      \ccgdefFromCountedComp\tpRunBookName{tpAuthor}{author-list-pdfinfo-format}%
-    \else
-      \ifnum\tpEditorCnt>\z@
-        \ccgdefFromCountedComp\tpRunBookName{tpEditor}{editor-list-pdfinfo-format}%
-      \else
-        \ccPackageWarning{transcript-title}{Meta Data}{No author or editor given!}%
-        \@tempswafalse
-      \fi
-    \fi
+    \ccIfComp{AuthorNameList}
+      {\ccgdefFromComp\tpRunBookName{AuthorNameList}}
+      {\ccIfComp{EditorNameList}
+         {\ccgdefFromComp\tpRunBookName{EditorNameList}}
+         {\ifnum\tpAuthorCnt>\z@
+            \@setpar{\@@par}%
+            \ccgdefFromCountedComp\tpRunBookName{tpAuthor}{author-list-pdfinfo-format}%
+          \else
+            \ifnum\tpEditorCnt>\z@
+              \ccgdefFromCountedComp\tpRunBookName{tpEditor}{editor-list-pdfinfo-format}%
+            \else
+              \ccPackageWarning{transcript-title}{Meta Data}{No author or editor given!}%
+              \@tempswafalse
+            \fi
+          \fi}}%
     \if@tempswa
       \pdfstringdef\@author{\tpRunBookName}%
       \cct@write@pdf@meta{pdfauthor}{Author}{\tpRunBookName}%
@@ -265,8 +269,8 @@
 %   meta data file into the pdf, if it exists.
 %    \begin{macrocode}
 \def\cct@title@insert@xmp{%
-  \edef\include@xmp{\noexpand\@include@xmp{\tpUseComp{XmpFile}.xmp}}
-  \def\@include@xmp##1{\IfFileExists{##1}{\@@include@xmp{##1}}{}}
+  \edef\include@xmp{\noexpand\@include@xmp{\tpUseComp{XmpFile}.xmp}}%
+  \def\@include@xmp##1{\IfFileExists{##1}{\@@include@xmp{##1}}{}}%
   \def\@@include@xmp##1{%
     \begingroup
       \immediate\pdfobj stream attr {/Type /Metadata /Subtype /XML}
