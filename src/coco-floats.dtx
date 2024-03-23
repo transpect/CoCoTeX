@@ -839,9 +839,8 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 % \begin{macro}{\tp@capt@top@offset} determines the spacing inserted
 %   \textbf{above both captions}.
 %    \begin{macrocode}
-\def\tp@capt@top@offset{%
-  \ifx\@argi\tp@str@top
-  \else
+\def\tp@capt@top@offset#1{%
+  \ifstrequal{#1}{top}{}{%
     \par\if@ccf@break@capt\else\nopagebreak\fi%
     \expandafter\@tempskipa\ccUseProperty{\tp@prefix caption-sep-bottom}\relax%
     \advance\@tempskipa\dimexpr-\topskip+\dp\strutbox\relax
@@ -855,34 +854,31 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
     \fi
     \vskip\@tempskipa
     \leavevmode
-  \fi}
+  }}
 
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro} determines the spacing inserted \textbf{below the
 %   captions}.
 %    \begin{macrocode}
-\def\tp@capt@bottom@offset{%
-  \ifx\@argi\tp@str@top
-    \@tempskipa\z@
-    \expandafter\advance\expandafter\@tempskipa\ccUseProperty{\tp@prefix caption-sep-top}%
-    %
-    \ifnum\tpSubFloatCnt=\z@
-      \ifx\tp@has@subcapt@top\@empty
-        %% subcapt-top exists and capt-top is rendered
-        \advance\@tempskipa\dimexpr\ht\strutbox-\topskip-\p@\relax
-        \expandafter\advance\expandafter\@tempskipa\ccUseProperty{subcaption-add-sep-top}\relax%
-      \else
-        \advance\@tempskipa\dimexpr-\dp\strutbox\relax
-      \fi
-    \fi
-    \vskip\@tempskipa
-    \par\if@ccf@break@capt\else\nopagebreak\fi
-  \else
-    \ifnum\tpSubFloatCnt>\z@
+\def\tp@capt@bottom@offset#1{%
+  \ifstrequal{#1}{top}
+    {\@tempskipa\z@
+     \expandafter\advance\expandafter\@tempskipa\ccUseProperty{\tp@prefix caption-sep-top}%
+     \ifnum\tpSubFloatCnt=\z@
+       \ifx\tp@has@subcapt@top\@empty
+         %% subcapt-top exists and capt-top is rendered
+         \advance\@tempskipa\dimexpr\ht\strutbox-\topskip-\p@\relax
+         \expandafter\advance\expandafter\@tempskipa\ccUseProperty{subcaption-add-sep-top}\relax%
+       \else
+         \advance\@tempskipa\dimexpr-\dp\strutbox\relax
+       \fi
+     \fi
+     \vskip\@tempskipa
+     \par\if@ccf@break@capt\else\nopagebreak\fi}
+   {\ifnum\tpSubFloatCnt>\z@
       \vskip\dp\strutbox
-    \fi
-  \fi}
+    \fi}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccf@make@caption} prints the caption.
@@ -892,7 +888,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 % \end{description}
 %    \begin{macrocode}
 \long\def\ccf@make@caption#1#2{%
-  \tp@capt@top@offset
+  \tp@capt@top@offset{#1}%
   \ifnum\tpSubFloatCnt=\z@
     \def\ccf@caption@box{%
       \ccIfAttrIsStr{\tp@captype}{orientation}{landscape}
@@ -913,7 +909,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
     \ifstrequal{#2}{bottom}{}{\if@ccf@break@capt\else\vss\fi}%
   \egroup%
   \if@ccf@break@capt\unvbox\@tempboxa\else\box\@tempboxa\fi%
-  \tp@capt@bottom@offset
+  \tp@capt@bottom@offset{#1}%
 }
 \let\tp@make@caption\ccf@make@caption% legacy
 %    \end{macrocode}
