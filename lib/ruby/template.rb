@@ -78,13 +78,21 @@ module CoCoTeX
         toml = OpenStruct.new()
         toml.version = OpenStruct.new()
         toml.date = OpenStruct.new()
-        toml.version.major,toml.version.minor,toml.version.patch = String.split(file_version, ".")
+        toml.version.major,toml.version.minor,toml.version.patch = file_version.split(".")
         toml.date.year =  Time.now.strftime("%Y")
         toml.date.month = Time.now.strftime("%m")
         toml.date.day =   Time.now.strftime("%d")
         @file_version = file_version
         @file_date = format("%s/%s/%s", toml.date.year, toml.date.month, toml.date.day)
-        @new_version = toml
+        @new_version = {"version" =>
+                        {"major" => toml.version.major,
+                         "minor" => toml.version.minor,
+                         "patch" => toml.version.patch},
+                        "date" =>
+                        {"year" => toml.date.year,
+                         "month" => toml.date.month,
+                         "day" => toml.date.day
+                        }}
       else
         @file_version = format("%s.%s.%s", current.version.major, current.version.minor, current.version.patch)
         @file_date = format("%s/%s/%s", current.date.year, current.date.month, current.date.day)
