@@ -666,6 +666,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 \def\@tp@float[#1]{%
   \par
   \begingroup
+    \@cc@is@finalfalse
     \global\advance\tp@int@flt@cnt\@ne
     \ccEvalType{FloatEnvInfo}%
     \tp@flt@reset@defaults
@@ -1144,6 +1145,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
     \def\@igopts{#1,width=\hsize}%
   \fi
   \gdef\@tp@fig@path{#2}%
+  \cc@if@ally{\if@cc@is@final\ccaAddPlacement{Block}\fi}{}%
   \expandafter\tpltx@includegraphics\expandafter[\@igopts]{#2}%
 }
 

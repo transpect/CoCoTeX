@@ -328,8 +328,8 @@
 \ifx\cch@highest@level\@undefined \def\cch@highest@level{99}\fi
 \ifx\cch@lowest@level\@undefined  \def\cch@lowest@level{-99}\fi
 \AtEndDocument{%
-  \write\@auxout{\string\gdef\string\cch@highest@level{\the\cch@min@level}}%
-  \write\@auxout{\string\gdef\string\cch@lowest@level{\the\cch@max@level}}%
+  \immediate\write\@mainaux{\string\gdef\string\cch@highest@level{\the\cch@min@level}}%
+  \immediate\write\@mainaux{\string\gdef\string\cch@lowest@level{\the\cch@max@level}}%
 }%
 %    \end{macrocode}
 % \end{macro}

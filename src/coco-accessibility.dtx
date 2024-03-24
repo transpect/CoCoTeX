@@ -195,6 +195,8 @@
 %   the name of the PDF role.
 %    \begin{macrocode}
 \newcommand*{\ccaAddRolemap}[2]{\directlua{ltpdfa.tagger.addRolemap('\luaescapestring{#1}','\luaescapestring{#2}')}}
+\newcommand*{\ccaAddPlacement}[1]{\directlua{ltpdfa.tagger.addPlacement('\luaescapestring{#1}')}}
+\newcommand*{\ccaAddNumbering}[1]{\directlua{ltpdfa.tagger.addNumbering('\luaescapestring{#1}')}}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -397,16 +399,20 @@
 %    \end{macrocode}
 % \end{macro}
 % which we add to the beginning and the end of \lstinline{graphics}
-% package's \lstinline{\Ginclude@graphics} macro, respectively:
+% package's \lstinline{\Ginclude@graphics} macro, respectively.
 %    \begin{macrocode}
-\@ifpackageloaded{grffile}
-  {\pretocmd\grffile@Ginclude@graphics{\if@cc@is@final\ccaFigureStart{}\fi}{}{}%
-   \apptocmd\grffile@Ginclude@graphics{\if@cc@is@final\ccaFigureEnd{}\fi}{}{}}
-  {\pretocmd\Ginclude@graphics{\if@cc@is@final\ccaFigureStart{}\fi}{}{}%
-   \apptocmd\Ginclude@graphics{\if@cc@is@final\ccaFigureEnd{}\fi}{}{}}
-
+\if@cc@modern
+  \let\ltx@Ginclulde@graphics\Ginclude@graphics
+  \def\Ginclude@graphics#1{\if@cc@is@final\message{^^J==>Getting image #1}\ccaFigureStart{}\fi\ltx@Ginclulde@graphics{#1}\if@cc@is@final\ccaFigureEnd{}\fi}%
+\else
+  \@ifpackageloaded{grffile}
+    {\pretocmd\grffile@Ginclude@graphics{\if@cc@is@final\ccaFigureStart{}\fi}{}{}%
+     \apptocmd\grffile@Ginclude@graphics{\if@cc@is@final\ccaFigureEnd{}\fi}{}{}}
+    {\pretocmd\Ginclude@graphics{\if@cc@is@final\ccaFigureStart{}\fi}{}{}%
+     \apptocmd\Ginclude@graphics{\if@cc@is@final\ccaFigureEnd{}\fi}{}{}}%
+\fi
 %    \end{macrocode}
-% 
+%
 %    \begin{macrocode}
 \apptocmd\Ginclude@@pdftex{\if@cc@is@final%
   \def\@tempa{!}%
@@ -415,6 +421,12 @@
     {\ifx\Gin@scaley\@tempa\else \Gin@scaley\fi}
     {\ifGin@clip true\else false\fi}\fi%rwi/rhi
 }{}{}
+\AtBeginDocument{%
+\@ifpackageloaded{htmltabs}{%
+  \let\ltx@ht@valign@box\ht@valign@box
+  \def\ht@valign@box{\if@ht@final@render\@cc@is@finaltrue\fi\ltx@ht@valign@box}
+  \let\ltx@ht@RenderCell\ht@RenderCell
+  \def\ltx@ht@RenderCell{\@cc@is@finalfalse\ltx@ht@RenderCell}}{}}
 %    \end{macrocode}
 %
 %
