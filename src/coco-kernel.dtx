@@ -1136,6 +1136,7 @@
 %   branch, respectively.
 %    \begin{macrocode}
 \def\ccIfAttrIsStr#1#2#3#4#5{\ccIfAttr{#1}{#2}{\ifcsstring{tp@#1@attr@#2}{#3}{#4}{#5}}{#5}}
+\let\tpIfAttrStr\ccIfAttrIsStr
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccIfAttrIsSet} can be used to check if a value-less
