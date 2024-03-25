@@ -898,6 +898,17 @@
 \let\tpUsePropEnv\ccUsePropertyEnv% legacy
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{\ccIfStrEqual} is variant of etoolbox's
+%   \lstinline{\ifstrequal} that first fully expands both comparatives
+%     before evaluating them.
+%    \begin{macrocode}
+\def\ccIfStrEqual#1#2{%
+  \edef\@argi{#1}\edef\@argii{#2}%
+  \expandafter\expandafter\expandafter\ifstrequal
+    \expandafter\expandafter\expandafter{\expandafter\@argi\expandafter}%
+      \expandafter{\@argii}}
+%    \end{macrocode}
+% \end{macro}
 %
 % \subsection{Processing Instructions}\label{sect:tpPI}
 %

@@ -897,11 +897,11 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
     \def\ccf@caption@box{\setbox\@tempboxa\vbox to \tp@tempskipa\bgroup}%
   \fi
   \ccf@caption@box%
-    \ifstrequal{#2}{top}{}{\if@ccf@break@capt\else\vss\fi}%
+    \ccIfStrEqual{#2}{top}{}{\if@ccf@break@capt\else\vss\fi}%
     \ccUseProperty{\tp@prefix caption-face}%
     \ccUseProperty{\tp@prefix caption-face-#1}%
     \cc@topstrut\ccUseProperty{\tp@prefix caption-#1}\strut%
-    \ifstrequal{#2}{bottom}{}{\if@ccf@break@capt\else\vss\fi}%
+    \ccIfStrEqual{#2}{bottom}{}{\if@ccf@break@capt\else\vss\fi}%
   \egroup%
   \if@ccf@break@capt\unvbox\@tempboxa\else\box\@tempboxa\fi%
   \tp@capt@bottom@offset{#1}%
