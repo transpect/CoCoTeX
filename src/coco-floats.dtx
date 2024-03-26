@@ -64,6 +64,7 @@
 %    \begin{macrocode}
 \newcount\tpSubFloatCnt       \tpSubFloatCnt=\z@\relax
 \newcount\tp@int@flt@cnt      \tp@int@flt@cnt\z@
+\newcount\ccf@int@sub@flt@cnt  \ccf@int@sub@flt@cnt\z@
 %    \end{macrocode}
 % Various dimension registers that store dimensions and spaces of floats and sub-floats:
 % \begin{itemize}
@@ -312,7 +313,7 @@
 %   declarations. \#1 is the generic name of the Component.
 %    \begin{macrocode}
 \def\tpMakeFltComp#1{%
-  \cc@def@counted@comp{#1-\the\tpSubFloatCnt}{#1}{\ifx\tp@is@subflt\relax\else\tpSubFloatCnt=\z@\relax\fi}{}%
+  \cc@def@counted@comp{#1-\the\tpSubFloatCnt}{#1}{\ifx\ccf@is@subfloat\relax\else\tpSubFloatCnt=\z@\relax\fi}{}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -521,14 +522,14 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
     \ccIfComp{ListofSource}{\csgappto{@tp@listof@entry}{\string\tpListofSource{\tpUseComp{ListofSource}}}}{}%
     \ccUnlessAttr{#2}{nolist}
       {\ifx\@tp@listof@entry\relax
-         \ifx\tp@is@subflt\relax\else
+         \ifx\ccf@is@subfloat\relax\else
            \ccf@restore@contentsline
          \fi
        \else
          \begingroup
            \tpGobble
            \protected@edef\tp@listof@entry{\@tp@listof@entry}%
-           \ifx\tp@is@subflt\relax
+           \ifx\ccf@is@subfloat\relax
              \ccf@store@sub@contentsline{#1}{\tp@captype}{\expandonce{\tp@listof@entry}}%
            \else
              \ccf@addcontentsline{#1}{\tp@captype}{\expandonce{\tp@listof@entry}}%
@@ -589,46 +590,63 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %
 % \section{Label and Referencing mechanisms}
 %
-% \begin{macro}{\ccf@create@counter} creates an auto-numbered counter
-%   if it is not given in the input via the \lstinline{Number}
-%   Component. With optional \#1 the internal subfloat counter can
-%   be overridden.
+%  \subsection{Generation of Number Components}
+%
+% \begin{macro}{\ccf@generate@counters} iterates through all subfloats
+%   in the current float container and generates Number components.
 %    \begin{macrocode}
-\def\ccf@create@counter{\cc@opt@empty\@ccf@create@counter}
-\def\@ccf@create@counter[#1]{%
-  \ifblank{#1}
-    {\@tempcnta\tpSubFloatCnt\relax}
-    {\@tempcnta#1\relax}%
-  \ccIfAttrIsSet{\tp@captype}{nonumber}
-    {}
+\def\ccf@generate@counters{%
+  \ccf@int@sub@flt@cnt=\tpSubFloatCnt\relax
+  \cc@iterate{\tpSubFloatCnt}{\z@}{\the\ccf@int@sub@flt@cnt}
+    {\ccf@create@counter}%
+  \tpSubFloatCnt=\ccf@int@sub@flt@cnt\relax
+  \let\ccf@is@subfloat\@undefined
+}%
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccf@create@counter} checks for the various parameters
+%   that control whether or not a Number component is auto-generated
+%   for each sub-float.
+%    \begin{macrocode}
+\def\ccf@create@counter{%
+  \ifnum\tpSubFloatCnt>\z@\relax\let\ccf@is@subfloat\relax\fi
+  \ccIfAttrIsSet{\tp@captype}{nonumber}{}
     {\ccUnlessComp{Number}
       {\ccIfPropVal{numbering}{auto}
         {\ccIfAttr{\tp@captype}{subfloat}
-          {\ccf@set@subcounter{\the\@tempcnta}}
-          {\global\expandafter\advance\csname c@\tp@captype\endcsname\@ne\relax
-            \ccf@set@counter{\the\@tempcnta}}}
-      {}}}}
+          {\ifnum\tpSubFloatCnt=\z@\relax
+             \ccf@set@top@counter%
+           \else
+             \ccf@set@subcounter%
+           \fi}
+          {\ccf@set@top@counter}}{}}}%
+}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccf@set@counter} generates the first level float
-%   counter. \#1 is the sub-float counter.
+% \begin{macro}{\ccf@set@top@counter} generates first level float
+%   counter.
 %    \begin{macrocode}
-\def\ccf@set@counter#1{%
-  \edef\@tempa{\csname the\tp@captype\endcsname}%
-  \expandafter\tpNumber\expandafter{\@tempa}}
+\def\ccf@set@top@counter{%
+  \ccWhenComp{Caption}{%
+    \global\expandafter\advance\csname c@\tp@captype\endcsname\@ne\relax
+    \ccdefFromProperty\ccf@prefix{auto-number-prefix}%
+    \ccdefFromProperty\ccf@sep{auto-number-prefix-sep}%
+    \protected@edef\@tempa{\ccf@prefix\ccf@sep\expandafter\the\csname c@\tp@captype\endcsname}%
+    \expandafter\tpNumber\expandafter{\@tempa}}%
+}
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\ccf@set@subcounter} generates second level counters for
-%   numbered sub-floats. \#1 is the sub-float counter
+% \begin{macro}{\ccf@set@subcounter} generates second level counters
+%   for numbered sub-floats. \#1 is the sub-float counter.
 %    \begin{macrocode}
-\def\ccf@set@subcounter#1{%
-  \ccSetPropertyVal{float-number}{\csname tp@\tp@cur@cont @number-0\endcsname}%
+\def\ccf@set@subcounter{%
+  \ccSetPropertyVal{float-number}{\csname tp@\tp@cur@cont @Number-0\endcsname}%
   \ccSetPropertyVal{sub-number}{%
     \begingroup
       \expandonce{\ccUseProperty{sub-number-face}}%
       \relax\ccUseProperty{sub-number-before}%
-      \csname @\ccUseProperty{sub-number-style}\endcsname{#1}%
+      \csname @\ccUseProperty{sub-number-style}\endcsname{\the\tpSubFloatCnt}%
       \ccUseProperty{sub-number-after}%
     \endgroup}%
   \tpNumber{\ccUseProperty{sub-number-format}}%
@@ -636,17 +654,19 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %    \end{macrocode}
 % \end{macro}
 %
+% \subsection{Generation of {\LaTeX} Labels}
+%
 % \begin{macro}{\ccfCreateLabel} creates labels
 %    \begin{macrocode}
 \def\ccfCreateLabel{%
-  \def\cc@fallback@anchor{%
-    \tpGobble
-    \ccdefFromComp\@currentlabel{Number}%
-    \ccdefFromComp\@currentlabelname{ListofCaption}%
-  }%
-  \def\cc@labelname@comp{Caption}%
-  \expandafter\ccCreateLabel\expandafter{\tp@captype}%
-}
+  \tpIfComp{Number}
+    {\def\cc@fallback@anchor{%
+       \tpGobble
+       \ccdefFromComp\@currentlabel{Number}%
+       \ccdefFromComp\@currentlabelname{ListofCaption}}%
+     \def\cc@labelname@comp{Caption}}
+   {\def\cc@fallback@anchor{\phantomsection}}%
+  \expandafter\ccCreateLabel\expandafter{\tp@captype}}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -690,7 +710,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
     \ccf@set@top@sep
     \ccf@test@caption{0}{}{top}%
     \ccf@test@caption{0}{}{bottom}%
-    \ccf@create@counter[0]%
+    \ccf@generate@counters
     \ccf@compose
     \tp@save@page
     \ccf@set@bot@sep
@@ -708,25 +728,26 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tpSubFloat} is the user-level environment for sub-floats
+% \begin{macro}{\ccSubFloat} is the user-level environment for sub-floats
 %
 % TODO: transform into a Component Group
+% TODO: remove tp prefix
 %    \begin{macrocode}
-\def\tpSubFloat{%
-  \ifx\tp@is@subflt\relax
+\def\ccSubFloat{%
+  \ifx\ccf@is@subfloat\relax
     \PackageError{coco-floats.sty}{Nested tpSubFloats detected!}{You cannot (yet) nest a `tpSubFloat' environment into another `tpSubFloat' environment!}%
   \else
-    \global\let\tp@is@subflt\relax
+    \global\let\ccf@is@subfloat\relax
     \global\advance\tpSubFloatCnt\@ne
     \ignorespaces
   \fi}
+\let\tpSubFloat\ccSubFloat% legacy
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\endtpSubFloat} is the end of the sub-float environment
+% \begin{macro}{\endccSubFloat} is the end of the sub-float environment
 %    \begin{macrocode}
-\def\endtpSubFloat{%
+\def\endccSubFloat{%
   \ccUseProperty{subfloat-handler}%
-  \ccf@create@counter%
   \expandafter\xdef\csname tp@\tp@cur@cont @width-\the\tpSubFloatCnt\endcsname{\the\wd\tp@subfltbox}%
   \expandafter\xdef\csname tp@\tp@cur@cont @height-\the\tpSubFloatCnt\endcsname{\the\ht\tp@subfltbox}%
   \expandafter\xdef\csname tp@\tp@cur@cont @depth-\the\tpSubFloatCnt\endcsname{\the\dp\tp@subfltbox}%
@@ -737,8 +758,9 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
   \fi
   \ignorespaces
   \global\setbox\tp@subfltbox\box\voidb@x
-  \global\let\tp@is@subflt\@undefined
+  \global\let\ccf@is@subfloat\@undefined
 }
+\let\endtpSubFloat\endccSubFloat% legacy
 %    \end{macrocode}
 % \end{macro}
 %
@@ -756,7 +778,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
       \ccUseProperty{float-render}%
     \egroup
   \else
-    \let\tp@is@subflt\relax
+    \global\let\ccf@is@subfloat\relax
     \@cc@is@finalfalse
     \ccf@calc@sameheight
     \ifx\tp@has@subcapt@top\@empty\tp@flt@calc@row@ht{top}\fi%
@@ -765,7 +787,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
     \@cc@is@finaltrue
     \ccUseProperty{subfloat-render}%
     \let\tp@prefix\@empty
-    \let\tp@is@subflt\@undefined
+    \global\let\ccf@is@subfloat\@undefined
   \fi
   \tp@make@outer@caption{bottom}%
 }
@@ -835,7 +857,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %   \textbf{above both captions}.
 %    \begin{macrocode}
 \def\tp@capt@top@offset#1{%
-  \ifstrequal{#1}{top}{}{%
+  \ccIfStrEqual{#1}{top}{}{%
     \par\if@ccf@break@capt\else\nopagebreak\fi%
     \expandafter\@tempskipa\ccUseProperty{\tp@prefix caption-sep-bottom}\relax%
     \advance\@tempskipa\dimexpr-\topskip+\dp\strutbox\relax
@@ -850,14 +872,13 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
     \vskip\@tempskipa
     \leavevmode
   }}
-
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro} determines the spacing inserted \textbf{below the
 %   captions}.
 %    \begin{macrocode}
 \def\tp@capt@bottom@offset#1{%
-  \ifstrequal{#1}{top}
+  \ccIfStrEqual{#1}{top}
     {\@tempskipa\z@
      \expandafter\advance\expandafter\@tempskipa\ccUseProperty{\tp@prefix caption-sep-top}%
      \ifnum\the\tpSubFloatCnt=\z@\relax
@@ -929,6 +950,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
   \expandafter\ccIfPropVal\expandafter{\ccf@propname}{#1}
     {\ifx\ccf@measure\relax\else
        \begingroup
+         \let\ccf@is@subfloat\@undefined
          \tpSubFloatCnt=\z@\relax
          \csname tp@make@listof@\tp@captype\endcsname{\tp@captype}% single float
          \ccfCreateLabel
@@ -952,7 +974,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
       \ccf@make@caption{#1}{top}%
       \spewnotes
     \egroup
-    \ifstrequal{#1}{top}{\if@ccf@break@capt\else\nopagebreak\fi}{}%
+    \ccIfStrEqual{#1}{top}{\if@ccf@break@capt\else\nopagebreak\fi}{}%
   \fi
 }
 %    \end{macrocode}
@@ -985,8 +1007,8 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 \long\def\ccf@render@sub#1#2{%
   \tpSubFloatCnt=#1\relax
   \ccIfAttr{\tp@captype}{subfloat}
-    {\csname tp@make@listof@\tp@captype\endcsname{sub\tp@captype}}% real subfloats
-    {\csname tp@make@listof@\tp@captype\endcsname{\tp@captype}}% subfloats are counted separately
+    {\let\ccf@is@subfloat\relax\csname tp@make@listof@\tp@captype\endcsname{sub\tp@captype}}% real subfloats
+    {\let\ccf@is@subfloat\@undefined\csname tp@make@listof@\tp@captype\endcsname{\tp@captype}}% subfloats are counted separately
   \expandafter\ifx\csname tp@has@\tp@prefix capt@top\endcsname\@empty
     \ccfCreateLabel
     \ccf@make@caption{top}{\ccUseProperty{\tp@prefix caption-valign-top}}%
@@ -1279,6 +1301,8 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %
 %    \begin{macrocode}
 \ccAddToType{Properties}{float}{%
+  \ccSetProperty{auto-number-prefix}{\csname\tp@captype name\endcsname}%% Prefix for auto-generated Number components
+  \ccSetProperty{auto-number-prefix-sep}{~}%% Prefix for auto-generated Number components
   \ccSetProperty{intext-skip-top}{\intextsep}%% non-float sep top
   \ccSetProperty{intext-skip-bottom}{\intextsep}%% non-float sep bottom
   \ccSetProperty{float-skip-top}{\z@}%% float sep top

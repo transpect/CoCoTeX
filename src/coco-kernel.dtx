@@ -745,11 +745,11 @@
   }%
   \let\tpIfComp\ccIfComp% legacy
   \long\def\ccWhenComp##1{%
-    \expandafter\expandafter\expandafter\expandafter\expandafter\expandafter\expandafter\ifx\csname tp@\tp@cur@cont @##1\endcsname\relax\expandafter\@secondoftwo\fi%
+    \expandafter\expandafter\expandafter\expandafter\expandafter\expandafter\expandafter\ifx\csname tp@\tp@cur@cont @##1\endcsname\relax\expandafter\@gobble\else\expandafter\@firstofone\fi%
   }%
   \let\tpWhenComp\ccWhenComp% legacy
   \long\def\ccUnlessComp##1{%
-    \expandafter\expandafter\expandafter\expandafter\expandafter\expandafter\expandafter\ifx\csname tp@\tp@cur@cont @##1\endcsname\relax\else\expandafter\@secondoftwo\fi%
+    \expandafter\expandafter\expandafter\expandafter\expandafter\expandafter\expandafter\ifx\csname tp@\tp@cur@cont @##1\endcsname\relax\expandafter\@firstofone\else\expandafter\@gobble\fi%
   }%
   \long\def\ccIfCompEmpty##1{%
     \expandafter\expandafter\expandafter\ifx\csname tp@\tp@cur@cont @##1\endcsname\cc@long@empty\expandafter\@firstoftwo\else\expandafter\@secondoftwo\fi}%
@@ -1011,11 +1011,11 @@
 %    \begin{macrocode}
 \long\def\cc@iterate{\@ifnextchar[{\@cc@iterate}{\@cc@iterate[\@ne]}}%]
 \long\def\@cc@iterate[#1]#2#3#4#5{%
-  \advance#2 by #1\relax
   #2=#3\relax%
   \expandafter\ifnum#2>#4\relax%
   \else
     #5%
+    \advance#2 by #1\relax
     \cc@iterate[#1]{#2}{\the#2}{#4}{#5}%
   \fi}%
 %    \end{macrocode}
