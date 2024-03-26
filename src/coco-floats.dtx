@@ -615,7 +615,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %    \begin{macrocode}
 \def\ccf@set@counter#1{%
   \edef\@tempa{\csname the\tp@captype\endcsname}%
-  \expandafter\tpNumber\@tempa}
+  \expandafter\tpNumber\expandafter{\@tempa}}
 %    \end{macrocode}
 % \end{macro}
 %
