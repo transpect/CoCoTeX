@@ -230,10 +230,10 @@
   \begingroup
     \tpGobble
     \renewcommand\foreignlanguage[2]{{##2}}%
-    \ccIfComp{AuthorNameList}
-      {\ccgdefFromComp\tpRunBookName{AuthorNameList}}
-      {\ccIfComp{EditorNameList}
-         {\ccgdefFromComp\tpRunBookName{EditorNameList}}
+    \ccIfComp{AuthorPDFInfo}
+      {\ccgdefFromComp\tpRunBookName{AuthorPDFInfo}}
+      {\ccIfComp{EditorPDFInfo}
+         {\ccgdefFromComp\tpRunBookName{EditorPDFInfo}}
          {\ifnum\tpAuthorCnt>\z@
             \@setpar{\@@par}%
             \ccgdefFromCountedComp\tpRunBookName{tpAuthor}{author-list-pdfinfo-format}%
