@@ -308,7 +308,7 @@
 %   declarations. \#1 is the generic name of the Component.
 %    \begin{macrocode}
 \def\ccfMakeComp#1{%
-  \cc@def@counted@comp{#1-\the\tpSubFloatCnt}{#1}{\ifx\ccf@is@subfloat\relax\else\tpSubFloatCnt=\z@\relax\fi}{}%
+  \cc@def@counted@comp{#1-\the\tpSubFloatCnt}{#1}{}{}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -363,6 +363,7 @@
     \ccfMakeCompL{Number}%
     \ccfMakeComp{RefLabel}%
     \ccfMakeComp{AltText}% neu: 2023-06-08; TODO: muss noch implementiert werden
+    \ccfMakeComp{ListofEntry}%
   }%
   \ccDeclareType{Properties}{}%
 }
@@ -498,81 +499,26 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
       \ccUseHook{list-of-after-hook-##1}%
       \ccUseProperty{list-of-after-entry}%
     \egroup}%
-%    \end{macrocode}
-% \end{macro}
-% \begin{macro}{\csname tp@make@listof@<type>\endcsname}
-%   The last macro to be defined here is the list-of writer. This
-%   macro is responsible to write the entry into TeX's auxiliary file
-%   system. \#\#1 is the name of the ``level'' for the entry.
-%    \begin{macrocode}
-  \expandafter\gdef\csname tp@make@listof@#2\endcsname##1{%
-    \ccf@check@empty{Number}%
-    \ccf@check@empty{Caption}%
-    \ccf@check@empty{Legend}%
-    \ccf@check@empty{Source}%
-    \let\@tp@listof@entry\relax
-    \ccWhenComp{ListofCaption}{\csgappto{@tp@listof@entry}{\string\tpListofCaption{\tpUseComp{ListofCaption}}}}%
-    \ccWhenComp{ListofNumber}{\csgappto{@tp@listof@entry}{\string\tpListofNumber{\tpUseComp{ListofNumber}}}}%
-    \ccWhenComp{ListofLegend}{\csgappto{@tp@listof@entry}{\string\tpListofLegend{\tpUseComp{ListofLegend}}}}%
-    \ccWhenComp{ListofSource}{\csgappto{@tp@listof@entry}{\string\tpListofSource{\tpUseComp{ListofSource}}}}%
-    \ccUnlessAttr{#2}{nolist}
-      {\ifx\@tp@listof@entry\relax
-         \ifx\ccf@is@subfloat\relax\else
-           \ccf@restore@contentsline
-         \fi
-       \else
-         \begingroup
-           \tpGobble
-           \protected@edef\tp@listof@entry{\@tp@listof@entry}%
-           \ifx\ccf@is@subfloat\relax
-             \ccf@store@sub@contentsline{#1}{\tp@captype}{\expandonce{\tp@listof@entry}}%
-           \else
-             \ccf@addcontentsline{#1}{\tp@captype}{\expandonce{\tp@listof@entry}}%
-             \ccf@restore@contentsline
-           \fi
-         \endgroup
-       \fi}%
-   }%
 }
 %    \end{macrocode}
 % \end{macro}
 % \end{macro}
-% \begin{macro}{\ccf@store@sub@contentsline} saves the contentsline macros
-%   for prematurely expanded captions.
+% \end{tpContainer}
 %
-%   If we immediatetly write the list-of entries for sub-floats into
-%   the list-of files, they will be printed before their respective
-%   parent entry. This is because sub-floats are processed before
-%   their parent floats. To avoid the wrong order in the list-of, we
-%   progressively store the sub-float's addcontentsline commands in
-%   the \lstinline{\ccf@sub@contentsline@store} macro and expand it
-%   after the list-of for the parent float has been processed.
+%
+% \begin{macro}{\ccf@addcontentsline} fork of \LaTeX's
+%   \lstinline{\addtocontents} macro.
 %    \begin{macrocode}
-\def\ccf@store@sub@contentsline#1#2#3{%
-  \protected@xdef\ccf@sub@contentsline@store{\expandonce{\ccf@sub@contentsline@store}\noexpand\ccf@addcontentsline{#1}{#2}{#3}\relax}}
-%    \end{macrocode}
-% \end{macro}
-% \begin{macro}{\tp@restore@contetnsline} restores and expands the
-%   list of sub-float addcontentsline commands, if there are any.
-%    \begin{macrocode}
-\def\ccf@restore@contentsline{%
-  \ifx\ccf@sub@contentsline@store\@empty\else
-    \ccf@sub@contentsline@store
-    \global\let\ccf@sub@contentsline@store\@empty
-  \fi}
-%    \end{macrocode}
-% \end{macro}
-% \begin{macro}{\ccf@addcontentsline} fork of \LaTeX's \lstinline{\addtocontents} macro
-%   \begin{description}
-%   \item[\#1] extension of the list file
-%   \item[\#2] caption type; passed to the first argument of \LaTeX's \lstinline{\contentsline}
-%   \item[\#3] the entry itself; passed to the second argument of \LaTeX's \lstinline{\contentsline}
-%   \end{description}
-%    \begin{macrocode}
-\def\ccf@addcontentsline#1#2#3{%
-  \protected@write\@auxout
-    {\tpGobble}%
-    {\string\@writefile{#1}{\protect\tpContentsline{#2}{#3}{\thepage}{\@currentHref}\protected@file@percent}}\relax}
+\def\ccf@addcontentsline{%
+  \ccWhenComp{ListofEntry}{%
+    \protected@write\@auxout
+      {\tpGobble}%
+      {\string\@writefile{\tp@caplisttype}
+        {\protect\tpContentsline
+          {\ifnum\tpSubFloatCnt>\z@\ccIfAttr{\tp@captype}{subfloat}{sub}{}\fi\tp@captype}
+          {\tpUseComp{ListofEntry}}
+          {\thepage}
+          {\@currentHref}\protected@file@percent}}\relax}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccf@check@empty} is a wrapper for CoCoTeX kernel's \lstinline{\tp@check@empty}
@@ -580,30 +526,62 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 \def\ccf@check@empty#1{\cc@check@empty{\tp@cur@cont}{#1-\the\tpSubFloatCnt}{Listof}}
 %    \end{macrocode}
 % \end{macro}
-% \end{tpContainer}
+% \begin{macro}{\ccf@compose@listof} is the Component Group Handler
+%   for \lstinline{Listof} Components.
+%    \begin{macrocode}
+\def\ccf@compose@listof{%
+  \ccf@check@empty{Number}%
+  \ccf@check@empty{Caption}%
+  \ccf@check@empty{Legend}%
+  \ccf@check@empty{Source}%
+  \let\@tp@listof@entry\relax
+  \tpWhenComp{ListofCaption}{\csgappto{@tp@listof@entry}{\string\tpListofCaption{\tpUseComp{ListofCaption}}}}%
+  \tpWhenComp{ListofNumber}{\csgappto{@tp@listof@entry}{\string\tpListofNumber{\tpUseComp{ListofNumber}}}}%
+  \tpWhenComp{ListofLegend}{\csgappto{@tp@listof@entry}{\string\tpListofLegend{\tpUseComp{ListofLegend}}}}%
+  \tpWhenComp{ListofSource}{\csgappto{@tp@listof@entry}{\string\tpListofSource{\tpUseComp{ListofSource}}}}%
+  \ifx\@tp@listof@entry\relax\else
+    \bgroup
+      \tpGobble
+      \protected@edef\tp@listof@entry{\@tp@listof@entry}%
+      \expandafter\tpListofEntry\expandafter{\tp@listof@entry}%
+    \egroup
+  \fi
+}%
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\tp@write@listof}
+%   The last macro to be defined here is the list-of writer. This
+%   macro is responsible to write the entry into TeX's auxiliary file
+%   system.
+%    \begin{macrocode}
+\def\tp@write@listof{%
+  \ccUnlessAttr{\tp@captype}{nolist}
+    {\ifnum\tpSubFloatCnt=\z@\relax
+       \ccIfAttr{\tp@captype}{subfloat}
+         {\tpSubFloatCnt=\z@\relax
+          \cc@iterate{\tpSubFloatCnt}{\z@}{\the\ccf@int@sub@flt@cnt}
+            {\ccf@addcontentsline}}%
+         {\ccf@addcontentsline}%
+     \else
+       \ccIfAttr{\tp@captype}{subfloat}{}{\ccf@addcontentsline}%
+     \fi}%
+}
+%    \end{macrocode}
+% \end{macro}
+% 
+%    \begin{macrocode}
+
+%    \end{macrocode}
 %
 % \section{Label and Referencing mechanisms}
 %
 %  \subsection{Generation of Number Components}
 %
-% \begin{macro}{\ccf@generate@counters} iterates through all subfloats
-%   in the current float container and generates Number components.
-%    \begin{macrocode}
-\def\ccf@generate@counters{%
-  \ccf@int@sub@flt@cnt=\tpSubFloatCnt\relax
-  \cc@iterate{\tpSubFloatCnt}{\z@}{\the\ccf@int@sub@flt@cnt}
-    {\ccf@create@counter}%
-  \tpSubFloatCnt=\ccf@int@sub@flt@cnt\relax
-  \let\ccf@is@subfloat\@undefined
-}%
-%    \end{macrocode}
-% \end{macro}
 % \begin{macro}{\ccf@create@counter} checks for the various parameters
 %   that control whether or not a Number component is auto-generated
 %   for each sub-float.
 %    \begin{macrocode}
 \def\ccf@create@counter{%
-  \ifnum\tpSubFloatCnt>\z@\relax\let\ccf@is@subfloat\relax\fi
   \ccIfAttrIsSet{\tp@captype}{nonumber}{}
     {\ccUnlessComp{Number}
       {\ccIfPropVal{numbering}{auto}
@@ -611,7 +589,8 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
           {\ifnum\tpSubFloatCnt=\z@\relax
              \ccf@set@top@counter%
            \else
-             \ccf@set@subcounter%
+             \ccIfPropVal{sub-numbering}{auto}
+               {\ccf@set@subcounter}{}%
            \fi}
           {\ccf@set@top@counter}}{}}}}
 %    \end{macrocode}
@@ -701,9 +680,14 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 \def\endtp@float{%
     \ccf@begin@env
       \ccf@set@top@sep
+      \ccf@int@sub@flt@cnt=\tpSubFloatCnt\relax
+      \tpSubFloatCnt=\z@\relax
+      \cc@iterate{\tpSubFloatCnt}{\z@}{\the\ccf@int@sub@flt@cnt}
+        {\ccf@create@counter
+         \ccf@compose@listof}%
+      \tpSubFloatCnt=\ccf@int@sub@flt@cnt\relax
       \ccf@test@caption{0}{}{top}%
       \ccf@test@caption{0}{}{bottom}%
-      \ccf@generate@counters
       \bgroup
         \hsize\tp@total@flt@width
         \tp@flt@process
@@ -767,7 +751,6 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %   environment.
 %    \begin{macrocode}
 \def\tp@flt@process{%
-  \tp@test@subcapt
   \ifx\tp@has@capt@top\@empty\leavevmode\fi
   \tp@make@outer@caption{top}%
   \ifnum\the\tpSubFloatCnt=\z@\relax
@@ -775,7 +758,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
       \ccUseProperty{float-render}%
     \egroup
   \else
-    \global\let\ccf@is@subfloat\relax
+    \tp@test@subcapt
     \@cc@is@finalfalse
     \ccf@calc@sameheight
     \def\tp@prefix{sub}%
@@ -784,7 +767,6 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
     \@cc@is@finaltrue
     \ccUseProperty{subfloat-render}%
     \let\tp@prefix\@empty
-    \global\let\ccf@is@subfloat\@undefined
   \fi
   \tp@make@outer@caption{bottom}%
 }
@@ -907,6 +889,12 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
     \ccUseProperty{\tp@prefix caption-face}%
     \ccUseProperty{\tp@prefix caption-face-#1}%
     \cc@topstrut\ccUseProperty{\tp@prefix caption-#1}\strut%
+    \ifx\ccf@measure\relax\else
+      \ccIfPropVal{label-pos}{#1}{%
+        \ccfCreateLabel%
+        \tp@write@listof%
+      }{}%
+    \fi
     \ccIfStrEqual{#2}{bottom}{}{\if@ccf@break@capt\else\vss\fi}%
   \egroup%
   \if@ccf@break@capt\unvbox\@tempboxa\else\box\@tempboxa\fi%
@@ -916,31 +904,9 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tp@make@outer@caption} is a shell for the outer
-%   captions. \#1 is the placement (\texttt{top}, \texttt{bottom})
+%   captions. \#1 is the placement (\texttt{top} or \texttt{bottom})
 %    \begin{macrocode}
 \def\tp@make@outer@caption#1{%
-%    \end{macrocode}
-% First, we need to determine, where the labels or targets for
-% internal hyperlinks should be positioned. Usually, this would be
-% where the float's Counter is printed, but since we don't know if the
-% counter is in the top or the bottom caption, nor if the float has a
-% (printed) counter, at all, we have to rely on specific Properties for
-% floats and sub-floats.
-%    \begin{macrocode}
-  \ifnum\the\tpSubFloatCnt=\z@\relax
-    \edef\ccf@propname{label-pos}%
-  \else
-    \edef\ccf@propname{sublabel-pos}%
-  \fi
-  \expandafter\ccIfPropVal\expandafter{\ccf@propname}{#1}
-    {\ifx\ccf@measure\relax\else
-       \begingroup
-         \let\ccf@is@subfloat\@undefined
-         \tpSubFloatCnt=\z@\relax
-         \csname tp@make@listof@\tp@captype\endcsname{\tp@captype}% single float
-         \ccfCreateLabel
-       \endgroup
-     \fi}{}%
 %    \end{macrocode}
 % now, we print the actual captions, if they contain contents.
 %    \begin{macrocode}
@@ -960,8 +926,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
       \spewnotes
     \egroup
     \ccIfStrEqual{#1}{top}{\if@ccf@break@capt\else\nopagebreak\fi}{}%
-  \fi
-}
+  \fi}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccfRenderSubFloats} iterates through the single
@@ -978,6 +943,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
   \vtop\bgroup
     \expandafter\hsize\csname tp@\tp@cur@cont @res@width-#1\endcsname\relax
     \let\includegraphics\tp@includesubgraphics
+    \leavevmode
     \ccf@render@sub{#1}{#2}%
   \egroup
   \spewnotes
@@ -988,13 +954,6 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %    \begin{macrocode}
 \def\ccf@make@subcaption#1{%
   \expandafter\ifx\csname tp@has@\tp@prefix capt@#1\endcsname\@empty
-    \expandafter\ifx\csname ccf@made@label@for@\the\tpSubFloatCnt\endcsname\relax
-      \ccIfAttr{\tp@captype}{subfloat}
-        {\let\ccf@is@subfloat\relax\csname tp@make@listof@\tp@captype\endcsname{sub\tp@captype}}% real subfloats
-        {\let\ccf@is@subfloat\@undefined\csname tp@make@listof@\tp@captype\endcsname{\tp@captype}}% subfloats are counted separately
-      \ccfCreateLabel
-      \global\cslet{ccf@made@label@for@\the\tpSubFloatCnt}\@empty
-    \fi
     \ccf@make@caption{#1}{\ccUseProperty{\tp@prefix caption-valign-#1}}%
   \fi}
 %    \end{macrocode}
@@ -1338,6 +1297,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
   \ccSetProperty{subcaption-valign-bottom}{top}%% vertical alignment of neighboring bottom-placed sub-captions
   %% Numbers
   \ccSetProperty{numbering}{auto}%% automatic numbering for missing Number component
+  \ccSetProperty{sub-numbering}{}%% automatic numbering for missing Number component in real(!) sub-floats
   \ccSetProperty{number-sep}{\enskip}% Separator between label and caption
   \ccSetProperty{number-face}{\bfseries}% Format of number, additional to caption-format
   \ccSetProperty{sub-number-sep}{\,}%% when sub-captions, this is placed between the float counter and the sub-float counter
