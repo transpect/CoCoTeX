@@ -261,6 +261,26 @@
 }%
 %    \end{macrocode}
 % \end{macro}
+% \begin{tpContainer}{article-meta}
+%    \begin{macrocode}
+  %% for single articles
+\ccDeclareContainer{article-meta}{%
+  \ccDeclareType{Components}{%
+    \ccDeclareGlobalComponent{StartPage}                     % Start page of a single article
+    \ccDeclareGlobalComponent{EndPage}                       % End page of a single article
+    \tpDeclareLabeledComp[Cite as]{CiteAs}{cite-as}          % As what the article should be cited
+    \tpDeclareLabeledComp[Submitted]{Submitted}{sumbitted}   % Date the article was submitted
+    \tpDeclareLabeledComp[Received]{Received}{received}      % Date the article was recieved
+    \tpDeclareLabeledComp[Revised]{Revised}{revised}         % Date the article was revised
+    \tpDeclareLabeledComp[Reviewed]{Reviewed}{reviewed}      % Date the article was reviewed
+    \tpDeclareLabeledComp[Accepted]{Accepted}{accepted}      % Date the article was accepted
+    \tpDeclareLabeledComp[Published]{Published}{published}   % Date the article was published
+    \tpDeclareLabeledComp[Conflict of Interest]{COIStatement}{coi-statement}% Conflict of Interest statement
+  }%
+}
+%    \end{macrocode}
+% \end{tpContainer}
+% 
 % \begin{macro}{\tp@extended@common@meta@macros}
 %   provides some extended markup. Some headings use these Components
 %   for compilations of contributions by different authors. They are

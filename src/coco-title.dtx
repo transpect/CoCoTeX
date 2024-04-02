@@ -24,6 +24,7 @@
 %    \begin{macrocode}
 \ccDeclareContainer{titlepage}{%
   \ccInherit {Components,Properties}{CommonMeta}%
+  \ifarticle\ccInherit{Components}{article-meta}\fi
   \ccDeclareType{Components}{%
     \tp@title@simple@comps
     \tp@meta@generic@comp
@@ -461,17 +462,6 @@
   \tp@title@macro{PubCycle}                      % Publication cycle
   \tp@title@macro{Prices}                        % Prices of the journal issues or subscription models
   \tp@title@macro{MemberList}                    % In case of publishing organizations, this macro may hold a list of members.
-  %% for single articles
-  \tp@title@macro{StartPage}                     % Start page of a single article
-  \tp@title@macro{EndPage}                       % End page of a single article
-  \tpDeclareLabeledComp[Cite as]{CiteAs}{cite-as}          % As what the article should be cited
-  \tpDeclareLabeledComp[Submitted]{Submitted}{sumbitted}   % Date the article was submitted
-  \tpDeclareLabeledComp[Received]{Received}{received}      % Date the article was recieved
-  \tpDeclareLabeledComp[Revised]{Revised}{revised}         % Date the article was revised
-  \tpDeclareLabeledComp[Reviewed]{Reviewed}{reviewed}      % Date the article was reviewed
-  \tpDeclareLabeledComp[Accepted]{Accepted}{accepted}      % Date the article was accepted
-  \tpDeclareLabeledComp[Published]{Published}{published}   % Date the article was published
-  \tpDeclareLabeledComp[Conflict of Interest]{COIStatement}{coi-statement}% Conflict of Interest statement
   %% Generic additional information
   \tp@title@macro{AddNoteI}                      % Additional information, title page I
   \tp@title@macro{AddNoteII}                     % Additional information, title page II

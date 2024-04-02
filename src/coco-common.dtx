@@ -351,8 +351,10 @@
 %
 % \subsection{Content lists}
 %
+% \subsubsection{Default {\LaTeX} Content Lists}
+%
 % This part contains macros to ``simplify'' the generation of content
-% lists like the table of contents or list of figures/tables, etc.
+% lists like the Table of Contents or List of Figures/Tables, etc.
 %
 % Entries in the list-files (e.\,g., \lstinline{\jobname.toc},
 % \lstinline{\jobname.lof}, etc.) usually contain
@@ -448,6 +450,45 @@
   \fi
   \global\let\tp@tempa\relax
 }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsubsection{Custom Content Lists}
+%
+% \begin{macro}{\ccDeclareExtraToc} provides an interface for
+%   additional content lists. \#1 is the name of the custom content,
+%   \#2 is a comma separated list of container names, the instances of
+%   which should be listed in the custom contents list.
+%    \begin{macrocode}
+\def\ccDeclareContentList#1#2{%
+  \def\cc@add@extra@cl##1{%
+    \expandafter\ifx\csname cc@##1@extra@cl\endcsname\relax
+      \csgdef{cc@##1@extra@cl}{#1}%
+    \else
+      \csgappto{cc@##1@extra@cl}{,#1}%
+    \fi}%
+  \edef\@argii{#2}%
+  \cc@parse@csv\cc@add@extra@cl{@argii}%
+  \expandafter\newwrite\csname cc@cl@#1\endcsname\relax
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccCreateContentListEntries} creates entries for
+%   Custom Content Lists. It is called during the proccessing of a
+%   container's instance. \#1 is the name of the calling Container,
+%   \#2 is the name of the file stream, \#3 is the level of the entry,
+%   \#4 is the current page counter, \#5 is the current Hyperref label.
+%    \begin{macrocode}
+\def\ccCreateContentListEntries#1#2#3#4#5{%
+  \def\cc@add@extra@cl##1{%
+    \expandafter\protected@write\csname cc@cl@##1\endcsname
+      {\tpGobble}%
+      {\protect\tpContentsline{#2}{#3}{#4}{#5}\protected@file@percent}\relax
+  }%
+  \ifcsdef{cc@#1@extra@cl}{%
+    \cc@parse@csv\cc@add@extra@cl{cc@#1@extra@cl}}{}%
+}
+
 %    \end{macrocode}
 % \end{macro}
 %

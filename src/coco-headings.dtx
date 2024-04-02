@@ -43,6 +43,7 @@
 %    \begin{macrocode}
 \ccDeclareContainer{heading}{%
   \ccInherit{Components,Properties}{CommonMeta}%
+  \ccDeclareType{Parent}{}%
   \ccDeclareType{Components}{%
 %    \end{macrocode}
 % We already have the Author Component inherited from the
@@ -609,8 +610,7 @@
   \cc@check@empty{heading}{Number}{Toc}%
   \cc@check@empty{heading}{Subtitle}{Toc}%
   \cch@set@author@name@list{Toc}%
-  \ccIfAttrIsSet{heading}{notoc}
-    {}
+  \ccIfAttrIsSet{heading}{notoc}{}
     {\protected@edef\tp@heading@toc@entry{%
        \ccIfComp{TocTitle}{\string\tpTocTitle{\string\ignorespaces\space\expandonce{\tp@heading@TocTitle}}}{}%
        \ccIfComp{TocNumber}{\string\tpTocNumber{\string\ignorespaces\space\expandonce{\tp@heading@TocNumber}}}{}%
@@ -621,8 +621,9 @@
      \protected@write\@auxout
        {\tpGobble}%
        {\string\@writefile{toc}{\protect\tpContentsline{\cch@sec@name}{\tp@heading@toc@entry}{\thepage}{\@currentHref}\protected@file@percent}}\relax
-    }
-}
+     \ccCreateContentListEntries{heading}{\cch@sec@name}{\tp@heading@toc@entry}{\thepage}{\@currentHref}%
+     \ccCreateContentListEntries{\cch@sec@name}{\cch@sec@name}{\tp@heading@toc@entry}{\thepage}{\@currentHref}%
+   }}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tp@toc@extract@data} is called within
@@ -809,19 +810,19 @@
 % the time of its expansion, the level of the heading isn't known, yet. So, we
 % need to take the ugly road, for now.
 %    \begin{macrocode}
-    \ccIfAlly{%
-      \endgroup
-      \ccaVstructStart{#2}%
-      \ifnum\luatexversion>111\relax\UseHook{env/heading/before}\fi
-      \@ignorefalse
-      \begingroup
-        \@endpefalse
-        \def\@currenvir{heading}%
-        \edef\@currenvline{\on@line}%
-        \ifnum\luatexversion>111\relax
-          \@execute@begin@hook{heading}%
-        \fi
-      }{}%
+  \ccIfAlly
+    {\endgroup
+     \ccaVstructStart{#2}%
+     \ifnum\luatexversion>111\relax\UseHook{env/heading/before}\fi
+     \@ignorefalse
+     \begingroup
+       \@endpefalse
+       \def\@currenvir{heading}%
+       \edef\@currenvline{\on@line}%
+       \ifnum\luatexversion>111\relax
+         \@execute@begin@hook{heading}%
+       \fi
+    }{}%
 %    \end{macrocode}
 % Some {\LaTeX} kernel macros are saved, the namespace is
 % set and counted groups from previous headings are reset.
@@ -831,6 +832,12 @@
 % Handling of the optional argument
 %    \begin{macrocode}
   \ccParseAttributes{heading}{#1}%
+%    \end{macrocode}
+% and treatment of heading-level specific style classes.
+%    \begin{macrocode}
+ \ccWhenAttr{heading}{class}
+    {\global\letcs\tp@current@class{tp@heading@attr@class}%
+     \expandafter\ccUseStyleClass\expandafter{\csname tp@heading@attr@class\endcsname}{heading}}%
 %    \end{macrocode}
 % The mandatory argument contains the heading level. This corresponds
 % to \LaTeX's way of counting heading levels, where, by default,
