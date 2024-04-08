@@ -149,9 +149,100 @@
 %    \begin{macrocode}
 \AfterLastShipout{\immediate\write\@mainaux{\string\newlabel{LTLastPage}{{LTLastPage}{\directlua{ltpdfa.getPageNum()}}}}}
 %    \end{macrocode}
+%
+% \subsection{Generic Macro to Declare Accessibility Features}
+%
+% In order to selectively enable and disable accessibility macros
+% during runtime, we need each tagging markup macro to exist in two
+% states, one where they trigger tagging into the pdf, and one where
+% they do nothing.
+%
+% The enabled and disabled versions of each macro are stored inside
+% two seperate lists:
+% \begin{macro}{\cca@relaxed@defs} is the list that stores the
+%   \textit{disabled} ltpdfa interface command variants,
+%    \begin{macrocode}
+\def\cca@relaxed@defs{}
+%    \end{macrocode}
+% \end{macro}
+% and
+% \begin{macro}{\cca@saved@defs} is a list that stores the
+%   \textit{enabled} ltpdfa interface command variants.
+%    \begin{macrocode}
+\def\cca@saved@defs{}
+%    \end{macrocode}
+% \end{macro}
+% The next two macros are used to disable and enable accessibility
+% markup:
+% \begin{macro}{\ccaDisable} disables all ltpdfa commands
+%    \begin{macrocode}
+\def\ccaDisable{\cca@relaxed@defs}
+%    \end{macrocode}
+% \end{macro}
+% and
+% \begin{macro}{\ccaEnable} enables all ltpdfa commands.
+%    \begin{macrocode}
+\def\ccaEnable{\cca@saved@defs}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\CsToStr} is a xparse helper macro which returns the name of
+%   a control sequence \#1.
+%    \begin{macrocode}
+\ExplSyntaxOn
+\newcommand{\CsToStr}[1]{\cs_to_str:N #1}
+\ExplSyntaxOff
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\DeclareAccessibilityCommand} is the wrapper for our
+%   interface macros. It has the same argument signature as \LaTeX's
+%   \lstinline{\newcommand*}, albeit without the whole checking for
+%   already defined control sequences.
+%    \begin{macrocode}
+\def\DeclareAccessibilityCommand#1{\@ifnextchar[{\cca@declare@cmd@firstopt#1}{\cca@declare@cmd#1}}%]
+%    \end{macrocode}
+%   First, we need to take care of the optional arguments:
+% \begin{macro}{\cca@temp@signature} is the temporary storage for the
+%   argument signature.
+%    \begin{macrocode}
+\let\cca@temp@signature\@empty
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\cca@declare@cmd@firstopt} is the handler for the
+%   first optional argument, which holds the overall number of the
+%   arguments of our interface macro:
+%    \begin{macrocode}
+\def\cca@declare@cmd@firstopt#1[#2]{\edef\cca@temp@signature{[\unexpanded{#2}]}%
+  \@ifnextchar[{\cca@declare@cmd@secopt#1}{\cca@declare@cmd#1}}%]
+%    \end{macrocode}
+%   \end{macro}
+%   \begin{macro}{\cca@declare@cmd@secopt} is the handler for the second
+%     optional argument, which indicates that the first of the
+%     first-level arguments is optional and which itself holds the
+%     default value for that optional argument. Its unexpanded value is added to
+%     the argument signature.
+%    \begin{macrocode}
+\def\cca@declare@cmd@secopt#1[#2]{\eappto\cca@temp@signature{[\unexpanded{#2}]}\cca@declare@cmd#1}
+%    \end{macrocode}
+%   \end{macro}
+%   \begin{macro}{\cca@declare@cmd}, eventually, is the actual wrapper
+%     for the newcommand calls.
+%    \begin{macrocode}
+\def\cca@declare@cmd#1#2{%
+  \edef\x{\noexpand\newcommand*\noexpand#1\expandonce{\cca@temp@signature}{\unexpanded{#2}}}\x%
+  \global\expandafter\let\csname lt@saved@\CsToStr{#1}\endcsname#1%
+  \edef\x{\noexpand\let\noexpand#1\expandafter\noexpand\csname lt@saved@\CsToStr{#1}\endcsname}%
+  \global\expandafter\appto\expandafter\cca@saved@defs\expandafter{\x}%
+  \edef\x{\noexpand\newcommand*\expandafter\noexpand\csname lt@no@\CsToStr{#1}\endcsname\expandonce{\cca@temp@signature}{\relax}}\x%
+  \edef\x{\noexpand\let\noexpand#1\expandafter\noexpand\csname lt@no@\CsToStr{#1}\endcsname}%
+  \expandafter\appto\expandafter\cca@relaxed@defs\expandafter{\x}%
+  \let\cca@temp@signature\@empty
+}
+%    \end{macrocode}
+%   \end{macro}
+% \end{macro}
 % Some macros from \lstinline{ltpdfa.sty}:
 %    \begin{macrocode}
-\newcommand*{\ccaAddToConfig}[2]{\directlua{ltpdfa.addToConfig('\luaescapestring{#1}','\luaescapestring{#2}')}}
+\DeclareAccessibilityCommand{\ccaAddToConfig}[2]{\directlua{ltpdfa.addToConfig('\luaescapestring{#1}','\luaescapestring{#2}')}}
 \@onlypreamble\ccaAddToConfig
 %    \end{macrocode}
 % \begin{macro}{\ccaStructStart, \ccaStructEnd} inserts a structural
@@ -161,16 +252,16 @@
 %   This tagging macro inserts \lstinline{\bgroup} and
 %     \lstinline{\egroup} around the tagged area.
 %    \begin{macrocode}
-\newcommand*{\ccaStructStart}[2][]{\directlua{ltpdfa.tagger.structStart('\luaescapestring{#2}','\luaescapestring{#1}')}}
-\newcommand*{\ccaStructEnd}[1]{\directlua{ltpdfa.tagger.structEnd('\luaescapestring{#1}')}}
+\DeclareAccessibilityCommand{\ccaStructStart}[2][]{\directlua{ltpdfa.tagger.structStart('\luaescapestring{#2}','\luaescapestring{#1}')}}
+\DeclareAccessibilityCommand{\ccaStructEnd}[1]{\directlua{ltpdfa.tagger.structEnd('\luaescapestring{#1}')}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccaVstructStart, \ccaVstructEnd} are the same as
 %   \lstinline{\ccaStructStart} and \lstinline{\ccaStructEnd} but
 %   without grouping the area.
 %    \begin{macrocode}
-\newcommand*{\ccaVstructStart}[2][]{\directlua{ltpdfa.tagger.vstructStart('\luaescapestring{#2}','\luaescapestring{#1}')}}
-\newcommand*{\ccaVstructEnd}[1]{\directlua{ltpdfa.tagger.vstructEnd('\luaescapestring{#1}')}}
+\DeclareAccessibilityCommand{\ccaVstructStart}[2][]{\directlua{ltpdfa.tagger.vstructStart('\luaescapestring{#2}','\luaescapestring{#1}')}}
+\DeclareAccessibilityCommand{\ccaVstructEnd}[1]{\directlua{ltpdfa.tagger.vstructEnd('\luaescapestring{#1}')}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccaPstructStart, \ccaPstructEnd} same as
@@ -178,15 +269,15 @@
 %   grouping and not setting any attributes. Implies that the element
 %   has no content children, at all.
 %    \begin{macrocode}
-\newcommand*{\ccaPstructStart}[2][]{\directlua{ltpdfa.tagger.pstructStart('\luaescapestring{#2}','\luaescapestring{#1}')}}
-\newcommand*{\ccaPstructEnd}[1]{\directlua{ltpdfa.tagger.pstructEnd('\luaescapestring{#1}')}}
+\DeclareAccessibilityCommand{\ccaPstructStart}[2][]{\directlua{ltpdfa.tagger.pstructStart('\luaescapestring{#2}','\luaescapestring{#1}')}}
+\DeclareAccessibilityCommand{\ccaPstructEnd}[1]{\directlua{ltpdfa.tagger.pstructEnd('\luaescapestring{#1}')}}
 %    \end{macrocode}
 % \end{macro}
 %
 % \begin{macro}{\cca@set@docinfo} sets the PDF docinfo. \#2 is a key,
 %   \#3 is the value, optional \#1 is an encoding.
 %    \begin{macrocode}
-\newcommand*{\ccaSetDocinfo}[3][]{\directlua{ltpdfa.setDocInfo('\luaescapestring{#2}','\luaescapestring{#3}','\luaescapestring{#1}')}}
+\DeclareAccessibilityCommand{\ccaSetDocinfo}[3][]{\directlua{ltpdfa.setDocInfo('\luaescapestring{#2}','\luaescapestring{#3}','\luaescapestring{#1}')}}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -194,9 +285,9 @@
 %   a well-defined PDF tag. \#1 is the name of the LateX Tag, \#2 is
 %   the name of the PDF role.
 %    \begin{macrocode}
-\newcommand*{\ccaAddRolemap}[2]{\directlua{ltpdfa.tagger.addRolemap('\luaescapestring{#1}','\luaescapestring{#2}')}}
-\newcommand*{\ccaAddPlacement}[1]{\directlua{ltpdfa.tagger.addPlacement('\luaescapestring{#1}')}}
-\newcommand*{\ccaAddNumbering}[1]{\directlua{ltpdfa.tagger.addNumbering('\luaescapestring{#1}')}}
+\DeclareAccessibilityCommand{\ccaAddRolemap}[2]{\directlua{ltpdfa.tagger.addRolemap('\luaescapestring{#1}','\luaescapestring{#2}')}}
+\DeclareAccessibilityCommand{\ccaAddPlacement}[1]{\directlua{ltpdfa.tagger.addPlacement('\luaescapestring{#1}')}}
+\DeclareAccessibilityCommand{\ccaAddNumbering}[1]{\directlua{ltpdfa.tagger.addNumbering('\luaescapestring{#1}')}}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -226,14 +317,14 @@
 % \begin{macro}{\ccaAddAltText} is used to add an Alternative Text
 %   node, given in \#1, to the PDF structTree.
 %    \begin{macrocode}
-\def\ccaAddAltText#1{\directlua{ltpdfa.tagger.addAltText('\luaescapestring{#1}')}}
+\DeclareAccessibilityCommand{\ccaAddAltText}[1]{\directlua{ltpdfa.tagger.addAltText('\luaescapestring{#1}')}}
 %    \end{macrocode}
 % \end{macro}
 %
 % \begin{macro}{\ccaAddLastLink} adds the last Link node to the PDF
 %   structTree.
 %    \begin{macrocode}
-\def\ccaAddLastLink{\directlua{ltpdfa.tagger.addLastLink()}}
+\DeclareAccessibilityCommand{\ccaAddLastLink}{\directlua{ltpdfa.tagger.addLastLink()}}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -241,7 +332,7 @@
 %   structure. This is needed in case a link breaks across columns (or
 %   pages).
 %    \begin{macrocode}
-\def\ccaGetStructParent{\directlua{ltpdfa.tagger.getStructParent()}}
+\DeclareAccessibilityCommand{\ccaGetStructParent}{\directlua{ltpdfa.tagger.getStructParent()}}
 %    \end{macrocode}
 % \end{macro}
 % Now, we patch them into \lstinline{hyperref}.
@@ -294,14 +385,19 @@
 % macro and links to both the original version (when \lstinline{\ref*}
 % is used), and its own re-definition (else), so we need to patch both
 % versions. We start by resetting \lstinline{\@setref} to its vanilla
-% state and inject our tagging:
+% state and inject our tagging, once for the start tag and a second
+% time for the end tag:
 %    \begin{macrocode}
 \let\cca@hy@setref\@setref
 \let\@setref\real@setref
 \patchcmd\@setref
-  {\expandafter#2#1\null}
-  {\ccaStructStart{Reference}\expandafter#2#1\null\ccaStructEnd{Reference}}
-  {}{\cca@patch@error\@setref}
+  {\else}
+  {\else\ccaStructStart{Reference}}
+  {}{\cca@patch@error\orig@setref@new}%
+\patchcmd\@setref
+  {\fi}
+  {\ccaStructEnd{Reference}\fi}
+  {}{\cca@patch@error\orig@setref@new}%
 %    \end{macrocode}
 % Now, we restore hyperref's version and inject the tagging there as
 % well:
@@ -331,7 +427,7 @@
 %   \lstinline{\@oddhead}, \lstinline{\@evenhead},
 %   \lstinline{\@oddfoot} and \lstinline{\@evenfoot} macros.
 %    \begin{macrocode}
-\def\ccaPagestyleArtifacts{%
+\DeclareAccessibilityCommand{\ccaPagestyleArtifacts}{%
   \ifx\@oddhead\@empty\else
     \pretocmd\@oddhead{\ccaStructStart[document]{header}}{}{}%
     \apptocmd\@oddhead{\ccaStructEnd{header}}{}{}%
@@ -378,7 +474,7 @@
 % \subsubsection{Taggin for Figures}
 %
 %    \begin{macrocode}
-\newcommand*{\ccaAddFigure}[7]{\directlua{ltpdfa.tagger.addFigure(
+\DeclareAccessibilityCommand{\ccaAddFigure}[7]{\directlua{ltpdfa.tagger.addFigure(
     '\luaescapestring{#1}',
     '\luaescapestring{#2}',
     '\luaescapestring{#3}',
@@ -390,12 +486,12 @@
 %
 % \begin{macro}{\ccaFigureStart} injects the starting tag for images to the pdf
 %    \begin{macrocode}
-\newcommand*{\ccaFigureStart}[1]{\directlua{ltpdfa.tagger.figureStart('\luaescapestring{#1}')}}
+\DeclareAccessibilityCommand{\ccaFigureStart}[1]{\directlua{ltpdfa.tagger.figureStart('\luaescapestring{#1}')}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccaFigureEnd} injects the ending tag for images
 %    \begin{macrocode}
-\newcommand*{\ccaFigureEnd}[1]{\directlua{ltpdfa.tagger.figureEnd('\luaescapestring{#1}')}}
+\DeclareAccessibilityCommand{\ccaFigureEnd}[1]{\directlua{ltpdfa.tagger.figureEnd('\luaescapestring{#1}')}}
 %    \end{macrocode}
 % \end{macro}
 % which we add to the beginning and the end of \lstinline{graphics}
