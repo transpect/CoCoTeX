@@ -13,6 +13,11 @@
 > If you feel valiant, read the source code documentation, instead
 > (`doc/cocotex.pdf`). We try to keep this one as up-to-date as
 > possible.
+>
+> In the `doc` folder, you also find a
+> [Dante2024.pdf](https://github.com/transpect/CoCoTeX/blob/main/doc/Dante2024.pdf),
+> which is the slides to a talk the main developer gave at the 2024
+> Dante Frühjahrestagung in Weimar in April 2024 (German only).
 
 # CoCoTeX Kernel #
 
