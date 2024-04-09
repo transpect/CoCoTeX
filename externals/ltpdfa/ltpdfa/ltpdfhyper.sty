@@ -5,7 +5,24 @@
 
 \@ifpackageloaded{hyperref}{%
   %% TODO hypersetup ???
-  \hypersetup{pdfa=true,unicode=true,linktoc=all}%
+  \hypersetup{pdfa=true,
+    unicode=true,
+    linktoc=all,
+    unicode=true,
+    bookmarks=true,
+    bookmarksnumbered=true,
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=purple,%% defaults to magenta which is cmyk
+    raiselinks=true,
+    pdfinfo={},
+    pdfpagelabels=true,
+    pageanchor=true,
+    hyperindex=true,
+    linktoc=all,
+    hyperfootnotes=true,
+  }%
+  \Hy@pdfatrue
 }{
   % \RequirePackage[
   % pdfa=true,
@@ -191,7 +208,7 @@
   \@lt@save@hyper@linkstart{#2}{#3}%
 }
 \renewcommand{\Hy@StartlinkName}[2]{%
-  \vstructStart{Link}\addAltText{#2}\edef\@ltpdfmy@parent{\getStructParent}%
+  \structStart{Link}\addAltText{#2}\edef\@ltpdfmy@parent{\getStructParent}%
   \pdfstartlink attr{#1 /StructParent \@ltpdfmy@parent} goto name{#2}\relax
 }
 \renewcommand{\hyper@linkurl}[2]{%
@@ -199,7 +216,7 @@
     \Hy@pstringdef\Hy@pstringURI{#2}%
     \hyper@chars
     \leavevmode
-    \vstructStart{Link}\addAltText{#1}\edef\@ltpdfmy@parent{\getStructParent}%
+    \structStart{Link}\addAltText{#1}\edef\@ltpdfmy@parent{\getStructParent}%
     \pdfstartlink
       attr{%
         \Hy@setpdfborder
@@ -238,7 +255,7 @@
   \Hy@endcolorlink
   \Hy@VerboseLinkStop
   \pdfendlink
-  \addLastLink\vstructEnd{Link}%
+  \addLastLink\structEnd{Link}%
 }
 \fi
 

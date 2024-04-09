@@ -122,13 +122,14 @@
   \end{center}%
   \par
   \vskip 1.5em}
+\fi
 %% assumes there are chapters before mainmatter
 \let\@ltpdfa@org@mainmatter\mainmatter
 \renewcommand\mainmatter{%
   \vstructEnd{chapter}%
   \@ltpdfa@org@mainmatter%
 }
-\fi
+
 \renewcommand\part{%
   \vstructStart{part}%
   \if@openright

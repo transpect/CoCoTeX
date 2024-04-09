@@ -386,6 +386,7 @@
 \addToConfig{artifact}{leaders={Type:Layout}}
 \addToConfig{artifact}{footnoterule={Type:Layout}}
 \addToConfig{artifact}{Artifact={Type:Layout}}
+\addToConfig{artifact}{colseprule={Type:Layout}}
 % autoclose
 \addToConfig{autoclose}{document={Type:Sectioning}{Child:chapter}{Egroup:false}}
 \addToConfig{autoclose}{chapter={Type:Sectioning}{Child:section}{Egroup:true}}
@@ -435,6 +436,24 @@
 \@ifclassloaded{book}{\RequirePackage{ltbook}}{}
 \@ifclassloaded{article}{\RequirePackage{ltart}}{}
 
+\@ifpackageloaded{multicol}%
+{%
+  \def\LR@column@boxes{%
+     \process@cols\mult@gfirstbox{%
+       \ifdim\dp\count@>\dimen\tw@
+         \global\dimen\tw@\dp\count@ \fi
+       \mc@col@status@write
+       \box\count@
+       \hss{\vstructStart{colseprule}\columnseprulecolor\vrule
+              \@width\columnseprule\vstructEnd{colseprule}}\hss}%
+     \ifdim\dp\mult@rightbox>\dimen\tw@
+       \global\dimen\tw@\dp\mult@rightbox \fi
+     \mc@lastcol@status@write
+     \box\mult@rightbox
+   }
+   \LRmulticolcolumns%
+}%
+{\relax}%
 %%%%%%%%%%%%%%%% dviwriter and distwriter
 %/@rwi { 10 div /rwi X /rwiSeen true N } B % rwi will be real width after scaling
 %/@rhi { 10 div /rhi X /rhiSeen true N } B % rhi will be real height after scaling
