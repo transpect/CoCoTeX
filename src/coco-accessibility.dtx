@@ -109,6 +109,7 @@
 %    \begin{macrocode}
 \RequirePackage{luatexbase-attr}
 \RequirePackage{atveryend}
+\Hy@pdfatrue
 %    \end{macrocode}
 % Now, we set the configuration of the \lstinline{ltpdfa} lua facility
 % by passing some of the \lstinline{coco-accessibility} package
@@ -341,7 +342,7 @@
 %    \begin{macrocode}
 \patchcmd\Hy@StartlinkName
   {\pdfstartlink}
-  {\ccaVstructStart{Link}\ccaAddAltText{#2}\edef\@ltpdfmy@parent{\ccaGetStructParent}%
+  {\ccaStructStart{Link}\ccaAddAltText{#2}\edef\@ltpdfmy@parent{\ccaGetStructParent}%
    \pdfstartlink}
   {}{\cca@patch@error\Hy@StartlinkName}
 %    \end{macrocode}
@@ -356,7 +357,7 @@
 %    \begin{macrocode}
 \patchcmd\hyper@linkurl
   {\pdfstartlink}
-  {\ccaVstructStart{Link}\ccaAddAltText{#1}\edef\@ltpdfmy@parent{\ccaGetStructParent}%
+  {\ccaStructStart{Link}\ccaAddAltText{#1}\edef\@ltpdfmy@parent{\ccaGetStructParent}%
    \pdfstartlink}
   {}{\cca@patch@error\hyper@linkurl}
 %    \end{macrocode}
@@ -377,7 +378,7 @@
 \patchcmd\close@pdflink
   {\pdfendlink}
   {\pdfendlink
-   \ccaAddLastLink\ccaVstructEnd{Link}}
+   \ccaAddLastLink\ccaStructEnd{Link}}
   {}{\cca@patch@error\close@pdflink}
 %    \end{macrocode}
 % For internal references, we patch the tagging into the
