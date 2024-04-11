@@ -257,7 +257,7 @@
 \DeclareAccessibilityCommand{\ccaStructEnd}[1]{\directlua{ltpdfa.tagger.structEnd('\luaescapestring{#1}')}}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccaVstructStart, \ccaVstructEnd} are the same as
+% \begin{macro}{\ccaVstructStart,\ccaVstructEnd} are the same as
 %   \lstinline{\ccaStructStart} and \lstinline{\ccaStructEnd} but
 %   without grouping the area.
 %    \begin{macrocode}
@@ -357,7 +357,7 @@
 %    \begin{macrocode}
 \patchcmd\hyper@linkurl
   {\pdfstartlink}
-  {\ccaStructStart{Link}\ccaAddAltText{#1}\edef\@ltpdfmy@parent{\ccaGetStructParent}%
+  {\ccaStructStart{Link}\ccaAddAltText{#2}\edef\@ltpdfmy@parent{\ccaGetStructParent}%
    \pdfstartlink}
   {}{\cca@patch@error\hyper@linkurl}
 %    \end{macrocode}
@@ -474,6 +474,11 @@
 %
 % \subsubsection{Taggin for Figures}
 %
+% \begin{macro}{\ccaAddFigure} \#1, \#2, \#3, and \#4 are the x and y
+%   coordinates of the image, first x and y of the lower left corner,
+%   then x and y of the upper right corner; \#5 and \#6 are the $x$
+%   and $y$ scales, respectively; and \#7 is ``true'' or ``false''
+%   depending on whether or not the clipping option is active.
 %    \begin{macrocode}
 \DeclareAccessibilityCommand{\ccaAddFigure}[7]{\directlua{ltpdfa.tagger.addFigure(
     '\luaescapestring{#1}',
@@ -484,6 +489,7 @@
     '\luaescapestring{#6}',
     '\luaescapestring{#7}')}}
 %    \end{macrocode}
+% \end{macro}
 %
 % \begin{macro}{\ccaFigureStart} injects the starting tag for images to the pdf
 %    \begin{macrocode}
@@ -500,13 +506,13 @@
 %    \begin{macrocode}
 \if@cc@modern
   \let\ltx@Ginclulde@graphics\Ginclude@graphics
-  \def\Ginclude@graphics#1{\if@cc@is@final\message{^^J==>Getting image #1}\ccaFigureStart{}\fi\ltx@Ginclulde@graphics{#1}\if@cc@is@final\ccaFigureEnd{}\fi}%
+  \def\Ginclude@graphics#1{\if@cc@is@final\ccaFigureStart{}\fi\ltx@Ginclulde@graphics{#1}\if@cc@is@final\ccaFigureEnd{}\fi}%
 \else
   \@ifpackageloaded{grffile}
-    {\pretocmd\grffile@Ginclude@graphics{\if@cc@is@final\ccaFigureStart{}\fi}{}{}%
-     \apptocmd\grffile@Ginclude@graphics{\if@cc@is@final\ccaFigureEnd{}\fi}{}{}}
-    {\pretocmd\Ginclude@graphics{\if@cc@is@final\ccaFigureStart{}\fi}{}{}%
-     \apptocmd\Ginclude@graphics{\if@cc@is@final\ccaFigureEnd{}\fi}{}{}}%
+  {\pretocmd\grffile@Ginclude@graphics{\if@cc@is@final\ccaFigureStart{}\fi}{}{}%
+   \apptocmd\grffile@Ginclude@graphics{\if@cc@is@final\ccaFigureEnd{}\fi}{}{}}
+  {\pretocmd\Ginclude@graphics{\if@cc@is@final\ccaFigureStart{}\fi}{}{}%
+   \apptocmd\Ginclude@graphics{\if@cc@is@final\ccaFigureEnd{}\fi}{}{}}%
 \fi
 %    \end{macrocode}
 %
