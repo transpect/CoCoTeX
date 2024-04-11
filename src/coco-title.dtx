@@ -46,7 +46,7 @@
     \tp@titlepage@role{series-editor}{SeriesEditor}%
   }%
   \ccDeclareType{Properties}{}%
-  \ccDeclareEnv[tpMeta]{\tp@Meta}{\tp@endMeta}%
+  \ccDeclareEnv[Meta]{\cct@meta}{\endcct@meta}%
 }
 %    \end{macrocode}
 % \end{tpContainer}
@@ -64,13 +64,13 @@
 %   Roles.
 %    \begin{macrocode}
 \def\tp@title@role@handlers#1#2{%
-  \tpAddToRole{#2}{%
+  \ccAddToRole{#2}{%
     \ccDeclareCountedComponent{Bio}%
     \ccDeclareCountedComponent{Biography}}%
-  \ccDeclareGroupHandler{tp#2}{%
-    \ccIfComp{Biography}{}{\ccIfComp{Bio}{\tpBiography{\ccUseProperty{#1-biography-format}}}{}}%
+  \ccDeclareGroupHandler{#2}{%
+    \ccIfComp{Biography}{}{\ccIfComp{Bio}{\ccComponent{Biography}{\ccUseProperty{#1-biography-format}}}{}}%
   }%
-  \tpDeclareRoleBlock[apply]{#2}{BioBlock}{#1-bio-block-format}%
+  \ccDeclareRoleBlock[apply]{#2}{BioBlock}{#1-bio-block-format}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -80,9 +80,9 @@
 \def\tpDeclareTitlepage{\ccAddToType{Properties}{titlepage}}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@Meta} is the code executed at the beginning of the \lstinline{tpMeta} Container
+% \begin{macro}{\cct@meta} is the code executed at the beginning of the \lstinline{tpMeta} Container
 %    \begin{macrocode}
-\def\tp@Meta{%
+\def\cct@meta{%
   \ccEvalType{Components}%
 }
 %    \end{macrocode}
@@ -109,14 +109,14 @@
 \def\tp@title@add@eval{}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@endMeta} is the code executed at the end of the \lstinline{tpMeta} Container
+% \begin{macro}{\endcct@meta} is the code executed at the end of the \lstinline{Meta} Container
 %    \begin{macrocode}
-\def\tp@endMeta{%
+\def\endcct@meta{%
   \ccSetContainer{titlepage}%
   \ccEvalType{Properties}%
   \tp@maketitle
   \tp@meta@role@eval{Author}%
-  \ccApplyCollection{tpAffil}{affil-block-item-format}{AffilBlock}%
+  \ccApplyCollection{Affil}{affil-block-item-format}{AffilBlock}%
   \tp@title@eds@eval{Editor}%
   \tp@title@eds@eval{SeriesEditor}%
   \tp@meta@generic@eval
@@ -163,7 +163,7 @@
       \pdfstringdef\cct@cur@data{##3}%
 %    \end{macrocode}
 % If the storage is still empty (i.e. the field is also missing in the
-% \lstinline{tpMeta} environment), we do nothing.
+% \lstinline{Meta} environment), we do nothing.
 %    \begin{macrocode}
       \ifx\cct@cur@data\@empty\else
 %    \end{macrocode}
@@ -229,18 +229,18 @@
 \def\cct@title@process@bka{%
   \@tempswatrue
   \begingroup
-    \tpGobble
+    \ccGobble
     \renewcommand\foreignlanguage[2]{{##2}}%
     \ccIfComp{AuthorPDFInfo}
       {\ccgdefFromComp\tpRunBookName{AuthorPDFInfo}}
       {\ccIfComp{EditorPDFInfo}
          {\ccgdefFromComp\tpRunBookName{EditorPDFInfo}}
-         {\ifnum\tpAuthorCnt>\z@
+         {\ifnum\ccAuthorCnt>\z@
             \@setpar{\@@par}%
-            \ccgdefFromCountedComp\tpRunBookName{tpAuthor}{author-list-pdfinfo-format}%
+            \ccgdefFromCountedComp\tpRunBookName{Author}{author-list-pdfinfo-format}%
           \else
-            \ifnum\tpEditorCnt>\z@
-              \ccgdefFromCountedComp\tpRunBookName{tpEditor}{editor-list-pdfinfo-format}%
+            \ifnum\ccEditorCnt>\z@
+              \ccgdefFromCountedComp\tpRunBookName{Editor}{editor-list-pdfinfo-format}%
             \else
               \ccPackageWarning{transcript-title}{Meta Data}{No author or editor given!}%
               \@tempswafalse
@@ -270,7 +270,7 @@
 %   meta data file into the pdf, if it exists.
 %    \begin{macrocode}
 \def\cct@title@insert@xmp{%
-  \edef\include@xmp{\noexpand\@include@xmp{\tpUseComp{XmpFile}.xmp}}%
+  \edef\include@xmp{\noexpand\@include@xmp{\ccUseComp{XmpFile}.xmp}}%
   \def\@include@xmp##1{\IfFileExists{##1}{\@@include@xmp{##1}}{}}%
   \def\@@include@xmp##1{%
     \begingroup
@@ -364,8 +364,8 @@
 %   and adds a suffix.
 %    \begin{macrocode}
 \def\tp@create@editor@string#1{%
-  \expandafter\ifx\csname tp@\tp@cur@cont @#1NameList\endcsname\relax\else
-    \csgappto{tp@\tp@cur@cont @#1NameList}{{\letcs\tpTotalCount{tp#1Cnt}\ccUseProperty{editor-suffix}}}%
+  \expandafter\ifx\csname cc@\tp@cur@cont @#1NameList\endcsname\relax\else
+    \csgappto{cc@\tp@cur@cont @#1NameList}{{\letcs\ccTotalCount{cc#1Cnt}\ccUseProperty{editor-suffix}}}%
   \fi
 }%
 %    \end{macrocode}
@@ -528,7 +528,7 @@
     \expandafter\@tempcnta\CalcModulo{\tpCurCount}{\ccUseProperty{funding-columns}}%
     \ifnum\@tempcnta=\z@
       \par
-      \ifnum\tpCurCount<\tpTotalCount\relax
+      \ifnum\tpCurCount<\ccTotalCount\relax
         \vskip\ccUseProperty{fund-vertical-sep}%
       \fi
     \else
@@ -688,11 +688,11 @@
     \ccGetComp{PubWeb}%
   }%
   % Name Formats
-  \ccSetProperty{counted-meta-sep}{\ifnum\tpCurCount<\tpTotalCount\relax\vskip\baselineskip\fi}% separator between multiple instances of the same meta datum
+  \ccSetProperty{counted-meta-sep}{\ifnum\tpCurCount<\ccTotalCount\relax\vskip\baselineskip\fi}% separator between multiple instances of the same meta datum
   \ccSetProperty{counted-name-sep}{% Separator between multiple names; titlepage-specific override of the same Property in coco-meta!
-    \ifnum\tpTotalCount>1\relax
-      \ifnum\tpCurCount<\tpTotalCount\relax
-        \ifnum\tpCurCount<\numexpr\tpTotalCount-1\relax
+    \ifnum\ccTotalCount>1\relax
+      \ifnum\tpCurCount<\ccTotalCount\relax
+        \ifnum\tpCurCount<\numexpr\ccTotalCount-1\relax
           \ccUseProperty{name-sep}%
         \else
           \ccUseProperty{name-and}%
@@ -730,7 +730,7 @@
   \ccSetProperty{editor-suffix-pl}{(Eds.)}%
   \ccSetProperty{editor-suffix}{%
     \space
-    \ifnum\tpTotalCount=\@ne\relax
+    \ifnum\ccTotalCount=\@ne\relax
       \ccUseProperty{editor-suffix-sgl}%
     \else
       \ccUseProperty{editor-suffix-pl}%

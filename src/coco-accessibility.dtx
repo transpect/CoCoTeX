@@ -109,6 +109,16 @@
 %    \begin{macrocode}
 \RequirePackage{luatexbase-attr}
 \RequirePackage{atveryend}
+%    \end{macrocode}
+% Additional hyperref setup
+%    \begin{macrocode}
+\hypersetup{%
+  %pdfa=true% already set elsewhere
+  ,unicode=true%
+  ,pdfinfo={}%
+  %,pdfpagelabels=true% already set elsewhere
+  ,pageanchor=true%
+}
 \Hy@pdfatrue
 %    \end{macrocode}
 % Now, we set the configuration of the \lstinline{ltpdfa} lua facility
@@ -553,12 +563,12 @@
 %   \lstinline{ltpdfa} generate the \lstinline{xmp} file.
 %    \begin{macrocode}
 \def\cct@title@insert@xmp{%
-  \edef\tp@xmp@file@name{\ccUseComponentFrom{titlepage}{XmpFile}.xmp}%
-  \IfFileExists{\tp@xmp@file@name}
-    {\ccaAddToConfig{metadata}{xmpfile=\tp@xmp@file@name}%
+  \edef\cca@xmp@file@name{\ccUseComponentFrom{titlepage}{XmpFile}.xmp}%
+  \IfFileExists{\cca@xmp@file@name}
+    {\ccaAddToConfig{metadata}{xmpfile=\cca@xmp@file@name}%
      \directlua{ally.meta.extract()}}
     {\ccPackageWarning{A11y}{File}{%
-\tp@xmp@file@name\space not found.^^J
+\cca@xmp@file@name\space not found.^^J
 Note that the ltpdfa package will create one^^J
 from the Components given in the tpMeta Container.}}}
 %    \end{macrocode}
@@ -594,10 +604,10 @@ from the Components given in the tpMeta Container.}}}
 % \lstinline{output-intent} which we add to \lstinline{coco-title}'s
 % Properties list:
 %    \begin{macrocode}
-\ifdefstring\tp@color@enc{cmyk}
+\ifdefstring\cc@color@enc{cmyk}
   {\def\cca@default@icc@comp{4}}
   {\def\cca@default@icc@comp{3}}
-\ifdefstring\tp@color@enc{cmyk}
+\ifdefstring\cc@color@enc{cmyk}
   {\def\cca@default@icc@iden{Coated FOGRA39}}
   {\def\cca@default@icc@iden{sRGB IEC61966-2.1}}
 \ccAddToType{Properties}{titlepage}{%
@@ -617,7 +627,7 @@ from the Components given in the tpMeta Container.}}}
 % \end{description}
 %    \begin{macrocode}
   \ccSetProperty{output-intent}{%
-    profile=\ccIfComp{IccProfileFile}{\tpUseComp{IccProfileFile}}{suppl/\tp@color@enc.icc};%
+    profile=\ccIfComp{IccProfileFile}{\tpUseComp{IccProfileFile}}{suppl/\cc@color@enc.icc};%
     components=\ccIfComp{IccComponents}{\tpUseComp{IccComponents}}{\cca@default@icc@comp};%
     identifier=\ccIfComp{IccIdentifier}{\tpUseComp{IccIdentifier}}{\cca@default@icc@iden}%
   }}

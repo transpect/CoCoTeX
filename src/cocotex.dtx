@@ -88,10 +88,36 @@
 \DeclareOptionX{endnotesperchapter}{\PassOptionsToPackage{\CurrentOption}{coco-notes}}
 \ProcessOptionsX
 %    \end{macrocode}
+% \begin{macro}{\ccAfterClassHook}
+%   Almost all user level macros have been renamed when {\CoCoTeX}
+%   became independent from \lstinline{xerif}. In order to ensure
+%   backwards-compatibility, we define a hook that holds aliases from
+%   the old names to the new ones. Those are defined in the
+%   \lstinline{coco-xerif} module (which is \textit{not} part of
+%   {\CoCoTeX} itself, but included in \lstinline{xerif}'s common
+%   files). The hook is expanded at the very end of the
+%   \lstinline{cocotex.cls} file. The \lstinline{coco-xerif} module
+%   itself is loaded early in \lstinline{coco-common.sty}.
+%
+%   Note that this hook is temporary. As soon as all legacy styles are
+%   adjusted to the new macro names, this hook will be removed!
+%    \begin{macrocode}
+\def\ccAfterClassHook{}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccToggleCountedConditionalsHook} is a hook to ensure
+%   backwards-compatibility within the processing of Counted Components
+%
+%   Note that this hook is temporary. As soon as all legacy styles are
+%   adjusted to the new macro names, this hook will be removed!
+%    \begin{macrocode}
+\def\ccToggleCountedConditionalsHook{}%
+\RequirePackage{coco-common}
+%    \end{macrocode}
+% \end{macro}
 % All publication types supported by {\CoCoTeX} are based on one of
 % \LaTeX's default classes \lstinline{book} or \lstinline{article}:
 %    \begin{macrocode}
-\RequirePackage{coco-common}
 \ifarticle
   \LoadClass[10pt,a4paper]{article}
 \else
@@ -207,13 +233,6 @@
 % Bookmarks are numbered by default.
 %    \begin{macrocode}
    ,bookmarksnumbered=true%
-   \ccIfAlly{%
-     ,pdfa=true%
-     ,unicode=true%
-     ,pdfinfo={}%
-     ,pdfpagelabels=true%
-     ,pageanchor=true%
-   }{}%
 }
 %    \end{macrocode}
 % Disables PDF compression when the \lstinline{no-compress} document
@@ -234,6 +253,10 @@
 \ifx\cc@do@ally\relax
   \RequirePackage{coco-accessibility}
 \fi
+%    \end{macrocode}
+% Expanding backwards-compatibility aliases from the coco-xerif module:
+%    \begin{macrocode}
+\ccAfterClassHook
 %    \end{macrocode}
 %    \begin{macrocode}[gobble=1]
 %</class>

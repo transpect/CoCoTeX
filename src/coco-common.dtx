@@ -30,35 +30,45 @@
 % Default color encoding passed as option to the \lstinline{xcolor}
 % package.
 %    \begin{macrocode}
-\def\tp@color@enc{cmyk}
-\define@choicekey{coco-common.sty}{color-enc}[\@tp@color@enc\nr]{srgb,rgb,gray,cmy,cmyk,natural}[cmyk]{%
-  \let\tp@color@enc\@tp@color@enc
+\def\cc@color@enc{cmyk}
+\define@choicekey{coco-common.sty}{color-enc}[\@cc@color@enc\nr]{srgb,rgb,gray,cmy,cmyk,natural}[cmyk]{%
+  \let\cc@color@enc\@cc@color@enc
   \ifcase\nr\relax% srgb
-    \def\tp@color@enc{rgb}%
+    \def\cc@color@enc{rgb}%
   \or% rgb
   \or% gray
   \or% cmy
-    \def\tp@color@enc{cmyk}%
+    \def\cc@color@enc{cmyk}%
   \or% cmyk
   \else% natural, i.e. no conversion of color spaces takes place
   \fi
 }
 \ProcessOptionsX
-\PassOptionsToPackage{\tp@color@enc}{xcolor}%
+\PassOptionsToPackage{\cc@color@enc}{xcolor}%
 %    \end{macrocode}
-% \begin{macro}{\tpIfAlly} is a switch to distinct between compilation
+% \begin{macro}{\ccIfAlly} is a switch to distinct between compilation
 %   with (implicit \#1) or without (implicit \#2) activated accessibility features.
 %    \begin{macrocode}
 \def\cc@if@ally{\ifx\cc@do@ally\relax\expandafter\@firstoftwo\else\expandafter\@secondoftwo\fi}
 \let\ccIfAlly\cc@if@ally
 \def\cc@if@preamble{\ifx\@nodocument\relax\expandafter\@secondoftwo\else\expandafter\@firstoftwo\fi}
-\let\tpIfPreamble\cc@if@preamble
+\let\ccIfPreamble\cc@if@preamble
 %    \end{macrocode}
 % \end{macro}
 %
 % \section{Commonly Used Low-Level Macros and Registers}
-% Contains common macros used in the {\CoCoTeX} modules and that
-% are intended for macro and stylesheet programming.
+%
+% If {\CoCoTeX} is used in conjunction with
+% \lstinline{xerif}\footnote{See
+% \url{https://github.com/transpect/xerif/}}, we include the
+% \lstinline{coco-xerif} module, which, albeit not an official part of
+% the {\CoCoTeX} framework, is essential for the Framework to work
+% with \lstinline{xerif} generated \lstinline{.tex} files.
+%    \begin{macrocode}
+\IfFileExists{coco-xerif.sty}{\RequirePackage{coco-xerif}}{}
+%    \end{macrocode}
+% The coco-kernel module contains the core functions of the {\CoCoTeX}
+% framework.
 %    \begin{macrocode}
 \RequirePackage{coco-kernel}
 %    \end{macrocode}
@@ -77,40 +87,40 @@
 % \subsection{Common Variables}
 %
 % \subsubsection{String Variables for Value Comparisions}
-% \begin{macro}{\tp@str@default}
+% \begin{macro}{\cc@str@default}
 %    \begin{macrocode}
-\def\tp@str@default{default}
+\def\cc@str@default{default}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@str@table}
+% \begin{macro}{\cc@str@table}
 %    \begin{macrocode}
-\def\tp@str@table{table}
+\def\cc@str@table{table}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@str@figure}
+% \begin{macro}{\cc@str@figure}
 %    \begin{macrocode}
-\def\tp@str@figure{figure}
+\def\cc@str@figure{figure}
 %    \end{macrocode}
 % \end{macro}
 %
 % \subsubsection{Box Registers}
 % Some temporary boxes that won't interfere with LaTeX's temporary
 % boxes.
-% \begin{macro}{\tp@tempboxa}
+% \begin{macro}{\cc@tempboxa}
 %    \begin{macrocode}
-\newbox\tp@tempboxa
+\newbox\cc@tempboxa
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@tempboxb}
+% \begin{macro}{\cc@tempboxb}
 %    \begin{macrocode}
-\newbox\tp@tempboxb
+\newbox\cc@tempboxb
 %    \end{macrocode}
 % \end{macro}
 %
 % \subsubsection{Length and Skip Registers}
-% \begin{macro}{\tp@tempskipa}
+% \begin{macro}{\cc@tempskipa}
 %    \begin{macrocode}
-\newskip\tp@tempskipa
+\newskip\cc@tempskipa
 %    \end{macrocode}
 % \end{macro}
 % \subsection{Helper macros}
@@ -182,7 +192,7 @@
 \long\def\@@gobbleopt[#1]#2{}%
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tpGobble} is used to de-activate certain macros to
+% \begin{macro}{\ccGobble} is used to de-activate certain macros to
 %   prevent them from being called multiple times while processing
 %   contents. An example is a footnote inside a caption while
 %   calculating the height of the caption. In this case, we need the
@@ -190,7 +200,7 @@
 %   being written into the footnote insert, since that should happen
 %   when we actually print the caption.
 %    \begin{macrocode}
-\def\tpGobble{%
+\def\ccGobble{%
   \renewcommand\footnote[2][\the\c@footnote]{\def\@thefnmark{##1}\@makefnmark}%
   \renewcommand\index[2][]{}%
   \renewcommand\marginpar[2][]{}%
@@ -268,70 +278,70 @@
 % by an empty page. Therefore, we save the default page counter from
 % {\LaTeX} to evaluate it independently from the actual manner of
 % counting.
-% \begin{macro}{\the@tp@thispage}
+% \begin{macro}{\the@cc@thispage}
 %    \begin{macrocode}
-\def\the@tp@thispage{}%
+\def\the@cc@thispage{}%
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@abspage}
+% \begin{macro}{\cc@abspage}
 %    \begin{macrocode}
-\newcount\tp@abspage \tp@abspage\z@
+\newcount\cc@abspage \cc@abspage\z@
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\thetp@abspage}
+% \begin{macro}{\thecc@abspage}
 %    \begin{macrocode}
-\def\thetp@abspage{\the\tp@abspage}
+\def\thecc@abspage{\the\cc@abspage}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\if@tp@odd}
+% \begin{macro}{\if@cc@odd}
 %    \begin{macrocode}
-\newif\if@tp@odd \@tp@oddtrue
+\newif\if@cc@odd \@cc@oddtrue
 %    \end{macrocode}
 % \end{macro}
 %    \begin{macrocode}
 \AtBeginDocument{%
-  \global\tp@abspage=\c@page\relax%
-  \g@addto@macro\@outputpage{\global\tp@abspage\c@page}%
+  \global\cc@abspage=\c@page\relax%
+  \g@addto@macro\@outputpage{\global\cc@abspage\c@page}%
 }
 %    \end{macrocode}
-% \begin{macro}{\tp@test@page}
-% We split this into two parts. The first one is run before the
-% floating object is placed. It will store the page according to the
-% placement in the tex source code.
+% We split this into two parts:
+% \begin{macro}{\ccTestPage}
+%   The first one is run before the floating object is placed. It will
+%   store the page according to the placement in the tex source code.
 %    \begin{macrocode}
-\def\tp@test@page{%
-  \expandafter\ifx\csname the@tp@thispage\endcsname\@empty
-    \gdef\the@tp@atthispage{1}%
+\def\ccTestPage{%
+  \expandafter\ifx\csname the@cc@thispage\endcsname\@empty
+    \gdef\the@cc@atthispage{1}%
   \else
-    \expandafter\ifnum \the@tp@thispage=\tp@abspage%
+    \expandafter\ifnum \the@cc@thispage=\cc@abspage%
       \begingroup
-        \@tempcnta\the@tp@atthispage\relax
+        \@tempcnta\the@cc@atthispage\relax
         \advance\@tempcnta\@ne\relax
-        \xdef\the@tp@atthispage{\the\@tempcnta}%
+        \xdef\the@cc@atthispage{\the\@tempcnta}%
       \endgroup
     \else
-      \gdef\@tp@atthispage{1}%
+      \gdef\the@cc@atthispage{1}%
     \fi
   \fi
-  \xdef\the@tp@thispage{\the\tp@abspage}%
-  \let\@tp@currpage\relax
-  \expandafter\ifx\csname \tp@cur@cont-\the@tp@thispage-\the@tp@atthispage\endcsname\relax
-    \ifodd\tp@abspage\relax\@tp@oddtrue\else\@tp@oddfalse\fi
+  \xdef\the@cc@thispage{\the\cc@abspage}%
+  \let\@cc@currpage\relax
+  \expandafter\ifx\csname \tp@cur@cont-\the@cc@thispage-\the@cc@atthispage\endcsname\relax
+    \ifodd\cc@abspage\relax\@cc@oddtrue\else\@cc@oddfalse\fi
   \else
-    \edef\@tp@currpage{\expandafter\expandafter\expandafter\@firstofone\csname \tp@cur@cont-\the@tp@thispage-\the@tp@atthispage\endcsname}%
-    \ifodd\@tp@currpage\relax\@tp@oddtrue\else\@tp@oddfalse\fi
+    \edef\@cc@currpage{\expandafter\expandafter\expandafter\@firstofone\csname \tp@cur@cont-\the@cc@thispage-\the@cc@atthispage\endcsname}%
+    \ifodd\@cc@currpage\relax\@cc@oddtrue\else\@cc@oddfalse\fi
   \fi
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@save@page}
+% \begin{macro}{\ccSavePage}
 % the second macro writes the actual position of the floating object
 % into the aux files. This macro has to be placed inside the float
 % environment/macro.
 %    \begin{macrocode}
-\def\tp@save@page{%
-  \protected@write\@auxout{\def\the@tp@cur@cont{\tp@cur@cont}\let\thetp@abspage\relax}{%
-    \string\expandafter\string\gdef\string\csname\space \tp@cur@cont-\the@tp@thispage-\the@tp@atthispage\string\endcsname{\thetp@abspage}}%
+\def\ccSavePage{%
+  \protected@write\@auxout{\def\the@cc@cur@cont{\tp@cur@cont}\let\thecc@abspage\relax}{%
+    \string\expandafter\string\gdef\string\csname\space \tp@cur@cont-\the@cc@thispage-\the@cc@atthispage\string\endcsname{\thecc@abspage}}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -340,12 +350,12 @@
 %
 % \subsection{Keeping .aux-Files Up-to-Date}
 %
-% \begin{macro}{\tpBreak}
+% \begin{macro}{\ccBreak}
 %   is a general line break macro intended to be re-defined if
 %   necessary without touching LaTeX's kernel page and line breaking
 %   macros.
 %    \begin{macrocode}
-\DeclareRobustCommand{\tpBreak}{\hfill\break}
+\DeclareRobustCommand{\ccBreak}{\hfill\break}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -361,54 +371,62 @@
 % \lstinline{\contentsline} macros that expand to
 % \lstinline{l@<level>}.  Whenever a level of Components that are to
 % be written into content lists is declared, the package automatically
-% generates a \lstinline{\tp@l@<level>} macro for this level of entries.
-% The content-baring argument of \lstinline{\tpContentsline} (or
-% \lstinline{\tp@l@<level>}, resp.) contains Components.
+% generates a \lstinline{\cc@l@<level>} macro for this level of entries.
+% The content-baring argument of \lstinline{\ccContentsline} (or
+% \lstinline{\cc@l@<level>}, resp.) contains Components.
 %
-% Once a list file is read, those \lstinline{\tp@l@<level>} macros are
+% Once a list file is read, those \lstinline{\cc@l@<level>} macros are
 % expanded in two steps. Each entry constitutes a Container in its own
 % right. It therefore can have multiple Components. The first step is
 % the extraction phase, where the entry's Container is dynamically
 % declared, the corresponding properties are initialised, and its
 % Components are extracted
 %
-% \begin{macro}{\tp@init@l@}
+% \begin{macro}{\cc@init@l@}
 %   is a low-level macro used to dynamically define
-%   \lstinline{\tp@l@<level>} macros. Optional \#1 is an override for
+%   \lstinline{\cc@l@<level>} macros. Optional \#1 is an override for
 %   counters that have to be restored, \#2 is the list file ending
 %   (raw entries being stored in a file \lstinline{\jobname.#2}), \#3
 %   is a number that indicated the nesting depth, \#4 is the nested
 %   level's unique name.
 %    \begin{macrocode}
-\def\tp@init@l@{\cc@opt@empty\@tp@init@l@}%
-\def\@tp@init@l@[#1]#2#3#4{%
+\def\cc@init@l@{\cc@opt@empty\@cc@init@l@}%
+\def\@cc@init@l@[#1]#2#3#4{%
   \expandafter\ifx\csname c@#2depth\endcsname\relax
     \expandafter\global\expandafter\newcount\csname c@#2depth\endcsname
     \expandafter\global\csname c@#2depth\endcsname=0\relax
   \fi
-  \expandafter\ifx\csname tp@#2@extract@data\endcsname\relax
-    \expandafter\let\csname tp@#2@extract@data\endcsname\tp@extract@generic
+  \expandafter\ifx\csname cc@#2@extract@data\endcsname\relax
+    \expandafter\let\csname cc@#2@extract@data\endcsname\cc@extract@generic
   \fi
-  \expandafter\ifx\csname tp@#2@print@entry\endcsname\relax
-    \expandafter\let\csname tp@#2@print@entry\endcsname\tp@print@generic
+  \expandafter\ifx\csname cc@#2@print@entry\endcsname\relax
+    \expandafter\let\csname cc@#2@print@entry\endcsname\cc@print@generic
   \fi
-  \expandafter\long\expandafter\gdef\csname tp@l@#4\endcsname##1##2{%
+  \expandafter\long\expandafter\gdef\csname cc@l@#4\endcsname##1##2{%
     \ifLuaTeX\suppresslongerror=1\fi
     \expandafter\ifnum \csname c@#2depth\endcsname<#3\relax
     \else
       \bgroup
+%    \end{macrocode}
+% \begin{macro}{\ccTocLink} is used to link list entries to their
+%   destination.
+%    \begin{macrocode}
         \cc@if@ally
-          {\long\def\tpTocLink####1{\hyper@linkstart[####1]{link}{\Hy@tocdestname}{####1}\hyper@linkend}}
-          {\long\def\tpTocLink####1{\hyper@linkstart{link}{\Hy@tocdestname}{####1}\hyper@linkend}}%
-        \csname tp@#2@extract@data\endcsname{#3}{#4}{##1}{##2}%
-        \csname tp@#2@print@entry\endcsname{#4}%
+          {\long\def\ccTocLink####1{\hyper@linkstart[####1]{link}{\Hy@tocdestname}{####1}\hyper@linkend}}
+          {\long\def\ccTocLink####1{\hyper@linkstart{link}{\Hy@tocdestname}{####1}\hyper@linkend}}%
+          \let\tpTocLink\ccTocLink% legacy
+%    \end{macrocode}
+% \end{macro}
+%    \begin{macrocode}
+        \csname cc@#2@extract@data\endcsname{#3}{#4}{##1}{##2}%
+        \csname cc@#2@print@entry\endcsname{#4}%
       \egroup
     \fi
     \ifLuaTeX\suppresslongerror=0\fi
   }}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tpContentsline} has two purposes: It re-directs
+% \begin{macro}{\ccContentsline} has two purposes: It re-directs
 %   \lstinline{l@<level>} macros to our own version, and it ensures
 %   that {\LaTeX} won't break if Components in the content lists
 %   contain \lstinline{\par}. In order for the latter to work
@@ -419,36 +437,36 @@
   \begingroup\toks0=\expandafter{\contentsline{#1}{#2}{#3}{#4}}
   \edef\x{\endgroup\long\def\noexpand\contentsline##1##2##3##4{\the\toks0 }}\x
 }
-\long\def\tpContentsline#1#2#3#4{\bgroup\csletcs{l@#1}{tp@l@#1}\contentsline{#1}{#2}{#3}{#4}\egroup}
+\long\def\ccContentsline#1#2#3#4{\bgroup\csletcs{l@#1}{cc@l@#1}\contentsline{#1}{#2}{#3}{#4}\egroup}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@extract@generic}
+% \begin{macro}{\cc@extract@generic}
 %    \begin{macrocode}
-\def\tp@extract@generic#1#2#3#4{}
+\def\cc@extract@generic#1#2#3#4{}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@print@generic}
+% \begin{macro}{\cc@print@generic}
 %    \begin{macrocode}
-\def\tp@print@generic#1{}
+\def\cc@print@generic#1{}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@expand@l@contents}
-%   expands the content of the \lstinline{tp@l@<level>} macro and contains some code
+% \begin{macro}{\cc@expand@l@contents}
+%   expands the content of the \lstinline{cc@l@<level>} macro and contains some code
 %   to catch and handle standard \LaTeX\ headings. \#1 is the content
-%   of the \lstinline{tp@l@}-macro, \#2 is the namespace, \#3 is the Component
+%   of the \lstinline{cc@l@}-macro, \#2 is the namespace, \#3 is the Component
 %   prefix and \#4 is the name of the Content component.
 %    \begin{macrocode}
-\def\tp@expand@l@contents#1#2#3#4{%
-  \global\let\tp@tempa\relax
-  \sbox\z@{\def\numberline##1{\xdef\tp@tempa{\noexpand\csdef{tp@#2@#3Number}{##1}}}#1}%
+\def\cc@expand@l@contents#1#2#3#4{%
+  \global\let\cc@tempa\relax
+  \sbox\z@{\def\numberline##1{\xdef\cc@tempa{\noexpand\csdef{cc@#2@#3Number}{##1}}}#1}%
   \ifdim\wd\z@>\z@
     \let\numberline\@gobble%
-    \protected@csedef{tp@#2@#3#4}{#1}%
-    \tp@tempa
+    \protected@csedef{cc@#2@#3#4}{#1}%
+    \cc@tempa
   \else
     #1%
   \fi
-  \global\let\tp@tempa\relax
+  \global\let\cc@tempa\relax
 }
 %    \end{macrocode}
 % \end{macro}
@@ -482,8 +500,8 @@
 \def\ccCreateContentListEntries#1#2#3#4#5{%
   \def\cc@add@extra@cl##1{%
     \expandafter\protected@write\csname cc@cl@##1\endcsname
-      {\tpGobble}%
-      {\protect\tpContentsline{#2}{#3}{#4}{#5}\protected@file@percent}\relax
+      {\ccGobble}%
+      {\protect\ccContentsline{#2}{#3}{#4}{#5}\protected@file@percent}\relax
   }%
   \ifcsdef{cc@#1@extra@cl}{%
     \cc@parse@csv\cc@add@extra@cl{cc@#1@extra@cl}}{}%
@@ -521,7 +539,7 @@
 % values are available immediately and can be used to fortify those
 % parameters.
 %
-% \begin{macro}{\tp@store@latest}
+% \begin{macro}{\cc@store@latest}
 %   low-level macro that stores the maximum value of a dimension
 %   Property \#1. An internal Property \lstinline{\#1-local} is
 %   constantly updated whenever the macro is called and the previously
@@ -531,24 +549,24 @@
 %   addendum to the \lstinline{\@enddocumenthook} which causes the
 %   last value for that dimension to be stored in the .aux file. If
 %   the Property hasn't been set from a previous {\LaTeX} run or a
-%   previous call to the \lstinline{\tp@store@latest} macro for the
+%   previous call to the \lstinline{\cc@store@latest} macro for the
 %   same Property and the same level, it is set to \#2.
 %
 %   \#1 is the internal name of the property, \#2 is the check value.
 %    \begin{macrocode}
-\def\tp@store@latest#1#2{%
-  \expandafter\ifx\csname tp-\tp@cur@cont-#1\endcsname\relax
-    \csxdef{tp-\tp@cur@cont-#1}{#2}%
+\def\cc@store@latest#1#2{%
+  \expandafter\ifx\csname \ccPrefix-\tp@cur@cont-#1\endcsname\relax
+    \csxdef{\ccPrefix-\tp@cur@cont-#1}{#2}%
   \else
-    \expandafter\ifdim\csname tp-\tp@cur@cont-#1\endcsname<#2\relax
-      \csxdef{tp-\tp@cur@cont-#1}{#2}%
+    \expandafter\ifdim\csname \ccPrefix-\tp@cur@cont-#1\endcsname<#2\relax
+      \csxdef{\ccPrefix-\tp@cur@cont-#1}{#2}%
     \fi
   \fi
-  \expandafter\ifx\csname tp-\tp@cur@cont-#1-local\endcsname\relax
-    \csxdef{tp-\tp@cur@cont-#1-local}{#2}%
+  \expandafter\ifx\csname \ccPrefix-\tp@cur@cont-#1-local\endcsname\relax
+    \csxdef{\ccPrefix-\tp@cur@cont-#1-local}{#2}%
   \else
-    \expandafter\ifdim\csname tp-\tp@cur@cont-#1-local\endcsname<#2\relax
-      \csxdef{tp-\tp@cur@cont-#1-local}{#2}%
+    \expandafter\ifdim\csname \ccPrefix-\tp@cur@cont-#1-local\endcsname<#2\relax
+      \csxdef{\ccPrefix-\tp@cur@cont-#1-local}{#2}%
     \fi
   \fi
 %    \end{macrocode}
@@ -566,22 +584,22 @@
 % values change, you still need to do at least two more {\LaTeX} runs
 % before the values stabilize.
 %    \begin{macrocode}
-  \ifcsdef{tp-\tp@cur@cont-#1-stored-trigger}{}
+  \ifcsdef{\ccPrefix-\tp@cur@cont-#1-stored-trigger}{}
     {\edef\@tempa{%
        \noexpand\immediate\noexpand\write\noexpand\@auxout{%
-         \noexpand\string\noexpand\csgdef{tp-\tp@cur@cont-#1}{%
-           \noexpand\csname tp-\tp@cur@cont-#1-local\noexpand\endcsname}}}%
+         \noexpand\string\noexpand\csgdef{\ccPrefix-\tp@cur@cont-#1}{%
+           \noexpand\csname \ccPrefix-\tp@cur@cont-#1-local\noexpand\endcsname}}}%
      \expandafter\AtEndDocument\expandafter{\@tempa}%
-     \csgdef{tp-\tp@cur@cont-#1-stored-trigger}{\@empty}}}
+     \csgdef{\ccPrefix-\tp@cur@cont-#1-stored-trigger}{\@empty}}}
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\tp@format@number}
+% \begin{macro}{\cc@format@number}
 %   calculates number widths and prepares macros to be used by the
 %   user. \#1 is the internal Property prefix, \#2 is the user-level
 %   Component prefix, \#3 is the numerical list level.
 %    \begin{macrocode}
-\def\tp@format@number#1#2#3{%
+\def\cc@format@number#1#2#3{%
   \ccSetPropertyVal{#1curr-number-level}{#3}%
 %    \end{macrocode}
 % First step: measuring the natural width of the Number if it exists
@@ -597,16 +615,16 @@
 % \lstinline{\@enddocumenthook}. We do the same for the maximum across
 % \textit{all} levels of the same Container Type.
 %    \begin{macrocode}
-  \tp@store@latest{#1number-#3-maxwd}{\the\wd\z@}%
-  \tp@store@latest{#1number-maxwd}{\the\wd\z@}%
+  \cc@store@latest{#1number-#3-maxwd}{\the\wd\z@}%
+  \cc@store@latest{#1number-maxwd}{\the\wd\z@}%
 %    \end{macrocode}
 % We provide the maximum level as a user-level Property
 % \lstinline{#1number-width-level-max}, the global maximum across all
 % levels as \lstinline{#1number-width-max}, and the width of the
 % current number as \lstinline{#1number-width}.
 %    \begin{macrocode}
-  \ccSetPropertyVal{#1number-width-level-max}{\csname tp-\tp@cur@cont-#1number-#3-maxwd\endcsname}%
-  \ccSetPropertyVal{#1number-width-max}{\csname tp-\tp@cur@cont-#1number-maxwd\endcsname}%
+  \ccSetPropertyVal{#1number-width-level-max}{\csname \ccPrefix-\tp@cur@cont-#1number-#3-maxwd\endcsname}%
+  \ccSetPropertyVal{#1number-width-max}{\csname \ccPrefix-\tp@cur@cont-#1number-maxwd\endcsname}%
   \ccSetPropertyVal{#1number-width}{\the\wd\z@}%
 %    \end{macrocode}
 % Third step: we calculate and fortify the actual
@@ -614,17 +632,17 @@
 % whole item) and \lstinline{#1indent} (offset of the first line) of
 % the entry.
 %    \begin{macrocode}
-  \tp@get@indent{#1}{#3}%
-  \tp@set@hang{#1}%
+  \cc@get@indent{#1}{#3}%
+  \cc@set@hang{#1}%
 }
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\tp@set@hang} determines and sets the hanging indent
+% \begin{macro}{\cc@set@hang} determines and sets the hanging indent
 %   of a counter. \#1 is the internal Property prefix.
 %
 %    \begin{macrocode}
-\def\tp@set@hang#1{%
+\def\cc@set@hang#1{%
 %    \end{macrocode}
 % First, we set the \lstinline{#1hang-number} to be an alias of
 % \lstinline{#1number-format} as fallback.
@@ -653,7 +671,7 @@
 % (\lstinline{#1number-format}) we set in the first step.
 % \end{macro}
 %
-% \begin{macro}{\tp@calc@margin@left}
+% \begin{macro}{\cc@calc@margin@left}
 %   determines the left margin of the current level by subtracting the
 %   current level's indent from the left margin of the next-higher
 %   level. ``Next-higher'' meaning ``hierarchically'', i.e., the level
@@ -663,23 +681,23 @@
 %   \#1 is the Property prefix, \#2 is the current numerical list
 %   level.
 %    \begin{macrocode}
-\def\tp@calc@margin@left#1#2{%
+\def\cc@calc@margin@left#1#2{%
   \@tempcnta\numexpr#2-1\relax
-  \expandafter\ifx\csname tp-\tp@cur@cont-#1\the\@tempcnta-margin-left\endcsname\relax
+  \expandafter\ifx\csname \ccPrefix-\tp@cur@cont-#1\the\@tempcnta-margin-left\endcsname\relax
     \@tempdima=-\ccUseProperty{#1indent}\relax%
   \else
-    \@tempdima=\dimexpr\csname tp-\tp@cur@cont-#1\the\@tempcnta-margin-left\endcsname-\ccUseProperty{#1indent}\relax
+    \@tempdima=\dimexpr\csname \ccPrefix-\tp@cur@cont-#1\the\@tempcnta-margin-left\endcsname-\ccUseProperty{#1indent}\relax
   \fi
-  \tp@store@latest{#1#2-margin-left}{\the\@tempdima}%
+  \cc@store@latest{#1#2-margin-left}{\the\@tempdima}%
   \ccSetProperty{#1margin-left}{\the\@tempdima}}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@get@indent}
+% \begin{macro}{\cc@get@indent}
 %   Eventually, write the actually used values for margin-left and
 %   indent into the current container's Property list. \#1 is the
 %   internal property prefix, \#2 is the numerical list level.
 %    \begin{macrocode}
-\def\tp@get@indent#1#2{%
+\def\cc@get@indent#1#2{%
 %    \end{macrocode}
 % First, we need to store the initial values for both
 % \lstinline{#1margin-left} and \lstinline{#1indent} since, first
@@ -730,9 +748,9 @@
              {\ccSetProperty{#1indent}{\z@}}}%
 %    \end{macrocode}
 % the final value for \lstinline{margin-left} is calculated by the
-% \lstinline{\tp@calc@margin@left} macro, above. It will be set to the sum of indent and
+% \lstinline{\cc@calc@margin@left} macro, above. It will be set to the sum of indent and
 %    \begin{macrocode}
-        \tp@calc@margin@left{#1}{#2}}
+        \cc@calc@margin@left{#1}{#2}}
 %    \end{macrocode}
 % This branch is reached when the left margin is not set to \lstinline{auto}.
 %    \begin{macrocode}
@@ -820,7 +838,7 @@
     {\ccgdefFromComp\cc@ref@label{RefLabel}%
      \expandafter\cc@create@label\expandafter{\cc@ref@label}}%
   \ccIfAttr{\tp@cur@cont}{label}
-    {\cc@parse@csv\cc@create@label{tp@\tp@cur@cont @attr@label}}%
+    {\cc@parse@csv\cc@create@label{cc@\tp@cur@cont @attr@label}}%
     {\ifx\cc@ref@label\relax\cc@create@label{\@currentHref}\fi}}
 %    \end{macrocode}
 % \end{macro}
@@ -834,7 +852,7 @@
       \def\cc@labelname@comp{Title}%
     \fi
     \begingroup
-      \tpGobble
+      \ccGobble
       \ccgdefFromComp\@currentlabel{Number}%
       \ccgdefFromComp\@currentlabelname{\cc@labelname@comp}%
     \endgroup}%
@@ -851,12 +869,12 @@
 %
 % \subsection{Linguistic Name generation and selection}
 %
-% \begin{macro}{\tpSetBabelLabel} defined a language-dependent string
+% \begin{macro}{\ccSetBabelLabel} defined a language-dependent string
 %   macro for German and English varieties.  \#1 is the language, \#2
 %   is the internal reference name, and \#3 is the language specific
 %   label.
 %    \begin{macrocode}
-\def\tpSetBabelLabel#1#2#3{%
+\def\ccSetBabelLabel#1#2#3{%
   \def\ccc@lang{#1}%
   \expandafter\def\expandafter\ccc@tempa\expandafter{\expandafter\def\csname #2name\endcsname{#3}}%
   \ifdefstring\ccc@lang{german}{%
@@ -875,19 +893,19 @@
 % \end{macro}
 % \subsection{Link Generation}
 %
-% \begin{macro}{\tpCompLink} creates a hyperlink with the target taken
+% \begin{macro}{\ccCompLink} creates a hyperlink with the target taken
 %   from Component with the name \#1 and the label \#2.
 %    \begin{macrocode}
-\def\tpCompLink#1#2{%
-  \protected@edef\@argi{\expandonce{\tpUseComp{#1}}}%
+\def\ccCompLink#1#2{%
+  \protected@edef\@argi{\expandonce{\ccUseComp{#1}}}%
   \expandafter\href\expandafter{\@argi}{#2}%
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tpPageLabel} enables referencing pages via \pageref
+% \begin{macro}{\ccPageLabel} enables referencing pages via \pageref
 %   by using \phantomsection to create a hyperref anchor for label \#1.
 %    \begin{macrocode}
-\def\tpPageLabel#1{\phantomsection\label{#1}}
+\def\ccPageLabel#1{\phantomsection\label{#1}}
 %    \end{macrocode}
 % \end{macro}
 %    \begin{macrocode}[gobble=1]

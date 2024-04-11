@@ -39,9 +39,9 @@
 %    \end{macrocode}
 %
 % \section{Facility for declaring heading levels and their layouts}%
-% \begin{tpContainer}{heading}
+% \begin{tpContainer}{Heading}
 %    \begin{macrocode}
-\ccDeclareContainer{heading}{%
+\ccDeclareContainer{Heading}{%
   \ccInherit{Components,Properties}{CommonMeta}%
   \ccDeclareType{Parent}{}%
   \ccDeclareType{Components}{%
@@ -63,7 +63,7 @@
     \cch@provide@quotes
   }%
   \ccDeclareType{Properties}{}%
-  \ccDeclareEnv{\heading}{\endheading}%
+  \ccDeclareEnv{\cch@heading}{\cch@end@heading}%
 }
 %    \end{macrocode}
 % \end{tpContainer}
@@ -117,7 +117,7 @@
 %    \begin{macrocode}
     \ccAddToType{Properties}{#3}{#4}%
 %    \end{macrocode}
-% Finally, we need to re-define the \lstinline{\tpUseHeading} macro so
+% Finally, we need to re-define the \lstinline{\ccUseHeading} macro so
 % that changes to the heading's Property list will be taken into
 % account for all dependend constructions like list-ofs and
 % toc-entries.
@@ -149,13 +149,13 @@
 %    \begin{macrocode}
       \ccPackageInfo{Headings}{}{Declaring heading `#3'}%
       \edef\@argi{#1}%
-      \ccDeclareType{Parent}{\tp@heading@create@parent{#1}{#3}}
+      \ccDeclareType{Parent}{\cch@create@parent{#1}{#3}}
 %    \end{macrocode}
 % We inherit everything from the heading levels parent, or from the
 % default heading if no parent is present.
 %    \begin{macrocode}
       \ifx\@argi\@empty
-        \ccInherit{Components,Properties}{heading}%
+        \ccInherit{Components,Properties}{Heading}%
       \else
         \ccInherit{Components,Properties,Parent}{#1}%
       \fi
@@ -174,22 +174,22 @@
       \ccDeclareType{Init}{%
         \tp@init@hooks{#3}%
         \let\@tp@cur@cont\tp@cur@cont
-        \def\tp@cur@cont{heading}%
-        \tp@init@l@{toc}{#2}{#3}%
+        \def\tp@cur@cont{Heading}%
+        \cc@init@l@{toc}{#2}{#3}%
         \let\tp@cur@cont\@tp@cur@cont
-        \tp@init@cnt{#3}%
+        \cch@init@cnt{#3}%
       }%
 %    \end{macrocode}
 % Unlike other Sub-Containers, headings form no own {\LaTeX}
 % environment.  Instead, headings are specifications of one common
-% \lstinline{heading} environment. Is is outsourced into the internal
+% \lstinline{\ccPrefix Heading} environment. Is is outsourced into the internal
 % \lstinline{\cch@declare@heading} macro, which is defined below.
 %
 % The reason for that is that we don't want to define versions of the
 % same property macros for each and every single heading
 % level. Instead, we locally re-define the general low-level macros
 % that represent the heading's properties for each instance of the
-% generalised \lstinline{heading} container.
+% generalised \lstinline{Heading} container.
 %    \begin{macrocode}
       \cch@declare@heading{#2}{#3}%
     }% \ccDeclareContainer{#3}
@@ -334,10 +334,10 @@
 }%
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@heading@create@parent} stores the heading level's name and its
+% \begin{macro}{\cch@create@parent} stores the heading level's name and its
 %   parent, if it exists.
 %    \begin{macrocode}
-\def\tp@heading@create@parent#1#2{%
+\def\cch@create@parent#1#2{%
   \def\cch@sec@name{#2}%
   \if!#1!\else
     \ccCheckParent{#1}{#2}%
@@ -356,24 +356,24 @@
   \ccEvalType{Init}%
 %    \end{macrocode}
 %
-% \begin{macro}{\tpUseHeading} is defined as second step. It is called
-%   at the end of each \lstinline{heading} environment to process the
+% \begin{macro}{\ccUseHeading} is defined as second step. It is called
+%   at the end of each \lstinline{\ccPrefix Heading} environment to process the
 %   Components within the Container instance. Each heading level has
 %   its own ``version'' of this macro.
 %    \begin{macrocode}
-  \csgdef{tpUseHeading#2}{%
+  \csgdef{ccUseHeading#2}{%
 %    \end{macrocode}
 % Since heading levels don't define their own environments, we make
-% sure that \lstinline{heading} is the namespace we are working in.
+% sure that \lstinline{Heading} is the namespace we are working in.
 %    \begin{macrocode}
-    \ccSetContainer{heading}%
+    \ccSetContainer{Heading}%
     \@setpar{\@@par}%
 %    \end{macrocode}
 % Properties are stored in macros specific to the current heading
 % Sub-Container, therefore we evaluate the level's Properties, not
-% those of the \lstinline{heading} Container. However, since we made
+% those of the \lstinline{Heading} Container. However, since we made
 % use of the inheritance mechanism earlier, each Sub-Container's
-% Property list also contains the general \lstinline{heading} Property
+% Property list also contains the general \lstinline{Heading} Property
 % list.
 %    \begin{macrocode}
     \def\tpHeadingLevel{#1}%
@@ -382,8 +382,8 @@
 % Processing the author name list (from coco-meta.sty).
 %    \begin{macrocode}
     \tp@meta@role@eval{Author}%
-    \ccComposeCollection{tpAuthor}{author-contact-block-format}{AuthorContactBlock}%
-    \ccComposeCollection{tpAffil}{affil-block-item-format}{AffilBlock}%
+    \ccComposeCollection{Author}{author-contact-block-format}{AuthorContactBlock}%
+    \ccComposeCollection{Affil}{affil-block-item-format}{AffilBlock}%
 %    \end{macrocode}
 % Processing the \lstinline{tpQuote} environments, if any.
 %    \begin{macrocode}
@@ -410,7 +410,7 @@
 % The counters we calculated earlier and the space needed to render
 % them are evaluated
 %    \begin{macrocode}
-    \tp@format@number{}{}{#1}%
+    \cc@format@number{}{}{#1}%
 %    \end{macrocode}
 % The value of after-skip is essential to determine whether the
 % heading is to be displayed as block or inline element. In case, some
@@ -522,10 +522,10 @@
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@init@cnt} initialises a counter with the name \#1
+% \begin{macro}{\cch@init@cnt} initialises a counter with the name \#1
 %   for automatic numbering if it doesn't exist, yet.
 %    \begin{macrocode}
-\def\tp@init@cnt#1{\ifcsname c@#1\endcsname\else\@definecounter{#1}\fi}
+\def\cch@init@cnt#1{\ifcsname c@#1\endcsname\else\@definecounter{#1}\fi}
 %    \end{macrocode}
 % \end{macro}
 % \subsection{Initializers for Instances of Heading Levels}%
@@ -538,8 +538,8 @@
 %    \begin{macrocode}
 \def\tp@auto@number#1#2{%
   \ccIfPropVal{numbering}{auto}
-    {\expandafter\ifx\csname c@#2\endcsname\relax\tp@init@cnt{#2}\fi
-     \ccIfAttrIsSet{heading}{nonumber}
+    {\expandafter\ifx\csname c@#2\endcsname\relax\cch@init@cnt{#2}\fi
+     \ccIfAttrIsSet{Heading}{nonumber}
        {}
        {\ccIfComp{Number}
          {}
@@ -566,30 +566,30 @@
 %    \begin{macrocode}
 \def\cch@set@author@name@list#1{%
 %    \end{macrocode}
-% first, we look if the Override was given in the \lstinline{heading}
+% first, we look if the Override was given in the \lstinline{Heading}
 % Container. If so, we do nothing.
 %    \begin{macrocode}
   \ccUnlessComp{#1AuthorNameList}{%
 %    \end{macrocode}
 % If not, we look whether or not the general
-% \lstinline{AuthorNameList} override was given in the \lstinline{heading}
+% \lstinline{AuthorNameList} override was given in the \lstinline{Heading}
 % Container.
 %    \begin{macrocode}
     \ifx\cc@used@AuthorNameList@override\@empty
 %    \end{macrocode}
-% If yes, then we copy its value to \lstinline{tp#1AuthorNameList}.
+% If yes, then we copy its value to \lstinline{#1AuthorNameList}.
 %    \begin{macrocode}
-      \expandafter\csname tp#1AuthorNameList\expandafter\endcsname\expandafter{\tp@heading@AuthorNameList}%
+      \ccComponent{#1AuthorNameList}{\cc@Heading@AuthorNameList}%
     \else
 %    \end{macrocode}
 % Or else, we re-build the \lstinline{#1AuthorNameList} from the raw
 % \lstinline{Author} Subcontainers by using the
 % \lstinline{author-list-print-format} Property.
 %    \begin{macrocode}
-      \ifnum\tpAuthorCnt>\z@
-        \ccdefFromCountedComp\cch@tempa{tpAuthor}{author-list-print-format}%
+      \ifnum\ccAuthorCnt>\z@
+        \ccdefFromCountedComp\cch@tempa{Author}{author-list-print-format}%
         \ifx\cch@tempa\relax\else
-          \expandafter\csname tp#1AuthorNameList\expandafter\endcsname\expandafter{\cch@tempa}%
+          \ccComponent{#1AuthorNameList}{\cch@tempa}%
         \fi
       \fi
     \fi
@@ -600,40 +600,40 @@
 % \subsection{Table of Contents Entry}
 %
 % \begin{macro}{\tp@make@toc} initializes the creation of a
-%   \lstinline{heading} instance's entry in the table of contents.
+%   \lstinline{Heading} instance's entry in the table of contents.
 %
 %   Each entry is in itself treated as a Container. As such, it
 %   consists of Components that are written into the .toc file.
 %    \begin{macrocode}
 \def\tp@make@toc{%
-  \cc@check@empty{heading}{Title}{Toc}%
-  \cc@check@empty{heading}{Number}{Toc}%
-  \cc@check@empty{heading}{Subtitle}{Toc}%
+  \cc@check@empty{Heading}{Title}{Toc}%
+  \cc@check@empty{Heading}{Number}{Toc}%
+  \cc@check@empty{Heading}{Subtitle}{Toc}%
   \cch@set@author@name@list{Toc}%
-  \ccIfAttrIsSet{heading}{notoc}{}
-    {\protected@edef\tp@heading@toc@entry{%
-       \ccIfComp{TocTitle}{\string\tpTocTitle{\string\ignorespaces\space\expandonce{\tp@heading@TocTitle}}}{}%
-       \ccIfComp{TocNumber}{\string\tpTocNumber{\string\ignorespaces\space\expandonce{\tp@heading@TocNumber}}}{}%
-       \ccIfComp{TocAuthorNameList}{\string\tpTocAuthorNameList{\string\ignorespaces\space\expandonce{\tp@heading@TocAuthorNameList}}}{}%
-       \ccIfComp{TocSubtitle}{\string\tpTocSubtitle{\string\ignorespaces\space\expandonce{\tp@heading@TocSubtitle}}}{}%
+  \ccIfAttrIsSet{Heading}{notoc}{}
+    {\protected@edef\cch@toc@entry{%
+       \ccIfComp{TocTitle}{\string\ccComponent{TocTitle}{\string\ignorespaces\space\expandonce{\cc@Heading@TocTitle}}}{}%
+       \ccIfComp{TocNumber}{\string\ccComponent{TocNumber}{\string\ignorespaces\space\expandonce{\cc@Heading@TocNumber}}}{}%
+       \ccIfComp{TocAuthorNameList}{\string\ccComponent{TocAuthorNameList}{\string\ignorespaces\space\expandonce{\cc@Heading@TocAuthorNameList}}}{}%
+       \ccIfComp{TocSubtitle}{\string\ccComponent{TocSubtitle}{\string\ignorespaces\space\expandonce{\cc@Heading@TocSubtitle}}}{}%
      }%
      \ccIfProp{toc-level}{\edef\cch@sec@name{\ccUseProperty{toc-level}}}{}%
      \protected@write\@auxout
-       {\tpGobble}%
-       {\string\@writefile{toc}{\protect\tpContentsline{\cch@sec@name}{\tp@heading@toc@entry}{\thepage}{\@currentHref}\protected@file@percent}}\relax
-     \ccCreateContentListEntries{heading}{\cch@sec@name}{\tp@heading@toc@entry}{\thepage}{\@currentHref}%
-     \ccCreateContentListEntries{\cch@sec@name}{\cch@sec@name}{\tp@heading@toc@entry}{\thepage}{\@currentHref}%
+       {\ccGobble}%
+       {\string\@writefile{toc}{\protect\ccContentsline{\cch@sec@name}{\cch@toc@entry}{\thepage}{\@currentHref}\protected@file@percent}}\relax
+     \ccCreateContentListEntries{Heading}{\cch@sec@name}{\cch@toc@entry}{\thepage}{\@currentHref}%
+     \ccCreateContentListEntries{\cch@sec@name}{\cch@sec@name}{\cch@toc@entry}{\thepage}{\@currentHref}%
    }}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@toc@extract@data} is called within
+% \begin{macro}{\cc@toc@extract@data} is called within
 %   the \lstinline{\l@<level>} macro to extract the Components for
 %   each entry in the .toc file. \#1 is the numerical heading level,
 %   \#2 is the name of the heading level, \#3 is the content of the
 %   toc entry (which holds the Components), \#4 is the page number.
 %    \begin{macrocode}
-\def\tp@toc@extract@data#1#2#3#4{%
-  \ccSetContainer{heading}%
+\def\cc@toc@extract@data#1#2#3#4{%
+  \ccSetContainer{Heading}%
   \ccEvalType[#2]{Properties}%
   \ccDeclareComponent{TocPage}{}{}%
   \tpTocPage{\ccUseProperty{toc-page-face}#4}%
@@ -641,16 +641,16 @@
   \ccDeclareComponent{TocSubtitle}{}{}%
   \ccDeclareComponent{TocNumber}{}{}%
   \ccDeclareComponent{TocAuthorNameList}{}{}%
-  \tp@expand@l@contents{#3}{heading}{Toc}{Title}%%
-  \tp@format@number{toc-}{Toc}{#1}%
+  \cc@expand@l@contents{#3}{Heading}{Toc}{Title}%%
+  \cc@format@number{toc-}{Toc}{#1}%
 }
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tp@toc@print@entry} is also called within the
 %   \lstinline{\l@<level>} macro and eventually prints the entry by
-%   expanding a \lstinline{heading}'s toc-specific Properties.
+%   expanding a \lstinline{Heading}'s toc-specific Properties.
 %    \begin{macrocode}
-\def\tp@toc@print@entry#1{%
+\def\cc@toc@print@entry#1{%
   \bgroup
     \ccUseHook{toc-before-hook-#1}%
     \ccUseProperty{toc-before-entry}%
@@ -666,7 +666,7 @@
 % \begin{macro}{\tp@make@run}
 %   prepares the Components used to compose the running titles. It
 %   checks if the user provides page header specific overrides in the
-%   \lstinline{heading} instance. If not, it uses the non-specific
+%   \lstinline{Heading} instance. If not, it uses the non-specific
 %   Components instead, as long as they are not empty.
 %
 %   After all the header-specific Components are set, the heading
@@ -675,25 +675,25 @@
 %   iff they exist.
 %    \begin{macrocode}
 \def\tp@make@run{%
-  \cc@check@empty{heading}{Title}{Run}%
-  \cc@check@empty{heading}{Number}{Run}%
-  \cc@check@empty{heading}{Subtitle}{Run}%
+  \cc@check@empty{Heading}{Title}{Run}%
+  \cc@check@empty{Heading}{Number}{Run}%
+  \cc@check@empty{Heading}{Subtitle}{Run}%
   \cch@set@author@name@list{Run}%
   \ccUseProperty{running-extra}%
   \ccIfProp{running-level}
-    {\letcs\tp@mark@name{\ccUseProperty{running-level}mark}}
-    {\letcs\tp@mark@name{\cch@sec@name mark}}%
-    \letcs\tp@heading@parent{cc@parent@\cch@sec@name}%
-    \ifx\tp@mark@name\@undefined
-      \ifx\tp@heading@parent\relax\else
-        \letcs\tp@mark@name{\tp@heading@parent mark}%
+    {\letcs\cch@mark@name{\ccUseProperty{running-level}mark}}
+    {\letcs\cch@mark@name{\cch@sec@name mark}}%
+    \letcs\cch@parent{cc@parent@\cch@sec@name}%
+    \ifx\cch@mark@name\@undefined
+      \ifx\cch@parent\relax\else
+        \letcs\cch@mark@name{\cch@parent mark}%
       \fi
     \fi
-  \ifx\tp@mark@name\@undefined\else
+  \ifx\cch@mark@name\@undefined\else
     \begingroup
-      \tpGobble
-      \protected@edef\@tempa{\csname tp@heading@running-heading\endcsname}%
-      \expandafter\tp@mark@name\expandafter{\@tempa}%
+      \ccGobble
+      \protected@edef\@tempa{\csname tp@Heading@running-heading\endcsname}%
+      \expandafter\cch@mark@name\expandafter{\@tempa}%
     \endgroup
   \fi
 }
@@ -707,16 +707,16 @@
 %   the \lstinline{bookmark} package.
 %    \begin{macrocode}
 \def\tp@make@bookmarks{%
-  \cc@check@empty[Toc]{heading}{Title}{BM}%
-  \cc@check@empty[Toc]{heading}{Number}{BM}%
-  \cc@check@empty[Toc]{heading}{AuthorNameList}{BM}%
-  \cc@check@empty[Toc]{heading}{Subtitle}{BM}%
-  \ccIfAttrIsSet{heading}{noBM}
+  \cc@check@empty[Toc]{Heading}{Title}{BM}%
+  \cc@check@empty[Toc]{Heading}{Number}{BM}%
+  \cc@check@empty[Toc]{Heading}{AuthorNameList}{BM}%
+  \cc@check@empty[Toc]{Heading}{Subtitle}{BM}%
+  \ccIfAttrIsSet{Heading}{noBM}
     {}
     {\ccIfProp{bookmark-level}{\edef\Hy@toclevel{\ccUseProperty{bookmark-level}}}{}%
      \begingroup
-       \tpGobble
-       \protected@edef\@tempa{\csname tp@heading@bookmark\endcsname}%
+       \ccGobble
+       \protected@edef\@tempa{\csname tp@Heading@bookmark\endcsname}%
        \bookmark[level=\Hy@toclevel,dest=\@currentHref]{\expandonce{\@tempa}}%
      \endgroup
    }}
@@ -783,17 +783,17 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \section{The \protect\texttt{heading} environment}
+% \section{The \protect\texttt{Heading} environment}
 %
 % \subsection{Environment Macros}
 %
 %
-% \begin{macro}{\heading} is the macro called at the begin of the
-%   \lstinline{heading} environment. Optional \#1 stores the headings
+% \begin{macro}{\cch@heading} is the macro called at the begin of the
+%   \lstinline{Heading} environment. Optional \#1 stores the headings
 %   local parameters, \#2 is the level of the heading.
 %    \begin{macrocode}
-\def\heading{\cc@opt@empty\@heading}%
-\def\@heading[#1]#2{%
+\def\cch@heading{\cc@opt@empty\@cch@heading}%
+\def\@cch@heading[#1]#2{%
 %    \end{macrocode}
 % Adding start tags for the contents that ``belong'' to a
 % heading. \textbf{Warning}, the following code is incredibly ugly. In
@@ -803,24 +803,25 @@
 %
 % This is necessary, because otherwise we would need to either
 % manually add the starting sectioning tag outside the
-% \lstinline{heading} environment, or, if we want to keep
+% \lstinline{\ccPrefix Heading} environment, or, if we want to keep
 % \lstinline{ltpdfa}'s \lstinline{autoclose} mechanism, the sectioning
-% tag is auto-ended at \lstinline|\end{heading}|. Using the
-% \lstinline{env/heading/before} hook won't work either, because at
+% tag is auto-ended at \lstinline|\end{Heading}|. Using the
+% \lstinline{env/Heading/before} hook won't work either, because at
 % the time of its expansion, the level of the heading isn't known, yet. So, we
 % need to take the ugly road, for now.
 %    \begin{macrocode}
   \ccIfAlly
-    {\endgroup
+    {\global\let\cch@currenvir\@currenvir
+     \endgroup
      \ccaVstructStart{#2}%
-     \ifnum\luatexversion>111\relax\UseHook{env/heading/before}\fi
+     \ifnum\luatexversion>111\relax\UseHook{env/\ccPrefix Heading/before}\fi
      \@ignorefalse
      \begingroup
        \@endpefalse
-       \def\@currenvir{heading}%
+       \let\@currenvir\cch@currenvir
        \edef\@currenvline{\on@line}%
        \ifnum\luatexversion>111\relax
-         \@execute@begin@hook{heading}%
+         \@execute@begin@hook{\ccPrefix Heading}%
        \fi
     }{}%
 %    \end{macrocode}
@@ -831,13 +832,13 @@
 %    \end{macrocode}
 % Handling of the optional argument
 %    \begin{macrocode}
-  \ccParseAttributes{heading}{#1}%
+  \ccParseAttributes{Heading}{#1}%
 %    \end{macrocode}
 % and treatment of heading-level specific style classes.
 %    \begin{macrocode}
- \ccWhenAttr{heading}{class}
-    {\global\letcs\tp@current@class{tp@heading@attr@class}%
-     \expandafter\ccUseStyleClass\expandafter{\csname tp@heading@attr@class\endcsname}{heading}}%
+ \ccWhenAttr{Heading}{class}
+    {\global\let\cch@current@class\cc@Heading@attr@class% TODO: check if still needed!
+     \expandafter\ccUseStyleClass\expandafter{\cc@Heading@attr@class}{Heading}}%
 %    \end{macrocode}
 % The mandatory argument contains the heading level. This corresponds
 % to \LaTeX's way of counting heading levels, where, by default,
@@ -853,15 +854,15 @@
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\endheading}
-%   is stuff that happens at the end of the \lstinline{heading}
+% \begin{macro}{\cch@end@heading}
+%   is stuff that happens at the end of the \lstinline{Heading}
 %   environment.
 %    \begin{macrocode}
-\def\endheading{%
-  \expandafter\ifx\csname tpUseHeading\cch@sec@name\endcsname\relax
+\def\cch@end@heading{%
+  \expandafter\ifx\csname ccUseHeading\cch@sec@name\endcsname\relax
     \PackageError{coco-headings.sty}{Heading level \cch@sec@name\space unknown!}{A Heading with level \cch@sec@name\space is unknown. Use the \string\tpDeclareHeading\space macro to declare heading levels.}%
   \else
-    \csname tpUseHeading\cch@sec@name\endcsname%
+    \csname ccUseHeading\cch@sec@name\endcsname%
   \fi
   \cch@reset
 }
@@ -875,18 +876,18 @@
 %   other macros have their default values:
 %    \begin{macrocode}
 \def\cch@reserve{%
-  \ccSetContainer{heading}%
+  \ccSetContainer{Heading}%
   \let\cch@ltx@dbl@backslash\\
   \let\\\tpBreak
   \let\cc@ltx@label\label
-  \def\tpAuthorCnt{\z@}%
-  \def\tpAffilCnt{\z@}%
+  \def\ccAuthorCnt{\z@}%
+  \def\ccAffilCnt{\z@}%
   \cc@reset@components{\tp@cur@cont}%
   }
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\cch@reset} restores \LaTeX's default definitions (however, this
-%   should be unnecessary since \lstinline{heading} is an environment
+%   should be unnecessary since \lstinline{Heading} is an environment
 %   and therefore constitutes a closed group).
 %    \begin{macrocode}
 \def\cch@reset{%
@@ -909,14 +910,14 @@
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@heading@role@handlers} sets up the additional Components for the Author Role specific to headings.
+% \begin{macro}{\tp@Heading@role@handlers} sets up the additional Components for the Author Role specific to headings.
 %    \begin{macrocode}
 \def\cch@provide@authors{%
-  \tpAddToRole{Author}{%
+  \ccAddToRole{Author}{%
     \ccDeclareCountedComponent{AuthorContact}%
   }%
-  \tpDeclareRoleBlock{Author}{ContactBlock}{author-contact-block-format}%
-  \ccDeclareGroupHandler{tpAuthor}{%
+  \ccDeclareRoleBlock{Author}{ContactBlock}{author-contact-block-format}%
+  \ccDeclareGroupHandler{Author}{%
     \ccIfComp{AuthorContact}{}{\csname tpAuthorContact\endcsname{\ccUseProperty{author-contact-format}}}{}%
   }%
   \cc@provide@overrides{AuthorNameList}%
@@ -934,7 +935,7 @@
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\cc@provide@overrides} declares the Component
-%   macros for a heading Component's overrides. \#1 is the Component
+%   macros for a Heading Component's overrides. \#1 is the Component
 %   name. The overrides allow a four-way distinction between
 %   \textit{i} the data printed in-situ (\lstinline{\tp#1}), \textit{ii} data sent
 %   to toc (\lstinline{\tpToc#1}), (iii) data sent to the page styles (\lstinline{\tpRun#1}), and (iv) the data sent
@@ -951,7 +952,7 @@
 % \section{Defaults}
 %
 %    \begin{macrocode}
-\ccAddToProperties{heading}{%
+\ccAddToProperties{Heading}{%
   \ccSetProperty{interline-para}{}%
   \ccSetProperty{interline-para-sep}{\space}
   \ccSetProperty{heading-par}{%
@@ -1076,7 +1077,7 @@
     \tpUseComp{BMTitle}%
   }%
   \ccSetProperty{orcid-link}{% how the ORC-ID is rendered
-    \ccIfComp{ORCID}{\def\tp@Linkimg{\includegraphics[height=1em]{logos/ORCID.pdf}}\tpCompLink{ORCID}{\tp@Linkimg}}{}%
+    \ccIfComp{ORCID}{\def\tp@Linkimg{\includegraphics[height=1em]{logos/ORCID.pdf}}\ccCompLink{ORCID}{\tp@Linkimg}}{}%
   }%
   %% a single Author's contact infomration block
   \ccSetProperty{author-contact-format}{%Format of a single author's contact information
@@ -1085,7 +1086,7 @@
   }%
   \ccPropertyLet{author-list-format}{author-list-print-format}%
   \ccSetProperty{author-contact-block-format}{% Format of the whole contact information block
-    \tpUseComp{AuthorContact}\ifnum\tpCurCount<\tpTotalCount\ccUseProperty{counted-name-sep}\fi
+    \tpUseComp{AuthorContact}\ifnum\tpCurCount<\ccTotalCount\ccUseProperty{counted-name-sep}\fi
   }%
 }
 %    \end{macrocode}

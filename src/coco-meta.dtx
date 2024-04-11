@@ -45,7 +45,7 @@
 %    \begin{macrocode}
 \def\tp@meta@generic@comp{%
   \ccDeclareComponent{GenericMetaBlock}{\expandafter\global}{}%
-  \ccDeclareComponentGroup{tpGenericMeta}{%
+  \ccDeclareComponentGroup{GenericMeta}{%
     \ccDeclareCountedComponent{Heading}%
     \ccDeclareCountedComponent{Content}%
   }}
@@ -81,7 +81,7 @@
 %    \begin{macrocode}
 \def\tpDeclareRole{\cc@opt@second\tp@declare@role}%
 \def\tp@declare@role[#1]#2{%
-  \ccDeclareComponentGroup{tp#2}{%
+  \ccDeclareComponentGroup{#2}{%
     \ccDeclareCountedComponent{FullName}%
     \ccDeclareCountedComponent{CiteName}%
     \ccDeclareCountedComponent{ShortCiteName}%
@@ -98,7 +98,7 @@
     \ccDeclareCountedComponent{Email}%
     \ccDeclareCountedComponent{CorrespondenceAs}%
   }%
-  \ccDeclareGroupHandler{tp#2}{%
+  \ccDeclareGroupHandler{#2}{%
     \ccIfComp{FullName}{}{\tpFullName{\ccUseProperty{#1-full-name-format}}}%
     \ccIfComp{Initial}{}{\tpInitial{\ccUseProperty{initials-format}}}%
     \ccIfComp{CiteName}{}{\tpCiteName{\ccUseProperty{#1-cite-name-format}}}%
@@ -107,25 +107,25 @@
     \ccIfComp{CorrespondenceAs}{}{\tpCorrespondenceAs{\ccUseProperty{#1-correspondence-as-format}}}%
     \ccIfComp{AffilRef}{\ccIfComp{Affiliation}{%
         \ccPackageError{Meta}{Ambiguity}
-          {You cannot use both Containers \string\tpAffilRef\space and \string\tpAffiliation\space in the same `tp#2' Sub-Container}
-          {At least one `tp#2' Sub-Container contains both \string\tpAffilRef\space and \string\tpAffiliation. This is not allowed. Please decide for one affiliation strategy: Either two lists with cross-references, or affiliations directly as an author's meta-data.}}{}}{}%
+          {You cannot use both Containers \string\tpAffilRef\space and \string\tpAffiliation\space in the same `\ccPrefix#2' Sub-Container}
+          {At least one `\ccPrefix#2' Sub-Container contains both \string\tpAffilRef\space and \string\tpAffiliation. This is not allowed. Please decide for one affiliation strategy: Either two lists with cross-references, or affiliations directly as an author's meta-data.}}{}}{}%
   }%
-  \tpDeclareRoleBlock{#2}{NameList}{#1-list-print-format}%
-  \tpDeclareRoleBlock{#2}{CitationList}{#1-list-cite-format}%
-  \tpDeclareRoleBlock{#2}{ShortCitationList}{#1-list-short-cite-format}%
-  \tpDeclareRoleBlock[apply]{#2}{PDFInfo}{#1-list-pdfinfo-format}%
-  \tpDeclareRoleBlock{#2}{Correspondence}{#1-list-correspondence-format}%
+  \ccDeclareRoleBlock{#2}{NameList}{#1-list-print-format}%
+  \ccDeclareRoleBlock{#2}{CitationList}{#1-list-cite-format}%
+  \ccDeclareRoleBlock{#2}{ShortCitationList}{#1-list-short-cite-format}%
+  \ccDeclareRoleBlock[apply]{#2}{PDFInfo}{#1-list-pdfinfo-format}%
+  \ccDeclareRoleBlock{#2}{Correspondence}{#1-list-correspondence-format}%
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tpAddToRole} appends another Component declaration block \#2 to a pre-defined Role \#1.
+% \begin{macro}{\ccAddToRole} appends another Component declaration block \#2 to a pre-defined Role \#1.
 %    \begin{macrocode}
-\def\tpAddToRole#1#2{%
-  \csgappto{@tp#1@hook}{#2}%
+\def\ccAddToRole#1#2{%
+  \csgappto{@#1@hook}{#2}%
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tpDeclareRoleBlock} is used to create a new output
+% \begin{macro}{\ccDeclareRoleBlock} is used to create a new output
 %   container (named \lstinline{\tp#2#3}) for a given Role \#2. A Role
 %   Block is a Component of the parent Container which contains
 %   certain Components of all members of the Role within its parent
@@ -135,7 +135,7 @@
 %   the collector is to be composed. Valid values are
 %   \lstinline{compose} (default) or \lstinline{apply}.
 %    \begin{macrocode}
-\def\tpDeclareRoleBlock{\@ifnextchar[\tp@declare@role@block{\tp@declare@role@block[compose]}}%]
+\def\ccDeclareRoleBlock{\@ifnextchar[\tp@declare@role@block{\tp@declare@role@block[compose]}}%]
 \def\tp@declare@role@block[#1]#2#3#4{%
   \ifcsdef{tp@meta@role@#1}
     {\ccDeclareComponent{#2#3}{\expandafter\global}{}%
@@ -143,8 +143,8 @@
      \csappto{@tp@meta@role@eval@\tp@cur@cont @#2}
         {\csname tp@meta@role@#1\endcsname{#2}{#3}}}
     {\ccPackageError{Meta}{Argument}
-      {Invalid optional argument in \string\tpDeclareRoleBlock!}
-      {Only `apply' or `compose' are allowed as values^^Jin the optional argument of \string\tpDeclareRoleBlock!}}}%
+      {Invalid optional argument in \string\ccDeclareRoleBlock!}
+      {Only `apply' or `compose' are allowed as values^^Jin the optional argument of \string\ccDeclareRoleBlock!}}}%
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\tp@meta@role@eval} creates the name lists for the
@@ -172,14 +172,14 @@
 % than 0. If neither is the case, this means that the Group does not
 % occur in the input, at all, so we don't need to do anything.
 %    \begin{macrocode}
-    \ifcsdef{tp#2Cnt}
-      {\expandafter\ifnum\csname tp#2Cnt\endcsname>\z@
+    \ifcsdef{cc#2Cnt}
+      {\expandafter\ifnum\csname cc#2Cnt\endcsname>\z@
 %    \end{macrocode}
 % otherwise, we call the Property that is stored in
 % \lstinline{\tp@meta@role@\tp@cur@cont @#2@#3} and store the result in the
 % Component \lstinline{#2#3}.
 %    \begin{macrocode}
-          #1{tp#2}{\csname tp@meta@role@\tp@cur@cont @#2@#3\endcsname}{#2#3}%
+          #1{#2}{\csname tp@meta@role@\tp@cur@cont @#2@#3\endcsname}{#2#3}%
         \fi
       }{}}}
 %    \end{macrocode}
@@ -216,7 +216,7 @@
   \ccDeclareComponent{#2Label}{\expandafter\global}{}%
   \csxdef{labeled-meta-property-infix-\tp@cur@cont-#2}{#3}%
   \if!#1!\else
-    \long\csgdef{tp@\tp@cur@cont @#2Label}{#1}%
+    \long\csgdef{cc@\tp@cur@cont @#2Label}{#1}%
   \fi
 }
 %    \end{macrocode}
@@ -303,7 +303,7 @@
 %    \begin{macrocode}
 \def\tp@declare@meta@affils{%
   \ccDeclareComponent{AffilBlock}{\expandafter\global}{}%
-  \ccDeclareComponentGroup{tpAffil}{%
+  \ccDeclareComponentGroup{Affil}{%
     \ccDeclareCountedComponent{Affiliation}%
     \ccDeclareCountedComponent{Address}%
     \ccDeclareCountedComponent{Institute}%
@@ -311,9 +311,9 @@
     \ccDeclareCountedComponent{Department}%
     \ccDeclareCountedComponent{AffilID}%
   }%
-  \ccDeclareGroupHandler{tpAffil}{%
-    \ccIfComp{AffilID}{}{\expandafter\tpAffilID\expandafter{\tpAffilCnt}}%
-    \ccIfComp{Affiliation}{}{\tpAffiliation{\ccUseProperty{affiliation-format}}}%
+  \ccDeclareGroupHandler{Affil}{%
+    \ccIfComp{AffilID}{}{\ccComponentEA{AffilID}{\ccAffilCnt}}%
+    \ccIfComp{Affiliation}{}{\ccComponent{Affiliation}{\ccUseProperty{affiliation-format}}}%
   }%
 }
 %    \end{macrocode}
@@ -324,13 +324,13 @@
 %    \begin{macrocode}
 \ccAddToProperties{CommonMeta}{%
   \ccSetProperty{initials-format}{%
-    \expandafter\ifx\csname tp@\tp@cur@cont @\tp@cnt@grp-FirstName-\the\tpCurCount\endcsname\cc@long@empty\else
-      \expandafter\ifx\csname tp@\tp@cur@cont @\tp@cnt@grp-FirstName-\the\tpCurCount\endcsname\relax\else
-        \expandafter\expandafter\expandafter\@car\csname tp@\tp@cur@cont @\tp@cnt@grp-FirstName-\the\tpCurCount\endcsname\relax\@nil\ccUseProperty{initials-period}%
-      \expandafter\ifx\csname tp@\tp@cur@cont @\tp@cnt@grp-MidName-\the\tpCurCount\endcsname\cc@long@empty\else
-        \expandafter\ifx\csname tp@\tp@cur@cont @\tp@cnt@grp-MidName-\the\tpCurCount\endcsname\relax\else
+    \expandafter\ifx\csname cc@\tp@cur@cont @\tp@cnt@grp-FirstName-\the\tpCurCount\endcsname\cc@long@empty\else
+      \expandafter\ifx\csname cc@\tp@cur@cont @\tp@cnt@grp-FirstName-\the\tpCurCount\endcsname\relax\else
+        \expandafter\expandafter\expandafter\@car\csname cc@\tp@cur@cont @\tp@cnt@grp-FirstName-\the\tpCurCount\endcsname\relax\@nil\ccUseProperty{initials-period}%
+      \expandafter\ifx\csname cc@\tp@cur@cont @\tp@cnt@grp-MidName-\the\tpCurCount\endcsname\cc@long@empty\else
+        \expandafter\ifx\csname cc@\tp@cur@cont @\tp@cnt@grp-MidName-\the\tpCurCount\endcsname\relax\else
           \ccUseProperty{initials-sep}%
-          \expandafter\expandafter\expandafter\@car\csname tp@\tp@cur@cont @\tp@cnt@grp-MidName-\the\tpCurCount\endcsname\relax\@nil\ccUseProperty{initials-period}%
+          \expandafter\expandafter\expandafter\@car\csname cc@\tp@cur@cont @\tp@cnt@grp-MidName-\the\tpCurCount\endcsname\relax\@nil\ccUseProperty{initials-period}%
         \fi\fi
     \fi\fi
   }
@@ -360,10 +360,10 @@
   \ccPropertyLet{role-pdfinfo-name-format}{role-cite-name-format}% How PDFInfoName for each item is built
   \ccSetProperty{role-correspondence-as-format}{\tpUseComp{Email}}% How PDFInfoName for each item is built
   %% Properties that control how the single items in a compoent list are formatted:
-  \ccSetProperty{role-block-print-format}{\tpUseComp{FullName}\ifnum\tpCurCount<\tpTotalCount\ccUseProperty{counted-name-sep}\fi}% How <Role>NameList for each name is build
-  \ccSetProperty{role-block-cite-format}{\tpUseComp{CiteName}\ifnum\tpCurCount<\tpTotalCount\ccUseProperty{counted-name-sep}\fi}% How each item in Component <Role>CitationList is formatted
-  \ccSetProperty{role-block-short-cite-format}{\tpUseComp{ShortCiteName}\ifnum\tpCurCount<\tpTotalCount\ccUseProperty{counted-name-sep}\fi}%  How each item in the Component <Role>ShortCitationList is formatted
-  \ccSetProperty{role-block-pdfinfo-format}{\tpUseComp{PDFInfoName}\ifnum\tpCurCount<\tpTotalCount\ccUseProperty{counted-name-sep}\fi}% How each item in the Component <Role>PDFInfo is formatted
+  \ccSetProperty{role-block-print-format}{\tpUseComp{FullName}\ifnum\tpCurCount<\ccTotalCount\ccUseProperty{counted-name-sep}\fi}% How <Role>NameList for each name is build
+  \ccSetProperty{role-block-cite-format}{\tpUseComp{CiteName}\ifnum\tpCurCount<\ccTotalCount\ccUseProperty{counted-name-sep}\fi}% How each item in Component <Role>CitationList is formatted
+  \ccSetProperty{role-block-short-cite-format}{\tpUseComp{ShortCiteName}\ifnum\tpCurCount<\ccTotalCount\ccUseProperty{counted-name-sep}\fi}%  How each item in the Component <Role>ShortCitationList is formatted
+  \ccSetProperty{role-block-pdfinfo-format}{\tpUseComp{PDFInfoName}\ifnum\tpCurCount<\ccTotalCount\ccUseProperty{counted-name-sep}\fi}% How each item in the Component <Role>PDFInfo is formatted
   \ccSetProperty{role-block-correspondence-format}{%
     \ccIfAttrIsSet{\tp@cnt@grp-\the\tpCurCount}{corresp}
       {\ifx\is@first@corresp\relax
@@ -409,7 +409,7 @@
       \ccUseProperty{affil-block-item-face}%
       \tpUseComp{Affiliation}
     \egroup%
-    \ifnum\tpCurCount<\tpTotalCount\relax\ccUseProperty{affil-sep}\fi%
+    \ifnum\tpCurCount<\ccTotalCount\relax\ccUseProperty{affil-sep}\fi%
   }
   \ccSetProperty{affil-block-face}{\small\normalfont}%
   \ccSetProperty{affil-block-format}{%

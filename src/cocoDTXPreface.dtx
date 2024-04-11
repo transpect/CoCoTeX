@@ -64,12 +64,12 @@
 \let\endmacro\relax
 
  %% Environment for CoCoTeX Containers:
-\def\tpContainer{\begingroup
+\def\ContainerDoc{\begingroup
    \catcode`\\12
    \let\is@m@cro@\relax
    \MakePrivateLetters\tp@doc@container%
 }
-\let\endtpContainer\relax%
+\let\endContainerDoc\relax%
 \def\tp@doc@container#1{\endgroup \topsep\MacroTopsep%
   \edef\saved@macroname{\string#1}%
   \let\saved@indexname\saved@macroname
@@ -81,6 +81,8 @@
   \SpecialContIndex{#1}\nobreak
   \DoNotIndex{#1}%
 }
+\let\tpContainer\ContainerDoc
+\let\endtpContainer\endContainerDoc
 
  % Environment for CoCoTeX Property definitions: #1 is the name of the
  % parent container, #2 is the name of the Property, BODY is the

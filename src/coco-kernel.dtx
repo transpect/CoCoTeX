@@ -64,17 +64,24 @@
 %   info string.
 %    \begin{macrocode}
 \def\ccPackageInfo#1#2#3{%
-   \GenericInfo{%
-      (#1)\@spaces\@spaces\@spaces\@spaces
-   }{%
-      [CoCoTeX #1 \if!#2!\else#2 \fi] #3%
-   }%
+  \GenericInfo{%
+    (#1)\@spaces\@spaces\@spaces\@spaces
+  }{%
+    [CoCoTeX #1\if!#2!\else\space#2\fi] #3%
+  }%
 }
 %    \end{macrocode}
 % \end{macro}
 %
 % \section{Global Switches}
 %
+% \begin{macro}{\ccPrefix} is the prefix that is added to Component
+%   macros and (some) Container environments.
+%    \begin{macrocode}
+\ifx\ccPrefix\@undefined\def\ccPrefix{}\fi
+\ccPackageInfo{Kernel}{Info}{The Macro prefix is now `\ccPrefix'.}
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\if@cc@is@final} is a boolean switch that indicates
 %     whether or not a process is final. This is mainly used in the
 %     accessibility module where it matters if a macro is actually
@@ -151,8 +158,8 @@
 %    \begin{macrocode}
     \def\ccDeclareEnv{\@ifnextchar [{\cc@declare@env}{\cc@declare@env[#1]}}%]
     \def\cc@declare@env[##1]##2##3{%
-      \csgdef{##1}{\global\let\reserved@cont\tp@cur@cont\def\tp@cur@cont{#1}##2}%
-      \csgdef{end##1}{##3}\global\let\tp@cur@cont\reserved@cont}%
+      \csgdef{\ccPrefix ##1}{\global\let\reserved@cont\tp@cur@cont\def\tp@cur@cont{#1}##2}%
+      \csgdef{end\ccPrefix ##1}{##3}\global\let\tp@cur@cont\reserved@cont}%
 %    \end{macrocode}
 % \end{macro}
 %    \begin{macrocode}
@@ -161,14 +168,12 @@
     }%
   \expandafter\x\endgroup
 }
-\let\tpDeclareContainer\ccDeclareContainer% legacy
 \@onlypreamble\ccDeclareContainer
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccAddToType} add additional content (i.e., the next token) to a Type \#1 of a previously declared Container \#2.
 %    \begin{macrocode}
 \def\ccAddToType#1#2{\csgappto{cc@type@#1@#2}}
-\let\tpAddToType\ccAddToType% legacy
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccEvalType}
@@ -264,7 +269,7 @@
 % \begin{description}
 % \item[\#1] is the Component's identifier.
 %   The internal macro that is used to store the Component's value is
-%   \lstinline{\csname tp@<current Container name>@<#1>\endcsname}. If omitted, \#1 is the same as \#2.
+%   \lstinline{\csname cc@<current Container name>@<#1>\endcsname}. If omitted, \#1 is the same as \#2.
 % \item[\#2] is the Component's name.
 % \item[\#3] is code that is executed \textit{before} assignment of the user's value
 % \item[\#4] is code that is executed \textit{after} assignment of the user's value
@@ -272,9 +277,9 @@
 %    \begin{macrocode}
 \def\ccDeclareComponent{\cc@opt@second\cc@declare@comp}
 \def\cc@declare@comp[#1]#2#3#4{%
-  \ltx@LocalExpandAfter\global\expandafter\let\csname tp@\tp@cur@cont @#1\endcsname\relax
-  \expandafter\long\expandafter\def\csname tp#2\endcsname##1{%
-    #3\expandafter\long\expandafter\def\csname tp@\tp@cur@cont @#1\endcsname{##1}\ignorespaces#4}%
+  \ltx@LocalExpandAfter\global\expandafter\let\csname cc@\tp@cur@cont @#1\endcsname\relax
+  \expandafter\long\expandafter\def\csname \ccPrefix#2\endcsname##1{%
+    #3\expandafter\long\expandafter\def\csname cc@\tp@cur@cont @#1\endcsname{##1}\ignorespaces#4}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -285,51 +290,65 @@
 \def\ccDeclareGlobalComponent{\cc@opt@empty\cc@declare@global@comp}%
 \def\cc@declare@global@comp[#1]#2{%
   \ccDeclareComponent{#2}{\expandafter\global}{}%
-  \if!#1!\else\csname tp#2\endcsname{#1}\fi%
+  \if!#1!\else\csname \ccPrefix #2\endcsname{#1}\fi%
 }
 %    \end{macrocode}
 % \end{macro}
 % Once declared, a component can be set in two ways: The first way is
-% to use \lstinline{\tp<name>} with one argument for its value. The
+% to use \lstinline{\ccPrefix<name>} with one argument for its value. The
 % second, preferred, way is to use the \lstinline{\ccComponent} macro which
 % takes two arguments: \#1 is the name of the Component, \#2 is the
 % value. This macro checks whether an Component of name \#1 has
 % actually been declared and does so, if not.
+%
+% \begin{macro}{\cc@counted@comp@scheme} gives the scheme how counted
+%   components are defined internally. It consumes one argument \#1,
+%   which contains the name of the Counted Component.
+%    \begin{macrocode}
+\def\cc@counted@comp@scheme#1{\tp@cnt@grp-#1-\csname \tp@cnt@grp Cnt\endcsname}
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\ccComponent}
 %   This is the preferred way to fill a Component with content. \#1 is
 %   the Component's name, \#2 is the value.
 %    \begin{macrocode}
 \long\protected\def\ccComponent#1#2{%
   \ifx\cc@is@counted\relax
-    \ifcsdef{tp@\tp@cur@cont @#1}{}
-      {\cc@def@counted@comp{\tp@cnt@grp-#1-\csname \tp@cnt@grp Cnt\endcsname}{#1}{}{}}%
-    \csgdef{tp@\tp@cur@cont @\tp@cnt@grp-#1-\csname \tp@cnt@grp Cnt\endcsname}{#2}%
+    \ifcsdef{cc@\tp@cur@cont @#1}{}
+      {\cc@def@counted@comp{\cc@counted@comp@scheme{#1}}{#1}{}{}}%
+    \csgdef{cc@\tp@cur@cont @\cc@counted@comp@scheme{#1}}{#2}%
   \else
-    \ifcsdef{tp@\tp@cur@cont @#1}{}{\ccDeclareComponent{#1}{}{}}%
-    \csname tp#1\endcsname{#2}%
+    \ifcsdef{cc@\tp@cur@cont @#1}{}{\ccDeclareComponent{#1}{}{}}%
+    \csdef{cc@\tp@cur@cont @#1}{#2}%
   \fi
 }
-\let\tpSetComp\ccComponent% legacy
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tpUseComp} is a high level command to return (or
+% \begin{macro}{\ccComponentEA} is a variant of
+%   \lstinline{\ccComponent} but it expands the Content in \#2 once
+%   before it is assigned to the Component \#1.
+%    \begin{macrocode}
+\long\protected\def\ccComponentEA#1#2{%
+  \def\x{\ccComponent{#1}}\expandafter\x\expandafter{#2}%
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccUseComp} is a high level command to return (or
 %   print) the material stored as a Component with the name \#1.
 %    \begin{macrocode}
-\def\tpUseComp#1{\csname tp@\tp@cur@cont @#1\endcsname}
+\def\ccUseComp#1{\csname cc@\tp@cur@cont @#1\endcsname}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccdefFromComp} is a high level command to store the
 %   value of a Component \#2 into a CS token \#1.
 %    \begin{macrocode}
 \def\ccdefFromComp#1#2{\cc@store@comp{e}#1{#2}}
-\let\tpStoreComp\ccdefFromComp% legacy
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccgdefFromComp} is the global variant of
 %   \lstinline{\ccdefFromComp}.
 %    \begin{macrocode}
 \def\ccgdefFromComp#1#2{\cc@store@comp{x}#1{#2}}
-\let\tpGStoreComp\ccgdefFromComp% legacy
 %    \end{macrocode}
 % \end{macro}
 %
@@ -341,7 +360,7 @@
 \def\strip@longprefix#1\long macro:->#2{#2}
 \long\def\cc@store@comp#1#2#3{%
   \edef\@tempa{\expandonce{\csname protected@#1def\endcsname}\noexpand#2}%
-  \protected@edef\@tempb{\csname tp@\tp@cur@cont @#3\endcsname}%
+  \protected@edef\@tempb{\csname cc@\tp@cur@cont @#3\endcsname}%
    \ifx\@tempb\relax
      \let#2\relax
    \else
@@ -353,8 +372,7 @@
 % \begin{macro}{\ccUseComponentFrom} is a high level command to return (or
 %   print) the material stored as a global Component from the Container \#1 with the name \#2.
 %    \begin{macrocode}
-\def\ccUseComponentFrom#1#2{\csname tp@#1@#2\endcsname}
-\let\tpUseGComp\ccUseComponentFrom% legacy
+\def\ccUseComponentFrom#1#2{\csname cc@#1@#2\endcsname}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccGetComp} is a high level command to return the
@@ -362,15 +380,13 @@
 %   Component is neither empty nor \lstinline{\relax}.
 %    \begin{macrocode}
 \def\ccGetComp#1{\ccWhenComp{#1}{\tpUseComp{#1}\par}}
-\let\tpGetComp\ccGetComp% legacy
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccIfComp} is a high level macro that executes \#2 if
 %   the Component macro \#1 is used in a Container (empty or
 %   non-empty), and \#3 if not.
 %    \begin{macrocode}
-\long\def\ccIfComp#1#2#3{\expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\relax#3\else#2\fi}
-\let\tpIfComp\ccIfComp% legacy
+\long\def\ccIfComp#1#2#3{\expandafter\ifx\csname cc@\tp@cur@cont @#1\endcsname\relax#3\else#2\fi}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccWhenComp} is a high level variant of
@@ -378,8 +394,7 @@
 %   is code that is expanded when the Component \#1 is used in a
 %   container (empty or non-empty).
 %    \begin{macrocode}
-\long\def\ccWhenComp#1#2{\expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\relax\else#2\fi}
-\let\tpWhenComp\ccWhenComp% legacy
+\long\def\ccWhenComp#1#2{\expandafter\ifx\csname cc@\tp@cur@cont @#1\endcsname\relax\else#2\fi}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccUnlessComp} is a high level variant of
@@ -387,7 +402,7 @@
 %   is the code that is expanded when a Container \#1 is \textit{not}
 %   used in a Container (neither empty nor non-empty).
 %    \begin{macrocode}
-\long\def\ccUnlessComp#1#2{\expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\relax#2\fi}
+\long\def\ccUnlessComp#1#2{\expandafter\ifx\csname cc@\tp@cur@cont @#1\endcsname\relax#2\fi}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccIfCompFrom} Global variant of
@@ -395,7 +410,7 @@
 %   the name of the Component, \#3 is the \lstinline{then}-branch, \#4
 %   is the \lstinline{else}-branch.
 %    \begin{macrocode}
-\long\def\ccIfCompFrom#1#2#3#4{\expandafter\ifx\csname tp@#1@#2\endcsname\relax#4\else#3\fi}
+\long\def\ccIfCompFrom#1#2#3#4{\expandafter\ifx\csname cc@#1@#2\endcsname\relax#4\else#3\fi}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccIfCompEmpty} is a high level macro that executes \#2 if
@@ -403,7 +418,7 @@
 %   Container, and \#3 if it is either not existant or non-empty.
 %    \begin{macrocode}
 \long\def\cc@long@empty{}
-\long\def\ccIfCompEmpty#1#2#3{\expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\cc@long@empty#2\else#3\fi}
+\long\def\ccIfCompEmpty#1#2#3{\expandafter\ifx\csname cc@\tp@cur@cont @#1\endcsname\cc@long@empty#2\else#3\fi}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccIfCompFromEmpty} is a global variant of
@@ -411,7 +426,7 @@
 %   is the name of the Component, \#3 is the \lstinline{then}-branch,
 %   \#4 is the \lstinline{else}-branch.
 %    \begin{macrocode}
-\long\def\ccIfCompFromEmpty#1#2#3#4{\expandafter\ifx\csname tp@#1@#2\endcsname\cc@long@empty#3\else#4\fi}
+\long\def\ccIfCompFromEmpty#1#2#3#4{\expandafter\ifx\csname cc@#1@#2\endcsname\cc@long@empty#3\else#4\fi}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\cc@check@empty} handles the distinction between empty
@@ -430,14 +445,13 @@
 %   Override's prefix.
 %    \begin{macrocode}
 \def\cc@check@empty{\cc@opt@empty\@cc@check@empty}%]
-\let\tp@check@empty\cc@check@empty% legacy
 \def\@cc@check@empty[#1]#2#3#4{%
    \ccIfComp{#4#3}
      {\ccIfCompEmpty{#4#3}
-       {\expandafter\global\expandafter\let\csname tp@#2@#4#3\endcsname\relax}
+       {\expandafter\global\expandafter\let\csname cc@#2@#4#3\endcsname\relax}
        {}}
      {\ccIfComp{#1#3}
-       {\expandafter\expandafter\expandafter\let\expandafter\csname tp@#2@#4#3\expandafter\endcsname\csname tp@#2@#1#3\endcsname}
+       {\expandafter\expandafter\expandafter\let\expandafter\csname cc@#2@#4#3\expandafter\endcsname\csname \ccPrefix @#2@#1#3\endcsname}
        {}}}
 %    \end{macrocode}
 % \end{macro}
@@ -455,16 +469,16 @@
 %   declare a new Component Group with the name \#1 and the body \#2.
 %    \begin{macrocode}
 \def\ccDeclareComponentGroup#1#2{%
-  \csnumgdef{#1Cnt}{\z@}%
-  \csdef{#1}{\cc@opt@empty{\csname @#1\endcsname}}%
-  \csdef{@#1}[##1]{%
-    \def\tp@cnt@grp{#1}%
-    \csxdef{#1Cnt}{\expandafter\the\expandafter\numexpr\csname #1Cnt\endcsname+\@ne\relax}%
-    \if!##1!\else\csgdef{tp@\tp@cur@cont @#1-\csname #1Cnt\endcsname @attrs}{##1}\fi
+  \csnumgdef{cc#1Cnt}{\z@}%
+  \csdef{\ccPrefix#1}{\cc@opt@empty{\csname cc@group@#1\endcsname}}%
+  \csdef{cc@group@#1}[##1]{%
+    \def\tp@cnt@grp{cc#1}%
+    \csxdef{cc#1Cnt}{\expandafter\the\expandafter\numexpr\csname cc#1Cnt\endcsname+\@ne\relax}%
+    \if!##1!\else\csgdef{cc@\tp@cur@cont @#1-\csname cc#1Cnt\endcsname @attrs}{##1}\fi
     #2%
     \csname @#1@hook\endcsname
   }%
-  \csdef{end#1}{{\ccToggleCountedConditionals\csuse{tp@compose@group@#1}}}%
+  \csdef{end\ccPrefix#1}{{\ccToggleCountedConditionals\csuse{cc@compose@group@#1}}}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -477,13 +491,12 @@
 %   Component ``FullName''.
 %    \begin{macrocode}
 \def\ccDeclareGroupHandler#1#2{%
-  \ifcsdef{@#1}
-    {\ifcsdef{tp@compose@group@#1}
-      {\csgappto{tp@compose@group@#1}{#2}}
-      {\csgdef{tp@compose@group@#1}{#2}}}
+  \ifcsdef{cc@group@#1}
+    {\ifcsdef{cc@compose@group@#1}
+      {\csgappto{cc@compose@group@#1}{#2}}
+      {\csgdef{cc@compose@group@#1}{#2}}}
     {\ccPackageError{Kernel}{Type}{Component Group `#1' unknown!}{You tried to declare a Group Handler for a Component Group that has not been declared, yet! Use \string\ccDeclareComponentGroup{#1}{} to declare the Component Group first.}}%
 }
-\let\tpGroupHandler\ccDeclareGroupHandler% legacy
 %    \end{macrocode}
 % \end{macro}
 %
@@ -495,7 +508,7 @@
 % \end{macro}
 % \begin{macro}{\ccUseCompByIndex} picks a Component with name \#3 and index \#2 from a group \#1.
 %    \begin{macrocode}
-\def\ccUseCompByIndex#1#2#3{\csname tp@\tp@cur@cont @#1-#3-#2\endcsname}
+\def\ccUseCompByIndex#1#2#3{\csname cc@\tp@cur@cont @#1-#3-#2\endcsname}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccUsePropFrom} picks a specific Property of a group.
@@ -503,14 +516,13 @@
 \def\ccUsePropFrom#1#2#3{%
   \begingroup
     \@tempcnta\numexpr#2\relax
-    \letcs\tpTotalCount{#1Cnt}%
-    \def\tp@cnt@grp{#1}%
+    \letcs\ccTotalCount{cc#1Cnt}%
+    \def\tp@cnt@grp{cc#1}%
     \ccToggleCountedConditionals
-    \csnumdef{#1Cnt}{\the\@tempcnta}%
+    \csnumdef{cc#1Cnt}{\the\@tempcnta}%
     \tpCurCount=\the\@tempcnta\relax%
-    \csname tp@\tp@cur@cont @#3\endcsname%
+    \csname cc@\tp@cur@cont @#3\endcsname%
   \endgroup}
-\let\tpUseGroupProp\ccUsePropFrom% legacy
 %    \end{macrocode}
 % \end{macro}
 %
@@ -554,7 +566,6 @@
 %   or \#3 if it has been generated from Counted Components.
 %    \begin{macrocode}
 \def\ccIfComponentOverride#1#2#3{\expandafter\ifx\csname cc@used@#1@override\endcsname\@empty#2\else#3\fi}
-\let\tpIfCompOverride\ccIfComponentOverride% legacy
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccComposeCollection} is used to create an unexpanded
@@ -563,29 +574,29 @@
 %    \begin{macrocode}
 \def\ccComposeCollection#1#2#3{%
   \ccIfComp{#3}{\cslet{cc@used@#3@override}\@empty}{%
-    \ifcsdef{#1Cnt}{%
-      \expandafter\ifnum\csname #1Cnt\endcsname > \z@\relax
+    \ifcsdef{cc#1Cnt}{%
+      \expandafter\ifnum\csname cc#1Cnt\endcsname > \z@\relax
         \edef\cc@iterate@res{%
           \noexpand\bgroup
-            \noexpand\def\noexpand\tpTotalCount{\csname #1Cnt\endcsname}%
+            \noexpand\def\noexpand\ccTotalCount{\csname cc#1Cnt\endcsname}%
             \noexpand\ccToggleCountedConditionals
-            \noexpand\def\noexpand\tp@cnt@grp{#1}}%
-          \expandafter\@tempcntb=\csname #1Cnt\endcsname\relax
+            \noexpand\def\noexpand\tp@cnt@grp{cc#1}}%
+          \expandafter\@tempcntb=\csname cc#1Cnt\endcsname\relax
           \cc@iterate{\@tempcnta}{\@ne}{\@tempcntb}{%
             \edef\@tempb{%
               %% top-level counter for user interaction
               \noexpand\tpCurCount=\the\@tempcnta
               %% evaluating group attributes
-              \ifcsdef{tp@\tp@cur@cont @#1-\the\@tempcnta @attrs}{\noexpand\ccParseAttributes{#1-\the\@tempcnta}{\csname tp@\tp@cur@cont @#1-\the\@tempcnta @attrs\endcsname}}{}
+              \ifcsdef{cc@\tp@cur@cont @#1-\the\@tempcnta @attrs}{\noexpand\ccParseAttributes{#1-\the\@tempcnta}{\csname cc@\tp@cur@cont @#1-\the\@tempcnta @attrs\endcsname}}{}
               %% internal counter for macro grabbing
-              \noexpand\csnumdef{#1Cnt}{\tpCurCount}%
+              \noexpand\csnumdef{cc#1Cnt}{\tpCurCount}%
               \noexpand\ccUseProperty{#2}}%
             \expandafter\expandafter\expandafter\def
             \expandafter\expandafter\expandafter\cc@iterate@res
             \expandafter\expandafter\expandafter{\expandafter\cc@iterate@res\@tempb}%
           }%
           \expandafter\def\expandafter\cc@iterate@res\expandafter{\cc@iterate@res\egroup}%
-          \cc@assign@res{tp#3}%
+          \cc@assign@res{\ccPrefix#3}%
       \fi
     }{}}%
 }
@@ -598,7 +609,7 @@
 \def\ccApplyCollection#1#2#3{%
   \ccIfComp{#3}{\cslet{cc@used@#3@override}\@empty}
     {\cc@apply@collection{#1}{#2}%
-     \cc@assign@res{tp#3}%
+     \cc@assign@res{\ccPrefix#3}%
    }%
 }
 %    \end{macrocode}
@@ -608,15 +619,15 @@
 \def\cc@apply@collection#1#2{%
   \begingroup
     \global\let\cc@iterate@res\relax
-    \letcs\tpTotalCount{#1Cnt}%
-    \cc@iterate{\@tempcnta}{\@ne}{\tpTotalCount}{%
+    \letcs\ccTotalCount{cc#1Cnt}%
+    \cc@iterate{\@tempcnta}{\@ne}{\ccTotalCount}{%
       \bgroup
         \ccToggleCountedConditionals
-        \def\tp@cnt@grp{#1}%
-        \csnumdef{#1Cnt}{\the\@tempcnta}%
-        \ifcsdef{tp@\tp@cur@cont @#1-\the\@tempcnta @attrs}{\ccParseAttributes{#1-\the\@tempcnta}{\csname tp@\tp@cur@cont @#1-\the\@tempcnta @attrs\endcsname}}{}
+        \def\tp@cnt@grp{cc#1}%
+        \csnumdef{cc#1Cnt}{\the\@tempcnta}%
+        \ifcsdef{cc@\tp@cur@cont @#1-\the\@tempcnta @attrs}{\ccParseAttributes{#1-\the\@tempcnta}{\csname cc@\tp@cur@cont @#1-\the\@tempcnta @attrs\endcsname}}{}
         \tpCurCount=\the\@tempcnta
-        \protected@xdef\@tempb{\csname tp@\tp@cur@cont @#2\endcsname}%
+        \protected@xdef\@tempb{\csname cc@\tp@cur@cont @#2\endcsname}%
         \@temptokena \expandafter{\@tempb}%
         \def\@tempc{\csgappto{cc@iterate@res}}%
         \expandafter\@tempc\expandafter{\@tempb}%
@@ -629,7 +640,7 @@
 %   a TeX macro. \#1 is a prefix to the def command, e.g.,
 %   \lstinline{\global} or \lstinline{\protected}; \#2 is the name of
 %   the TeX macro, \#3 is the Name of the Counted Component (incl. the
-%   tp-prefix), and \#4 is the Property that should be applied to all
+%   prefix), and \#4 is the Property that should be applied to all
 %   Members of the Counted Component.
 %    \begin{macrocode}
 \def\cc@comp@def{\cc@opt@empty\@cc@comp@def}
@@ -652,7 +663,6 @@
 % \begin{macro}{\ccgdefFromCountedComp} is the User-level command for \textit{global} \lstinline{\cc@comp@def}.
 %    \begin{macrocode}
 \def\ccgdefFromCountedComp{\cc@comp@def[\global]}
-\let\tpCompGDef\ccgdefFromCountedComp% legacy
 %    \end{macrocode}
 % \end{macro}
 %
@@ -664,12 +674,11 @@
 %    \begin{macrocode}
 \def\ccDeclareCountedComponent#1{%
   \cc@def@counted@comp
-    {\tp@cnt@grp-#1-\csname \tp@cnt@grp Cnt\endcsname}
+    {\cc@counted@comp@scheme{#1}}
     {#1}
     {}
     {\expandafter\global}%
 }
-\let\tpDeclareCountedComp\ccDeclareCountedComponent% legacy
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\cc@def@counted@comp}
@@ -684,10 +693,10 @@
   \ccDeclareComponent[#1]{#2}
     {\bgroup#3\expandafter\global}
     {\def\@tempa{{@cc@reset@components@\tp@cur@cont}}%
-     \edef\@tempb{\noexpand\csgundef{tp@\noexpand\tp@cur@cont @#1}}%
+     \edef\@tempb{\noexpand\csgundef{cc@\noexpand\tp@cur@cont @#1}}%
      \expandafter\expandafter\expandafter\csgappto\expandafter\@tempa\expandafter{\@tempb}%
      \egroup}%
-   #4\expandafter\long\expandafter\def\csname tp@\tp@cur@cont @#2\endcsname{\csname tp@\tp@cur@cont @#1\endcsname}%
+   #4\expandafter\long\expandafter\def\csname cc@\tp@cur@cont @#2\endcsname{\csname cc@\tp@cur@cont @#1\endcsname}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -738,19 +747,17 @@
 % before it can be expanded by \lstinline{\ifx}.
 %    \begin{macrocode}
   \long\def\ccIfComp##1{%
-    \expandafter\expandafter\expandafter\expandafter\expandafter\expandafter\expandafter\ifx\csname tp@\tp@cur@cont @##1\endcsname\relax\expandafter\@secondoftwo\else\expandafter\@firstoftwo\fi%
+    \expandafter\expandafter\expandafter\expandafter\expandafter\expandafter\expandafter\ifx\csname cc@\tp@cur@cont @##1\endcsname\relax\expandafter\@secondoftwo\else\expandafter\@firstoftwo\fi%
   }%
-  \let\tpIfComp\ccIfComp% legacy
   \long\def\ccWhenComp##1{%
-    \expandafter\expandafter\expandafter\expandafter\expandafter\expandafter\expandafter\ifx\csname tp@\tp@cur@cont @##1\endcsname\relax\expandafter\@gobble\else\expandafter\@firstofone\fi%
+    \expandafter\expandafter\expandafter\expandafter\expandafter\expandafter\expandafter\ifx\csname cc@\tp@cur@cont @##1\endcsname\relax\expandafter\@gobble\else\expandafter\@firstofone\fi%
   }%
-  \let\tpWhenComp\ccWhenComp% legacy
   \long\def\ccUnlessComp##1{%
-    \expandafter\expandafter\expandafter\expandafter\expandafter\expandafter\expandafter\ifx\csname tp@\tp@cur@cont @##1\endcsname\relax\expandafter\@firstofone\else\expandafter\@gobble\fi%
+    \expandafter\expandafter\expandafter\expandafter\expandafter\expandafter\expandafter\ifx\csname cc@\tp@cur@cont @##1\endcsname\relax\expandafter\@firstofone\else\expandafter\@gobble\fi%
   }%
   \long\def\ccIfCompEmpty##1{%
-    \expandafter\expandafter\expandafter\ifx\csname tp@\tp@cur@cont @##1\endcsname\cc@long@empty\expandafter\@firstoftwo\else\expandafter\@secondoftwo\fi}%
-  \let\tpIfCompEmpty\ccIfCompEmpty% legacy
+    \expandafter\expandafter\expandafter\ifx\csname cc@\tp@cur@cont @##1\endcsname\cc@long@empty\expandafter\@firstoftwo\else\expandafter\@secondoftwo\fi}%
+  \ccToggleCountedConditionalsHook% legacy
 }
 %    \end{macrocode}
 % \end{macro}
@@ -778,7 +785,6 @@
 %   hook the material in \#3 is to be appended to.
 %    \begin{macrocode}
 \def\ccAddToHook{\cc@opt@curcont\cc@add@to@hook}
-\let\tpAddToHook\ccAddToHook% legacy
 \def\cc@add@to@hook[#1]#2#3{%
   \expandafter\ifx\csname cc@hook@#1@#2\endcsname\relax
     \ccDeclareHook[#1]{#2}%
@@ -791,7 +797,6 @@
 %   the name \#2 from Container \#1 (current Container if omitted).
 %    \begin{macrocode}
 \def\ccUseHook{\cc@opt@curcont\cc@use@hook}
-\let\tpUseHook\ccUseHook% legacy
 \def\cc@use@hook[#1]#2{\csuse{cc@hook@#1@#2}}
 %    \end{macrocode}
 % \end{macro}
@@ -804,24 +809,21 @@
 %   for Containers. \#1 is the name of the Property, \#2 is the Value
 %   assigned to that Property.
 %    \begin{macrocode}
-\long\def\ccSetProperty#1#2{\long\csdef{tp@\tp@cur@cont @#1}{#2}}
-\let\tpSetProperty\ccSetProperty% legacy
+\long\def\ccSetProperty#1#2{\long\csdef{cc@\tp@cur@cont @#1}{#2}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccPropertyLet} can be used to create an alias
 %   Property \#1 of a given Property \#2. Is is equivalent to
 %   \lstinline|\ccSetProperty{\#1}{\ccUseProperty{\#2}}|.
 %    \begin{macrocode}
-\long\def\ccPropertyLet#1#2{\long\csedef{tp@\tp@cur@cont @#1}{\expandonce{\csname tp@\tp@cur@cont @#2\endcsname}}}
-\let\tpPropertyLet\ccPropertyLet% legacy
+\long\def\ccPropertyLet#1#2{\long\csedef{cc@\tp@cur@cont @#1}{\expandonce{\csname cc@\tp@cur@cont @#2\endcsname}}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccPropertyLetX} creates a Property \#1 with the fully
 %   expanded value of another Property \#2 Is is equivalent to
 %   \lstinline|\ccSetPropertyX{\#1}{\ccUseProperty{\#2}}|.
 %    \begin{macrocode}
-\long\def\ccPropertyLetX#1#2{\long\csedef{tp@\tp@cur@cont @#1}{\csname tp@\tp@cur@cont @#2\endcsname}}
-\let\tpPropertyLetX\ccPropertyLetX% legacy
+\long\def\ccPropertyLetX#1#2{\long\csedef{cc@\tp@cur@cont @#1}{\csname cc@\tp@cur@cont @#2\endcsname}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccSetPropertyVal}
@@ -831,7 +833,6 @@
 %   variable macro, dimension, counter or length to a Property.
 %    \begin{macrocode}
 \long\def\ccSetPropertyVal#1#2{\def\@tempa{\ccSetProperty{#1}}\expandafter\@tempa\expandafter{#2}}
-\let\tpSetPropVal\ccSetPropertyVal% legacy
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccSetPropertyX}
@@ -842,15 +843,13 @@
 %   actual values of Properties that otherwise expect fixed named or
 %   dimensional values.
 %    \begin{macrocode}
-\long\def\ccSetPropertyX#1#2{\long\csedef{tp@\tp@cur@cont @#1}{#2}}
-\let\tpSetPropertyX\ccSetPropertyX% legacy
+\long\def\ccSetPropertyX#1#2{\long\csedef{cc@\tp@cur@cont @#1}{#2}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccAddToProperties} adds the material in the next token
 %   to a Container of name \#1's \lstinline{Properties} Type.
 %    \begin{macrocode}
 \long\def\ccAddToProperties#1#2{\ccAddToType{Properties}{#1}{#2}}
-\let\tpAddToDefault\ccAddToProperties% legacy
 %    \end{macrocode}
 % \end{macro}
 %
@@ -859,8 +858,7 @@
 % \begin{macro}{\ccUseProperty}
 %   is a user-level command to directly access a previously set Property.
 %    \begin{macrocode}
-\def\ccUseProperty#1{\csuse{tp@\tp@cur@cont @#1}}
-\let\tpUseProperty\ccUseProperty% legacy
+\def\ccUseProperty#1{\csuse{cc@\tp@cur@cont @#1}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\cc@store@prop} stores the result of the application
@@ -891,8 +889,7 @@
 % \begin{macro}{\ccUsePropertyEnv}
 %   is a user-level command to access a previously set Property and make it an environment accessible to Property specific processing instrunctions (see below).
 %    \begin{macrocode}
-\def\ccUsePropertyEnv#1{\cslet{tp@#1@active}{\relax}\csuse{tp@\tp@cur@cont @#1}\csundef{tp@#1@active}}
-\let\tpUsePropEnv\ccUsePropertyEnv% legacy
+\def\ccUsePropertyEnv#1{\cslet{cc@#1@active}{\relax}\csuse{cc@\tp@cur@cont @#1}\csundef{cc@#1@active}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccIfStrEqual} is variant of etoolbox's
@@ -919,7 +916,7 @@
 %   when a Property with the name \#1 is currently processed with the
 %   \lstinline{\ccUsePropertyEnv} macro.
 %    \begin{macrocode}
-\DeclareRobustCommand\tpPI[2]{\ifcsdef{tp@#1@active}{#2}{}}
+\DeclareRobustCommand\tpPI[2]{\ifcsdef{cc@#1@active}{#2}{}}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -932,11 +929,11 @@
 %   Container. 
 %    \begin{macrocode}
 \def\tpCascadeProps#1#2{%
-  \csname tp@#2@default\endcsname
-  \expandafter\ifx\csname tp@#2@#1@parent\endcsname\relax\else
-    \expandafter\tp@inherit@props\expandafter{\csname tp@#2@#1@parent\endcsname}{#2}%
+  \csname cc@#2@default\endcsname
+  \expandafter\ifx\csname cc@#2@#1@parent\endcsname\relax\else
+    \expandafter\tp@inherit@props\expandafter{\csname cc@#2@#1@parent\endcsname}{#2}%
   \fi
-  \csname tp@#2@#1@properties\endcsname
+  \csname cc@#2@#1@properties\endcsname
 }
 %    \end{macrocode}
 % This low-level macro recursivly loads properties from parent
@@ -944,11 +941,11 @@
 % the macro family.
 %    \begin{macrocode}
 \def\tp@inherit@props#1#2{%
-  \expandafter\ifx\csname tp@#2@#1@parent\endcsname\relax\else
-    \edef\@tempa{\csname tp@#2@#1@parent\endcsname}%
+  \expandafter\ifx\csname cc@#2@#1@parent\endcsname\relax\else
+    \edef\@tempa{\csname cc@#2@#1@parent\endcsname}%
     \expandafter\tp@inherit@props\expandafter{\@tempa}{#2}%
   \fi
-  \csname tp@#2@#1@properties\endcsname
+  \csname cc@#2@#1@properties\endcsname
 }
 %    \end{macrocode}
 % \end{macro}
@@ -960,11 +957,10 @@
 %   non-empty. If so, do \#2, otherwise do \#3.
 %    \begin{macrocode}
 \long\def\ccIfProp#1#2#3{%
-  \expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\relax#3\else
-    \expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\cc@long@empty #3\else#2\fi
+  \expandafter\ifx\csname cc@\tp@cur@cont @#1\endcsname\relax#3\else
+    \expandafter\ifx\csname cc@\tp@cur@cont @#1\endcsname\cc@long@empty #3\else#2\fi
   \fi
 \ignorespaces}
-\let\tpIfProp\ccIfProp% legacy
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccIfPropVal}
@@ -975,8 +971,7 @@
 %   are used in \lstinline{\ccApplyCollection}!
 %    \begin{macrocode}
 \long\def\ccIfPropVal#1#2#3#4{\long\def\@tempa{#2}%
-  \expandafter\ifx\csname tp@\tp@cur@cont @#1\endcsname\@tempa\relax#3\else#4\fi\ignorespaces}
-\let\tpIfPropVal\ccIfPropVal% legacy
+  \expandafter\ifx\csname cc@\tp@cur@cont @#1\endcsname\@tempa\relax#3\else#4\fi\ignorespaces}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -1062,10 +1057,10 @@
 \gdef\cc@parse@kv#1=#2=#3\@nil{%
   \edef\@argii{#2}%
   \ifx\@argii\@empty
-    \expandafter\let\csname tp@\tp@cur@node @attr@#1\endcsname\@empty%
+    \expandafter\let\csname cc@\tp@cur@node @attr@#1\endcsname\@empty%
   \else
     \ifx #2 =\else
-      \expandafter\def\csname tp@\tp@cur@node @attr@#1\endcsname{#2}%
+      \expandafter\def\csname cc@\tp@cur@node @attr@#1\endcsname{#2}%
     \fi
   \fi}
 %    \end{macrocode}
@@ -1106,7 +1101,7 @@
 %
 %   \#1 is the attribute node, \#2 is the attribute name.
 %    \begin{macrocode}
-\def\ccGetAttribute#1#2{\csuse{tp@#1@attr@#2}}
+\def\ccGetAttribute#1#2{\csuse{cc@#1@attr@#2}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccIfAttr} can be used to call macros depending on
@@ -1115,7 +1110,7 @@
 %   \#1 is the attribute node, \#2 is the attribute name, \#3 and \#4 are the true and false
 %   branch, respectively.
 %    \begin{macrocode}
-\def\ccIfAttr#1#2#3#4{\ifcsdef{tp@#1@attr@#2}{#3}{#4}}
+\def\ccIfAttr#1#2#3#4{\ifcsdef{cc@#1@attr@#2}{#3}{#4}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccWhenAttr} is a variant of \lstinline{\ccIfAttr}
@@ -1124,7 +1119,7 @@
 %   \#1 is the attribute node, \#2 is the attribute name, \#3 is what
 %   happens if the attribute \textit{is set}.
 %    \begin{macrocode}
-\def\ccWhenAttr#1#2#3{\ifcsdef{tp@#1@attr@#2}{#3}{}}
+\def\ccWhenAttr#1#2#3{\ifcsdef{cc@#1@attr@#2}{#3}{}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccUnlessAttr} is a variant of \lstinline{\ccIfAttr}
@@ -1133,7 +1128,7 @@
 %   \#1 is the attribute node, \#2 is the attribute name, \#3 is what
 %   happens if the attribute \textit{is not set}.
 %    \begin{macrocode}
-\def\ccUnlessAttr#1#2#3{\ifcsdef{tp@#1@attr@#2}{}{#3}}
+\def\ccUnlessAttr#1#2#3{\ifcsdef{cc@#1@attr@#2}{}{#3}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccIfAttrIsStr} can be used to call macros depending if
@@ -1143,7 +1138,7 @@
 %   comparision value (a string!), \#4 and \#5 are the true and false
 %   branch, respectively.
 %    \begin{macrocode}
-\def\ccIfAttrIsStr#1#2#3#4#5{\ccIfAttr{#1}{#2}{\ifcsstring{tp@#1@attr@#2}{#3}{#4}{#5}}{#5}}
+\def\ccIfAttrIsStr#1#2#3#4#5{\ccIfAttr{#1}{#2}{\ifcsstring{cc@#1@attr@#2}{#3}{#4}{#5}}{#5}}
 \let\tpIfAttrStr\ccIfAttrIsStr
 %    \end{macrocode}
 % \end{macro}
@@ -1153,7 +1148,7 @@
 %   \#1 is the attribute node, \#2 is the attribute name, \#3 and \#4
 %   are the true and false branch, respectively.
 %    \begin{macrocode}
-\def\ccIfAttrIsSet#1#2#3#4{\ccIfAttr{#1}{#2}{\expandafter\ifx\csname tp@#1@attr@#2\endcsname\@empty#3\else#4\fi}{#4}}
+\def\ccIfAttrIsSet#1#2#3#4{\ccIfAttr{#1}{#2}{\expandafter\ifx\csname cc@#1@attr@#2\endcsname\@empty#3\else#4\fi}{#4}}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -1179,15 +1174,14 @@
 %   property values, as in CSS.
 %    \begin{macrocode}
 \long\def\ccDeclareClass{\@ifnextchar [{\@cc@set@class}{\@cc@set@class[default]}}%]
-\let\tpDeclareClass\ccDeclareClass% legacy
 \long\def\@cc@set@class[#1]#2{\cc@opt@empty{\cc@set@class[#1]{#2}}}%
 \long\gdef\tp@default@class@default{}
 \long\def\cc@set@class[#1]#2[#3]#4{%
-  \def\@argii{#2}\ifx\@argii\@empty\let\@argii\tp@str@default\fi%
+  \def\@argii{#2}\ifx\@argii\@empty\let\@argii\cc@str@default\fi%
   \if!#3!\else
-    \expandafter\long\expandafter\def\csname tp@#1@class@\@argii @parent\endcsname{#3}%
+    \expandafter\long\expandafter\def\csname cc@#1@class@\@argii @parent\endcsname{#3}%
   \fi
-  \expandafter\long\expandafter\def\csname tp@#1@class@\@argii\endcsname{#4}%
+  \expandafter\long\expandafter\def\csname cc@#1@class@\@argii\endcsname{#4}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -1198,16 +1192,16 @@
 %   Style Class name, \#2 is the Container.
 %    \begin{macrocode}
 \def\ccUseStyleClass#1#2{%
-  \expandafter\ifx\csname tp@#2@class@#1\endcsname\relax
-    \expandafter\ifx\csname tp@default@class@#1\endcsname\relax
+  \expandafter\ifx\csname cc@#2@class@#1\endcsname\relax
+    \expandafter\ifx\csname cc@default@class@#1\endcsname\relax
       \PackageError{cocotex.cls}{Class `#1' with scope `#2' not defined!}{Please declare the class `#1'!}%
     \fi
   \fi
-  \csname tp@default@class@#1\endcsname%
-  \expandafter\ifx\csname tp@#2@class@#1@parent\endcsname\relax\else
-    \expandafter\ccUseStyleClass\expandafter{\csname tp@#2@class@#1@parent\endcsname}{#2}%
+  \csname cc@default@class@#1\endcsname%
+  \expandafter\ifx\csname cc@#2@class@#1@parent\endcsname\relax\else
+    \expandafter\ccUseStyleClass\expandafter{\csname cc@#2@class@#1@parent\endcsname}{#2}%
   \fi
-  \csname tp@#2@class@#1\endcsname}
+  \csname cc@#2@class@#1\endcsname}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\CoCoTeX} the {\CoCoTeX} Logo.
