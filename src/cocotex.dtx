@@ -207,6 +207,13 @@
 % Bookmarks are numbered by default.
 %    \begin{macrocode}
    ,bookmarksnumbered=true%
+   \ccIfAlly{%
+     ,pdfa=true%
+     ,unicode=true%
+     ,pdfinfo={}%
+     ,pdfpagelabels=true%
+     ,pageanchor=true%
+   }{}%
 }
 %    \end{macrocode}
 % Disables PDF compression when the \lstinline{no-compress} document
