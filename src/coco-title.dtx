@@ -19,15 +19,15 @@
 %    \end{macrocode}
 % \section{Top-Level Interface}
 %
-% \begin{tpContainer}{titlepage} is the main Container for the
+% \begin{ContainerDoc}{titlepage} is the main Container for the
 %   document's locally defined meta data.
 %    \begin{macrocode}
 \ccDeclareContainer{titlepage}{%
   \ccInherit {Components,Properties}{CommonMeta}%
   \ifarticle\ccInherit{Components}{article-meta}\fi
   \ccDeclareType{Components}{%
-    \tp@title@simple@comps
-    \tp@meta@generic@comp
+    \cct@simple@comps
+    \ccm@generic@comp
 %    \end{macrocode}
 % The following macro provides some meta data Components defined in
 % the \lstinline{coco-meta} module. They are:
@@ -40,30 +40,30 @@
 %   English.
 % \end{itemize}
 %    \begin{macrocode}
-    \tp@title@fundings@comp
-    \tp@title@role@handlers{author}{Author}%
-    \tp@titlepage@role{editor}{Editor}%
-    \tp@titlepage@role{series-editor}{SeriesEditor}%
+    \cct@fundings@comp
+    \cct@role@handlers{author}{Author}%
+    \cct@declare@role{editor}{Editor}%
+    \cct@declare@role{series-editor}{SeriesEditor}%
   }%
   \ccDeclareType{Properties}{}%
   \ccDeclareEnv[Meta]{\cct@meta}{\endcct@meta}%
 }
 %    \end{macrocode}
-% \end{tpContainer}
-% \begin{macro}{\tp@titlepage@role} declares the roles for editors and
+% \end{ContainerDoc}
+% \begin{macro}{\cct@declare@role} declares the roles for editors and
 %   series editors and initializes the biography meta block for both.
 %    \begin{macrocode}
-\def\tp@titlepage@role#1#2{%
-  \tpDeclareRole[#1]{#2}%
-  \tp@title@role@handlers{#1}{#2}%
+\def\cct@declare@role#1#2{%
+  \ccDeclareRole[#1]{#2}%
+  \cct@role@handlers{#1}{#2}%
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@title@role@handlers} adds title page specific
+% \begin{macro}{\cct@role@handlers} adds title page specific
 %   Components and Handlers to the Author, Editor and Series-Editor
 %   Roles.
 %    \begin{macrocode}
-\def\tp@title@role@handlers#1#2{%
+\def\cct@role@handlers#1#2{%
   \ccAddToRole{#2}{%
     \ccDeclareCountedComponent{Bio}%
     \ccDeclareCountedComponent{Biography}}%
@@ -74,39 +74,39 @@
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tpDeclareTitlepage} is the default titlepage
+% \begin{macro}{\ccDeclareTitlepage} is the default titlepage
 %   declarator with the next token being added the titlepage's Property list.
 %    \begin{macrocode}
-\def\tpDeclareTitlepage{\ccAddToType{Properties}{titlepage}}
+\def\ccDeclareTitlepage{\ccAddToType{Properties}{titlepage}}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\cct@meta} is the code executed at the beginning of the \lstinline{tpMeta} Container
+% \begin{macro}{\cct@meta} is the code executed at the beginning of the \lstinline{\ccPrefix Meta} Container
 %    \begin{macrocode}
 \def\cct@meta{%
   \ccEvalType{Components}%
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tpAddTitleRole} is a user-level macro to add both a
+% \begin{macro}{\ccAddTitleRole} is a user-level macro to add both a
 %   new Role with the name \#2 and a controlling Property \#1 to the
 %   \lstinline{titlepage} container.
 %    \begin{macrocode}
-\def\tpAddTitleRole#1#2{%
-  \ccAddToType{Components}{titlepage}{\tp@titlepage@role{#1}{#2}}%
-  \tpAddTitleEval{\tp@title@eds@eval{#2}}%
+\def\ccAddTitleRole#1#2{%
+  \ccAddToType{Components}{titlepage}{\cct@declare@role{#1}{#2}}%
+  \ccAddTitleEval{\cct@eds@eval{#2}}%
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tpAddTitleEval} is a User-level macro to add
+% \begin{macro}{\ccAddTitleEval} is a User-level macro to add
 %   additional Material titlepage evaluators (the next token).
 %    \begin{macrocode}
-\def\tpAddTitleEval{\csgappto{tp@title@add@eval}}
+\def\ccAddTitleEval{\csgappto{cct@add@eval}}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@title@add@eval} is a hook for additional titlepage
+% \begin{macro}{\cct@add@eval} is a hook for additional titlepage
 %   evaluators
 %    \begin{macrocode}
-\def\tp@title@add@eval{}
+\def\cct@add@eval{}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\endcct@meta} is the code executed at the end of the \lstinline{Meta} Container
@@ -114,17 +114,17 @@
 \def\endcct@meta{%
   \ccSetContainer{titlepage}%
   \ccEvalType{Properties}%
-  \tp@maketitle
-  \tp@meta@role@eval{Author}%
+  \cct@maketitle
+  \ccm@role@eval{Author}%
   \ccApplyCollection{Affil}{affil-block-item-format}{AffilBlock}%
-  \tp@title@eds@eval{Editor}%
-  \tp@title@eds@eval{SeriesEditor}%
-  \tp@meta@generic@eval
-  \tp@title@fundings@eval
-  \tp@title@add@eval
+  \cct@eds@eval{Editor}%
+  \cct@eds@eval{SeriesEditor}%
+  \ccm@generic@eval
+  \cct@fundings@eval
+  \cct@add@eval
   \cc@if@preamble\cct@set@pdfmeta\relax
   \ccUseHook{document-meta-hook}%
-  \let\tp@cur@cont\@empty
+  \let\cc@cur@cont\@empty
 }
 %    \end{macrocode}
 % \end{macro}
@@ -215,8 +215,8 @@
 %    \begin{macrocode}
 \def\cct@title@process@bkt{%
   \let\tpBreak\space
-  \pdfstringdef\@title{\tpUseComp{Title}}%
-  \cct@write@pdf@meta{pdftitle}{Title}{\tpUseComp{Title}}%
+  \pdfstringdef\@title{\ccUseComp{Title}}%
+  \cct@write@pdf@meta{pdftitle}{Title}{\ccUseComp{Title}}%
   \ccgdefFromProperty\tpRunBookTitle{run-book-title}%
 }
 %    \end{macrocode}
@@ -259,9 +259,9 @@
 %   creator
 %    \begin{macrocode}
 \def\cct@title@process@bkc{%
-  \cct@write@pdf@meta{pdfcreator}{Creator}{\ccIfComp{PDFCreator}{\tpUseComp{PDFCreator}}{\tpUseComp{Publisher}\ccIfComp{PubPlace}{, \tpUseComp{PubPlace}}{}}}%
-  \cct@write@pdf@meta{pdfproducer}{Producer}{\tpUseComp{PDFProducer}}%
-  \cct@write@pdf@meta{pdfkeywords}{Keywords}{\tpUseComp{Keywords}}%
+  \cct@write@pdf@meta{pdfcreator}{Creator}{\ccIfComp{PDFCreator}{\ccUseComp{PDFCreator}}{\ccUseComp{Publisher}\ccIfComp{PubPlace}{, \ccUseComp{PubPlace}}{}}}%
+  \cct@write@pdf@meta{pdfproducer}{Producer}{\ccUseComp{PDFProducer}}%
+  \cct@write@pdf@meta{pdfkeywords}{Keywords}{\ccUseComp{Keywords}}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -292,51 +292,73 @@
 \ccDeclareHook[titlepage]{document-meta-hook}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@maketitle}
-%   collects the meta information and constructs the tpMaketitle macro
+% \begin{macro}{\cct@article@titlepage} is the prototype for article
+%   title pages.
 %    \begin{macrocode}
-\def\tp@maketitle{%
-  \ifarticle
-    \gdef\tpMaketitle{%
-      \let\tp@cnt@grp\@empty
-      \ccUseHook[titlepage]{before-maketitle-hook}%
-      \bgroup
-        \ccSetContainer{titlepage}%
-        \ccEvalType{Properties}%
-        \ccUseProperty{article-title}%
-      \egroup
-      \ccUseHook[titlepage]{after-maketitle-hook}%
-    }%
-  \else
-    \gdef\tpMaketitle{%
-      \let\tp@cnt@grp\@empty
-      \ccUseHook[titlepage]{before-maketitle-hook}%
-      \bgroup
-        \ccSetContainer{titlepage}%
-        \ccEvalType{Properties}%
-        \ccUseProperty{before-titlepage}%
-        \ccIfComp{Cover}{%
-          \ccUseProperty{coverpage}%
-        }{}%
-        \ccUseProperty{before-titlepage-roman}%
-        \ccUseProperty{titlepage-roman}%
-        \ccUseProperty{after-titlepage}%
-      \egroup
-      }%
-  \fi
+\def\cct@article@titlepage{%
+  \ccUseProperty{article-title}%
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\cct@journal@titlepage} is the prototype for journal
+%   title pages.
+%    \begin{macrocode}
+\def\cct@journal@titlepage{%
+  \ccUseProperty{before-titlepage}%
+  \ccUseProperty{coverpage}%Cover ist kein Bild, wird von uns gebaut
+  \ccUseProperty{before-titlepage-roman}%
+  \ccUseProperty{titlepage-roman}%
+  \ccUseProperty{after-titlepage}%
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\cct@book@titlepage} is the prototype for book
+%   (monographs and collections) title pages.
+%    \begin{macrocode}
+\def\cct@book@titlepage{%
+  \ccUseProperty{before-titlepage}%
+  \ccWhenComp{Cover}{\ccUseProperty{coverpage}}%
+  \ccUseProperty{before-titlepage-roman}%
+  \ccUseProperty{titlepage-roman}%
+  \ccUseProperty{after-titlepage}%
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\cct@maketitle} assigns one of the above definitions
+%   to the \lstinline{\ccPrefix Maketitle} macro.
+%    \begin{macrocode}
+\def\cct@maketitle{%
+  \expandafter\gdef\csname\ccPrefix Maketitle\endcsname{%
+    \let\cc@cnt@grp\@empty
+    \ccUseHook[titlepage]{before-maketitle-hook}%
+    \bgroup
+      \ccSetContainer{titlepage}%
+      \ccEvalType{Properties}%
+      \ifarticle
+        \cct@article@titlepage
+      \else
+        \ifjournal
+          \cct@journal@titlepage
+        \else
+          \cct@book@titlepage
+        \fi
+      \fi
+    \egroup
+    \ccUseHook[titlepage]{after-maketitle-hook}%
+  }%
 }
 %    \end{macrocode}
 % \end{macro}
 %
 % \subsection{Funds, Grants, and Supporters}
 %
-% This is a Subcontainer within \lstinline{tpMeta} which allows to set
+% This is a Subcontainer within \lstinline{\ccPrefix Meta} which allows to set
 % up multiple funding, grant, or supporter callouts.
-% \begin{macro}{\tp@title@fundings@comp} wrapper to set up the Subcontainer
+% \begin{macro}{\cct@fundings@comp} wrapper to set up the Subcontainer
 %    \begin{macrocode}
-\def\tp@title@fundings@comp{%
+\def\cct@fundings@comp{%
   \ccDeclareComponent{FundingBlock}{\expandafter\global}{}%
-  \ccDeclareComponentGroup{tpFunding}{%
+  \ccDeclareComponentGroup{Funding}{%
     \ccDeclareCountedComponent{FundName}%
     \ccDeclareCountedComponent{FundLogo}%
     \ccDeclareCountedComponent{FundID}%
@@ -345,27 +367,27 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\tp@title@fundings@eval} Evaluator for the funding
+% \begin{macro}{\cct@fundings@eval} Evaluator for the funding
 %    \begin{macrocode}
-\def\tp@title@fundings@eval{{%
-    \def\tp@cur@cont{titlepage}%
-    \ccComposeCollection{tpFunding}{fund-format}{FundingBlock}%
+\def\cct@fundings@eval{{%
+    \def\cc@cur@cont{titlepage}%
+    \ccComposeCollection{Funding}{fund-format}{FundingBlock}%
 }}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@title@eds@eval} evaluator for the editors
+% \begin{macro}{\cct@eds@eval} evaluator for the editors
 %    \begin{macrocode}
-\def\tp@title@eds@eval#1{%
-  \tp@meta@role@eval{#1}%
-  \tp@create@editor@string{#1}}
+\def\cct@eds@eval#1{%
+  \ccm@role@eval{#1}%
+  \cct@create@editor@string{#1}}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@create@editor@string} evaluates the editor string
+% \begin{macro}{\cct@create@editor@string} evaluates the editor string
 %   and adds a suffix.
 %    \begin{macrocode}
-\def\tp@create@editor@string#1{%
-  \expandafter\ifx\csname cc@\tp@cur@cont @#1NameList\endcsname\relax\else
-    \csgappto{cc@\tp@cur@cont @#1NameList}{{\letcs\ccTotalCount{cc#1Cnt}\ccUseProperty{editor-suffix}}}%
+\def\cct@create@editor@string#1{%
+  \expandafter\ifx\csname cc@\cc@cur@cont @#1NameList\endcsname\relax\else
+    \csgappto{cc@\cc@cur@cont @#1NameList}{{\letcs\ccTotalCount{cc#1Cnt}\ccUseProperty{editor-suffix}}}%
   \fi
 }%
 %    \end{macrocode}
@@ -373,100 +395,94 @@
 %
 % \subsection{Simple Component Declarations}
 %
-% \begin{macro}{\tp@title@macro} is an alias for
-%   \lstinline{\ccDeclareGlobalComponent} for backwards compatibility.
+% \begin{macro}{\cct@simple@comps} wrapper for the Titlepage's simple Components.
 %    \begin{macrocode}
-\let\tp@title@macro\ccDeclareGlobalComponent
-%    \end{macrocode}
-% \end{macro}
-% \begin{macro}{\tp@title@simple@comps} wrapper for the Titlepage's simple Components.
-%    \begin{macrocode}
-\def\tp@title@simple@comps{%
+\def\cct@simple@comps{%
   \ccDeclareGlobalComponent[\jobname]{XmpFile}             % File basename of the XMP file ('.xmp' is added automatically)
   %% Cover
-  \tp@title@macro{Cover}                         % Path to Cover Image(!)
+  \ccDeclareGlobalComponent{Cover}                         % Path to Cover Image(!)
   %% Titles
-  \tp@title@macro{Title}                         % Main Title
-  \tp@title@macro{ShortTitle}                    % Shortened main title
-  \tp@title@macro{RunTitle}                      % Shortened main title override for headers
-  \tp@title@macro{AltTitle}                      % Alternative main title (e.g. for bastard title page)
-  \tp@title@macro{Subtitle}                      % Sub Title
-  \tp@title@macro{TitleNote}                     % Additional Title Information (contributor list)
-  \tp@title@macro{RunNames}                      % Shortened list of names (authors and/or publishers)
-  \tp@title@macro{AltNames}                      % Alternative list of names (e.g. for bastard title page)
+  \ccDeclareGlobalComponent{Title}                         % Main Title
+  \ccDeclareGlobalComponent{ShortTitle}                    % Shortened main title
+  \ccDeclareGlobalComponent{RunTitle}                      % Shortened main title override for headers
+  \ccDeclareGlobalComponent{AltTitle}                      % Alternative main title (e.g. for bastard title page)
+  \ccDeclareGlobalComponent{Subtitle}                      % Sub Title
+  \ccDeclareGlobalComponent{TitleNote}                     % Additional Title Information (contributor list)
+  \ccDeclareGlobalComponent{RunNames}                      % Shortened list of names (authors and/or publishers)
+  \ccDeclareGlobalComponent{AltNames}                      % Alternative list of names (e.g. for bastard title page)
   %% Series
-  \tp@title@macro{Series}                        % Series Title
-  \tp@title@macro{SubSeries}                     % Series Subtitle
-  \tp@title@macro{SeriesNote}                    % Series Notes
-  \tp@title@macro{Volume}                        % Series Volume
-  \tp@title@macro{Number}                        % Series Number
-  \tp@title@macro{EditorNameList}                % Editor Text Line
-  \tp@title@macro{SeriesEditorNameList}          % Series Editor Text Line
+  \ccDeclareGlobalComponent{Series}                        % Series Title
+  \ccDeclareGlobalComponent{SubSeries}                     % Series Subtitle
+  \ccDeclareGlobalComponent{SeriesNote}                    % Series Notes
+  \ccDeclareGlobalComponent{Volume}                        % Series Volume
+  \ccDeclareGlobalComponent{Number}                        % Series Number
+  \ccDeclareGlobalComponent{EditorNameList}                % Editor Text Line
+  \ccDeclareGlobalComponent{SeriesEditorNameList}          % Series Editor Text Line
   %% Publisher
-  \tp@title@macro{Publisher}                     % Publisher Name
-  \tp@title@macro{PubDivision}                   % Publishing Division
-  \tp@title@macro{PubDivInfo}                    % Publishing Division Info
-  \tp@title@macro{PubPlace}                      % Publisher Location
-  \tp@title@macro{PubLogo}                       % Publisher Logo
-  \tp@title@macro{PubNote}                       % Additional publisher notes
-  \tp@title@macro{PubWeb}                        % Publisher URL
+  \ccDeclareGlobalComponent{Publisher}                     % Publisher Name
+  \ccDeclareGlobalComponent{PubDivision}                   % Publishing Division
+  \ccDeclareGlobalComponent{PubDivInfo}                    % Publishing Division Info
+  \ccDeclareGlobalComponent{PubPlace}                      % Publisher Location
+  \ccDeclareGlobalComponent{PubLogo}                       % Publisher Logo
+  \ccDeclareGlobalComponent{PubNote}                       % Additional publisher notes
+  \ccDeclareGlobalComponent{PubWeb}                        % Publisher URL
   %% Pubication Meta
-  \tp@title@macro{PDFCreator}                    % Creator for pdf metadata
-  \tp@title@macro[le-tex xerif with CoCoTeX v.\fileversion]{PDFProducer}     % PDF producer for pdf metadata
-  \tp@title@macro{Dedication}                    % Dedication
-  \tp@title@macro{Acknowledgements}              % Acknowledgements
-  \tp@title@macro{Statement}                     % Acknowledgements
-  \tp@title@macro{EditionNote}                   % Edition Note
-  \tp@title@macro{Editorial}                     % Editorial
-  \tp@title@macro{Edition}                       % Edition
-  \tp@title@macro{Year}                          % Publication Year
-  \tp@title@macro{ISBNPreText}                   % Text before ISBN block
-  \tp@title@macro{ISBN}                          % ISBN
-  \tp@title@macro{ISSN}                          % ISSN
-  \tp@title@macro{EISSN}                         % Ebook-ISSN
-  \tp@title@macro{EpubPreText}                   % Text between ISBN and eISBN
-  \tp@title@macro{EISBN}                         % Ebook-ISBN
-  \tp@title@macro{EpubISBN}                      % Epub-ISBN
-  \tp@title@macro{ElibPDF}                       % ???
-  \tp@title@macro{BiblISSN}                      % Bibl-ISBN
-  \tp@title@macro{BibleISSN}                     % Bible-ISBN
+  \ccDeclareGlobalComponent{PDFCreator}                    % Creator for pdf metadata
+  \ccDeclareGlobalComponent[le-tex xerif with CoCoTeX v.\fileversion]{PDFProducer}     % PDF producer for pdf metadata
+  \ccDeclareGlobalComponent{Dedication}                    % Dedication
+  \ccDeclareGlobalComponent{Acknowledgements}              % Acknowledgements
+  \ccDeclareGlobalComponent{Statement}                     % Acknowledgements
+  \ccDeclareGlobalComponent{EditionNote}                   % Edition Note
+  \ccDeclareGlobalComponent{Editorial}                     % Editorial
+  \ccDeclareGlobalComponent{Edition}                       % Edition
+  \ccDeclareGlobalComponent{Year}                          % Publication Year
+  \ccDeclareGlobalComponent{ISBNPreText}                   % Text before ISBN block
+  \ccDeclareGlobalComponent{ISBN}                          % ISBN
+  \ccDeclareGlobalComponent{ISSN}                          % ISSN
+  \ccDeclareGlobalComponent{EISSN}                         % Ebook-ISSN
+  \ccDeclareGlobalComponent{EpubPreText}                   % Text between ISBN and eISBN
+  \ccDeclareGlobalComponent{EISBN}                         % Ebook-ISBN
+  \ccDeclareGlobalComponent{EpubISBN}                      % Epub-ISBN
+  \ccDeclareGlobalComponent{ElibPDF}                       % ???
+  \ccDeclareGlobalComponent{BiblISSN}                      % Bibl-ISBN
+  \ccDeclareGlobalComponent{BibleISSN}                     % Bible-ISBN
   %% Funding
-  \tp@title@macro{FundingPreText}                % Text before the Funding list
-  \tp@title@macro{FundingPostText}               % Text after the Funding list
+  \ccDeclareGlobalComponent{FundingPreText}                % Text before the Funding list
+  \ccDeclareGlobalComponent{FundingPostText}               % Text after the Funding list
   %% Imprint Meta
-  \tp@title@macro{Biblio}                        % Bibliographical Information
-  \tp@title@macro{BiblioTitle}                   % Heading Bibliographical Information
-  \tp@title@macro{Print}                         % Printer
-  \tp@title@macro{PrintNote}                     % Print Note
-  \tp@title@macro{Lectorate}                     % Lector
-  \tp@title@macro{Translator}                    % Translator
-  \tp@title@macro{CoverConcept}                  % Cover Concept
-  \tp@title@macro{CoverDesign}                   % Cover Designer
-  \tp@title@macro{CoverImage}                    % Cover Image Creator
-  \tp@title@macro{Typesetter}                    % Typesetting company
-  \tp@title@macro{QA}                            % Quality Assurance
-  \tp@title@macro{UsedFont}                      % Used Font(s)
-  \tp@title@macro{Conversion}                    % Data Converison
-  \tp@title@macro{EnvDisclaimer}                 % Environmental Disclaimer
-  \tp@title@macro{Advertise}                     % Advertisements
+  \ccDeclareGlobalComponent{Biblio}                        % Bibliographical Information
+  \ccDeclareGlobalComponent{BiblioTitle}                   % Heading Bibliographical Information
+  \ccDeclareGlobalComponent{Print}                         % Printer
+  \ccDeclareGlobalComponent{PrintNote}                     % Print Note
+  \ccDeclareGlobalComponent{Lectorate}                     % Lector
+  \ccDeclareGlobalComponent{Translator}                    % Translator
+  \ccDeclareGlobalComponent{CoverConcept}                  % Cover Concept
+  \ccDeclareGlobalComponent{CoverDesign}                   % Cover Designer
+  \ccDeclareGlobalComponent{CoverImage}                    % Cover Image Creator
+  \ccDeclareGlobalComponent{Typesetter}                    % Typesetting company
+  \ccDeclareGlobalComponent{QA}                            % Quality Assurance
+  \ccDeclareGlobalComponent{UsedFont}                      % Used Font(s)
+  \ccDeclareGlobalComponent{Conversion}                    % Data Converison
+  \ccDeclareGlobalComponent{EnvDisclaimer}                 % Environmental Disclaimer
+  \ccDeclareGlobalComponent{Advertise}                     % Advertisements
   %% Licencing
-  \tp@title@macro{LicenceText}                   % License Description
-  \tp@title@macro{LicenceLogo}                   % License Logo
-  \tp@title@macro{LicenceLink}                   % License Link
-  \tp@title@macro{LicenceName}                   % License Name
-  \tp@title@macro{CopyrightDisclaimer}           % Copyright Disclaimer
+  \ccDeclareGlobalComponent{LicenceText}                   % License Description
+  \ccDeclareGlobalComponent{LicenceLogo}                   % License Logo
+  \ccDeclareGlobalComponent{LicenceLink}                   % License Link
+  \ccDeclareGlobalComponent{LicenceName}                   % License Name
+  \ccDeclareGlobalComponent{CopyrightDisclaimer}           % Copyright Disclaimer
   %% for journals
-  \tp@title@macro{JournalName}                   % Full name of the journal
-  \tp@title@macro{JournalAbbrev}                 % Short name of the journal
-  \tp@title@macro{Issue}                         % Issue of the journal
-  \tp@title@macro{PubCycle}                      % Publication cycle
-  \tp@title@macro{Prices}                        % Prices of the journal issues or subscription models
-  \tp@title@macro{MemberList}                    % In case of publishing organizations, this macro may hold a list of members.
+  \ccDeclareGlobalComponent{JournalName}                   % Full name of the journal
+  \ccDeclareGlobalComponent{JournalAbbrev}                 % Short name of the journal
+  \ccDeclareGlobalComponent{Issue}                         % Issue of the journal
+  \ccDeclareGlobalComponent{PubCycle}                      % Publication cycle
+  \ccDeclareGlobalComponent{Prices}                        % Prices of the journal issues or subscription models
+  \ccDeclareGlobalComponent{MemberList}                    % In case of publishing organizations, this macro may hold a list of members.
   %% Generic additional information
-  \tp@title@macro{AddNoteI}                      % Additional information, title page I
-  \tp@title@macro{AddNoteII}                     % Additional information, title page II
-  \tp@title@macro{AddNoteIII}                    % Additional information, title page III
-  \tp@title@macro{AddNoteIV}                     % Additional information, title page IV
+  \ccDeclareGlobalComponent{AddNoteI}                      % Additional information, title page I
+  \ccDeclareGlobalComponent{AddNoteII}                     % Additional information, title page II
+  \ccDeclareGlobalComponent{AddNoteIII}                    % Additional information, title page III
+  \ccDeclareGlobalComponent{AddNoteIV}                     % Additional information, title page IV
 }
 %    \end{macrocode}
 % \end{macro}
@@ -477,7 +493,7 @@
 \ccAddToProperties{titlepage}{%
   \ccSetProperty{article-title}{}%
   % Title page hooks
-  % Before \tpMaketitle and outside the group
+  % Before \ccPrefix Maketitle and outside the group
   \ccSetProperty{before-titlepage}{%
     \pagestyle{empty}%
     \parindent\z@
@@ -493,7 +509,7 @@
           \raise\dimexpr\headheight+\headsep+\topmargin+\topskip-\paperheight\relax
           \vtop{%
             \hskip-\oddsidemargin
-            \includegraphics[width=\paperwidth,height=\paperheight]{\tpUseComp{Cover}}%
+            \includegraphics[width=\paperwidth,height=\paperheight]{\ccUseComp{Cover}}%
           }}}%
       \ccUseProperty{after-coverpage}%
     \egroup
@@ -512,8 +528,8 @@
   %% Generic meta blocks
   \ccSetProperty{generic-meta-heading-face}{\large}% format of the heading of a generic meta block
   \ccSetProperty{generic-meta-format}{% Format of a single generic meta-block
-    \ccIfComp{Heading}{{\ccUseProperty{generic-meta-heading-face}\tpUseComp{Heading}\par}\vskip\baselineskip}{}%
-    \tpUseComp{Content}%
+    \ccIfComp{Heading}{{\ccUseProperty{generic-meta-heading-face}\ccUseComp{Heading}\par}\vskip\baselineskip}{}%
+    \ccUseComp{Content}%
     \par%
   }%
   %% Funding
@@ -525,10 +541,10 @@
   \ccSetProperty{fund-width}{.5\textwidth}
   \ccSetProperty{fund-vertical-sep}{\baselineskip}%
   \ccSetProperty{fund-sep}{%
-    \expandafter\@tempcnta\CalcModulo{\tpCurCount}{\ccUseProperty{funding-columns}}%
+    \expandafter\@tempcnta\CalcModulo{\ccCurCount}{\ccUseProperty{funding-columns}}%
     \ifnum\@tempcnta=\z@
       \par
-      \ifnum\tpCurCount<\ccTotalCount\relax
+      \ifnum\ccCurCount<\ccTotalCount\relax
         \vskip\ccUseProperty{fund-vertical-sep}%
       \fi
     \else
@@ -537,8 +553,8 @@
   \ccSetProperty{fund-format}{% Format of a single fund/grant/sponsor
     \strut\vtop{%
       \hsize\ccUseProperty{fund-width}%
-      \ccIfComp{FundName}{\tpUseComp{FundName}\\[1ex]}{}%
-      \includegraphics[width=\ccUseProperty{fund-width}]{\tpUseComp{FundLogo}}}%
+      \ccIfComp{FundName}{\ccUseComp{FundName}\\[1ex]}{}%
+      \includegraphics[width=\ccUseProperty{fund-width}]{\ccUseComp{FundLogo}}}%
     \ccUseProperty{fund-sep}%
   }%
   \ccSetProperty{funding-sep}{4mm}%
@@ -562,15 +578,14 @@
   }%
   \ccSetProperty{titlepage-i}{%
     \ifmonograph
-      \tpUseComp{AuthorNameList}%
+      \ccUseComp{AuthorNameList}%
     \else
       \ccUseProperty{EditorNameList}%
     \fi%
     \vskip\baselineskip
     \bgroup
-      \ccUseProperty{title-face}\tpUseComp{Title}%
+      \ccUseProperty{title-face}\ccUseComp{Title}%
     \egroup
-    %\expandafter\meaning\csname tp@titlepage@editor-2@FullName\endcsname
   }%
   \ccSetProperty{titlepage-ii}{%
     \ccGetComp{Editorial}%
@@ -581,7 +596,7 @@
   }%
   \ccSetProperty{titlepage-iii}{%
     \ifmonograph
-      \tpUseComp{AuthorNameList}%
+      \ccUseComp{AuthorNameList}%
     \else
       \ccUseProperty{EditorNameList}%
     \fi%
@@ -611,7 +626,7 @@
   \ccSetProperty{title-format}{%
     \bgroup
       \ccUseProperty{title-face}%
-      \tpUseComp{Title}\par
+      \ccUseComp{Title}\par
     \egroup
     \ccWhenComp{Subtitle}{\ccUseProperty{subtitle-format}}%
     \ccWhenComp{TitleNote}{\ccUseProperty{title-note-format}}%
@@ -622,7 +637,7 @@
   \ccSetProperty{title-note-format}{%
     \bgroup
       \ccUseProperty{title-note-face}%
-      \tpUseComp{TitleNote}%
+      \ccUseComp{TitleNote}%
     \egroup
     \par
   }%
@@ -630,7 +645,7 @@
   \ccSetProperty{subtitle-format}{%
     \bgroup
       \ccUseProperty{subtitle-face}%
-      \tpUseComp{Subtitle}%
+      \ccUseComp{Subtitle}%
     \egroup
     \par
   }%
@@ -663,23 +678,23 @@
     \ccGetComp{EnvDisclaimer}%
   }%
   \ccSetProperty{journal-meta}{%
-    \tpUseLabeledComp{Submitted}%
-    \tpUseLabeledComp{Received}%
-    \tpUseLabeledComp{Revised}%
-    \tpUseLabeledComp{Accepted}%
-    \tpUseLabeledComp{Published}%
-    \tpUseLabeledComp{Copyright}%
-    \tpUseLabeledComp{COIStatement}%
-    \tpUseLabeledComp{Keywords}
+    \ccUseLabeledComp{Submitted}%
+    \ccUseLabeledComp{Received}%
+    \ccUseLabeledComp{Revised}%
+    \ccUseLabeledComp{Accepted}%
+    \ccUseLabeledComp{Published}%
+    \ccUseLabeledComp{Copyright}%
+    \ccUseLabeledComp{COIStatement}%
+    \ccUseLabeledComp{Keywords}
   }%
   \ccSetProperty{licence}{%
-    \ccIfComp{LicenceLogo}{\includegraphics{\tpUseComp{LicenceLogo}}\par}{}%
+    \ccIfComp{LicenceLogo}{\includegraphics{\ccUseComp{LicenceLogo}}\par}{}%
     \ccGetComp{LicenceText}%
   }%
   \ccSetProperty{copyright}{%
     \ccIfComp{Copyright}
-      {\tpUseComp{Copyright}\par}
-      {\textcopyright\space\tpUseComp{Year}\space\tpUseComp{Publisher},\space\tpUseComp{PubPlace}\par}%
+      {\ccUseComp{Copyright}\par}
+      {\textcopyright\space\ccUseComp{Year}\space\ccUseComp{Publisher},\space\ccUseComp{PubPlace}\par}%
     }%
   \ccSetProperty{publisher}{%
     \ccGetComp{PubDivInfo}%
@@ -688,11 +703,11 @@
     \ccGetComp{PubWeb}%
   }%
   % Name Formats
-  \ccSetProperty{counted-meta-sep}{\ifnum\tpCurCount<\ccTotalCount\relax\vskip\baselineskip\fi}% separator between multiple instances of the same meta datum
+  \ccSetProperty{counted-meta-sep}{\ifnum\ccCurCount<\ccTotalCount\relax\vskip\baselineskip\fi}% separator between multiple instances of the same meta datum
   \ccSetProperty{counted-name-sep}{% Separator between multiple names; titlepage-specific override of the same Property in coco-meta!
     \ifnum\ccTotalCount>1\relax
-      \ifnum\tpCurCount<\ccTotalCount\relax
-        \ifnum\tpCurCount<\numexpr\ccTotalCount-1\relax
+      \ifnum\ccCurCount<\ccTotalCount\relax
+        \ifnum\ccCurCount<\numexpr\ccTotalCount-1\relax
           \ccUseProperty{name-sep}%
         \else
           \ccUseProperty{name-and}%
@@ -739,12 +754,12 @@
   % Biography
   % those Properties control how (Role specific) Biography Blocks are formatted, i.e. the list of all Biographies of a specific Role:
   \ccSetProperty{role-bio-block-face}{}% face for the entire, role-specific, Biography Block
-  \ccSetProperty{role-bio-block-format}{{\ccUseProperty{role-bio-block-face}\tpUseComp{Biography}}\par}% Format of the whole, Role specific, Biography Block
+  \ccSetProperty{role-bio-block-format}{{\ccUseProperty{role-bio-block-face}\ccUseComp{Biography}}\par}% Format of the whole, Role specific, Biography Block
   \ccPropertyLet{author-bio-block-format}        {role-bio-block-format}% Override for single author meta info
   \ccPropertyLet{editor-bio-block-format}        {role-bio-block-format}% Override for single editor meta info
   \ccPropertyLet{series-editor-bio-block-format} {role-bio-block-format}% Override for single series editor meta info
   % those Properties control how a (Role specific) Biography is formatted:
-  \ccSetProperty{role-biography-format}{{\bfseries\tpUseComp{FullName}:}\space\tpUseComp{Bio}\par}% Format of a single entry in the Role specific Biography
+  \ccSetProperty{role-biography-format}{{\bfseries\ccUseComp{FullName}:}\space\ccUseComp{Bio}\par}% Format of a single entry in the Role specific Biography
   \ccPropertyLet{author-biography-format}        {role-biography-format}% Override for single author meta info
   \ccPropertyLet{editor-biography-format}        {role-biography-format}% Override for single editor meta info
   \ccPropertyLet{series-editor-biography-format} {role-biography-format}% Override for single series editor meta info
@@ -756,21 +771,21 @@
   % Running headers
   \ccSetProperty{run-book-title}{%
     \ccIfComp{RunTitle}
-      {\tpUseComp{RunTitle}}
+      {\ccUseComp{RunTitle}}
       {\ccIfComp{ShortTitle}
-        {\tpUseComp{ShortTitle}}
-        {\ccIfComp{Title}{\tpUseComp{Title}}{No title given!}}}%
+        {\ccUseComp{ShortTitle}}
+        {\ccIfComp{Title}{\ccUseComp{Title}}{No title given!}}}%
   }%
   \ccSetProperty{run-book-name}{%
     \ccIfComp{RunNames}
-      {\tpUseComp{RunNames}}
+      {\ccUseComp{RunNames}}
       {\ifmonograph
          \ccIfComp{AuthorNameList}
-           {\tpUseComp{AuthorNameList}}
+           {\ccUseComp{AuthorNameList}}
            {no author defined!}%
        \else
          \ccIfComp{EditorNameList}
-           {\tpUseComp{EditorNameList}}
+           {\ccUseComp{EditorNameList}}
            {no editor defined!}%
        \fi}%
   }%

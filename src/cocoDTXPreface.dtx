@@ -13,8 +13,8 @@
 \BeforePackage{doc}{\let\oldmaketitle\maketitle}
 \documentclass[a4paper]{ltxdoc}
 \makeatletter
-\def\tp@fileversion{\fileversion}
-\def\tp@filedate{\filedate}
+\def\cc@fileversion{\fileversion}
+\def\cc@filedate{\filedate}
 \frenchspacing
 \parindent0pt
 \parskip\medskipamount
@@ -67,10 +67,10 @@
 \def\ContainerDoc{\begingroup
    \catcode`\\12
    \let\is@m@cro@\relax
-   \MakePrivateLetters\tp@doc@container%
+   \MakePrivateLetters\container@doc%
 }
 \let\endContainerDoc\relax%
-\def\tp@doc@container#1{\endgroup \topsep\MacroTopsep%
+\def\container@doc#1{\endgroup \topsep\MacroTopsep%
   \edef\saved@macroname{\string#1}%
   \let\saved@indexname\saved@macroname
   \ifx\is@m@cro@\relax
@@ -81,13 +81,11 @@
   \SpecialContIndex{#1}\nobreak
   \DoNotIndex{#1}%
 }
-\let\tpContainer\ContainerDoc
-\let\endtpContainer\endContainerDoc
 
  % Environment for CoCoTeX Property definitions: #1 is the name of the
  % parent container, #2 is the name of the Property, BODY is the
  % documentation for that Property.
-\def\tpProperty#1#2{%
+\def\PropertyDoc#1#2{%
   \propertysection{Property #1::#2}\ignorespaces
   \edef\saved@macroname{#1::#2}%
   \let\saved@indexname\saved@macroname
@@ -95,12 +93,11 @@
   \DoNotIndex{#1::#2}%
   \nobreak
 }
-\let\endtpProperty\relax
-
+\let\endPropertyDoc\relax
  % Environment for CoCoTeX Component definitions: #1 is the name of the
  % parent container, #2 is the name of the Component, BODY is the
  % documentation for that Component.
-\def\ccComponentDescr#1#2{%
+\def\ccComponentDoc#1#2{%
   \componentsection{Compoent #1::#2}\ignorespaces
   \edef\saved@macroname{#1::#2}%
   \let\saved@indexname\saved@macroname
@@ -108,7 +105,7 @@
   \DoNotIndex{#1::#2}%
   \nobreak
 }
-\let\endComponentDesc\relax
+\let\endComponentDoc\relax
 
  %% no longer working with TL>2022 *grrrr*
  %\def\SpecialMainIndex#1{\@bsphack
@@ -399,7 +396,7 @@
     \addcontentsline{toc}{chapter}{#1}%
   \fi
   \chaptermark{#1}%
-  \def\tp@cur@module{\number\c@chapter}%
+  \def\cc@cur@module{\number\c@chapter}%
   \@makechapterhead{#2}%
   \@afterheading}
 
@@ -558,8 +555,8 @@
     {\Large\mybfseries\color{spot}\sffamily
       \hfill\vbox{\hsize.5\textwidth\@subtitle\par}}%
     \par\vskip2\baselineskip
-    {\large\sffamily Version~\tp@fileversion}\par
-    (\sffamily \tp@filedate)\par
+    {\large\sffamily Version~\cc@fileversion}\par
+    (\sffamily \cc@filedate)\par
     \vfill
     {\large\sffamily\@author\par\href{mailto:\@authormail}{\@authormail}\par}%
   \egroup

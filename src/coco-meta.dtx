@@ -19,31 +19,31 @@
     [\filedate \fileversion CoCoTeX meta module]
 \RequirePackage{coco-common}
 %    \end{macrocode}
-% \begin{tpContainer}{CommonMeta} is an abstract Container for
+% \begin{ContainerDoc}{CommonMeta} is an abstract Container for
 %   commonly used meta data, both for whole documents as well as parts
 %   of documents.
 %    \begin{macrocode}
 \ccDeclareContainer{CommonMeta}{%
   \ccDeclareType{Components}{%
-    \tpDeclareRole[author]{Author}%
-    \tp@declare@common@meta@comp
-    \tp@extended@common@meta@macros
-    \tp@declare@meta@affils
+    \ccDeclareRole[author]{Author}%
+    \ccm@declare@comp
+    \ccm@extended@common@macros
+    \ccm@declare@affils
   }%
   \ccDeclareType{Properties}{}%
 }
 %    \end{macrocode}
-% \end{tpContainer}
+% \end{ContainerDoc}
 %
 % \section{Counted Container Handlers}
 %
 % \subsection{Generic Blocks}
 %
-% \begin{macro}{\tp@meta@generic@comp} is used to define a generic
+% \begin{macro}{\ccm@generic@comp} is used to define a generic
 %   meta data block.It provides two Components for each instance, one
 %   for the block's Heading and one for its Content.
 %    \begin{macrocode}
-\def\tp@meta@generic@comp{%
+\def\ccm@generic@comp{%
   \ccDeclareComponent{GenericMetaBlock}{\expandafter\global}{}%
   \ccDeclareComponentGroup{GenericMeta}{%
     \ccDeclareCountedComponent{Heading}%
@@ -51,13 +51,13 @@
   }}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@meta@generic@eval} evaluates the Components and
+% \begin{macro}{\ccm@generic@eval} evaluates the Components and
 %   tells the Framework how the generic counted Sub-Containers should
 %   be rendered.
 %    \begin{macrocode}
-\def\tp@meta@generic@eval{{%
-  \def\tp@cur@cont{titlepage}%
-  \ccComposeCollection{tpGenericMeta}{generic-meta-format}{GenericMetaBlock}
+\def\ccm@generic@eval{{%
+  \def\cc@cur@cont{titlepage}%
+  \ccComposeCollection{GenericMeta}{generic-meta-format}{GenericMetaBlock}
 }}
 %    \end{macrocode}
 % \end{macro}
@@ -68,7 +68,7 @@
 % Examples for such roles are an article{\slash}chapter{\slash}book's
 % authors, or a collection{\slash}series' editors.
 %
-% \begin{macro}{\tpDeclareRole} is used to declare the Components that
+% \begin{macro}{\ccDeclareRole} is used to declare the Components that
 %   belong to each member of a contributor role. \#2 is the name of
 %   the role, optional \#1 is the internal name of the Role's
 %   formatting Property. If omitted, it is the same as \#2.
@@ -79,8 +79,8 @@
 %   conventions, the role names for a Component and its respective
 %   Property do not necessarily need to be identical.
 %    \begin{macrocode}
-\def\tpDeclareRole{\cc@opt@second\tp@declare@role}%
-\def\tp@declare@role[#1]#2{%
+\def\ccDeclareRole{\cc@opt@second\cc@declare@role}%
+\def\cc@declare@role[#1]#2{%
   \ccDeclareComponentGroup{#2}{%
     \ccDeclareCountedComponent{FullName}%
     \ccDeclareCountedComponent{CiteName}%
@@ -93,22 +93,22 @@
     \ccDeclareCountedComponent{Honorific}%
     \ccDeclareCountedComponent{Lineage}%
     \ccDeclareCountedComponent{ORCID}%
-    \ccDeclareCountedComponent{AffilRef}% for references to the tpAffil Group
-    \ccDeclareCountedComponent{Affiliation}% for affiliations  as direct tpAuthor meta data
+    \ccDeclareCountedComponent{AffilRef}% for references to the Affil Group
+    \ccDeclareCountedComponent{Affiliation}% for affiliations  as direct Author meta data
     \ccDeclareCountedComponent{Email}%
     \ccDeclareCountedComponent{CorrespondenceAs}%
   }%
   \ccDeclareGroupHandler{#2}{%
-    \ccIfComp{FullName}{}{\tpFullName{\ccUseProperty{#1-full-name-format}}}%
-    \ccIfComp{Initial}{}{\tpInitial{\ccUseProperty{initials-format}}}%
-    \ccIfComp{CiteName}{}{\tpCiteName{\ccUseProperty{#1-cite-name-format}}}%
-    \ccIfComp{ShortCiteName}{}{\tpShortCiteName{\ccUseProperty{#1-short-cite-name-format}}}%
-    \ccIfComp{PDFInfoName}{}{\tpPDFInfoName{\ccUseProperty{#1-pdfinfo-name-format}}}%
-    \ccIfComp{CorrespondenceAs}{}{\tpCorrespondenceAs{\ccUseProperty{#1-correspondence-as-format}}}%
+    \ccIfComp{FullName}{}{\ccComponent{FullName}{\ccUseProperty{#1-full-name-format}}}%
+    \ccIfComp{Initial}{}{\ccComponent{Initial}{\ccUseProperty{initials-format}}}%
+    \ccIfComp{CiteName}{}{\ccComponent{CiteName}{\ccUseProperty{#1-cite-name-format}}}%
+    \ccIfComp{ShortCiteName}{}{\ccComponent{ShortCiteName}{\ccUseProperty{#1-short-cite-name-format}}}%
+    \ccIfComp{PDFInfoName}{}{\ccComponent{PDFInfoName}{\ccUseProperty{#1-pdfinfo-name-format}}}%
+    \ccIfComp{CorrespondenceAs}{}{\ccComponent{CorrespondenceAs}{\ccUseProperty{#1-correspondence-as-format}}}%
     \ccIfComp{AffilRef}{\ccIfComp{Affiliation}{%
         \ccPackageError{Meta}{Ambiguity}
-          {You cannot use both Containers \string\tpAffilRef\space and \string\tpAffiliation\space in the same `\ccPrefix#2' Sub-Container}
-          {At least one `\ccPrefix#2' Sub-Container contains both \string\tpAffilRef\space and \string\tpAffiliation. This is not allowed. Please decide for one affiliation strategy: Either two lists with cross-references, or affiliations directly as an author's meta-data.}}{}}{}%
+          {You cannot use both Containers AffilRef and Affiliation in the same `\ccPrefix#2' Sub-Container}
+          {At least one `\ccPrefix#2' Sub-Container contains both AffilRef and Affiliation. This is not allowed. Please decide for one affiliation strategy: Either two lists with cross-references, or affiliations directly as an author's meta-data.}}{}}{}%
   }%
   \ccDeclareRoleBlock{#2}{NameList}{#1-list-print-format}%
   \ccDeclareRoleBlock{#2}{CitationList}{#1-list-cite-format}%
@@ -126,7 +126,7 @@
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccDeclareRoleBlock} is used to create a new output
-%   container (named \lstinline{\tp#2#3}) for a given Role \#2. A Role
+%   container (named \lstinline{\ccPrefix#2#3}) for a given Role \#2. A Role
 %   Block is a Component of the parent Container which contains
 %   certain Components of all members of the Role within its parent
 %   Container. Format and selection of the utilised Components are
@@ -135,32 +135,32 @@
 %   the collector is to be composed. Valid values are
 %   \lstinline{compose} (default) or \lstinline{apply}.
 %    \begin{macrocode}
-\def\ccDeclareRoleBlock{\@ifnextchar[\tp@declare@role@block{\tp@declare@role@block[compose]}}%]
-\def\tp@declare@role@block[#1]#2#3#4{%
-  \ifcsdef{tp@meta@role@#1}
+\def\ccDeclareRoleBlock{\@ifnextchar[\cc@declare@role@block{\cc@declare@role@block[compose]}}%]
+\def\cc@declare@role@block[#1]#2#3#4{%
+  \ifcsdef{ccm@role@#1}
     {\ccDeclareComponent{#2#3}{\expandafter\global}{}%
-     \csgdef{tp@meta@role@\tp@cur@cont @#2@#3}{#4}%
-     \csappto{@tp@meta@role@eval@\tp@cur@cont @#2}
-        {\csname tp@meta@role@#1\endcsname{#2}{#3}}}
+     \csgdef{ccm@role@\cc@cur@cont @#2@#3}{#4}%
+     \csappto{@ccm@role@eval@\cc@cur@cont @#2}
+        {\csname ccm@role@#1\endcsname{#2}{#3}}}
     {\ccPackageError{Meta}{Argument}
       {Invalid optional argument in \string\ccDeclareRoleBlock!}
       {Only `apply' or `compose' are allowed as values^^Jin the optional argument of \string\ccDeclareRoleBlock!}}}%
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@meta@role@eval} creates the name lists for the
+% \begin{macro}{\ccm@role@eval} creates the name lists for the
 %   role. \#1 is the name of the role.
 %    \begin{macrocode}
-\def\tp@meta@role@eval#1{\csname @tp@meta@role@eval@\tp@cur@cont @#1\endcsname}
+\def\ccm@role@eval#1{\csname @ccm@role@eval@\cc@cur@cont @#1\endcsname}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\@tp@meta@role@eval} \#1 is the name of the macro
+% \begin{macro}{\@ccm@role@eval} \#1 is the name of the macro
 %   used to compose the Collection (either
 %   \lstinline{\ccComposeCollection}, or
 %   \lstinline{\ccApplyCollection}), \#2 is the name of the role and
 %   \#3 is the name of the list. The access Component is
 %   \lstinline{#2#3}, i.e., both argumets together.
 %    \begin{macrocode}
-\def\@tp@meta@role@eval#1#2#3{%
+\def\@ccm@role@eval#1#2#3{%
 %    \end{macrocode}
 % First, we check if the Collection Component has already been set in
 % the input. If so, we set an internal flag to indicate that the
@@ -176,75 +176,75 @@
       {\expandafter\ifnum\csname cc#2Cnt\endcsname>\z@
 %    \end{macrocode}
 % otherwise, we call the Property that is stored in
-% \lstinline{\tp@meta@role@\tp@cur@cont @#2@#3} and store the result in the
+% \lstinline{\ccm@role@\cc@cur@cont @#2@#3} and store the result in the
 % Component \lstinline{#2#3}.
 %    \begin{macrocode}
-          #1{#2}{\csname tp@meta@role@\tp@cur@cont @#2@#3\endcsname}{#2#3}%
+          #1{#2}{\csname ccm@role@\cc@cur@cont @#2@#3\endcsname}{#2#3}%
         \fi
       }{}}}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@meta@role@apply} \#1 is the name of the role and
+% \begin{macro}{\ccm@role@apply} \#1 is the name of the role and
 %   \#2 is the name of the composition. This macro applies
-%   (i.e. \textit{fully expands}) the \lstinline{\tp@meta@role@\tp@cur@cont @#1@#2}
+%   (i.e. \textit{fully expands}) the \lstinline{\ccm@role@\cc@cur@cont @#1@#2}
 %   Property and stores the result in the \lstinline{#1#2} Component.
 %    \begin{macrocode}
-\def\tp@meta@role@apply#1#2{\@tp@meta@role@eval\ccApplyCollection{#1}{#2}}
+\def\ccm@role@apply#1#2{\@ccm@role@eval\ccApplyCollection{#1}{#2}}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@meta@role@compose} \#1 is the name of the role and
+% \begin{macro}{\ccm@role@compose} \#1 is the name of the role and
 %   \#2 is the name of the composition. This stores the
-%   \textit{unexpaded} contents of the \lstinline{\tp@meta@role@\tp@cur@cont @#1@#2}
+%   \textit{unexpaded} contents of the \lstinline{\ccm@role@\cc@cur@cont @#1@#2}
 %   Property in the \lstinline{#1#2} Component.
 %    \begin{macrocode}
-\def\tp@meta@role@compose#1#2{\@tp@meta@role@eval\ccComposeCollection{#1}{#2}}
+\def\ccm@role@compose#1#2{\@ccm@role@eval\ccComposeCollection{#1}{#2}}
 %    \end{macrocode}
 % \end{macro}
 %
 %
 % \section{Labeled Components}
 %
-% \begin{macro}{\tpDeclareLabeledComp} declares two Components: one
-%   named \lstinline{\csname tp#2\endcsname} for the value and another
-%   one named \lstinline{\csname tp#2Label\endcsname} for its
+% \begin{macro}{\ccDeclareLabeledComp} declares two Components: one
+%   named \lstinline{\ccPrefix #2} for the value and another
+%   one named \lstinline{\ccPrefix #2Label} for its
 %   corresponding label. \#3 is used for property overrides. The
 %   optional Argument \#1 allows to set a default value for the Label.
 %    \begin{macrocode}
-\def\tpDeclareLabeledComp{\cc@opt@empty\tp@declare@labeled@comp}
-\def\tp@declare@labeled@comp[#1]#2#3{%
+\def\ccDeclareLabeledComp{\cc@opt@empty\cc@declare@labeled@comp}
+\def\cc@declare@labeled@comp[#1]#2#3{%
   \ccDeclareComponent{#2}{\expandafter\global}{}%
   \ccDeclareComponent{#2Label}{\expandafter\global}{}%
-  \csxdef{labeled-meta-property-infix-\tp@cur@cont-#2}{#3}%
+  \csxdef{labeled-meta-property-infix-\cc@cur@cont-#2}{#3}%
   \if!#1!\else
-    \long\csgdef{cc@\tp@cur@cont @#2Label}{#1}%
+    \long\csgdef{cc@\cc@cur@cont @#2Label}{#1}%
   \fi
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tpUseLabeledComp} declares two Components: one named
-%   \lstinline{\csname tp#1\endcsname} for the value and another one
-%   named \lstinline{\csname tp#1Label\endcsname} for its
+% \begin{macro}{\ccUseLabeledComp} declares two Components: one named
+%   \lstinline{\ccPrefix#1} for the value and another one
+%   named \lstinline{\ccPrefix#1Label} for its
 %   corresponding label. An optional Argument allows to set a default
 %   value for the Label.
 %    \begin{macrocode}
-\def\tpUseLabeledComp#1{%
+\def\ccUseLabeledComp#1{%
   \ccIfComp{#1}{%
 %    \end{macrocode}
 %
-% \begin{macro}{\tpCurInfix} stores the currently active property
+% \begin{macro}{\ccCurInfix} stores the currently active property
 %   infix for the Labeled Component
 %    \begin{macrocode}
-    \letcs\tpCurInfix{labeled-meta-property-infix-\tp@cur@cont-#1}%
+    \letcs\ccCurInfix{labeled-meta-property-infix-\cc@cur@cont-#1}%
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tpCurComp} stores the currently active Component name
+% \begin{macro}{\ccCurComp} stores the currently active Component name
 %    \begin{macrocode}
-    \def\tpCurComp{#1}%
+    \def\ccCurComp{#1}%
 %    \end{macrocode}
 % \end{macro}
 %    \begin{macrocode}
-    \ccIfProp{labeled-meta-\tpCurInfix-format}
-      {\ccUseProperty{labeled-meta-\tpCurInfix-format}}
+    \ccIfProp{labeled-meta-\ccCurInfix-format}
+      {\ccUseProperty{labeled-meta-\ccCurInfix-format}}
       {\ccUseProperty{labeled-meta-format}}%
   }{}}
 %    \end{macrocode}
@@ -252,45 +252,45 @@
 %
 % \section{common meta data}
 %
-% \begin{macro}{\tp@declare@common@meta@comp} defines some commonly used meta Components
+% \begin{macro}{\ccm@declare@comp} defines some commonly used meta Components
 %    \begin{macrocode}
-\def\tp@declare@common@meta@comp{%
+\def\ccm@declare@comp{%
     \ccDeclareComponent{Copyright}{\expandafter\global}{}% Copyright text
     \ccDeclareComponent{DOI}{\expandafter\global}{}%         DOI
 
 }%
 %    \end{macrocode}
 % \end{macro}
-% \begin{tpContainer}{article-meta}
+% \begin{ContainerDoc}{article-meta}
 %    \begin{macrocode}
   %% for single articles
 \ccDeclareContainer{article-meta}{%
   \ccDeclareType{Components}{%
     \ccDeclareGlobalComponent{StartPage}                     % Start page of a single article
     \ccDeclareGlobalComponent{EndPage}                       % End page of a single article
-    \tpDeclareLabeledComp[Cite as]{CiteAs}{cite-as}          % As what the article should be cited
-    \tpDeclareLabeledComp[Submitted]{Submitted}{sumbitted}   % Date the article was submitted
-    \tpDeclareLabeledComp[Received]{Received}{received}      % Date the article was recieved
-    \tpDeclareLabeledComp[Revised]{Revised}{revised}         % Date the article was revised
-    \tpDeclareLabeledComp[Reviewed]{Reviewed}{reviewed}      % Date the article was reviewed
-    \tpDeclareLabeledComp[Accepted]{Accepted}{accepted}      % Date the article was accepted
-    \tpDeclareLabeledComp[Published]{Published}{published}   % Date the article was published
-    \tpDeclareLabeledComp[Conflict of Interest]{COIStatement}{coi-statement}% Conflict of Interest statement
+    \ccDeclareLabeledComp[Cite as]{CiteAs}{cite-as}          % As what the article should be cited
+    \ccDeclareLabeledComp[Submitted]{Submitted}{sumbitted}   % Date the article was submitted
+    \ccDeclareLabeledComp[Received]{Received}{received}      % Date the article was recieved
+    \ccDeclareLabeledComp[Revised]{Revised}{revised}         % Date the article was revised
+    \ccDeclareLabeledComp[Reviewed]{Reviewed}{reviewed}      % Date the article was reviewed
+    \ccDeclareLabeledComp[Accepted]{Accepted}{accepted}      % Date the article was accepted
+    \ccDeclareLabeledComp[Published]{Published}{published}   % Date the article was published
+    \ccDeclareLabeledComp[Conflict of Interest]{COIStatement}{coi-statement}% Conflict of Interest statement
   }%
 }
 %    \end{macrocode}
-% \end{tpContainer}
+% \end{ContainerDoc}
 % 
-% \begin{macro}{\tp@extended@common@meta@macros}
+% \begin{macro}{\ccm@extended@common@macros}
 %   provides some extended markup. Some headings use these Components
 %   for compilations of contributions by different authors. They are
 %   also loaded by article title pages.
 %    \begin{macrocode}
-\def\tp@extended@common@meta@macros{%
-  \tpDeclareLabeledComp[Abstract]{Abstract}{abstract}%
-  \tpDeclareLabeledComp[Keywords]{Keywords}{keyword}%
-  \tpDeclareLabeledComp{DOI}{doi}%
-  \tpDeclareLabeledComp{TitleEn}{title-en}%
+\def\ccm@extended@common@macros{%
+  \ccDeclareLabeledComp[Abstract]{Abstract}{abstract}%
+  \ccDeclareLabeledComp[Keywords]{Keywords}{keyword}%
+  \ccDeclareLabeledComp{DOI}{doi}%
+  \ccDeclareLabeledComp{TitleEn}{title-en}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -298,10 +298,10 @@
 %
 % \subsection{Affiliations}
 %
-% \begin{macro}{\tp@meta@affils} is a wrapper that creates the
+% \begin{macro}{\ccm@declare@affils} is a wrapper that creates the
 %   user-level macros for the affiliations.
 %    \begin{macrocode}
-\def\tp@declare@meta@affils{%
+\def\ccm@declare@affils{%
   \ccDeclareComponent{AffilBlock}{\expandafter\global}{}%
   \ccDeclareComponentGroup{Affil}{%
     \ccDeclareCountedComponent{Affiliation}%
@@ -324,13 +324,13 @@
 %    \begin{macrocode}
 \ccAddToProperties{CommonMeta}{%
   \ccSetProperty{initials-format}{%
-    \expandafter\ifx\csname cc@\tp@cur@cont @\tp@cnt@grp-FirstName-\the\tpCurCount\endcsname\cc@long@empty\else
-      \expandafter\ifx\csname cc@\tp@cur@cont @\tp@cnt@grp-FirstName-\the\tpCurCount\endcsname\relax\else
-        \expandafter\expandafter\expandafter\@car\csname cc@\tp@cur@cont @\tp@cnt@grp-FirstName-\the\tpCurCount\endcsname\relax\@nil\ccUseProperty{initials-period}%
-      \expandafter\ifx\csname cc@\tp@cur@cont @\tp@cnt@grp-MidName-\the\tpCurCount\endcsname\cc@long@empty\else
-        \expandafter\ifx\csname cc@\tp@cur@cont @\tp@cnt@grp-MidName-\the\tpCurCount\endcsname\relax\else
+    \expandafter\ifx\csname cc@\cc@cur@cont @\cc@cnt@grp-FirstName-\the\ccCurCount\endcsname\cc@long@empty\else
+      \expandafter\ifx\csname cc@\cc@cur@cont @\cc@cnt@grp-FirstName-\the\ccCurCount\endcsname\relax\else
+        \expandafter\expandafter\expandafter\@car\csname cc@\cc@cur@cont @\cc@cnt@grp-FirstName-\the\ccCurCount\endcsname\relax\@nil\ccUseProperty{initials-period}%
+      \expandafter\ifx\csname cc@\cc@cur@cont @\cc@cnt@grp-MidName-\the\ccCurCount\endcsname\cc@long@empty\else
+        \expandafter\ifx\csname cc@\cc@cur@cont @\cc@cnt@grp-MidName-\the\ccCurCount\endcsname\relax\else
           \ccUseProperty{initials-sep}%
-          \expandafter\expandafter\expandafter\@car\csname cc@\tp@cur@cont @\tp@cnt@grp-MidName-\the\tpCurCount\endcsname\relax\@nil\ccUseProperty{initials-period}%
+          \expandafter\expandafter\expandafter\@car\csname cc@\cc@cur@cont @\cc@cnt@grp-MidName-\the\ccCurCount\endcsname\relax\@nil\ccUseProperty{initials-period}%
         \fi\fi
     \fi\fi
   }
@@ -340,38 +340,38 @@
   %% Properties that control how the composed compoents WITHIN each item in a Role are formatted:
   %
   \ccSetProperty{role-full-name-format}{%
-    \if\tpUseComp{Honorific}\relax
+    \if\ccUseComp{Honorific}\relax
     \else
-      \tpUseComp{Honorific}\space
+      \ccUseComp{Honorific}\space
     \fi
-    \tpUseComp{FirstName}\space
-    \if\tpUseComp{MidName}\relax
+    \ccUseComp{FirstName}\space
+    \if\ccUseComp{MidName}\relax
     \else
-      \tpUseComp{MidName}\space
+      \ccUseComp{MidName}\space
     \fi
-    \tpUseComp{LastName}%
-    \if\tpUseComp{Lineage}\relax
+    \ccUseComp{LastName}%
+    \if\ccUseComp{Lineage}\relax
     \else
-      \space\tpUseComp{Lineage}%
+      \space\ccUseComp{Lineage}%
     \fi%
   }% How FullName for each name is built
-  \ccSetProperty{role-cite-name-format}{\ccIfComp{LastName}{\tpUseComp{LastName},~\tpUseComp{Initial}}{\tpUseComp{FullName}}}% How CiteName for each name is built
-  \ccSetProperty{role-short-cite-name-format}{\tpUseComp{LastName}}% how ShortCiteName for each name is built
+  \ccSetProperty{role-cite-name-format}{\ccIfComp{LastName}{\ccUseComp{LastName},~\ccUseComp{Initial}}{\ccUseComp{FullName}}}% How CiteName for each name is built
+  \ccSetProperty{role-short-cite-name-format}{\ccUseComp{LastName}}% how ShortCiteName for each name is built
   \ccPropertyLet{role-pdfinfo-name-format}{role-cite-name-format}% How PDFInfoName for each item is built
-  \ccSetProperty{role-correspondence-as-format}{\tpUseComp{Email}}% How PDFInfoName for each item is built
+  \ccSetProperty{role-correspondence-as-format}{\ccUseComp{Email}}% How PDFInfoName for each item is built
   %% Properties that control how the single items in a compoent list are formatted:
-  \ccSetProperty{role-block-print-format}{\tpUseComp{FullName}\ifnum\tpCurCount<\ccTotalCount\ccUseProperty{counted-name-sep}\fi}% How <Role>NameList for each name is build
-  \ccSetProperty{role-block-cite-format}{\tpUseComp{CiteName}\ifnum\tpCurCount<\ccTotalCount\ccUseProperty{counted-name-sep}\fi}% How each item in Component <Role>CitationList is formatted
-  \ccSetProperty{role-block-short-cite-format}{\tpUseComp{ShortCiteName}\ifnum\tpCurCount<\ccTotalCount\ccUseProperty{counted-name-sep}\fi}%  How each item in the Component <Role>ShortCitationList is formatted
-  \ccSetProperty{role-block-pdfinfo-format}{\tpUseComp{PDFInfoName}\ifnum\tpCurCount<\ccTotalCount\ccUseProperty{counted-name-sep}\fi}% How each item in the Component <Role>PDFInfo is formatted
+  \ccSetProperty{role-block-print-format}{\ccUseComp{FullName}\ifnum\ccCurCount<\ccTotalCount\ccUseProperty{counted-name-sep}\fi}% How <Role>NameList for each name is build
+  \ccSetProperty{role-block-cite-format}{\ccUseComp{CiteName}\ifnum\ccCurCount<\ccTotalCount\ccUseProperty{counted-name-sep}\fi}% How each item in Component <Role>CitationList is formatted
+  \ccSetProperty{role-block-short-cite-format}{\ccUseComp{ShortCiteName}\ifnum\ccCurCount<\ccTotalCount\ccUseProperty{counted-name-sep}\fi}%  How each item in the Component <Role>ShortCitationList is formatted
+  \ccSetProperty{role-block-pdfinfo-format}{\ccUseComp{PDFInfoName}\ifnum\ccCurCount<\ccTotalCount\ccUseProperty{counted-name-sep}\fi}% How each item in the Component <Role>PDFInfo is formatted
   \ccSetProperty{role-block-correspondence-format}{%
-    \ccIfAttrIsSet{\tp@cnt@grp-\the\tpCurCount}{corresp}
+    \ccIfAttrIsSet{\cc@cnt@grp\the\ccCurCount}{corresp}
       {\ifx\is@first@corresp\relax
          \ccUseProperty{corresp-sep}%
        \else
          \global\let\is@first@corresp\relax
        \fi
-       \tpUseComp{CorrespondenceAs}%
+       \ccUseComp{CorrespondenceAs}%
      }{}}% How each item in the Component <Role>Correspondence is formatted
   % Aliasses
   % for Role "Author":
@@ -397,26 +397,26 @@
   % Affiliation Properties
   %
   \ccSetProperty{affiliation-format}{% Format of the  affiliation block
-    \ccIfComp{Institute}{\tpUseComp{Institute}}{}%
-    \ccIfComp{Department}{, \tpUseComp{Department}}{}%
-    \ccIfComp{Address}{, \tpUseComp{Address}}{}%
+    \ccIfComp{Institute}{\ccUseComp{Institute}}{}%
+    \ccIfComp{Department}{, \ccUseComp{Department}}{}%
+    \ccIfComp{Address}{, \ccUseComp{Address}}{}%
   }%
   \ccSetProperty{affil-sep}{\par}
   \ccSetProperty{affil-block-item-face}{}% Font of a single item in the affiliation list
   \ccSetProperty{affil-block-item-format}{% Format of a single item in the affiliation list
-    \textsuperscript{\tpUseComp{AffilID}}%
+    \textsuperscript{\ccUseComp{AffilID}}%
     \bgroup
       \ccUseProperty{affil-block-item-face}%
-      \tpUseComp{Affiliation}
+      \ccUseComp{Affiliation}
     \egroup%
-    \ifnum\tpCurCount<\ccTotalCount\relax\ccUseProperty{affil-sep}\fi%
+    \ifnum\ccCurCount<\ccTotalCount\relax\ccUseProperty{affil-sep}\fi%
   }
   \ccSetProperty{affil-block-face}{\small\normalfont}%
   \ccSetProperty{affil-block-format}{%
     \ccIfComp{AffilBlock}
       {\bgroup
          \ccUseProperty{affil-block-face}%
-         \tpUseComp{AffilBlock}%
+         \ccUseComp{AffilBlock}%
        \egroup
        \par
      }{}}
@@ -424,32 +424,32 @@
   % Labeled Meta Properties
   %
   \ccSetProperty{labeled-meta-format}{%
-    \ccIfProp{labeled-meta-before-\tpCurInfix}
-      {\ccUseProperty{labeled-meta-before-\tpCurInfix}}
+    \ccIfProp{labeled-meta-before-\ccCurInfix}
+      {\ccUseProperty{labeled-meta-before-\ccCurInfix}}
       {\ccUseProperty{labeled-meta-before}}%
     \bgroup
-      \ccIfProp{labeled-meta-\tpCurInfix-face}
-        {\ccUseProperty{labeled-meta-\tpCurInfix-face}}
+      \ccIfProp{labeled-meta-\ccCurInfix-face}
+        {\ccUseProperty{labeled-meta-\ccCurInfix-face}}
         {\ccUseProperty{labeled-meta-face}}%
-      \ccIfProp{labeled-meta-\tpCurInfix-label-format}
-        {\ccUseProperty{labeled-meta-\tpCurInfix-label-format}}
+      \ccIfProp{labeled-meta-\ccCurInfix-label-format}
+        {\ccUseProperty{labeled-meta-\ccCurInfix-label-format}}
         {\ccUseProperty{labeled-meta-label-format}}%
-      \tpUseComp{\tpCurComp}%
+      \ccUseComp{\ccCurComp}%
     \egroup
-    \ccIfProp{labeled-meta-after-\tpCurInfix}
-      {\ccUseProperty{labeled-meta-after-\tpCurInfix}}
+    \ccIfProp{labeled-meta-after-\ccCurInfix}
+      {\ccUseProperty{labeled-meta-after-\ccCurInfix}}
       {\ccUseProperty{labeled-meta-after}}%
   }
   \ccSetProperty{labeled-meta-label-format}{%
-    \ccIfComp{\tpCurComp Label}{%
+    \ccIfComp{\ccCurComp Label}{%
       \bgroup
-        \ccUseProperty{labeled-meta-before-\tpCurInfix-label}%
-        \ccIfProp{labeled-meta-\tpCurInfix-label-face}
-          {\ccUseProperty{labeled-meta-\tpCurInfix-label-face}}
+        \ccUseProperty{labeled-meta-before-\ccCurInfix-label}%
+        \ccIfProp{labeled-meta-\ccCurInfix-label-face}
+          {\ccUseProperty{labeled-meta-\ccCurInfix-label-face}}
           {\ccUseProperty{labeled-meta-label-face}}%
-        \tpUseComp{\tpCurComp Label}%
-        \ccIfProp{labeled-meta-\tpCurInfix-label-sep}
-          {\ccUseProperty{labeled-meta-\tpCurInfix-label-sep}}
+        \ccUseComp{\ccCurComp Label}%
+        \ccIfProp{labeled-meta-\ccCurInfix-label-sep}
+          {\ccUseProperty{labeled-meta-\ccCurInfix-label-sep}}
           {\ccUseProperty{labeled-meta-label-sep}}%
       \egroup
     }{}}

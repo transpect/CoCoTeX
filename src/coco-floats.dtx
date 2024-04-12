@@ -173,7 +173,7 @@
   \global\let\ccf@sub@contentsline@store\@empty
   \global\ccf@sub@maxheight=\z@\relax
   \@tempcnta=\z@\relax
-  \cc@reset@components{\tp@cur@cont}%
+  \cc@reset@components{\cc@cur@cont}%
   \let\ccf@prefix\@empty
   \let\ht@cur@element\ccf@cap@type
   \global\let\ccf@current@class\relax
@@ -256,7 +256,7 @@
   \ccIfAttr{#1}{debug}
   {\message{^^J[CoCo Float Debug]^^J
       Textheight:\space\the\textheight^^J
-      Type:\space\space\space\space\space\space\space\tp@cur@cont^^J
+      Type:\space\space\space\space\space\space\space\cc@cur@cont^^J
 \ifx\ccf@cap@type\cc@str@figure
       Path: \space\space\space\space\space\space\ccf@fig@path^^J
 \fi
@@ -269,9 +269,9 @@
       Height:\space\space\space\space\space\the\ccf@total@height^^J
       Depth:\space\space\space\space\space\space\the\ccf@total@depth^^J
 \else
-      Width \the\ccSubFloatCnt:\space\space\space\space\space\space\expandafter\meaning\csname ccf@\tp@cur@cont @width-\the\ccSubFloatCnt\endcsname^^J
-      Height \the\ccSubFloatCnt:\space\space\space\space\space     \expandafter\meaning\csname ccf@\tp@cur@cont @height-\the\ccSubFloatCnt\endcsname^^J
-      Depth \the\ccSubFloatCnt:\space\space\space\space\space\space\expandafter\meaning\csname ccf@\tp@cur@cont @depth-\the\ccSubFloatCnt\endcsname^^J
+      Width \the\ccSubFloatCnt:\space\space\space\space\space\space\expandafter\meaning\csname ccf@\cc@cur@cont @width-\the\ccSubFloatCnt\endcsname^^J
+      Height \the\ccSubFloatCnt:\space\space\space\space\space     \expandafter\meaning\csname ccf@\cc@cur@cont @height-\the\ccSubFloatCnt\endcsname^^J
+      Depth \the\ccSubFloatCnt:\space\space\space\space\space\space\expandafter\meaning\csname ccf@\cc@cur@cont @depth-\the\ccSubFloatCnt\endcsname^^J
 \fi}}{}}
 %    \end{macrocode}
 % \end{macro}
@@ -406,8 +406,6 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
     \ccAddToType{FloatEnvInfo}{#2}{%
       \def\ccf@cap@type{#3}%
       \def\ccf@cap@list@type{#4}%
-      \let\tp@captype\ccf@cap@type% legacy
-      \let\tp@caplisttype\ccf@cap@list@type% legacy
     }%
   }{%
 %    \end{macrocode}
@@ -425,8 +423,6 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
         \ccSetContainer{#2}%
         \def\ccf@cap@type{#3}%
         \def\ccf@cap@list@type{#4}%
-        \let\tp@captype\ccf@cap@type% legacy
-        \let\tp@caplisttype\ccf@cap@list@type% legacy
       }% /FloatEnvInfo
 %    \end{macrocode}
 % The macro actually defines two {\LaTeX} environments; a normal one
@@ -444,7 +440,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %    \begin{macrocode}
       \ccf@generate@listof@handlers{#4}{#3}{#2}%
       \bgroup
-        \def\tp@cur@cont{#2}%
+        \def\cc@cur@cont{#2}%
         \cc@init@l@[list-of]{#4}{0}{#3}% Generate listof-Entries for first level floats
         \cc@init@l@[list-of]{#4}{1}{sub#3}% Generate listof-Entries for sub-floats
       \egroup
@@ -526,7 +522,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 % \end{macro}
 % \begin{macro}{\ccf@check@empty} is a wrapper for CoCoTeX kernel's \lstinline{\cc@check@empty}
 %    \begin{macrocode}
-\def\ccf@check@empty#1{\cc@check@empty{\tp@cur@cont}{#1-\the\ccSubFloatCnt}{Listof}}
+\def\ccf@check@empty#1{\cc@check@empty{\cc@cur@cont}{#1-\the\ccSubFloatCnt}{Listof}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccf@compose@listof} is the Component Group Handler
@@ -617,7 +613,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %   for numbered sub-floats. \#1 is the sub-float counter.
 %    \begin{macrocode}
 \def\ccf@set@subcounter{%
-  \ccSetPropertyVal{float-number}{\csname  cc@\tp@cur@cont @Number-0\endcsname}%
+  \ccSetPropertyVal{float-number}{\csname  cc@\cc@cur@cont @Number-0\endcsname}%
   \ccSetPropertyVal{sub-number}{%
     \begingroup
       \expandonce{\ccUseProperty{sub-number-face}}%
@@ -730,9 +726,9 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %    \begin{macrocode}
 \def\endccSubFloat{%
   \ccUseProperty{subfloat-handler}%
-  \expandafter\xdef\csname ccf@\tp@cur@cont @width-\the\ccSubFloatCnt\endcsname{\the\wd\ccf@sub@box}%
-  \expandafter\xdef\csname ccf@\tp@cur@cont @height-\the\ccSubFloatCnt\endcsname{\the\ht\ccf@sub@box}%
-  \expandafter\xdef\csname ccf@\tp@cur@cont @depth-\the\ccSubFloatCnt\endcsname{\the\dp\ccf@sub@box}%
+  \expandafter\xdef\csname ccf@\cc@cur@cont @width-\the\ccSubFloatCnt\endcsname{\the\wd\ccf@sub@box}%
+  \expandafter\xdef\csname ccf@\cc@cur@cont @height-\the\ccSubFloatCnt\endcsname{\the\ht\ccf@sub@box}%
+  \expandafter\xdef\csname ccf@\cc@cur@cont @depth-\the\ccSubFloatCnt\endcsname{\the\dp\ccf@sub@box}%
   \@tempdima=\dimexpr\the\ht\ccf@sub@box+\the\dp\ccf@sub@box\relax
   \@tempdimb=\dimexpr\the\wd\ccf@sub@box\relax
   \ifdim\@tempdima>\ccf@sub@maxheight\relax
@@ -940,7 +936,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
   \savenotes
   \ifnum#1>\@ne\hfill\fi
   \vtop\bgroup
-    \expandafter\hsize\csname  cc@\tp@cur@cont @res@width-#1\endcsname\relax
+    \expandafter\hsize\csname  cc@\cc@cur@cont @res@width-#1\endcsname\relax
     \let\includegraphics\ccf@includesubgraphics
     \leavevmode
     \ccf@render@sub{#1}{#2}%
@@ -978,7 +974,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
   \cc@iterate{\@tempcnta}{\@ne}{\ccSubFloatCnt}{%
     \setbox\z@\vbox{%
       \ccSubFloatCnt\@tempcnta\relax
-      \expandafter\hsize\expandafter\dimexpr\csname  cc@\tp@cur@cont @res@width-\the\@tempcnta\endcsname\relax
+      \expandafter\hsize\expandafter\dimexpr\csname  cc@\cc@cur@cont @res@width-\the\@tempcnta\endcsname\relax
       \ccGobble
       \ccUseProperty{\ccf@prefix caption-face}%
       \ccUseProperty{\ccf@prefix caption-face-#1}%
@@ -1001,26 +997,26 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
   \ccf@calc@width=\ccf@total@width\relax
   \advance\ccf@calc@width-\ccf@margin@l\relax
   \cc@iterate{\@tempcnta}{\@ne}{\ccSubFloatCnt}{%
-    \edef\@tempa{\CalcRatio{\ccf@sub@maxheight}{\csname ccf@\tp@cur@cont @height-\the\@tempcnta\endcsname}}%
+    \edef\@tempa{\CalcRatio{\ccf@sub@maxheight}{\csname ccf@\cc@cur@cont @height-\the\@tempcnta\endcsname}}%
     \ifnum\the\@tempcnta>\@ne\relax
       \advance\ccf@calc@width-\ccf@sub@sep\relax%
     \fi
-    \expandafter\@tempdimc\csname ccf@\tp@cur@cont @width-\the\@tempcnta\endcsname\relax
+    \expandafter\@tempdimc\csname ccf@\cc@cur@cont @width-\the\@tempcnta\endcsname\relax
     \@tempdimb=\@tempa\@tempdimc\relax
-    \expandafter\edef\csname   cc@\tp@cur@cont @adj@width-\the\@tempcnta\endcsname{\the\@tempdimb}%
+    \expandafter\edef\csname   cc@\cc@cur@cont @adj@width-\the\@tempcnta\endcsname{\the\@tempdimb}%
     \advance\@tempdima\@tempdimb
   }%
   \@tempcnta=\z@\relax
   \@tempdimb=\z@\relax
   \@tempdimc=\z@\relax
   \cc@iterate{\@tempcnta}{\@ne}{\ccSubFloatCnt}{%
-    \edef\@tempa{\CalcRatio{\csname  cc@\tp@cur@cont @adj@width-\the\@tempcnta\endcsname}{\@tempdima}}%
-    \expandafter\edef\csname  cc@\tp@cur@cont @res@width-\the\@tempcnta\endcsname{\dimexpr\@tempa\ccf@calc@width\relax}%
-    \@tempdimc\dimexpr\csname ccf@\tp@cur@cont @height-\the\@tempcnta\endcsname\relax
+    \edef\@tempa{\CalcRatio{\csname  cc@\cc@cur@cont @adj@width-\the\@tempcnta\endcsname}{\@tempdima}}%
+    \expandafter\edef\csname  cc@\cc@cur@cont @res@width-\the\@tempcnta\endcsname{\dimexpr\@tempa\ccf@calc@width\relax}%
+    \@tempdimc\dimexpr\csname ccf@\cc@cur@cont @height-\the\@tempcnta\endcsname\relax
     \@tempdimc\dimexpr\@tempa\@tempdimc\relax
     \ifdim\@tempa\@tempdimb<\@tempdimc\@tempdimb\@tempdimc\relax\fi
   }%
-  \expandafter\edef\csname  cc@\tp@cur@cont @res@height\endcsname{\the\@tempdimb}%
+  \expandafter\edef\csname  cc@\cc@cur@cont @res@height\endcsname{\the\@tempdimb}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -1360,7 +1356,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 }
 %    \end{macrocode}
 % \end{ContainerDoc}
-% \begin{tpContainerDoc}{Table} defines the default Properties of the
+% \begin{ContainerDoc}{Table} defines the default Properties of the
 %   \lstinline{\ccPrefix Table} Container.
 %    \begin{macrocode}
 \ccDeclareFloat{Table}{table}{lot}{%
@@ -1371,7 +1367,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
   \ccSetProperty{subfloat-render}{\ccfSubTableRender}%
 }
 %    \end{macrocode}
-% \end{tpContainer}
+% \end{ContainerDoc}
 %    \begin{macrocode}[gobble=1]
 %</floats>
 %    \end{macrocode}

@@ -118,8 +118,8 @@
       \fi
       \global\advance\realchap\@ne
       \global\c@endnote\z@
-      \def\tp@par@title{\ccIfComp{TocTitle}{\tpUseComp{TocTitle}}{\tpUseComp{Title}}}%
-      \def\tp@par@runtitle{\ccIfComp{RunTitle}{\tpUseComp{RunTitle}}{\tpUseComp{Title}}}%
+      \def\tp@par@title{\ccIfComp{TocTitle}{\ccUseComp{TocTitle}}{\ccUseComp{Title}}}%
+      \def\tp@par@runtitle{\ccIfComp{RunTitle}{\ccUseComp{RunTitle}}{\ccUseComp{Title}}}%
       \addtoendnotes{%
         \noexpand\expandafter\noexpand\ifx\noexpand\csname enotes@in@\the\realchap\noexpand\endcsname\noexpand\@empty
           \bgroup

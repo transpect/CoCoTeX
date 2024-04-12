@@ -31,7 +31,7 @@
 \ProvidesPackage{coco-accessibility}
     [\filedate \fileversion CoCoTeX accessibility module]
 %    \end{macrocode}
-% \begin{macro}{\tp@if@ally} If the \lstinline{coco-ally} package is
+% \begin{macro}{\cc@if@ally} If the \lstinline{coco-ally} package is
 %   loaded, the conditional from the \lstinline{coco-common} module is
 %   re-defined to always expand the \texttt{true} branch and discard
 %   the \texttt{false} branch:
@@ -303,7 +303,7 @@
 % \end{macro}
 %
 % The local preferences for \CoCoTeX's accessibility features is done
-% via the \lstinline{tpMeta} environment. Therefore, we hook the
+% via the \lstinline{\ccPrefix Meta} environment. Therefore, we hook the
 % neccessary Components and Properties right into the
 % \lstinline{titlepage} container. Therefore,
 % \lstinline{coco-title.sty} is a hard requirement for \CoCoTeX's
@@ -551,7 +551,7 @@
 % code provides a superior alternative to that via the
 % \lstinline{ltpdfa} package.
 %
-% \begin{macro}{\tp@title@insert@xmp} is an override of the same macro
+% \begin{macro}{\cc@title@insert@xmp} is an override of the same macro
 %   in \lstinline{coco-title.sty} (see. Sect.~\ref{sec:title:xmp}). If
 %   the \lstinline{ally} document option is set, XMP inclusion is done
 %   via the \lstinline{ltpdfa} package.
@@ -570,7 +570,7 @@
     {\ccPackageWarning{A11y}{File}{%
 \cca@xmp@file@name\space not found.^^J
 Note that the ltpdfa package will create one^^J
-from the Components given in the tpMeta Container.}}}
+from the Components given in the Meta Container.}}}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -582,24 +582,24 @@ from the Components given in the tpMeta Container.}}}
 %    \begin{macrocode}
 \ccAddToType{Components}{titlepage}{%
 %    \end{macrocode}
-% \begin{ComponentDescr}{titlepage}{IccProfileFile} holds the path
+% \begin{ComponentDoc}{titlepage}{IccProfileFile} holds the path
 %   (relative to the main tex file) and name of the .icc file.
 %    \begin{macrocode}
   \ccDeclareGlobalComponent{IccProfileFile}
 %    \end{macrocode}
-% \end{ComponentDescr}
-% \begin{ComponentDescr}{titlepage}{IccComponents} holds the number of
+% \end{ComponentDoc}
+% \begin{ComponentDoc}{titlepage}{IccComponents} holds the number of
 %   components in the color profile
 %    \begin{macrocode}
   \ccDeclareGlobalComponent{IccComponents}
 %    \end{macrocode}
-% \end{ComponentDescr}
-% \begin{ComponentDescr}{titlepage}{IccIdentifier} holds the identifier
+% \end{ComponentDoc}
+% \begin{ComponentDoc}{titlepage}{IccIdentifier} holds the identifier
 %   of the color profile
 %    \begin{macrocode}
   \ccDeclareGlobalComponent{IccIdentifier}}
 %    \end{macrocode}
-% \end{ComponentDescr}
+% \end{ComponentDoc}
 % The Components are composed via a new Property
 % \lstinline{output-intent} which we add to \lstinline{coco-title}'s
 % Properties list:
@@ -612,7 +612,7 @@ from the Components given in the tpMeta Container.}}}
   {\def\cca@default@icc@iden{sRGB IEC61966-2.1}}
 \ccAddToType{Properties}{titlepage}{%
 %    \end{macrocode}
-% \begin{tpProperty}{titlepage}{output-intent} sends the output
+% \begin{PropertyDoc}{titlepage}{output-intent} sends the output
 %   intent information to the ltpdfa package. It must contain of three
 %   data fields:
 %   \begin{description}
@@ -627,12 +627,12 @@ from the Components given in the tpMeta Container.}}}
 % \end{description}
 %    \begin{macrocode}
   \ccSetProperty{output-intent}{%
-    profile=\ccIfComp{IccProfileFile}{\tpUseComp{IccProfileFile}}{suppl/\cc@color@enc.icc};%
-    components=\ccIfComp{IccComponents}{\tpUseComp{IccComponents}}{\cca@default@icc@comp};%
-    identifier=\ccIfComp{IccIdentifier}{\tpUseComp{IccIdentifier}}{\cca@default@icc@iden}%
+    profile=\ccIfComp{IccProfileFile}{\ccUseComp{IccProfileFile}}{suppl/\cc@color@enc.icc};%
+    components=\ccIfComp{IccComponents}{\ccUseComp{IccComponents}}{\cca@default@icc@comp};%
+    identifier=\ccIfComp{IccIdentifier}{\ccUseComp{IccIdentifier}}{\cca@default@icc@iden}%
   }}
 %    \end{macrocode}
-% \end{tpProperty}
+% \end{PropertyDoc}
 % The Component Handler which links the new Components to that
 % Property is added to titlepage's \lstinline{document-meta-hook}:
 %    \begin{macrocode}
@@ -659,26 +659,26 @@ from the Components given in the tpMeta Container.}}}
 \ccAddToType{Components}{titlepage}{%
 %    \end{macrocode}
 %
-% \begin{ComponentDescr}{PDFAID} defines the PDF/A ID (Default: 2,
+% \begin{ComponentDoc}{titlepage}{PDFAID} defines the PDF/A ID (Default: 2,
 %   meaning: PDF/A-2)
 %    \begin{macrocode}
   \ccDeclareGlobalComponent[2]{PDFAID}%
 %    \end{macrocode}
-% \end{ComponentDescr}
-% \begin{ComponentDescr}{PDFALevel} defines the PDF/A Level (Default: A,
+% \end{ComponentDoc}
+% \begin{ComponentDoc}{titlepage}{PDFALevel} defines the PDF/A Level (Default: A,
 %   meaning PDF/A-2A)
 %    \begin{macrocode}
   \ccDeclareGlobalComponent[A]{PDFALevel}%
 %    \end{macrocode}
-% \end{ComponentDescr}
-% \begin{ComponentDescr}{PDFUAID} defines the PDF standard (Default: 1,
-%   meaning: PDF/UA-1). Use \lstinline|\tpPDFUAID{}| (i.e. set it to
+% \end{ComponentDoc}
+% \begin{ComponentDoc}{titlepage}{PDFUAID} defines the PDF standard (Default: 1,
+%   meaning: PDF/UA-1). Use \lstinline|\ccPrefix PDFUAID{}| (i.e. set it to
 %   nothing) to make the document conform to the PDF/A standard, but
 %   \textbf{not} to the PDF/UA standard.
 %    \begin{macrocode}
   \ccDeclareGlobalComponent[1]{PDFUAID}}%
 %    \end{macrocode}
-% \end{ComponentDescr}
+% \end{ComponentDoc}
 % The checking if the values are valid, and the separation of the
 % various parts of the standard is done via a lua script in the
 % \lstinline{document-meta-hook}. The \lstinline{conformance}
@@ -688,9 +688,9 @@ from the Components given in the tpMeta Container.}}}
 \ccAddToHook[titlepage]{document-meta-hook}{%
   \ccIfCompEmpty{PDFAID}{}{\ccIfCompEmpty{PDFALevel}{}{%
       \edef\x{\noexpand\ccaSetDocinfo{conformance}{%
-          pdfaid=\tpUseComp{PDFAID};%
-          level=\tpUseComp{PDFALevel}%
-          \ccIfCompEmpty{PDFUAID}{}{;pdfuaid=\tpUseComp{PDFUAID}}}}%
+          pdfaid=\ccUseComp{PDFAID};%
+          level=\ccUseComp{PDFALevel}%
+          \ccIfCompEmpty{PDFUAID}{}{;pdfuaid=\ccUseComp{PDFUAID}}}}%
       \x}}}
 %    \end{macrocode}
 %
@@ -757,7 +757,7 @@ local meta = {
 % from the \lstinline{\jobname.xmp} and stores certain values to be
 % accessed by LaTeX. This is used to fill the DocumentInfo when a xmp
 % file is available during the expansion of
-% \lstinline{\tp@write@pdf@meta} from the coco-title module (see
+% \lstinline{\cct@write@pdf@meta} from the coco-title module (see
 % Sect.~\ref{sect:coco-title:pdf-meta-data}).
 %    \begin{macrocode}[language={[5.3]Lua}]
   extract = function ()

@@ -39,7 +39,7 @@
 %    \end{macrocode}
 %
 % \section{Facility for declaring heading levels and their layouts}%
-% \begin{tpContainer}{Heading}
+% \begin{ContainerDoc}{Heading}
 %    \begin{macrocode}
 \ccDeclareContainer{Heading}{%
   \ccInherit{Components,Properties}{CommonMeta}%
@@ -66,9 +66,9 @@
   \ccDeclareEnv{\cch@heading}{\cch@end@heading}%
 }
 %    \end{macrocode}
-% \end{tpContainer}
+% \end{ContainerDoc}
 %
-% \begin{macro}{\tpDeclareHeading} is the user-level macro to declare
+% \begin{macro}{\ccDeclareHeading} is the user-level macro to declare
 %   new headings.
 % \begin{description}[2em]
 % \item[\#1] (optional) inherit-from: load all properties from that heading level, first.
@@ -77,8 +77,8 @@
 % \item[\#4] Property definitions and switches
 % \end{description}
 %    \begin{macrocode}
-\long\def\tpDeclareHeading{\cc@opt@empty\@tpDeclareHeading}
-\long\def\@tpDeclareHeading[#1]#2#3#4{%
+\long\def\ccDeclareHeading{\cc@opt@empty\cc@declare@heading}
+\long\def\cc@declare@heading[#1]#2#3#4{%
 %    \end{macrocode}
 % First, we check if the heading has already been declared.
 %    \begin{macrocode}
@@ -172,11 +172,11 @@
 % handlers, the heading's counters and its hooks.
 %    \begin{macrocode}
       \ccDeclareType{Init}{%
-        \tp@init@hooks{#3}%
-        \let\@tp@cur@cont\tp@cur@cont
-        \def\tp@cur@cont{Heading}%
+        \cch@init@hooks{#3}%
+        \let\@cch@cur@cont\cc@cur@cont
+        \def\cc@cur@cont{Heading}%
         \cc@init@l@{toc}{#2}{#3}%
-        \let\tp@cur@cont\@tp@cur@cont
+        \let\cc@cur@cont\@cch@cur@cont
         \cch@init@cnt{#3}%
       }%
 %    \end{macrocode}
@@ -209,7 +209,7 @@
   \ifnum#2>\cch@max@level\relax
     \global\cch@max@level=\csname cch@#3@level\endcsname\relax
   \fi
-}% \@tpDeclareHeading
+}% \cc@declare@heading
 %    \end{macrocode}
 %   Each new heading level needs some configuration with the
 % \lstinline{ltpdfa} package in order to automatically close heading
@@ -376,12 +376,12 @@
 % Property list also contains the general \lstinline{Heading} Property
 % list.
 %    \begin{macrocode}
-    \def\tpHeadingLevel{#1}%
+    \def\cchLevel{#1}%
     \ccEvalType[#2]{Properties}%
 %    \end{macrocode}
 % Processing the author name list (from coco-meta.sty).
 %    \begin{macrocode}
-    \tp@meta@role@eval{Author}%
+    \ccm@role@eval{Author}%
     \ccComposeCollection{Author}{author-contact-block-format}{AuthorContactBlock}%
     \ccComposeCollection{Affil}{affil-block-item-format}{AffilBlock}%
 %    \end{macrocode}
@@ -511,10 +511,10 @@
 %
 % \subsection{Initializers for New Heading Levels}%
 %
-% \begin{macro}{\tp@init@hooks} initializes the Hooks for heading
+% \begin{macro}{\cch@init@hooks} initializes the Hooks for heading
 %   level \#1.
 %    \begin{macrocode}
-\def\tp@init@hooks#1{%
+\def\cch@init@hooks#1{%
   \ccDeclareHook{toc-before-hook-#1}% Expanded before the toc entry is printed
   \ccDeclareHook{toc-after-hook-#1}% Expanded after the toc entry is printed
   \ccDeclareHook{before-hook-#1}% Expanded before before-heading property is expanded
@@ -860,7 +860,7 @@
 %    \begin{macrocode}
 \def\cch@end@heading{%
   \expandafter\ifx\csname ccUseHeading\cch@sec@name\endcsname\relax
-    \PackageError{coco-headings.sty}{Heading level \cch@sec@name\space unknown!}{A Heading with level \cch@sec@name\space is unknown. Use the \string\tpDeclareHeading\space macro to declare heading levels.}%
+    \PackageError{coco-headings.sty}{Heading level \cch@sec@name\space unknown!}{A Heading with level \cch@sec@name\space is unknown. Use the \string\ccDeclareHeading\space macro to declare heading levels.}%
   \else
     \csname ccUseHeading\cch@sec@name\endcsname%
   \fi
@@ -882,7 +882,7 @@
   \let\cc@ltx@label\label
   \def\ccAuthorCnt{\z@}%
   \def\ccAffilCnt{\z@}%
-  \cc@reset@components{\tp@cur@cont}%
+  \cc@reset@components{\cc@cur@cont}%
   }
 %    \end{macrocode}
 % \end{macro}
@@ -891,7 +891,7 @@
 %   and therefore constitutes a closed group).
 %    \begin{macrocode}
 \def\cch@reset{%
-  \let\tp@cur@cont\relax
+  \let\cc@cur@cont\relax
   \let\\\cch@ltx@dbl@backslash
   \let\label\cc@ltx@label
   \let\cch@sec@name\relax
@@ -970,30 +970,30 @@
   \ccSetProperty{quote-block-format}{%
     \bgroup
       \ccUseProperty{quote-face}%
-      \tpUseComp{QuoteText}\par
-      \ccIfComp{QuoteSource}{{\ccUseProperty{quote-source-face}--\space\tpUseComp{QuoteSource}}\par}{}%
+      \ccUseComp{QuoteText}\par
+      \ccIfComp{QuoteSource}{{\ccUseProperty{quote-source-face}--\space\ccUseComp{QuoteSource}}\par}{}%
     \egroup}
   \ccSetProperty{heading-block}
     {\ccUseProperty{title-face}%
      \ccIfComp{Number}
        {\ccUseProperty{hang-number}}
        {\leftskip0pt}%
-     \tpUseComp{Title}\par%
-     \ccIfComp{Subtitle}{{\ccUseProperty{subtitle-face}\tpUseComp{Subtitle}}\par}{}%
-     \ccIfComp{AuthorNameList}{{\ccUseProperty{author-face}\tpUseComp{AuthorNameList}}\par}{}%
-     \ccIfComp{QuoteBlock}{\tpUseComp{QuoteBlock}}{}%
-     \ccIfComp{AffilBlock}{{\ccUseProperty{affil-block-face}\tpUseComp{AffilBlock}}\par}{}%
+     \ccUseComp{Title}\par%
+     \ccIfComp{Subtitle}{{\ccUseProperty{subtitle-face}\ccUseComp{Subtitle}}\par}{}%
+     \ccIfComp{AuthorNameList}{{\ccUseProperty{author-face}\ccUseComp{AuthorNameList}}\par}{}%
+     \ccIfComp{QuoteBlock}{\ccUseComp{QuoteBlock}}{}%
+     \ccIfComp{AffilBlock}{{\ccUseProperty{affil-block-face}\ccUseComp{AffilBlock}}\par}{}%
     }%
   \ccSetProperty{extended-heading}{%
     \ccIfComp{Abstract}
       {\par\vskip\baselineskip
-       {\bfseries\ccIfComp{AbstractLabel}{\tpUseComp{AbstractLabel}}{Abstract}}\par
-       {\itshape\small\tpUseComp{Abstract}}\par}
+       {\bfseries\ccIfComp{AbstractLabel}{\ccUseComp{AbstractLabel}}{Abstract}}\par
+       {\itshape\small\ccUseComp{Abstract}}\par}
       {}%
     \ccIfComp{Keywords}
       {\par\vskip\baselineskip
-       {\bfseries\ccIfComp{KeywordsLabel}{\tpUseComp{KeywordsLabel}}{Keywords}}\par
-       {\itshape\small\tpUseComp{Keywords}\par}}
+       {\bfseries\ccIfComp{KeywordsLabel}{\ccUseComp{KeywordsLabel}}{Keywords}}\par
+       {\itshape\small\ccUseComp{Keywords}\par}}
      {}%
    }%
   \ccSetProperty{before-skip}{\z@skip}% TODOC: values < 0pt use \minusvspace, else \addvspace. LaTeX's default behaviour of @afterindent is relocated to the after-indent property.
@@ -1012,15 +1012,15 @@
     \bgroup
       \ccUseProperty{title-face}%
       \ccUseProperty{number-face}%
-      \tpUseComp{Number}%
+      \ccUseComp{Number}%
       \ccUseProperty{number-sep}%
     \egroup}
   \ccSetProperty{numbering}{auto}%
   %% running header
   \ccSetProperty{running-level}{}% override level for running title, name
   \ccSetProperty{running-heading}{%
-    \ccIfComp{RunAuthorNameList}{\tpUseComp{RunAuthorNameList}:\space}{}%
-    \tpUseComp{RunTitle}%
+    \ccIfComp{RunAuthorNameList}{\ccUseComp{RunAuthorNameList}:\space}{}%
+    \ccUseComp{RunTitle}%
   }%
   %% ToC
   \ccSetProperty{no-toc}{false}% toc entries are generally disabled iff true
@@ -1038,7 +1038,7 @@
   \ccSetProperty{toc-number-format}{% Format of the TocNumber
     \bgroup
       \ccUseProperty{toc-number-face}%
-      \tpUseComp{TocNumber}%
+      \ccUseComp{TocNumber}%
       \ccUseProperty{toc-number-sep}%
     \egroup}
   \ccSetProperty{toc-page-sep}{\dotfill}% between TocTitle and the page counter
@@ -1047,7 +1047,7 @@
     \ccUseProperty{toc-page-sep}%
     \bgroup
       \ccUseProperty{toc-page-face}%
-      \tpUseComp{TocPage}%
+      \ccUseComp{TocPage}%
     \egroup}%
   \ccSetProperty{toc-link}{none}% should toc entries be linked? values: none,title,page,all
   \ccSetProperty{toc-level}{}% override heading level for ToC, name!
@@ -1066,27 +1066,27 @@
     \ccIfComp{TocNumber}
       {\ccUseProperty{toc-hang-number}}
       {\leftskip0pt\leavevmode}%
-    \ccIfComp{TocAuthorNameList}{\tpUseComp{TocAuthorNameList}:\space}{}%
-    \tpUseComp{TocTitle}%
+    \ccIfComp{TocAuthorNameList}{\ccUseComp{TocAuthorNameList}:\space}{}%
+    \ccUseComp{TocTitle}%
     \ccUseProperty{toc-page-format}%
   }%
   %% PDF-Bookmarks
   \ccSetProperty{bookmark-level}{}% override heading level for PDF bookmarks, numeric!
   \ccSetProperty{bookmark}{%
-    \ccIfComp{BMNumber}{\tpUseComp{BMNumber}\space}{}%
-    \tpUseComp{BMTitle}%
+    \ccIfComp{BMNumber}{\ccUseComp{BMNumber}\space}{}%
+    \ccUseComp{BMTitle}%
   }%
   \ccSetProperty{orcid-link}{% how the ORC-ID is rendered
     \ccIfComp{ORCID}{\def\tp@Linkimg{\includegraphics[height=1em]{logos/ORCID.pdf}}\ccCompLink{ORCID}{\tp@Linkimg}}{}%
   }%
   %% a single Author's contact infomration block
   \ccSetProperty{author-contact-format}{%Format of a single author's contact information
-    \tpUseComp{FullName}\ccWhenComp{RefAffil}{\textsuperscript{\tpUseComp{AffilRef}}}%
+    \ccUseComp{FullName}\ccWhenComp{RefAffil}{\textsuperscript{\ccUseComp{AffilRef}}}%
     \ccUseProperty{orcid-link}%
   }%
   \ccPropertyLet{author-list-format}{author-list-print-format}%
   \ccSetProperty{author-contact-block-format}{% Format of the whole contact information block
-    \tpUseComp{AuthorContact}\ifnum\tpCurCount<\ccTotalCount\ccUseProperty{counted-name-sep}\fi
+    \ccUseComp{AuthorContact}\ifnum\ccCurCount<\ccTotalCount\ccUseProperty{counted-name-sep}\fi
   }%
 }
 %    \end{macrocode}

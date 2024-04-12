@@ -325,10 +325,10 @@
   \fi
   \xdef\the@cc@thispage{\the\cc@abspage}%
   \let\@cc@currpage\relax
-  \expandafter\ifx\csname \tp@cur@cont-\the@cc@thispage-\the@cc@atthispage\endcsname\relax
+  \expandafter\ifx\csname \cc@cur@cont-\the@cc@thispage-\the@cc@atthispage\endcsname\relax
     \ifodd\cc@abspage\relax\@cc@oddtrue\else\@cc@oddfalse\fi
   \else
-    \edef\@cc@currpage{\expandafter\expandafter\expandafter\@firstofone\csname \tp@cur@cont-\the@cc@thispage-\the@cc@atthispage\endcsname}%
+    \edef\@cc@currpage{\expandafter\expandafter\expandafter\@firstofone\csname \cc@cur@cont-\the@cc@thispage-\the@cc@atthispage\endcsname}%
     \ifodd\@cc@currpage\relax\@cc@oddtrue\else\@cc@oddfalse\fi
   \fi
 }
@@ -340,8 +340,8 @@
 % environment/macro.
 %    \begin{macrocode}
 \def\ccSavePage{%
-  \protected@write\@auxout{\def\the@cc@cur@cont{\tp@cur@cont}\let\thecc@abspage\relax}{%
-    \string\expandafter\string\gdef\string\csname\space \tp@cur@cont-\the@cc@thispage-\the@cc@atthispage\string\endcsname{\thecc@abspage}}%
+  \protected@write\@auxout{\def\the@cc@cur@cont{\cc@cur@cont}\let\thecc@abspage\relax}{%
+    \string\expandafter\string\gdef\string\csname\space \cc@cur@cont-\the@cc@thispage-\the@cc@atthispage\string\endcsname{\thecc@abspage}}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -414,7 +414,6 @@
         \cc@if@ally
           {\long\def\ccTocLink####1{\hyper@linkstart[####1]{link}{\Hy@tocdestname}{####1}\hyper@linkend}}
           {\long\def\ccTocLink####1{\hyper@linkstart{link}{\Hy@tocdestname}{####1}\hyper@linkend}}%
-          \let\tpTocLink\ccTocLink% legacy
 %    \end{macrocode}
 % \end{macro}
 %    \begin{macrocode}
@@ -426,18 +425,11 @@
   }}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccContentsline} has two purposes: It re-directs
-%   \lstinline{l@<level>} macros to our own version, and it ensures
-%   that {\LaTeX} won't break if Components in the content lists
-%   contain \lstinline{\par}. In order for the latter to work
-%   correctly, however, we need to patch \lstinline{\contentsline} to
-%   make it \lstinline{\long}, first.
+% \begin{macro}{\ccContentsline} is our version of \LaTeX's
+%   \lstinline{\contentsline}.
 %    \begin{macrocode}
-\AtBeginDocument{%
-  \begingroup\toks0=\expandafter{\contentsline{#1}{#2}{#3}{#4}}
-  \edef\x{\endgroup\long\def\noexpand\contentsline##1##2##3##4{\the\toks0 }}\x
-}
-\long\def\ccContentsline#1#2#3#4{\bgroup\csletcs{l@#1}{cc@l@#1}\contentsline{#1}{#2}{#3}{#4}\egroup}
+\long\def\ccContentsline#1#2#3#4{\gdef\@contentsline@destination{#4}%
+  \csname cc@l@#1\endcsname{#2}{#3}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\cc@extract@generic}
@@ -555,18 +547,18 @@
 %   \#1 is the internal name of the property, \#2 is the check value.
 %    \begin{macrocode}
 \def\cc@store@latest#1#2{%
-  \expandafter\ifx\csname \ccPrefix-\tp@cur@cont-#1\endcsname\relax
-    \csxdef{\ccPrefix-\tp@cur@cont-#1}{#2}%
+  \expandafter\ifx\csname \ccPrefix-\cc@cur@cont-#1\endcsname\relax
+    \csxdef{\ccPrefix-\cc@cur@cont-#1}{#2}%
   \else
-    \expandafter\ifdim\csname \ccPrefix-\tp@cur@cont-#1\endcsname<#2\relax
-      \csxdef{\ccPrefix-\tp@cur@cont-#1}{#2}%
+    \expandafter\ifdim\csname \ccPrefix-\cc@cur@cont-#1\endcsname<#2\relax
+      \csxdef{\ccPrefix-\cc@cur@cont-#1}{#2}%
     \fi
   \fi
-  \expandafter\ifx\csname \ccPrefix-\tp@cur@cont-#1-local\endcsname\relax
-    \csxdef{\ccPrefix-\tp@cur@cont-#1-local}{#2}%
+  \expandafter\ifx\csname \ccPrefix-\cc@cur@cont-#1-local\endcsname\relax
+    \csxdef{\ccPrefix-\cc@cur@cont-#1-local}{#2}%
   \else
-    \expandafter\ifdim\csname \ccPrefix-\tp@cur@cont-#1-local\endcsname<#2\relax
-      \csxdef{\ccPrefix-\tp@cur@cont-#1-local}{#2}%
+    \expandafter\ifdim\csname \ccPrefix-\cc@cur@cont-#1-local\endcsname<#2\relax
+      \csxdef{\ccPrefix-\cc@cur@cont-#1-local}{#2}%
     \fi
   \fi
 %    \end{macrocode}
@@ -584,13 +576,13 @@
 % values change, you still need to do at least two more {\LaTeX} runs
 % before the values stabilize.
 %    \begin{macrocode}
-  \ifcsdef{\ccPrefix-\tp@cur@cont-#1-stored-trigger}{}
+  \ifcsdef{\ccPrefix-\cc@cur@cont-#1-stored-trigger}{}
     {\edef\@tempa{%
        \noexpand\immediate\noexpand\write\noexpand\@auxout{%
-         \noexpand\string\noexpand\csgdef{\ccPrefix-\tp@cur@cont-#1}{%
-           \noexpand\csname \ccPrefix-\tp@cur@cont-#1-local\noexpand\endcsname}}}%
+         \noexpand\string\noexpand\csgdef{\ccPrefix-\cc@cur@cont-#1}{%
+           \noexpand\csname \ccPrefix-\cc@cur@cont-#1-local\noexpand\endcsname}}}%
      \expandafter\AtEndDocument\expandafter{\@tempa}%
-     \csgdef{\ccPrefix-\tp@cur@cont-#1-stored-trigger}{\@empty}}}
+     \csgdef{\ccPrefix-\cc@cur@cont-#1-stored-trigger}{\@empty}}}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -623,8 +615,8 @@
 % levels as \lstinline{#1number-width-max}, and the width of the
 % current number as \lstinline{#1number-width}.
 %    \begin{macrocode}
-  \ccSetPropertyVal{#1number-width-level-max}{\csname \ccPrefix-\tp@cur@cont-#1number-#3-maxwd\endcsname}%
-  \ccSetPropertyVal{#1number-width-max}{\csname \ccPrefix-\tp@cur@cont-#1number-maxwd\endcsname}%
+  \ccSetPropertyVal{#1number-width-level-max}{\csname \ccPrefix-\cc@cur@cont-#1number-#3-maxwd\endcsname}%
+  \ccSetPropertyVal{#1number-width-max}{\csname \ccPrefix-\cc@cur@cont-#1number-maxwd\endcsname}%
   \ccSetPropertyVal{#1number-width}{\the\wd\z@}%
 %    \end{macrocode}
 % Third step: we calculate and fortify the actual
@@ -683,10 +675,10 @@
 %    \begin{macrocode}
 \def\cc@calc@margin@left#1#2{%
   \@tempcnta\numexpr#2-1\relax
-  \expandafter\ifx\csname \ccPrefix-\tp@cur@cont-#1\the\@tempcnta-margin-left\endcsname\relax
+  \expandafter\ifx\csname \ccPrefix-\cc@cur@cont-#1\the\@tempcnta-margin-left\endcsname\relax
     \@tempdima=-\ccUseProperty{#1indent}\relax%
   \else
-    \@tempdima=\dimexpr\csname \ccPrefix-\tp@cur@cont-#1\the\@tempcnta-margin-left\endcsname-\ccUseProperty{#1indent}\relax
+    \@tempdima=\dimexpr\csname \ccPrefix-\cc@cur@cont-#1\the\@tempcnta-margin-left\endcsname-\ccUseProperty{#1indent}\relax
   \fi
   \cc@store@latest{#1#2-margin-left}{\the\@tempdima}%
   \ccSetProperty{#1margin-left}{\the\@tempdima}}
@@ -837,8 +829,8 @@
   \ccWhenComp{RefLabel}
     {\ccgdefFromComp\cc@ref@label{RefLabel}%
      \expandafter\cc@create@label\expandafter{\cc@ref@label}}%
-  \ccIfAttr{\tp@cur@cont}{label}
-    {\cc@parse@csv\cc@create@label{cc@\tp@cur@cont @attr@label}}%
+  \ccIfAttr{\cc@cur@cont}{label}
+    {\cc@parse@csv\cc@create@label{cc@\cc@cur@cont @attr@label}}%
     {\ifx\cc@ref@label\relax\cc@create@label{\@currentHref}\fi}}
 %    \end{macrocode}
 % \end{macro}
