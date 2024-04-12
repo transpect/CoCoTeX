@@ -18,10 +18,10 @@
 \ProvidesPackage{coco-notes}
     [\filedate \fileversion le-tex coco notes module]
 %    \end{macrocode}
-% internal switch for endnotes (\lstinline{\endnotestrue}) or footnotes (\lstinline{\endnotesfalse}, default).
+% internal switch for endnotes (\lstinline{\ccn@use@entrue}) or footnotes (\lstinline{\ccn@use@enfalse}, default).
 %    \begin{macrocode}
-\newif\ifendnotes \endnotesfalse
-\newif\ifendnotelinks \endnotelinksfalse
+\newif\if@ccn@use@en \@ccn@use@enfalse
+\newif\if@ccn@en@links \@ccn@en@linksfalse
 %    \end{macrocode}
 % package options:
 % \begin{itemize}
@@ -37,11 +37,11 @@
 %   (otherwise it is chapter level).
 % \end{itemize}
 %    \begin{macrocode}
-\DeclareOption{endnotes}{\global\endnotestrue}
-\DeclareOption{ennotoc}{\global\let\tp@ennotoc\relax}
-\DeclareOption{resetnotesperchapter}{\global\let\reset@notes@per@chapter\relax}
-\DeclareOption{endnoteswithchapters}{\global\endnotestrue\global\let\endnotes@with@chapters\relax}
-\DeclareOption{endnotelinks}{\global\endnotelinkstrue}
+\DeclareOption{endnotes}{\global\@ccn@use@entrue}
+\DeclareOption{ennotoc}{\global\let\ccn@en@no@toc\relax}
+\DeclareOption{resetnotesperchapter}{\global\let\ccn@reset@notes@per@chapter\relax}
+\DeclareOption{endnoteswithchapters}{\global\@ccn@use@entrue\global\let\ccn@en@with@chapters\relax}
+\DeclareOption{endnotelinks}{\global\@ccn@en@linkstrue}
 \ProcessOptions
 %    \end{macrocode}
 % footnote package is mandatory since it provides the \lstinline{\savenotes} and \lstinline{\spewnotes} macros:
@@ -51,12 +51,12 @@
 % Handling of endnotes:
 %    \begin{macrocode}
 \newif\if@enotesopen
-\AtBeginDocument{\edef\tpfn@parindent{\the\parindent}}
-\ifendnotes
+\AtBeginDocument{\edef\ccn@parindent{\the\parindent}}
+\if@ccn@use@en
   \RequirePackage{endnotes}
-  \@ifpackageloaded{coco-headings}{\let\tp@useTeXHeading\relax}{}
+  \@ifpackageloaded{coco-headings}{\let\ccn@use@TeX@heading\relax}{}
   % Allow linking endnotes to their respective occurrence in the document.
-  \ifendnotelinks
+  \if@ccn@en@links
     \global\newcount\endnoteLinkCnt \global\endnoteLinkCnt\z@
     \def\@endnotemark{%
       \leavevmode
@@ -72,26 +72,26 @@
   \def\enotesize{\normalsize}%
   \def\enoteformat{%
     % Create the label right at the start of the endnote text to prevent erroneous pointing to the next page.
-    \ifendnotelinks%
+    \if@ccn@en@links%
       \phantomsection%
       \label{endnotetext-\currentEndnote}%
     \fi
     \noindent
     \leavevmode
     \hskip-2em\hb@xt@2em{%
-      \ifendnotelinks
+      \if@ccn@en@links
         \hyperref[endnote-\currentEndnote]{\@theenmark}\hss%
       \else
         \@theenmark\hss%
       \fi%
     }%
-    \expandafter\parindent\tpfn@parindent\relax\expandafter%
+    \expandafter\parindent\ccn@parindent\relax\expandafter%
   }%
   \gdef\enoteheading{%
     \leftskip2em
   }%
   \def\printnotes{%
-    \ifx\endnotes@with@chapters\relax
+    \ifx\ccn@en@with@chapters\relax
       \ifnum\c@endnote>\z@
         \expandafter\global\expandafter\let\csname enotes@in@\the\realchap\endcsname\@empty
       \fi
@@ -110,7 +110,7 @@
 \fi
 
 \newcount\realchap \realchap\z@
-\ifx\endnotes@with@chapters\relax
+\ifx\ccn@en@with@chapters\relax
   \AtBeginDocument{%
     \ccAddToHook[heading]{before-hook-chapter}{%
       \ifnum\c@endnote>\z@\relax
@@ -118,15 +118,15 @@
       \fi
       \global\advance\realchap\@ne
       \global\c@endnote\z@
-      \def\tp@par@title{\ccIfComp{TocTitle}{\ccUseComp{TocTitle}}{\ccUseComp{Title}}}%
-      \def\tp@par@runtitle{\ccIfComp{RunTitle}{\ccUseComp{RunTitle}}{\ccUseComp{Title}}}%
+      \def\ccn@par@title{\ccIfComp{TocTitle}{\ccUseComp{TocTitle}}{\ccUseComp{Title}}}%
+      \def\ccn@par@runtitle{\ccIfComp{RunTitle}{\ccUseComp{RunTitle}}{\ccUseComp{Title}}}%
       \addtoendnotes{%
         \noexpand\expandafter\noexpand\ifx\noexpand\csname enotes@in@\the\realchap\noexpand\endcsname\noexpand\@empty
           \bgroup
             \noexpand\leftskip\noexpand\z@
-            \noexpand\begin{heading}\ifx\tp@ennotoc\relax[notoc]\fi{section}%
-              \noexpand\tpTitle{\tp@par@title}%
-              \noexpand\tpRunTitle{\tp@par@runtitle}%
+            \noexpand\begin{heading}\ifx\ccn@en@no@toc\relax[notoc]\fi{section}%
+              \noexpand\ccComponent{Title}{\ccn@par@title}%
+              \noexpand\ccComponent{RunTitle}{\ccn@par@runtitle}%
             \noexpand\end{heading}%
           \egroup
         \noexpand\fi}%
@@ -134,7 +134,7 @@
   }
 \fi
 
-\ifx\reset@notes@per@chapter\relax
+\ifx\ccn@reset@notes@per@chapter\relax
   \AtBeginDocument{%
     \ccAddToHook[heading]{before-hook-chapter}{%
       \global\c@footnote\z@
@@ -210,7 +210,7 @@
   \global\@haveenotestrue
   \if@enotesopen \else \@openenotes \fi
   \immediate\write\@enotes{%
-    \ifendnotelinks
+    \if@ccn@en@links
       \string\def\string\currentEndnote{\the\endnoteLinkCnt}%
     \fi%
     \@doanenote{\@theenmark}%
@@ -221,7 +221,7 @@
      \immediate\write\@enotes{\meaning\next}%
   \endgroup
   \immediate\write\@enotes{\@endanenote}%
-  \ifendnotelinks
+  \if@ccn@en@links
     \global\advance\endnoteLinkCnt\@ne%
   \fi%
 }

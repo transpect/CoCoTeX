@@ -214,10 +214,10 @@
 % \begin{macro}{\cct@title@process@bkt} processes the document's main title
 %    \begin{macrocode}
 \def\cct@title@process@bkt{%
-  \let\tpBreak\space
+  \cslet{\ccPrefix Break}\space
   \pdfstringdef\@title{\ccUseComp{Title}}%
   \cct@write@pdf@meta{pdftitle}{Title}{\ccUseComp{Title}}%
-  \ccgdefFromProperty\tpRunBookTitle{run-book-title}%
+  \ccpgdefFromProperty{RunBookTitle}{run-book-title}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -232,23 +232,23 @@
     \ccGobble
     \renewcommand\foreignlanguage[2]{{##2}}%
     \ccIfComp{AuthorPDFInfo}
-      {\ccgdefFromComp\tpRunBookName{AuthorPDFInfo}}
+      {\ccpgdefFromProperty{RunBookName}{AuthorPDFInfo}}
       {\ccIfComp{EditorPDFInfo}
-         {\ccgdefFromComp\tpRunBookName{EditorPDFInfo}}
+         {\ccpgdefFromProperty{RunBookName}{EditorPDFInfo}}
          {\ifnum\ccAuthorCnt>\z@
             \@setpar{\@@par}%
-            \ccgdefFromCountedComp\tpRunBookName{Author}{author-list-pdfinfo-format}%
+            \ccggdefFromCountedComp{RunBookName}{Author}{author-list-pdfinfo-format}%
           \else
             \ifnum\ccEditorCnt>\z@
-              \ccgdefFromCountedComp\tpRunBookName{Editor}{editor-list-pdfinfo-format}%
+              \ccpgdefFromCountedComp{RunBookName}{Editor}{editor-list-pdfinfo-format}%
             \else
               \ccPackageWarning{transcript-title}{Meta Data}{No author or editor given!}%
               \@tempswafalse
             \fi
           \fi}}%
     \if@tempswa
-      \pdfstringdef\@author{\tpRunBookName}%
-      \cct@write@pdf@meta{pdfauthor}{Author}{\tpRunBookName}%
+      \pdfstringdef\@author{\csname\ccPrefix RunBookName\endcsname}%
+      \cct@write@pdf@meta{pdfauthor}{Author}{\csname\ccPrefix RunBookName\endcsname}%
     \fi
   \endgroup
 }

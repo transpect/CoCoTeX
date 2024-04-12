@@ -663,6 +663,7 @@
 % \begin{macro}{\ccgdefFromCountedComp} is the user-level command for \textit{global} \lstinline{\cc@comp@def}.
 %    \begin{macrocode}
 \def\ccgdefFromCountedComp{\cc@comp@def[\global]}
+\def\ccpgdefFromCountedComp#1{\expandafter\ccgdefFromCountedComp\csname \ccPrefix #1\endcsname}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -903,6 +904,7 @@
 %   of \lstinline{\ccdefFromProperty}.
 %    \begin{macrocode}
 \def\ccgdefFromProperty{\cc@store@prop[\global]}
+\def\ccpgdefFromProperty#1{\expandafter\ccgdefFromProperty\csname \ccPrefix #1\endcsname}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -940,35 +942,6 @@
 %    \end{macrocode}
 % \end{macro}
 %
-%
-% \Deprecated TODO: Incorporate into the Container inheritance mechanism. Check if inheritance of Container Types is to be distinguished from inheritance of Properties and their Values!
-% \begin{macro}{\tpCascadeProps}
-%   recursivly loads a Container's own Properties, the Properties of
-%   the Container's parent(s), and the default Properties of the top-level
-%   Container. \#1 is the current Container's name, \#2 is the top-level
-%   Container. 
-%    \begin{macrocode}
-\def\tpCascadeProps#1#2{%
-  \csname cc@#2@default\endcsname
-  \expandafter\ifx\csname cc@#2@#1@parent\endcsname\relax\else
-    \expandafter\tp@inherit@props\expandafter{\csname cc@#2@#1@parent\endcsname}{#2}%
-  \fi
-  \csname cc@#2@#1@properties\endcsname
-}
-%    \end{macrocode}
-% This low-level macro recursivly loads properties from parent
-% namespaces, if they exist. \#1 is the parent (may be empty), \#2 is
-% the macro family.
-%    \begin{macrocode}
-\def\tp@inherit@props#1#2{%
-  \expandafter\ifx\csname cc@#2@#1@parent\endcsname\relax\else
-    \edef\@tempa{\csname cc@#2@#1@parent\endcsname}%
-    \expandafter\tp@inherit@props\expandafter{\@tempa}{#2}%
-  \fi
-  \csname cc@#2@#1@properties\endcsname
-}
-%    \end{macrocode}
-% \end{macro}
 %
 % \subsection{Property Conditionals}\label{sec:kernel:prop:cond}
 %

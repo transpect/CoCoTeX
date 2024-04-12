@@ -55,7 +55,7 @@
 \newif\ifarticle    \articlefalse
 \newif\ifmonograph  \monographfalse
 \newif\ifjournal    \journalfalse
-\define@choicekey{cocotex.cls}{pubtype}[\tp@pubtype\nr]{collection,article,journal,mono}{%
+\define@choicekey{cocotex.cls}{pubtype}[\cc@pub@type\nr]{collection,article,journal,mono}{%
   \ifcase\nr\relax% collection
     \global\collectiontrue
   \or% article
@@ -78,7 +78,7 @@
 \DeclareOptionX{showspaces}{\PassOptionsToPackage{\CurrentOption}{coco-accessibility}}
 \DeclareOptionX{no-spaces}{\PassOptionsToPackage{\CurrentOption}{coco-accessibility}}
 \DeclareOptionX{no-paras}{\PassOptionsToPackage{\CurrentOption}{coco-accessibility}}
-\DeclareOptionX{no-compress}{\let\tp@no@pdf@compression\relax}
+\DeclareOptionX{no-compress}{\let\cc@no@pdf@compression\relax}
 \DeclareOptionX{color-enc}{\PassOptionsToPackage{\CurrentOption}{coco-common}}
 \DeclareOptionX{usescript}{\PassOptionsToPackage{\CurrentOption}{coco-script}}
 \DeclareOptionX{nofigs}{\PassOptionsToPackage{\CurrentOption}{coco-floats}}
@@ -238,7 +238,7 @@
 % Disables PDF compression when the \lstinline{no-compress} document
 % option is set.
 %    \begin{macrocode}
-\ifx\tp@no@pdf@compression\relax
+\ifx\cc@no@pdf@compression\relax
   \ifx\pdfobjcompresslevel\@undefined
     \edef\pdfobjcompresslevel{\pdfvariable objcompresslevel}%
   \fi

@@ -27,7 +27,7 @@
 \RequirePackage[quiet]{fontspec}
 \RequirePackage[bidi=basic,silent]{babel}
 \def\parse@script#1,#2,\relax{%
-  \tp@script@callback{#1}%
+  \ccs@callback{#1}%
   \edef\@argii{#2}%
   \let\next\relax
   \ifx\@argii\@empty\else
@@ -35,7 +35,7 @@
   \fi\next}
 
 \ifx\usescript\relax\else
-  \def\tp@script@callback#1{\expandafter\global\expandafter\let\csname use@script@#1\endcsname\@empty}%
+  \def\ccs@callback#1{\expandafter\global\expandafter\let\csname use@script@#1\endcsname\@empty}%
   \expandafter\parse@script\usescript,,\relax
 \fi
 
@@ -46,7 +46,6 @@
 % The default fall backfont is the NotoSans Font Family
 %
 %    \begin{macrocode}
-
 \newfontfamily\fallbackfont{NotoSerif-Regular.ttf}%
 [BoldFont = NotoSerif-Bold.ttf,%
  ItalicFont = NotoSerif-Italic.ttf,%
@@ -70,21 +69,21 @@
 % \item[\#4] argument(s) passed to \lstinline|\babelfont{sf}|
 % \end{description}
 %    \begin{macrocode}
-\def\tpDeclareBabelFont{\@ifnextchar[\tp@declare@babel@font{\tp@declare@babel@font[]}}%]
-\def\tp@declare@babel@font[#1]#2#3#4{%
+\def\ccDeclareBabelFont{\cc@opt@empty\ccs@declare@babel@font}%
+\def\ccs@declare@babel@font[#1]#2#3#4{%
   \expandafter\ifx\csname use@script@#2\endcsname\@empty
     \babelprovide[#1]{#2}%
     \message{^^J  [coco-script Loaded Script: #2]^^J}%
     %%
-    \expandafter\gdef\csname tp@babel@rm@font@#2\endcsname{#3}%
-    \expandafter\gdef\csname tp@babel@sf@font@#2\endcsname{#4}%
+    \expandafter\gdef\csname ccs@babel@rm@font@#2\endcsname{#3}%
+    \expandafter\gdef\csname ccs@babel@sf@font@#2\endcsname{#4}%
     \if!#2!\else
       \def\ccs@tempa{\babelfont[#2]{rm}}%
-      \expandafter\expandafter\expandafter\ccs@tempa\csname tp@babel@rm@font@#2\endcsname
+      \expandafter\expandafter\expandafter\ccs@tempa\csname ccs@babel@rm@font@#2\endcsname
     \fi
     \if!#3!\else
       \def\ccs@tempa{\babelfont[#2]{sf}}%
-      \expandafter\expandafter\expandafter\ccs@tempa\csname tp@babel@sf@font@#2\endcsname
+      \expandafter\expandafter\expandafter\ccs@tempa\csname ccs@babel@sf@font@#2\endcsname
     \fi
   \fi
 }
@@ -95,19 +94,18 @@
 % \item[\#2] font family fallback
 % \end{description}
 %    \begin{macrocode}
-
-\def\tpBabelAlias#1#2{%
+\def\ccBabelAlias#1#2{%
   \ifx\usescript\relax\else
-    \def\tp@script@callback##1{%
-      \expandafter\ifx\csname tp@no@fallback@##1\endcsname\relax
-        \expandafter\ifx\csname tp@babel@#2@font@##1\endcsname\relax
+    \def\ccs@callback##1{%
+      \expandafter\ifx\csname ccs@no@fallback@##1\endcsname\relax
+        \expandafter\ifx\csname ccs@babel@#2@font@##1\endcsname\relax
           \PackageError
             {coco-script.sty}
             {\expandafter\string\csname #2family\endcsname\space for Language `##1' was not declared!}
             {You attempted to declare an alias towards a font family that has not been declared for the language `##1', yet.}%
         \else
           \def\ccs@tempa{\babelfont[##1]{#1}}%
-          \expandafter\expandafter\expandafter\ccs@tempa\csname tp@babel@#2@font@##1\endcsname
+          \expandafter\expandafter\expandafter\ccs@tempa\csname ccs@babel@#2@font@##1\endcsname
         \fi
       \else
         \PackageInfo{coco-script.sty}{^^J\space\space\space\space No fallback for `##1';^^J\space\space\space\space Skipping font family `#1'->`#2'}%
@@ -127,12 +125,12 @@
      Path = \NotoArmenianPath,%
      WordSpace = 1.25]
   \DeclareTextFontCommand\armenian{\fallbackfont@armenian}
-  \let\tp@no@fallback@armenian\@empty%
+  \let\ccs@no@fallback@armenian\@empty%
 \fi
 %    \end{macrocode}
 % \subsection{Support for Chinese script}
 %    \begin{macrocode}
-\tpDeclareBabelFont{chinese}{[%
+\ccDeclareBabelFont{chinese}{[%
     Path=./fonts/Noto/Chinese/,
     BoldFont = NotoSerifSC-Bold.otf,%
     WordSpace = 1.25]{NotoSerifSC-Regular.otf}}
@@ -145,7 +143,7 @@
 %    \end{macrocode}
 % \subsection{Support for Japanese script}
 %    \begin{macrocode}
-\tpDeclareBabelFont{japanese}{[%
+\ccDeclareBabelFont{japanese}{[%
     Path=./fonts/Noto/Japanese/,
     BoldFont = NotoSerifJP-Bold.otf,%
     WordSpace = 1.25]{NotoSerifJP-Regular.otf}
@@ -157,7 +155,7 @@
 %    \end{macrocode}
 % \subsection{Support for Hebrew script}
 %    \begin{macrocode}
-\tpDeclareBabelFont{hebrew}{[%
+\ccDeclareBabelFont{hebrew}{[%
     Scale=MatchUppercase,%
     Path=./fonts/Noto/Hebrew/,%
     Ligatures=TeX,%
@@ -172,7 +170,7 @@
 %    \end{macrocode}
 % \subsection{Support for Arabic script}
 %    \begin{macrocode}
-\tpDeclareBabelFont{arabic}{[%
+\ccDeclareBabelFont{arabic}{[%
     BoldFont = NotoNaskhArabic-Bold.ttf,%
     Path = ./fonts/Noto/Arabic/%
     ]{NotoNaskhArabic-Regular.ttf}}
@@ -185,7 +183,7 @@
 %    \end{macrocode}
 % \subsection{Support for Greek script}
 %    \begin{macrocode}
-\tpDeclareBabelFont{greek}{[%
+\ccDeclareBabelFont{greek}{[%
     BoldFont = NotoSerif-Bold.ttf,%
     ItalicFont = NotoSerif-Italic.ttf,%
     BoldItalicFont = NotoSerif-BoldItalic.ttf,%
@@ -245,7 +243,7 @@ derivate = no
 %    \end{macrocode}
 % Now, we can create the fallback font and import the newly created ini file:
 %    \begin{macrocode}
-\tpDeclareBabelFont[import=syriac]{syriac}{[%
+\ccDeclareBabelFont[import=syriac]{syriac}{[%
     BoldFont = NotoSansSyriac-Black.ttf,%
     ItalicFont = NotoSansSyriac-Regular.ttf,%
     BoldItalicFont = NotoSansSyriac-Black.ttf,%

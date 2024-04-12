@@ -385,9 +385,9 @@
     \ccComposeCollection{Author}{author-contact-block-format}{AuthorContactBlock}%
     \ccComposeCollection{Affil}{affil-block-item-format}{AffilBlock}%
 %    \end{macrocode}
-% Processing the \lstinline{tpQuote} environments, if any.
+% Processing the \lstinline{Quote} Group Container, if any.
 %    \begin{macrocode}
-    \ccComposeCollection{tpQuote}{quote-block-format}{QuoteBlock}%
+    \ccComposeCollection{Quote}{quote-block-format}{QuoteBlock}%
 %    \end{macrocode}
 % Hyperref related stuff.
 %    \begin{macrocode}
@@ -395,7 +395,7 @@
 %    \end{macrocode}
 % Call the mechanism to calculate the heading's counter.
 %    \begin{macrocode}
-    \tp@auto@number{#1}{#2}%
+    \cch@auto@number{#1}{#2}%
 %    \end{macrocode}
 % Here, the actual construction of the heading begins.
 %    \begin{macrocode}
@@ -405,7 +405,7 @@
 %    \end{macrocode}
 % Add vertical space before the heading
 %    \begin{macrocode}
-    \tp@do@before@skip
+    \cch@add@before@skip
 %    \end{macrocode}
 % The counters we calculated earlier and the space needed to render
 % them are evaluated
@@ -443,12 +443,12 @@
 % \textbf{Style progammers need to make sure that no page breaks are
 % allowed within the \lstinline{heading-block}!}
 %    \begin{macrocode}
-        \ccIfPropVal{no-toc}{true}{}{\tp@make@toc}% ToC entries
-        \ccIfPropVal{no-BM}{true}{}{\tp@make@bookmarks}% Bookmarks
+        \ccIfPropVal{no-toc}{true}{}{\cch@make@toc}% ToC entries
+        \ccIfPropVal{no-BM}{true}{}{\cch@make@bookmarks}% Bookmarks
         \ccUseProperty{toc-hook}%
         \ccIfProp{extended}{\ccUseProperty{extended-heading}}{}%
       \egroup%
-      \tp@make@run% Running headers
+      \cch@make@run% Running headers
       \ccUseProperty{after-heading-block}%
     }%
 %    \end{macrocode}
@@ -459,17 +459,17 @@
 % a block heading, a negative value yields an inline heading.
 %    \begin{macrocode}
     \ifdim\@tempskipa <\z@\relax
-      \tp@inline@heading{#2}%
+      \cch@make@inline{#2}%
     \else
-      \tp@block@heading{#2}%
+      \cch@make@block{#2}%
     \fi
 %    \end{macrocode}
 % This macro is called at the end of the heading environment. In order
 % to deal with possible vertical spaces after the heading, we wait
 % until the group of the heading environemnt is closed before we
 % actually print the fully composed heading. The definition of
-% \lstinline{\next} happens in either \lstinline{\tp@inline@heading}
-% or \lstinline{\tp@block@heading}.
+% \lstinline{\next} happens in either \lstinline{\cch@make@inline}
+% or \lstinline{\cch@make@block}.
 %    \begin{macrocode}
     \aftergroup\next%
   }%
@@ -490,9 +490,9 @@
 %    \end{macrocode}
 % \end{macro}
 % 
-% \begin{macro}{\tp@do@before@skip} is a routine that determins the skip that is inserted before a heading.
+% \begin{macro}{\cch@add@before@skip} is a routine that determins the skip that is inserted before a heading.
 %    \begin{macrocode}
-\def\tp@do@before@skip{%
+\def\cch@add@before@skip{%
   \setlength\@tempskipa{\ccUseProperty{before-skip}}%
   \ifdim\@tempskipa<\z@\relax
     \def\do@skip{\minusvspace{-\@tempskipa}}%
@@ -530,13 +530,13 @@
 % \end{macro}
 % \subsection{Initializers for Instances of Heading Levels}%
 %
-% \begin{macro}{\tp@auto@number}
+% \begin{macro}{\cch@auto@number}
 %   advances the heading counter if the \lstinline{numbering} Property
 %   is set to \texttt{auto} and the current heading is not overridden
 %   by the \lstinline{Number} Component.  \#1 is the numeric level of
 %   the heading, \#2 is the name of the heading's counter.
 %    \begin{macrocode}
-\def\tp@auto@number#1#2{%
+\def\cch@auto@number#1#2{%
   \ccIfPropVal{numbering}{auto}
     {\expandafter\ifx\csname c@#2\endcsname\relax\cch@init@cnt{#2}\fi
      \ccIfAttrIsSet{Heading}{nonumber}
@@ -546,7 +546,7 @@
          {\ifnum #1>\c@secnumdepth\relax\else
             \stepcounter{#2}%
             \edef\@tempa{\csname the#2\endcsname}%
-            \expandafter\tpNumber\expandafter{\@tempa}%
+            \ccComponentEA{Number}{\@tempa}%
           \fi}}
      }{}}
 %    \end{macrocode}
@@ -599,13 +599,13 @@
 %
 % \subsection{Table of Contents Entry}
 %
-% \begin{macro}{\tp@make@toc} initializes the creation of a
+% \begin{macro}{\cch@make@toc} initializes the creation of a
 %   \lstinline{Heading} instance's entry in the table of contents.
 %
 %   Each entry is in itself treated as a Container. As such, it
 %   consists of Components that are written into the .toc file.
 %    \begin{macrocode}
-\def\tp@make@toc{%
+\def\cch@make@toc{%
   \cc@check@empty{Heading}{Title}{Toc}%
   \cc@check@empty{Heading}{Number}{Toc}%
   \cc@check@empty{Heading}{Subtitle}{Toc}%
@@ -636,7 +636,7 @@
   \ccSetContainer{Heading}%
   \ccEvalType[#2]{Properties}%
   \ccDeclareComponent{TocPage}{}{}%
-  \tpTocPage{\ccUseProperty{toc-page-face}#4}%
+  \ccComponent{TocPage}{\ccUseProperty{toc-page-face}#4}%
   \ccDeclareComponent{TocTitle}{}{}%
   \ccDeclareComponent{TocSubtitle}{}{}%
   \ccDeclareComponent{TocNumber}{}{}%
@@ -646,7 +646,7 @@
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@toc@print@entry} is also called within the
+% \begin{macro}{\cc@toc@print@entry} is also called within the
 %   \lstinline{\l@<level>} macro and eventually prints the entry by
 %   expanding a \lstinline{Heading}'s toc-specific Properties.
 %    \begin{macrocode}
@@ -663,7 +663,7 @@
 %
 %\subsection{Facility to create the running title macros}
 %
-% \begin{macro}{\tp@make@run}
+% \begin{macro}{\cch@make@run}
 %   prepares the Components used to compose the running titles. It
 %   checks if the user provides page header specific overrides in the
 %   \lstinline{Heading} instance. If not, it uses the non-specific
@@ -674,7 +674,7 @@
 %   and passed to the corresponding \lstinline{\<level>mark} macros
 %   iff they exist.
 %    \begin{macrocode}
-\def\tp@make@run{%
+\def\cch@make@run{%
   \cc@check@empty{Heading}{Title}{Run}%
   \cc@check@empty{Heading}{Number}{Run}%
   \cc@check@empty{Heading}{Subtitle}{Run}%
@@ -692,7 +692,7 @@
   \ifx\cch@mark@name\@undefined\else
     \begingroup
       \ccGobble
-      \protected@edef\@tempa{\csname tp@Heading@running-heading\endcsname}%
+      \protected@edef\@tempa{\csname cc@Heading@running-heading\endcsname}%
       \expandafter\cch@mark@name\expandafter{\@tempa}%
     \endgroup
   \fi
@@ -702,11 +702,11 @@
 %
 % \subsection{Facility to create PDF bookmarks}
 %
-% \begin{macro}{\tp@make@bookmarks} generates an entry that is
+% \begin{macro}{\cch@make@bookmarks} generates an entry that is
 %   directly written as Bookmark into the PDF file. This is done using
 %   the \lstinline{bookmark} package.
 %    \begin{macrocode}
-\def\tp@make@bookmarks{%
+\def\cch@make@bookmarks{%
   \cc@check@empty[Toc]{Heading}{Title}{BM}%
   \cc@check@empty[Toc]{Heading}{Number}{BM}%
   \cc@check@empty[Toc]{Heading}{AuthorNameList}{BM}%
@@ -716,7 +716,7 @@
     {\ccIfProp{bookmark-level}{\edef\Hy@toclevel{\ccUseProperty{bookmark-level}}}{}%
      \begingroup
        \ccGobble
-       \protected@edef\@tempa{\csname tp@Heading@bookmark\endcsname}%
+       \protected@edef\@tempa{\csname cc@Heading@bookmark\endcsname}%
        \bookmark[level=\Hy@toclevel,dest=\@currentHref]{\expandonce{\@tempa}}%
      \endgroup
    }}
@@ -727,18 +727,18 @@
 %
 %\subsection{Inline Headings}
 %
-% \begin{macro}{\tp@inline@heading}
+% \begin{macro}{\cch@make@inline}
 %   Inline headings are stored in a temporary box and expanded after
 %   the next (non-heading) paragraph is opened.
 %
 %   \#1 is the name of the heading and used for tagging.
 %    \begin{macrocode}
-\newbox\tp@inlinesecbox
-\def\tp@inline@heading#1{%
+\newbox\cch@inline@sec@box
+\def\cch@make@inline#1{%
   \ccIfProp{after-indent}{\global\@afterindenttrue}{\global\@afterindentfalse}%
   \ccIfProp{interline-para}
-    {\global\setbox\tp@inlinesecbox\hbox{\ifvoid\tp@inlinesecbox\else\unhbox\tp@inlinesecbox\ccUseProperty{interline-para-sep}\fi\@svsec}}%
-    {\global\setbox\tp@inlinesecbox\hbox{\@svsec}}
+    {\global\setbox\cch@inline@sec@box\hbox{\ifvoid\cch@inline@sec@box\else\unhbox\cch@inline@sec@box\ccUseProperty{interline-para-sep}\fi\@svsec}}%
+    {\global\setbox\cch@inline@sec@box\hbox{\@svsec}}
   \@nobreakfalse
   \global\@noskipsectrue
   \gdef\next{%
@@ -749,14 +749,14 @@
         \clubpenalty\@M
         \begingroup
           \ccIfAlly{\ccaVstructStart{#1head}}{}%
-          \unhbox\tp@inlinesecbox
+          \unhbox\cch@inline@sec@box
           \ccIfAlly{\ccaVstructEnd{#1head}}{}%
         \endgroup
         \unskip
         \hskip -\@tempskipa
       \else
         \clubpenalty \@clubpenalty
-        \global\setbox\tp@inlinesecbox\box\voidb@x
+        \global\setbox\cch@inline@sec@box\box\voidb@x
         \everypar{}%
       \fi}%
     \ignorespaces}}
@@ -765,11 +765,11 @@
 %
 %\subsection{Block Headings}
 %
-% \begin{macro}{\tp@block@heading} is used to print block headings.
+% \begin{macro}{\cch@make@block} is used to print block headings.
 %
 %   \#1 is the name of the heading and used for tagging.
 %    \begin{macrocode}
-\def\tp@block@heading#1{%
+\def\cch@make@block#1{%
   \ccIfAlly{\ccaVstructStart{#1head}}{}%
   \@svsec
   \ccIfAlly{\ccaVstructEnd{#1head}}{}%
@@ -878,7 +878,7 @@
 \def\cch@reserve{%
   \ccSetContainer{Heading}%
   \let\cch@ltx@dbl@backslash\\
-  \let\\\tpBreak
+  \letcs\\{\ccPrefix Break}
   \let\cc@ltx@label\label
   \def\ccAuthorCnt{\z@}%
   \def\ccAffilCnt{\z@}%
@@ -903,14 +903,14 @@
 %    \begin{macrocode}
 \def\cch@provide@quotes{%
   \ccDeclareComponent{QuoteBlock}{}{}%
-  \ccDeclareComponentGroup{tpQuote}{%
+  \ccDeclareComponentGroup{Quote}{%
     \ccDeclareCountedComponent{QuoteText}%
     \ccDeclareCountedComponent{QuoteSource}%
   }%
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\tp@Heading@role@handlers} sets up the additional Components for the Author Role specific to headings.
+% \begin{macro}{\cch@provide@authors} sets up the additional Components for the Author Role specific to headings.
 %    \begin{macrocode}
 \def\cch@provide@authors{%
   \ccAddToRole{Author}{%
@@ -918,7 +918,7 @@
   }%
   \ccDeclareRoleBlock{Author}{ContactBlock}{author-contact-block-format}%
   \ccDeclareGroupHandler{Author}{%
-    \ccIfComp{AuthorContact}{}{\csname tpAuthorContact\endcsname{\ccUseProperty{author-contact-format}}}{}%
+    \ccIfComp{AuthorContact}{}{\ccComponent{AuthorContact}{\ccUseProperty{author-contact-format}}}{}%
   }%
   \cc@provide@overrides{AuthorNameList}%
 }
@@ -937,9 +937,9 @@
 % \begin{macro}{\cc@provide@overrides} declares the Component
 %   macros for a Heading Component's overrides. \#1 is the Component
 %   name. The overrides allow a four-way distinction between
-%   \textit{i} the data printed in-situ (\lstinline{\tp#1}), \textit{ii} data sent
-%   to toc (\lstinline{\tpToc#1}), (iii) data sent to the page styles (\lstinline{\tpRun#1}), and (iv) the data sent
-%   to the PDF bookmarks (\lstinline{\tpBM#1}).
+%   \textit{i} the data printed in-situ (\lstinline{\ccPrefix#1}), \textit{ii} data sent
+%   to toc (\lstinline{\ccPrefix Toc#1}), (iii) data sent to the page styles (\lstinline{\ccPrefix Run#1}), and (iv) the data sent
+%   to the PDF bookmarks (\lstinline{\ccPrefix BM#1}).
 %    \begin{macrocode}
 \def\cc@provide@overrides#1{%
   \ccDeclareComponent{Toc#1}{}{}% toc overrides
@@ -1077,7 +1077,7 @@
     \ccUseComp{BMTitle}%
   }%
   \ccSetProperty{orcid-link}{% how the ORC-ID is rendered
-    \ccIfComp{ORCID}{\def\tp@Linkimg{\includegraphics[height=1em]{logos/ORCID.pdf}}\ccCompLink{ORCID}{\tp@Linkimg}}{}%
+    \ccIfComp{ORCID}{\ccCompLink{ORCID}{\includegraphics[height=1em]{logos/ORCID.pdf}}}{}%
   }%
   %% a single Author's contact infomration block
   \ccSetProperty{author-contact-format}{%Format of a single author's contact information
@@ -1095,18 +1095,18 @@
 %
 % \subsection{Alternative paragraph separation}
 %
-% \begin{macro}{\tpNewPar} is a user-level macro to have a vertical
+% \begin{macro}{\ccPrefix NewPar} is a user-level macro to have a vertical
 %   skip between two local paragraphs and no indent in the second
 %   one. The amount of vertical space between the paragraphs can be
 %   adjusted with the optional argument. If \#1 is omitted,
-%   \lstinline{\tpnewparskip} is inserted, which defaults to
+%   \lstinline{\ccnewparskip} is inserted, which defaults to
 %   \lstinline{1\baselineskip} if the dimension isn't set to something
 %   other than 0pt in the preamble. This macro is intended to be used
 %   at the end of the first of the paragraphs.
 %    \begin{macrocode}
-\newdimen\tpnewparskip \AtBeginDocument{\ifdim\tpnewparskip=\z@\relax \tpnewparskip=1\baselineskip\relax\fi}
-\def\tpNewPar{\@ifnextchar[{\@tpnewpar}{\@tpnewpar[\the\tpnewparskip]}}%]
-\def\@tpnewpar[#1]{%
+\newdimen\ccnewparskip \AtBeginDocument{\ifdim\ccnewparskip=\z@\relax \ccnewparskip=1\baselineskip\relax\fi}
+\csdef{\ccPrefix NewPar}{\@ifnextchar[{\cc@newpar}{\cc@newpar[\the\ccnewparskip]}}%]
+\def\cc@newpar[#1]{%
   \ifhmode\par\fi
   \vskip#1\relax
   \@afterheading
@@ -1116,7 +1116,7 @@
 % \Deprecated
 % \begin{macro}{\TitleBreak}
 %    \begin{macrocode}
-\let\TitleBreak\tpBreak
+\letcs\TitleBreak{\ccPrefix Break}
 %    \end{macrocode}
 % \end{macro}
 %    \begin{macrocode}[gobble=1]

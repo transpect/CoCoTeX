@@ -20,14 +20,14 @@
 % \section{Top-Level Interface}
 %
 %    \begin{macrocode}
-\let\tp@frame n
-\define@choicekey{coco-frame.sty}{frame}[\tp@frame\nr]{none,crop,frame}{%
+\let\cc@frame@mode n
+\define@choicekey{coco-frame.sty}{frame}[\cc@frame@mode\nr]{none,crop,frame}{%
   \ifcase\nr\relax% none
-    \let\tp@frame n
+    \let\cc@frame@mode n
   \or% crop
-    \let\tp@frame p
+    \let\cc@frame@mode p
   \else% frame
-    \let\tp@frame w
+    \let\cc@frame@mode w
   \fi
 }%
 \ProcessOptionsX\relax
@@ -35,19 +35,19 @@
 % \section{Cropmark printer}
 %
 %    \begin{macrocode}
-\ifx\tp@frame p\relax
+\ifx\cc@frame@mode p\relax
   \ifx\bleed\@undefined \newdimen\bleed \bleed4mm\relax\fi
-  \ifx\tp@frame@offset\@undefined \newdimen\tp@frame@offset \tp@frame@offset4em\relax\fi
-  \voffset\dimexpr\tp@frame@offset-1in\relax
-  \hoffset\dimexpr\tp@frame@offset-1in\relax
-  \edef\l@offset{\strip@pt\dimexpr\tp@frame@offset*7200/7227\relax}
-  \edef\r@offset{\strip@pt\dimexpr(\tp@frame@offset+\paperwidth)*7200/7227\relax}
-  \edef\u@offset{\strip@pt\dimexpr(\tp@frame@offset)*7200/7227\relax}
-  \edef\o@offset{\strip@pt\dimexpr(\tp@frame@offset+\paperheight)*7200/7227\relax}
-  \edef\b@l@offset{\strip@pt\dimexpr(\tp@frame@offset-\bleed)*7200/7227\relax}
-  \edef\b@r@offset{\strip@pt\dimexpr(\tp@frame@offset+\paperwidth+\bleed)*7200/7227\relax}
-  \edef\b@u@offset{\strip@pt\dimexpr(\tp@frame@offset-\bleed)*7200/7227\relax}
-  \edef\b@o@offset{\strip@pt\dimexpr(\tp@frame@offset+\paperheight+\bleed)*7200/7227\relax}
+  \ifx\cc@frame@@offset\@undefined \newdimen\cc@frame@@offset \cc@frame@@offset4em\relax\fi
+  \voffset\dimexpr\cc@frame@@offset-1in\relax
+  \hoffset\dimexpr\cc@frame@@offset-1in\relax
+  \edef\l@offset{\strip@pt\dimexpr\cc@frame@@offset*7200/7227\relax}
+  \edef\r@offset{\strip@pt\dimexpr(\cc@frame@@offset+\paperwidth)*7200/7227\relax}
+  \edef\u@offset{\strip@pt\dimexpr(\cc@frame@@offset)*7200/7227\relax}
+  \edef\o@offset{\strip@pt\dimexpr(\cc@frame@@offset+\paperheight)*7200/7227\relax}
+  \edef\b@l@offset{\strip@pt\dimexpr(\cc@frame@@offset-\bleed)*7200/7227\relax}
+  \edef\b@r@offset{\strip@pt\dimexpr(\cc@frame@@offset+\paperwidth+\bleed)*7200/7227\relax}
+  \edef\b@u@offset{\strip@pt\dimexpr(\cc@frame@@offset-\bleed)*7200/7227\relax}
+  \edef\b@o@offset{\strip@pt\dimexpr(\cc@frame@@offset+\paperheight+\bleed)*7200/7227\relax}
   \edef\@tempa{%
     /TrimBox [\l@offset\space\u@offset\space\r@offset\space\o@offset]
     /BleedBox[\b@l@offset\space\b@u@offset\space\b@r@offset\space\b@o@offset]
@@ -69,10 +69,10 @@
 %    \end{macrocode}
 % Setting PDF boundaries
 %    \begin{macrocode}
-\ifx\tp@frame n\relax\else
-  \ifx\tp@frame p\relax
-    \edef\stockwidth{\the\dimexpr\paperwidth+\tp@frame@offset+\tp@frame@offset\relax}
-    \edef\stockheight{\the\dimexpr\paperheight+\tp@frame@offset+\tp@frame@offset\relax}
+\ifx\cc@frame@mode n\relax\else
+  \ifx\cc@frame@mode p\relax
+    \edef\stockwidth{\the\dimexpr\paperwidth+\cc@frame@@offset+\cc@frame@@offset\relax}
+    \edef\stockheight{\the\dimexpr\paperheight+\cc@frame@@offset+\cc@frame@@offset\relax}
   \fi
 %    \end{macrocode}
 % Cropmarks and page area frames both are painted via the \lstinline{crop} package.
@@ -89,7 +89,7 @@
     \hskip1in\relax
     \CROP@llc\null\hfill\CROP@loedge\hfill\null\CROP@lrc\hskip-1in\null
     \vskip-1in}%
-  \ifx\tp@frame p\relax
+  \ifx\cc@frame@mode p\relax
     \def\camcross{%
       \smash{\rlap{%
           \kern-0.15\p@
@@ -108,11 +108,11 @@
     \def\cammcrossright{%
       \rlap{\kern\bleed\vrule\@width\dimexpr\bleed+2mm\relax\@height0.15\p@\@depth0.15\p@\camcross}}
     \def\cammcrossup{%
-      \rlap{\smash{\raise\dimexpr\tp@frame@offset-2mm\relax\hbox{\camcross}%
-          \kern-0.15\p@\vrule\@width0.3\p@\@height\dimexpr\tp@frame@offset-2mm\relax\@depth-\bleed}}}
+      \rlap{\smash{\raise\dimexpr\cc@frame@@offset-2mm\relax\hbox{\camcross}%
+          \kern-0.15\p@\vrule\@width0.3\p@\@height\dimexpr\cc@frame@@offset-2mm\relax\@depth-\bleed}}}
     \def\cammcrossdown{%
-      \rlap{\smash{\lower\dimexpr\tp@frame@offset-2mm\relax\hbox{\camcross}%
-          \kern-0.15\p@\vrule\@width0.3\p@\@height-\bleed\@depth\dimexpr\tp@frame@offset-2mm\relax}}}
+      \rlap{\smash{\lower\dimexpr\cc@frame@@offset-2mm\relax\hbox{\camcross}%
+          \kern-0.15\p@\vrule\@width0.3\p@\@height-\bleed\@depth\dimexpr\cc@frame@@offset-2mm\relax}}}
     \def\CROP@@ulc{\cammcrossup\cammcrossleft}
     \def\CROP@@urc{\cammcrossup\cammcrossright}
     \def\CROP@@llc{\cammcrossdown\cammcrossleft}
@@ -144,7 +144,7 @@
     \divide\@tempdima by\baselineskip
     \multiply\@tempdima by65536\relax
     \edef\cnt@baselines{\strip@pt\@tempdima}%
-    \def\tp@frame@lines{%
+    \def\cc@frame@lines{%
       \@tempcnta\z@
       \loop\advance\@tempcnta\@ne
         \hsize1em\relax
@@ -166,7 +166,7 @@
         \break
       \ifnum\@tempcnta<\cnt@baselines
       \repeat}
-    \def\tp@margin@frame{%
+    \def\cc@frame@margin{%
       \vrule height\textheight%
       \hskip-\marginparwidth\relax
       \vbox to\textheight{\hsize\marginparwidth\relax
@@ -188,12 +188,12 @@
         \vskip\headsep\vbox to\z@{\vss\hrule width\textwidth}%
         \hbox to\textwidth{%
           \ifodd\count\z@
-            \rlap{\hskip\dimexpr\textwidth+\marginparsep+\marginparwidth\relax\tp@margin@frame}%
+            \rlap{\hskip\dimexpr\textwidth+\marginparsep+\marginparwidth\relax\cc@frame@margin}%
           \else
-            \rlap{\hskip-\marginparsep\relax\tp@margin@frame}%
+            \rlap{\hskip-\marginparsep\relax\cc@frame@margin}%
           \fi
           \llap{\vbox to\textheight{\tiny\let\@tempa\f@size\normalsize\let\f@size\@tempa\selectfont
-              \vskip\topskip\tp@frame@lines\null\vss}}%
+              \vskip\topskip\cc@frame@lines\null\vss}}%
           \llap{\vrule height\textheight}%
           \if@twocolumn
             \hskip\columnwidth\rlap{\vrule height\textheight}%
