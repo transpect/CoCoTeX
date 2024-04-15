@@ -932,6 +932,36 @@
 %    \end{macrocode}
 % \end{macro}
 %
+% \subsubsection{Local Property Overrides}
+%
+% \begin{macro}{\cc@set@property@local} is a low-level macro to
+%   locally manipulate Properties. \#1 is the CS token representing a
+%   method to alter the property (\lstinline{\ccSetProperty},
+%   \lstinline{\ccAppToProp}, or \lstinline{\ccPreToProp}), \#2 is the
+%   name of the Property to be altered, and \#3 is the new (or added)
+%   Value.
+%    \begin{macrocode}
+\def\cc@set@property@locally#1#2#3{%
+  \let\@cc@cur@cont\cc@cur@cont
+  \ifdefstring\@cc@cur@cont{Heading}{\let\@cc@cur@cont\cch@sec@name}{}%
+  \csappto{cc@type@Properties@\@cc@cur@cont}{#1{#2}{#3}}%
+}
+%    \end{macrocode}
+% \end{macro}
+% The User level macros are Prefix sensitive. They exist in three
+% flavours depending on whether the global Value of a Property should
+% be kept or be replaced.
+% \begin{macro}{\ccPrefix SetPropLocal, \ccPrefix AppPropLocal, \ccPrefix PrePropLocal}
+%   They all take two arguments: \#1 is the name of the Property, \#2
+%   is the value to be set, appended, or prepended to that Property,
+%   respectively.
+%    \begin{macrocode}
+\csdef{\ccPrefix SetPropLocal}{\cc@set@property@locally\ccSetProperty}%
+\csdef{\ccPrefix AppPropLocal}{\cc@set@property@locally\ccAppToProp}%
+\csdef{\ccPrefix PrePropLocal}{\cc@set@property@locally\ccPreToProp}%
+%    \end{macrocode}
+% \end{macro}
+%
 % \subsection{Processing Instructions}\label{sect:ccPI}
 %
 % In general, processing instructions are commands that are only
