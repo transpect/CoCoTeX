@@ -56,6 +56,7 @@
 %    \end{macrocode}
 % \end{macro}
 %
+%
 % \section{Commonly Used Low-Level Macros and Registers}
 %
 % If {\CoCoTeX} is used in conjunction with
@@ -72,7 +73,10 @@
 %    \begin{macrocode}
 \RequirePackage{coco-kernel}
 %    \end{macrocode}
+%
+%
 % \subsection{Hard Dependencies}
+%
 % Hard requirements for all {\CoCoTeX} modules:
 %    \begin{macrocode}
 \RequirePackage{xcolor}
@@ -84,46 +88,58 @@
 \DeclareGraphicsRule{.EPS}{eps}{.EPS}{}
 %    \end{macrocode}
 %
+%
 % \subsection{Common Variables}
 %
 % \subsubsection{String Variables for Value Comparisions}
-% \begin{macro}{\cc@str@default}
+% \begin{macro}{\cc@str@default} is a CS token that holds the string
+%   ``default'' for comparisons.
 %    \begin{macrocode}
 \def\cc@str@default{default}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\cc@str@table}
+% \begin{macro}{\cc@str@table} is a CS token that holds the string
+%   ``table'' for comparisons.
 %    \begin{macrocode}
 \def\cc@str@table{table}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\cc@str@figure}
+% \begin{macro}{\cc@str@figure} is a CS token that holds the string
+%   ``figure'' for comparisons.
 %    \begin{macrocode}
 \def\cc@str@figure{figure}
 %    \end{macrocode}
 % \end{macro}
 %
+%
 % \subsubsection{Box Registers}
+%
 % Some temporary boxes that won't interfere with LaTeX's temporary
 % boxes.
-% \begin{macro}{\cc@tempboxa}
+% \begin{macro}{\cc@tempboxa} is a temporary box register used throughout \CoCoTeX.
 %    \begin{macrocode}
 \newbox\cc@tempboxa
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\cc@tempboxb}
+% \begin{macro}{\cc@tempboxb} is another temporary box register used throughout \CoCoTeX.
 %    \begin{macrocode}
 \newbox\cc@tempboxb
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsubsection{Length and Skip Registers}
-% \begin{macro}{\cc@tempskipa}
+%
+% \subsubsection{Temporary Length and Skip Registers}
+%
+% \begin{macro}{\cc@tempskipa} is a temporary skip register used
+%   throughout \CoCoTeX.
 %    \begin{macrocode}
 \newskip\cc@tempskipa
 %    \end{macrocode}
 % \end{macro}
+%
+%
 % \subsection{Helper macros}
+%
 % \begin{macro}{\afterfi} used to execute code after the next \lstinline{\fi}:
 %    \begin{macrocode}
 \def\afterfi#1\fi{\fi#1}
@@ -136,9 +152,8 @@
 \def\cc@topstrut{\vrule\@width\z@\@height\topskip\@depth\dimexpr\baselineskip-\topskip\relax}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\afterbox}
-%   prevents indentation and additional spacing after
-%   environments. Intended to be used in combination with
+% \begin{macro}{\afterbox} prevents indentation and additional spacing
+%   after environments. Intended to be used in combination with
 %   \lstinline{\aftergroup}.
 %    \begin{macrocode}
 \def\@afterbox{%
@@ -158,7 +173,9 @@
 %    \end{macrocode}
 % \end{macro}
 %
+%
 % \subsection{Masks}
+%
 % These macros are intended to mask non-content markup, like page- or
 % line breaking commands in order to find and remove or alter them
 % easier.
@@ -210,7 +227,10 @@
 }%
 %    \end{macrocode}
 % \end{macro}
+%
+%
 % \subsection{Arithmetics}
+%
 % \begin{macro}{\CalcRatio} is used to calculate the ratio between two
 %   integers.
 %    \begin{macrocode}
@@ -267,6 +287,8 @@
   \fi}
 %    \end{macrocode}
 % \end{macro}
+%
+%
 % \subsection{Determine actual page number}
 %
 % We need to determine the real page a floating object is
@@ -346,6 +368,7 @@
 %    \end{macrocode}
 % \end{macro}
 %
+%
 % \section{Re-Thinking {\LaTeX} Core Functions}
 %
 % \subsection{Keeping .aux-Files Up-to-Date}
@@ -358,6 +381,7 @@
 \expandafter\DeclareRobustCommand\expandafter*\expandafter{\csname\ccPrefix Break\endcsname}{\hfill\break}
 %    \end{macrocode}
 % \end{macro}
+%
 %
 % \subsection{Content lists}
 %
@@ -498,7 +522,6 @@
   \ifcsdef{cc@#1@extra@cl}{%
     \cc@parse@csv\cc@add@extra@cl{cc@#1@extra@cl}}{}%
 }
-
 %    \end{macrocode}
 % \end{macro}
 %
@@ -531,11 +554,11 @@
 % values are available immediately and can be used to fortify those
 % parameters.
 %
-% \begin{macro}{\cc@store@latest}
-%   low-level macro that stores the maximum value of a dimension
-%   Property \#1. An internal Property \lstinline{\#1-local} is
-%   constantly updated whenever the macro is called and the previously
-%   stored value is lower than the one given in \lstinline{#2}.
+% \begin{macro}{\cc@store@latest} is a low-level macro that stores the
+%   maximum value of a dimension Property \#1. An internal Property
+%   \lstinline{\#1-local} is constantly updated whenever the macro is
+%   called and the previously stored value is lower than the one given
+%   in \lstinline{#2}.
 %
 %   The first call of the macro for a given Property triggers an
 %   addendum to the \lstinline{\@enddocumenthook} which causes the
@@ -594,16 +617,16 @@
 \def\cc@format@number#1#2#3{%
   \ccSetPropertyVal{#1curr-number-level}{#3}%
 %    \end{macrocode}
-% First step: measuring the natural width of the Number if it exists
-% for the current item.
+% \textit{First step:} measuring the natural width of the Number if it
+% exists for the current item.
 %    \begin{macrocode}
   \ccIfComp{#2Number}
     {\sbox\z@{\ccUseProperty{#1number-format}}}
     {\sbox\z@{}}%
 %    \end{macrocode}
-% Second step: we store the width of \lstinline{\box0} if it is wider
-% than the previously stored width for that level. The end value will
-% be written into the .aux file during expansion of the
+% \textit{Second step:} we store the width of \lstinline{\box0} if it
+% is wider than the previously stored width for that level. The end
+% value will be written into the .aux file during expansion of the
 % \lstinline{\@enddocumenthook}. We do the same for the maximum across
 % \textit{all} levels of the same Container Type.
 %    \begin{macrocode}
@@ -619,7 +642,7 @@
   \ccSetPropertyVal{#1number-width-max}{\csname \ccPrefix-\cc@cur@cont-#1number-maxwd\endcsname}%
   \ccSetPropertyVal{#1number-width}{\the\wd\z@}%
 %    \end{macrocode}
-% Third step: we calculate and fortify the actual
+% \textit{Third step:} we calculate and fortify the actual
 % \lstinline{#1margin-left} (i.e., the overall left indent of the
 % whole item) and \lstinline{#1indent} (offset of the first line) of
 % the entry.
@@ -632,7 +655,6 @@
 %
 % \begin{macro}{\cc@set@hang} determines and sets the hanging indent
 %   of a counter. \#1 is the internal Property prefix.
-%
 %    \begin{macrocode}
 \def\cc@set@hang#1{%
 %    \end{macrocode}
@@ -790,6 +812,7 @@
 %    \end{macrocode}
 % \end{macro}
 %
+%
 % \subsection{Labelling and Cross referencing}
 %
 % {\CoCoTeX} provides two ways to put labels on Container instances:
@@ -883,6 +906,8 @@
 }
 %    \end{macrocode}
 % \end{macro}
+%
+%
 % \subsection{Link Generation}
 %
 % \begin{macro}{\ccCompLink} creates a hyperlink with the target taken

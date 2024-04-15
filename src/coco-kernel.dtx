@@ -145,10 +145,10 @@
 % \begin{macro}{\ccDeclareEnv}
 %   Each container usually is realised as a {\LaTeX} environment. The
 %   \lstinline{\ccDeclareEnv} macro is used to set up this
-%   environment. Usually, the environment has the same name as the
-%   Container. With the optional argument \#\#1 you can override the
-%   environment's name.  However, keep in mind that the Container's
-%   name is not changed by re-naming the corresponding
+%   environment. Usually, the environment has \textit{the same name as
+%   the Container}. With the optional argument \#\#1 you can override
+%   the environment's name.  However, keep in mind that the
+%   Container's name is not changed by re-naming the corresponding
 %   environment. \#\#2 is used for the stuff done at the beginning of
 %   the environment, \#\#3 for the stuff done at the end.
 %
@@ -169,6 +169,12 @@
   \expandafter\x\endgroup
 }
 \@onlypreamble\ccDeclareContainer
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccSetContainer} is used to change the currently
+%   active (Sub-)Container.
+%    \begin{macrocode}
+\def\ccSetContainer#1{\def\cc@cur@cont{#1}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccAddToType} add additional content (i.e., the next token) to a Type \#1 of a previously declared Container \#2.
@@ -1201,10 +1207,6 @@
 \DeclareRobustCommand\CoCoTeX{\texorpdfstring{{C\kern-.1em o\kern-.033emC\kern-.1em o}\kern-.133em\TeX}{CoCoTeX}}
 %    \end{macrocode}
 % \end{macro}
-% \section{Legacy Functions}\Deprecated
-%    \begin{macrocode}
-\def\ccSetContainer#1{\def\cc@cur@cont{#1}}
-%    \end{macrocode}
 %    \begin{macrocode}[gobble=1]
 %</kernel>
 %    \end{macrocode}
