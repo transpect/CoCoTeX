@@ -18,11 +18,18 @@
 \ProvidesClass{cocotex}
     [\filedate \fileversion cocotex]
 %    \end{macrocode}
-% Hard-coded requirements
+%
+%
+% \section{Hard-coded requirements}
+%
 %    \begin{macrocode}
 \RequirePackage{kvoptions-patch}
 \RequirePackage{xkeyval}
 %    \end{macrocode}
+%
+%
+% \section{Class Options}
+%
 % Passing options down to the \LaTeX\space standard packages
 %    \begin{macrocode}
 \DeclareOptionX{main}{\PassOptionsToPackage{\CurrentOption}{babel}}
@@ -72,7 +79,7 @@
 % Passing options down to various {\CoCoTeX} modules:
 %    \begin{macrocode}
 \DeclareOptionX{debug}{\PassOptionsToPackage{\CurrentOption}{coco-kernel}}
-\DeclareOptionX{a11y}{\PassOptionsToPackage{\CurrentOption}{coco-common}}
+\DeclareOptionX{a11y}{\PassOptionsToPackage{init}{coco-accessibility}}
 \DeclareOptionX{lang-id}{\PassOptionsToPackage{\CurrentOption}{coco-accessibility}}
 \DeclareOptionX{nodetree}{\PassOptionsToPackage{\CurrentOption}{coco-accessibility}}
 \DeclareOptionX{showspaces}{\PassOptionsToPackage{\CurrentOption}{coco-accessibility}}
@@ -88,6 +95,10 @@
 \DeclareOptionX{endnotesperchapter}{\PassOptionsToPackage{\CurrentOption}{coco-notes}}
 \ProcessOptionsX
 %    \end{macrocode}
+%
+%
+% \section{Class Hook}
+%
 % \begin{macro}{\ccAfterClassHook}
 %   Almost all user level macros have been renamed when {\CoCoTeX}
 %   became independent from \lstinline{xerif}. In order to ensure
@@ -112,9 +123,19 @@
 %   adjusted to the new macro names, this hook will be removed!
 %    \begin{macrocode}
 \def\ccToggleCountedConditionalsHook{}%
+%    \end{macrocode}
+%
+%
+% \section{Internal Requirement}
+%
+%    \begin{macrocode}
 \RequirePackage{coco-common}
 %    \end{macrocode}
 % \end{macro}
+%
+%
+% \section{Loading and Adjusting Underlying DocumentClass}
+%
 % All publication types supported by {\CoCoTeX} are based on one of
 % \LaTeX's default classes \lstinline{book} or \lstinline{article}:
 %    \begin{macrocode}
@@ -124,6 +145,10 @@
   \LoadClass[10pt,a4paper]{book}
 \fi
 %    \end{macrocode}
+%
+%
+% \subsection{General Typography}
+%
 % Offsets are the removed to make all values relative to the upper left corner of the page to ease maintainance.
 %    \begin{macrocode}
 \voffset-1in\relax
@@ -139,6 +164,10 @@
 \clubpenalty10000
 \widowpenalty10000
 %    \end{macrocode}
+%
+%
+% \subsubsection{Empty Pagestyle}
+%
 % page style without any headers or footers
 %    \begin{macrocode}
 \def\ps@empty{%
@@ -148,11 +177,19 @@
   \let\@evenfoot\@empty
 }
 %    \end{macrocode}
-% vacancy pages need to have page style \lstinline{empty}:
+%
+%
+% \subsubsection{Empty Pagestyle}
+%
+% Vacancy pages in general need to have page style \lstinline{empty}:
 %    \begin{macrocode}
 \def\cleardoublepage{\clearpage\if@twoside \ifodd\c@page\else
     \hbox{}\thispagestyle{empty}\newpage\if@twocolumn\hbox{}\newpage\fi\fi\fi}
 %    \end{macrocode}
+%
+%
+% \subsubsection{Book Parts}
+%
 % re-defined to make front- and backmatter components distinguish-able
 %    \begin{macrocode}
 \ifarticle\else
@@ -173,8 +210,24 @@
     \@mainmatterfalse
     \@frontmatterfalse}
 \fi
+%    \end{macrocode}
+% \Deprecated
+%    \begin{macrocode}
 \usepackage{soul}
 %    \end{macrocode}
+%
+%
+% \section{Loading other {\CoCoTeX} Modules}
+%
+% \subsection{coco-accessibility}
+%
+% We load the accessibility module always, even if we don't end up
+% actually using it.
+%    \begin{macrocode}
+\RequirePackage{coco-accessibility}
+%
+% \subsection{coco-script}
+%
 % Inclusion of the script module which also loads the babel package
 %    \begin{macrocode}
 \ifLuaTeX
@@ -182,16 +235,34 @@
 \else
 \RequirePackage{babel}
 \fi
+%    \end{macrocode}
+%
+%
+% \subsection{coco-headings}
+%
+%    \begin{macrocode}
 \RequirePackage{coco-headings}
 %    \end{macrocode}
+%
+%
+% \subsection{coco-floats}
+%
 % Inclusion of the float module
 %    \begin{macrocode}
 \RequirePackage{coco-floats}
 %    \end{macrocode}
+%
+%
+% \subsection{coco-title}
+%
 % Inclusion of the title page module
 %    \begin{macrocode}
 \RequirePackage{coco-title}
 %    \end{macrocode}
+%
+%
+% \subsection{coco-notes}
+%
 % Inclusion of the end-/footnotes module
 %    \begin{macrocode}
 \RequirePackage{coco-notes}
@@ -199,10 +270,21 @@
 % Fallback, in case, \lstinline{coco-headings.sty} is not loaded for
 % some reason.
 %
+%
+% \section{Further Hard Dependencies}
+%
+% \subsection{Index}
+%
 % Some more hard dependencies:
 %    \begin{macrocode}
 \RequirePackage{index}
 \makeindex
+%    \end{macrocode}
+%
+%
+% \subsection{Hyperref}
+%
+%    \begin{macrocode}
 \RequirePackage{hyperref}
 %    \end{macrocode}
 % Finally, some \lstinline{hyperref} settings (TODO: check, which of
@@ -246,14 +328,10 @@
   \pdfobjcompresslevel=0
 \fi
 %    \end{macrocode}
-% Since \lstinline{ltpdfa} messes with a lot of {\LaTeX} Kernel macros
-% (like \lstinline{\begin} and \lstinline{\end}) as well as external
-% packages (\lstinline{hyperref}), it must be loaded last:
-%    \begin{macrocode}
-\ifx\cc@do@ally\relax
-  \RequirePackage{coco-accessibility}
-\fi
-%    \end{macrocode}
+%
+%
+% \section{End of Dcument Class Hook}
+%
 % Expanding backwards-compatibility aliases from the coco-xerif module:
 %    \begin{macrocode}
 \ccAfterClassHook

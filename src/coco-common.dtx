@@ -22,11 +22,6 @@
 %
 % \subsection{Accessibility Features}
 %
-% The option \lstinline{a11y} triggers loading of the {\CoCoTeX}
-% Accessibility Module and its features.
-%    \begin{macrocode}
-\DeclareOptionX{a11y}{\let\cc@do@ally\relax}
-%    \end{macrocode}
 % Default color encoding passed as option to the \lstinline{xcolor}
 % package.
 %    \begin{macrocode}
@@ -46,11 +41,9 @@
 \ProcessOptionsX
 \PassOptionsToPackage{\cc@color@enc}{xcolor}%
 %    \end{macrocode}
-% \begin{macro}{\ccIfAlly} is a switch to distinct between compilation
-%   with (implicit \#1) or without (implicit \#2) activated accessibility features.
+% \begin{macro}{\ccIfPreamble} is true as long as there has not been a
+%   \lstinline|\begin{document}|.
 %    \begin{macrocode}
-\def\cc@if@ally{\ifx\cc@do@ally\relax\expandafter\@firstoftwo\else\expandafter\@secondoftwo\fi}
-\let\ccIfAlly\cc@if@ally
 \def\cc@if@preamble{\ifx\@nodocument\relax\expandafter\@secondoftwo\else\expandafter\@firstoftwo\fi}
 \let\ccIfPreamble\cc@if@preamble
 %    \end{macrocode}

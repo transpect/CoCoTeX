@@ -30,15 +30,11 @@
 \NeedsTeXFormat{LaTeX2e}[2018/12/01]
 \ProvidesPackage{coco-accessibility}
     [\filedate \fileversion CoCoTeX accessibility module]
+\RequirePackage{kvoptions-patch}
+\RequirePackage{xkeyval}
+\RequirePackage{atbegshi}
+\RequirePackage{xparse}
 %    \end{macrocode}
-% \begin{macro}{\cc@if@ally} If the \lstinline{coco-ally} package is
-%   loaded, the conditional from the \lstinline{coco-common} module is
-%   re-defined to always expand the \texttt{true} branch and discard
-%   the \texttt{false} branch:
-%    \begin{macrocode}
-\def\cc@if@ally{\expandafter\@firstoftwo}
-%    \end{macrocode}
-% \end{macro}
 % The \lstinline{ltpdfa} package re-defines too many standard LaTeX
 % macros, so we only use its lua code and define the interface
 % ourself. For that, we use \lstinline{etoolbox}'s patch commands to
@@ -46,8 +42,7 @@
 % create hard copies. This should increase compatibility with other
 % packages and make all our lifes easier.
 %
-% We start with ltpdfa's package options.
-% 
+% We start with adopting \lstinline{ltpdfa}'s package options.
 % \begin{macro}{\cca@lang@id} is the ISO 639-2 code for the document's
 %   main language. As default, we assume Modern English.
 %    \begin{macrocode}
@@ -55,13 +50,15 @@
 \DeclareOptionX{lang-id}{\gdef\cca@lang@id{#1}}
 %    \end{macrocode}
 % \end{macro}
+%    \begin{macrocode}
+\DeclareOptionX{init}{\global\let\cc@do@ally\relax}
+%    \end{macrocode}
 % \begin{macro}{\cca@do@nodetree} if \lstinline{\relax}, show the node tree in
 %   the log and in the shell output.
 %    \begin{macrocode}
 \DeclareOptionX{nodetree}{\let\cca@do@nodetree\relax}
 %    \end{macrocode}
 % \end{macro}
-% 
 % \begin{macro}{\cca@do@showspaces} if \lstinline{\relax}, show spaces
 %   in the pdf.
 %    \begin{macrocode}
@@ -83,7 +80,6 @@
 \DeclareOptionX{no-spaces}{\let\cca@do@dospaces\@undefined}
 %    \end{macrocode}
 % \end{macro}
-% 
 % \begin{macro}{\cca@do@doparas} if \lstinline{\relax}, add paragraph
 %   tagging.
 %    \begin{macrocode}
@@ -91,47 +87,89 @@
 \DeclareOptionX{no-paras}{\let\cca@do@doparas\@undefined}
 %    \end{macrocode}
 % \end{macro}
-% Process the options.
+% Processing the options.
 %    \begin{macrocode}
 \ProcessOptionsX
 %    \end{macrocode}
-% 
+%
+% \begin{macro}{\cca@patch@error} is a generic error message that is
+%   thrown whenever a {\LaTeX} kernel macro could not be patched. This
+%   is usually the case when the macro definition does not match
+%   coco-accessibility's expectation, e.g., when another package
+%   messes with the macro's original definition. \#1 is the CS token
+%   of the un-patchable macro.
 %    \begin{macrocode}
 \def\cca@patch@error#1{%
   \ccPackageError{a11y}{compatibility}
   {Could not patch \noexpand#1}
-  {You probably use a LaTeX package that re-defines hyperref's \noexpand#1 macro. It is apparently not compatbile with coco-accessibility.sty. Sorry}}
+  {You probably use a LaTeX package that re-defines the \noexpand#1 control sequence. It is apparently not compatbile with coco-accessibility.sty. Sorry}}
 %    \end{macrocode}
-% then we need to packages. \lstinline{luatexbase-attr} (possibly
-% deprecated?) provides an interface to add attributes to lua code;
-% \lstinline{atveryend} provides a hook to inject code to the final
-% steps of rendering.
+% \end{macro}
+%
+%
+% \subsection{Activating and Deactivating  Accessibility Features}
+%
+% \begin{macro}{\ccIfAlly} is a switch to distinct between compilation
+%   with (implicit \#1) or without (implicit \#2) activated accessibility features.
 %    \begin{macrocode}
-\RequirePackage{luatexbase-attr}
-\RequirePackage{atveryend}
+\def\cc@if@ally{\ifx\cc@do@ally\relax\expandafter\@firstoftwo\else\expandafter\@secondoftwo\fi}
+\let\ccIfAlly\cc@if@ally
 %    \end{macrocode}
-% Additional hyperref setup
+% \end{macro}
+% \begin{macro}{\ccWhenAlly} is a variant of \lstinline{\ccIfAlly}
+%   that omits the else branch.
 %    \begin{macrocode}
-\hypersetup{%
-  %pdfa=true% already set elsewhere
-  ,unicode=true%
-  ,pdfinfo={}%
-  %,pdfpagelabels=true% already set elsewhere
-  ,pageanchor=true%
-}
-\Hy@pdfatrue
+\def\ccWhenAlly{\ifx\cc@do@ally\relax\expandafter\@firstofone\else\expandafter\@gobble\fi}
 %    \end{macrocode}
+% \end{macro}
+%
+%
+% \subsection{Accessibility-specific additions}
+%
+% \subsubsection{Loading Further Dependencies}
+%
+% Activated coco-accessibility requires two packages:
+% \lstinline{luatexbase-attr} (possibly deprecated?) provides an
+% interface to add attributes to lua code; \lstinline{atveryend}
+% provides a hook to inject code to the final stages of PDF rendering.
+%    \begin{macrocode}
+\ccWhenAlly{%
+  \RequirePackage{luatexbase-attr}
+  \RequirePackage{atveryend}
+%    \end{macrocode}
+%
+%
+% \subsubsection{Additonal Hyperref Setup}
+%
+% Additional hyperref setup to be executed at the very end of the
+% preamble.
+%    \begin{macrocode}
+  \AtBeginDocument{%
+    \hypersetup{%
+      % pdfa=true% already set elsewhere
+      ,unicode=true%
+      ,pdfinfo={}%
+      % ,pdfpagelabels=true% already set elsewhere
+      ,pageanchor=true%
+    }%
+    \Hy@pdfatrue
+  }
+%    \end{macrocode}
+%
+%
+% \subsubsection{Loading and Configuring ltpdfa's Lua Modules}
+%
 % Now, we set the configuration of the \lstinline{ltpdfa} lua facility
 % by passing some of the \lstinline{coco-accessibility} package
 % options:
 %    \begin{macrocode}
-\directlua{ltpdfa = require('ltpdfa')}
-\directlua{ltpdfa.config.final = true}
-\directlua{ltpdfa.config.debug = \if@cc@debug true\else false\fi}
-\directlua{ltpdfa.config.nodetree = \ifx\cca@do@nodetree\relax true\else false\fi}
-\directlua{ltpdfa.config.showspaces = \ifx\cca@do@showspaces\relax true\else false\fi}
-\directlua{ltpdfa.config.dospaces = \ifx\cca@do@dospaces\relax true\else false\fi}
-\directlua{ltpdfa.config.doparas = \ifx\cca@do@doparas\relax true\else false\fi}
+  \directlua{ltpdfa = require('ltpdfa')}
+  \directlua{ltpdfa.config.final = true}
+  \directlua{ltpdfa.config.debug = \if@cc@debug true\else false\fi}
+  \directlua{ltpdfa.config.nodetree = \ifx\cca@do@nodetree\relax true\else false\fi}
+  \directlua{ltpdfa.config.showspaces = \ifx\cca@do@showspaces\relax true\else false\fi}
+  \directlua{ltpdfa.config.dospaces = \ifx\cca@do@dospaces\relax true\else false\fi}
+  \directlua{ltpdfa.config.doparas = \ifx\cca@do@doparas\relax true\else false\fi}
 %    \end{macrocode}
 % \lstinline{ltpdfa} provides two ways to tag heading heads. One by
 % tagging headers as \lstinline{H1..H6}, and one where all headings
@@ -139,26 +177,27 @@
 % nesting. Since most of our projects require way more than 6 heading
 % levels, we hard-code the nesting approach:
 %    \begin{macrocode}
-\directlua{ltpdfa.config.headnums = false}
+  \directlua{ltpdfa.config.headnums = false}
 %    \end{macrocode}
 % CoCoTeX with accessibility support is \lstinline{\luaTeX} only, so
 % we hard-code \lstinline{pdftex} as render engine:
 %    \begin{macrocode}
-\directlua{ltpdfa.config.driver = "\luaescapestring{pdftex}"}
-\directlua{ltpdfa.config.lang = '\luaescapestring{\cca@lang@id}'}
-\directlua{ltpdfa.init()}%
+  \directlua{ltpdfa.config.driver = "\luaescapestring{pdftex}"}
+  \directlua{ltpdfa.config.lang = '\luaescapestring{\cca@lang@id}'}
+  \directlua{ltpdfa.init()}%
 %    \end{macrocode}
 % Initial setup of ltpdfa
 %    \begin{macrocode}
-\edef\@ltpdfa@pattr{\directlua{ltpdfa.getAttribute('\luaescapestring{parentattr}')}}
-\edef\@ltpdfa@tattr{\directlua{ltpdfa.getAttribute('\luaescapestring{typeattr}')}}
-\attributedef\@ltpdfa@typeattr=\@ltpdfa@tattr
-\attributedef\@ltpdfa@parentattr=\@ltpdfa@pattr
-\def\ltpdfa@last@page{\ifx\r@LTLastPage\undefined\@empty\else\expandafter\@secondoftwo\r@LTLastPage\fi}
+  \edef\@ltpdfa@pattr{\directlua{ltpdfa.getAttribute('\luaescapestring{parentattr}')}}
+  \edef\@ltpdfa@tattr{\directlua{ltpdfa.getAttribute('\luaescapestring{typeattr}')}}
+  \attributedef\@ltpdfa@typeattr=\@ltpdfa@tattr
+  \attributedef\@ltpdfa@parentattr=\@ltpdfa@pattr
+  \def\ltpdfa@last@page{\ifx\r@LTLastPage\undefined\@empty\else\expandafter\@secondoftwo\r@LTLastPage\fi}%
 %    \end{macrocode}
 % We need the absolute last page of the document
 %    \begin{macrocode}
-\AfterLastShipout{\immediate\write\@mainaux{\string\newlabel{LTLastPage}{{LTLastPage}{\directlua{ltpdfa.getPageNum()}}}}}
+  \AfterLastShipout{\immediate\write\@mainaux{\string\newlabel{LTLastPage}{{LTLastPage}{\directlua{ltpdfa.getPageNum()}}}}}%
+}%/ccWhenAlly
 %    \end{macrocode}
 %
 % \subsection{Generic Macro to Declare Accessibility Features}
@@ -239,13 +278,44 @@
 %     for the newcommand calls.
 %    \begin{macrocode}
 \def\cca@declare@cmd#1#2{%
-  \edef\x{\noexpand\newcommand*\noexpand#1\expandonce{\cca@temp@signature}{\unexpanded{#2}}}\x%
-  \global\expandafter\let\csname lt@saved@\CsToStr{#1}\endcsname#1%
-  \edef\x{\noexpand\let\noexpand#1\expandafter\noexpand\csname lt@saved@\CsToStr{#1}\endcsname}%
+%    \end{macrocode}
+% First, we create a string \lstinline{\savedDef} that includes the
+% \textit{active} definition of our interface macro and store it in an
+% internal macro named \lstinline{\cc@saved@#1}. This macro is
+% immediately called.
+%    \begin{macrocode}
+  \edef\savedDef{\noexpand\newcommand*\expandafter\noexpand\csname cc@saved@\CsToStr{#1}\endcsname\expandonce{\cca@temp@signature}{\unexpanded{#2}}}\savedDef%
+%    \end{macrocode}
+% Then, we create a \lstinline{\let} sequence that maps the plain CS
+% name \#1 onto that newly created internal macro. The String
+% containing the let-sequence is then stored in the {\cca@saved@defs}
+% list, so whenever this list is expanded, the desired CS-token
+% ``\#1'' is defined to the active definition.
+%    \begin{macrocode}
+  \edef\x{\noexpand\let\noexpand#1\expandafter\noexpand\csname cc@saved@\CsToStr{#1}\endcsname}%
   \global\expandafter\appto\expandafter\cca@saved@defs\expandafter{\x}%
-  \edef\x{\noexpand\newcommand*\expandafter\noexpand\csname lt@no@\CsToStr{#1}\endcsname\expandonce{\cca@temp@signature}{\relax}}\x%
-  \edef\x{\noexpand\let\noexpand#1\expandafter\noexpand\csname lt@no@\CsToStr{#1}\endcsname}%
-  \expandafter\appto\expandafter\cca@relaxed@defs\expandafter{\x}%
+%    \end{macrocode}
+% Then, we repeat the same procedure, but this time, we define the
+% whole internal CS token with the same argument structure to expand
+% to \lstinline{\relax}.
+%    \begin{macrocode}
+  \edef\relaxDef{\noexpand\newcommand*\expandafter\noexpand\csname cc@no@\CsToStr{#1}\endcsname\expandonce{\cca@temp@signature}{\relax}}\relaxDef%
+%    \end{macrocode}
+% The whole \lstinline{\let} sequence for the \lstinline{\relax}
+% version of our internal macro is then stored in the
+% \lstinline{\cca@relaxed@defs} list.
+%    \begin{macrocode}
+  \edef\y{\noexpand\let\noexpand#1\expandafter\noexpand\csname cc@no@\CsToStr{#1}\endcsname}%
+  \expandafter\appto\expandafter\cca@relaxed@defs\expandafter{\y}%
+%    \end{macrocode}
+% Now, we can decide which of the two \lstinline{\let}-sequences
+% should be the used to define the initial value of the \#1 CS token,
+% depending on the value of the \lstinline{\ccIfAlly} conditional:
+%    \begin{macrocode}
+  \ccIfAlly{\x}{\y}%
+%    \end{macrocode}
+% Finally, we reset the temporary argument signature macro.
+%    \begin{macrocode}
   \let\cca@temp@signature\@empty
 }
 %    \end{macrocode}
@@ -297,20 +367,19 @@
 %   the name of the PDF role.
 %    \begin{macrocode}
 \DeclareAccessibilityCommand{\ccaAddRolemap}[2]{\directlua{ltpdfa.tagger.addRolemap('\luaescapestring{#1}','\luaescapestring{#2}')}}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccaAddPlacement} ???
+%    \begin{macrocode}
 \DeclareAccessibilityCommand{\ccaAddPlacement}[1]{\directlua{ltpdfa.tagger.addPlacement('\luaescapestring{#1}')}}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccaAddNumbering} ???
+%    \begin{macrocode}
 \DeclareAccessibilityCommand{\ccaAddNumbering}[1]{\directlua{ltpdfa.tagger.addNumbering('\luaescapestring{#1}')}}
 %    \end{macrocode}
 % \end{macro}
 %
-% The local preferences for \CoCoTeX's accessibility features is done
-% via the \lstinline{\ccPrefix Meta} environment. Therefore, we hook the
-% neccessary Components and Properties right into the
-% \lstinline{titlepage} container. Therefore,
-% \lstinline{coco-title.sty} is a hard requirement for \CoCoTeX's
-% accessibility module:
-%    \begin{macrocode}
-\RequirePackage{coco-title}%
-%    \end{macrocode}
 %
 % \subsection{Lua injection}
 %
@@ -318,8 +387,9 @@
 % include the code that is generated from material later in this
 % source file:
 %    \begin{macrocode}
-\directlua{ally = require('coco-accessibility')}
+\ccWhenAlly{\directlua{ally = require('coco-accessibility')}}
 %    \end{macrocode}
+%
 %
 % \subsection{Hyperlink handling}
 %
@@ -346,50 +416,56 @@
 \DeclareAccessibilityCommand{\ccaGetStructParent}{\directlua{ltpdfa.tagger.getStructParent()}}
 %    \end{macrocode}
 % \end{macro}
-% Now, we patch them into \lstinline{hyperref}.
+% We prepare the link interface macros to be patched into
+% \lstinline{hyperref} at the begin document hook if accessibility
+% features are activated.
 %
 % First we add the start tag for a Link node.
 %    \begin{macrocode}
-\patchcmd\Hy@StartlinkName
-  {\pdfstartlink}
-  {\ccaStructStart{Link}\ccaAddAltText{#2}\edef\@ltpdfmy@parent{\ccaGetStructParent}%
-   \pdfstartlink}
-  {}{\cca@patch@error\Hy@StartlinkName}
+\begingroup
+\@makeother\#
+\ccWhenAlly{%
+\AtBeginDocument{%
+    \patchcmd\Hy@StartlinkName
+      {\pdfstartlink}
+      {\ccaStructStart{Link}\ccaAddAltText{#2}\edef\@ltpdfmy@parent{\ccaGetStructParent}%
+       \pdfstartlink}
+      {}{\cca@patch@error\Hy@StartlinkName}
 %    \end{macrocode}
 % and the parent node inside the link attribute:
 %    \begin{macrocode}
-\patchcmd\Hy@StartlinkName
-  {#1}
-  {#1 /StructParent \@ltpdfmy@parent}
-  {}{\cca@patch@error\Hy@StartlinkName}
+    \patchcmd\Hy@StartlinkName
+      {#1}
+      {#1 /StructParent \@ltpdfmy@parent}
+      {}{\cca@patch@error\Hy@StartlinkName}
 %    \end{macrocode}
 % then we patch hyperref's general link macro, twice. Once for the Link's start tag
 %    \begin{macrocode}
-\patchcmd\hyper@linkurl
-  {\pdfstartlink}
-  {\ccaStructStart{Link}\ccaAddAltText{#2}\edef\@ltpdfmy@parent{\ccaGetStructParent}%
-   \pdfstartlink}
-  {}{\cca@patch@error\hyper@linkurl}
+    \patchcmd\hyper@linkurl
+      {\pdfstartlink}
+      {\ccaStructStart{Link}\ccaAddAltText{#2}\edef\@ltpdfmy@parent{\ccaGetStructParent}%
+        \pdfstartlink}
+      {}{\cca@patch@error\hyper@linkurl}
 %    \end{macrocode}
 % and secondly for the Parent:
 %    \begin{macrocode}
-\patchcmd\hyper@linkurl
-  {/C[\@urlbordercolor]%
+    \patchcmd\hyper@linkurl
+      {/C[\@urlbordercolor]%
         \fi
-  }
-  {/C[\@urlbordercolor]%
+      }
+      {/C[\@urlbordercolor]%
         \fi
         /StructParent \@ltpdfmy@parent%
-  }{}{\cca@patch@error\hyper@linkurl}
+      }{}{\cca@patch@error\hyper@linkurl}
 %    \end{macrocode}
 % finally, we patch the end tag for the link node into the
 % \lstinline{\close@pdflink} macro:
 %    \begin{macrocode}
-\patchcmd\close@pdflink
-  {\pdfendlink}
-  {\pdfendlink
-   \ccaAddLastLink\ccaStructEnd{Link}}
-  {}{\cca@patch@error\close@pdflink}
+    \patchcmd\close@pdflink
+      {\pdfendlink}
+      {\pdfendlink
+        \ccaAddLastLink\ccaStructEnd{Link}}
+      {}{\cca@patch@error\close@pdflink}
 %    \end{macrocode}
 % For internal references, we patch the tagging into the
 % \lstinline{\@setref} macro. Unfortunately, hyperref redefines this
@@ -399,30 +475,33 @@
 % state and inject our tagging, once for the start tag and a second
 % time for the end tag:
 %    \begin{macrocode}
-\let\cca@hy@setref\@setref
-\let\@setref\real@setref
-\patchcmd\@setref
-  {\else}
-  {\else\ccaStructStart{Reference}}
-  {}{\cca@patch@error\orig@setref@new}%
-\patchcmd\@setref
-  {\fi}
-  {\ccaStructEnd{Reference}\fi}
-  {}{\cca@patch@error\orig@setref@new}%
+    \let\cca@hy@setref\@setref
+    \let\@setref\real@setref
+    \patchcmd\@setref
+      {\else}
+      {\else\ccaStructStart{Reference}}
+      {}{\cca@patch@error\orig@setref@new}%
+    \patchcmd\@setref
+      {\fi}
+      {\ccaStructEnd{Reference}\fi}
+      {}{\cca@patch@error\orig@setref@new}%
 %    \end{macrocode}
 % Now, we restore hyperref's version and inject the tagging there as
 % well:
 %    \begin{macrocode}
-\let\real@setref\@setref
-\let\@setref\cca@hy@setref
-\patchcmd\@setref
-  {\expandafter\Hy@setref@link}
-  {\ccaStructStart{Reference}\expandafter\Hy@setref@link}
-  {}{\cca@patch@error\@setref}
-\patchcmd\@setref
-  {{#2}}
-  {{#2}\ccaStructEnd{Reference}}
-  {}{\cca@patch@error\@setref}
+    \let\real@setref\@setref
+    \let\@setref\cca@hy@setref
+    \patchcmd\@setref
+      {\expandafter\Hy@setref@link}
+      {\ccaStructStart{Reference}\expandafter\Hy@setref@link}
+      {}{\cca@patch@error\@setref}
+    \patchcmd\@setref
+      {{#2}}
+      {{#2}\ccaStructEnd{Reference}}
+      {}{\cca@patch@error\@setref}
+    }% /AtBeginDocument
+}% /ccWhenAlly
+\endgroup
 %    \end{macrocode}
 %
 % \subsection{Tagging Page Styles as Artifacts}
@@ -462,22 +541,24 @@
 % internal header and footer macros are patched whenever the pagestyle
 % changes and the internal macros are themselves re-defined.
 %    \begin{macrocode}
-\apptocmd\pagestyle{\ccaPagestyleArtifacts}{}{}
-\apptocmd\thispagestyle{\ccaPagestyleArtifacts}{}{}
+\ccWhenAlly{%
+  \apptocmd\pagestyle{\ccaPagestyleArtifacts}{}{}
+  \apptocmd\thispagestyle{\ccaPagestyleArtifacts}{}{}
 %    \end{macrocode}
 % Finally, we register the \lstinline{footer} and \lstinline{header}
 % PDF tags as \lstinline{artifacts} with \lstinline{ltpdfa}:
 %    \begin{macrocode}
-\ccaAddToConfig{artifact}{header={Type:Pagination}{Subtype:Header}}
-\ccaAddToConfig{artifact}{footer={Type:Pagination}{Subtype:Footer}}
+  \ccaAddToConfig{artifact}{header={Type:Pagination}{Subtype:Header}}
+  \ccaAddToConfig{artifact}{footer={Type:Pagination}{Subtype:Footer}}
 %    \end{macrocode}
 %
 %\subsection{generic artifacts}
 %
 %    \begin{macrocode}
-\ccaAddToConfig{artifact}{leaders={Type:Layout}}
-\ccaAddToConfig{artifact}{footnoterule={Type:Layout}}
-\ccaAddToConfig{artifact}{Artifact={Type:Layout}}
+  \ccaAddToConfig{artifact}{leaders={Type:Layout}}
+  \ccaAddToConfig{artifact}{footnoterule={Type:Layout}}
+  \ccaAddToConfig{artifact}{Artifact={Type:Layout}}
+}
 %    \end{macrocode}
 %
 % \subsection{Tagging for Floats}
@@ -514,16 +595,18 @@
 % which we add to the beginning and the end of \lstinline{graphics}
 % package's \lstinline{\Ginclude@graphics} macro, respectively.
 %    \begin{macrocode}
-\if@cc@modern
-  \let\ltx@Ginclulde@graphics\Ginclude@graphics
-  \def\Ginclude@graphics#1{\if@cc@is@final\ccaFigureStart{}\fi\ltx@Ginclulde@graphics{#1}\if@cc@is@final\ccaFigureEnd{}\fi}%
-\else
-  \@ifpackageloaded{grffile}
-  {\pretocmd\grffile@Ginclude@graphics{\if@cc@is@final\ccaFigureStart{}\fi}{}{}%
-   \apptocmd\grffile@Ginclude@graphics{\if@cc@is@final\ccaFigureEnd{}\fi}{}{}}
-  {\pretocmd\Ginclude@graphics{\if@cc@is@final\ccaFigureStart{}\fi}{}{}%
-   \apptocmd\Ginclude@graphics{\if@cc@is@final\ccaFigureEnd{}\fi}{}{}}%
-\fi
+\AtBeginDocument{%
+  \if@cc@modern
+    \let\ltx@Ginclulde@graphics\Ginclude@graphics
+    \def\Ginclude@graphics#1{\if@cc@is@final\ccaFigureStart{}\fi\ltx@Ginclulde@graphics{#1}\if@cc@is@final\ccaFigureEnd{}\fi}%
+  \else
+    \@ifpackageloaded{grffile}
+      {\pretocmd\grffile@Ginclude@graphics{\if@cc@is@final\ccaFigureStart{}\fi}{}{}%
+       \apptocmd\grffile@Ginclude@graphics{\if@cc@is@final\ccaFigureEnd{}\fi}{}{}}
+      {\pretocmd\Ginclude@graphics{\if@cc@is@final\ccaFigureStart{}\fi}{}{}%
+       \apptocmd\Ginclude@graphics{\if@cc@is@final\ccaFigureEnd{}\fi}{}{}}%
+  \fi
+}
 %    \end{macrocode}
 %
 %    \begin{macrocode}
@@ -532,112 +615,16 @@
   \ccaAddFigure{\Gin@llx}{\Gin@lly}{\Gin@urx}{\Gin@ury}
     {\ifx\Gin@scalex\@tempa\else \Gin@scalex\fi}
     {\ifx\Gin@scaley\@tempa\else \Gin@scaley\fi}
-    {\ifGin@clip true\else false\fi}\fi%rwi/rhi
-}{}{}
+    {\ifGin@clip true\else false\fi}\fi}%rwi/rhi
+    {}{}
 \AtBeginDocument{%
-\@ifpackageloaded{htmltabs}{%
-  \let\ltx@ht@valign@box\ht@valign@box
-  \def\ht@valign@box{\if@ht@final@render\@cc@is@finaltrue\fi\ltx@ht@valign@box}
-  \let\ltx@ht@RenderCell\ht@RenderCell
-  \def\ltx@ht@RenderCell{\@cc@is@finalfalse\ltx@ht@RenderCell}}{}}
+  \@ifpackageloaded{htmltabs}{%
+    \let\ltx@ht@valign@box\ht@valign@box
+    \def\ht@valign@box{\if@ht@final@render\@cc@is@finaltrue\fi\ltx@ht@valign@box}
+    \let\ltx@ht@RenderCell\ht@RenderCell
+    \def\ltx@ht@RenderCell{\@cc@is@finalfalse\ltx@ht@RenderCell}}{}}
 %    \end{macrocode}
 %
-%
-% \subsection{XMP Integration}
-%
-% The first feature of \lstinline{coco-ally} is the integration of XMP
-% meta data into the output PDF. Note that XMP integration is also a
-% built-in feature of the \lstinline{coco-title} module. The following
-% code provides a superior alternative to that via the
-% \lstinline{ltpdfa} package.
-%
-% \begin{macro}{\cc@title@insert@xmp} is an override of the same macro
-%   in \lstinline{coco-title.sty} (see. Sect.~\ref{sec:title:xmp}). If
-%   the \lstinline{ally} document option is set, XMP inclusion is done
-%   via the \lstinline{ltpdfa} package.
-%
-%   First we check if the specified xmp file exists. If it exists, the
-%   \lstinline{DocumentInfo} is extracted from the XMP
-%   file. Otherwise, we set the \lstinline{DocumentInfo} from the
-%   contents of the \lstinline{titlepage} Container and let
-%   \lstinline{ltpdfa} generate the \lstinline{xmp} file.
-%    \begin{macrocode}
-\def\cct@title@insert@xmp{%
-  \edef\cca@xmp@file@name{\ccUseComponentFrom{titlepage}{XmpFile}.xmp}%
-  \IfFileExists{\cca@xmp@file@name}
-    {\ccaAddToConfig{metadata}{xmpfile=\cca@xmp@file@name}%
-     \directlua{ally.meta.extract()}}
-    {\ccPackageWarning{A11y}{File}{%
-\cca@xmp@file@name\space not found.^^J
-Note that the ltpdfa package will create one^^J
-from the Components given in the Meta Container.}}}
-%    \end{macrocode}
-% \end{macro}
-%
-% \subsection{Output Intent and ICC Profiles}
-%
-%
-% First, we declare some Components that represent the three necessary
-% parameters for the output intent:
-%    \begin{macrocode}
-\ccAddToType{Components}{titlepage}{%
-%    \end{macrocode}
-% \begin{ComponentDoc}{titlepage}{IccProfileFile} holds the path
-%   (relative to the main tex file) and name of the .icc file.
-%    \begin{macrocode}
-  \ccDeclareGlobalComponent{IccProfileFile}
-%    \end{macrocode}
-% \end{ComponentDoc}
-% \begin{ComponentDoc}{titlepage}{IccComponents} holds the number of
-%   components in the color profile
-%    \begin{macrocode}
-  \ccDeclareGlobalComponent{IccComponents}
-%    \end{macrocode}
-% \end{ComponentDoc}
-% \begin{ComponentDoc}{titlepage}{IccIdentifier} holds the identifier
-%   of the color profile
-%    \begin{macrocode}
-  \ccDeclareGlobalComponent{IccIdentifier}}
-%    \end{macrocode}
-% \end{ComponentDoc}
-% The Components are composed via a new Property
-% \lstinline{output-intent} which we add to \lstinline{coco-title}'s
-% Properties list:
-%    \begin{macrocode}
-\ifdefstring\cc@color@enc{cmyk}
-  {\def\cca@default@icc@comp{4}}
-  {\def\cca@default@icc@comp{3}}
-\ifdefstring\cc@color@enc{cmyk}
-  {\def\cca@default@icc@iden{Coated FOGRA39}}
-  {\def\cca@default@icc@iden{sRGB IEC61966-2.1}}
-\ccAddToType{Properties}{titlepage}{%
-%    \end{macrocode}
-% \begin{PropertyDoc}{titlepage}{output-intent} sends the output
-%   intent information to the ltpdfa package. It must contain of three
-%   data fields:
-%   \begin{description}
-%   \item[profile] with the name of the to-be-embedded
-%     \lstinline{.icc} file,
-%   \item[componetns] with an integer telling the pdfwriter how many
-%     values are coded by each color (e.g., \lstinline{4} for cmyk,
-%     \lstinline{3} for rgb)
-%   \item[identifier] with the identifying name of the profile (e.g.,
-%     \lstinline{Coated FOGRA39} for the included cmyk
-%     profile, etc.)
-% \end{description}
-%    \begin{macrocode}
-  \ccSetProperty{output-intent}{%
-    profile=\ccIfComp{IccProfileFile}{\ccUseComp{IccProfileFile}}{suppl/\cc@color@enc.icc};%
-    components=\ccIfComp{IccComponents}{\ccUseComp{IccComponents}}{\cca@default@icc@comp};%
-    identifier=\ccIfComp{IccIdentifier}{\ccUseComp{IccIdentifier}}{\cca@default@icc@iden}%
-  }}
-%    \end{macrocode}
-% \end{PropertyDoc}
-% The Component Handler which links the new Components to that
-% Property is added to titlepage's \lstinline{document-meta-hook}:
-%    \begin{macrocode}
-\ccAddToHook[titlepage]{document-meta-hook}{\edef\x{\noexpand\ccaAddToConfig{intent}{\ccUseProperty{output-intent}}}\x}
-%    \end{macrocode}
 %
 % \subsection{Transformation of  Typographic Unicode characters}
 %
@@ -652,48 +639,6 @@ from the Components given in the Meta Container.}}}
 \pdfgentounicode = 1
 %    \end{macrocode}
 %
-% \subsection{Encoding of the PDF-A Conformance}
-% As before, the parameters for the PDF conformity level are encoded
-% via specific Components in the titlepage Container:
-%    \begin{macrocode}
-\ccAddToType{Components}{titlepage}{%
-%    \end{macrocode}
-%
-% \begin{ComponentDoc}{titlepage}{PDFAID} defines the PDF/A ID (Default: 2,
-%   meaning: PDF/A-2)
-%    \begin{macrocode}
-  \ccDeclareGlobalComponent[2]{PDFAID}%
-%    \end{macrocode}
-% \end{ComponentDoc}
-% \begin{ComponentDoc}{titlepage}{PDFALevel} defines the PDF/A Level (Default: A,
-%   meaning PDF/A-2A)
-%    \begin{macrocode}
-  \ccDeclareGlobalComponent[A]{PDFALevel}%
-%    \end{macrocode}
-% \end{ComponentDoc}
-% \begin{ComponentDoc}{titlepage}{PDFUAID} defines the PDF standard (Default: 1,
-%   meaning: PDF/UA-1). Use \lstinline|\ccPrefix PDFUAID{}| (i.e. set it to
-%   nothing) to make the document conform to the PDF/A standard, but
-%   \textbf{not} to the PDF/UA standard.
-%    \begin{macrocode}
-  \ccDeclareGlobalComponent[1]{PDFUAID}}%
-%    \end{macrocode}
-% \end{ComponentDoc}
-% The checking if the values are valid, and the separation of the
-% various parts of the standard is done via a lua script in the
-% \lstinline{document-meta-hook}. The \lstinline{conformance}
-% DocumentInfo nodes are only written, if \textit{neither}
-% \lstinline{PDFAID}, \textit{nor} \lstinline{PDFALevel} is empty.
-%    \begin{macrocode}
-\ccAddToHook[titlepage]{document-meta-hook}{%
-  \ccIfCompEmpty{PDFAID}{}{\ccIfCompEmpty{PDFALevel}{}{%
-      \edef\x{\noexpand\ccaSetDocinfo{conformance}{%
-          pdfaid=\ccUseComp{PDFAID};%
-          level=\ccUseComp{PDFALevel}%
-          \ccIfCompEmpty{PDFUAID}{}{;pdfuaid=\ccUseComp{PDFUAID}}}}%
-      \x}}}
-%    \end{macrocode}
-%
 % \subsection{Automatic PDF Tagging}
 %
 % \subsubsection{Document Root Node}
@@ -702,23 +647,32 @@ from the Components given in the Meta Container.}}}
 % \lstinline{document} environmant as the structural representation's
 % root node:
 %    \begin{macrocode}
-\ccDeclareHook[document]{cca/at/begin/document}
-\AtBeginDocument{%
-  \directlua{ltpdfa.beginDocument('\luaescapestring{\ltpdfa@last@page}')}
-  \ccUseHook[document]{cca/at/begin/document}%
-  \directlua{ltpdfa.configAutoclose()}
-  \ccaVstructStart{document}%
+\ccWhenAlly{%
+  \ccDeclareHook[document]{cca/at/begin/document}
+  \AtBeginDocument{%
+    \directlua{ltpdfa.beginDocument('\luaescapestring{\ltpdfa@last@page}')}
+    \ccUseHook[document]{cca/at/begin/document}%
+    \directlua{ltpdfa.configAutoclose()}
+    \ccaVstructStart{document}%
+  }
+  \AtEndDocument{%
+    \ccaVstructEnd{document}
+    \directlua{ltpdfa.endDocument()}%
+  }
 }
-\AtEndDocument{%
-  \ccaVstructEnd{document}
-  \directlua{ltpdfa.endDocument()}%
-}
+%    \end{macrocode}
+%
+%
+% \section{Default Role Mapping}
+%
+%    \begin{macrocode}
 \ccaAddRolemap{document}{Document}
+\ccaAddRolemap{Para}{P}
 %    \end{macrocode}
 % Finally, we hook \lstinline{ltpdfa}'s page processor into
 % \lstinline{AtBeginShipoutBox}:
 %    \begin{macrocode}
-\AtBeginShipout{\directlua{ltpdfa.pageprocessor(tex.box["AtBeginShipoutBox"])}}%
+\ccWhenAlly{\AtBeginShipout{\directlua{ltpdfa.pageprocessor(tex.box["AtBeginShipoutBox"])}}}%
 %    \end{macrocode}
 % End of {\TeX} source code.
 %    \begin{macrocode}[gobble=1]

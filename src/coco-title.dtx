@@ -254,7 +254,10 @@
 }
 %    \end{macrocode}
 % \end{macro}
+%
+%
 % \subsection{Processing of  the PDF's Creator, Producer, and Keywords Meta Data}
+%
 % \begin{macro}{\cct@title@process@bkc} processes the metadata for the pdf
 %   creator
 %    \begin{macrocode}
@@ -265,11 +268,20 @@
 }
 %    \end{macrocode}
 % \end{macro}
+%
+%
 % \subsection{Including the XMP Meta Data}\label{sec:title:xmp}
+%
 % \begin{macro}{\cct@title@insert@xmp}\label{} inserts the contents of the XMP
-%   meta data file into the pdf, if it exists.
+%   meta data file into the pdf, if it exists. There are two versions,
+%   depending on whether coco-accessibility is active or not.
 %    \begin{macrocode}
-\def\cct@title@insert@xmp{%
+\def\cct@title@insert@xmp{\ccIfAlly{\cct@title@insert@xmp@ltpdfa}{\cct@title@insert@xmp@direct}}
+%    \end{macrocode}
+% \begin{macro}{\cct@title@insert@xmp@direct} is the default version
+%   which writes the xmp meta data directly into the PDF.
+%    \begin{macrocode}
+\def\cct@title@insert@xmp@direct{%
   \edef\include@xmp{\noexpand\@include@xmp{\ccUseComp{XmpFile}.xmp}}%
   \def\@include@xmp##1{\IfFileExists{##1}{\@@include@xmp{##1}}{}}%
   \def\@@include@xmp##1{%
@@ -281,6 +293,27 @@
   \include@xmp
 }
 %    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\cct@title@insert@xmp@ltpdfa} is the version that uses
+%   ltpdfa's mechanism to write XMP meta data into the PDF.
+%
+%   First we check if the specified xmp file exists. If it exists, the
+%   \lstinline{DocumentInfo} is extracted from the XMP
+%   file. Otherwise, we set the \lstinline{DocumentInfo} from the
+%   contents of the \lstinline{titlepage} Container and let
+%   \lstinline{ltpdfa} generate the \lstinline{xmp} file.
+%    \begin{macrocode}
+\def\cct@title@insert@xmp@ltpdfa{%
+  \edef\cca@xmp@file@name{\ccUseComponentFrom{titlepage}{XmpFile}.xmp}%
+  \IfFileExists{\cca@xmp@file@name}
+    {\ccaAddToConfig{metadata}{xmpfile=\cca@xmp@file@name}%
+     \directlua{ally.meta.extract()}}
+    {\ccPackageWarning{A11y}{File}{%
+\cca@xmp@file@name\space not found.^^J
+Note that the ltpdfa package will create one^^J
+from the Components given in the Meta Container.}}}
+%    \end{macrocode}
+% \end{macro}
 % \end{macro}
 %
 % \section{Intermediate Level Interfaces}
@@ -791,6 +824,124 @@
   }%
 }
 %    \end{macrocode}
+%
+%
+% \section{Accessibility Features}
+%
+% \subsection{Output Intent and ICC Profiles}
+%
+%    \begin{macrocode}
+\ccWhenAlly{%
+%    \end{macrocode}
+% First, we declare some Components that represent the three necessary
+% parameters for the output intent:
+%    \begin{macrocode}
+  \ccAddToType{Components}{titlepage}{%
+%    \end{macrocode}
+% \begin{ComponentDoc}{titlepage}{IccProfileFile} holds the path
+%   (relative to the main tex file) and name of the .icc file.
+%    \begin{macrocode}
+    \ccDeclareGlobalComponent{IccProfileFile}
+%    \end{macrocode}
+% \end{ComponentDoc}
+% \begin{ComponentDoc}{titlepage}{IccComponents} holds the number of
+%   components in the color profile
+%    \begin{macrocode}
+    \ccDeclareGlobalComponent{IccComponents}
+%    \end{macrocode}
+% \end{ComponentDoc}
+% \begin{ComponentDoc}{titlepage}{IccIdentifier} holds the identifier
+%   of the color profile
+%    \begin{macrocode}
+    \ccDeclareGlobalComponent{IccIdentifier}}
+%    \end{macrocode}
+% \end{ComponentDoc}
+% The Components are composed via a new Property
+% \lstinline{output-intent} which we add to \lstinline{coco-title}'s
+% Properties list (\lstinline{\cc@color@enc} is set via the
+% \lstinline{coco-common} module):
+%    \begin{macrocode}
+  \ifdefstring\cc@color@enc{cmyk}
+    {\def\cca@default@icc@comp{4}}
+    {\def\cca@default@icc@comp{3}}
+  \ifdefstring\cc@color@enc{cmyk}
+    {\def\cca@default@icc@iden{Coated FOGRA39}}
+    {\def\cca@default@icc@iden{sRGB IEC61966-2.1}}
+  \ccAddToType{Properties}{titlepage}{%
+%    \end{macrocode}
+% \begin{PropertyDoc}{titlepage}{output-intent} sends the output
+%   intent information to the ltpdfa package. It must contain of three
+%   data fields:
+%   \begin{description}
+%   \item[profile] with the name of the to-be-embedded
+%     \lstinline{.icc} file,
+%   \item[componetns] with an integer telling the pdfwriter how many
+%     values are coded by each color (e.g., \lstinline{4} for cmyk,
+%     \lstinline{3} for rgb)
+%   \item[identifier] with the identifying name of the profile (e.g.,
+%     \lstinline{Coated FOGRA39} for the included cmyk
+%     profile, etc.)
+% \end{description}
+%    \begin{macrocode}
+    \ccSetProperty{output-intent}{%
+      profile=\ccIfComp{IccProfileFile}{\ccUseComp{IccProfileFile}}{suppl/\cc@color@enc.icc};%
+      components=\ccIfComp{IccComponents}{\ccUseComp{IccComponents}}{\cca@default@icc@comp};%
+      identifier=\ccIfComp{IccIdentifier}{\ccUseComp{IccIdentifier}}{\cca@default@icc@iden}%
+    }}
+%    \end{macrocode}
+% \end{PropertyDoc}
+% The Component Handler which links the new Components to that
+% Property is added to titlepage's \lstinline{document-meta-hook}:
+%    \begin{macrocode}
+  \ccAddToHook[titlepage]{document-meta-hook}{\edef\x{\noexpand\ccaAddToConfig{intent}{\ccUseProperty{output-intent}}}\x}
+%    \end{macrocode}
+%
+% \subsection{Encoding of the PDF-A Conformance}
+% As before, the parameters for the PDF conformity level are encoded
+% via specific Components in the titlepage Container:
+%    \begin{macrocode}
+\ccAddToType{Components}{titlepage}{%
+%    \end{macrocode}
+%
+% \begin{ComponentDoc}{titlepage}{PDFAID} defines the PDF/A ID (Default: 2,
+%   meaning: PDF/A-2)
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent[2]{PDFAID}%
+%    \end{macrocode}
+% \end{ComponentDoc}
+% \begin{ComponentDoc}{titlepage}{PDFALevel} defines the PDF/A Level (Default: A,
+%   meaning PDF/A-2A)
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent[A]{PDFALevel}%
+%    \end{macrocode}
+% \end{ComponentDoc}
+% \begin{ComponentDoc}{titlepage}{PDFUAID} defines the PDF standard (Default: 1,
+%   meaning: PDF/UA-1). Use \lstinline|\ccPrefix PDFUAID{}| (i.e. set it to
+%   nothing) to make the document conform to the PDF/A standard, but
+%   \textbf{not} to the PDF/UA standard.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent[1]{PDFUAID}}%
+%    \end{macrocode}
+% \end{ComponentDoc}
+% The checking if the values are valid, and the separation of the
+% various parts of the standard is done via a lua script in the
+% \lstinline{document-meta-hook}. The \lstinline{conformance}
+% DocumentInfo nodes are only written, if \textit{neither}
+% \lstinline{PDFAID}, \textit{nor} \lstinline{PDFALevel} is empty.
+%    \begin{macrocode}
+\ccAddToHook[titlepage]{document-meta-hook}{%
+  \ccIfCompEmpty{PDFAID}{}{\ccIfCompEmpty{PDFALevel}{}{%
+      \edef\x{\noexpand\ccaSetDocinfo{conformance}{%
+          pdfaid=\ccUseComp{PDFAID};%
+          level=\ccUseComp{PDFALevel}%
+          \ccIfCompEmpty{PDFUAID}{}{;pdfuaid=\ccUseComp{PDFUAID}}}}%
+      \x}}}
+%    \end{macrocode}
+%    \begin{macrocode}
+}%ccWhenAlly
+%    \end{macrocode}
+%
+%
 %    \begin{macrocode}[gobble=1]
 %</title>
 %    \end{macrocode}

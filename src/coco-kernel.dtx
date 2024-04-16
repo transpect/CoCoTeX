@@ -91,6 +91,22 @@
 \AtBeginDocument{\@cc@is@finaltrue}
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{\ccWhenAlly} is a stub that eats its argument. It only
+%   does stuff when the coco-accessibility package is loaded, which we
+%   cannot know, yet.
+%    \begin{macrocode}
+\let\ccWhenAlly\@gobble
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccIfAlly} the same, but it takes two arguments, one
+%   for the \textit{true} case and a second for the \textit{false}
+%   case. We default to the \textit{else} case, so we gobble the first
+%   argument. This will be altered if the coco-accessibility package
+%   is loaded later.
+%    \begin{macrocode}
+\let\ccIfAlly\@gobble
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\if@cc@modern} is a switch to distinguish older
 %     versions of the {\LaTeX} Kernel from newer versions. The pivot
 %     date is defined to be 2020/06/01.
@@ -385,7 +401,11 @@
 %   contents stored in a Component of name \#1 as a paragraph iff the
 %   Component is neither empty nor \lstinline{\relax}.
 %    \begin{macrocode}
-\def\ccGetComp#1{\ccWhenComp{#1}{\ccUseComp{#1}\par}}
+\def\ccGetComp#1{\ccWhenComp{#1}{%
+    \ccWhenAlly{\ccaStructStart{Para}}%
+    \ccUseComp{#1}%
+    \ccWhenAlly{\ccaStructEnd{Para}}%
+    \par}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccIfComp} is a high level macro that executes \#2 if

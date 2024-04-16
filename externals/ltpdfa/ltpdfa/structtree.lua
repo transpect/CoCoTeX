@@ -509,7 +509,7 @@ local function postProcessFigs()
          -- try from posfile
          --log("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ %s %s %s", ppos.x1, k, positions[k])
          --dumpArray(positions[k].ppos)
-         if positions ~= nil and positions[k].ppos then
+         if positions ~= nil and positions[k] ~= nil and positions[k].ppos then
             ppos = positions[k].ppos
          end
          if (ppos.x1 == nil or ppos.x2 == nil or ppos.y1 == nil or ppos.y2 == nil) then

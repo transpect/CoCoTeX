@@ -114,6 +114,7 @@
     Border=\@pdfborder,%
     BorderStyle=\@pdfborderstyle,%
     Color=\Hy@tempcolor,%
+    Contents=TODO,%Acrobat Preflight wants it
     Raw=H.B /StructParent \@ltpdfmy@parent%
   }%
   \if@inartifact\else\if@distwriter\special{ps::[/E\string{\ltpdf@tempb\string}/StPush pdfmark [/Obj\string{\ltpdf@tempa\string}/StOBJ pdfmark [/StPop pdfmark}\fi\fi%
@@ -159,6 +160,7 @@
       Subtype=/Link,%
       PDFAFlags=4,%
       Dest=\Hy@testname,%
+      Contents=TODO,%
       Raw=/StructParent \@ltpdfmy@parent%
     }%
     \if@inartifact\else\if@distwriter\special{ps::[/E\string{\ltpdf@tempb\string}/StPush pdfmark [/Obj\string{\ltpdf@tempa\string}/StOBJ pdfmark [/StPop pdfmark}\fi\fi%
@@ -192,6 +194,7 @@
       >>},%
       Subtype=/Link,%
       PDFAFlags=4,%
+      Contents=TODO,%
       Raw=/StructParent \@ltpdfmy@parent%
     }%
     \if@inartifact\else\if@distwriter\special{ps::[/E\string{\ltpdf@tempb\string}/StPush pdfmark [/Obj\string{\ltpdf@tempa\string}/StOBJ pdfmark [/StPop pdfmark}\fi\fi%
@@ -216,7 +219,7 @@
     \Hy@pstringdef\Hy@pstringURI{#2}%
     \hyper@chars
     \leavevmode
-    \structStart{Link}\addAltText{#1}\edef\@ltpdfmy@parent{\getStructParent}%
+    \structStart{Link}\addAltText{#2}\edef\@ltpdfmy@parent{\getStructParent}%
     \pdfstartlink
       attr{%
         \Hy@setpdfborder
