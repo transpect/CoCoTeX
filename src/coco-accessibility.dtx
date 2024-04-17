@@ -134,6 +134,11 @@
 % provides a hook to inject code to the final stages of PDF rendering.
 %    \begin{macrocode}
 \ccWhenAlly{%
+  \ifluatex\else
+    \ccPackageError{a11y}{engine}
+      {accessibility features require lualatex!}
+      {You tried to use the accessibility features of CoCoTeX with an other TeX engine than lualatex. This will not work; lualatex is a hard requirement. Sorry.}}
+  \fi
   \RequirePackage{luatexbase-attr}
   \RequirePackage{atveryend}
 %    \end{macrocode}
@@ -633,10 +638,12 @@
 % need to be mapped to their underlaying orthographic characters. This
 % is done via pdftex's \lstinline{glyphtounicode} tables:
 %    \begin{macrocode}
+\ifx\pdfextension\@undefined\else
 \protected\def\pdfglyphtounicode{\pdfextension glyphtounicode}
 \input glyphtounicode
 \edef\pdfgentounicode{\pdfvariable gentounicode}
 \pdfgentounicode = 1
+\fi
 %    \end{macrocode}
 %
 % \subsection{Automatic PDF Tagging}
