@@ -175,7 +175,7 @@
   \@tempcnta=\z@\relax
   \cc@reset@components{\cc@cur@cont}%
   \let\ccf@prefix\@empty
-  \let\ht@cur@element\ccf@cap@type
+  \let\ht@cur@element\ccfCapType
   \global\let\ccf@current@class\relax
 }
 %    \end{macrocode}
@@ -195,8 +195,8 @@
     \ccParseAttributes{#2}{#1}%
     \ccIfAttr{#2}{class}
       {\global\letcs\ccf@current@class{\ccPrefix @#2@attr@class}%
-       \ccUseStyleClass{default}{\ccf@cap@type}%
-       \expandafter\ccUseStyleClass\expandafter{\csname \ccPrefix @#2@attr@class\endcsname}{\ccf@cap@type}}
+       \ccUseStyleClass{default}{\ccfCapType}%
+       \expandafter\ccUseStyleClass\expandafter{\csname \ccPrefix @#2@attr@class\endcsname}{\ccfCapType}}
       {}%
       \ccIfAttr{#2}{break-caption}{\@ccf@break@capttrue}{}%
   \fi
@@ -238,12 +238,12 @@
     \let\ccf@end@env\egroup
     %\ifhmode\par\fi
   \else
-    \ccIfAttrIsStr{\ccf@cap@type}{orientation}{landscape}
-      {\edef\ccf@env@name{sideways\ccf@cap@type}%
+    \ccIfAttrIsStr{\ccfCapType}{orientation}{landscape}
+      {\edef\ccf@env@name{sideways\ccfCapType}%
        \edef\ccf@begin@env{\noexpand\begin{\ccf@env@name\ifx\ccf@do@dbl\relax*\fi}}%
        \edef\ccf@end@env{\noexpand\end{\ccf@env@name\ifx\ccf@do@dbl\relax*\fi}}}
       {\edef\ccf@env@name{\ifx\ccf@do@dbl\relax dbl\fi float}%
-       \edef\ccf@begin@env{\expandafter\noexpand\csname @x\ccf@env@name\endcsname {\ccf@cap@type}[\ccf@floatpos]}%
+       \edef\ccf@begin@env{\expandafter\noexpand\csname @x\ccf@env@name\endcsname {\ccfCapType}[\ccf@floatpos]}%
        \edef\ccf@end@env{\expandafter\noexpand\csname end@\ccf@env@name\endcsname}}%
   \fi}
 %    \end{macrocode}
@@ -257,7 +257,7 @@
   {\message{^^J[CoCo Float Debug]^^J
       Textheight:\space\the\textheight^^J
       Type:\space\space\space\space\space\space\space\cc@cur@cont^^J
-\ifx\ccf@cap@type\cc@str@figure
+\ifx\ccfCapType\cc@str@figure
       Path: \space\space\space\space\space\space\ccf@fig@path^^J
 \fi
       Class:\space\space\space\space\space\space\ccf@current@class^^J
@@ -284,7 +284,7 @@
   \else
     \expandafter\ccf@sep@top\dimexpr\ccUseProperty{float-skip-top}\relax%
   \fi
-    \ccIfAttrIsStr{\ccf@cap@type}{orientation}{landscape}{}
+    \ccIfAttrIsStr{\ccfCapType}{orientation}{landscape}{}
       {\ifx\ccf@floatpos\@empty
          \expandafter\ccf@sep@bottom\dimexpr\ccUseProperty{intext-skip-bottom}\relax%
        \else
@@ -374,13 +374,15 @@
 %     Container should inherit Properties (\textit{optional})
 %   \item[\#2] top-level name of the float environment (e.g.,
 %     \lstinline{\ccPrefix Table}, \lstinline{\ccPrefix Figure})
-%   \item[\#3] caption type (e.g., \texttt{table}, \texttt{figure})
-%   \item[\#4] list (e.g., \texttt{lot}, \texttt{lof})
-%   \item[\#5] Property list
+%   \item[\#3] the tagging Role (\textit{optional}, defaults to Div)
+%   \item[\#4] caption type (e.g., \texttt{table}, \texttt{figure})
+%   \item[\#5] list (e.g., \texttt{lot}, \texttt{lof})
+%   \item[\#6] Property list
 %   \end{description}
 %    \begin{macrocode}
 \def\ccDeclareFloat{\cc@opt@empty\ccf@declare@float}
-\long\def\ccf@declare@float[#1]#2#3#4#5{%
+\def\ccf@declare@float[#1]#2{\@ifnextchar[{\@ccf@declare@float[#1]#2}{\@ccf@declare@float[#1]#2[Div]}}%]
+\long\def\@ccf@declare@float[#1]#2[#3]#4#5#6{%
   \def\ccf@parent{#1}%
 %    \end{macrocode}
 % If the float Container has already been declared, we only load its
@@ -398,14 +400,14 @@
 float containers!^^J^^J%
 Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
     \fi
-    \ccAddToType{Properties}{#2}{#5}%
+    \ccAddToType{Properties}{#2}{#6}%
 %    \end{macrocode}
 % Other than Properties, the Float's default caption type or list-of
 % handler may also be overridden by a re-definition.
 %    \begin{macrocode}
     \ccAddToType{FloatEnvInfo}{#2}{%
-      \def\ccf@cap@type{#3}%
-      \def\ccf@cap@list@type{#4}%
+      \def\ccfCapType{#4}%
+      \def\ccf@cap@list@type{#5}%
     }%
   }{%
 %    \end{macrocode}
@@ -421,8 +423,8 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
       \fi
       \ccDeclareType{FloatEnvInfo}{%
         \ccSetContainer{#2}%
-        \def\ccf@cap@type{#3}%
-        \def\ccf@cap@list@type{#4}%
+        \def\ccfCapType{#4}%
+        \def\ccf@cap@list@type{#5}%
       }% /FloatEnvInfo
 %    \end{macrocode}
 % The macro actually defines two {\LaTeX} environments; a normal one
@@ -438,15 +440,18 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 % Generating the Handlers for the list-of entries and define the
 % corresponding \lstinline{l@} macros
 %    \begin{macrocode}
-      \ccf@generate@listof@handlers{#4}{#3}{#2}%
+      \ccf@generate@listof@handlers{#5}{#4}{#2}%
       \bgroup
         \def\cc@cur@cont{#2}%
-        \cc@init@l@[list-of]{#4}{0}{#3}% Generate listof-Entries for first level floats
-        \cc@init@l@[list-of]{#4}{1}{sub#3}% Generate listof-Entries for sub-floats
+        \cc@init@l@[list-of]{#4}{0}{#4}% Generate listof-Entries for first level floats
+        \cc@init@l@[list-of]{#5}{1}{sub#4}% Generate listof-Entries for sub-floats
       \egroup
-      \ccDeclareType{Properties}{#5}%
+      \ccDeclareType{Properties}{#6}%
     }% /container
   }% /ifcsdef{cc@container@#2}
+  \ifstrequal{Table}{#3}{}
+    {\ifstrequal{Figure}{#3}{}
+       {\ccaAddRolemap{#2}{#3}}}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -514,7 +519,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
       {\ccGobble}%
       {\string\@writefile{\ccf@cap@list@type}
         {\protect\ccContentsline
-          {\ifnum\ccSubFloatCnt>\z@\ccIfAttr{\ccf@cap@type}{subfloat}{sub}{}\fi\ccf@cap@type}
+          {\ifnum\ccSubFloatCnt>\z@\ccIfAttr{\ccfCapType}{subfloat}{sub}{}\fi\ccfCapType}
           {\ccUseComp{ListofEntry}}
           {\thepage}
           {\@currentHref}\protected@file@percent}}\relax}}
@@ -554,15 +559,15 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %   system.
 %    \begin{macrocode}
 \def\ccf@write@listof{%
-  \ccUnlessAttr{\ccf@cap@type}{nolist}
+  \ccUnlessAttr{\ccfCapType}{nolist}
     {\ifnum\ccSubFloatCnt=\z@\relax
-       \ccIfAttr{\ccf@cap@type}{subfloat}
+       \ccIfAttr{\ccfCapType}{subfloat}
          {\ccSubFloatCnt=\z@\relax
           \cc@iterate{\ccSubFloatCnt}{\z@}{\the\ccf@int@sub@flt@cnt}
             {\ccf@addcontentsline}}%
          {\ccf@addcontentsline}%
      \else
-       \ccIfAttr{\ccf@cap@type}{subfloat}{}{\ccf@addcontentsline}%
+       \ccIfAttr{\ccfCapType}{subfloat}{}{\ccf@addcontentsline}%
      \fi}%
 }
 %    \end{macrocode}
@@ -581,10 +586,10 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %   for each sub-float.
 %    \begin{macrocode}
 \def\ccf@create@counter{%
-  \ccIfAttrIsSet{\ccf@cap@type}{nonumber}{}
+  \ccIfAttrIsSet{\ccfCapType}{nonumber}{}
     {\ccUnlessComp{Number}
       {\ccIfPropVal{numbering}{auto}
-        {\ccIfAttr{\ccf@cap@type}{subfloat}
+        {\ccIfAttr{\ccfCapType}{subfloat}
           {\ifnum\ccSubFloatCnt=\z@\relax
              \ccf@set@top@counter%
            \else
@@ -599,10 +604,10 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %    \begin{macrocode}
 \def\ccf@set@top@counter{%
   \ccWhenComp{Caption}{%
-    \global\expandafter\advance\csname c@\ccf@cap@type\endcsname\@ne\relax
+    \global\expandafter\advance\csname c@\ccfCapType\endcsname\@ne\relax
     \ccdefFromProperty\ccf@name@prefix{auto-number-prefix}%
     \ccdefFromProperty\ccf@name@sep{auto-number-prefix-sep}%
-    \protected@edef\@tempa{\ccf@name@prefix\ccf@name@sep\expandafter\the\csname c@\ccf@cap@type\endcsname}%
+    \protected@edef\@tempa{\ccf@name@prefix\ccf@name@sep\expandafter\the\csname c@\ccfCapType\endcsname}%
     \ccComponentEA{Number}{\@tempa}%
   }%
 }
@@ -638,7 +643,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
        \ccdefFromComp\@currentlabelname{ListofCaption}}%
      \def\cc@labelname@comp{Caption}}
    {\def\cc@fallback@anchor{\phantomsection}}%
-  \expandafter\ccCreateLabel\expandafter{\ccf@cap@type}}
+  \expandafter\ccCreateLabel\expandafter{\ccfCapType}}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -664,7 +669,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
     \ccf@reset@defaults
     \ccToggleCountedConditionals
     \ccEvalType{Properties}%
-    \ccf@get@attr{#1}{\ccf@cap@type}%
+    \ccf@get@attr{#1}{\ccfCapType}%
     \ccf@set@hsize
     \ccf@get@seps
     \ccEvalType{Components}%
@@ -689,14 +694,16 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
       \ccf@test@caption{0}{}{top}%
       \ccf@test@caption{0}{}{bottom}%
       \bgroup
+        \ccaStructStart{\cc@cur@cont}%
         \hsize\ccf@total@width
         \ccf@process
+        \ccaStructEnd{\cc@cur@cont}%
         \par
       \egroup
       \ccSavePage
       \ccf@set@bot@sep
     \ccf@end@env
-    \ccf@debug{\ccf@cap@type}%
+    \ccf@debug{\ccfCapType}%
     \ifx\ccf@floatpos\@empty\else\spewnotes\fi
   \endgroup
   \immediate\write\@auxout
@@ -870,7 +877,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
   \ccf@capt@top@offset{#1}%
   \ifnum\the\ccSubFloatCnt=\z@\relax
     \def\ccf@caption@box{%
-      \ccIfAttrIsStr{\ccf@cap@type}{orientation}{landscape}
+      \ccIfAttrIsStr{\ccfCapType}{orientation}{landscape}
         {\setbox\@tempboxa\vbox\bgroup\hsize\textheight}
         {\hskip\ccf@margin@l%
          \setbox\@tempboxa\vbox\bgroup\advance\hsize-\ccf@margin@l}%
@@ -884,8 +891,10 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
     \ccIfStrEqual{#2}{top}{}{\if@ccf@break@capt\else\vss\fi}%
     \ccUseProperty{\ccf@prefix caption-face}%
     \ccUseProperty{\ccf@prefix caption-face-#1}%
+    \ifx\ccf@measure\relax\else\ccaVstructStart{Caption}\fi
     \cc@topstrut\ccUseProperty{\ccf@prefix caption-#1}\strut%
     \ifx\ccf@measure\relax\else
+      \ccaVstructEnd{Caption}%
       \ccIfPropVal{label-pos}{#1}{%
         \ccfCreateLabel%
         \ccf@write@listof%
@@ -1076,11 +1085,13 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %    \begin{macrocode}
 \def\ccfFigureRender{%
   \bgroup
-    \ccIfAttrIsStr{\ccf@cap@type}{orientation}{landscape}
+    \ccIfAttrIsStr{\ccfCapType}{orientation}{landscape}
       {\hsize\dimexpr\textwidth-\ccf@margin@r-\ccf@margin@l\relax}%
       {}%
     \let\includegraphics\ccf@includesubgraphics
     \hskip\ccf@margin@l
+    \ccWhenComp{AltText}{\ccaAddAltText{\ccUseComp{AltText}}}
+    \ccaAddPlacement{Block}%
     \strut\ccUseComp{Fig}\strut
   \egroup}
 %    \end{macrocode}
@@ -1099,7 +1110,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %   \lstinline{\includegraphics} patched to adjust for maximum width
 %   and height.
 %    \begin{macrocode}
-\def\ccf@includesubgraphics{\@ifnextchar [\@ccf@includesubgraphics{\@ccf@includesubgraphics[]}}%]
+\def\ccf@includesubgraphics{\cc@opt@empty\@ccf@includesubgraphics}%
 \def\@ccf@includesubgraphics[#1]#2{%
   \ifx\ccf@current@class\relax
     \def\@igopts{max width=\hsize,max height=\vsize}%
@@ -1110,7 +1121,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
     \def\@igopts{#1,width=\hsize}%
   \fi
   \gdef\ccf@fig@path{#2}%
-  \cc@if@ally{\if@cc@is@final\ccaAddPlacement{Block}\fi}{}%
+  \if@cc@is@final\ccaAddPlacement{Block}\fi%
   \expandafter\ccf@ltx@includegraphics\expandafter[\@igopts]{#2}%
 }
 
@@ -1189,7 +1200,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
   }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccfGetTableContent} returns the \lstinline{\cc@floatbox} if it is not un-itialized or void.
+% \begin{macro}{\ccfGetTableContent} returns the \lstinline{\ccf@floatbox} if it is not un-itialized or void.
 %    \begin{macrocode}
 \def\ccfGetTableContent{%
   \ifx\htTableBox\@undefined\else
@@ -1244,7 +1255,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %
 %    \begin{macrocode}
 \ccAddToType{Properties}{float}{%
-  \ccSetProperty{auto-number-prefix}{\csname\ccf@cap@type name\endcsname}%% Prefix for auto-generated Number components
+  \ccSetProperty{auto-number-prefix}{\csname\ccfCapType name\endcsname}%% Prefix for auto-generated Number components
   \ccSetProperty{auto-number-prefix-sep}{~}%% Prefix for auto-generated Number components
   \ccSetProperty{intext-skip-top}{\intextsep}%% non-float sep top
   \ccSetProperty{intext-skip-bottom}{\intextsep}%% non-float sep bottom
@@ -1347,7 +1358,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 % \begin{ContainerDoc}{Figure} defines the defaults for the
 %   \lstinline{\ccPrefix Figure} Container.
 %    \begin{macrocode}
-\ccDeclareFloat{Figure}{figure}{lof}{%
+\ccDeclareFloat{Figure}[Figure]{figure}{lof}{%
   \ccSetProperty{subfloat-same-height}{true}% if true, the subfloat must/can be adjusted to the same heights
   \ccSetProperty{float-handler}{\ccfFigureHandler}%
   \ccSetProperty{subfloat-handler}{\ccfSubFigureHandler}%
@@ -1359,7 +1370,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 % \begin{ContainerDoc}{Table} defines the default Properties of the
 %   \lstinline{\ccPrefix Table} Container.
 %    \begin{macrocode}
-\ccDeclareFloat{Table}{table}{lot}{%
+\ccDeclareFloat{Table}[Table]{table}{lot}{%
   \ccSetProperty{subcaption-valign-top}{bottom}%
   \ccSetProperty{float-handler}{\ccfTableHandler}%
   \ccSetProperty{subfloat-handler}{\ccfSubTableHandler}%

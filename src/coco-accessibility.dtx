@@ -374,7 +374,8 @@
 \DeclareAccessibilityCommand{\ccaAddRolemap}[2]{\directlua{ltpdfa.tagger.addRolemap('\luaescapestring{#1}','\luaescapestring{#2}')}}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccaAddPlacement} ???
+% \begin{macro}{\ccaAddPlacement} tells the tagger if a floating
+%   object is placed as a ``Block'' or ``Inline''.
 %    \begin{macrocode}
 \DeclareAccessibilityCommand{\ccaAddPlacement}[1]{\directlua{ltpdfa.tagger.addPlacement('\luaescapestring{#1}')}}
 %    \end{macrocode}

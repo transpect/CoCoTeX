@@ -99,16 +99,16 @@
     \ccDeclareCountedComponent{CorrespondenceAs}%
   }%
   \ccDeclareGroupHandler{#2}{%
-    \ccIfComp{FullName}{}{\ccComponent{FullName}{\ccUseProperty{#1-full-name-format}}}%
-    \ccIfComp{Initial}{}{\ccComponent{Initial}{\ccUseProperty{initials-format}}}%
-    \ccIfComp{CiteName}{}{\ccComponent{CiteName}{\ccUseProperty{#1-cite-name-format}}}%
-    \ccIfComp{ShortCiteName}{}{\ccComponent{ShortCiteName}{\ccUseProperty{#1-short-cite-name-format}}}%
-    \ccIfComp{PDFInfoName}{}{\ccComponent{PDFInfoName}{\ccUseProperty{#1-pdfinfo-name-format}}}%
-    \ccIfComp{CorrespondenceAs}{}{\ccComponent{CorrespondenceAs}{\ccUseProperty{#1-correspondence-as-format}}}%
-    \ccIfComp{AffilRef}{\ccIfComp{Affiliation}{%
+    \ccUnlessComp{FullName}{\ccComponent{FullName}{\ccUseProperty{#1-full-name-format}}}%
+    \ccUnlessComp{Initial}{\ccComponent{Initial}{\ccUseProperty{initials-format}}}%
+    \ccUnlessComp{CiteName}{\ccComponent{CiteName}{\ccUseProperty{#1-cite-name-format}}}%
+    \ccUnlessComp{ShortCiteName}{\ccComponent{ShortCiteName}{\ccUseProperty{#1-short-cite-name-format}}}%
+    \ccUnlessComp{PDFInfoName}{\ccComponent{PDFInfoName}{\ccUseProperty{#1-pdfinfo-name-format}}}%
+    \ccUnlessComp{CorrespondenceAs}{\ccComponent{CorrespondenceAs}{\ccUseProperty{#1-correspondence-as-format}}}%
+    \ccWhenComp{AffilRef}{\ccWhenComp{Affiliation}{%
         \ccPackageError{Meta}{Ambiguity}
           {You cannot use both Containers AffilRef and Affiliation in the same `\ccPrefix#2' Sub-Container}
-          {At least one `\ccPrefix#2' Sub-Container contains both AffilRef and Affiliation. This is not allowed. Please decide for one affiliation strategy: Either two lists with cross-references, or affiliations directly as an author's meta-data.}}{}}{}%
+          {At least one `\ccPrefix#2' Sub-Container contains both AffilRef and Affiliation. This is not allowed. Please decide for one affiliation strategy: Either two lists with cross-references, or affiliations directly as an author's meta-data.}}}%
   }%
   \ccDeclareRoleBlock{#2}{NameList}{#1-list-print-format}%
   \ccDeclareRoleBlock{#2}{CitationList}{#1-list-cite-format}%
@@ -227,8 +227,9 @@
 %   corresponding label. An optional Argument allows to set a default
 %   value for the Label.
 %    \begin{macrocode}
-\def\ccUseLabeledComp#1{%
-  \ccIfComp{#1}{%
+\def\ccUseLabeledComp{\@ifstar{\global\let\ccm@no@tag\relax}\relax\cc@use@labeled@comp}
+\def\cc@use@labeled@comp#1{%
+  \ccWhenComp{#1}{%
 %    \end{macrocode}
 %
 % \begin{macro}{\ccCurInfix} stores the currently active property
@@ -243,10 +244,18 @@
 %    \end{macrocode}
 % \end{macro}
 %    \begin{macrocode}
+    \ifx\ccm@no@tag\relax\else\ccaStructStart{KVPair}\fi
     \ccIfProp{labeled-meta-\ccCurInfix-format}
       {\ccUseProperty{labeled-meta-\ccCurInfix-format}}
       {\ccUseProperty{labeled-meta-format}}%
-  }{}}
+    \ifx\ccm@no@tag\relax\else\ccaStructEnd{KVPair}\fi
+  }\global\let\ccm@no@tag\@undefined}
+%    \end{macrocode}
+% Role mapping for accessibility tagging:
+%    \begin{macrocode}
+\ccaAddRolemap{KVPair}{Div}
+\ccaAddRolemap{Key}{Para}
+\ccaAddRolemap{Value}{Para}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -312,8 +321,8 @@
     \ccDeclareCountedComponent{AffilID}%
   }%
   \ccDeclareGroupHandler{Affil}{%
-    \ccIfComp{AffilID}{}{\ccComponentEA{AffilID}{\ccAffilCnt}}%
-    \ccIfComp{Affiliation}{}{\ccComponent{Affiliation}{\ccUseProperty{affiliation-format}}}%
+    \ccUnlessComp{AffilID}{\ccComponentEA{AffilID}{\ccAffilCnt}}%
+    \ccUnlessComp{Affiliation}{\ccComponent{Affiliation}{\ccUseProperty{affiliation-format}}}%
   }%
 }
 %    \end{macrocode}
@@ -397,9 +406,9 @@
   % Affiliation Properties
   %
   \ccSetProperty{affiliation-format}{% Format of the  affiliation block
-    \ccIfComp{Institute}{\ccUseComp{Institute}}{}%
-    \ccIfComp{Department}{, \ccUseComp{Department}}{}%
-    \ccIfComp{Address}{, \ccUseComp{Address}}{}%
+    \ccWhenComp{Institute}{\ccUseComp{Institute}}%
+    \ccWhenComp{Department}{, \ccUseComp{Department}}%
+    \ccWhenComp{Address}{, \ccUseComp{Address}}%
   }%
   \ccSetProperty{affil-sep}{\par}
   \ccSetProperty{affil-block-item-face}{}% Font of a single item in the affiliation list
@@ -413,13 +422,13 @@
   }
   \ccSetProperty{affil-block-face}{\small\normalfont}%
   \ccSetProperty{affil-block-format}{%
-    \ccIfComp{AffilBlock}
+    \ccWhenComp{AffilBlock}
       {\bgroup
          \ccUseProperty{affil-block-face}%
          \ccUseComp{AffilBlock}%
        \egroup
        \par
-     }{}}
+     }}
   %
   % Labeled Meta Properties
   %
@@ -428,20 +437,24 @@
       {\ccUseProperty{labeled-meta-before-\ccCurInfix}}
       {\ccUseProperty{labeled-meta-before}}%
     \bgroup
+      \ifx\ccm@no@tag\relax\else\ccaStructStart{Key}\fi
       \ccIfProp{labeled-meta-\ccCurInfix-face}
         {\ccUseProperty{labeled-meta-\ccCurInfix-face}}
         {\ccUseProperty{labeled-meta-face}}%
       \ccIfProp{labeled-meta-\ccCurInfix-label-format}
         {\ccUseProperty{labeled-meta-\ccCurInfix-label-format}}
         {\ccUseProperty{labeled-meta-label-format}}%
+      \ifx\ccm@no@tag\relax\else\ccaStructEnd{Key}\fi
+      \ifx\ccm@no@tag\relax\else\ccaStructStart{Value}\fi
       \ccUseComp{\ccCurComp}%
+      \ifx\ccm@no@tag\relax\else\ccaStructEnd{Value}\fi
     \egroup
     \ccIfProp{labeled-meta-after-\ccCurInfix}
       {\ccUseProperty{labeled-meta-after-\ccCurInfix}}
       {\ccUseProperty{labeled-meta-after}}%
   }
   \ccSetProperty{labeled-meta-label-format}{%
-    \ccIfComp{\ccCurComp Label}{%
+    \ccWhenComp{\ccCurComp Label}{%
       \bgroup
         \ccUseProperty{labeled-meta-before-\ccCurInfix-label}%
         \ccIfProp{labeled-meta-\ccCurInfix-label-face}
@@ -452,7 +465,7 @@
           {\ccUseProperty{labeled-meta-\ccCurInfix-label-sep}}
           {\ccUseProperty{labeled-meta-label-sep}}%
       \egroup
-    }{}}
+    }}
   \ccSetProperty{labeled-meta-label-face}{\bfseries}
   \ccSetProperty{labeled-meta-label-sep}{:\enskip}
   \ccSetProperty{labeled-meta-face}{}

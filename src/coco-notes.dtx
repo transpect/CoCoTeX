@@ -168,6 +168,11 @@
   }%
 }
 %    \end{macrocode}
+% Adding artifact tagging to the footnoterule:
+%    \begin{macrocode}
+\pretocmd\footnoterule{\ccaVstructStart{footnoterule}}{}{}
+\apptocmd\footnoterule{\ccaVstructEnd{footnoterule}}{}{}
+%    \end{macrocode}
 % Re-definition of \lstinline{footnote} package's footnote mark
 % retriever to allow non-numeric values in the optional argument of
 % \lstinline{\footnote}.
