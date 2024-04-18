@@ -223,33 +223,39 @@
 %   \textit{all} locally defined heading levels beforehand in order to
 %   build the Sectioning tree correctly.
 %    \begin{macrocode}
+\newcount\cch@tempcnta \cch@tempcnta\z@
 \def\cch@add@autoclose#1#2{%
   \ccAddToHook[document]{cca/at/begin/document}{%
 %    \end{macrocode}
 % First, we assign the Sectioning tag and the tag for the section's
-% head itself to the \lstinline{Sect} and \lstinline{H} tags,
+% head itself to the \lstinline{Sect} and \lstinline{H#} tags,
 % respectively.
-%
-% Note that PDF Tags allow for enumerated heading tags (H1, H2, etc.)
-% to be used. However, there are only six (H1 through H6) possible
-% headings, which, by experinece, is too few for most CoCoTeX
-% projects. Therefore, we use the ``nested-H'' approach, instead which
-% has no such restriction.
 %    \begin{macrocode}
     \ccaAddRolemap{#2}{Sect}%
-    \ccaAddRolemap{#2head}{H}%
+%    \end{macrocode}
+% Then we determine the hierarchical heading level we need to assign
+% to the PDF tags. H1 is always reserved for the entire document's
+% title, so we need to calculate the difference of the lowest used
+% value and 2 and add this to the actual level of the current heading.
+%    \begin{macrocode}
+    \cch@tempcnta=\numexpr\tw@-\cch@highest@level\relax
+    \advance\cch@tempcnta by #1\relax
+    \ccaAddRolemap{#2head}{H\the\cch@tempcnta}%
+    \ifnum\cch@tempcnta>6\relax
+      \ccaAddRolemap{H\the\cch@tempcnta}{H}%
+    \fi
 %    \end{macrocode}
 % Next, we tell \lstinline{ltpdfa} for each heading level which other
 % heading level is the next down the Sectioning hierarchy. For that,
 % we first put the current heading level in a calculable counter.
 %    \begin{macrocode}
-    \@tempcnta=#1\relax
+    \cch@tempcnta=#1\relax
 %    \end{macrocode}
 % Then we catch the heading with the highest level (from the aux file)
 % and set the \lstinline{document} layer in the \lstinline{ltpdfa}'s
 % \lstinline{Sectioning} table to have that heading as its child
 %    \begin{macrocode}
-    \ifnum\@tempcnta=\cch@highest@level
+    \ifnum\cch@tempcnta=\cch@highest@level
       \edef\x{\noexpand\ccaAddToConfig{autoclose}{document={Type:Sectioning}{Child:\csname cch@#1@unique\endcsname}{Egroup:false}}}\x%
     \fi
 %    \end{macrocode}
@@ -260,7 +266,7 @@
 % hold one heading per level. All other hadings of the same level are,
 % per definition, Aliases of the one that has been defined first.
 %    \begin{macrocode}
-    \ifnum\@tempcnta=\cch@lowest@level\relax
+    \ifnum\cch@tempcnta=\cch@lowest@level\relax
       \ifcsstring{cch@#1@unique}{#2}
         {\edef\x{\noexpand\ccaAddToConfig{autoclose}{#2={Type:Sectioning}{Child:none}{Egroup:false}}}\x}
         {\edef\x{\noexpand\ccaAddToConfig{autoclose}{#2={Type:Sectioning}{Child:none}{Egroup:false}{Alias:\csname cch@#1@unique\endcsname}}}\x}%
@@ -273,7 +279,7 @@
 %    \end{macrocode}
 % by incrementing the heading level counter by one
 %    \begin{macrocode}
-        \advance\@tempcnta\@ne\relax
+        \advance\cch@tempcnta\@ne\relax
 %    \end{macrocode}
 % and checking the variable \lstinline{repeat} condition:
 %    \begin{macrocode}
@@ -282,13 +288,13 @@
 % We don't go further when the current loop counter is already larger
 % than the heading level with the highest level counter.
 %    \begin{macrocode}
-        \ifnum\@tempcnta>\cch@lowest@level\relax
+        \ifnum\cch@tempcnta>\cch@lowest@level\relax
           \@tempswafalse
         \else
 %    \end{macrocode}
 % If we are below the highest level, we check if a heading with the current level is defined
 %    \begin{macrocode}
-          \expandafter\ifx\csname cch@\the\@tempcnta @unique\endcsname\relax
+          \expandafter\ifx\csname cch@\the\cch@tempcnta @unique\endcsname\relax
 %    \end{macrocode}
 % if not, we continue. This is the case, when heading levels are not
 % sequentially numbered. Which does (and did) happen. For reasons
@@ -304,8 +310,8 @@
 % original headings and Aliases.
 %    \begin{macrocode}
             \ifcsstring{cch@#1@unique}{#2}
-              {\edef\x{\noexpand\ccaAddToConfig{autoclose}{#2={Type:Sectioning}{Child:\csname cch@\the\@tempcnta @unique\endcsname}{Egroup:false}}}\x}
-              {\edef\x{\noexpand\ccaAddToConfig{autoclose}{#2={Type:Sectioning}{Child:\csname cch@\the\@tempcnta @unique\endcsname}{Egroup:false}{Alias:\csname cch@#1@unique\endcsname}}}\x}%
+              {\edef\x{\noexpand\ccaAddToConfig{autoclose}{#2={Type:Sectioning}{Child:\csname cch@\the\cch@tempcnta @unique\endcsname}{Egroup:false}}}\x}
+              {\edef\x{\noexpand\ccaAddToConfig{autoclose}{#2={Type:Sectioning}{Child:\csname cch@\the\cch@tempcnta @unique\endcsname}{Egroup:false}{Alias:\csname cch@#1@unique\endcsname}}}\x}%
             \@tempswafalse
           \fi
         \fi
@@ -338,7 +344,7 @@
 %   parent, if it exists.
 %    \begin{macrocode}
 \def\cch@create@parent#1#2{%
-  \def\cch@sec@name{#2}%
+  \def\ccCurSecName{#2}%
   \if!#1!\else
     \ccCheckParent{#1}{#2}%
   \fi%
@@ -459,9 +465,9 @@
 % a block heading, a negative value yields an inline heading.
 %    \begin{macrocode}
     \ifdim\@tempskipa <\z@\relax
-      \cch@make@inline{#2}%
+      \cch@make@inline%
     \else
-      \cch@make@block{#2}%
+      \cch@make@block%
     \fi
 %    \end{macrocode}
 % This macro is called at the end of the heading environment. In order
@@ -485,7 +491,7 @@
     \edef\@cch@parent{#1-\csname cc@parent@#2\endcsname}%
     \expandafter\ccUseHook\expandafter{\@cch@parent}%
   \fi
-  \ccUseHook{#1-\cch@sec@name}%
+  \ccUseHook{#1-\ccCurSecName}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -617,12 +623,14 @@
        \ccIfComp{TocAuthorNameList}{\string\ccComponent{TocAuthorNameList}{\string\ignorespaces\space\expandonce{\cc@Heading@TocAuthorNameList}}}{}%
        \ccIfComp{TocSubtitle}{\string\ccComponent{TocSubtitle}{\string\ignorespaces\space\expandonce{\cc@Heading@TocSubtitle}}}{}%
      }%
-     \ccIfProp{toc-level}{\edef\cch@sec@name{\ccUseProperty{toc-level}}}{}%
+     \ccIfProp{toc-level}
+       {\edef\cch@toc@sec@name{\ccUseProperty{toc-level}}}
+       {\let\cch@toc@sec@name\ccCurSecName}%
      \protected@write\@auxout
        {\ccGobble}%
-       {\string\@writefile{toc}{\protect\ccContentsline{\cch@sec@name}{\cch@toc@entry}{\thepage}{\@currentHref}\protected@file@percent}}\relax
-     \ccCreateContentListEntries{Heading}{\cch@sec@name}{\cch@toc@entry}{\thepage}{\@currentHref}%
-     \ccCreateContentListEntries{\cch@sec@name}{\cch@sec@name}{\cch@toc@entry}{\thepage}{\@currentHref}%
+       {\string\@writefile{toc}{\protect\ccContentsline{\cch@toc@sec@name}{\cch@toc@entry}{\thepage}{\@currentHref}\protected@file@percent}}\relax
+     \ccCreateContentListEntries{Heading}{\cch@toc@sec@name}{\cch@toc@entry}{\thepage}{\@currentHref}%
+     \ccCreateContentListEntries{\cch@toc@sec@name}{\cch@toc@sec@name}{\cch@toc@entry}{\thepage}{\@currentHref}%
    }}
 %    \end{macrocode}
 % \end{macro}
@@ -682,8 +690,8 @@
   \ccUseProperty{running-extra}%
   \ccIfProp{running-level}
     {\letcs\cch@mark@name{\ccUseProperty{running-level}mark}}
-    {\letcs\cch@mark@name{\cch@sec@name mark}}%
-    \letcs\cch@parent{cc@parent@\cch@sec@name}%
+    {\letcs\cch@mark@name{\ccCurSecName mark}}%
+    \letcs\cch@parent{cc@parent@\ccCurSecName}%
     \ifx\cch@mark@name\@undefined
       \ifx\cch@parent\relax\else
         \letcs\cch@mark@name{\cch@parent mark}%
@@ -731,10 +739,9 @@
 %   Inline headings are stored in a temporary box and expanded after
 %   the next (non-heading) paragraph is opened.
 %
-%   \#1 is the name of the heading and used for tagging.
 %    \begin{macrocode}
 \newbox\cch@inline@sec@box
-\def\cch@make@inline#1{%
+\def\cch@make@inline{%
   \ccIfProp{after-indent}{\global\@afterindenttrue}{\global\@afterindentfalse}%
   \ccIfProp{interline-para}
     {\global\setbox\cch@inline@sec@box\hbox{\ifvoid\cch@inline@sec@box\else\unhbox\cch@inline@sec@box\ccUseProperty{interline-para-sep}\fi\@svsec}}%
@@ -748,9 +755,7 @@
         {\setbox\z@\lastbox}%
         \clubpenalty\@M
         \begingroup
-          \ccIfAlly{\ccaVstructStart{#1head}}{}%
           \unhbox\cch@inline@sec@box
-          \ccIfAlly{\ccaVstructEnd{#1head}}{}%
         \endgroup
         \unskip
         \hskip -\@tempskipa
@@ -766,13 +771,9 @@
 %\subsection{Block Headings}
 %
 % \begin{macro}{\cch@make@block} is used to print block headings.
-%
-%   \#1 is the name of the heading and used for tagging.
 %    \begin{macrocode}
-\def\cch@make@block#1{%
-  \ccIfAlly{\ccaVstructStart{#1head}}{}%
+\def\cch@make@block{%
   \@svsec
-  \ccIfAlly{\ccaVstructEnd{#1head}}{}%
   \ccUseProperty{after-heading-par}%
   \ccIfProp{after-indent}{\global\@afterindenttrue}{\global\@afterindentfalse}%
   \gdef\next{%
@@ -836,17 +837,16 @@
 %    \end{macrocode}
 % and treatment of heading-level specific style classes.
 %    \begin{macrocode}
- \ccWhenAttr{Heading}{class}
+  \ccWhenAttr{Heading}{class}
     {\global\let\cch@current@class\cc@Heading@attr@class% TODO: check if still needed!
      \expandafter\ccUseStyleClass\expandafter{\cc@Heading@attr@class}{Heading}}%
 %    \end{macrocode}
-% The mandatory argument contains the heading level. This corresponds
-% to \LaTeX's way of counting heading levels, where, by default,
-% \lstinline{part} is \lstinline{-1}, \lstinline{chapter} is
-% \lstinline{0}, \lstinline{section} is \lstinline{1}, etc.
+% \begin{macro}{\ccCurSecName} stores the name of the current heading
+%   level.
 %    \begin{macrocode}
-  \edef\cch@sec@name{#2}%
+  \edef\ccCurSecName{#2}%
 %    \end{macrocode}
+% \end{macro}
 % The cascaded Properties of the heading level are expanded. This is
 % excluded into its own macro to simplify re-definition if necessary.
 %    \begin{macrocode}
@@ -859,10 +859,10 @@
 %   environment.
 %    \begin{macrocode}
 \def\cch@end@heading{%
-  \expandafter\ifx\csname ccUseHeading\cch@sec@name\endcsname\relax
-    \PackageError{coco-headings.sty}{Heading level \cch@sec@name\space unknown!}{A Heading with level \cch@sec@name\space is unknown. Use the \string\ccDeclareHeading\space macro to declare heading levels.}%
+  \expandafter\ifx\csname ccUseHeading\ccCurSecName\endcsname\relax
+    \PackageError{coco-headings.sty}{Heading level \ccCurSecName\space unknown!}{A Heading with level \ccCurSecName\space is unknown. Use the \string\ccDeclareHeading\space macro to declare heading levels.}%
   \else
-    \csname ccUseHeading\cch@sec@name\endcsname%
+    \csname ccUseHeading\ccCurSecName\endcsname%
   \fi
   \cch@reset
 }
@@ -894,7 +894,7 @@
   \let\cc@cur@cont\relax
   \let\\\cch@ltx@dbl@backslash
   \let\label\cc@ltx@label
-  \let\cch@sec@name\relax
+  \let\ccCurSecName\relax
   }
 %    \end{macrocode}
 % \end{macro}
@@ -974,16 +974,22 @@
       \ccIfComp{QuoteSource}{{\ccUseProperty{quote-source-face}--\space\ccUseComp{QuoteSource}}\par}{}%
     \egroup}
   \ccSetProperty{heading-block}
-    {\ccUseProperty{title-face}%
-     \ccIfComp{Number}
-       {\ccUseProperty{hang-number}}
-       {\leftskip0pt}%
-     \ccUseComp{Title}\par%
+    {\ccUseProperty{main-title-format}%
      \ccIfComp{Subtitle}{{\ccUseProperty{subtitle-face}\ccUseComp{Subtitle}}\par}{}%
      \ccIfComp{AuthorNameList}{{\ccUseProperty{author-face}\ccUseComp{AuthorNameList}}\par}{}%
      \ccIfComp{QuoteBlock}{\ccUseComp{QuoteBlock}}{}%
      \ccIfComp{AffilBlock}{{\ccUseProperty{affil-block-face}\ccUseComp{AffilBlock}}\par}{}%
     }%
+  \ccSetProperty{main-title-format}{%
+    \ccUseProperty{title-face}%
+    \ccaVstructStart{\ccCurSecName head}%
+    \ccIfComp{Number}%
+    {\ccUseProperty{hang-number}}%
+    {\leftskip0pt}%
+    \ccUseComp{Title}
+    \ccaVstructEnd{\ccCurSecName head}%
+    \par
+  }
   \ccSetProperty{extended-heading}{%
     \ccIfComp{Abstract}
       {\par\vskip\baselineskip
