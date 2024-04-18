@@ -397,15 +397,21 @@
 \def\ccUseComponentFrom#1#2{\csname cc@#1@#2\endcsname}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccGetComp} is a high level command to return the
+% \begin{macro}{\ccGetComp, \ccGetComp*} is a high level command to return the
 %   contents stored in a Component of name \#1 as a paragraph iff the
-%   Component is neither empty nor \lstinline{\relax}.
+%   Component is neither empty nor \lstinline{\relax}. If
+%   Accessibility features are activated, the returned content of the
+%   Component is autmatically tagged with a \lstinline{Para} tag. The
+%   starred version of \lstinline{\ccGetComp} supresses auto-tagging
+%   for that Component.
 %    \begin{macrocode}
-\def\ccGetComp#1{\ccWhenComp{#1}{%
+\def\ccGetComp{\@ifstar\cc@sget@comp\cc@get@comp}
+\def\cc@get@comp#1{\ccWhenComp{#1}{%
     \ccWhenAlly{\ccaStructStart{Para}}%
     \ccUseComp{#1}%
     \ccWhenAlly{\ccaStructEnd{Para}}%
     \par}}
+\def\cc@sget@comp#1{\ccWhenComp{#1}{\ccUseComp{#1}\par}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccIfComp} is a high level macro that executes \#2 if
@@ -963,7 +969,7 @@
 %    \begin{macrocode}
 \def\cc@set@property@locally#1#2#3{%
   \let\@cc@cur@cont\cc@cur@cont
-  \ifdefstring\@cc@cur@cont{Heading}{\let\@cc@cur@cont\cch@sec@name}{}%
+  \ifdefstring\@cc@cur@cont{Heading}{\let\@cc@cur@cont\ccCurSecName}{}%
   \csappto{cc@type@Properties@\@cc@cur@cont}{#1{#2}{#3}}%
 }
 %    \end{macrocode}
