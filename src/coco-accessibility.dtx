@@ -541,18 +541,18 @@
   \fi}
 %    \end{macrocode}
 % \end{macro}
-% The \lstinline{\ccaPagestyleArtifacts} itself is patched into the
-% \lstinline{\pagestyle} and \lstinline{\thispagestyle} macros, so the
-% internal header and footer macros are patched whenever the pagestyle
-% changes and the internal macros are themselves re-defined.
+% The standard pagestyles from the {\LaTeX} kernel are patched
+% by the module.
 %    \begin{macrocode}
-\ccWhenAlly{%
-  \apptocmd\pagestyle{\ccaPagestyleArtifacts}{}{}
-  \apptocmd\thispagestyle{\ccaPagestyleArtifacts}{}{}
+\apptocmd\ps@empty{\ccaPagestyleArtifacts}{}{}
+\apptocmd\ps@plain{\ccaPagestyleArtifacts}{}{}
+\apptocmd\ps@headings{\ccaPagestyleArtifacts}{}{}
+\apptocmd\ps@myheadings{\ccaPagestyleArtifacts}{}{}
 %    \end{macrocode}
 % Finally, we register the \lstinline{footer} and \lstinline{header}
 % PDF tags as \lstinline{artifacts} with \lstinline{ltpdfa}:
 %    \begin{macrocode}
+\ccWhenAlly{%
   \ccaAddToConfig{artifact}{header={Type:Pagination}{Subtype:Header}}
   \ccaAddToConfig{artifact}{footer={Type:Pagination}{Subtype:Footer}}
 %    \end{macrocode}
