@@ -758,6 +758,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
   \ccf@make@outer@caption{top}%
   \ifnum\the\ccSubFloatCnt=\z@\relax
     \bgroup\advance\hsize-\ccf@margin@l
+      \@cc@is@finaltrue
       \ccUseProperty{float-render}%
     \egroup
   \else
@@ -1091,7 +1092,6 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
     \let\includegraphics\ccf@includesubgraphics
     \hskip\ccf@margin@l
     \ccWhenComp{AltText}{\ccaAddAltText{\ccUseComp{AltText}}}
-    \ccaAddPlacement{Block}%
     \strut\ccUseComp{Fig}\strut
   \egroup}
 %    \end{macrocode}
