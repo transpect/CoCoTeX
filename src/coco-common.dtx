@@ -434,9 +434,7 @@
 % \begin{macro}{\ccTocLink} is used to link list entries to their
 %   destination.
 %    \begin{macrocode}
-        \cc@if@ally
-          {\long\def\ccTocLink####1{\hyper@linkstart[####1]{link}{\Hy@tocdestname}{####1}\hyper@linkend}}
-          {\long\def\ccTocLink####1{\hyper@linkstart{link}{\Hy@tocdestname}{####1}\hyper@linkend}}%
+        \long\def\ccTocLink####1{\hyper@linkstart{link}{\@contentsline@destination}{####1}\hyper@linkend}%
 %    \end{macrocode}
 % \end{macro}
 %    \begin{macrocode}

@@ -227,7 +227,7 @@
 %   corresponding label. An optional Argument allows to set a default
 %   value for the Label.
 %    \begin{macrocode}
-\def\ccUseLabeledComp{\@ifstar{\global\let\ccm@no@tag\relax}\relax\cc@use@labeled@comp}
+\def\ccUseLabeledComp{\@ifstar{\global\let\ccm@no@tag\relax\cc@use@labeled@comp}{\cc@use@labeled@comp}}
 \def\cc@use@labeled@comp#1{%
   \ccWhenComp{#1}{%
 %    \end{macrocode}
@@ -244,22 +244,34 @@
 %    \end{macrocode}
 % \end{macro}
 %    \begin{macrocode}
-    \ifx\ccm@no@tag\relax\else\ccaStructStart{KVPair}\fi
+    \ifx\ccm@no@tag\relax\else\ccaStructStart{MetaDatum}\fi
     \ccIfProp{labeled-meta-\ccCurInfix-format}
       {\ccUseProperty{labeled-meta-\ccCurInfix-format}}
       {\ccUseProperty{labeled-meta-format}}%
-    \ifx\ccm@no@tag\relax\else\ccaStructEnd{KVPair}\fi
+    \ifx\ccm@no@tag\relax\else\ccaStructEnd{MetaDatum}\fi
   }\global\let\ccm@no@tag\@undefined}
 %    \end{macrocode}
+%
+%
+% \section{Meta Data Rolemaps for Tagged PDFs}
+%
 % Role mapping for accessibility tagging:
 %    \begin{macrocode}
-\ccaAddRolemap{KVPair}{Div}
-\ccaAddRolemap{Key}{Para}
-\ccaAddRolemap{Value}{Para}
+\ccaAddRolemap{Authors}{Para}
+\ccaAddRolemap{Affiliations}{Para}
+\ccaAddRolemap{MetaDatum}{Div}
+\ccaAddRolemap{MetaDatumLabel}{Para}
+\ccaAddRolemap{MetaDatumValue}{Para}
+\ccaAddRolemap{Abstract}{Div}
+\ccaAddRolemap{AbstractLabel}{P}
+\ccaAddRolemap{AbstractText}{Div}
+\ccaAddRolemap{Keywords}{Div}
+\ccaAddRolemap{KeywordsLabel}{P}
+\ccaAddRolemap{KeywordsText}{Div}
 %    \end{macrocode}
 % \end{macro}
 %
-% \section{common meta data}
+% \section{Common Meta Data}
 %
 % \begin{macro}{\ccm@declare@comp} defines some commonly used meta Components
 %    \begin{macrocode}
@@ -437,17 +449,17 @@
       {\ccUseProperty{labeled-meta-before-\ccCurInfix}}
       {\ccUseProperty{labeled-meta-before}}%
     \bgroup
-      \ifx\ccm@no@tag\relax\else\ccaStructStart{Key}\fi
+      \ifx\ccm@no@tag\relax\else\ccaStructStart{MetaDatumLabel}\fi
       \ccIfProp{labeled-meta-\ccCurInfix-face}
         {\ccUseProperty{labeled-meta-\ccCurInfix-face}}
         {\ccUseProperty{labeled-meta-face}}%
       \ccIfProp{labeled-meta-\ccCurInfix-label-format}
         {\ccUseProperty{labeled-meta-\ccCurInfix-label-format}}
         {\ccUseProperty{labeled-meta-label-format}}%
-      \ifx\ccm@no@tag\relax\else\ccaStructEnd{Key}\fi
-      \ifx\ccm@no@tag\relax\else\ccaStructStart{Value}\fi
+      \ifx\ccm@no@tag\relax\else\ccaStructEnd{MetaDatumLabel}\fi
+      \ifx\ccm@no@tag\relax\else\ccaStructStart{MetaDatumValue}\fi
       \ccUseComp{\ccCurComp}%
-      \ifx\ccm@no@tag\relax\else\ccaStructEnd{Value}\fi
+      \ifx\ccm@no@tag\relax\else\ccaStructEnd{MetaDatumValue}\fi
     \egroup
     \ccIfProp{labeled-meta-after-\ccCurInfix}
       {\ccUseProperty{labeled-meta-after-\ccCurInfix}}

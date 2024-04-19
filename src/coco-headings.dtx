@@ -1069,12 +1069,19 @@
   \ccSetProperty{toc-after-entry}{\par\addvspace{\ccUseProperty{toc-margin-bottom}}}% Thing at the end of the entry, after the page number
   \ccSetProperty{toc-format}{% Order and formatting of the entry itself
     \ccUseProperty{toc-title-face}%
+    \ccaStructStart{TOCI}%
     \ccIfComp{TocNumber}
-      {\ccUseProperty{toc-hang-number}}
+      {\ccaStructStart{P}\ccaStructStart{Reference}\ccaStructStart{Lbl}\ccUseProperty{toc-hang-number}\ccaStructEnd{Lbl}}
       {\leftskip0pt\leavevmode}%
-    \ccIfComp{TocAuthorNameList}{\ccUseComp{TocAuthorNameList}:\space}{}%
-    \ccUseComp{TocTitle}%
-    \ccUseProperty{toc-page-format}%
+    \ccaVstructStart{Span}%
+    \ccTocLink{%
+      \ccWhenComp{TocAuthorNameList}{\ccUseComp{TocAuthorNameList}:\space}%
+      \ccUseComp{TocTitle}%
+      \ccUseProperty{toc-page-format}%
+    }%
+    \ccaVstructEnd{Span}%
+    \ccWhenComp{TocNumber}{\ccaStructEnd{Reference}\ccaStructEnd{P}}%
+    \ccaStructEnd{TOCI}%
   }%
   %% PDF-Bookmarks
   \ccSetProperty{bookmark-level}{}% override heading level for PDF bookmarks, numeric!
