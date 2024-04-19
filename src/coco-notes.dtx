@@ -146,7 +146,7 @@
 %    \end{macrocode}
 % Here we make a small adjustment to the \lstinline{\fn@fntext} macro
 % from the \lstinline{footnote} package by making it \lstinline{\long}
-% and therefore allowing \lstinline{\par} inside it's argument.
+% and therefore allowing \lstinline{\par} inside its argument.
 %    \begin{macrocode}
 \long\def\fn@fntext#1{%
   \ifx\ifmeasuring@\@@undefined%
@@ -170,7 +170,7 @@
 %    \end{macrocode}
 % Adding artifact tagging to the footnoterule:
 %    \begin{macrocode}
-\pretocmd\footnoterule{\ccaVstructStart{footnoterule}}{}{}
+\pretocmd\footnoterule{\ccaVstructStart[document]{footnoterule}}{}{}
 \apptocmd\footnoterule{\ccaVstructEnd{footnoterule}}{}{}
 %    \end{macrocode}
 % Re-definition of \lstinline{footnote} package's footnote mark
@@ -206,7 +206,32 @@
      \fi
    \endgroup
    \@footnotemark\@footnotetext%
-} 
+}
+%    \end{macrocode}
+% patching \lstinline{\@footnotemark}
+%    \begin{macrocode}
+\pretocmd\@footnotemark{%
+  \ccaStructStart{Span}\protected@xdef\@lt@fn@parent{\ccaGetCurStruct{idx}}%
+  \ccaStructStart{footnotemark}%\addAltText{\@thefnmark}
+}{}{}
+\apptocmd\@footnotemark{%
+  \ccaStructEnd{footnotemark}\ccaStructEnd{Span}%
+}{}{}
+%    \end{macrocode}
+% patching \lstinline{\@makefntext}
+%    \begin{macrocode}
+\pretocmd\@makefntext{%
+  \ccaStructStart{footnotetext}%
+  \ifx\@lt@fn@parent\@empty\relax\else\addToStruct{\@lt@fn@parent}\fi%
+}{}{}
+\apptocmd\@makefntext{%
+  \ccaAddID{auto}\ccaStructEnd{footnotetext}%
+}{}{}
+%    \end{macrocode}
+% Adding footnotemark and footnotetext PDF tags to the rolemap
+%    \begin{macrocode}
+\ccaAddRolemap{footnotemark}{Reference}
+\ccaAddRolemap{footnotetext}{Note}
 %    \end{macrocode}
 % Linking endnotes requires overwriting the \@endnotetext macro to save a global counter to the *.ent file.
 %    \begin{macrocode}

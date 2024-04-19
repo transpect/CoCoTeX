@@ -360,6 +360,28 @@
 %    \end{macrocode}
 % \end{macro}
 %
+% \begin{macro}{\ccaGetCurStruct} returns the internal ID of the
+%   currently open structural element. \#1 is table attribute that
+%   should be returned(?)
+%    \begin{macrocode}
+\DeclareAccessibilityCommand{\ccaGetCurStruct}[1]{\directlua{ltpdfa.tagger.getCurrentStruct('\luaescapestring{#1}')}}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccaAddToStruct} adds the current structural element
+%   to the structural element \#1 (retrieved using
+%   \lstinline{\ccaGetCurStruct}).
+%    \begin{macrocode}
+\DeclareAccessibilityCommand{\ccaAddToStruct}[1]{\directlua{ltpdfa.tagger.addToStruct('\luaescapestring{#1}')}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\ccaAddID} adds the ID \#1 to the current node. If \#1
+%   is ``auto'' the ID is calculated by ltpdfa.
+%    \begin{macrocode}
+\DeclareAccessibilityCommand{\ccaAddID}[1]{\directlua{ltpdfa.tagger.addID('\luaescapestring{#1}')}}
+%    \end{macrocode}
+% \end{macro}
+%
 % \begin{macro}{\cca@set@docinfo} sets the PDF docinfo. \#2 is a key,
 %   \#3 is the value, optional \#1 is an encoding.
 %    \begin{macrocode}
@@ -563,6 +585,7 @@
 %    \begin{macrocode}
   \ccaAddToConfig{artifact}{leaders={Type:Layout}}
   \ccaAddToConfig{artifact}{footnoterule={Type:Layout}}
+  \ccaAddToConfig{artifact}{Rule={Type:Layout}}
   \ccaAddToConfig{artifact}{Artifact={Type:Layout}}
 }
 %    \end{macrocode}
