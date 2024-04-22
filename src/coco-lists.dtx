@@ -1,24 +1,300 @@
 % \chapter{coco-lists.dtx}
-% This module provides handlers for lists like glossaries and descriptions.
-%
+% This module provides handlers for list-like environments like item
+% lists, enumerations, glossaries and descriptions.
 %    \begin{macrocode}[gobble=1]
 %<*lists>
 %    \end{macrocode}
+%
+% \textbf{Note:} The \lstinline{coco-lists} module diverges somewhat
+% from the other {\CoCoTeX} modules insofar as that its main Container
+% does not follow the \CoCoTeX's usual ``collect all--process later''
+% approach, but all Properties are processed at the beginning of each
+% Container's instances and the contents are processed as they are
+% parsed by the \lstinline{\LaTeX} interpreter, just like ``reguar''
+% {\LaTeX} lists. Configuration of lists, however, follows the
+% {\CoCoTeX} playbook.
+%
+% \section{Preamble}
+%
 %    \begin{macrocode}
-%%
-%% module for CoCoTeX that handles lists.
-%%
-%% Maintainer: marcus.hottenroth@le-tex.de
-%%
-%% lualatex – texlive ≥ 2019
-%%
-\PackageError{coco-list}{coco-list is currently broken! DO NOT USE!}{}
-\endinput
-
 \NeedsTeXFormat{LaTeX2e}[2018/12/01]
 \ProvidesPackage{coco-lists}
     [\filedate \fileversion CoCoTeX lists module]
 \RequirePackage{coco-common}
+%    \end{macrocode}
+%
+%
+% \subsection{Package Options}
+%
+% If the \lstinline{replace} option is set, LaTeX's default lists are
+% replaced by \lstinline{coco-lists} module. This effects \LaTeX's
+% \lstinline{enumerate}, \lstinline{itemize}, and
+% \lstinline{description} environments.
+%    \begin{macrocode}
+\newif\if@ccl@replace \@ccl@replacefalse
+\DeclareOption{replace}{\global\@ccl@replacetrue}%
+%    \end{macrocode}
+% The option inherit defines how nested lists inherit their
+% properties. Currently, there are two ways: \lstinline{common}: All
+% nested lists of the same type inherit only from the same, generic
+% type definition; \lstinline{conseq}: nested lists of the same type
+% inherit from the next-higher level list of the same type, and from
+% the generic type definition.
+%
+% For example, if \lstinline{inherit=common}, 3rd level
+% \lstinline{itemize} and 2nd level \lstinline{itemize} both inherit
+% only the property values of the same generic \lstinline{itemize}
+% list type. If \lstinline{inherit=conseq}, 3rd level inherits the
+% property lists from 2nd level \lstinline{itemize}.
+%
+% Since inheritance is a transitive relation, 3rd level
+% \lstinline{itemize} will ultimately also inherit the Properties from
+% generic \lstinline{itemize}, but in contrast to \lstinline{common},
+% \lstinline{conseq} allows 2nd level \lstinline{itemize} to override
+% some Properties of generic \lstinline{itemize}, which will be
+% propagate down to 3rd level \lstinline{itemize}, while with
+% \lstinline{inherit=common}, the override on 2nd level
+% \lstinline{itemize} would have no effect on 3rd level
+% \lstinline{itemize}.
+%    \begin{macrocode}
+\def\ccl@ih@common{common}
+\def\ccl@ih@conseq{conseq}%
+\let\ccl@inherit\ccl@ih@common
+\define@choicekey{coco-lists.sty}{inherit}[\@ccl@inherit\nr]{conseq,common}{%
+  \ifcase\nr\relax% conseq: nested lists of the same type inherit only from the previous level
+    \global\let\ccl@inherit\ccl@ih@conseq
+  \fi
+}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\ProcessOptionsX
+
+\ccDeclareContainer{List}{%
+  \ccDeclareType{Properties}{%
+    %% list formatting
+    \ccSetProperty{before-list}{\par}% at the very beginning of each (nested) list
+    \ccSetProperty{after-list}{\ccUseProperty{after-item}}% after each (nested) list
+    %% list margins
+    \ccSetProperty{margin-top}{\z@}% vertical space after the list.
+    \ccSetProperty{margin-bottom}{\z@}% vertical space before the list.
+    \ccSetProperty{margin-left}{1em+\ccUseProperty{prev-margin-left}}% horizontal space to the left of each list item (auto=width of widest label + prev-margin-left)
+    \ccSetProperty{margin-right}{\z@}% horizontal space to the right of each list item
+    %% between list items
+    \ccSetProperty{item-sep}{\z@}% vertical space between two adjacent list items (real: this value + par-skip)
+    \ccSetProperty{after-item}{\par}% material after each item
+    \ccSetProperty{after-indent}{false}% whether the paragraph after the list should have an indent (true) or not (false)
+    %% inside list items
+    \ccSetProperty{par-indent}{\parindent}% indent of the first line of a *new* paragraph inside a list item
+    \ccSetProperty{par-fill-skip}{\z@skip}% skip at the end of the last line of each paragraph inside a list item
+    \ccSetProperty{par-skip}{\z@}% vertical space between two adjacent paragraphs inside a list item
+    %% label formatting
+    \ccSetProperty{label}{\ccUseComp{Label}}% This Component is set via the optional argument of \Item, otherwise it is generated
+    \ccSetProperty{label-indent}{-1em}% indent of each list item's first line (relative to margin-left)
+    \ccSetProperty{label-sep}{\enskip}% separator between each item's label and its content
+    \ccSetProperty{label-face}{}% font of the item's label
+    \ccSetProperty{label-align}{left}% alignment of label within its hbox
+    \ccSetProperty{label-format}{% format of the label
+      \ccUseProperty{label-face}%
+      \ccUseProperty{label}%
+      \ccUseProperty{label-sep}%
+    }%
+    %% TODO: separate pre-item, margins, and label-format
+    \ccSetProperty{item-format}{% material at the beginning of a new item
+      \ifcclFirst
+        \global\cclFirstfalse
+      \else
+        \ccUseProperty{after-item}%
+        \vskip\ccUseProperty{item-sep}%
+      \fi
+      \leavevmode
+      \@tempskipa\ccUseProperty{label-indent}%
+      \advance\@tempskipa-\parindent\relax
+      \hskip\@tempskipa\relax%
+      \ifdim\ccUseProperty{label-indent}>\z@
+        \@tempskipa\ccUseProperty{label-indent}%
+      \else
+        \@tempskipa-\ccUseProperty{label-indent}%
+      \fi
+      \hbox to \@tempskipa%
+      {\ccIfPropVal{label-align}{left}{}{\hss}%
+        \ccUseProperty{label-format}%
+        \ccIfPropVal{label-align}{right}{}{\hss}}%
+    }%
+  }%
+  \ccDeclareType{Components}{%
+    \ccDeclareComponent{Label}%
+  }%
+  \ccDeclareEnv{cc@list}{endcc@list}%
+}
+%    \end{macrocode}
+% \begin{macro}{\ccDeclareList} defines a new list
+%   enviromenmt. Optional \#1 is the nesting level, \#2 is the name of
+%   the list environment, \#3 is the Property list.
+%    \begin{macrocode}
+\def\ccDeclareList{\cc@opt@empty\cc@declare@list}%
+\def\cc@declare@list[#1]#2#3{%
+  \edef\@argi{#1}%
+  \edef\ccl@def@depth{#2\if!#1!\else-\fi#1}%
+  \expandafter\ccDeclareContainer\expandafter{\ccl@def@depth}{%
+    \ifx\@argi\@empty
+      \ccInherit{Properties,Components}{List}%
+    \else
+      \@tempswatrue
+      \ifx\ccl@inherit\ccl@ih@common
+      \else
+        \ifnum\@argi=\@ne\relax
+        \else
+          \@tempswafalse
+        \fi
+      \fi
+      \if@tempswa
+        \ifcsdef{cc@container@#2}
+          {\ccInherit{Properties,Components}{#2}}
+          {\ccPackageError{lists}{Inheritance}
+            {Prototype List `#2' undefined!}
+            {You need to define the prototype for list type `#2' before you can define a nested list type!}}%
+      \else
+        \@tempcnta=\@argi\relax \advance\@tempcnta\m@ne\relax
+        \ifcsdef{cc@container@#2-\the\@tempcnta}
+          {\ccInherit{Properties,Components}{#2-\the\@tempcnta}}
+          {\ccPackageError{lists}{Inheritance}
+            {Prototype List `#2-\the\@tempcnta' undefined!}
+            {You need to define the nesting level \the\@tempcnta of list type #2 before you can define nesting level #1!}}%
+      \fi
+    \fi
+    \ccDeclareType{Properties}{#3}%
+    \ifx\@argi\@empty
+      \ccDeclareEnv[#2]{\cc@list}{\endcc@list}%
+    \fi
+  }%
+  \ifx\@argi\@empty
+    \csdef{cc@cur@depth@#2}{\z@}%
+    \cc@declare@list[1]{#2}{#3}%
+  \fi
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% We want to count each list type seperately to ensure the correct
+% item label is printed, but we also need to keep within the global
+% nesting level limit. Therefore, we set two internal counters, one
+% for the overall nesting level, and another one for each list
+% type. Note that the latter is a macro, not a counter register.
+%
+% \begin{macro}{\ccl@advance@cnts} is a helper macro to advance both
+%   the global list nesting level, as well as the list Container
+%   specific nesting level. \#1 is the amount by which both counters
+%   should be advanced.
+%    \begin{macrocode}
+\newcount\ccl@depth
+\newcount\ccl@item@cnt
+\newif\ifcclFirst \cclFirsttrue
+\def\ccl@advance@cnts#1{%
+  \global\advance\ccl@depth#1\relax
+  \expandafter\@tempcnta\csname cc@cur@depth@\cc@cur@cont\endcsname\relax
+  \advance\@tempcnta#1\relax
+  \csxdef{cc@cur@depth@\cc@cur@cont}{\the\@tempcnta}%
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\cc@list} is begin macro for the generalized coco-list
+%   environment. \#1 is the attribute list of the environment.
+%    \begin{macrocode}
+\def\cc@list{\cc@opt@empty\@cc@list}
+\def\@cc@list[#1]{%
+  \edef\ccl@prev@depth{\csname cc@cur@depth@\cc@cur@cont\endcsname}%
+  \ccl@advance@cnts\@ne%
+  \edef\ccl@curr@depth{\csname cc@cur@depth@\cc@cur@cont\endcsname}%
+  \global\cclFirsttrue
+  \ccl@item@cnt=\z@\relax
+  \edef\ccl@cur@cont{\cc@cur@cont-\ccl@curr@depth}%
+%    \end{macrocode}
+% If the nesting goes deeper than the style programmer anticipated:
+%    \begin{macrocode}
+  \ifcsdef{cc@container@\ccl@cur@cont}{}
+    {\ifx\ccl@inherit\ccl@ih@common
+       \let\ccl@cur@cont\cc@cur@cont%
+     \else
+       \global\csletcs
+         {cc@type@Properties@\cc@cur@cont-\ccl@curr@depth}
+         {cc@type@Properties@\cc@cur@cont-\ccl@prev@depth}%
+     \fi}%
+%    \end{macrocode}
+% Horizontal margin Properties from the previous nesting level are
+% stored so that the nested lists can use them:
+%    \begin{macrocode}
+  \ccSetPropertyX{prev-margin-left}{\the\leftskip}%
+  \ccSetPropertyX{prev-margin-right}{\the\rightskip}%
+  \ccEvalType[\ccl@cur@cont]{Properties}%
+%    \end{macrocode}
+% The macro that separates the items of the list is defined locally so
+% that we can use Properties:
+%    \begin{macrocode}
+  \csdef{\ccPrefix Item}{\cc@opt@empty\ccl@item}%
+  \def\ccl@item[##1]{%
+    \edef\ccl@item@label{##1}%
+    \ifx\ccl@item@label\@empty
+%    \end{macrocode}
+% TODO: Items without optional argument need to be generated,
+% especially for enumerations!
+%    \begin{macrocode}
+      \advance\ccl@item@cnt\@ne
+      \ccComponent{Label}{\the\ccl@item@cnt}%
+    \else
+      \ccComponent{Label}{##1}%
+    \fi
+    \ccUseProperty{item-format}\ignorespaces
+  }%
+%    \end{macrocode}
+% Up to this point, we only managed Properties. From this point
+% forward, we actually print the list:
+%    \begin{macrocode}
+  \ccUseProperty{before-list}%
+  \if@ccl@replace\letcs\item{\ccPrefix Item}\fi%
+  \leftskip\dimexpr\ccUseProperty{margin-left}\relax%
+  \rightskip\ccUseProperty{margin-right}%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+%    \begin{macrocode}
+\def\endcc@list{%
+  \ccUseProperty{after-list}%
+  \ccl@item@cnt=\z@\relax
+  \ccl@advance@cnts\m@ne%
+}
+%    \end{macrocode}
+%
+%
+%% TEMP:
+%    \begin{macrocode}
+\def\blacksquare{\raise.15ex\hbox{\rule{.5em}{.5em}}}
+\ccDeclareList{Itemize}{%  is also nesting level 1
+  \ccSetProperty{label-face}{\color{black}}%
+  \ccSetProperty{label}{\blacksquare}%
+}
+
+
+\ccDeclareList[2]{Itemize}{\ccSetProperty{label-face}{\color{black!50}}}
+\ccDeclareList[3]{Itemize}{\ccSetProperty{label-face}{\color{black!25}}}
+\ccDeclareList{Enumerate}{}
+\ccDeclareList{Description}{}
+
+\if@ccl@replace
+  \letcs\itemize{\ccPrefix Itemize}
+  \letcs\enditemize{end\ccPrefix Itemize}
+  \letcs\enumerate{\ccPrefix Enumerate}
+  \letcs\endenumerate{end\ccPrefix Enumerate}
+  \letcs\description{\ccPrefix Description}
+  \letcs\enddescription{end\ccPrefix Description}
+\fi
+
+
+
+
+\endinput
+
 \usepackage{enumerate}
 
 \ifx\labelitemfont\@undefined\let\labelitemfont\relax\fi
@@ -39,7 +315,7 @@
               \topsep    \z@
               \parsep    \z@
               \itemsep   \parsep}
-              
+
 \def\@listiii{\leftmargin\leftmarginiii
               \labelwidth\leftmarginiii
               \advance\labelwidth-\labelsep
@@ -47,7 +323,7 @@
               \parsep    \z@
               \partopsep \z@
               \itemsep   \topsep}
-              
+
 \def\@@enum@[#1]{%
   \@enLab{}\let\@enThe\@enQmark
   \@enloop#1\@enum@
@@ -57,7 +333,7 @@
   \expandafter\let\csname the\@enumctr\endcsname\@enThe
   \csname c@\@enumctr\endcsname7
   \@enum@}
-  
+
 \def\@enum@{%
   \list{\csname label\@enumctr\endcsname}%
   {%
@@ -129,7 +405,7 @@
     \@endpetrue
     \everypar{{\setbox\z@\lastbox}\everypar{}\@endpefalse}%
     \global\let\@doendpe\orig@doendpe}}
-    
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Environment declarations, CoCoTeX style.
 % Supposed to eventually replace all the definitions above.
@@ -178,7 +454,7 @@
   %
   \if!#1!\else\expandafter\protect\expandafter\def\csname tp@list@#3@parent\endcsname{#1}\fi%
   \expandafter\protect\expandafter\def\csname tp@list@#2@properties\endcsname{#3}%
-  
+
   % Define the macro for list with name/class #2.
   \expandafter\def\csname tpUseList#2\endcsname{%
     \if!#1!\else\edef\tp@list@parent{#1}\fi%
@@ -202,10 +478,10 @@
     \ifnum\tp@currListDepth=-\@ne\relax%
       \count255=\z@
       \loop
-        \immediate\write\@auxout{\string\expandafter\string\gdef\string\csname\space\string tp@maxLabelWidth@\the\tp@listNumber @\the\count255\endcsname{\csname tp@maxLabelWidth@\the\tp@listNumber @\the\count255\endcsname}}  
+        \immediate\write\@auxout{\string\expandafter\string\gdef\string\csname\space\string tp@maxLabelWidth@\the\tp@listNumber @\the\count255\endcsname{\csname tp@maxLabelWidth@\the\tp@listNumber @\the\count255\endcsname}}
         \advance\count255 by \@ne
       \expandafter\ifx\csname tp@maxLabelWidth@\the\tp@listNumber @\the\count255\endcsname\relax\else\repeat
-    \fi      
+    \fi
     \csname tpUseList\tp@list@name\endcsname%
     \vskip\ccUseProperty{after-skip}
   \fi%
@@ -227,12 +503,12 @@
   \ifnum\tp@currListDepth = \z@
     \global\advance\tp@listNumber by \@ne%
   \fi
-  
+
   % Assign a new counter for the item numbers as well as an inheritable prefix for sublists, depending on the list depth.
   \global\expandafter\newcount\csname tp@itemNumber\the\tp@currListDepth\endcsname%
   \expandafter\gdef\csname tp@inheritablePrefix\the\tp@currListDepth\endcsname{}%
   \gdef\tp@inheritedPrefixAbove{}%
-  
+
   \newbox\tp@labelbox%
   \edef\tp@list@name{#2} % Needed for afterskips to apply.
   \tpCascadeProps{#2}{list} % Load the properties.
@@ -240,9 +516,9 @@
   \tp@ifstring{#1}{inherit}%
     \ccIfPropVal{label-type}{char}{}{\gdef\tp@inheritedPrefixAbove{\csname tp@inheritablePrefix\the\numexpr\the\tp@currListDepth-1\relax \endcsname}}%
   \fi
-  
+
   \vskip\ccUseProperty{before-skip}
-  
+
   \ccIfPropVal{label-type}{char}{%
     \ccSetProperty{label-prefix-delimiter}{}%
     \ccSetProperty{label-suffix}{}%
@@ -254,7 +530,7 @@
   \ccIfPropVal{label-type}{alpha}{\edef\tp@convertNumber##1{\tp@numToLCLetter{##1}}}{}%
   \ccIfPropVal{label-type}{Roman}{\def\tp@convertNumber##1{\uppercase\expandafter{\romannumeral##1}}}{}%
   \ccIfPropVal{label-type}{roman}{\def\tp@convertNumber##1{\romannumeral##1}}{}%
-  
+
   % Use the label prefix delimiter only if there actually is a label prefix.
   \ifx\empty\tp@inheritedPrefixAbove\empty
     \ccSetProperty{label-prefix-delimiter}{}%
@@ -264,14 +540,14 @@
   \ifdim\wd\tp@labelbox > \ccUseProperty{label-width}\relax%
     \ccSetProperty{label-width}{\the\wd\tp@labelbox}%
   \fi%
-  
+
   % If the macro already exists (loaded from the aux file), …
   \expandafter\ifx\csname tp@maxLabelWidth@\the\tp@listNumber @\the\tp@currListDepth\endcsname\relax%
   \else%
     % … set the »label-width« property accordingly.
     \ccSetProperty{label-width}{\csname tp@maxLabelWidth@\the\tp@listNumber @\the\tp@currListDepth\endcsname}%
   \fi
-  
+
   \list{%
     % Label. Uses [] in description items. Empty otherwise.%
   }{%
