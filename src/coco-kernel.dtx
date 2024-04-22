@@ -4,36 +4,51 @@
 %    \begin{macrocode}[gobble=1]
 %<*kernel>
 %    \end{macrocode}
-% \paragraph*{Preamble and Package Options}
+%
+%
+% \section{Preamble}
+%
 %    \begin{macrocode}
 \NeedsTeXFormat{LaTeX2e}[2018/12/01]
 \ProvidesPackage{coco-kernel}
     [\filedate \fileversion cocotex kernel]
 %    \end{macrocode}
+%
+%
+% \subsection{Hard dependencies}
+%
+%    \begin{macrocode}
+\RequirePackage{kvoptions-patch}
+\RequirePackage{xkeyval}
+\RequirePackage{etoolbox}
+%    \end{macrocode}
+%
+%
+% \subsection{Package Options}
+%
 % The \lstinline{debug} option triggers the output of additional
 % information messages to the shell.
 %    \begin{macrocode}
 \newif\if@cc@debug \@cc@debugfalse
 \DeclareOption{debug}{\global\@cc@debugtrue}%
-\ProcessOptions
 %    \end{macrocode}
-% \paragraph*{Hard dependencies}
+% The \lstinline{prefix} option will be explained below in
+% Sect.~\ref{sec:kernel:global-switches}.
 %    \begin{macrocode}
-\RequirePackage{etoolbox}
+\DeclareOptionX{prefix}[]{\gdef\cc@prefix{#1}}%
+\ProcessOptionsX
 %    \end{macrocode}
+%
+%
 % \section{Exception handlers}
 %
-% \begin{macro}{\ccKernelDebugMsg}
-%   is used to print debug messages iff the \lstinline{debug} class
-%   option is set.
-%    \begin{macrocode}
-\def\ccKernelDebugMsg#1{\if@cc@debug\message{[CoCo Kernel Debug]\space\space#1^^J}\fi}
-%    \end{macrocode}
-% \end{macro}
-% \begin{macro}{\ccPackageError}
-%   is a macro to create error messages specific to the Framework. \#1
-%   is the module, \#2 is the type of error, \#3 is the immediate
-%   error message, \#4 is the help string.
+% The {\CoCoTeX} kernel provides some macros to unify exception
+% handling. There are four levels of output: \lstinline{error},
+% \lstinline{warning}, \lstinline{info}, and \lstinline{debug}.
+%
+% \begin{macro}{\ccPackageError} creates an error message specific to
+%   the Framework. \#1 is the module, \#2 is the type of error, \#3 is
+%   the immediate error message, \#4 is the help string.
 %    \begin{macrocode}
 \def\ccPackageError#1#2#3#4{%
    \GenericError{%
@@ -72,14 +87,33 @@
 }
 %    \end{macrocode}
 % \end{macro}
+% While the macros defined above are meant to be used in all
+% {\CoCoTeX} modules, the following is only for the Kernel.
 %
-% \section{Global Switches}
+% \begin{macro}{\ccKernelDebugMsg} prints a debug message if and only
+%   if the \lstinline{debug} package option is set.
+%    \begin{macrocode}
+\def\ccKernelDebugMsg#1{\if@cc@debug\message{[CoCo Kernel Debug]\space\space#1^^J}\fi}
+%    \end{macrocode}
+% \end{macro}
+%
+% \section{Global Switches}\label{sec:kernel:global-switches}
 %
 % \begin{macro}{\ccPrefix} is the prefix that is added to Component
 %   macros and (some) Container environments.
+%
+%   This has mostly historic reasons: back when CoCoTeX was specific
+%   to the \textit{xerif} typesetting automaton, all macros produced
+%   by the xml converter had a \lstinline{tp} prefix (from
+%   \textbf{t}rans\textbf{p}ect, the XML conversion tool in the
+%   backend of \textit{xerif}). After CoCoTeX became stand-alone, the
+%   tp prefix became obsolete, but the converters running at the time
+%   needed to be backward-compatible. Therefore, all xerif-bound
+%   CoCoTeX instances still set this macro to ensure user-level macros
+%   bear the tp-prefix.
 %    \begin{macrocode}
-\ifx\ccPrefix\@undefined\def\ccPrefix{}\fi
-\ccPackageInfo{Kernel}{Info}{The Macro prefix is now `\ccPrefix'.}
+\ifx\ccPrefix\@undefined\edef\ccPrefix{\cc@prefix}\fi
+\ccPackageInfo{Kernel}{Info}{The macro prefix is now `\ccPrefix'.}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\if@cc@is@final} is a boolean switch that indicates
@@ -92,17 +126,17 @@
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccWhenAlly} is a stub that eats its argument. It only
-%   does stuff when the coco-accessibility package is loaded, which we
-%   cannot know, yet.
+%   does stuff when the \lstinline{coco-accessibility} package is
+%   loaded, which we cannot know, yet.
 %    \begin{macrocode}
 \let\ccWhenAlly\@gobble
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccIfAlly} the same, but it takes two arguments, one
 %   for the \textit{true} case and a second for the \textit{false}
-%   case. We default to the \textit{else} case, so we gobble the first
-%   argument. This will be altered if the coco-accessibility package
-%   is loaded later.
+%   case. We default to the \textit{else} case, so we always gobble
+%   the first argument. This will be altered if the
+%   \lstinline{coco-accessibility} package is loaded later.
 %    \begin{macrocode}
 \let\ccIfAlly\@gobble
 %    \end{macrocode}
@@ -184,7 +218,7 @@
     }%
   \expandafter\x\endgroup
 }
-\@onlypreamble\ccDeclareContainer
+ %\@onlypreamble\ccDeclareContainer
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccSetContainer} is used to change the currently
