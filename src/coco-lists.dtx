@@ -90,7 +90,9 @@
   \ccDeclareType{Properties}{%
     %% list formatting
     \ccSetProperty{before-list}{\par}% at the very beginning of each (nested) list
-    \ccSetProperty{after-list}{\ccUseProperty{after-item}}% after each (nested) list
+    \ccSetProperty{after-list}{% after each (nested) list
+      \ccUseProperty{after-item}%
+    }%
     %% list margins
     \ccSetProperty{margin-top}{\z@}% vertical space after the list.
     \ccSetProperty{margin-bottom}{\z@}% vertical space before the list.
@@ -116,13 +118,13 @@
       \ccaVstructStart{LI}%
     }%
     \ccSetProperty{item-offset}{% Setting the label indent and first-line offset
-      \cclItemIndent\ccUseProperty{label-indent}%
+      \cclItemIndent\ccUseProperty{int-indent}%
       \advance\cclItemIndent-\parindent\relax
       \hskip\cclItemIndent\relax%
-      \ifdim\ccUseProperty{label-indent}>\z@
-        \cclItemIndent\ccUseProperty{label-indent}%
+      \ifdim\ccUseProperty{int-indent}>\z@
+        \cclItemIndent\ccUseProperty{int-indent}%
       \else
-        \cclItemIndent-\ccUseProperty{label-indent}%
+        \cclItemIndent-\ccUseProperty{int-indent}%
       \fi
     }%
     %% inside list items
@@ -131,7 +133,7 @@
     \ccSetProperty{par-skip}{\z@}% vertical space between two adjacent paragraphs inside a list item
     %% label formatting
     \ccSetProperty{label}{\ccUseComp{Label}}% The Label Component is set via the optional argument of \Item, otherwise it is generated
-    \ccSetProperty{label-indent}{-1em}% indent of each list item's first line (relative to margin-left)
+    \ccSetProperty{indent}{-1em}% indent of each list item's first line (relative to margin-left)
     \ccSetProperty{label-sep}{\enskip}% separator between each item's label and its content
     \ccSetProperty{label-face}{}% font of the item's label
     \ccSetProperty{label-align}{left}% alignment of label within its hbox
@@ -303,6 +305,37 @@
 \newskip\cclItemIndent
 %    \end{macrocode}
 % \end{macro}
+% 
+% \begin{macro}{\cclID} stores a unique ``identifier'' number
+%   for each list. An internal global counter register
+%   \lstinline{\ccl@total@list@cnt} is used to count the overall
+%   number of opening lists.
+%    \begin{macrocode}
+\newcount\cclID       \cclID\z@
+\newcount\ccl@total@list@cnt \ccl@total@list@cnt\z@\relax
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccl@incr@count} stores the current list ID counter in
+%   a nesting-depth specific macro
+%   \lstinline{ccl@prev@cnt@\the\ccl@depth}, advances the global
+%   internal list counter by one, and sets the publicly available
+%   counter \lstinline{\cclID} to the resulting value.
+%    \begin{macrocode}
+\def\ccl@incr@count{%
+  \csxdef{ccl@prev@cnt@\the\ccl@depth}{\the\cclID}%
+  \global\advance\ccl@total@list@cnt\@ne\relax
+  \global\cclID\ccl@total@list@cnt\relax
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccl@decr@count} resets the list counter for the next
+%   lower nesting level, whenever a nested list is closed.
+%    \begin{macrocode}
+\def\ccl@decr@count{%
+  \global\cclID\csname ccl@prev@cnt@\the\ccl@depth\endcsname\relax
+}
+%    \end{macrocode}
+% \end{macro}
 %
 %
 % \subsection{The List Environment}
@@ -317,6 +350,7 @@
 \def\cc@list{\cc@opt@empty\@cc@list}
 \def\@cc@list[#1]{%
   \ccl@advance@depth\@ne%
+  \ccl@incr@count%
   \edef\ccl@cur@cont{\cc@cur@cont-\cclCurDepth}%
   \global\cclFirsttrue
   \ccaStructStart{L}%
@@ -337,7 +371,6 @@
 %    \begin{macrocode}
   \ccSetPropertyX{prev-margin-left}{\the\leftskip}%
   \ccSetPropertyX{prev-margin-right}{\the\rightskip}%
-\message{^^J===>loading Properties from \ccl@cur@cont}
   \ccEvalType[\ccl@cur@cont]{Properties}%
   \edef\ccl@list@type{\ccUseProperty{list-type}}%
 %    \end{macrocode}
@@ -348,6 +381,9 @@
 % The macro that separates the items of the list is defined locally so
 % that we can use Properties:
 %    \begin{macrocode}
+  \cclCalculateMarginLeft%
+  \cclCalculateVMargin{top}%
+  \cclCalculateVMargin{bottom}%
   \csdef{\ccPrefix Item}{\cc@opt@empty\ccl@item}%
   \def\ccl@item[##1]{%
     \edef\ccl@item@label{##1}%
@@ -356,15 +392,25 @@
     \else
       \ccComponent{Label}{##1}%
     \fi
+    \sbox\z@{\@cc@is@finalfalse\ccUseProperty{label-format}}%
+    \cc@store@latest{list-number-\the\cclID-maxwd}{\the\wd\z@}%
+    \cc@store@latest{list-number-maxwd}{\the\wd\z@}%
+    \cc@set@property@locally\ccSetPropertyVal{list-number-width}{\the\wd\z@}%
     \ccUseProperty{item-format}\ignorespaces
   }%
+%    \end{macrocode}
+% If default {\LaTeX} macros are replaced per package option,
+% \lstinline{\item} is made into a copy of the local definition of
+% \lstinline{\ccPrefix Item}.
+%    \begin{macrocode}
+  \if@ccl@replace\letcs\item{\ccPrefix Item}\fi%
 %    \end{macrocode}
 % Up to this point, we only managed Properties. From this point
 % forward, we actually print the list:
 %    \begin{macrocode}
   \ccUseProperty{before-list}%
-  \if@ccl@replace\letcs\item{\ccPrefix Item}\fi%
-  \leftskip\dimexpr\ccUseProperty{margin-left}\relax%
+  \ccUseProperty{int-margin-top}%
+  \ccUseProperty{int-margin-left}\relax%
   \rightskip\ccUseProperty{margin-right}%
 }
 %    \end{macrocode}
@@ -376,8 +422,37 @@
 %    \begin{macrocode}
 \def\endcc@list{%
   \ccUseProperty{after-list}%
+  \ccUseProperty{int-margin-bottom}%
+  \ccl@decr@count%
   \ccl@advance@depth\m@ne%
   \ccaStructEnd{L}%
+}
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{\cclCalculateVMargin} generates a macro that realizes
+%   the internal vertical margin of the (nested) list. \#1 is the
+%   orientation (\lstinline{top} or \lstinline{bottom}).
+%    \begin{macrocode}
+\def\cclCalculateVMargin#1{%
+  \ifdim\ccUseProperty{margin-#1}=\z@\relax
+    \ccSetPropLocal{int-margin-#1}{\relax}%
+  \else
+    \ccSetPropLocal{int-margin-#1}{\vskip\ccUseProperty{margin-#1}\relax}%
+  \fi
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\cclCalculateLeftMargin} generates the value that
+%   \lstinline{\leftskip} is set to.
+%    \begin{macrocode}
+\def\cclCalculateMarginLeft{%
+  \ccPropertyLet{list-margin-left}{margin-left}%
+  \ccPropertyLet{list-indent}{indent}%
+  \ccSetPropertyVal{list-number-width-max}{\csname cc-\cc@cur@cont-list-number-maxwd\endcsname}%
+  \ccSetPropertyVal{list-number-width-level-max}{\csname cc-\cc@cur@cont-list-number-\the\cclID-maxwd\endcsname}%
+  \ccSetProperty{int-margin-left}{\leftskip\dimexpr\ccUseProperty{margin-left}\relax}%
+  \ccPropertyLet{int-indent}{indent}%
 }
 %    \end{macrocode}
 % \end{macro}

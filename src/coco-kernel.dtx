@@ -1016,9 +1016,12 @@
 %   is the value to be set, appended, or prepended to that Property,
 %   respectively.
 %    \begin{macrocode}
-\csdef{\ccPrefix SetPropLocal}{\cc@set@property@locally\ccSetProperty}%
-\csdef{\ccPrefix AppPropLocal}{\cc@set@property@locally\ccAppToProp}%
-\csdef{\ccPrefix PrePropLocal}{\cc@set@property@locally\ccPreToProp}%
+\def\ccSetPropLocal{\cc@set@property@locally\ccSetProperty}
+\cslet{\ccPrefix SetPropLocal}\ccSetPropLocal%
+\def\ccAppPropLocal{\cc@set@property@locally\ccAppToProp}
+\cslet{\ccPrefix AppPropLocal}\ccAppPropLocal%
+\def\ccPrePropLocal{\cc@set@property@locally\ccPreToProp}
+\cslet{\ccPrefix PrePropLocal}\ccPrePropLocal%
 %    \end{macrocode}
 % \end{macro}
 %
