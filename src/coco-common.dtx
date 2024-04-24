@@ -567,18 +567,18 @@
 %   \#1 is the internal name of the property, \#2 is the check value.
 %    \begin{macrocode}
 \def\cc@store@latest#1#2{%
-  \expandafter\ifx\csname \ccPrefix-\cc@cur@cont-#1\endcsname\relax
-    \csxdef{\ccPrefix-\cc@cur@cont-#1}{#2}%
+  \expandafter\ifx\csname cc-\cc@cur@cont-#1\endcsname\relax
+    \csxdef{cc-\cc@cur@cont-#1}{#2}%
   \else
-    \expandafter\ifdim\csname \ccPrefix-\cc@cur@cont-#1\endcsname<#2\relax
-      \csxdef{\ccPrefix-\cc@cur@cont-#1}{#2}%
+    \expandafter\ifdim\csname cc-\cc@cur@cont-#1\endcsname<#2\relax
+      \csxdef{cc-\cc@cur@cont-#1}{#2}%
     \fi
   \fi
-  \expandafter\ifx\csname \ccPrefix-\cc@cur@cont-#1-local\endcsname\relax
-    \csxdef{\ccPrefix-\cc@cur@cont-#1-local}{#2}%
+  \expandafter\ifx\csname cc-\cc@cur@cont-#1-local\endcsname\relax
+    \csxdef{cc-\cc@cur@cont-#1-local}{#2}%
   \else
-    \expandafter\ifdim\csname \ccPrefix-\cc@cur@cont-#1-local\endcsname<#2\relax
-      \csxdef{\ccPrefix-\cc@cur@cont-#1-local}{#2}%
+    \expandafter\ifdim\csname cc-\cc@cur@cont-#1-local\endcsname<#2\relax
+      \csxdef{cc-\cc@cur@cont-#1-local}{#2}%
     \fi
   \fi
 %    \end{macrocode}
@@ -596,13 +596,13 @@
 % values change, you still need to do at least two more {\LaTeX} runs
 % before the values stabilize.
 %    \begin{macrocode}
-  \ifcsdef{\ccPrefix-\cc@cur@cont-#1-stored-trigger}{}
+  \ifcsdef{cc-\cc@cur@cont-#1-stored-trigger}{}
     {\edef\@tempa{%
        \noexpand\immediate\noexpand\write\noexpand\@auxout{%
-         \noexpand\string\noexpand\csgdef{\ccPrefix-\cc@cur@cont-#1}{%
-           \noexpand\csname \ccPrefix-\cc@cur@cont-#1-local\noexpand\endcsname}}}%
+         \noexpand\string\noexpand\csgdef{cc-\cc@cur@cont-#1}{%
+           \noexpand\csname cc-\cc@cur@cont-#1-local\noexpand\endcsname}}}%
      \expandafter\AtEndDocument\expandafter{\@tempa}%
-     \csgdef{\ccPrefix-\cc@cur@cont-#1-stored-trigger}{\@empty}}}
+     \csgdef{cc-\cc@cur@cont-#1-stored-trigger}{\@empty}}}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -635,8 +635,8 @@
 % levels as \lstinline{#1number-width-max}, and the width of the
 % current number as \lstinline{#1number-width}.
 %    \begin{macrocode}
-  \ccSetPropertyVal{#1number-width-level-max}{\csname \ccPrefix-\cc@cur@cont-#1number-#3-maxwd\endcsname}%
-  \ccSetPropertyVal{#1number-width-max}{\csname \ccPrefix-\cc@cur@cont-#1number-maxwd\endcsname}%
+  \ccSetPropertyVal{#1number-width-level-max}{\csname cc-\cc@cur@cont-#1number-#3-maxwd\endcsname}%
+  \ccSetPropertyVal{#1number-width-max}{\csname cc-\cc@cur@cont-#1number-maxwd\endcsname}%
   \ccSetPropertyVal{#1number-width}{\the\wd\z@}%
 %    \end{macrocode}
 % \textit{Third step:} we calculate and fortify the actual
@@ -694,10 +694,10 @@
 %    \begin{macrocode}
 \def\cc@calc@margin@left#1#2{%
   \@tempcnta\numexpr#2-1\relax
-  \expandafter\ifx\csname \ccPrefix-\cc@cur@cont-#1\the\@tempcnta-margin-left\endcsname\relax
+  \expandafter\ifx\csname cc-\cc@cur@cont-#1\the\@tempcnta-margin-left\endcsname\relax
     \@tempdima=-\ccUseProperty{#1indent}\relax%
   \else
-    \@tempdima=\dimexpr\csname \ccPrefix-\cc@cur@cont-#1\the\@tempcnta-margin-left\endcsname-\ccUseProperty{#1indent}\relax
+    \@tempdima=\dimexpr\csname cc-\cc@cur@cont-#1\the\@tempcnta-margin-left\endcsname-\ccUseProperty{#1indent}\relax
   \fi
   \cc@store@latest{#1#2-margin-left}{\the\@tempdima}%
   \ccSetProperty{#1margin-left}{\the\@tempdima}}

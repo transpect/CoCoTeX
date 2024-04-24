@@ -140,7 +140,7 @@
 % floats. Those values will later be written into the \lstinline{.aux}
 % file for each float. The values, together with the float's overall
 % width, are stored in a macro called
-% \lstinline{\ccPrefix-float-\the\ccf@int@cnt-dimens}.
+% \lstinline{cc-float-\the\ccf@int@cnt-dimens}.
 %    \begin{macrocode}
   \gappto\@endfloatbox{%
     \global\ccf@total@height=\ht\@currbox\relax%
@@ -194,9 +194,9 @@
   \if!#1!\else
     \ccParseAttributes{#2}{#1}%
     \ccIfAttr{#2}{class}
-      {\global\letcs\ccf@current@class{\ccPrefix @#2@attr@class}%
+      {\global\letcs\ccf@current@class{cc@#2@attr@class}%
        \ccUseStyleClass{default}{\ccfCapType}%
-       \expandafter\ccUseStyleClass\expandafter{\csname \ccPrefix @#2@attr@class\endcsname}{\ccfCapType}}
+       \expandafter\ccUseStyleClass\expandafter{\csname cc@#2@attr@class\endcsname}{\ccfCapType}}
       {}%
       \ccIfAttr{#2}{break-caption}{\@ccf@break@capttrue}{}%
   \fi
@@ -211,7 +211,7 @@
 %    \begin{macrocode}
 \def\ccf@get@pos#1{%
   \ccIfAttr{#1}{float-pos}
-    {\letcs\ccf@floatpos{\ccPrefix @#1@attr@float-pos}}
+    {\letcs\ccf@floatpos{cc@#1@attr@float-pos}}
     {\let\ccf@floatpos\@empty}%
   \def\@tempa{h!}\ifx\ccf@floatpos\@tempa\let\ccf@floatpos\@empty\fi
   \def\@tempa{h}\ifx\ccf@floatpos\@tempa\def\ccf@floatpos{htbp!}\fi
@@ -484,7 +484,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
     \ccDeclareComponent{ListofSource}{}{}%
     \ccDeclareComponent{ListofNumber}{}{}%
     \ccDeclareComponent{ListofPage}{}{}%
-    \csname\ccPrefix ListofPage\endcsname{\ccUseProperty{list-of-page-face}##4}%
+    \ccComponent{ListofPage}{\ccUseProperty{list-of-page-face}##4}%
     \cc@expand@l@contents{##3}{#3}{Listof}{Caption}%%
     \cc@format@number{list-of-}{Listof}{##1}%
   }%
@@ -539,10 +539,10 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
   \ccf@check@empty{Legend}%
   \ccf@check@empty{Source}%
   \let\ccf@listof@entry\relax
-  \ccWhenComp{ListofCaption}{\csgappto{ccf@listof@entry}{\expandafter\string\csname \ccPrefix ListofCaption\endcsname{\ccUseComp{ListofCaption}}}}%
-  \ccWhenComp{ListofNumber}{\csgappto{ccf@listof@entry}{\expandafter\string\csname \ccPrefix ListofNumber\endcsname{\ccUseComp{ListofNumber}}}}%
-  \ccWhenComp{ListofLegend}{\csgappto{ccf@listof@entry}{\expandafter\string\csname \ccPrefix ListofLegend\endcsname{\ccUseComp{ListofLegend}}}}%
-  \ccWhenComp{ListofSource}{\csgappto{ccf@listof@entry}{\expandafter\string\csname \ccPrefix ListofSource\endcsname{\ccUseComp{ListofSource}}}}%
+  \ccWhenComp{ListofCaption}{\csgappto{ccf@listof@entry}{\string\ccComponent{ListofCaption}{\ccUseComp{ListofCaption}}}}%
+  \ccWhenComp{ListofNumber}{\csgappto{ccf@listof@entry}{\string\ccComponent{ListofNumber}{\ccUseComp{ListofNumber}}}}%
+  \ccWhenComp{ListofLegend}{\csgappto{ccf@listof@entry}{\string\ccComponent{ListofLegend}{\ccUseComp{ListofLegend}}}}%
+  \ccWhenComp{ListofSource}{\csgappto{ccf@listof@entry}{\string\ccCompoennt{ListofSource}{\ccUseComp{ListofSource}}}}%
   \ifx\ccf@listof@entry\relax\else
     \bgroup
       \ccGobble
@@ -707,7 +707,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
     \ifx\ccf@floatpos\@empty\else\spewnotes\fi
   \endgroup
   \immediate\write\@auxout
-    {\string\expandafter\string\gdef\string\csname\space \ccPrefix-float-\the\ccf@int@cnt-dimens\string\endcsname{%
+    {\string\expandafter\string\gdef\string\csname\space cc-float-\the\ccf@int@cnt-dimens\string\endcsname{%
         {\the\ccf@total@width}%
         {\the\ccf@total@height}%
         {\the\ccf@total@depth}%
@@ -958,7 +958,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 % \begin{macro}{depending}
 %    \begin{macrocode}
 \def\ccf@make@subcaption#1{%
-  \expandafter\ifx\csname \ccPrefix @has@\ccf@prefix capt@#1\endcsname\@empty
+  \expandafter\ifx\csname cc@has@\ccf@prefix capt@#1\endcsname\@empty
     \ccf@make@caption{#1}{\ccUseProperty{\ccf@prefix caption-valign-#1}}%
   \fi}
 %    \end{macrocode}
@@ -1223,7 +1223,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %    \begin{macrocode}
 \def\ccfTableRender{%
   \ccfGetTableContent
-  \csname \ccPrefix Content\endcsname{\unvbox\ccf@floatbox}%
+  \ccComponent{Content}{\unvbox\ccf@floatbox}%
   \ccUseComp{Content}%
   \par\if@ccf@break@capt\else\nopagebreak\fi
   \vskip\dp\strutbox
@@ -1235,7 +1235,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 \def\ccfSubTableRender{%
   \cc@iterate{\@tempcnta}{\@ne}{\ccSubFloatCnt}{%
     \ccfGetTableContent
-    \csname \ccPrefix Content\endcsname{\unvbox\ccf@floatbox}%
+    \ccComponent{Content}{\unvbox\ccf@floatbox}%
     \ccfRenderSubFloats{\the\@tempcnta}{Content}%
   }}
 %    \end{macrocode}

@@ -338,16 +338,16 @@
 %   This tagging macro inserts \lstinline{\bgroup} and
 %     \lstinline{\egroup} around the tagged area.
 %    \begin{macrocode}
-\DeclareAccessibilityCommand{\ccaStructStart}[2][]{\directlua{ltpdfa.tagger.structStart('\luaescapestring{#2}','\luaescapestring{#1}')}}
-\DeclareAccessibilityCommand{\ccaStructEnd}[1]{\directlua{ltpdfa.tagger.structEnd('\luaescapestring{#1}')}}
+\DeclareAccessibilityCommand{\ccaStructStart}[2][]{\if@cc@is@final\directlua{ltpdfa.tagger.structStart('\luaescapestring{#2}','\luaescapestring{#1}')}\fi}
+\DeclareAccessibilityCommand{\ccaStructEnd}[1]{\if@cc@is@final\directlua{ltpdfa.tagger.structEnd('\luaescapestring{#1}')}\fi}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccaVstructStart,\ccaVstructEnd} are the same as
 %   \lstinline{\ccaStructStart} and \lstinline{\ccaStructEnd} but
 %   without grouping the area.
 %    \begin{macrocode}
-\DeclareAccessibilityCommand{\ccaVstructStart}[2][]{\directlua{ltpdfa.tagger.vstructStart('\luaescapestring{#2}','\luaescapestring{#1}')}}
-\DeclareAccessibilityCommand{\ccaVstructEnd}[1]{\directlua{ltpdfa.tagger.vstructEnd('\luaescapestring{#1}')}}
+\DeclareAccessibilityCommand{\ccaVstructStart}[2][]{\if@cc@is@final\directlua{ltpdfa.tagger.vstructStart('\luaescapestring{#2}','\luaescapestring{#1}')}\fi}
+\DeclareAccessibilityCommand{\ccaVstructEnd}[1]{\if@cc@is@final\directlua{ltpdfa.tagger.vstructEnd('\luaescapestring{#1}')}\fi}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccaPstructStart, \ccaPstructEnd} same as
