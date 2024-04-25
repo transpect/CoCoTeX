@@ -693,7 +693,7 @@
 %   level.
 %    \begin{macrocode}
 \def\cc@calc@margin@left#1#2{%
-  \@tempcnta\numexpr#2-1\relax
+  \@tempcnta\numexpr#2-\@ne\relax
   \expandafter\ifx\csname cc-\cc@cur@cont-#1\the\@tempcnta-margin-left\endcsname\relax
     \@tempdima=-\ccUseProperty{#1indent}\relax%
   \else
@@ -705,92 +705,105 @@
 % \end{macro}
 % \begin{macro}{\cc@get@indent}
 %   Eventually, write the actually used values for margin-left and
-%   indent into the current container's Property list. \#1 is the
-%   internal property prefix, \#2 is the numerical list level.
+%   indent into the current container's Property list.
+%
+%   \#1 is the CS token of a method that is called to calculate the
+%   actual left margin of the list item. It defaults to above's
+%   \lstinline{\cc@calc@margin@left} and is fed the two mandatory
+%   arguments of the \lstinline{\cc@get@indent} macro, namely \#2 for
+%   the internal property prefix, and \#3 for the numerical list
+%   level. The callback method should set and store the
+%   \lstinline{#2margin-left} Property.
 %    \begin{macrocode}
-\def\cc@get@indent#1#2{%
+\def\cc@get@indent{\@ifnextchar[{\@cc@get@indent}{\@cc@get@indent[\cc@calc@margin@left]}}
+\def\@cc@get@indent[#1]#2#3{%
 %    \end{macrocode}
 % First, we need to store the initial values for both
-% \lstinline{#1margin-left} and \lstinline{#1indent} since, first
+% \lstinline{#2margin-left} and \lstinline{#2indent} since, first
 % their values might be non-dimensional, and second, they will be
 % altered during macro expansion to ultimatly being passed to
 % \lstinline{\hskip}.
 %    \begin{macrocode}
-  \ccPropertyLetX{int-#1margin-left}{#1margin-left}%
-  \ccPropertyLetX{int-#1indent}{#1indent}%
-  \ccIfPropVal{#1indent}{auto-global}
+  \ccPropertyLetX{int-#2margin-left}{#2margin-left}%
+  \ccPropertyLetX{int-#2indent}{#2indent}%
+  \ccIfPropVal{#2indent}{auto-global}
 %    \end{macrocode}
-% If \lstinline{#1indent} is set to \lstinline{auto-global}, the item
+% If \lstinline{#2indent} is set to \lstinline{auto-global}, the item
 % gets an \lstinline{indent} that is set to the negative value of the
 % maximum width of all numbers across all Levels of the same Container
 % Type. The same maximum is added to the user-set value of
 % \lstinline{margin-left}.
 %    \begin{macrocode}
-    {\ccSetPropertyX{#1indent}{-\ccUseProperty{#1number-width-max}}%
+    {\ccSetPropertyX{#2indent}{-\ccUseProperty{#2number-width-max}}%
+%    \end{macrocode}
+% If the user has set \lstinline{#2margin-left} to \lstinline{auto}, we reset it to empty.
+%    \begin{macrocode}
+     \ccIfPropVal{#2margin-left}{auto}{\ccSetProperty{#2margin-left}{}}{}%
 %    \end{macrocode}
 % If the user has not set \lstinline{margin-left}, we set it to \lstinline{\z@}.
 %    \begin{macrocode}
-     \ccIfPropVal{#1margin-left}{}
-       {\ccSetProperty{int-#1margin-left}{\z@}}
-       {\ccPropertyLetX{int-#1margin-left}{#1margin-left}}%
-     \ccSetPropertyX{#1margin-left}{\dimexpr\ccUseProperty{#1number-width-max}+\ccUseProperty{int-#1margin-left}\relax}}
+     \ccIfPropVal{#2margin-left}{}
+       {\ccSetProperty{int-#2margin-left}{\z@}}
+       {\ccPropertyLetX{int-#2margin-left}{#2margin-left}}%
+     \ccSetPropertyX{#2margin-left}{\dimexpr\ccUseProperty{#2number-width-max}+\ccUseProperty{int-#2margin-left}\relax}}
 %    \end{macrocode}
-% Next, we check if \lstinline{#1margin-left} is set to \lstinline{auto}.
+% Next, we check if \lstinline{#2margin-left} is set to \lstinline{auto}.
 %    \begin{macrocode}
-    {\ccIfPropVal{int-#1margin-left}{auto}
+    {\ccIfPropVal{int-#2margin-left}{auto}
 %    \end{macrocode}
-% If \lstinline{#1margin-left} is set to \lstinline{auto}, all
+% If \lstinline{#2margin-left} is set to \lstinline{auto}, all
 % items of the same level get the same left margin that is determined
 % by the sums of the indents of all higher levels.
 %    \begin{macrocode}
-       {\ccIfPropVal{int-#1indent}{auto}
+       {\ccIfPropVal{int-#2indent}{auto}
 %    \end{macrocode}
-% if \lstinline{#1indent} is also set to \lstinline{auto}, the
+% if \lstinline{#2indent} is also set to \lstinline{auto}, the
 % \lstinline{indent} of the current item is set to the wides Number of
 % the same level.
 %    \begin{macrocode}
-          {\ccSetPropertyX{#1indent}{-\ccUseProperty{#1number-width-level-max}}}
+          {\ccSetPropertyX{#2indent}{-\ccUseProperty{#2number-width-level-max}}}
 %    \end{macrocode}
 % otherwise it is set to the value of indent, or \lstinline{0pt} if it
 % was not set at all.
 %    \begin{macrocode}
-          {\ccIfProp{int-#1indent}
-             {\ccSetPropertyX{#1indent}{\ccUseProperty{int-#1indent}}}
-             {\ccSetProperty{#1indent}{\z@}}}%
+          {\ccIfProp{int-#2indent}
+             {\ccSetPropertyX{#2indent}{\ccUseProperty{int-#2indent}}}
+             {\ccSetProperty{#2indent}{\z@}}}%
 %    \end{macrocode}
-% the final value for \lstinline{margin-left} is calculated by the
-% \lstinline{\cc@calc@margin@left} macro, above. It will be set to the sum of indent and
+% the final value for \lstinline{margin-left} is calculated. If no
+% optional argument is given, the method called is the
+% \lstinline{\cc@calc@margin@left} macro, above.
 %    \begin{macrocode}
-        \cc@calc@margin@left{#1}{#2}}
+        #1{#2}{#3}}
 %    \end{macrocode}
 % This branch is reached when the left margin is not set to \lstinline{auto}.
 %    \begin{macrocode}
-       {\ccIfProp{int-#1margin-left}
-          {\ccIfPropVal{int-#1indent}{auto}
+       {\ccIfProp{int-#2margin-left}
+          {\ccIfPropVal{int-#2indent}{auto}
 %    \end{macrocode}
 % If \lstinline{margin-left} is set to a specific value and
 % \lstinline{indent} is set to \lstinline{auto}, set the actual indent
 % to the width of the level's widest Number.
 %    \begin{macrocode}
-            {\ccSetPropertyX{#1indent}{-\ccUseProperty{#1number-width-level-max}}}
-            {\ccIfProp{int-#1indent}
+            {\ccSetPropertyX{#2indent}{-\ccUseProperty{#2number-width-level-max}}}
+            {\ccIfProp{int-#2indent}
 %    \end{macrocode}
 % Otherwise, if \lstinline{indent} is set to a specific width, apply that value, or else set the inden to \lstinline{0pt}.
 %    \begin{macrocode}
-               {\ccSetPropertyX{#1indent}{\ccUseProperty{int-#1indent}}}
-               {\ccSetProperty{#1indent}{\z@}}}}
+               {\ccSetPropertyX{#2indent}{\ccUseProperty{int-#2indent}}}
+               {\ccSetProperty{#2indent}{\z@}}}}
 %    \end{macrocode}
 % If \lstinline{margin-left} is not set,
 %    \begin{macrocode}
-         {\ccIfPropVal{int-#1indent}{auto}
+         {\ccIfPropVal{int-#2indent}{auto}
 %    \end{macrocode}
 % and \lstinline{indent} is set to \lstinline{auto}, set
 % \lstinline{margin-left} to the width of the level's widest Number
 % and the actual \lstinline{indent} to the negative of that.
 %    \begin{macrocode}
-            {\ccPropertyLetX{#1margin-left}{#1number-width-level-max}%
-             \ccSetPropertyX{#1indent}{-\ccUseProperty{#1number-width-level-max}}}
-            {\ccIfProp{int-#1indent}
+            {\ccPropertyLetX{#2margin-left}{#2number-width-level-max}%
+             \ccSetPropertyX{#2indent}{-\ccUseProperty{#2number-width-level-max}}}
+            {\ccIfProp{int-#2indent}
 %    \end{macrocode}
 % If \lstinline{margin-left} is not set, and \lstinline{indent} is set
 % to a specific value, apply that value for \lstinline{indent} and set
@@ -798,14 +811,15 @@
 % \lstinline{indent} should have a positive value, otherwise the
 % content would probably lap over the left edge of the type area.
 %    \begin{macrocode}
-               {\ccSetPropertyX{#1indent}{\ccUseProperty{int-#1indent}}%
-                \ccSetProperty{#1margin-left}{\z@}}
+               {\ccSetPropertyX{#2indent}{\ccUseProperty{int-#2indent}}%
+                \ccSetProperty{#2margin-left}{\z@}}
 %    \end{macrocode}
 % otherwise set both \lstinline{indent} nad \lstinline{margin-left} to
 % \lstinline{0pt}.
 %    \begin{macrocode}
-               {\ccSetProperty{#1indent}{\z@}%
-                \ccSetProperty{#1margin-left}{\z@}}}}}}}
+               {\ccSetProperty{#2indent}{\z@}%
+                \ccSetProperty{#2margin-left}{\z@}}}}}}%
+}
 %    \end{macrocode}
 % \end{macro}
 %
