@@ -89,20 +89,28 @@
 \ccDeclareContainer{List}{%
   \ccDeclareType{Properties}{%
     %% list formatting
-    \ccSetProperty{before-list}{\par}% at the very beginning of each (nested) list
+    \ccSetProperty{before-list}{% at the very beginning of each (nested) list
+      \par
+      \ccaStructStart{L}% Start Tag for the (nested) list
+    }%
     \ccSetProperty{after-list}{% after each (nested) list
       \ccUseProperty{after-item}%
+      \ccaStructEnd{L}% end tag for the (nested) list
     }%
     %% list margins
     \ccSetProperty{margin-top}{\z@}% vertical space after the list.
     \ccSetProperty{margin-bottom}{\z@}% vertical space before the list.
-    \ccSetProperty{margin-left}{1em+\ccUseProperty{prev-margin-left}}% horizontal space to the left of each list item (auto=width of widest label + prev-margin-left)
+    \ccSetProperty{margin-left}{\csname leftmargin\@roman\cclCurDepth\endcsname+\ccUseProperty{prev-margin-left}}% horizontal space to the left of each item, from left boundary of the page area (auto=width of widest label + prev-margin-left, top-level-list-wise)
+    \ccSetProperty{max-label-width}{.33\textwidth}% maximum margin reserved for list labels
     \ccSetProperty{margin-right}{\z@}% horizontal space to the right of each list item
     %% between list items
     \ccSetProperty{item-sep}{\z@}% vertical space between two adjacent list items (real: this value + par-skip)
     \ccSetProperty{after-indent}{false}% whether the paragraph after the list should have an indent (true) or not (false)
+    \ccSetProperty{at-begin-item-body}{\ccaVstructStart{LBody}}% right at the beginning of a new item body
+    \ccSetProperty{at-end-item-body}{\ccaVstructEnd{LBody}}% at the very end of an item body, but before \par
     \ccSetProperty{after-item}{% material after each item
-      \ccaVstructEnd{LBody}\ccaVstructEnd{LI}%
+      \ccUseProperty{at-end-item-body}%
+      \ccaVstructEnd{LI}% Close list item tags
       \par}%
     \ccSetProperty{before-item}{%
       \ifcclFirst
@@ -115,16 +123,16 @@
       \parskip\ccUseProperty{par-skip}\relax%
       \parfillskip\ccUseProperty{par-fill-skip}\relax%
       \leavevmode
-      \ccaVstructStart{LI}%
+      \ccaVstructStart{LI}% Start tag for a list item
     }%
     \ccSetProperty{item-offset}{% Setting the label indent and first-line offset
-      \cclItemIndent\ccUseProperty{int-indent}%
-      \advance\cclItemIndent-\parindent\relax
+      \cclItemIndent\ccUseProperty{indent}%
+      \advance\cclItemIndent\dimexpr-\parindent-\ccUseProperty{label-sep}\relax
       \hskip\cclItemIndent\relax%
-      \ifdim\ccUseProperty{int-indent}>\z@
-        \cclItemIndent\ccUseProperty{int-indent}%
+      \ifdim\ccUseProperty{indent}>\z@
+        \cclItemIndent\ccUseProperty{indent}%
       \else
-        \cclItemIndent-\ccUseProperty{int-indent}%
+        \cclItemIndent-\ccUseProperty{indent}%
       \fi
     }%
     %% inside list items
@@ -133,18 +141,17 @@
     \ccSetProperty{par-skip}{\z@}% vertical space between two adjacent paragraphs inside a list item
     %% label formatting
     \ccSetProperty{label}{\ccUseComp{Label}}% The Label Component is set via the optional argument of \Item, otherwise it is generated
-    \ccSetProperty{indent}{-1em}% indent of each list item's first line (relative to margin-left)
-    \ccSetProperty{label-sep}{\enskip}% separator between each item's label and its content
+    \ccSetProperty{indent}{-\csname leftmargin\@roman\cclCurDepth\endcsname}% indent of each list item's first line (relative to margin-left) NOTE: auto-global is valid, but it causes *all* lists -- despite the nesting level -- to have the same left margin and indent!
+    \ccSetProperty{label-sep}{.5em}% horizontal skip between each item's label and its content
     \ccSetProperty{label-face}{}% font of the item's label
-    \ccSetProperty{label-align}{left}% alignment of label within its hbox
+    \ccSetProperty{label-align}{left}% alignment of label within its \hbox
     \ccSetProperty{label-format}{% format of the label itself
       \ccUseProperty{label-face}%
-      \ccaVstructStart{Lbl}%
+      \ccaVstructStart{Lbl}% Start Tag for the item's label
       \ccUseProperty{label}%
-      \ccaVstructEnd{Lbl}%
-      \ccUseProperty{label-sep}%
+      \ccaVstructEnd{Lbl}% End tag for the item's label
     }%
-    \ccSetProperty{label-box}{% hbox that contains the label
+    \ccSetProperty{label-box}{% hbox that contains and aligns the label
       \hbox to \cclItemIndent{%
         \ccIfPropVal{label-align}{left}{}{\hss}%
         \ccUseProperty{label-format}%
@@ -154,7 +161,7 @@
       \ccUseProperty{before-item}%
       \ccUseProperty{item-offset}%
       \ccUseProperty{label-box}%
-      \ccaVstructStart{LBody}%
+      \hskip\ccUseProperty{label-sep}%
     }%
   }%
   \ccDeclareType{Components}{%
@@ -176,7 +183,7 @@
 %   handler. \#3 is a list of type specific properties that are
 %   appended to the generic list's property list.
 %    \begin{macrocode}
-\def\ccDeclareListType#1#2#3{%
+\long\def\ccDeclareListType#1#2#3{%
 %    \end{macrocode}
 % \begin{macro}{\DeclareAttributeHandler} declares a new handler
 %   for a list's attributes. \#\#1 is the definition body.
@@ -306,12 +313,20 @@
 %    \end{macrocode}
 % \end{macro}
 % 
-% \begin{macro}{\cclID} stores a unique ``identifier'' number
-%   for each list. An internal global counter register
-%   \lstinline{\ccl@total@list@cnt} is used to count the overall
-%   number of opening lists.
+% \begin{macro}{\cclTopID} is a counter that stores a unique number
+%   for each top-level List Instance. It is used to calculate the
+%   margins of both top-level items and items of nested lists.
 %    \begin{macrocode}
-\newcount\cclID       \cclID\z@
+\newcount\cclTopID       \cclTopID\z@\relax
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\cclID} stores a unique ``identifier'' number for each
+%   list, irrespective their nesting levels. An internal global
+%   counter register \lstinline{\ccl@total@list@cnt} is used to count
+%   the overall number of opening lists. Currently, the global ID of
+%   each list is unused.
+%    \begin{macrocode}
+\newcount\cclID \cclID\z@\relax
 \newcount\ccl@total@list@cnt \ccl@total@list@cnt\z@\relax
 %    \end{macrocode}
 % \end{macro}
@@ -319,12 +334,17 @@
 %   a nesting-depth specific macro
 %   \lstinline{ccl@prev@cnt@\the\ccl@depth}, advances the global
 %   internal list counter by one, and sets the publicly available
-%   counter \lstinline{\cclID} to the resulting value.
+%   counter \lstinline{\cclID} to the resulting value. Also, if the
+%   nesting level is 1, the \lstinline{\cclTopID} counter is
+%   incremented.
 %    \begin{macrocode}
 \def\ccl@incr@count{%
   \csxdef{ccl@prev@cnt@\the\ccl@depth}{\the\cclID}%
   \global\advance\ccl@total@list@cnt\@ne\relax
   \global\cclID\ccl@total@list@cnt\relax
+  \ifnum\cclCurDepth=\@ne\relax
+    \global\advance\cclTopID\@ne\relax
+  \fi
 }
 %    \end{macrocode}
 % \end{macro}
@@ -353,7 +373,6 @@
   \ccl@incr@count%
   \edef\ccl@cur@cont{\cc@cur@cont-\cclCurDepth}%
   \global\cclFirsttrue
-  \ccaStructStart{L}%
 %    \end{macrocode}
 % If the nesting goes deeper than the style programmer anticipated:
 %    \begin{macrocode}
@@ -393,10 +412,18 @@
       \ccComponent{Label}{##1}%
     \fi
     \sbox\z@{\@cc@is@finalfalse\ccUseProperty{label-format}}%
-    \cc@store@latest{list-number-\the\cclID-maxwd}{\the\wd\z@}%
-    \cc@store@latest{list-number-maxwd}{\the\wd\z@}%
-    \cc@set@property@locally\ccSetPropertyVal{list-number-width}{\the\wd\z@}%
-    \ccUseProperty{item-format}\ignorespaces
+    \@tempdima=\dimexpr\ccUseProperty{max-label-width}\relax
+    \ifdim\wd\z@<\@tempdima\relax
+      \@tempdima=\the\wd\z@\relax%
+    \fi
+    \bgroup
+      \def\cc@cur@cont{list}%
+      \cc@store@latest{\the\cclTopID-number-\cclCurDepth-maxwd}{\the\@tempdima}%
+      \cc@store@latest{\the\cclTopID-number-maxwd}{\the\@tempdima}%
+    \egroup
+    \ccSetPropertyX{label-width}{\the\@tempdima}%
+    \ccUseProperty{item-format}%
+    \ccUseProperty{at-begin-item-body}\ignorespaces%
   }%
 %    \end{macrocode}
 % If default {\LaTeX} macros are replaced per package option,
@@ -410,8 +437,8 @@
 %    \begin{macrocode}
   \ccUseProperty{before-list}%
   \ccUseProperty{int-margin-top}%
-  \ccUseProperty{int-margin-left}\relax%
-  \rightskip\ccUseProperty{margin-right}%
+  \leftskip\dimexpr\ccUseProperty{margin-left}+\ccUseProperty{label-sep}\relax%
+  \rightskip\dimexpr\ccUseProperty{margin-right}\relax%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -425,11 +452,9 @@
   \ccUseProperty{int-margin-bottom}%
   \ccl@decr@count%
   \ccl@advance@depth\m@ne%
-  \ccaStructEnd{L}%
 }
 %    \end{macrocode}
 % \end{macro}
-% 
 % \begin{macro}{\cclCalculateVMargin} generates a macro that realizes
 %   the internal vertical margin of the (nested) list. \#1 is the
 %   orientation (\lstinline{top} or \lstinline{bottom}).
@@ -447,12 +472,28 @@
 %   \lstinline{\leftskip} is set to.
 %    \begin{macrocode}
 \def\cclCalculateMarginLeft{%
-  \ccPropertyLet{list-margin-left}{margin-left}%
-  \ccPropertyLet{list-indent}{indent}%
-  \ccSetPropertyVal{list-number-width-max}{\csname cc-\cc@cur@cont-list-number-maxwd\endcsname}%
-  \ccSetPropertyVal{list-number-width-level-max}{\csname cc-\cc@cur@cont-list-number-\the\cclID-maxwd\endcsname}%
-  \ccSetProperty{int-margin-left}{\leftskip\dimexpr\ccUseProperty{margin-left}\relax}%
-  \ccPropertyLet{int-indent}{indent}%
+  \ifcsdef{cc-list-\the\cclTopID-number-maxwd}
+    {\ccSetPropertyVal{number-width-max}{\csname cc-list-\the\cclTopID-number-maxwd\endcsname}}
+    {\ccSetPropertyVal{number-width-max}{1sp}}%
+  \ifcsdef{cc-list-\the\cclTopID-number-\cclCurDepth-maxwd}
+    {\ccSetPropertyVal{number-width-level-max}{\csname cc-list-\the\cclTopID-number-\cclCurDepth-maxwd\endcsname}}
+    {\ccSetPropertyVal{number-width-level-max}{1sp}}%
+  \cc@get@indent[\ccl@calc@margin@left]{}{\the\cclTopID}%
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccl@calc@margin@left} is an override for
+%   coco-common's \lstinline{\cc@calc@margin@left} specific for
+%   lists. Accordings to \lstinline{\cc@calc@margin@left}'s argument
+%   structure, \#1 is the internal Property prefix, and \#2 is the
+%   current value of the list depth counter. However, since we already
+%   stored the left margin of the previous depth level in the internal
+%   \lstinline{prev-margin-left} Property, we can gobble both
+%   arguments.
+%    \begin{macrocode}
+\def\ccl@calc@margin@left#1#2{%
+  \@tempdima=\ccUseProperty{prev-margin-left}\relax%
+  \ccSetPropertyX{margin-left}{\the\dimexpr\@tempdima-\ccUseProperty{indent}\relax}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -485,7 +526,7 @@
 %   list \#1.
 %    \begin{macrocode}
 \def\cclUseAttributeHandler#1{%
-  \ccParseAttributes{List}{#1}%
+  \ccParseAttributes{\cc@cur@cont-\cclCurDepth}{#1}%
   \expandafter\ifx\csname ccl@eval@attrs@\ccl@list@type\endcsname\relax
     \ccPackageError{Lists}{Type}
       {List type `\ccl@list@type' does not provide an Attribute Handler.}
@@ -518,29 +559,30 @@
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccl@eval@attrs@itemize} is the handler for attributes
-%   of itemize-like list types.
+%   of itemize-like list types. Currently, it does nothing.
 %    \begin{macrocode}
   \DeclareAttributeHandler{}
 %    \end{macrocode}
 % \end{macro}
-% Unnumbered list specific Properties
+%
+% \subsubsection{Itemize-Type List  Specific Properties}
+%
+% For unnumbered lists there is one new Property,
+% \lstinline{default-label} which defines a fallback label.
 %    \begin{macrocode}
-}{%
-  \ccSetProperty{default-label}{--}% the default label for unnumbered lists
-}
-%    \end{macrocode}
-%% TEMP:
-%    \begin{macrocode}
-\def\blacksquare{\raise.15ex\hbox{\rule{.5em}{.5em}}}
+}{\ccSetProperty{default-label}{-}}
 %    \end{macrocode}
 %
+%
+% \subsubsection{Itemize-Style Default Lists}
+%
 %    \begin{macrocode}
-\ccDeclareList{Itemize}{unnumbered}{%
-  \ccSetProperty{label-face}{\color{black}}%
-  \ccSetProperty{default-label}{\blacksquare}
-}
-\ccDeclareNested{Itemize}{1}{\ccSetProperty{label-face}{\color{yellow}}}
-\ccDeclareNested{Itemize}{2}{\ccSetProperty{label-face}{\color{red}}}
+\ccDeclareList{Itemize}{unnumbered}{\ccSetProperty{default-label}{\textbullet}}
+\ccDeclareNested{Itemize}{1}{%
+  \ccSetProperty{label-face}{\normalfont\bfseries}%
+  \ccSetProperty{default-label}{ \textendash}}
+\ccDeclareNested{Itemize}{2}{\ccSetProperty{default-label}{\textasteriskcentered}}
+\ccDeclareNested{Itemize}{3}{\ccSetProperty{default-label}{\textperiodcentered}}
 %    \end{macrocode}
 %
 %
@@ -553,17 +595,6 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\ccl@label@type@arabic, \ccl@label@type@roman,
-%   \ccl@label@type@Roman, \ccl@label@type@alph, \ccl@label@type@Alph}
-%   are all available label types.
-%    \begin{macrocode}
-\def\ccl@label@type@arabic{\@arabic}
-\def\ccl@label@type@roman{\@roman}
-\def\ccl@label@type@Roman{\@Roman}
-\def\ccl@label@type@alph{\@alph}
-\def\ccl@label@type@Alph{\@Alph}
-%    \end{macrocode}
-% \end{macro}
 %    \begin{macrocode}
 \ccDeclareListType{numbered}{%
 %    \end{macrocode}
@@ -577,23 +608,25 @@
 % counter should be advanced for each item. Defaults to $+1$ if none
 % is given.
 %    \begin{macrocode}
-    \ccIfAttr{List}{step}
-      {\ccl@item@adv=\expandafter\numexpr\csname cc@\cc@cur@cont @attr@step\endcsname\relax}%
+    \ccIfAttr{\cc@cur@cont-\cclCurDepth}{step}
+      {\ccl@item@adv=\expandafter\numexpr\csname cc@\cc@cur@cont-\cclCurDepth @attr@step\endcsname\relax}%
       {\ccl@item@adv=\@ne}%
 %    \end{macrocode}
 % The attribute \lstinline{start} indicates the initial internal
 % counter of the items in the list. The number itself is the counter
-% of the first item, so we need to add $-1$ to the given value such
-% that item can advance it by . If the attribute is not given, the
-% internal coutner is initialized to 0.
+% of the first item, so we need to substract the value of
+% \lstinline{step} from the given value such that \lstinline{\item} can
+% advance it by that same value. If the attribute is not given, the
+% internal coutner is initialized to \lstinline{0}.
 %    \begin{macrocode}
-    \ccIfAttr{List}{start}
-      {\ccl@item@cnt=\expandafter\numexpr\csname cc@\cc@cur@cont @attr@start\endcsname\relax
+    \ccIfAttr{\cc@cur@cont-\cclCurDepth}{start}
+      {\ccl@item@cnt=\expandafter\numexpr\csname cc@\cc@cur@cont-\cclCurDepth @attr@start\endcsname\relax
        \advance\ccl@item@cnt-\ccl@item@adv}%
       {\ccl@item@cnt=\z@\relax}%
     }
 %    \end{macrocode}
-% \begin{macro}{\ccl@make@label@numbered} creates the label of a
+% \end{macro}
+% \begin{macro}{\ccl@make@label@numbered} is the label handler of a
 %   numbered list type.
 %    \begin{macrocode}
   \DeclareLabelHandler{%
@@ -607,20 +640,59 @@
     \ccComponent{Label}{\ccl@label{\ccl@item@cnt}}
   }%
 %    \end{macrocode}
-% Numbered list specific Properties
+% \end{macro}
 %    \begin{macrocode}
 }{%
+%    \end{macrocode}
+%
+%
+% \subsubsection{Numbered List-Specific Properties}
+%
+% \paragraph{New Properties}
+%
+% The new Property \lstinline{enum-type} controls how the item counter
+% is rendered when it is not given explicitly with the optional
+% argument of \lstinline{\item}. The default values are borrowed from
+% LaTeX's default enumerate types and defined below.
+%    \begin{macrocode}
   \ccSetProperty{enum-type}{arabic}%
-}
+%    \end{macrocode}
+% 
+%
+% \paragraph{Properties with Deviating Default Values}
+%
+% By default, numeric labels are followed by a period to accommodate
+% {\LaTeX} customs.
+%    \begin{macrocode}
+  \ccSetProperty{label}{\ccUseComp{Label}.}}
+%    \end{macrocode}
+%
+% \subsubsection{Available Counting Styles}
+%
+% \begin{macro}{\ccl@label@type@arabic, \ccl@label@type@roman,
+%   \ccl@label@type@Roman, \ccl@label@type@alph, \ccl@label@type@Alph}
+%   are wrappers for all the available counter transformators built-in
+%   the \lstinline{\LaTeX} kernel.
+%    \begin{macrocode}
+\def\ccl@label@type@arabic{\@arabic}
+\def\ccl@label@type@roman{\@roman}
+\def\ccl@label@type@Roman{\@Roman}
+\def\ccl@label@type@alph{\@alph}
+\def\ccl@label@type@Alph{\@Alph}
 %    \end{macrocode}
 % \end{macro}
-% The enumerate-style prototype
+%
+%
+% \subsubsection{Enumerate-Style Default Lists}
+%
 %    \begin{macrocode}
-\ccDeclareList{Enumerate}{numbered}{%
-  \ccSetProperty{label}{\ccUseComp{Label}.}
+\ccDeclareList{Enumerate}{numbered}{}
+\ccDeclareNested{Enumerate}{1}{% (
+  \ccSetProperty{label}{\ccUseComp{Label})}%
+  \ccSetProperty{enum-type}{alph}%
 }
-\ccDeclareNested{Enumerate}{1}{\ccSetProperty{enum-type}{alph}}
 \ccDeclareNested{Enumerate}{2}{\ccSetProperty{enum-type}{roman}}
+\ccDeclareNested{Enumerate}{3}{\ccSetProperty{enum-type}{Alph}}
 %    \end{macrocode}
 %
 %
@@ -629,15 +701,16 @@
 %    \begin{macrocode}
 \ccDeclareListType{text}{%
 %    \end{macrocode}
-% 
 % \begin{macro}{\ccl@eval@attrs@text} is the handler for the
 %   attributes of description-like list types.
 %    \begin{macrocode}
   \DeclareAttributeHandler{%
-    \ccIfAttr{List}{width}
-      {\cclLabelWidth=\expandafter\numexpr\csname cc@\cc@cur@cont @attr@width\endcsname\relax}%
-      %% TODO: calculate exact value according to longest label
-      {\csname\ccPrefix SetPropLocal\endcsname{label-width}{20mm}}%
+    \ccIfAttr{\cc@cur@cont-\cclCurDepth}{width}
+      {\ccSetPropertyVal{min-margin-left}{\expandafter\dimexpr\csname cc@\cc@cur@cont-\cclCurDepth @attr@width\endcsname\relax}}%
+      {\ccSetProperty{min-margin-left}{2em}}%
+  \ccIfPropVal{label-growth}{down}
+    {\long\def\ccl@vbox##1{\smash{\vtop{##1}}}}
+    {\long\def\ccl@vbox##1{\vbox{##1}}}%
   }
 %    \end{macrocode}
 % \end{macro}
@@ -645,18 +718,73 @@
 %   description-like list type.
 %    \begin{macrocode}
   \DeclareLabelHandler{%
-    \ccComponent{Label}{}}
+    \ccComponent{Label}{}%
+  }
 %    \end{macrocode}
 % \end{macro}
-% Description list specific Properties
+%
+%
+% \subsubsection{Description-Type Specific Properties}
+%
+% \paragraph{New Properties}
+%
+% There is a new Property, \lstinline{label-growth}, which can be set
+% to \lstinline{up} or \lstinline{down} and which controls the
+% direction labels ``grow'' into when they need more space than
+% \lstinline{max-label-width}. On \TeX-primitive level, it controlls
+% whether the label is put into a \lstinline{\vbox} or
+% \lstinline{\vtop} with \lstinline{\hsize=\cclItemIndent}.
+%
+% \textbf{Improtant note:} If the \lstinline{label-growth} is set to
+% 'down' and the description of an item uses less lines than its
+% label, the label \textit{will} flow into the next item. There is no
+% (easy) way to catch that (automatically) without destroying the
+% possibility to nesting lists.
+%
+% \paragraph{Properties with Deviating Default Values}
+%
+% TO accommodate for the new option, the \lstinline{label-box} has a
+% conditional that switches between regular \lstinline{\hbox} labels
+% and the two \lstinline{\vbox} variants described above..
+%
+% The Properties \lstinline{margin-left} and \lstinline{indent} of
+% text-type lists are by default set to \lstinline{auto}.
 %    \begin{macrocode}
 }{%
-  \ccSetProperty{label-width}{2em}
+  \ccSetProperty{label-growth}{up}% or 'down'; where a multi-line label should "grow" to.
+  \ccSetProperty{indent}{auto}%
+  \ccSetProperty{margin-left}{auto}%
+  \ccSetProperty{label-box}{%
+    \ifdim\ccUseProperty{label-width}<\ccUseProperty{max-label-width}\relax
+      \hbox to \cclItemIndent{%
+        \ccIfPropVal{label-align}{left}{}{\hss}%
+        \ccUseProperty{label-format}%
+        \ccIfPropVal{label-align}{right}{}{\hss}}%
+    \else
+      \ccl@vbox{\relax%
+        \hsize\dimexpr\cclItemIndent%
+        \leftskip\z@
+        \rightskip\z@
+        \parindent\z@
+        \leavevmode
+        \ccUseProperty{label-format}%
+        \@@par
+      }%
+    \fi
+  }%
 }
 %    \end{macrocode}
-% 
+%
+%
+% \subsubsection{Description-Type Default Lists}
+%
+% As with the standard \lstinline{\LaTeX} \lstinline{description}
+% environment, there are no default definitions for nested
+% Description-type lists.
 %    \begin{macrocode}
-\ccDeclareList{Description}{text}{\ccSetProperty{list-type}{text}}
+\ccDeclareList{Description}{text}{%
+  \ccSetProperty{label-face}{\bfseries}
+}
 %    \end{macrocode}
 %
 %
