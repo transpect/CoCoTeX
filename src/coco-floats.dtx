@@ -694,10 +694,10 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
       \ccf@test@caption{0}{}{top}%
       \ccf@test@caption{0}{}{bottom}%
       \bgroup
-        \ccaStructStart{\cc@cur@cont}%
+        \@cc@is@finaltrue\ccaStructStart{\cc@cur@cont}\@cc@is@finalfalse
         \hsize\ccf@total@width
         \ccf@process
-        \ccaStructEnd{\cc@cur@cont}%
+        \@cc@is@finaltrue\ccaStructEnd{\cc@cur@cont}\@cc@is@finalfalse
         \par
       \egroup
       \ccSavePage
