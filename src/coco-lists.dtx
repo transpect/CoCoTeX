@@ -32,7 +32,7 @@
 % \lstinline{description} environments.
 %    \begin{macrocode}
 \newif\if@ccl@replace \@ccl@replacefalse
-\DeclareOption{replace}{\global\@ccl@replacetrue}%
+\DeclareOptionX{replace}{\global\@ccl@replacetrue}%
 %    \end{macrocode}
 % The option inherit defines how nested lists inherit their
 % properties. Currently, there are two ways: \lstinline{common}: All
@@ -78,6 +78,7 @@
     \global\let\ccl@nesting\ccl@str@local
   \fi
 }
+\ProcessOptionsX
 %    \end{macrocode}
 %
 % \section{The List Container}
@@ -85,7 +86,6 @@
 % The \lstinline{List} Container is the most abstract Container for lists. 
 %
 %    \begin{macrocode}
-\ProcessOptionsX
 \ccDeclareContainer{List}{%
   \ccDeclareType{Properties}{%
     %% list formatting
@@ -103,7 +103,7 @@
     %% list margins
     \ccSetProperty{margin-top}{\z@}% vertical space after the list.
     \ccSetProperty{margin-bottom}{\z@}% vertical space before the list.
-    \ccSetProperty{margin-left}{\csname leftmargin\@roman\cclCurDepth\endcsname+\ccUseProperty{prev-margin-left}}% horizontal space to the left of each item, from left boundary of the page area (auto=width of widest label + prev-margin-left, top-level-list-wise)
+    \ccSetProperty{margin-left}{\csname leftmargin\@roman\cclCurDepth\endcsname-\ccUseProperty{label-sep}+\ccUseProperty{prev-margin-left}}% horizontal space to the left of each item, from left boundary of the page area (auto=width of widest label + prev-margin-left, top-level-list-wise)
     \ccSetProperty{max-label-width}{.33\textwidth}% maximum margin reserved for list labels
     \ccSetProperty{margin-right}{\z@}% horizontal space to the right of each list item
     %% between list items
@@ -145,7 +145,7 @@
     \ccSetProperty{par-skip}{\z@}% vertical space between two adjacent paragraphs inside a list item
     %% label formatting
     \ccSetProperty{label}{\ccUseComp{Label}}% The Label Component is set via the optional argument of \Item, otherwise it is generated
-    \ccSetProperty{indent}{-\csname leftmargin\@roman\cclCurDepth\endcsname}% indent of each list item's first line (relative to margin-left) NOTE: auto-global is valid, but it causes *all* lists -- despite the nesting level -- to have the same left margin and indent!
+    \ccSetProperty{indent}{-\dimexpr\csname leftmargin\@roman\cclCurDepth\endcsname-\ccUseProperty{label-sep}\relax}% indent of each list item's first line (relative to margin-left) NOTE: auto-global is valid, but it causes *all* lists -- despite the nesting level -- to have the same left margin and indent!
     \ccSetProperty{label-sep}{.5em}% horizontal skip between each item's label and its content
     \ccSetProperty{label-face}{}% font of the item's label
     \ccSetProperty{label-align}{left}% alignment of label within its \hbox
