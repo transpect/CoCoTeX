@@ -90,7 +90,10 @@
   \ccDeclareType{Properties}{%
     %% list formatting
     \ccSetProperty{before-list}{% at the very beginning of each (nested) list
-      \par
+      \if@noskipsec \leavevmode \fi
+      \ifvmode\else
+        \unskip \par
+      \fi
       \ccaStructStart{L}% Start Tag for the (nested) list
     }%
     \ccSetProperty{after-list}{% after each (nested) list
@@ -122,12 +125,13 @@
       \parindent\ccUseProperty{par-indent}\relax%
       \parskip\ccUseProperty{par-skip}\relax%
       \parfillskip\ccUseProperty{par-fill-skip}\relax%
+      \noindent
       \leavevmode
       \ccaVstructStart{LI}% Start tag for a list item
     }%
     \ccSetProperty{item-offset}{% Setting the label indent and first-line offset
       \cclItemIndent\ccUseProperty{indent}%
-      \advance\cclItemIndent\dimexpr-\parindent-\ccUseProperty{label-sep}\relax
+      \advance\cclItemIndent\dimexpr-\ccUseProperty{label-sep}\relax
       \hskip\cclItemIndent\relax%
       \ifdim\ccUseProperty{indent}>\z@
         \cclItemIndent\ccUseProperty{indent}%
@@ -449,9 +453,18 @@
 %    \begin{macrocode}
 \def\endcc@list{%
   \ccUseProperty{after-list}%
-  \ccUseProperty{int-margin-bottom}%
   \ccl@decr@count%
   \ccl@advance@depth\m@ne%
+  \ccUseProperty{int-margin-bottom}%
+  \ifnum\cclCurDepth=\z@\relax
+    \ccIfPropVal{after-indent}{false}{%
+      \global\@afterindentfalse
+      \global\everypar{%
+        \if@afterindent \else
+          {\setbox\z@\lastbox}%
+        \fi
+        \global\everypar{}}}{}%
+  \fi
 }
 %    \end{macrocode}
 % \end{macro}
@@ -461,9 +474,9 @@
 %    \begin{macrocode}
 \def\cclCalculateVMargin#1{%
   \ifdim\ccUseProperty{margin-#1}=\z@\relax
-    \ccSetPropLocal{int-margin-#1}{\relax}%
+    \ccSetProperty{int-margin-#1}{\relax}%
   \else
-    \ccSetPropLocal{int-margin-#1}{\vskip\ccUseProperty{margin-#1}\relax}%
+    \ccSetProperty{int-margin-#1}{\addvspace{\ccUseProperty{margin-#1}}}%
   \fi
 }
 %    \end{macrocode}
