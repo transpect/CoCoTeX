@@ -676,7 +676,9 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
     \ccUseProperty{before-float}%
     \ccf@set@env
     \ifx\ccf@floatpos\@empty\else\savenotes\fi
-    \ignorespaces}
+    \ignorespaces
+    \@cc@is@finaltrue
+  }
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\endccf@float} is the end of the common float
@@ -684,6 +686,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %    \begin{macrocode}
 \def\endccf@float{%
     \ccf@begin@env
+      \@cc@is@finalfalse
       \ccf@set@top@sep
       \ccf@int@sub@flt@cnt=\ccSubFloatCnt\relax
       \ccSubFloatCnt=\z@\relax
@@ -694,10 +697,12 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
       \ccf@test@caption{0}{}{top}%
       \ccf@test@caption{0}{}{bottom}%
       \bgroup
-        \@cc@is@finaltrue\ccaStructStart{\cc@cur@cont}\@cc@is@finalfalse
+        \@cc@is@finaltrue
+        \ccaStructStart{\cc@cur@cont}%
+        \edef\ccf@parstruct@id{\ccaGetCurStruct{idx}}%
         \hsize\ccf@total@width
         \ccf@process
-        \@cc@is@finaltrue\ccaStructEnd{\cc@cur@cont}\@cc@is@finalfalse
+        \ccaStructEnd{\cc@cur@cont}%
         \par
       \egroup
       \ccSavePage
@@ -803,6 +808,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %   fails and no caption is printed!
 %    \begin{macrocode}
 \def\ccf@test@caption#1#2#3{%
+  \@cc@is@finalfalse
   \setbox\cc@tempboxa\hbox{\ccGobble\ccSubFloatCnt=0#1\relax\ccUseProperty{#2caption-#3}\relax}%
   \setbox\cc@tempboxb\hbox{\ccGobble\ccSubFloatCnt\m@ne\relax\ccUseProperty{#2caption-#3}\relax}%
   \edef\my@wda{\expandafter\strip@pt\wd\cc@tempboxa sp}%
@@ -810,6 +816,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
   \ifdim\my@wda>\my@wdb\relax
     \expandafter\global\expandafter\let\csname ccf@has@#2capt@#3\endcsname\@empty
   \fi
+  \@cc@is@finaltrue
 }
 %    \end{macrocode}
 % \end{macro}
@@ -892,10 +899,10 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
     \ccIfStrEqual{#2}{top}{}{\if@ccf@break@capt\else\vss\fi}%
     \ccUseProperty{\ccf@prefix caption-face}%
     \ccUseProperty{\ccf@prefix caption-face-#1}%
-    \ifx\ccf@measure\relax\else\ccaVstructStart{Caption}\fi
+    \ccaStructStart{Caption}%
     \cc@topstrut\ccUseProperty{\ccf@prefix caption-#1}\strut%
+    \ccaStructEnd{Caption}%
     \ifx\ccf@measure\relax\else
-      \ccaVstructEnd{Caption}%
       \ccIfPropVal{label-pos}{#1}{%
         \ccfCreateLabel%
         \ccf@write@listof%
@@ -917,6 +924,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %    \begin{macrocode}
   \expandafter\ifx\csname ccf@has@capt@#1\endcsname\@empty
     \setbox\z@\vbox{%
+      \@cc@is@finalfalse
       \let\ccf@measure\relax
       \ccGobble
       \ccSubFloatCnt\z@
@@ -924,6 +932,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
     }%
     \immediate\write\@auxout{\string\expandafter\string\gdef\string\csname\space ccFloat\the\ccf@int@cnt Cap#1\string\endcsname{\the\dimexpr \ht\z@+\dp\z@\relax}}%
     \bgroup
+      \@cc@is@finaltrue
       \savenotes
       \if@ccf@break@capt\else\nopagebreak\fi
       \ccSubFloatCnt\z@
@@ -1235,7 +1244,9 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 \def\ccfSubTableRender{%
   \cc@iterate{\@tempcnta}{\@ne}{\ccSubFloatCnt}{%
     \ccfGetTableContent
+    \@cc@is@finalfalse
     \ccComponent{Content}{\unvbox\ccf@floatbox}%
+    \@cc@is@finaltrue
     \ccfRenderSubFloats{\the\@tempcnta}{Content}%
   }}
 %    \end{macrocode}
