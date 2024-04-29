@@ -105,7 +105,7 @@ module CoCoTeX
       Open3.popen2e("umask 002 ; #{_cmd}") do |i,o,s|
         cnt = 0
         o.each do |l|
-          if @options.quick
+          if @options.debug
             puts l
           else
             if l =~ /^! /
@@ -128,7 +128,7 @@ module CoCoTeX
       cmd = "cd #{@temp_dir} ; ./index.sh #{@doc_main} #{target}"
       _cmd = check_shell_command(cmd)
       Open3.popen2e("umask 002 ; #{_cmd}") do |i,o,s|
-        if @options.quick
+        if @options.debug
           o.each do |l|
             puts l
           end
