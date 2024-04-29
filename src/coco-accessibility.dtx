@@ -240,6 +240,7 @@
 \def\ccaEnable{\cca@saved@defs}
 %    \end{macrocode}
 % \end{macro}
+% 
 % \begin{macro}{\CsToStr} is a xparse helper macro which returns the name of
 %   a control sequence \#1.
 %    \begin{macrocode}
@@ -405,6 +406,11 @@
 % \begin{macro}{\ccaAddNumbering} ???
 %    \begin{macrocode}
 \DeclareAccessibilityCommand{\ccaAddNumbering}[1]{\directlua{ltpdfa.tagger.addNumbering('\luaescapestring{#1}')}}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccaAddScope}
+%    \begin{macrocode}
+\DeclareAccessibilityCommand{\ccaAddScope}[1]{\relax\directlua{ltpdfa.tagger.addScope('\luaescapestring{#1}')}}
 %    \end{macrocode}
 % \end{macro}
 %
