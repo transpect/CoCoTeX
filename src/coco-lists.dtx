@@ -682,15 +682,33 @@
 %
 % \subsubsection{Available Counting Styles}
 %
-% \begin{macro}{\ccl@label@type@arabic, \ccl@label@type@roman,
-%   \ccl@label@type@Roman, \ccl@label@type@alph, \ccl@label@type@Alph}
-%   are wrappers for all the available counter transformators built-in
-%   the \lstinline{\LaTeX} kernel.
+% \begin{macro}{\ccl@label@type@arabic} transforms the value of the
+%   following (implicit) counter to arabic numerals.
 %    \begin{macrocode}
 \def\ccl@label@type@arabic{\@arabic}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccl@label@type@roman} transforms the value of the
+%   following (implicit) counrer to lower case roman numerals.
+%    \begin{macrocode}
 \def\ccl@label@type@roman{\@roman}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccl@label@type@Roman} transforms the value of the
+%   following (implicit) counrer to upper case roman numerals.
+%    \begin{macrocode}
 \def\ccl@label@type@Roman{\@Roman}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccl@label@type@alph} transforms the value of the
+%   following (implicit) counrer to lower case alphabetic letters.
+%    \begin{macrocode}
 \def\ccl@label@type@alph{\@alph}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccl@label@type@Alph} transforms the value of the
+%   following (implicit) counrer to upper case alphabetic letters.
+%    \begin{macrocode}
 \def\ccl@label@type@Alph{\@Alph}
 %    \end{macrocode}
 % \end{macro}

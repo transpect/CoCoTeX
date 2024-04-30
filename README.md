@@ -3,8 +3,9 @@
 > [!WARNING]  
 > This is a pre-release!
 >
-> The end user interface is currently being
-> refactored, so expect code-breaking changes in the next few weeks!
+> The end user interface is currently being refactored, so expect
+> code-breaking changes in the next few weeks! Active development
+> branch is [ally](https://github.com/transpect/CoCoTeX/tree/ally)!
 
 > [!WARNING]  
 > The end-user documentation (`doc/manual.pdf`) is incomplete and to
@@ -118,7 +119,8 @@ to create the User Manual and the source code documentation, or
 	./build.sh doc man
 	./build.sh doc source
 
-to create either separately.
+to create either separately. Both documents need a rather recent
+(>tl2022) version of lualatex to be rendered correctly.
 
 
 ## Usage ##

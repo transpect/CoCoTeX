@@ -372,12 +372,12 @@
 %
 % \subsection{Keeping .aux-Files Up-to-Date}
 %
-% \begin{macro}{\ccPrefix Break}
-%   is a general line break macro intended to be re-defined if
-%   necessary without touching LaTeX's kernel page and line breaking
-%   macros.
+% \begin{macro}{\ccBreak*} is a general line break macro intended to be
+%   re-defined if necessary without touching LaTeX's kernel page and
+%   line breaking macros.
 %    \begin{macrocode}
-\expandafter\DeclareRobustCommand\expandafter*\expandafter{\csname\ccPrefix Break\endcsname}{\hfill\break}
+\DeclareRobustCommand*{\ccBreak}{\hfill\break}
+\cslet{\ccPrefix break}\ccBreak
 %    \end{macrocode}
 % \end{macro}
 %

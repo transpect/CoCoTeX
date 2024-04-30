@@ -8,10 +8,8 @@
     [\filedate\space\fileversion\space CoCoTeX]
 %</package>
 %<*driver>
-\RequirePackage{scrlfile}
-\ReplaceClass{article}{book}
-\BeforePackage{doc}{\let\oldmaketitle\maketitle}
-\documentclass[a4paper]{ltxdoc}
+\documentclass[a4paper]{book}
+\usepackage[hyperref]{doc}
 \makeatletter
 \def\cc@fileversion{\fileversion}
 \def\cc@filedate{\filedate}
@@ -28,24 +26,16 @@
 \clubpenalty10000
 \widowpenalty10000
 \def\hack#1{#1}
-\RequirePackage[T1]{fontenc}
-\RequirePackage[utf8]{inputenc}
 \UseRawInputEncoding
 \RequirePackage{xcolor}
 \RequirePackage{graphicx}
 \usepackage{newtxtext,newtxmath}
-\RequirePackage[breaklinks,pdfborder={0 0 0}]{hyperref}
 \definecolor{spot}{cmyk}{0,0.82,0.59,0.18}
 \definecolor{mblue}{cmyk}{0,0.82,0.59,0.18}
 \definecolor{mpurp}{cmyk}{1,0.75,0,0}
 \usepackage{listings}
 \makeatletter
-\def\codeline@wrindex#1{%
-  \if@filesw
-    \immediate\write\@indexfile{\string\indexentry{#1}{\number\c@chapter.\number\c@lstnumber}}%
-  \fi
-}
-\CodelineIndex
+\PageIndex
 \def\macro{\begingroup
    \catcode`\\12
    \let\is@m@cro@\relax
@@ -59,110 +49,32 @@
     \macrosection{\string#1}\ignorespaces
   \fi
   \SpecialMainIndex{#1}\nobreak
-  \DoNotIndex{#1}%
 }
 \let\endmacro\relax
 
- %% Environment for CoCoTeX Containers:
-\def\ContainerDoc{\begingroup
-   \catcode`\\12
-   \let\is@m@cro@\relax
-   \MakePrivateLetters\container@doc%
-}
-\let\endContainerDoc\relax%
-\def\container@doc#1{\endgroup \topsep\MacroTopsep%
-  \edef\saved@macroname{\string#1}%
-  \let\saved@indexname\saved@macroname
-  \ifx\is@m@cro@\relax
-    \submacrosection{Container {\ttfamily\string#1}}\ignorespaces
-  \else
-    \macrosection{Container {\ttfamily\string#1}}\ignorespaces
-  \fi
-  \SpecialContIndex{#1}\nobreak
-  \DoNotIndex{#1}%
-}
+\NewDocElement[%
+   envlike=true
+  ,toplevel=false
+  ,idxgroup=Container
+  ]{Container}{ContainerDoc}
 
- % Environment for CoCoTeX Property definitions: #1 is the name of the
- % parent container, #2 is the name of the Property, BODY is the
- % documentation for that Property.
-\def\PropertyDoc#1#2{%
-  \propertysection{Property #1::#2}\ignorespaces
-  \edef\saved@macroname{#1::#2}%
-  \let\saved@indexname\saved@macroname
-  \SpecialPropIndex{#1::#2}%
-  \DoNotIndex{#1::#2}%
-  \nobreak
-}
-\let\endPropertyDoc\relax
- % Environment for CoCoTeX Component definitions: #1 is the name of the
- % parent container, #2 is the name of the Component, BODY is the
- % documentation for that Component.
-\def\ComponentDoc#1#2{%
-  \componentsection{Compoent #1::#2}\ignorespaces
-  \edef\saved@macroname{#1::#2}%
-  \let\saved@indexname\saved@macroname
-  \SpecialCompIndex{#1::#2}%
-  \DoNotIndex{#1::#2}%
-  \nobreak
-}
-\let\endComponentDoc\relax
+\NewDocElement[%
+   envlike=true
+  ,toplevel=false
+  ,idxgroup=Property
+  ]{Property}{PropertyDoc}
 
- %% no longer working with TL>2022 *grrrr*
- %\def\SpecialMainIndex#1{\@bsphack
- %    \SpecialIndex@{#1}{\encapchar main}%
- %  \@esphack}
-\def\SpecialContIndex#1{\@bsphack
-  \index{#1\actualchar{\protect\ttfamily#1}
-    (Container)\encapchar usage}%
-  \index{Containers:\levelchar#1\actualchar
-    {\protect\ttfamily#1}\encapchar usage}%
-  \@esphack}
-\def\SpecialPropIndex#1{\@bsphack
-  \index{#1\actualchar{\protect\ttfamily#1}
-    (Property)\encapchar usage}%
-  \index{Properties:\levelchar#1\actualchar
-    {\protect\ttfamily#1}\encapchar usage}%
-  \@esphack}
-\def\SpecialCompIndex#1{\@bsphack
-  \index{#1\actualchar{\protect\ttfamily#1}
-    (Component)\encapchar usage}%
-  \index{Components:\levelchar#1\actualchar
-    {\protect\ttfamily#1}\encapchar usage}%
-  \@esphack}
+\NewDocElement[%
+   envlike=true
+  ,toplevel=false
+  ,idxgroup=Component
+  ]{Component}{ComponentDoc}
 
 \lstset{%
   basicstyle={\ttfamily\color{spot}},
   firstnumber=last,
-  literate={%
-    {Ö}{{\"O}}1
-    {Ä}{{\"A}}1
-    {Ü}{{\"U}}1
-    {ß}{{\ss}}1
-    {ü}{{\"u}}1
-    {ä}{{\"a}}1
-    {ö}{{\"o}}1
-    {ܐ}{{x}}1
-    {ܠ}{{x}}1
-    {ܫ}{{x}}1
-    {ܢ}{{x}}1
-    {ܐ}{{x}}1
-    {ܣ}{{x}}1
-    {ܘ}{{x}}1
-    {ܪ}{{x}}1
-    {ܝ}{{x}}1
-    {ܐ}{{x}}1
-    {¬}{{$\neg$}}1
-    {«}{{\guillemotright}}1
-    {»}{{\guillemotleft}}1
-    {~}{{\textasciitilde}}1
-    {…}{{\dots}}1
-    {≥}{{$\geq$}}1
-    {–}{{--}}1
-    {’}{{'}}1
-  },
   inputencoding=utf8,
   language=[AlLaTeX]TeX,
-  extendedchars=true,                % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
   % basicstyle=\fontfamily{lmvtt}\selectfont\small,
   columns=fullflexible,
   numbers=left,
@@ -187,6 +99,17 @@
   stringstyle={},                    % string literal style
   tabsize=2,                         % sets default tabsize to 2 spaces
 }
+\usepackage{newunicodechar}
+\newunicodechar{ܠ}{?}
+\newunicodechar{ܫ}{?}
+\newunicodechar{ܢ}{?}
+\newunicodechar{ܐ}{?}
+\newunicodechar{ܣ}{?}
+\newunicodechar{ܘ}{?}
+\newunicodechar{ܪ}{?}
+\newunicodechar{ܝ}{?}
+\newunicodechar{ܝ}{?}
+\newunicodechar{ܐ}{?}
 \let\Finale\PrintIndex
 \let\macrocode\relax
 \lstnewenvironment{macrocode}[1][]{%

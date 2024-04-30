@@ -332,35 +332,47 @@
 \DeclareAccessibilityCommand{\ccaAddToConfig}[2]{\directlua{ltpdfa.addToConfig('\luaescapestring{#1}','\luaescapestring{#2}')}}
 \@onlypreamble\ccaAddToConfig
 %    \end{macrocode}
-% \begin{macro}{\ccaStructStart, \ccaStructEnd} inserts a structural
-%   tag with the name \#2. Optional \#1 is the name of a forced
-%   parent.
+% \begin{macro}{\ccaStructStart} inserts a structural tag with the
+%   name \#2. Optional \#1 is the name of a forced parent.
 %
-%   This tagging macro inserts \lstinline{\bgroup} and
-%     \lstinline{\egroup} around the tagged area.
+%   This tagging macro inserts \lstinline{\bgroup} at the start of the
+%     tagged area.
 %    \begin{macrocode}
 \DeclareAccessibilityCommand{\ccaStructStart}[2][]{\if@cc@is@final\directlua{ltpdfa.tagger.structStart('\luaescapestring{#2}','\luaescapestring{#1}')}\fi}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccaStructEnd} inserts the an \lstinline{\egroup} and
+% an end tag with the name \#1.
+%    \begin{macrocode}
 \DeclareAccessibilityCommand{\ccaStructEnd}[1]{\if@cc@is@final\directlua{ltpdfa.tagger.structEnd('\luaescapestring{#1}')}\fi}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccaVstructStart,\ccaVstructEnd} are the same as
-%   \lstinline{\ccaStructStart} and \lstinline{\ccaStructEnd} but
-%   without grouping the area.
+% \begin{macro}{\ccaVstructStart} is the same as
+%   \lstinline{\ccaStructStart}, but without inserting a group at the
+%   beginning of the tagging area.
 %    \begin{macrocode}
 \DeclareAccessibilityCommand{\ccaVstructStart}[2][]{\if@cc@is@final\directlua{ltpdfa.tagger.vstructStart('\luaescapestring{#2}','\luaescapestring{#1}')}\fi}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccaVstructEnd} ends an ungrouped tagging area. \#1 is
+%   the name of the tag.
+%    \begin{macrocode}
 \DeclareAccessibilityCommand{\ccaVstructEnd}[1]{\if@cc@is@final\directlua{ltpdfa.tagger.vstructEnd('\luaescapestring{#1}')}\fi}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccaPstructStart, \ccaPstructEnd} same as
-%   \lstinline{\ccaStructStart} and \lstinline{\ccaStructEnd} but no
-%   grouping and not setting any attributes. Implies that the element
-%   has no content children, at all.
+% \begin{macro}{\ccaPstructStart} is the same as
+%   \lstinline{\ccaStructStart} but no grouping and no setting of any
+%   attributes applies. Implies that the element has no content
+%   children, at all.
 %    \begin{macrocode}
 \DeclareAccessibilityCommand{\ccaPstructStart}[2][]{\directlua{ltpdfa.tagger.pstructStart('\luaescapestring{#2}','\luaescapestring{#1}')}}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccaPstructEnd} ends an unattributed tagging area.
+%    \begin{macrocode}
 \DeclareAccessibilityCommand{\ccaPstructEnd}[1]{\directlua{ltpdfa.tagger.pstructEnd('\luaescapestring{#1}')}}
 %    \end{macrocode}
 % \end{macro}
-%
 % \begin{macro}{\ccaGetCurStruct} returns the internal ID of the
 %   currently open structural element. \#1 is table attribute that
 %   should be returned(?)

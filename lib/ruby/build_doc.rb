@@ -5,6 +5,7 @@ module CoCoTeX
     # ctor
     def initialize(options: {})
       super
+      @tex_engine = File.join(ENV["LATEXBIN"], "lualatex")
       @doc_dir = resolve_path(@options.out)
     end
 
@@ -17,7 +18,6 @@ module CoCoTeX
 
     # creates the end user manual
     def create_manual
-      @tex_engine = File.join(ENV["LATEXBIN"], "lualatex")
       @doc_main = "manual"
       @doc_suffix = "tex"
       @man_src_dir = File.join(LIB_DIR, "manual")
@@ -32,10 +32,10 @@ module CoCoTeX
 
     # creates the source code documentation
     def create_doc
-      @tex_engine = File.join(ENV["LATEXBIN"], "pdflatex")
       @doc_main = "cocotex"
       @doc_suffix = "dtx"
       $log.info("Generating source code documentation")
+      prepare_doc
       build_doc
       create_or_exist(dir: @doc_dir)
       shell_command("mv #{@source_doc_out} #{@doc_dir}") if File.exists?(@source_doc_out)
@@ -43,6 +43,12 @@ module CoCoTeX
     end
 
     private
+    # prepare the temporary folder for source code doc generation
+    def prepare_doc
+      ist_file = File.join(LIB_DIR, "doc", "cocotex.ist")
+      shell_command("cp #{ist_file} #{@temp_dir}")
+    end
+
     # prepares the temporary folder for the manual
     def prepare_manual
       manual = File.read(File.join(@man_src_dir, "cocotex.tex"))
@@ -75,6 +81,9 @@ module CoCoTeX
       unless @options.quick
         run_while_status("2nd TeX run") do do_tex_run end
         run_while_status("3rd TeX run") do do_tex_run end
+        run_while_status("index generation") do do_makeindex end
+        run_while_status("4th TeX run") do do_tex_run end
+        run_while_status("5th TeX run") do do_tex_run end
       end
       @source_doc_out = File.join(@temp_dir, "cocotex.pdf")
     end
@@ -96,6 +105,30 @@ module CoCoTeX
       end
     end
 
+    def do_makeindex
+      makeindex = File.join(ENV["LATEXBIN"], "makeindex")
+      cmd = "cd #{@temp_dir} ; makeindex -s cocotex.ist #{@doc_main}"
+      _cmd = check_shell_command(cmd)
+      st = nil
+      err = ""
+      Open3.popen2e("umask 002 ; #{_cmd}") do |i,o,s|
+        cnt = 0
+        o.each do |l|
+          if @options.debug == "debug"
+            puts l
+          else
+            if l =~ /, [^0]+ rejected\)./
+              err += l
+              cnt = cnt - 1
+            end
+          end
+        end
+        if err != ""
+          raise StandardError.new("Makeindex error #{err}")
+        end
+      end
+    end
+
     # issues a single LaTeX run
     def do_tex_run
       cmd = "cd #{@temp_dir} ; #{@tex_engine} -interaction=nonstopmode #{@doc_main}.#{@doc_suffix}"
@@ -105,7 +138,7 @@ module CoCoTeX
       Open3.popen2e("umask 002 ; #{_cmd}") do |i,o,s|
         cnt = 0
         o.each do |l|
-          if @options.debug
+          if @options.debug == "debug"
             puts l
           else
             if l =~ /^! /
@@ -128,7 +161,7 @@ module CoCoTeX
       cmd = "cd #{@temp_dir} ; ./index.sh #{@doc_main} #{target}"
       _cmd = check_shell_command(cmd)
       Open3.popen2e("umask 002 ; #{_cmd}") do |i,o,s|
-        if @options.debug
+        if @options.debug == "debug"
           o.each do |l|
             puts l
           end

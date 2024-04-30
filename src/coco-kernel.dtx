@@ -431,13 +431,15 @@
 \def\ccUseComponentFrom#1#2{\csname cc@#1@#2\endcsname}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccGetComp, \ccGetComp*} is a high level command to return the
+% \begin{macro}{\ccGetComp*} is a high level command to return the
 %   contents stored in a Component of name \#1 as a paragraph iff the
 %   Component is neither empty nor \lstinline{\relax}. If
 %   Accessibility features are activated, the returned content of the
-%   Component is autmatically tagged with a \lstinline{Para} tag. The
-%   starred version of \lstinline{\ccGetComp} supresses auto-tagging
-%   for that Component.
+%   Component is autmatically tagged with a \lstinline{Para} tag.
+%
+%   The starred version of \lstinline{\ccGetComp} supresses automated
+%   tagging for that Component when the accessibility features are
+%   active.
 %    \begin{macrocode}
 \def\ccGetComp{\@ifstar\cc@sget@comp\cc@get@comp}
 \def\cc@get@comp#1{\ccWhenComp{#1}{%
@@ -1011,15 +1013,26 @@
 % The User level macros are Prefix sensitive. They exist in three
 % flavours depending on whether the global Value of a Property should
 % be kept or be replaced.
-% \begin{macro}{\ccPrefix SetPropLocal, \ccPrefix AppPropLocal, \ccPrefix PrePropLocal}
-%   They all take two arguments: \#1 is the name of the Property, \#2
-%   is the value to be set, appended, or prepended to that Property,
-%   respectively.
+%
+% They all take two arguments: \#1 is the name of the Property, \#2 is
+% the value to be set, appended, or prepended to that Property,
+% respectively.
+% \begin{macro}{\ccSetPropLocal} Sets a Property \#1 to a new value \#2.
 %    \begin{macrocode}
 \def\ccSetPropLocal{\cc@set@property@locally\ccSetProperty}
 \cslet{\ccPrefix SetPropLocal}\ccSetPropLocal%
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccAppPropLocal} appends the value \#2 to the end of
+%   an existing Property \#1.
+%    \begin{macrocode}
 \def\ccAppPropLocal{\cc@set@property@locally\ccAppToProp}
 \cslet{\ccPrefix AppPropLocal}\ccAppPropLocal%
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccPrePropLocal} appends the value \#2 to the
+%   beginning of an existing Property \#1.
+%    \begin{macrocode}
 \def\ccPrePropLocal{\cc@set@property@locally\ccPreToProp}
 \cslet{\ccPrefix PrePropLocal}\ccPrePropLocal%
 %    \end{macrocode}

@@ -465,7 +465,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %    \begin{macrocode}
 \def\ccf@generate@listof@handlers#1#2#3{%
 %    \end{macrocode}
-% \begin{macro}{cc@<list>@extract@data}
+% \begin{macro}{cc@listof@extract@data}
 %   The first macro that is dynamicly defined, is the Component
 %   collector.
 %   \begin{description}
@@ -490,7 +490,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
   }%
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\csname cc@<list>@print@entry\endcsname}
+% \begin{macro}{\cc@listof@print@entry}
 %   The second dynamically defined macro is the entry renderer. It
 %   applies the Listof properties and selects the components to be
 %   printed. \#\#1 is the caption type of the float.

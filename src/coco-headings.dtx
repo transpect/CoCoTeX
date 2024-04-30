@@ -133,7 +133,7 @@
     \ccDeclareContainer{#3}{%
 %    \end{macrocode}
 % 
-% \begin{macro}{\cch@<3>@level} stores the numeric heading level for the heading
+% \begin{macro}{\cch@3@level} stores the numeric heading level for the heading
 %    \begin{macrocode}
       \csgdef{cch@#3@level}{#2}%
 %    \end{macrocode}
@@ -325,15 +325,35 @@
   }}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\cch@min@level, \cch@max@level,
-%   \cch@highest@level, \cch@lowest@level} store the level
-%   numbers of the highest and lowest defined heading levels,
-%   respectively.  \lstinline|\begin{document}|.
+% \begin{macro}{\cch@min@level} is a temporary counter that stores and
+%   constantly updates the \textit{lowest} value for the used heading
+%   level.
 %    \begin{macrocode}
 \newcount\cch@min@level \cch@min@level=99\relax
+%    \end{macrocode}
+% \begin{macro}{\cch@max@level} is a temporary counter that stores and
+%   constantly updates the \textit{highest} value for the used heading
+%   level.
+%    \begin{macrocode}
 \newcount\cch@max@level \cch@max@level=-99\relax
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\cch@highest@level} stores the level number of the
+%   highest \textit{used} heading level from the previous tex run.
+%    \begin{macrocode}
 \ifx\cch@highest@level\@undefined \def\cch@highest@level{99}\fi
+%    \end{macrocode}
+% 
+% \end{macro}
+% \begin{macro}{\cch@lowest@level} stores the level number of the
+%   lowest \textit{used} heading level from the previous tex run.
+%    \begin{macrocode}
 \ifx\cch@lowest@level\@undefined  \def\cch@lowest@level{-99}\fi
+%    \end{macrocode}
+% \end{macro}
+% both temporary counters are written into the aux file at the very
+% end of the document for consecutive tex runs.
+%    \begin{macrocode}
 \AtEndDocument{%
   \immediate\write\@mainaux{\string\gdef\string\cch@highest@level{\the\cch@min@level}}%
   \immediate\write\@mainaux{\string\gdef\string\cch@lowest@level{\the\cch@max@level}}%
@@ -1108,7 +1128,7 @@
 %
 % \subsection{Alternative paragraph separation}
 %
-% \begin{macro}{\ccPrefix NewPar} is a user-level macro to have a vertical
+% \begin{macro}{\ccNewPar} is a user-level macro to have a vertical
 %   skip between two local paragraphs and no indent in the second
 %   one. The amount of vertical space between the paragraphs can be
 %   adjusted with the optional argument. If \#1 is omitted,
@@ -1118,12 +1138,13 @@
 %   at the end of the first of the paragraphs.
 %    \begin{macrocode}
 \newdimen\ccnewparskip \AtBeginDocument{\ifdim\ccnewparskip=\z@\relax \ccnewparskip=1\baselineskip\relax\fi}
-\csdef{\ccPrefix NewPar}{\@ifnextchar[{\cc@newpar}{\cc@newpar[\the\ccnewparskip]}}%]
+\def\ccNewPar{\@ifnextchar[{\cc@newpar}{\cc@newpar[\the\ccnewparskip]}}%]
 \def\cc@newpar[#1]{%
   \ifhmode\par\fi
   \vskip#1\relax
   \@afterheading
 }
+\cslet{\ccPrefix NewPar}\ccNewPar
 %    \end{macrocode}
 % \end{macro}
 % \Deprecated
