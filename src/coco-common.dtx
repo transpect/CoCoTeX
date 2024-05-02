@@ -139,11 +139,6 @@
 %
 % \subsection{Helper macros}
 %
-% \begin{macro}{\afterfi} used to execute code after the next \lstinline{\fi}:
-%    \begin{macrocode}
-\def\afterfi#1\fi{\fi#1}
-%    \end{macrocode}
-% \end{macro}
 % \begin{macro}{\cc@topstrut} is a \lstinline{\strut} that has the
 %   height of \lstinline{\topskip} and the depth of the difference
 %   between the \lstinline{\baselineskip} and \lstinline{\topskip}.
@@ -151,11 +146,11 @@
 \def\cc@topstrut{\vrule\@width\z@\@height\topskip\@depth\dimexpr\baselineskip-\topskip\relax}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\afterbox} prevents indentation and additional spacing
-%   after environments. Intended to be used in combination with
-%   \lstinline{\aftergroup}.
+% \begin{macro}{\cc@afterbox} prevents indentation and additional
+%   spacing after environments. Intended to be used in combination
+%   with \lstinline{\aftergroup}.
 %    \begin{macrocode}
-\def\@afterbox{%
+\def\cc@afterbox{%
   \everypar{%
     \if@nobreak
       \@nobreakfalse
