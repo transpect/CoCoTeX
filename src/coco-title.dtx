@@ -1,4 +1,5 @@
-% \chapter{coco-title.dtx}\label{chap:coco-title}
+% \chapter{coco-title.dtx}\label{chap:coco-title}\DescriptionDomain{titlepage}
+%
 % This file provides macros and facilities for title pages.
 %
 %    \begin{macrocode}[gobble=1]
@@ -19,8 +20,8 @@
 %    \end{macrocode}
 % \section{Top-Level Interface}
 %
-% \begin{ContainerDoc}{titlepage} is the main Container for the
-%   document's locally defined meta data.
+% \DescribeContainer{titlepage} is the main Container for the whole
+% document's meta data.
 %    \begin{macrocode}
 \ccDeclareContainer{titlepage}{%
   \ccInherit {Components,Properties}{CommonMeta}%
@@ -48,7 +49,6 @@
   \ccDeclareEnv[Meta]{\cct@meta}{\endcct@meta}%
 }
 %    \end{macrocode}
-% \end{ContainerDoc}
 % \begin{macro}{\cct@declare@role} declares the roles for editors and
 %   series editors and initializes the biography meta block for both.
 %    \begin{macrocode}
@@ -122,6 +122,9 @@
   \cct@fundings@eval
   \cct@add@eval
   \cc@if@preamble\cct@set@pdfmeta\relax
+%    \end{macrocode}
+% Now, we expand the \UsageHook{document-meta-hook}.
+%    \begin{macrocode}
   \ccUseHook{document-meta-hook}%
   \let\cc@cur@cont\@empty
 }
@@ -315,15 +318,19 @@ from the Components given in the Meta Container.}}}
 % \end{macro}
 % \end{macro}
 %
+%
 % \section{Intermediate Level Interfaces}
 %
-% \begin{macro}{before-maketitle-hook}
-%   Hook that is expanded right before the titlepage is printed.
+% \DescribeHook{before-maketitle-hook} is expanded right before the
+%   titlepage is printed.
 %    \begin{macrocode}
 \ccDeclareHook[titlepage]{before-maketitle-hook}
+%    \end{macrocode}
+% \DescribeHook{document-meta-hook} is expanded at the very end of
+%   the \texttt{Meta} Container.
+%    \begin{macrocode}
 \ccDeclareHook[titlepage]{document-meta-hook}
 %    \end{macrocode}
-% \end{macro}
 % \begin{macro}{\cct@article@titlepage} is the prototype for article
 %   title pages.
 %    \begin{macrocode}
@@ -362,6 +369,9 @@ from the Components given in the Meta Container.}}}
 \def\cct@maketitle{%
   \expandafter\gdef\csname\ccPrefix Maketitle\endcsname{%
     \let\cc@cnt@grp\@empty
+%    \end{macrocode}
+% Here, we expand the \UsageHook{before-maketitle-hook}.
+%    \begin{macrocode}
     \ccUseHook[titlepage]{before-maketitle-hook}%
     \bgroup
       \ccSetContainer{titlepage}%
@@ -839,24 +849,21 @@ from the Components given in the Meta Container.}}}
 %    \begin{macrocode}
   \ccAddToType{Components}{titlepage}{%
 %    \end{macrocode}
-% \begin{ComponentDoc}{titlepage}{IccProfileFile} holds the path
+% \DescribeComponent{IccProfileFile} holds the path
 %   (relative to the main tex file) and name of the .icc file.
 %    \begin{macrocode}
     \ccDeclareGlobalComponent{IccProfileFile}
 %    \end{macrocode}
-% \end{ComponentDoc}
-% \begin{ComponentDoc}{titlepage}{IccComponents} holds the number of
+% \DescribeComponent{IccComponents} holds the number of
 %   components in the color profile
 %    \begin{macrocode}
     \ccDeclareGlobalComponent{IccComponents}
 %    \end{macrocode}
-% \end{ComponentDoc}
-% \begin{ComponentDoc}{titlepage}{IccIdentifier} holds the identifier
+% \DescribeComponent{IccIdentifier} holds the identifier
 %   of the color profile
 %    \begin{macrocode}
     \ccDeclareGlobalComponent{IccIdentifier}}
 %    \end{macrocode}
-% \end{ComponentDoc}
 % The Components are composed via a new Property
 % \lstinline{output-intent} which we add to \lstinline{coco-title}'s
 % Properties list (\lstinline{\cc@color@enc} is set via the
@@ -870,9 +877,9 @@ from the Components given in the Meta Container.}}}
     {\def\cca@default@icc@iden{sRGB IEC61966-2.1}}
   \ccAddToType{Properties}{titlepage}{%
 %    \end{macrocode}
-% \begin{PropertyDoc}{titlepage}{output-intent} sends the output
-%   intent information to the ltpdfa package. It must contain of three
-%   data fields:
+% \DescribeProp{output-intent}{<see below>} sends the output intent
+% information to the \texttt{ltpdfa} package. It must contain of three
+% data fields:
 %   \begin{description}
 %   \item[profile] with the name of the to-be-embedded
 %     \lstinline{.icc} file,
@@ -890,7 +897,6 @@ from the Components given in the Meta Container.}}}
       identifier=\ccIfComp{IccIdentifier}{\ccUseComp{IccIdentifier}}{\cca@default@icc@iden}%
     }}
 %    \end{macrocode}
-% \end{PropertyDoc}
 % The Component Handler which links the new Components to that
 % Property is added to titlepage's \lstinline{document-meta-hook}:
 %    \begin{macrocode}
@@ -904,26 +910,23 @@ from the Components given in the Meta Container.}}}
 \ccAddToType{Components}{titlepage}{%
 %    \end{macrocode}
 %
-% \begin{ComponentDoc}{titlepage}{PDFAID} defines the PDF/A ID (Default: 2,
+% \DescribeComponent{PDFAID} defines the PDF/A ID (Default: 2,
 %   meaning: PDF/A-2)
 %    \begin{macrocode}
   \ccDeclareGlobalComponent[2]{PDFAID}%
 %    \end{macrocode}
-% \end{ComponentDoc}
-% \begin{ComponentDoc}{titlepage}{PDFALevel} defines the PDF/A Level (Default: A,
+% \DescribeComponent{PDFALevel} defines the PDF/A Level (Default: A,
 %   meaning PDF/A-2A)
 %    \begin{macrocode}
   \ccDeclareGlobalComponent[A]{PDFALevel}%
 %    \end{macrocode}
-% \end{ComponentDoc}
-% \begin{ComponentDoc}{titlepage}{PDFUAID} defines the PDF standard (Default: 1,
+% \DescribeComponent{PDFUAID} defines the PDF standard (Default: 1,
 %   meaning: PDF/UA-1). Use \lstinline|\ccPrefix PDFUAID{}| (i.e. set it to
 %   nothing) to make the document conform to the PDF/A standard, but
 %   \textbf{not} to the PDF/UA standard.
 %    \begin{macrocode}
   \ccDeclareGlobalComponent[1]{PDFUAID}}%
 %    \end{macrocode}
-% \end{ComponentDoc}
 % The checking if the values are valid, and the separation of the
 % various parts of the standard is done via a lua script in the
 % \lstinline{document-meta-hook}. The \lstinline{conformance}

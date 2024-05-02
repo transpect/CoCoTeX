@@ -31,8 +31,10 @@
 \RequirePackage{graphicx}
 \usepackage{newtxtext,newtxmath}
 \definecolor{spot}{cmyk}{0,0.82,0.59,0.18}
-\definecolor{mblue}{cmyk}{0,0.82,0.59,0.18}
-\definecolor{mpurp}{cmyk}{1,0.75,0,0}
+\definecolor{mgreen}{cmyk}{0.93,0,0.45,0.19}
+\definecolor{mora}{cmyk}{0,0.08,0.82,0.15}
+\definecolor{mblue}{cmyk}{0.82,0.59,0,0.18}
+\definecolor{mpurp}{cmyk}{.54,0.98,0,0.17}
 \usepackage{listings}
 \makeatletter
 \PageIndex
@@ -48,27 +50,55 @@
   \else
     \macrosection{\string#1}\ignorespaces
   \fi
-  \SpecialMainIndex{#1}\nobreak
+  \@bsphack
+  \begingroup
+    \let\index\ltx@index
+    \SpecialMainIndex{#1}\nobreak
+  \endgroup
+  \@esphack
 }
 \let\endmacro\relax
 
-\NewDocElement[%
-   envlike=true
-  ,toplevel=false
-  ,idxgroup=Container
-  ]{Container}{ContainerDoc}
+\def\DescriptionDomain#1{\def\description@domain{#1}}
+\DescriptionDomain{Generic}
 
-\NewDocElement[%
-   envlike=true
-  ,toplevel=false
-  ,idxgroup=Property
-  ]{Property}{PropertyDoc}
+\def\@print@component#1#2{%
+  \let\@argii\@empty
+  \if!#2!\else
+    \def\@argii{ (#2)}%
+  \fi
+  \componentsection{#1#2}%
+  \index[components]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{main}}%
+}%
 
-\NewDocElement[%
-   envlike=true
-  ,toplevel=false
-  ,idxgroup=Component
-  ]{Component}{ComponentDoc}
+\def\DescribeComponent#1{\@print@component{#1}{}}
+\def\DescribeLabeledComp#1{\@print@component{#1}{Labeled Component}}
+\def\DescribeCountedComp#1{\@print@component{#1}{Counted Component}}
+\def\DescribeGroupComp#1{\@print@component{#1}{Group Component}}
+\def\DescribeCollectionComp#1{\@print@component{#1}{Collection Component}}
+\def\DescribeOverrideComp#1{\@print@component{#1}{Override}}
+\def\AlsoOverride#1{\index[components]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{main}}}
+
+\def\UsageComponent#1{\texttt{#1}\index[components]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{usage}}}
+
+\def\DescribeContainer#1{%
+  \containersection{#1}%
+  \index[containers]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\noexpand\doc@handleencap{main}}%
+}
+\def\UsageContainer#1{\texttt{#1}\index[containers]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\noexpand\doc@handleencap{usage}}}
+
+\def\DescribeProp#1#2{% #1 is the name, #2 is the data type
+  \propertysection{#1}{\ttfamily\footnotesize\mybfseries #2}\enskip%
+  \index[properties]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{main}}%
+}
+\def\UsageProperty#1{\index[properties]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{usage}}}
+\def\UsageProp#1{#1\UsageProperty{#1}}
+
+\def\DescribeHook#1{%
+  \hooksection{#1}\enskip%
+  \index[hooks]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\noexpand\doc@handleencap{main}}%
+}
+\def\UsageHook#1{#1\index[hooks]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\noexpand\doc@handleencap{usage}}}
 
 \lstset{%
   basicstyle={\ttfamily\color{spot}},
@@ -110,7 +140,6 @@
 \newunicodechar{ܝ}{?}
 \newunicodechar{ܝ}{?}
 \newunicodechar{ܐ}{?}
-\let\Finale\PrintIndex
 \let\macrocode\relax
 \lstnewenvironment{macrocode}[1][]{%
   \if@noskipsec\leavevmode\fi
@@ -427,13 +456,21 @@
   {\small\ttfamily\mybfseries\color{spot!50}}*}
 
 \newcommand\propertysection{\@startsection{propsec}{99}{\z@}%
-  {0.5\baselineskip}%
+  {1sp}%
   {-.5em}%
   {\small\ttfamily\mybfseries\color{mpurp!75}}*}
 \newcommand\componentsection{\@startsection{compsec}{99}{\z@}%
   {0.5\baselineskip}%
   {-.5em}%
   {\small\ttfamily\mybfseries\color{mblue!75}}*}
+\newcommand\containersection{\@startsection{contsec}{99}{\z@}%
+  {0.5\baselineskip}%
+  {-.5em}%
+  {\small\ttfamily\mybfseries\color{mora!75}}*}
+\newcommand\hooksection{\@startsection{hooksec}{99}{\z@}%
+  {0.5\baselineskip}%
+  {-.5em}%
+  {\small\ttfamily\mybfseries\color{mgreen!75}}*}
 
 \lstdefinestyle{macrocode}{language=[AlLaTeX]TeX,
   keepspaces=false,                   % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
@@ -489,10 +526,49 @@
 }
 \DeclareRobustCommand\CoCoTeX{\texorpdfstring{{C\kern-.1em o\kern-.033emC\kern-.1em o}\kern-.133em\TeX}{CoCoTeX}}
 \def\Deprecated{\fcolorbox{red}{red!10}{\parbox{40mm}{\centering\bfseries\color{red} WARNING!\\The following section is deprecated and will be changed or deleted in future releases.}}\par}
+
+\usepackage[noautomatic,splitindex]{imakeidx}
+\indexsetup{level=\section*}
+\makeindex
+\makeindex[name=properties]
+\makeindex[name=containers]
+\makeindex[name=components]
+\makeindex[name=hooks]
+
+\long\def\PrintIndex{%
+  \backmatter
+  \chapter{Index}\markboth{Index}{Index}\c@section\z@%
+  Numbers written in \textit{italic} refer to the page where the
+  corresponding entry is described; numbers \underline{underlined}
+  refer to the definition; numbers in roman refer to the pages where
+  the entry is used.\par
+  \raggedright
+  \IndexPrologue{\section*{Macro and Environment Index}\markboth{Index -- Macros and Environments}{Index -- Macros and Environments}}%
+  \@input@{\jobname-cocotex.ind}%
+  \IndexPrologue{\section*{Container Index}\markboth{Index -- Containers}{Index -- Containers}}%
+  \@input@{\jobname-containers.ind}%
+  \IndexPrologue{\section*{Component Index}\markboth{Index -- Components}{Index -- Components}}%
+  \@input@{\jobname-components.c_ind}%
+  \IndexPrologue{\section*{Property Index}\markboth{Index -- Properties}{Index -- Properties}}%
+  \@input@{\jobname-properties.ind}%
+  \IndexPrologue{\section*{Hook Index}\markboth{Index -- Hooks}{Index -- Hooks}}%
+  \@input@{\jobname-hooks.ind}%
+  \global\let\PrintIndex\@empty
+}
+
+\setcounter{IndexColumns}{2}
+
+\renewenvironment{theindex}
+{\begin{multicols}\c@IndexColumns[\index@prologue][\IndexMin]%
+    \IndexParms \let\item\@idxitem \ignorespaces}%
+{\end{multicols}}
+
 \makeatother
   \OnlyDescription
 \begin{document}
   \DocInput{cocotex.dtx}
+  \clearpage
+  \PrintIndex
 \end{document}
 %</driver>
 %\fi
@@ -529,7 +605,7 @@
 %
 % \section{Basic concepts}
 %
-% The core concept of the {\CoCoTeX} Framework is the
+% The core concept of the {\CoCoTeX} Framework is the (more or less)
 % strict separation between document specific information bearing
 % units and publisher specific layout and rendering instructions to a
 % degree that is far more versatile and delicate than \LaTeX's usual
@@ -604,5 +680,16 @@
 %   \item Print the overall result of those calculations.
 %   \end{enumerate}
 % \end{enumerate}
+%
+% \section{How to Read This Documentation}
+%
+% Certain Parts of this documentation are color-coded:
+% \begin{itemize}
+% \item \textcolor{mora!75}{Containers} are \textcolor{mora}{orange},
+% \item \textcolor{mgreen!75}{Hooks} are \textcolor{mgreen}{green},
+% \item \textcolor{mblue!75}{Components} are \textcolor{mblue}{blue},
+% \item \textcolor{mpurp!75}{Properties} are \textcolor{mpurp}{purple},
+% \item \textcolor{spot!75}{\LaTeX-Macros} are \textcolor{spot}{le-tex red}
+% \end{itemize}
 %
 % \mainmatter

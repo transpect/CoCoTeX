@@ -19,7 +19,7 @@
     [\filedate \fileversion CoCoTeX meta module]
 \RequirePackage{coco-common}
 %    \end{macrocode}
-% \begin{ContainerDoc}{CommonMeta} is an abstract Container for
+% \DescribeContainer{CommonMeta} is an abstract Container for
 %   commonly used meta data, both for whole documents as well as parts
 %   of documents.
 %    \begin{macrocode}
@@ -33,7 +33,6 @@
   \ccDeclareType{Properties}{}%
 }
 %    \end{macrocode}
-% \end{ContainerDoc}
 %
 % \section{Counted Container Handlers}
 %
@@ -153,14 +152,14 @@
 \def\ccm@role@eval#1{\csname @ccm@role@eval@\cc@cur@cont @#1\endcsname}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\@ccm@role@eval} \#1 is the name of the macro
+% \begin{macro}{\ccm@eval@role} \#1 is the name of the macro
 %   used to compose the Collection (either
 %   \lstinline{\ccComposeCollection}, or
 %   \lstinline{\ccApplyCollection}), \#2 is the name of the role and
 %   \#3 is the name of the list. The access Component is
 %   \lstinline{#2#3}, i.e., both argumets together.
 %    \begin{macrocode}
-\def\@ccm@role@eval#1#2#3{%
+\def\ccm@eval@role#1#2#3{%
 %    \end{macrocode}
 % First, we check if the Collection Component has already been set in
 % the input. If so, we set an internal flag to indicate that the
@@ -189,7 +188,7 @@
 %   (i.e. \textit{fully expands}) the \lstinline{\ccm@role@\cc@cur@cont @#1@#2}
 %   Property and stores the result in the \lstinline{#1#2} Component.
 %    \begin{macrocode}
-\def\ccm@role@apply#1#2{\@ccm@role@eval\ccApplyCollection{#1}{#2}}
+\def\ccm@role@apply#1#2{\ccm@eval@role\ccApplyCollection{#1}{#2}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccm@role@compose} \#1 is the name of the role and
@@ -197,7 +196,7 @@
 %   \textit{unexpaded} contents of the \lstinline{\ccm@role@\cc@cur@cont @#1@#2}
 %   Property in the \lstinline{#1#2} Component.
 %    \begin{macrocode}
-\def\ccm@role@compose#1#2{\@ccm@role@eval\ccComposeCollection{#1}{#2}}
+\def\ccm@role@compose#1#2{\ccm@eval@role\ccComposeCollection{#1}{#2}}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -278,11 +277,20 @@
 \def\ccm@declare@comp{%
     \ccDeclareComponent{Copyright}{\expandafter\global}{}% Copyright text
     \ccDeclareComponent{DOI}{\expandafter\global}{}%         DOI
-
+%    \end{macrocode}
+% \DescribeComponent{LicenceLogo} is a component for a license
+% logo. This usually contains an \lstinline{\includegraphics}.
+%    \begin{macrocode}
+    \ccDeclareComponent{LicenceLogo}%
+%    \end{macrocode}
+% \DescribeComponent{LicenceName} is the name of the license.
+%    \begin{macrocode}
+    \ccDeclareComponent{LicenceName}%
 }%
 %    \end{macrocode}
 % \end{macro}
-% \begin{ContainerDoc}{article-meta}
+% \DescribeContainer{article-meta} is an abstract container that holds
+% meta data specific to journal articles.
 %    \begin{macrocode}
   %% for single articles
 \ccDeclareContainer{article-meta}{%
@@ -300,7 +308,6 @@
   }%
 }
 %    \end{macrocode}
-% \end{ContainerDoc}
 % 
 % \begin{macro}{\ccm@extended@common@macros}
 %   provides some extended markup. Some headings use these Components

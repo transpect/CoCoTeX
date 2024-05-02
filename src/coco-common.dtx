@@ -1,4 +1,4 @@
-% \chapter{coco-common.dtx}
+% \chapter{coco-common.dtx}\label{chap:common}
 % This file provides some macros that are used in more than one
 % {\CoCoTeX} module.
 %
@@ -517,7 +517,7 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsection{Indentation and Left Margins of Potentially Numbered Items}
+% \subsection{Indentation and Left Margins of Potentially Numbered Items}\label{sec:indent}
 %
 % The \textbf{left margin} means the space between the left border of
 % the page area and the imaginary line that multi-line text aligns
@@ -863,7 +863,7 @@
     {\ifx\cc@ref@label\relax\cc@create@label{\@currentHref}\fi}}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\@cc@create@label} generates the actual anchor for
+% \begin{macro}{\cc@create@label} generates the actual anchor for
 %   document-internal cross-references (i.e.,
 %   a~\LaTeX\space\lstinline{\label}). \#1 is the label ID.
 %    \begin{macrocode}

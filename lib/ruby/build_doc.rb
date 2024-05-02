@@ -81,7 +81,7 @@ module CoCoTeX
       unless @options.quick
         run_while_status("2nd TeX run") do do_tex_run end
         run_while_status("3rd TeX run") do do_tex_run end
-        run_while_status("index generation") do do_makeindex end
+        run_while_status("Generating Index") do do_makeindex() end
         run_while_status("4th TeX run") do do_tex_run end
         run_while_status("5th TeX run") do do_tex_run end
       end
@@ -107,7 +107,7 @@ module CoCoTeX
 
     def do_makeindex
       makeindex = File.join(ENV["LATEXBIN"], "makeindex")
-      cmd = "cd #{@temp_dir} ; makeindex -s cocotex.ist #{@doc_main}"
+      cmd = "cd #{@temp_dir} ; splitindex #{@doc_main}.idx -- -s cocotex.ist"
       _cmd = check_shell_command(cmd)
       st = nil
       err = ""
