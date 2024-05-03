@@ -10,6 +10,14 @@
 %<*driver>
 \documentclass[a4paper]{book}
 \usepackage[hyperref]{doc}
+\AddToHook{begindocument}{%
+  \hypersetup{%
+    colorlinks=true
+   ,allcolors=link
+   ,pdfborder={0 0 0}
+ }%
+\usepackage{bookmark}%
+}
 \makeatletter
 \def\cc@fileversion{\fileversion}
 \def\cc@filedate{\filedate}
@@ -30,11 +38,13 @@
 \RequirePackage{xcolor}
 \RequirePackage{graphicx}
 \usepackage{newtxtext,newtxmath}
-\definecolor{spot}{cmyk}{0,0.82,0.59,0.18}
-\definecolor{mgreen}{cmyk}{0.93,0,0.45,0.19}
-\definecolor{mora}{cmyk}{0,0.08,0.82,0.15}
-\definecolor{mblue}{cmyk}{0.82,0.59,0,0.18}
-\definecolor{mpurp}{cmyk}{.54,0.98,0,0.17}
+\definecolor{link}{cmyk}{0.00,0.00,0.00,1.00}
+\definecolor{spot}{cmyk}{0.00,0.82,0.59,0.18}
+\definecolor{contcolor}{cmyk}{0.00,0.00,1.00,0.20}
+\definecolor{compcolor}{cmyk}{1.00,1.00,0.00,0.10}
+\definecolor{hookcolor}{cmyk}{1.00,0.00,1.00,0.00}
+\definecolor{propcolor}{cmyk}{0.00,1.00,0.00,0.00}
+\definecolor{tagscolor}{cmyk}{1.00,0.00,0.00,0.20}
 \usepackage{listings}
 \makeatletter
 \PageIndex
@@ -67,7 +77,7 @@
   \if!#2!\else
     \def\@argii{ (#2)}%
   \fi
-  \componentsection{#1#2}%
+  \componentsection{#1\@argii}%
   \index[components]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{main}}%
 }%
 
@@ -79,20 +89,26 @@
 \def\DescribeOverrideComp#1{\@print@component{#1}{Override}}
 \def\AlsoOverride#1{\index[components]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{main}}}
 
-\def\UsageComponent#1{\texttt{#1}\index[components]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{usage}}}
+\def\UsageMacro#1{\PrintMacroName{#1}\SpecialMacroIndex{#1}}
+\def\UsageComponent#1{\textcolor{compcolor}{\texttt{#1}}\index[components]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{usage}}}
 
 \def\DescribeContainer#1{%
   \containersection{#1}%
   \index[containers]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\noexpand\doc@handleencap{main}}%
 }
-\def\UsageContainer#1{\texttt{#1}\index[containers]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\noexpand\doc@handleencap{usage}}}
+\def\UsageContainer#1{\textcolor{contcolor}{\texttt{#1}}\index[containers]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\noexpand\doc@handleencap{usage}}}
 
 \def\DescribeProp#1#2{% #1 is the name, #2 is the data type
   \propertysection{#1}{\ttfamily\footnotesize\mybfseries #2}\enskip%
   \index[properties]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{main}}%
 }
+\def\DescribeProperty#1{\index[properties]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{main}}}
 \def\UsageProperty#1{\index[properties]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{usage}}}
-\def\UsageProp#1{#1\UsageProperty{#1}}
+\def\UsageProp#1{\textcolor{propcolor}{\texttt{#1}}\UsageProperty{#1}}
+
+\def\DescribeTagS#1{\textcolor{tagscolor}{\texttt{<#1>}}\index[tags]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\noexpand\doc@handleencap{usage}}}
+\def\DescribeTagE#1{\textcolor{tagscolor}{\texttt{</#1>}}\index[tags]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\noexpand\doc@handleencap{usage}}}
+\def\DescribeTag#1{\textcolor{tagscolor}{\texttt{<#1/>}}\index[tags]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\noexpand\doc@handleencap{usage}}}
 
 \def\DescribeHook#1{%
   \hooksection{#1}\enskip%
@@ -121,7 +137,7 @@
   keepspaces=true,                   % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
   keywordstyle={\color{spot}\itshape},% keyword style
   identifierstyle={},
-  texcsstyle={\mybfseries},         % keyword style
+  texcsstyle={\color{spot}\mybfseries},% keyword style
   rulecolor=\color{spot},            % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
   showspaces=false,                  % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
   showstringspaces=true,             % underline spaces within strings only
@@ -458,19 +474,19 @@
 \newcommand\propertysection{\@startsection{propsec}{99}{\z@}%
   {1sp}%
   {-.5em}%
-  {\small\ttfamily\mybfseries\color{mpurp!75}}*}
+  {\small\ttfamily\mybfseries\color{propcolor!75}}*}
 \newcommand\componentsection{\@startsection{compsec}{99}{\z@}%
   {0.5\baselineskip}%
   {-.5em}%
-  {\small\ttfamily\mybfseries\color{mblue!75}}*}
+  {\small\ttfamily\mybfseries\color{compcolor!75}}*}
 \newcommand\containersection{\@startsection{contsec}{99}{\z@}%
   {0.5\baselineskip}%
   {-.5em}%
-  {\small\ttfamily\mybfseries\color{mora!75}}*}
+  {\small\ttfamily\mybfseries\color{contcolor!75}}*}
 \newcommand\hooksection{\@startsection{hooksec}{99}{\z@}%
   {0.5\baselineskip}%
   {-.5em}%
-  {\small\ttfamily\mybfseries\color{mgreen!75}}*}
+  {\small\ttfamily\mybfseries\color{hookcolor!75}}*}
 
 \lstdefinestyle{macrocode}{language=[AlLaTeX]TeX,
   keepspaces=false,                   % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
@@ -527,15 +543,17 @@
 \DeclareRobustCommand\CoCoTeX{\texorpdfstring{{C\kern-.1em o\kern-.033emC\kern-.1em o}\kern-.133em\TeX}{CoCoTeX}}
 \def\Deprecated{\fcolorbox{red}{red!10}{\parbox{40mm}{\centering\bfseries\color{red} WARNING!\\The following section is deprecated and will be changed or deleted in future releases.}}\par}
 
-\usepackage[noautomatic,splitindex]{imakeidx}
+\usepackage[noautomatic,splitindex,truexindy]{imakeidx}
 \indexsetup{level=\section*}
 \makeindex
 \makeindex[name=properties]
 \makeindex[name=containers]
 \makeindex[name=components]
 \makeindex[name=hooks]
+\makeindex[name=tags]
 
 \long\def\PrintIndex{%
+  \let\theindex\HDorg@theindex% otherwise all index sections get bookmarked as "Index..."
   \backmatter
   \chapter{Index}\markboth{Index}{Index}\c@section\z@%
   Numbers written in \textit{italic} refer to the page where the
@@ -543,16 +561,44 @@
   refer to the definition; numbers in roman refer to the pages where
   the entry is used.\par
   \raggedright
-  \IndexPrologue{\section*{Macro and Environment Index}\markboth{Index -- Macros and Environments}{Index -- Macros and Environments}}%
+  \IndexPrologue{\gdef\indexcolor{spot!75}%
+    \section*{\color{\indexcolor}Macro and Environment Index}%
+    \addcontentsline{toc}{section}{Macro and Environment Index}%
+    \markboth{Index -- Macros and Environments}{Index -- Macros and Environments}
+    In this index, the \texttt{cc(@)}- and module specific \texttt{ccX(@)}-Prefixes were omitted when sorting the entries.}%
   \@input@{\jobname-cocotex.ind}%
-  \IndexPrologue{\section*{Container Index}\markboth{Index -- Containers}{Index -- Containers}}%
+  \clearpage
+  \IndexPrologue{\gdef\indexcolor{contcolor!75}%
+    \section*{\color{\indexcolor}Container Index}%
+    \addcontentsline{toc}{section}{Container Index}%
+    \markboth{Index -- Containers}{Index -- Containers}}%
   \@input@{\jobname-containers.ind}%
-  \IndexPrologue{\section*{Component Index}\markboth{Index -- Components}{Index -- Components}}%
-  \@input@{\jobname-components.c_ind}%
-  \IndexPrologue{\section*{Property Index}\markboth{Index -- Properties}{Index -- Properties}}%
+  \clearpage
+  \IndexPrologue{\gdef\indexcolor{compcolor!75}%
+    \section*{\color{\indexcolor}Component Index}%
+    \addcontentsline{toc}{section}{Component Index}%
+    \markboth{Index -- Components}{Index -- Components}%
+  In this index, the name in parentheses denote the (abstract) Container within which the Component entry is defined.}%
+  \@input@{\jobname-components.ind}%
+  \clearpage
+  \IndexPrologue{\gdef\indexcolor{propcolor!75}%
+    \section*{\color{\indexcolor}Property Index}%
+    \addcontentsline{toc}{section}{Property Index}%
+    \markboth{Index -- Properties}{Index -- Properties}%
+  In this index, the name in parentheses denote the (abstract) Container within which the Property entry is defined.}%
   \@input@{\jobname-properties.ind}%
-  \IndexPrologue{\section*{Hook Index}\markboth{Index -- Hooks}{Index -- Hooks}}%
+  \clearpage
+  \IndexPrologue{\gdef\indexcolor{hookcolor!75}%
+    \section*{\color{\indexcolor}Hook Index}%
+    \addcontentsline{toc}{section}{Hook Index}%
+    \markboth{Index -- Hooks}{Index -- Hooks}}%
   \@input@{\jobname-hooks.ind}%
+  \clearpage
+  \IndexPrologue{\gdef\indexcolor{tagscolor!75}%
+    \section*{\color{\indexcolor}Tag Index}%
+    \addcontentsline{toc}{section}{Tag Index}%
+    \markboth{Index -- Tags}{Index -- Tags}}%
+  \@input@{\jobname-tags.ind}%
   \global\let\PrintIndex\@empty
 }
 
@@ -605,91 +651,111 @@
 %
 % \section{Basic concepts}
 %
-% The core concept of the {\CoCoTeX} Framework is the (more or less)
-% strict separation between document specific information bearing
-% units and publisher specific layout and rendering instructions to a
-% degree that is far more versatile and delicate than \LaTeX's usual
-% distinction between form and content.
+% The core concept of the {\CoCoTeX} Framework to view typographical
+% objects, such as floats, headings, title pages, etc., as closed
+% units that contain a fixed set of elements that determines the exact
+% nature of each occurrence. For a heading, such elements may be the
+% heading's title, an optional subtitle, a counter or a list of
+% authors responsible for the section that is introduced by the
+% heading.
 %
-% The basic data type in the Framework is the \textbf{Container}. On
-% the end-user level, this is virtually always a {\LaTeX} environment
-% that contain a specific set of macros used to store the atomic units
-% of information. Those macros and their contents are called
-% \textbf{Components}.
+% In {\CoCoTeX} those typographical units are called
+% \textit{Containers}, the elements inside a Container are called
+% \textit{Components}. The occurrence of a Container in a specific TeX
+% document is an \textit{Instance} of that Container.
 %
-% The instructions on how those Components are to be processed and
-% ultimately rendered are called \textbf{Properties}.
+% The exact realization of a Container is done in local style files
+% with so-called \textit{Properties}; short snippets of TeX code that
+% tell the LaTeX interpreter how the Components in the Instances of
+% Containers are to be read, processed and eventually rendered.
 %
-% \section{Flow of macro definitions and their expansions in modules that use the Property and Component mechanism}
+% Typically, Containers are {\LaTeX} environments that contain the
+% Components in the form of {\TeX} macros that in turn take as their
+% mandatory argument the value for the Component in that specific
+% Instance of the Container. Most Containers follow an \textit{read
+% first -- process later} approach, i.e., the LaTeX interpreter reads
+% the whole content of the environment and the processing is done at
+% the \lstinline{\end} macro of the corresponding environment.
 %
-% \Deprecated
+% \subsection{Types, Inheritance and Abstract Containers}
 %
-% Modules, that utilize the Property and Component mechanisms, define
-% a \textit{Declare macro}. This Declare macro is basicly a
-% constructor for a new \LaTeX\ environment which should share some
-% common \textit{Properties} and \textit{Components} with other
-% environments that are defined with the same Declare macro. Modules,
-% therefore, constitute what in other programming languages may be
-% referred to as \textit{Namespaces}.
+% Components and Properties are both \textit{(data-)Types} specific to
+% an Container. A Container can be abstract, meaning that the
+% container is not directly used in an end-user's tex file, but serves
+% as blueprint for other, user-level, Containers. As such, Containers
+% can \textit{inherit} the Types (i.\,e., the Properties and
+% Components) of another Container. Containers that inherit Types from
+% other Containers are called \textit{Sub-} or
+% \textit{Child-Containers}, the inherited Container is called a
+% \textit{Parent Container}.
 %
-% The purpose of the Declare macro is
-% \begin{enumerate}
-% \item to define a \LaTeX\ environment to be used in tex documents,
-% \item to define the Component macros available and allowed within that environment
-% \item to define the available Properties used to determine the appearance of the environment's content in the final render.
-% \item to define the processing of the information specific to each instance of the environment.
-% \end{enumerate}
+% Containers are therefore somewhat comparable to \textit{classes} in
+% object‐oriented programming languages, an Instance of a Container
+% can be seen as an \textit{object} (i.\,e., an Instance of a
+% Class). Components are then object variables, while Properties take
+% the place of \textit{class variables} and/or \textit{class methods},
+% depending on how exactly a Property is implemented. Sometimes, a
+% Property holds only a simple value, while another Property may
+% contain a complex set of instructions or even calls to other
+% Properties.
 %
-% Within the body of the Declare macro's definition, a Use macro is
-% defined which determines the Namespace-specific processing of an
-% environment's contents. This macro is (usually) expanded at the
-% \lstinline{\end} of the declared environment. The Use macro is where
-% the actual processing of an environment's contents takes
-% place. Since it is part of the body of the Declare macro, each
-% environment declared with this Declare macro defines it's own Use
-% macro.
+% \subsection{Complex Components}
 %
-% The Declare macro usually has at least two arguments: one argument
-% to give a \textit{name} to the soon-to-be-defined environment, and a
-% second one to define the Properties \textit{specific} to that
-% environment \textit{on top of} the Namespace's default
-% Properties. Some environments may also have a Parent which causes
-% Properties cascade across different inter-dependend environments.
+% Components can also be more complex than simple data storage
+% devices. Usually, a Component occurs only once in a Container, say,
+% for instance there can be only one (main) title in each heading.
 %
-% Within the tex-document, whenever an environment is used, the flow
-% is as follows:
-% \begin{enumerate}
-% \item \textit{store} the contents of all Components used within the
-%   environment in internal, locally defined, tex macros
-% \item expand the property lists:
-%   \begin{enumerate}
-%   \item expand the Default Properties of the Namespace
-%   \item If necessary, expand the specific Properties of the parent
-%     environment (overwriting the default properties of the same name). This step may
-%     occur recursively for each of the parent's own parents.
-%   \item expand the Specific Properties of the Environment itself.
-%   \end{enumerate}
-% \item Expand the Use-Macro
-%   \begin{enumerate}
-%   \item Process the components, depending on contents, presence, or
-%     absence of Components alter other Componentsor trigger property
-%     manipulatons, etc.
-%   \item Calculate the final states of variable properties (in
-%     dependency on the available components, other properties or
-%     global parameters)
-%   \item Print the overall result of those calculations.
-%   \end{enumerate}
-% \end{enumerate}
+% Other Components may occur more than once in the same Container
+% instance, e.\,g. a chapter (which itself may be a Sub-Container of
+% the abstract Parent Container \texttt{Heading}) may have more than
+% one Author. Such Components are called \textit{Group
+% Components}. They are usually realized as {\LaTeX} environments
+% within a Container's environment and contains in itself
+% Components. Those second-level Components are called \textit{Counted
+% Components}, as they are ``numbered'' across all Group Component
+% instances within the same Container Instance. For each Group
+% Component, there is another Container-unique \textit{Collection
+% Component}, in which all instances of a Group Component are
+% collected during processing. How this collection is put together is
+% controlled by a special \textit{Collection Property}.
 %
 % \section{How to Read This Documentation}
 %
+% \subsection{Keyword Colors}
+%
 % Certain Parts of this documentation are color-coded:
-% \begin{itemize}
-% \item \textcolor{mora!75}{Containers} are \textcolor{mora}{orange},
-% \item \textcolor{mgreen!75}{Hooks} are \textcolor{mgreen}{green},
-% \item \textcolor{mblue!75}{Components} are \textcolor{mblue}{blue},
-% \item \textcolor{mpurp!75}{Properties} are \textcolor{mpurp}{purple},
-% \item \textcolor{spot!75}{\LaTeX-Macros} are \textcolor{spot}{le-tex red}
-% \end{itemize}
+% \begin{description}
+% \item[\textcolor{contcolor!75}{Containers}] are \textcolor{contcolor!75}{orange},
+% \item[\textcolor{hookcolor!75}{Hooks}] are \textcolor{hookcolor!75}{green},
+% \item[\textcolor{compcolor!75}{Components}] are \textcolor{compcolor!75}{blue},
+% \item[\textcolor{propcolor!75}{Properties}] are \textcolor{propcolor!75}{magenta},
+% \item[\textcolor{tagscolor!75}{PDF-Tags}] are \textcolor{tagscolor!75}{cyan}
+% \item[\textcolor{spot!75}{\LaTeX-Macros}] are \textcolor{spot!75}{le-tex red}
+% \end{description}
+%
+% \subsection{Data Types of Properties}
+%
+% Whenever a Property is declared, the documentation contains a list
+% of expected values for that property. The following list gives an
+% overview over the various expected data types:
+% \begin{description}
+% \item[\texttt{<dimen>}] means that the Property is expected to
+%   return a dimensional value (or ``length'') or a dimension
+%   register.
+% \item[\texttt{<skip>}] means that the Property is expected to return
+%   a skip, i.\,e., a {\LaTeX} dimension with or without glue, or a
+%   skip register.
+% \item[<num>] means that the Property is expected to return a number
+%   or counter register.
+% \item[<CS token>] means that one previously defined control sequence
+%   token (i.\,e., a {\LaTeX} macro) is expected.
+% \item[{\texttt{[word1|word2]}}] indicates that either exact
+%   \texttt{word1} or \texttt{word2} is expected. This notation may
+%   also contain other fixed data types, and more than one option
+%   could be given.
+% \item[<name>] means that the name of a specific Component, Property
+%   or Container is expected. Details are usually in the description.
+% \item[\texttt{<any>}] means that the Property can take any value.
+% \end{description}
 %
 % \mainmatter

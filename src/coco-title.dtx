@@ -665,6 +665,11 @@ from the Components given in the Meta Container.}}}
   }%
   %% predefined face and format Properties
   \ccSetProperty{title-face}{\Huge\sffamily\bfseries}%
+%    \end{macrocode}
+% The document's main title is tagged with the \DescribeTag{Title}
+% tag, which in PDF-Versions less than 2.0 should be mapped to
+% \DescribeTag{H1}.
+%    \begin{macrocode}
   \ccSetProperty{title-format}{%
     \bgroup
       \ccVstructStart{Title}% PDF 2.0

@@ -25,10 +25,10 @@ delim_2   "\\pfill "
 % The next lines will produce some warnings when
 % running Makeindex as they try to cover two different
 % versions of the program:
-lethead_prefix   "{\\bfseries\\hfil "
+lethead_prefix   "{\\color{\\indexcolor}\\bfseries\\hfil "
 lethead_suffix   "\\hfil}\\nopagebreak\n"
 lethead_flag       1
-heading_prefix   "{\\bfseries\\hfil "
+heading_prefix   "{\\color{\\indexcolor}\\bfseries\\bfseries\\hfil "
 heading_suffix   "\\hfil}\\nopagebreak\n"
 headings_flag       1
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

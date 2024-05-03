@@ -1,4 +1,6 @@
 require_relative "build.rb"
+require "tempfile"
+require "fileutils"
 module CoCoTeX
   class BuildDoc <  Build
     public
@@ -107,6 +109,8 @@ module CoCoTeX
 
     def do_makeindex
       makeindex = File.join(ENV["LATEXBIN"], "makeindex")
+      raw_index_file = File.join(@temp_dir, "#{@doc_main}.idx")
+      preprocess_idx(index: raw_index_file)
       cmd = "cd #{@temp_dir} ; splitindex #{@doc_main}.idx -- -s cocotex.ist"
       _cmd = check_shell_command(cmd)
       st = nil
@@ -128,6 +132,18 @@ module CoCoTeX
         end
       end
     end
+
+    def preprocess_idx(index: )
+      temp = Tempfile.new('tempindex.idx')
+      File.open(index, "r") do |f|
+        f.each_line do |line|
+          temp.puts(line.gsub(/\\indexentry\[cocotex\]{cc[a-z]?@?/, '\\indexentry[cocotex]{'))
+        end
+      end
+      temp.close
+      FileUtils.mv(temp.path, index)
+    end
+
 
     # issues a single LaTeX run
     def do_tex_run

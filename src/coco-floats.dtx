@@ -644,11 +644,11 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %    \begin{macrocode}
 \def\ccf@set@subcounter{%
 %    \end{macrocode}
-% \DescribeProp{float-number}{any} the counter of a first-level float
+% \DescribeProp{float-number}{<any>} the counter of a first-level float
 %    \begin{macrocode}
   \ccSetPropertyVal{float-number}{\csname  cc@\cc@cur@cont @Number-0\endcsname}%
 %    \end{macrocode}
-% \DescribeProp{sub-number}{any} the counter of a second-level float%
+% \DescribeProp{sub-number}{<any>} the counter of a second-level float%
 % \UsageProperty{sub-number-face}\UsageProperty{sub-number-before}\UsageProperty{sub-number-style}\UsageProperty{sub-number-after}\UsageProperty{sub-number-format}
 %    \begin{macrocode}
   \ccSetPropertyVal{sub-number}{%
@@ -730,6 +730,11 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
       \ccf@test@caption{0}{}{bottom}%
       \bgroup
         \@cc@is@finaltrue
+%    \end{macrocode}
+% The entire float body is tagged with the Sub-Container's name, which
+% should be mapped to either \DescribeTag{Table}, \DescribeTag{Figure}
+% or \DescribeTag{Div}.
+%    \begin{macrocode}
         \ccaStructStart{\cc@cur@cont}%
         \edef\ccf@parstruct@id{\ccaGetCurStruct{idx}}%
         \hsize\ccf@total@width
@@ -931,6 +936,9 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
     \ccIfStrEqual{#2}{top}{}{\if@ccf@break@capt\else\vss\fi}%
     \ccUseProperty{\ccf@prefix caption-face}%
     \ccUseProperty{\ccf@prefix caption-face-#1}%
+%    \end{macrocode}
+% The caption is as a whole tagged with \DescribeTag{Caption}.
+%    \begin{macrocode}
     \ccaStructStart{Caption}%
     \cc@topstrut\ccUseProperty{\ccf@prefix caption-#1}\strut%
     \ccaStructEnd{Caption}%
@@ -1392,7 +1400,7 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 %    \begin{macrocode}
   \ccSetProperty{subfloat-render}{\ccfGenericRender}%
 %    \end{macrocode}
-% \DescribeProp{subfloat-same-height}{<bool>} whether or not subfloats
+% \DescribeProp{subfloat-same-height}{[true|false]} whether or not subfloats
 % should be adjusted to be the same height.
 %    \begin{macrocode}
   \ccSetProperty{subfloat-same-height}{}%

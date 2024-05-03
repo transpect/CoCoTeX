@@ -829,8 +829,11 @@
 \def\cch@heading{\cc@opt@empty\@cch@heading}%
 \def\@cch@heading[#1]#2{%
 %    \end{macrocode}
-% Adding start tags for the contents that ``belong'' to a
-% heading. \textbf{Warning}, the following code is incredibly ugly. In
+% Adding start tags for the contents that ``belong'' to a document
+% section. They are tagged with individual names, but all are mapped
+% to the \DescribeTagS{Sect} tag.
+%
+% \textbf{Warning}, the following code is incredibly ugly. In
 % principle, we close the semi-group opened by \lstinline{begin}, add
 % the tagging, and then re-build the rest of the code from older and
 % more modern \LaTeX's standard definitions of \lstinline{begin}.
@@ -1029,7 +1032,7 @@
     \global\@afterindenttrue
   }%
 %    \end{macrocode}
-% \DescribeProp{after-heading-par}{any} is expanded at the very end of
+% \DescribeProp{after-heading-par}{<any>} is expanded at the very end of
 % non-inline headings.
 %    \begin{macrocode}
   \ccSetProperty{after-heading-par}{\par \nobreak}%
@@ -1087,8 +1090,10 @@
     }%
 %    \end{macrocode}
 % \DescribeProp{main-title-format}{<any>} is the format of the
-% heading's main title. It uses the \UsageComponent{Number} and
-% \UsageComponent{Title} Components.
+% heading's main title. It should also enclose the heading's
+% \UsageComponent{Number} and \UsageComponent{Title} Components with
+% Tags that are mapped to \DescribeTag{H} or \DescribeTag{Hn} with
+% $1<n<6$.
 %    \begin{macrocode}
   \ccSetProperty{main-title-format}{%
     \ccUseProperty{title-face}%
@@ -1147,7 +1152,7 @@
 %    \begin{macrocode}
   \ccSetProperty{after-indent}{}%
 %    \end{macrocode}
-% \DescribeProp{margin-left}{auto|<dimen>|<empty>} is the left margin
+% \DescribeProp{margin-left}{[auto|<dimen>|<empty>]} is the left margin
 % of the heading. Its value can either be a fixed dimension, the
 % string \texttt{auto}, or empty. If the Property is set to
 % \texttt{auto} or an empty string, the margin is calculated from the
@@ -1167,7 +1172,7 @@
 %    \begin{macrocode}
   \ccSetProperty{after-skip}{1sp}%
 %    \end{macrocode}
-% \DescribeProp{indent}{auto|auto-global|<dimen>} is the offset of the
+% \DescribeProp{indent}{[auto|auto-global|<dimen>]} is the offset of the
 % first line of the heading relative to \UsageProp{margin-left}.
 %
 % If the value is auto, the indent of the heading is the width of the
@@ -1192,7 +1197,7 @@
 %    \begin{macrocode}
   \ccSetProperty{number-sep}{\space}%
 %    \end{macrocode}
-% \DescribeProp{number-align}{left|center|right} is the horizontal
+% \DescribeProp{number-align}{[left|center|right]} is the horizontal
 % alignment of the \texttt{Number} component inside its surrounding
 % \lstinline{\hbox}.
 %    \begin{macrocode}
@@ -1212,7 +1217,7 @@
       \ccUseProperty{number-sep}%
     \egroup}
 %    \end{macrocode}
-% \DescribeProp{numbering}{auto|<any>} if non-auto, headings are not
+% \DescribeProp{numbering}{[auto|<any>]} if non-auto, headings are not
 % numbered automatically if no Number component is given. This
 % property can be overridden in a local instance with the
 % \lstinline{nonumber} Attribute.
@@ -1240,13 +1245,13 @@
   }%
   %% ToC
 %    \end{macrocode}
-% \DescribeProp{no-toc}{true|false} whether or not the heading does
+% \DescribeProp{no-toc}{[true|false]} whether or not the heading does
 % \textit{not} create an entry in the table of contents (\texttt{true}
 % means no toc entry, \texttt{false} means toc entry).
 %    \begin{macrocode}
   \ccSetProperty{no-toc}{false}% toc entries are generally disabled iff true
 %    \end{macrocode}
-% \DescribeProp{no-BM}{true|false} whether or not the heading does
+% \DescribeProp{no-BM}{[true|false]} whether or not the heading does
 % \textit{not} create a bookmark (\texttt{true} means no bookmark,
 % \texttt{false} means bookmark).
 %    \begin{macrocode}
@@ -1260,7 +1265,7 @@
 %    \begin{macrocode}
   \ccSetProperty{toc-margin-bottom}{\z@}% bottom margin of the whole entry
 %    \end{macrocode}
-% \DescribeProp{toc-margin-left}{auto|<dimen>} left margin of the toc
+% \DescribeProp{toc-margin-left}{[auto|<dimen>]} left margin of the toc
 % entry. See \lstinline{margin-left} for the meaning of auto.
 %    \begin{macrocode}
   \ccSetProperty{toc-margin-left}{auto}% left indent of the whole entry
@@ -1274,7 +1279,7 @@
 %    \begin{macrocode}
   \ccSetProperty{toc-title-face}{}% appearance of title
 %    \end{macrocode}
-% \DescribeProp{toc-indent}{auto|auto-global|<dimen>} offset of the
+% \DescribeProp{toc-indent}{[auto|auto-global|<dimen>]} offset of the
 % ToC entry's first line relative to margin-left. See \lstinline{indent}.
 %    \begin{macrocode}
   \ccSetProperty{toc-indent}{auto}%
@@ -1284,7 +1289,7 @@
 %    \begin{macrocode}
   \ccSetProperty{toc-number-width}{}% current width of the TocNumber
 %    \end{macrocode}
-% \DescribeProp{toc-number-align}{left|center|right} the alignment of
+% \DescribeProp{toc-number-align}{[left|center|right]} the alignment of
 % the TocNumber within the surrounding \lstinline{\hbox}.
 %    \begin{macrocode}
   \ccSetProperty{toc-number-align}{left}% alignment of TocNumber within the hbox when hanging
@@ -1359,7 +1364,11 @@
 % uses the \UsageProp{toc-title-face}, \UsageProp{toc-hang-number} and
 % \UsageProp{toc-page-format} Properties to print the
 % \UsageComponent{TocNumber}, \UsageComponent{TocAuthorNameList},
-% \UsageComponent{TocTitle}, and \UsageComponent{TocPage} Components.
+% \UsageComponent{TocTitle}, and \UsageComponent{TocPage}
+% Components. Tagging should incorporate the \DescribeTag{TOCI},
+% \DescribeTag{P}, and \DescribeTag{Reference} tags for the entire
+% entry, as well as \DescribeTag{Lbl} for the \UsageComponent{TocNumber}, and
+% \DescribeTag{Span} for the rest of the entry.
 %    \begin{macrocode}
   \ccSetProperty{toc-format}{%
     \ccUseProperty{toc-title-face}%
