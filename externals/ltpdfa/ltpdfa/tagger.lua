@@ -285,7 +285,9 @@ local inputtagger = {
    setNewParent    = setNewParent,
    pushStruct      = pushStruct,
    setLang         = setLang,
-   addFigure       = addFigure
+   addFigure       = addFigure,
+   moveStruct      = structtree.moveStruct,
+   replaceStruct   = structtree.replaceStruct,
 }
 
 return inputtagger

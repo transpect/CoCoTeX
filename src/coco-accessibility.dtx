@@ -12,7 +12,7 @@
 %
 % \section{LaTeX code}
 %
-%    \begin{macrocode}[gobble=1]
+%    \begin{macrocode}[numbers=none,gobble=1]
 %<*a11y-sty>
 %    \end{macrocode}
 % \subsection{General Processing}
@@ -374,21 +374,71 @@
 % \end{macro}
 % \begin{macro}{\ccaGetCurStruct} returns the internal ID of the
 %   currently open structural element. \#1 is table attribute that
-%   should be returned(?)
+%   should be returned. The following code gives an example on how to
+%   use the macro:
+% \begin{lstlisting}[style=example,lastline=3,gobble=2]
+% \ccaStructStart{Leela}
+%   \xdef\LeelaID{\ccaGetCurStruct{idx}}%
+% \ccaStructEnd{Leela}
+% \end{lstlisting}
+%   This stores the internal node index of the \lstinline{Leela} tag
+%   node in the \lstinline{\LeelaID} macro so it can be referenced by
+%   other lua interface macros like \lstinline{\ccaAddToStruct} or
+%   \lstinline{\ccaMoveStruct}, as shown below.
 %    \begin{macrocode}
 \DeclareAccessibilityCommand{\ccaGetCurStruct}[1]{\directlua{ltpdfa.tagger.getCurrentStruct('\luaescapestring{#1}')}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccaAddToStruct} adds the current structural element
-%   to the structural element \#1 (retrieved using
-%   \lstinline{\ccaGetCurStruct}).
+%   to the structural element \#1 previously retrieved using
+%   \lstinline{\ccaGetCurStruct}, e.g.,
+% \begin{lstlisting}[style=example,lastline=6]
+% \ccaStructStart{Fry}
+%   \xdef\FryID{\ccaGetCurStruct{idx}}%
+% \ccaStructEnd{Fra}
+% \ccaStructStart{Hubert}
+%   \ccaAddToStruct{\CurrentNode}%
+% \ccaStructEnd{Hubert}
+% \end{lstlisting}
+%   makes \lstinline{Hubert} into a child node of \lstinline{Fry} and
+%   detaches it from its current parent node (which, in this case, is
+%   also the current parent of \lstinline{Foo}). Note that the parent
+%   has to be tagged \textit{before} the child node.
 %    \begin{macrocode}
 \DeclareAccessibilityCommand{\ccaAddToStruct}[1]{\directlua{ltpdfa.tagger.addToStruct('\luaescapestring{#1}')}}
 %    \end{macrocode}
 % \end{macro}
-%
-% \begin{macro}{\ccaAddID} adds the ID \#1 to the current node. If \#1
-%   is ``auto'' the ID is calculated by ltpdfa.
+% \begin{macro}{\ccaMoveStruct} removes the Node with the ID \#1 from
+%   its current parent and attaches it as child to the current
+%   node. \lstinline{\ccaMoveStruct} is the logical counter-part of
+%   above's \lstinline{\ccaAddToStruct}. The child's node ID can be
+%   retrieved with the \UsageMacro{\ccaGetCurrentStruct} command, for
+%   example:
+% \begin{lstlisting}[style=example,lastline=6,gobble=2]
+% \ccaStructStart{Hubert}
+%   \xdef\HubertID{\ccaGetCurStruct{idx}}
+% \ccaStructEnd{Hubert}
+% \structStart{Fry}
+%   \ccaMoveStruct{\HubertID}
+% \structEnd{Fry}
+% \end{lstlisting}
+%   This will make \lstinline{Hubert} a child of \lstinline{Fry}. In
+%   contrast to \lstinline{\ccaAddToStruct}, this allows to attach a
+%   previously tagged child node to a later tagged parent node.
+%    \begin{macrocode}
+\DeclareAccessibilityCommand{\ccaMoveStruct}[1]{\relax\directlua{ltpdfa.tagger.moveStruct('\luaescapestring{#1}')}}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccaReplaceStruct} takes a previously added tag node
+%   with the index \#1 and \textit{replaces} it with the current tag
+%   node.
+%    \begin{macrocode}
+\DeclareAccessibilityCommand{\ccaReplaceStruct}[1]{\relax\directlua{ltpdfa.tagger.replaceStruct('\luaescapestring{#1}')}}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccaAddID} renames the index attribute of the current
+%   tag node to \#1. If \#1 is ``auto'', the index is calculated by
+%   ltpdfa.
 %    \begin{macrocode}
 \DeclareAccessibilityCommand{\ccaAddID}[1]{\directlua{ltpdfa.tagger.addID('\luaescapestring{#1}')}}
 %    \end{macrocode}
@@ -417,11 +467,6 @@
 % \begin{macro}{\ccaAddNumbering} ???
 %    \begin{macrocode}
 \DeclareAccessibilityCommand{\ccaAddNumbering}[1]{\directlua{ltpdfa.tagger.addNumbering('\luaescapestring{#1}')}}
-%    \end{macrocode}
-% \end{macro}
-% \begin{macro}{\ccaAddScope}
-%    \begin{macrocode}
-\DeclareAccessibilityCommand{\ccaAddScope}[1]{\relax\directlua{ltpdfa.tagger.addScope('\luaescapestring{#1}')}}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -551,7 +596,7 @@
 %
 % \subsection{Tagging Page Styles as Artifacts}
 %
-% Page styles, i.e., headers and footers need to be tagged as
+% Page styles, i.e., headers and footers, need to be tagged as
 % artifacts unless they contain semantic information. To avoid
 % inserting the tagging by hand into each publisher's page style
 % definitions, we inject the tagging automatically by using
@@ -672,6 +717,37 @@
 %    \end{macrocode}
 %
 %
+% \subsubsection{Tagging for Tables}
+%
+% \begin{macro}{\ccaAddScope} is used to indicate the scope of in
+%   table's head cells. The value should be either \lstinline{Column}
+%   or \lstinline{Row}.
+%    \begin{macrocode}
+\DeclareAccessibilityCommand{\ccaAddScope}[1]{\relax\directlua{ltpdfa.tagger.addScope('\luaescapestring{#1}')}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\ccaAddColSpan} is used to mark a cell to span
+%   horizontally over \#1 columns (including it's own).
+%    \begin{macrocode}
+\DeclareAccessibilityCommand{\ccaAddColSpan}[1]{\relax\directlua{ltpdfa.tagger.addColSpan('\luaescapestring{#1}')}}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccaAddRowSpan} is used to mark a cell to span
+%   vertically over \#1 rows (including it's own).
+%    \begin{macrocode}
+\DeclareAccessibilityCommand{\ccaAddRowSpan}[1]{\relax\directlua{ltpdfa.tagger.addRowSpan('\luaescapestring{#1}')}}
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{\ccaAddKeep} is inserted into empty cells to tell the
+%   ltpdfa-tagger to not remove the Tag even though it may be empty.
+%    \begin{macrocode}
+\DeclareAccessibilityCommand{\ccaAddKeep}{\relax\directlua{ltpdfa.tagger.addKeep()}}
+%    \end{macrocode}
+% \end{macro}
+%
+%
 % \subsection{Transformation of  Typographic Unicode characters}
 %
 % In order for screen readers to work correctly, some unicode
@@ -711,7 +787,7 @@
 %    \end{macrocode}
 %
 %
-% \section{Default Role Mapping}
+% \subsection{Default Role Mapping}
 %
 % Note that this section contains only the role mappings that didn't
 % thematically fit into other {\CoCoTeX} modules.
@@ -726,15 +802,16 @@
 \ccWhenAlly{\AtBeginShipout{\directlua{ltpdfa.pageprocessor(tex.box["AtBeginShipoutBox"])}}}%
 %    \end{macrocode}
 % End of {\TeX} source code.
-%    \begin{macrocode}[gobble=1]
+%    \begin{macrocode}[numbers=none,gobble=1]
 %</a11y-sty>
 %    \end{macrocode}
 %
-%    \begin{macrocode}[gobble=1]
-%<*a11y-lua>
-%    \end{macrocode}
 %
 % \section{Lua code}
+%
+%    \begin{macrocode}[numbers=none,gobble=1]
+%<*a11y-lua>
+%    \end{macrocode}
 %
 % \subsection{Local Variables and Tables}
 %
@@ -816,6 +893,6 @@ cocotex.ally = {
 return cocotex.ally
 %    \end{macrocode}
 % no more lua code.
-%    \begin{macrocode}[gobble=1]
+%    \begin{macrocode}[numbers=none,gobble=1]
 %</a11y-lua>
 %    \end{macrocode}

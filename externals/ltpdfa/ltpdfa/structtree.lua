@@ -1196,6 +1196,7 @@ local function getCurrentStruct(key)
    tex.print(stree.current[key])
 end
 
+-- adds current as child to element with idx
 local function addToStruct(idx)
    local idx = tonumber(idx)
    local selem = stree.structarray[idx]
@@ -1203,6 +1204,37 @@ local function addToStruct(idx)
    stree.current.parent:removeChild(stree.current)
    stree.current.parent = selem
    table.insert(selem.childs, stree.current)
+end
+
+local function replaceStruct(idx)
+   local idx = tonumber(idx)
+   local selem = stree.structarray[idx]
+   local index = nil
+   for k,v in pairs(selem.parent.childs) do
+      if v.idx == idx then
+	 index = k
+      end
+   end
+   if index then
+      debug_log("replaceStruct %s with %s!", selem.parent.childs[index], idx)
+      stree.current.parent:removeChild(stree.current)
+      selem.parent.childs[index] = stree.current
+   else
+      log("Error: replaceStruct %s", idx)
+   end
+end
+
+-- deletes source at idx and inserts as child into current
+local function moveToStruct(idx)
+   local idx = tonumber(idx)
+   local source = stree.structarray[idx]
+   if source then
+      source.parent:removeChild(source)
+      debug_log("moveToStruct %s %s => %s", idx, source.type, stree.current.type)
+      table.insert(stree.current.childs, source)
+   else
+      debug_log("Error: moveToStruct %s", idx)
+   end
 end
 
 local function ignoreNext(sname)
@@ -1244,6 +1276,8 @@ local structtree = { -- module table
    setWriter        = setWriter,
    pushStruct       = pushStruct,
    addFigure        = addFigure,
+   moveStruct       = moveToStruct,
+   replaceStruct    = replaceStruct,
 }
 
 return structtree

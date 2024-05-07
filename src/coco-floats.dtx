@@ -1,10 +1,12 @@
 % \chapter{coco-floats.dtx}\DescriptionDomain{float}
+%
+%    \begin{macrocode}[numbers=none,gobble=1]
+%<*floats>
+%    \end{macrocode}
+%
 % This module provides handlers for floating objects like tables and
 % figures common to all {\CoCoTeX} projects
 %
-%    \begin{macrocode}[gobble=1]
-%<*floats>
-%    \end{macrocode}
 %    \begin{macrocode}
 %%
 %% module for CoCoTeX that extends floating objects.
@@ -1275,7 +1277,12 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
 \def\ccfTableRender{%
   \ccfGetTableContent
   \ccComponent{Content}{\unvbox\ccf@floatbox}%
+  % \ccaStructStart{Table}%
+  %   \ifx\ht@structID@THead\@undefined\else\ccaMoveStruct{\ht@structID@THead}\fi%
+  %   \ifx\ht@structID@TBody\@undefined\else\ccaMoveStruct{\ht@structID@TBody}\fi%
+  %   \ifx\ht@structID@TFoot\@undefined\else\ccaMoveStruct{\ht@structID@TFoot}\fi%
   \ccUseComp{Content}%
+  % \ccaStructEnd{Table}%
   \par\if@ccf@break@capt\else\nopagebreak\fi
   \vskip\dp\strutbox
 }
@@ -1699,6 +1706,6 @@ Use \string\ccAddToType{<Type>}{#2}{<code>}\space to alter the #2 container!}
   \ccSetProperty{subfloat-render}{\ccfSubTableRender}%
 }
 %    \end{macrocode}
-%    \begin{macrocode}[gobble=1]
+%    \begin{macrocode}[numbers=none,gobble=1]
 %</floats>
 %    \end{macrocode}

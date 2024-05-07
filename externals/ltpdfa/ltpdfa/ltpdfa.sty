@@ -161,6 +161,8 @@
 \newcommand*{\ignoreNext}[1]{\directlua{ltpdfa.tagger.ignoreNext('\luaescapestring{#1}')}}
 \newcommand*{\pushStruct}[1]{\directlua{ltpdfa.tagger.pushStruct('\luaescapestring{#1}')}}
 \newcommand*{\setLang}[1]{\directlua{ltpdfa.tagger.setLang('\luaescapestring{#1}')}}
+\newcommand*{\moveStruct}[1]{\directlua{ltpdfa.tagger.moveStruct('\luaescapestring{#1}')}}
+\newcommand*{\replaceStruct}[1]{\directlua{ltpdfa.tagger.replaceStruct('\luaescapestring{#1}')}}
 
 %% save definition of structuring commands
 \let\@lt@save@structStart\structStart
@@ -199,6 +201,8 @@
 \let\@lt@save@pushStruct\pushStruct
 \let\@lt@save@setLang\setLang
 \let\@lt@save@ltOmitEnv\ltOmitEnv
+\let\@lt@save@moveStruct\moveStruct
+\let\@lt@save@replaceStruct\replaceStruct
 
 \newcommand*{\@restoreLtpdfa}{%
   \global\let\ltOmitEnv\@lt@save@ltOmitEnv
@@ -237,6 +241,8 @@
   \global\let\ignoreNext\@lt@save@ignoreNext
   \global\let\pushStruct\@lt@save@pushStruct
   \global\let\setLang\@lt@save@setLang
+  \global\let\moveStruct\@lt@save@moveStruct
+  \global\let\replaceStruct\@lt@save@replaceStruct
   \endNoHyper
 }
 

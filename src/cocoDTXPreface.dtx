@@ -124,7 +124,7 @@
   % basicstyle=\fontfamily{lmvtt}\selectfont\small,
   columns=fullflexible,
   numbers=left,
-  numberfirstline=1,
+  numberfirstline=true,
   numberstyle=\scriptsize,
   numbersep=5pt,
   backgroundcolor=\color{spot!04},  % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
@@ -157,10 +157,13 @@
 \newunicodechar{ܝ}{?}
 \newunicodechar{ܐ}{?}
 \let\macrocode\relax
+\newcount\myCodeline \myCodeline\z@
 \lstnewenvironment{macrocode}[1][]{%
   \if@noskipsec\leavevmode\fi
+  \global\c@lstnumber=\myCodeline\relax
   \lstset{style=macrocode,#1}%
-}{}
+}{\global\myCodeline=\c@lstnumber\relax}
+
 
 \renewcommand\frontmatter{%
     \cleardoublepage
@@ -353,6 +356,7 @@
 \def\@chapter[#1]#2{%
   \thispagestyle{chapfirst}%
   \setcounter{lstnumber}{24}%
+  \global\myCodeline=22\relax
   \ifnum \c@secnumdepth >\m@ne
     \if@mainmatter
       \refstepcounter{chapter}%
@@ -490,7 +494,7 @@
 
 \lstdefinestyle{macrocode}{language=[AlLaTeX]TeX,
   keepspaces=false,                   % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
-  name=macrocode,
+  name=origcode,
   basicstyle=\footnotesize\ttfamily,
   commentstyle=\color{spot!70}\footnotesize, %
   stringstyle=\itshape, %
@@ -502,7 +506,16 @@
   basicstyle=\sffamily\small,
   literate=<{$\langle$}1>{$\rangle$}1,
 }
-
+\lstdefinestyle{example}{%
+  numbers=none,
+  name=example,
+  basicstyle={\ttfamily\footnotesize},
+  backgroundcolor=\color{blue!04},
+  keywordstyle={\color{blue}\itshape},
+  texcsstyle={\color{blue}\mybfseries},
+  rulecolor=\color{blue},
+  literate=<{$\langle$}1>{$\rangle$}1,
+}
 \usepackage{etoolbox}
 \patchcmd{\lsthk@TextStyle}{\let\lst@DefEsc\@empty}{}{}{\errmessage{failed to patch}}
 \global\let\lst@doendpe\@empty
@@ -721,6 +734,16 @@
 %
 % \section{How to Read This Documentation}
 %
+% The documented source code is printed in red code boxes with line
+% numbers referring to lines in the corresponding unpacked .sty files:
+% \begin{lstlisting}[lastline=1,style=macrocode,firstnumber=29,name=examplemacro,gobble=2]
+% This is the documented source code
+% \end{lstlisting}
+%
+% Code and usage examples are printed in blue boxes:
+% \begin{lstlisting}[lastline=1,style=example,gobble=2]
+% This is a {\LaTeX} example.
+% \end{lstlisting}
 % \subsection{Keyword Colors}
 %
 % Certain Parts of this documentation are color-coded:

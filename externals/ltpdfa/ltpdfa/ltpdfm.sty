@@ -393,7 +393,8 @@
 \addToConfig{autoclose}{section={Type:Sectioning}{Child:subsection}{Egroup:true}}
 \addToConfig{autoclose}{subsection={Type:Sectioning}{Child:subsubsection}{Egroup:true}}
 \addToConfig{autoclose}{subsubsection={Type:Sectioning}{Child:paragraph}{Egroup:true}}
-\addToConfig{autoclose}{paragraph={Type:Sectioning}{Child:none}{Egroup:true}}
+\addToConfig{autoclose}{paragraph={Type:Sectioning}{Child:subparagraph}{Egroup:true}}
+\addToConfig{autoclose}{subparagraph={Type:Sectioning}{Child:none}{Egroup:true}}
 
 %% Rolemap
 \addRolemap{document}{Document}
@@ -404,6 +405,7 @@
 \addRolemap{subsection}{Sect}
 \addRolemap{subsubsection}{Sect}
 \addRolemap{paragraph}{Sect}
+\addRolemap{subparagraph}{Sect}
 \addRolemap{center}{Div}
 \addRolemap{tabular}{Table}
 \addRolemap{em}{BlockQuote}
@@ -426,12 +428,14 @@
   \addRolemap{subsectionhead}{H2}
   \addRolemap{subsubsectionhead}{H3}
   \addRolemap{paragraphhead}{H4}
+  \addRolemap{subparagraphhead}{H5}
 \else
   \addRolemap{sectionhead}{H}
   \addRolemap{sechead}{H}
   \addRolemap{subsectionhead}{H}
   \addRolemap{subsubsectionhead}{H}
   \addRolemap{paragraphhead}{H}
+  \addRolemap{subparagraphhead}{H}
 \fi
 \@ifclassloaded{book}{\RequirePackage{ltbook}}{}
 \@ifclassloaded{article}{\RequirePackage{ltart}}{}

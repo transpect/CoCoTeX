@@ -55,8 +55,8 @@ module CoCoTeX
       last = 0
       for line in tpl
         last = n if line =~ /begin{macrocode}/
-        if line =~ /begin{macrocode}\[[.*]+\]/
-          optarg = line.scan(/^.*\[([.*]+)\].*$/).first.first
+        if line =~ /begin{macrocode}\[.+\]/
+          optarg = line.scan(/^.*?\[(.+)\].*$/).first.first
           optarg = ","+optarg
         end
         if line =~ /end{macrocode}/
