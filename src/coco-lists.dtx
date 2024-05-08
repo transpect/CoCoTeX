@@ -587,17 +587,21 @@
 %    \end{macrocode}
 % Horizontal margin Properties from the previous nesting level are
 % stored so that the nested lists can use them.
+%    \begin{macrocode}
+  \edef\ccl@leftskip{\the\dimexpr\leftskip\relax}%
+  \edef\ccl@rightskip{\the\dimexpr\leftskip\relax}%
+%    \end{macrocode}
 %
 % \DescribeProp{prev-margin-left}{<skip>} stores the left margin of
 % the next higher list level (i.\,e., the left margin of the list item
 % that the current list is nested into)
 %    \begin{macrocode}
-  \ccSetPropertyX{prev-margin-left}{\the\leftskip}%
+  \ccSetPropertyX{prev-margin-left}{\ccl@leftskip}%
 %    \end{macrocode}
 % \DescribeProp{prev-margin-right}{<skip>} stores the superior list
 % item's right margin.
 %    \begin{macrocode}
-  \ccSetPropertyX{prev-margin-right}{\the\rightskip}%
+  \ccSetPropertyX{prev-margin-right}{\ccl@rightskip}%
   \ccEvalType[\ccl@cur@cont]{Properties}%
 %    \end{macrocode}
 % \begin{macro}{\ccl@list@type} locally stores the current value of
