@@ -21,7 +21,7 @@
 %% same distribution. (The sources need not necessarily be
 %% in the same archive or directory.)
 \def\fileversion{0.3.0}%
-\def\filedate{2024-04-26}%
+\def\filedate{2024-05-08}%
 \NeedsTeXFormat{LaTeX2e}[2018/12/01]
 \ProvidesPackage{htmltabs}
     [\filedate\space\fileversion\space htmltabs]
@@ -1886,6 +1886,7 @@
   \egroup
   \let\ht@parent\ht@str@tbody
   \let\ht@initial@run\relax
+  \ccaDisable
 }
 \def\HTEndTable{%
   \let\ht@initial@run\@undefined
@@ -2353,6 +2354,7 @@
     \GetScopedProp{TabMarginBot}{table}{margin-bottom}%
     \GetScopedProp{TabMarginLeft}{table}{margin-left}%
     \GetScopedProp{TabMarginRight}{table}{margin-right}%
+    \ccaEnable
     \ifx\htCaptionContent\relax\else
       \bgroup
         \ht@eval@props{caption}%
