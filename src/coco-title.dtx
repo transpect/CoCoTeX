@@ -46,7 +46,7 @@
     \cct@declare@role{series-editor}{SeriesEditor}%
   }%
   \ccDeclareType{Properties}{}%
-  \ccDeclareEnv[Meta]{\cct@meta}{\endcct@meta}%
+  \ccDeclareEnv[Meta]{\cctmeta}{\endcctmeta}%
 }
 %    \end{macrocode}
 % \begin{macro}{\cct@declare@role} declares the roles for editors and
@@ -79,9 +79,12 @@
 \def\ccDeclareTitlepage{\ccAddToType{Properties}{titlepage}}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\cct@meta} is the code executed at the beginning of the \lstinline{\ccPrefix Meta} Container
+% \begin{macro}{\cctmeta} is the code executed at the beginning of the \lstinline{\ccPrefix Meta} Container
 %    \begin{macrocode}
-\def\cct@meta{%
+\def\cctmeta{\cc@opt@empty\cct@meta}
+\def\cct@meta[#1]{%
+  \ccParseAttributes{Meta}{#1}%
+  \ccUseHook[Meta]{attr-handler}%
   \ccEvalType{Components}%
 }
 %    \end{macrocode}
@@ -108,9 +111,9 @@
 \def\cct@add@eval{}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\endcct@meta} is the code executed at the end of the \lstinline{Meta} Container
+% \begin{macro}{\endcctmeta} is the code executed at the end of the \lstinline{Meta} Container
 %    \begin{macrocode}
-\def\endcct@meta{%
+\def\endcctmeta{%
   \ccSetContainer{titlepage}%
   \ccEvalType{Properties}%
   \cct@maketitle
@@ -330,6 +333,11 @@ from the Components given in the Meta Container.}}}
 %   the \texttt{Meta} Container.
 %    \begin{macrocode}
 \ccDeclareHook[titlepage]{document-meta-hook}
+%    \end{macrocode}
+% \DescribeHook{attr-handler} is used to handle the attributes in the
+% optional argument of \lstinline|\begin{\ccPrefix Meta}|.
+%    \begin{macrocode}
+\ccDeclareHook[titlepage]{attr-handler}
 %    \end{macrocode}
 % \begin{macro}{\cct@article@titlepage} is the prototype for article
 %   title pages.

@@ -559,6 +559,7 @@
   \ccDeclareHook{toc-after-hook-#1}% Expanded after the toc entry is printed
   \ccDeclareHook{before-hook-#1}% Expanded before before-heading property is expanded
   \ccDeclareHook{before-print-hook-#1}% Expanded at the very beginning of the local definition of \@svsec
+  \ccDeclareHook{attr-handler-#1}% Expanded before before-heading property is expanded
 }
 %    \end{macrocode}
 % \end{macro}
@@ -884,6 +885,11 @@
   \edef\ccCurSecName{#2}%
 %    \end{macrocode}
 % \end{macro}
+% \DescribeHook{attr-handler} is used to handle the attributes in the
+% optional argument of \lstinline|\begin{heading}|.
+%    \begin{macrocode}
+  \cch@use@hook{attr-handler}{#2}%
+%    \end{macrocode}
 % The cascaded Properties of the heading level are expanded. This is
 % excluded into its own macro to simplify re-definition if necessary.
 %    \begin{macrocode}
