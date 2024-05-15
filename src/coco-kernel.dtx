@@ -48,8 +48,11 @@
 % \lstinline{warning}, \lstinline{info}, and \lstinline{debug}.
 %
 % \begin{macro}{\ccPackageError} creates an error message specific to
-%   the Framework. \#1 is the module, \#2 is the type of error, \#3 is
-%   the immediate error message, \#4 is the help string.
+%   the Framework.
+%   \DescribeArg{1}{is the module}
+%   \DescribeArg{2}{is the type of error}
+%   \DescribeArg{3}{is the immediate error message}
+%   \DescribeArg{4}{is the help string}
 %    \begin{macrocode}
 \def\ccPackageError#1#2#3#4{%
    \GenericError{%
@@ -60,10 +63,11 @@
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccPackageWarning}
-%   is a macro to create warnings specific to the Framework. \#1
-%   is the module, \#2 is the type of error, \#3 is the immediate
-%   warning message.
+% \begin{macro}{\ccPackageWarning} is a macro to create warnings
+%   specific to the Framework. 
+%   \DescribeArg{1}{is the module}
+%   \DescribeArg{2}{is the type of error}
+%   \DescribeArg{3}{is the immediate warning message}
 %    \begin{macrocode}
 \def\ccPackageWarning#1#2#3{%
    \GenericWarning{%
@@ -75,9 +79,10 @@
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccPackageInfo}
-%   is a macro to create shell output specific to the Framework. \#1
-%   is the module, \#2 is the type of message, \#3 is the immediate
-%   info string.
+%   is a macro to create shell output specific to the Framework.
+%   \DescribeArg{1}{is the module}
+%   \DescribeArg{2}{is the type of message}
+%   \DescribeArg{3}{is the immediate info string}
 %    \begin{macrocode}
 \def\ccPackageInfo#1#2#3{%
   \GenericInfo{%
@@ -93,6 +98,7 @@
 %
 % \begin{macro}{\ccKernelDebugMsg} prints a debug message if and only
 %   if the \lstinline{debug} package option is set.
+%   \DescribeArg{1}{is the debug message}
 %    \begin{macrocode}
 \def\ccKernelDebugMsg#1{\if@cc@debug\message{[CoCo Kernel Debug]\space\space#1^^J}\fi}
 %    \end{macrocode}
@@ -159,10 +165,11 @@
 % Containers are the package's core data structure. They are basicly
 % sets of properties that are processed in the same way.
 %
-% \begin{macro}{\ccDeclareContainer}
-%   is the constructor for new Containers. \#1 is the Container's
-%   name, \#2 its body which conists of Inheritance instructions, Type
-%   and Env declarations.
+% \begin{macro}{\ccDeclareContainer} is the constructor for new
+%   Containers.
+%   \DescribeArg{1}{is the Container's name}
+%   \DescribeArg{2}{is its body, which conists of Inheritance
+%     instructions, Type and Env declarations.}
 %    \begin{macrocode}
 \def\cc@warning@spaces{\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space}%
 \long\def\ccDeclareContainer#1#2{%
@@ -172,38 +179,41 @@
     {\csdef{cc@container@#1}{}}%
   \csdef{cc@cur@cont}{#1}%
 %    \end{macrocode}
-% We want the declarator macros to be only allowed inside the \lstinline{\ccDeclareContainer} macro.
+% We want the declarator macros to be only allowed inside the
+% \lstinline{\ccDeclareContainer} macro.
 %    \begin{macrocode}
   \begingroup
 %    \end{macrocode}
-% \begin{macro}{\ccInherit}
-% The inherit mechanism is dynamic, i.e., we can load multiple type
-% declarations from multiple containers at once.
+% \begin{macro}{\ccInherit} The inherit mechanism is dynamic, i.e., we
+%   can load multiple type declarations from multiple containers at
+%   once.
+%   \DescribeArg{1}{is a comma-separated list of Types that should be inherited}
+%   \DescribeArg{2}{is a comma-separated list of Container names which the Types should be inherited from}
 %    \begin{macrocode}
     \def\ccInherit##1##2{\cc@inherit{##1}{##2}{#1}}%
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccDeclareType}
-% Each Container is defined by the data types it provides. These data
-% types are declared with this macro. The first argument \#\#1 is the
-% name of the data type. The second argument \#\#2 is a list of code
-% that is specific to this type, usually something like Component or
-% Property declarations, handlers, and so forth.
+%   Each Container is defined by the data types it provides. These data
+%   types are declared with this macro.
+%   \DescribeArg{1}{is the name of the data type}
+%   \DescribeArg{2}{is code that is specific to this type, usually something like Component or
+%     Property declarations, handlers, and so forth}
 %    \begin{macrocode}
     \long\def\ccDeclareType##1##2{\csgappto{cc@type@##1@#1}{##2}}%
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccDeclareEnv}
-%   Each container usually is realised as a {\LaTeX} environment. The
-%   \lstinline{\ccDeclareEnv} macro is used to set up this
-%   environment. Usually, the environment has \textit{the same name as
-%   the Container}. With the optional argument \#\#1 you can override
-%   the environment's name.  However, keep in mind that the
-%   Container's name is not changed by re-naming the corresponding
-%   environment. \#\#2 is used for the stuff done at the beginning of
-%   the environment, \#\#3 for the stuff done at the end.
+% \begin{macro}{\ccDeclareEnv} Each container usually is realised as a
+%   {\LaTeX} environment. The \lstinline{\ccDeclareEnv} macro is used
+%   to set up this environment. Usually, the environment has
+%   \textit{the same name as the Container}.
+%   \DescribeArg*{1}{overrides the environment's name.  However,
+%     keep in mind that the Container's name is not changed by re-naming
+%     the corresponding environment.}
+%   \DescribeArg{2}{is used for the stuff done at the environment's beginning}
+%   \DescribeArg{3}{is the stuff done at the environment's end}
 %
-%   In the begin part, the Types declared in the Container
+%   In the \lstinline{begin} part, the Types declared in the Container
 %   declaration's body should be evaluated using the
 %   \lstinline{\ccEvalType} macro, see below.
 %    \begin{macrocode}
@@ -219,23 +229,25 @@
     }%
   \expandafter\x\endgroup
 }
- %\@onlypreamble\ccDeclareContainer
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccSetContainer} is used to change the currently
 %   active (Sub-)Container.
+%   \DescribeArg{1}{is the name of the new active Container}
 %    \begin{macrocode}
 \def\ccSetContainer#1{\def\cc@cur@cont{#1}}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccAddToType} add additional content (i.e., the next token) to a Type \#1 of a previously declared Container \#2.
+% \begin{macro}{\ccAddToType} add additional content (i.e., the next
+%   token) to a Type \InlineArg{1} of a previously declared Container
+%   \InlineArg{2}.
 %    \begin{macrocode}
 \def\ccAddToType#1#2{\csgappto{cc@type@#1@#2}}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccEvalType}
-%   calls the Declaration list for data Type \#2. With optional \#1
-%   the Container Class can be overriden.
+% \begin{macro}{\ccEvalType} calls the declaration list for Data Type
+%   \InlineArg{2}. With optional \InlineArg*{1}, the Type's Container
+%   name can be overriden locally.
 %    \begin{macrocode}
 \def\ccEvalType{\cc@opt@curcont\cc@eval@type}
 \def\cc@eval@type[#1]#2{%
@@ -250,9 +262,8 @@
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccCheckParent}
-%   checks if a Container \#1 is declared so that another container
-%   \#2 can inherit.
+% \begin{macro}{\ccCheckParent} checks if a Container \InlineArg{1} is
+%   declared so that another Container \InlineArg{2} can inherit.
 %    \begin{macrocode}
 \def\ccCheckParent#1#2{%
   \expandafter\ifx\csname cc@container@#1\endcsname\relax
@@ -266,10 +277,10 @@
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\cc@inherit}
-% is the low-level inherit function. \#1 is a comma-separated list of things
-% to be inherited, and \#2 is the Container-list that should be
-% inherited from, and \#3 is the name of the descending Container.
+% \begin{macro}{\cc@inherit} is the low-level inherit function.
+%   \DescribeArg{1}{is a comma-separated list of things to be inherited}
+%   \DescribeArg{2}{is the Container-list that should be inherited from}
+%   \DescribeArg{3}{is the name of the inherting Container}
 %    \begin{macrocode}
 \def\cc@inherit#1#2#3{\cc@parse@inherit #1,,\@nil #2,,\@nil #3\@@nil}
 %    \end{macrocode}
@@ -299,8 +310,10 @@
   \next}
 %    \end{macrocode}
 % \end{macro}
-% Ultimately, this function is called for each Type--Container
-% combination invoked by the \lstinline{\ccInherit} macro.
+% \begin{macro}{\cc@do@inherit} is the macro that actually causes inheritance.
+%   \DescribeArg{1}{is the name of a Type}
+%   \DescribeArg{2}{is the name of the Container that Type \InlineArg{1} is \textit{inherited from}}
+%   \DescribeArg{3}{is the name of the Container that \textit{inherits} Type \InlineArg{1}}
 %    \begin{macrocode}
 \def\cc@do@inherit#1#2#3{%
   \ccKernelDebugMsg{#3 inherits #1 from #2.}%
@@ -315,6 +328,7 @@
 }
 %    \end{macrocode}
 % \end{macro}
+% \end{macro}
 %
 % \section{Components}
 %
@@ -323,16 +337,14 @@
 % within Containers to obtain data and store them for further
 % processing at the end of the Container, or even beyond.
 %
-% \begin{macro}{\ccDeclareComponent}
-% defines simple component macros.
-% \begin{description}
-% \item[\#1] is the Component's identifier.
-%   The internal macro that is used to store the Component's value is
-%   \lstinline{\csname cc@<current Container name>@<#1>\endcsname}. If omitted, \#1 is the same as \#2.
-% \item[\#2] is the Component's name.
-% \item[\#3] is code that is executed \textit{before} assignment of the user's value
-% \item[\#4] is code that is executed \textit{after} assignment of the user's value
-% \end{description}
+% \begin{macro}{\ccDeclareComponent} defines a simple Component macro.
+%   The internal macro that is used to store the Component's value is\\
+%   \lstinline{\csname cc@<current Container name>@<#1>\endcsname}.
+%   \DescribeArg*{1}{is the Component's identifier. If omitted,
+%     \InlineArg{1} is the same as \InlineArg{2}.}
+%   \DescribeArg{2}{is the Component's name}
+%   \DescribeArg{3}{is code that is executed \textit{before} assignment of the user's value}
+%   \DescribeArg{4}{is code that is executed \textit{after} assignment of the user's value}
 %    \begin{macrocode}
 \def\ccDeclareComponent{\cc@opt@second\cc@declare@comp}
 \def\cc@declare@comp[#1]#2#3#4{%
@@ -342,9 +354,10 @@
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccDeclareGlobalComponent} is a shortcut to declare simple,
-%   globally available Components with the name \#2 and an optional
-%   initial value \#1. They are usually empty.
+% \begin{macro}{\ccDeclareGlobalComponent} is a shortcut to declare
+%   simple, globally available Components with the name \InlineArg{2}
+%   and an optional initial value \InlineArg*{1}. They are usually
+%   empty.
 %    \begin{macrocode}
 \def\ccDeclareGlobalComponent{\cc@opt@empty\cc@declare@global@comp}%
 \def\cc@declare@global@comp[#1]#2{%
@@ -354,22 +367,13 @@
 %    \end{macrocode}
 % \end{macro}
 % Once declared, a component can be set in two ways: The first way is
-% to use \lstinline{\ccPrefix<name>} with one argument for its value. The
-% second, preferred, way is to use the \lstinline{\ccComponent} macro which
-% takes two arguments: \#1 is the name of the Component, \#2 is the
-% value. This macro checks whether an Component of name \#1 has
-% actually been declared and does so, if not.
-%
-% \begin{macro}{\cc@counted@comp@scheme} gives the scheme how counted
-%   components are defined internally. It consumes one argument \#1,
-%   which contains the name of the Counted Component.
-%    \begin{macrocode}
-\def\cc@counted@comp@scheme#1{\cc@cnt@grp-#1-\csname \cc@cnt@grp Cnt\endcsname}
-%    \end{macrocode}
-% \end{macro}
-% \begin{macro}{\ccComponent}
-%   This is the preferred way to fill a Component with content. \#1 is
-%   the Component's name, \#2 is the value.
+% to use \lstinline{\ccPrefix<name>} with one argument for its
+% value. The second, preferred, way is to use the
+% \lstinline{\ccComponent} macro:
+% \begin{macro}{\ccComponent} is the preferred way to fill a Component
+%   with content.
+%   \DescribeArg{1}{is the Component's name}
+%   \DescribeArg{2}{is the Instance value}.
 %    \begin{macrocode}
 \long\protected\def\ccComponent#1#2{%
   \ifx\cc@is@counted\relax
@@ -384,8 +388,9 @@
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccComponentEA} is a variant of
-%   \lstinline{\ccComponent} but it expands the Content in \#2 once
-%   before it is assigned to the Component \#1.
+%   \lstinline{\ccComponent} but it expands the Content in
+%   \InlineArg{2} once before it is assigned to the Component
+%   \InlineArg{1}.
 %    \begin{macrocode}
 \long\protected\def\ccComponentEA#1#2{%
   \def\x{\ccComponent{#1}}\expandafter\x\expandafter{#2}%
@@ -393,13 +398,14 @@
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccUseComp} is a high level command to return (or
-%   print) the material stored as a Component with the name \#1.
+%   print) the material stored as a Component with the name
+%   \InlineArg{1}.
 %    \begin{macrocode}
 \def\ccUseComp#1{\csname cc@\cc@cur@cont @#1\endcsname}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccdefFromComp} is a high level command to store the
-%   value of a Component \#2 into a CS token \#1.
+% \begin{macro}{\ccdefFromComp} is a user-level command to store the
+%   value of a Component \InlineArg{2} into a CS token \InlineArg{1}.
 %    \begin{macrocode}
 \def\ccdefFromComp#1#2{\cc@store@comp{e}#1{#2}}
 %    \end{macrocode}
@@ -411,12 +417,18 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\cc@store@comp} is a generalized macro to store a
-%   component's unexpanded internal definition in a TeX macro. \#1 is
-%   a scope quantifier (either `e' or `x'), \#2 is a cs token, \#3 is
-%   the name of a component.
+% \begin{macro}{\strip@longprefix} is a helper macro to strip the
+%   prefix from the \lstinline{\meaning} of a \lstinline{\long} macro.
 %    \begin{macrocode}
 \def\strip@longprefix#1\long macro:->#2{#2}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\cc@store@comp} is a generalized macro to store a
+%   component's unexpanded internal definition in a TeX macro.
+%   \DescribeArg{1}{is a scope quantifier (either `e' or `x')}
+%   \DescribeArg{2}{is a CS token}
+%   \DescribeArg{3}{is the name of a component}
+%    \begin{macrocode}
 \long\def\cc@store@comp#1#2#3{%
   \edef\@tempa{\expandonce{\csname protected@#1def\endcsname}\noexpand#2}%
   \protected@edef\@tempb{\csname cc@\cc@cur@cont @#3\endcsname}%
@@ -428,17 +440,19 @@
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccUseComponentFrom} is a high level command to return (or
-%   print) the material stored as a global Component from the Container \#1 with the name \#2.
+% \begin{macro}{\ccUseComponentFrom} is a high level command to return
+%   (or print) the material stored as a global Component from the
+%   Container \InlineArg{1} with the name \InlineArg{2}.
 %    \begin{macrocode}
 \def\ccUseComponentFrom#1#2{\csname cc@#1@#2\endcsname}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccGetComp*} is a high level command to return the
-%   contents stored in a Component of name \#1 as a paragraph iff the
-%   Component is neither empty nor \lstinline{\relax}. If
-%   Accessibility features are activated, the returned content of the
-%   Component is autmatically tagged with a \lstinline{Para} tag.
+% \begin{macro}{\ccGetComp*} is a user-level command to return the
+%   contents stored in a Component of name \InlineArg{1} as a
+%   paragraph iff the Component is neither empty nor
+%   \lstinline{\relax}. If Accessibility features are activated, the
+%   returned content of the Component is autmatically tagged with a
+%   \lstinline{Para} tag.
 %
 %   The starred version of \lstinline{\ccGetComp} supresses automated
 %   tagging for that Component when the accessibility features are
@@ -453,67 +467,82 @@
 \def\cc@sget@comp#1{\ccWhenComp{#1}{\ccUseComp{#1}\par}}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccIfComp} is a high level macro that executes \#2 if
-%   the Component macro \#1 is used in a Container (empty or
-%   non-empty), and \#3 if not.
+% \begin{macro}{\ccIfComp} is a high level macro that executes
+%   \InlineArg{2} if the Component macro \InlineArg{1} is used in a
+%   Container (empty or non-empty), and \InlineArg{3} if not.
 %    \begin{macrocode}
 \long\def\ccIfComp#1#2#3{\expandafter\ifx\csname cc@\cc@cur@cont @#1\endcsname\relax#3\else#2\fi}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccWhenComp} is a high level variant of
-%   \lstinline{\ccIfComp} that omits the \lstinline{else}-branch. \#2
-%   is code that is expanded when the Component \#1 is used in a
-%   container (empty or non-empty).
+%   \lstinline{\ccIfComp} that omits the \lstinline{else}-branch. 
+%   \DescribeArg{1}{is the name of the Component}
+%   \DescribeArg{2}{is code that is expanded when the Component
+%     \InlineArg{1} is used in a container (empty or non-empty)}
 %    \begin{macrocode}
 \long\def\ccWhenComp#1#2{\expandafter\ifx\csname cc@\cc@cur@cont @#1\endcsname\relax\else#2\fi}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccUnlessComp} is a high level variant of
-%   \lstinline{\ccIfComp} that omits the \lstinline{then}-branch. \#2
-%   is the code that is expanded when a Container \#1 is \textit{not}
-%   used in a Container (neither empty nor non-empty).
+%   \lstinline{\ccIfComp} that omits the \lstinline{then}-branch. 
+%   \DescribeArg{1}{is the name of the Component}
+%   \DescribeArg{2}{is the code that is expanded when a Container
+%     \InlineArg{1} is \textit{not} used in a Container (neither empty
+%     nor non-empty)}
 %    \begin{macrocode}
 \long\def\ccUnlessComp#1#2{\expandafter\ifx\csname cc@\cc@cur@cont @#1\endcsname\relax#2\fi}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccIfCompFrom} Global variant of
-%   \lstinline{\ccIfComp}. \#1 is the name of the Container, \#2 is
-%   the name of the Component, \#3 is the \lstinline{then}-branch, \#4
-%   is the \lstinline{else}-branch.
+% \begin{macro}{\ccIfCompFrom} is the global variant of
+%   \lstinline{\ccIfComp}. 
+%   \DescribeArg{1}{is the name of the Container}
+%   \DescribeArg{2}{is the name of the Component}
+%   \DescribeArg{3}{is the \texttt{then}-branch}
+%   \DescribeArg{4}{is the \texttt{else}-branch}
 %    \begin{macrocode}
 \long\def\ccIfCompFrom#1#2#3#4{\expandafter\ifx\csname cc@#1@#2\endcsname\relax#4\else#3\fi}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccIfCompEmpty} is a high level macro that executes \#2 if
-%   the Component macro \#1 is empty (or \lstinline|{}|) within its
-%   Container, and \#3 if it is either not existant or non-empty.
+% \begin{macro}{\cc@long@empty} is a helper macro used as comparator
+%   when checking whether a \lstinline{\long} macro is empty or not.
 %    \begin{macrocode}
 \long\def\cc@long@empty{}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccIfCompEmpty} is a high level macro that executes
+%   \InlineArg{2} if the Component macro \InlineArg{1} is empty (or
+%   \lstinline|{}|) within its Container, and \InlineArg{3} if it is
+%   either not existant or non-empty.
+%    \begin{macrocode}
 \long\def\ccIfCompEmpty#1#2#3{\expandafter\ifx\csname cc@\cc@cur@cont @#1\endcsname\cc@long@empty#2\else#3\fi}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccIfCompFromEmpty} is a global variant of
-%   \lstinline{\ccIfCompEmpty}. \#1 is the name of the Container, \#2
-%   is the name of the Component, \#3 is the \lstinline{then}-branch,
-%   \#4 is the \lstinline{else}-branch.
+%   \lstinline{\ccIfCompEmpty}. 
+%   \DescribeArg{1}{is the name of the Container}
+%   \DescribeArg{2}{is the name of the Component}
+%   \DescribeArg{3}{is the \texttt{then}-branch}
+%   \DescribeArg{4}{is the \texttt{else}-branch}
 %    \begin{macrocode}
 \long\def\ccIfCompFromEmpty#1#2#3#4{\expandafter\ifx\csname cc@#1@#2\endcsname\cc@long@empty#3\else#4\fi}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\cc@check@empty} handles the distinction between empty
-%   and un-used components: First, check if \#4\#3 is set (=anything
-%   but \lstinline{\relax}). If it is set, check if it is empty. If
-%   empty, set \lstinline{#4#3} to \lstinline{\relax}, meaning further
-%   occurences of \lstinline|\ccIfComp{#4#3}| will execute the
-%   \lstinline{else} branch. If \lstinline{#4#3} is non-empty, do nothing.
+%   and un-used components: First, check if \lstinline{#4#3} is set
+%   (i.\,e., anything but \lstinline{\relax}). If it is set, check if
+%   it is empty. If empty, set \lstinline{#4#3} to \lstinline{\relax},
+%   meaning further occurences of \lstinline|\ccIfComp{#4#3}| will
+%   execute the \lstinline{else} branch. If \lstinline{#4#3} is
+%   non-empty, do nothing.
 %
 %   If \lstinline{#4#3} is already \lstinline{\relax}, check if the
 %   fallback \lstinline{#1#3} is set. If so, make \lstinline{#4#3} an
 %   alias of \lstinline{#1#3}. If not, do nothing.
 %
-%   Optional \#1 is the prefix of the fallback component, \#2 is the
-%   Container name, \#3 is the name of the Component, \#4 is the
-%   Override's prefix.
+%   \DescribeArg*{1}{is the prefix of the fallback component}
+%   \DescribeArg{2}{is the Container name}
+%   \DescribeArg{3}{is the name of the Component}
+%   \DescribeArg{4}{is the Override's prefix}
 %    \begin{macrocode}
 \def\cc@check@empty{\cc@opt@empty\@cc@check@empty}%]
 \def\@cc@check@empty[#1]#2#3#4{%
@@ -537,7 +566,8 @@
 %
 % \subsubsection{Component Groups}\label{sec:kernel:compgroups}
 % \begin{macro}{\ccDeclareComponentGroup} is a user-level macro to
-%   declare a new Component Group with the name \#1 and the body \#2.
+%   declare a new Component Group with the name \InlineArg{1} and the
+%   body \InlineArg{2}.
 %    \begin{macrocode}
 \def\ccDeclareComponentGroup#1#2{%
   \csnumgdef{cc#1Cnt}{\z@}%
@@ -554,12 +584,12 @@
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccDeclareGroupHandler} is used to declare a new group
-%   handler. A Group Handler is a hook for code \#2 that is expanded
-%   at the end of a Component Group \#1's environment. It is mostly
-%   used to process Components within a Group instance and store the
-%   result in their own components. For instance, a Group Handler can
-%   be used to combine a First Name and a Surname to a combined
-%   Component ``FullName''.
+%   handler. A Group Handler is a hook for code \InlineArg{2} that is
+%   expanded at the end of a Component Group \InlineArg{1}'s
+%   environment. It is mostly used to process Components within a
+%   Group instance and store the result in their own components. For
+%   instance, a Group Handler can be used to combine a First Name and
+%   a Surname to a combined Component ``FullName''.
 %    \begin{macrocode}
 \def\ccDeclareGroupHandler#1#2{%
   \ifcsdef{cc@group@#1}
@@ -577,12 +607,15 @@
 \let\cc@cnt@grp\@empty
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccUseCompByIndex} picks a Component with name \#3 and index \#2 from a group \#1.
+% \begin{macro}{\ccUseCompByIndex} picks a Component with name
+%   \InlineArg{3} and index \InlineArg{2} from a group \InlineArg{1}.
 %    \begin{macrocode}
 \def\ccUseCompByIndex#1#2#3{\csname cc@\cc@cur@cont @#1-#3-#2\endcsname}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccUsePropFrom} picks a specific Property of a group.
+% \begin{macro}{\ccUsePropFrom} picks a Counted Component with the
+%   index \InlineArg{2} from a Group \InlineArg{1} and renders it
+%   using Property \InlineArg{3}.
 %    \begin{macrocode}
 \def\ccUsePropFrom#1#2#3{%
   \begingroup
@@ -600,10 +633,11 @@
 % \subsubsection{Iterating over Component Groups}
 %
 % The following two macros iterate over all instances of a Component
-% Group \#1 in the current Container and applies for each instance the
-% Property \#2. The result is appended to the the Collector Component
-% \#3, if and only if that Component is not yet set for the current
-% Container at the time of the first iteration.
+% Group \InlineArg{1} in the current Container and applies for each
+% instance the Property \InlineArg{2}. The result is appended to the
+% the Collector Component \InlineArg{3}, if and only if that Component
+% is not yet set for the current Container at the time of the first
+% iteration.
 %
 % While the first macro only writes the Property \textit{definition}
 % into the Collector Component, the second fully expands the macros inside the
@@ -619,8 +653,8 @@
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\cc@assign@res} assignes the result of the Component
-%   collection to a~control sequence with the name \#1 and resets
-%   the temporary storage.
+%   collection to a~control sequence with the name \InlineArg{1} and
+%   resets the temporary storage.
 %    \begin{macrocode}
 \def\cc@assign@res#1{%
   \ifx\cc@iterate@res\relax
@@ -632,16 +666,18 @@
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccIfComponentOverride} is a switch to apply \#2 if the
-%   Collection Component \#1 has been set manually within a container
-%   or \#3 if it has been generated from Counted Components.
+% \begin{macro}{\ccIfComponentOverride} is a switch to apply either
+%   \InlineArg{2}, if the Collection Component \InlineArg{1} has been
+%   set manually within a container; or \InlineArg{3}, if it has been
+%   generated from Counted Components.
 %    \begin{macrocode}
 \def\ccIfComponentOverride#1#2#3{\expandafter\ifx\csname cc@used@#1@override\endcsname\@empty#2\else#3\fi}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccComposeCollection} is used to create an unexpanded
-%   Collection Component \#3 from all instances of Component Group \#1
-%   using the instructions given by property \#2.
+%   Collection Component \InlineArg{3} from all instances of Component
+%   Group \InlineArg{1} using the instructions given by property
+%   \InlineArg{2}.
 %    \begin{macrocode}
 \def\ccComposeCollection#1#2#3{%
   \ccIfComp{#3}{\cslet{cc@used@#3@override}\@empty}{%
@@ -674,8 +710,10 @@
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccApplyCollection}
-%   is an alternative version of \lstinline{\ccComposeCollection} and fully
-%   expands the Property \#2 before it is stored inside the Component \#3.
+%   is an alternative version of \lstinline{\ccComposeCollection} and
+%   fully expands the result of the application of Property
+%   \InlineArg{2} before it is stored inside the Component
+%   \InlineArg{3}.
 %    \begin{macrocode}
 \def\ccApplyCollection#1#2#3{%
   \ccIfComp{#3}{\cslet{cc@used@#3@override}\@empty}
@@ -685,7 +723,9 @@
 }
 %    \end{macrocode}
 % \end{macro}
-% \#1 is the group name, \#2 is the property to format the collection
+% \begin{macro}{\cc@apply@collection} is the low-level macro used to
+%   fully expand a Component Group \InlineArg{1} into its Collection
+%   Component using Property \InlineArg{2}.
 %    \begin{macrocode}
 \def\cc@apply@collection#1#2{%
   \begingroup
@@ -707,11 +747,14 @@
   \endgroup
 }
 %    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\cc@comp@def} is used to pass a Counted Component into
-%   a TeX macro. \#1 is a prefix to the def command, e.g.,
-%   \lstinline{\global} or \lstinline{\protected}; \#2 is a CS token,
-%   \#3 is the Name of the Counted Component, and \#4 is the Property
-%   that should be applied to all Members of the Counted Component.
+%   a TeX macro.
+%   \DescribeArg{1}{is a prefix to the def command, e.g.,
+%   \texttt{\string\global} or \texttt{\string\protected}}
+%   \DescribeArg{2}{is a CS token}
+%   \DescribeArg{3}{is the Name of the Counted Component}
+%   \DescribeArg{4}{is the Property that should be applied to all Members of the Counted Component}
 %    \begin{macrocode}
 \def\cc@comp@def{\cc@opt@empty\@cc@comp@def}
 \def\@cc@comp@def[#1]#2#3#4{%
@@ -731,7 +774,8 @@
 \def\ccdefFromCountedComp{\cc@comp@def}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccgdefFromCountedComp} is the user-level command for \textit{global} \lstinline{\cc@comp@def}.
+% \begin{macro}{\ccgdefFromCountedComp} is the user-level command for
+%   \textit{global} \lstinline{\cc@comp@def}.
 %    \begin{macrocode}
 \def\ccgdefFromCountedComp{\cc@comp@def[\global]}
 \def\ccpgdefFromCountedComp#1{\expandafter\ccgdefFromCountedComp\csname \ccPrefix #1\endcsname}
@@ -740,9 +784,16 @@
 %
 % \subsubsection{Declaring Counted Component}
 %
+% \begin{macro}{\cc@counted@comp@scheme} gives the scheme how counted
+%   components are defined internally.
+%   \DescribeArg{1}{the name of the Counted Component}.
+%    \begin{macrocode}
+\def\cc@counted@comp@scheme#1{\cc@cnt@grp-#1-\csname \cc@cnt@grp Cnt\endcsname}
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\ccDeclareCountedComponent}
-%   is a user-level macro to create a new Counted Component. \#1 is
-%   the user-level name of the Component.
+%   is a user-level macro to create a new Counted Component.
+%   \DescribeArg{1}{is the user-level name of the Component}
 %    \begin{macrocode}
 \def\ccDeclareCountedComponent#1{%
   \cc@def@counted@comp
@@ -753,13 +804,14 @@
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\cc@def@counted@comp}
-%   registers counter dependent Components. \#1 is the internal name
-%   of the Component which is composed out of the group name, the
-%   value of the group counter and the user-level macro name \#2; \#3
-%   is some custom code passed to the second argument of
-%   \lstinline{\ccDeclareComponent}; and \#4 is a modifier to the internal
-%   macro definition.
+% \begin{macro}{\cc@def@counted@comp} is used to declare Counted Components.
+%   \DescribeArg{1}{is the internal name of the
+%   Component which is composed out of the group name, the value of
+%   the group counter and the user-level macro name \InlineArg{2}}
+%   \DescribeArg{2}{is the name of the Counted Component}
+%   \DescribeArg{3}{is some custom code passed to the second argument of
+%   \texttt{\string\ccDeclareComponent}}
+%   \DescribeArg{4}{is a modifier to the internal macro definition.}
 %    \begin{macrocode}
 \def\cc@def@counted@comp#1#2#3#4{%
   \ccDeclareComponent[#1]{#2}
@@ -789,7 +841,7 @@
 %   into the next one, specifically if a container occurs more than
 %   once in the same document.
 %
-%   \#1 is the type of the Component set.
+%   \DescribeArg{1}{is the name of the Component Group}
 %    \begin{macrocode}
 \def\cc@reset@components#1{%
   \csname @cc@reset@components@#1\endcsname
@@ -840,10 +892,12 @@
 %
 % Hooks are used to patch code into different parts of a Container's
 % processing chain.
-% \begin{macro}{\ccDeclareHook} registers a new hook. Optional \#1 is
-%   the container for which the Hook is declared. If omitted, this
-%   defaults to \lstinline{\cc@cur@cont}. \#2 is the Hook's user-level
-%   name. Hooks always default to an empty string.
+% \begin{macro}{\ccDeclareHook} registers a new hook.  Hooks always
+%   default to an empty string.
+%   \DescribeArg*{1}{is the Container for which the Hook is
+%     declared. If omitted, this defaults to the currently active
+%     Container (\texttt{\string\cc@cur@cont})}
+%   \DescribeArg{2}{is the Hook's user-level name}
 %    \begin{macrocode}
 \def\ccDeclareHook{\cc@opt@curcont\cc@declare@hook}
 \def\cc@declare@hook[#1]#2{\expandafter\global\expandafter\let\csname cc@hook@#1@#2\endcsname\@empty}
@@ -851,10 +905,11 @@
 % \end{macro}
 % \begin{macro}{\ccAddToHook} adds new material to a Hook. If the hook
 %   has not yet been declared, a \lstinline{\ccDeclareHook} for that
-%   hook is applied first. In that case, use the optional \#1 to
-%   specify the Container name that hook is intended for. If it is
-%   omitted, the current Container is used. \#2 is the name of the
-%   hook the material in \#3 is to be appended to.
+%   hook is applied first. In that case, use the optional
+%   \InlineArg*{1} to specify the Container name that hook is intended
+%   for. If it is omitted, the current Container is
+%   used. \InlineArg{2} is the name of the hook the material in
+%   \InlineArg{3} is to be appended to.
 %    \begin{macrocode}
 \def\ccAddToHook{\cc@opt@curcont\cc@add@to@hook}
 \def\cc@add@to@hook[#1]#2#3{%
@@ -866,7 +921,8 @@
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccUseHook} expands the current state of the hook with
-%   the name \#2 from Container \#1 (current Container if omitted).
+%   the name \InlineArg{2} from Container \InlineArg*{1} (current
+%   Container if omitted).
 %    \begin{macrocode}
 \def\ccUseHook{\cc@opt@curcont\cc@use@hook}
 \def\cc@use@hook[#1]#2{\csuse{cc@hook@#1@#2}}
@@ -878,16 +934,18 @@
 %
 % \begin{macro}{\ccSetProperty}
 %   is a user-level macro that provides the Property--Value interface
-%   for Containers. \#1 is the name of the Property, \#2 is the Value
-%   assigned to that Property.
+%   for Containers.
+%   \DescribeArg{1}{is the name of the Property}
+%   \DescribeArg{2}{is the Value assigned to that Property.}
 %    \begin{macrocode}
 \long\def\ccSetProperty#1#2{\long\csdef{cc@\cc@cur@cont @#1}{#2}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccAppToProp} can be used add material to the
-%   \textit{end} of an existing Property vaue. \#1 is the name of the
-%   Property, \#2 is the material to be added to previous value of
-%   that Property.
+%   \textit{end} of an existing Property vaue.
+%   \DescribeArg{1}{is the name of the Property}
+%   \DescribeArg{2}{is the material to be added to previous value of
+%     that Property}
 %    \begin{macrocode}
 \def\ccAppToProp#1#2{%
   \long\csappto{cc@\cc@cur@cont @#1}{#2}%
@@ -895,9 +953,10 @@
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccPreToProp} can be used add material to the
-%   \textit{beginning} of an existing Property. \#1 is the name of the
-%   Property, \#2 is the material to be inserted before to previous
-%   value of that Property.
+%   \textit{beginning} of an existing Property.
+%   \DescribeArg{1}{is the name of the Property}
+%   \DescribeArg{2}{is the material to be inserted before the previous
+%     value of that Property}
 %    \begin{macrocode}
 \def\ccPreToProp#1#2{%
   \long\cspreto{cc@\cc@cur@cont @#1}{#2}%
@@ -905,14 +964,16 @@
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccPropertyLet} can be used to create an alias
-%   Property \#1 of a given Property \#2. Is is equivalent to
+%   Property \InlineArg{1} of a given Property \InlineArg{2}. Is is
+%   equivalent to
 %   \lstinline|\ccSetProperty{\#1}{\ccUseProperty{\#2}}|.
 %    \begin{macrocode}
 \long\def\ccPropertyLet#1#2{\long\csedef{cc@\cc@cur@cont @#1}{\expandonce{\csname cc@\cc@cur@cont @#2\endcsname}}}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccPropertyLetX} creates a Property \#1 with the fully
-%   expanded value of another Property \#2 Is is equivalent to
+% \begin{macro}{\ccPropertyLetX} creates a Property \InlineArg{1} with
+%   the fully expanded value of another Property \InlineArg{2}. Is is
+%   equivalent to
 %   \lstinline|\ccSetPropertyX{\#1}{\ccUseProperty{\#2}}|.
 %    \begin{macrocode}
 \long\def\ccPropertyLetX#1#2{\long\csedef{cc@\cc@cur@cont @#1}{\csname cc@\cc@cur@cont @#2\endcsname}}
@@ -920,9 +981,10 @@
 % \end{macro}
 % \begin{macro}{\ccSetPropertyVal}
 %   is a variant of \lstinline{\ccSetProperty} that expands the value
-%   \#2 \textit{once} before assigning it to the Property macro with
-%   the name \#1. This can be used to assign the current value of a
-%   variable macro, dimension, counter or length to a Property.
+%   \InlineArg{2} \textit{once} before assigning it to the Property
+%   macro with the name \InlineArg{1}. This can be used to assign the
+%   current value of a variable macro, dimension, counter or length to
+%   a Property.
 %    \begin{macrocode}
 \long\def\ccSetPropertyVal#1#2{\def\@tempa{\ccSetProperty{#1}}\expandafter\@tempa\expandafter{#2}}
 %    \end{macrocode}
@@ -930,16 +992,17 @@
 % \begin{macro}{\ccSetPropertyX}
 %   is another variant of \lstinline{\ccSetProperty}, but it
 %   \textit{fully expands} the value (using \lstinline{\edef}) defined
-%   in \#2 before the Property is stored in the Property macro named
-%   \#1. Use this if you need to use conditionals to determine the
-%   actual values of Properties that otherwise expect fixed named or
-%   dimensional values.
+%   in \InlineArg{2} before the Property is stored in the Property
+%   macro named \InlineArg{1}. Use this if you need to use
+%   conditionals to determine the actual values of Properties that
+%   otherwise expect fixed named or dimensional values.
 %    \begin{macrocode}
 \long\def\ccSetPropertyX#1#2{\long\csedef{cc@\cc@cur@cont @#1}{#2}}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccAddToProperties} adds the material in the next token
-%   to a Container of name \#1's \lstinline{Properties} Type.
+% \begin{macro}{\ccAddToProperties} adds the material in \InlineArg{2}
+%   to a Container of name \InlineArg{1}'s \lstinline{Properties}
+%   List.
 %    \begin{macrocode}
 \long\def\ccAddToProperties#1#2{\ccAddToType{Properties}{#1}{#2}}
 %    \end{macrocode}
@@ -947,16 +1010,16 @@
 %
 % \subsection{Using Properties}\label{sec:kernel:prop:use}
 %
-% \begin{macro}{\ccUseProperty}
-%   is a user-level command to directly access a previously set Property.
+% \begin{macro}{\ccUseProperty} is a user-level command to directly
+%   access a previously set Property with the name \InlineArg{1}.
 %    \begin{macrocode}
 \def\ccUseProperty#1{\csuse{cc@\cc@cur@cont @#1}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\cc@store@prop} stores the result of the application
-%   of property \#3 in the control sequence \#2. The optional \#1 can
-%   hold a definition modifier like \lstinline{\global} or
-%   \lstinline{\long}.
+%   of property \InlineArg{3} in the control sequence
+%   \InlineArg{2}. The optional \InlineArg*{1} can hold a definition
+%   modifier like \lstinline{\global} or \lstinline{\long}.
 %    \begin{macrocode}
 \def\cc@store@prop{\cc@opt@empty\@cc@store@prop}%
 \long\def\@cc@store@prop[#1]#2#3{%
@@ -965,8 +1028,9 @@
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccdefFromProperty} expands an (implicit) Property \#2 and
-%   stores the result in (implicit) control sequence \#1.
+% \begin{macro}{\ccdefFromProperty} expands an (implicit) Property
+%   \InlineArg{2} and stores the result in (implicit) control sequence
+%   \InlineArg{1}.
 %    \begin{macrocode}
 \def\ccdefFromProperty{\cc@store@prop}
 %    \end{macrocode}
@@ -980,14 +1044,17 @@
 % \end{macro}
 %
 % \begin{macro}{\ccUsePropertyEnv}
-%   is a user-level command to access a previously set Property and make it an environment accessible to Property specific processing instrunctions (see below).
+%   is a user-level command to access a previously set Property and
+%   make it an environment accessible to Property specific processing
+%   instrunctions (see below).
 %    \begin{macrocode}
 \def\ccUsePropertyEnv#1{\cslet{cc@#1@active}{\relax}\csuse{cc@\cc@cur@cont @#1}\csundef{cc@#1@active}}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccIfStrEqual} is variant of etoolbox's
-%   \lstinline{\ifstrequal} that first fully expands both comparatives
-%     before evaluating them.
+% \begin{macro}{\ccIfStrEqual} is a variant of etoolbox's
+%   \lstinline{\ifstrequal} that first fully expands both arguments
+%     \InlineArg{1} and \InlineArg{2} (using \lstinline{\edef})
+%     before comparing them.
 %    \begin{macrocode}
 \def\ccIfStrEqual#1#2{%
   \edef\@argi{#1}\edef\@argii{#2}%
@@ -1000,11 +1067,12 @@
 % \subsubsection{Local Property Overrides}
 %
 % \begin{macro}{\cc@set@property@local} is a low-level macro to
-%   locally manipulate Properties. \#1 is the CS token representing a
-%   method to alter the property (\lstinline{\ccSetProperty},
-%   \lstinline{\ccAppToProp}, or \lstinline{\ccPreToProp}), \#2 is the
-%   name of the Property to be altered, and \#3 is the new (or added)
-%   Value.
+%   locally manipulate Properties. 
+%   \DescribeArg{1}{is the CS token representing a method to alter the
+%     property (\texttt{\string\ccSetProperty},
+%     \texttt{\string\ccAppToProp}, or \texttt{\string\ccPreToProp})}
+%   \DescribeArg{2}{is the name of the Property to be altered}
+%   \DescribeArg{3}{is the new (or added) Value}
 %    \begin{macrocode}
 \def\cc@set@property@locally#1#2#3{%
   \let\@cc@cur@cont\cc@cur@cont
@@ -1017,24 +1085,26 @@
 % flavours depending on whether the global Value of a Property should
 % be kept or be replaced.
 %
-% They all take two arguments: \#1 is the name of the Property, \#2 is
-% the value to be set, appended, or prepended to that Property,
-% respectively.
-% \begin{macro}{\ccSetPropLocal} Sets a Property \#1 to a new value \#2.
+% They all take two arguments:
+% \DescribeArg{1}{is the name of the Property}
+% \DescribeArg{2}{is the value to be set, appended, or prepended to that Property,
+%   respectively.}
+% \begin{macro}{\ccSetPropLocal} sets a Property \InlineArg{1} to a
+%   new value \InlineArg{2}.
 %    \begin{macrocode}
 \def\ccSetPropLocal{\cc@set@property@locally\ccSetProperty}
 \cslet{\ccPrefix SetPropLocal}\ccSetPropLocal%
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccAppPropLocal} appends the value \#2 to the end of
-%   an existing Property \#1.
+% \begin{macro}{\ccAppPropLocal} appends the value \InlineArg{2} to
+%   the \textit{end} of an existing Property \InlineArg{1}.
 %    \begin{macrocode}
 \def\ccAppPropLocal{\cc@set@property@locally\ccAppToProp}
 \cslet{\ccPrefix AppPropLocal}\ccAppPropLocal%
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccPrePropLocal} appends the value \#2 to the
-%   beginning of an existing Property \#1.
+% \begin{macro}{\ccPrePropLocal} appends the value \InlineArg{2} to
+%   the \textit{beginning} of an existing Property \InlineArg{1}.
 %    \begin{macrocode}
 \def\ccPrePropLocal{\cc@set@property@locally\ccPreToProp}
 \cslet{\ccPrefix PrePropLocal}\ccPrePropLocal%
@@ -1049,9 +1119,9 @@
 % commands placed inside a Component that should only take effect when
 % that Component is processed through a specific Property.
 %
-% \begin{macro}{\ccPI} is a Processing Instruction that executes \#2
-%   when a Property with the name \#1 is currently processed with the
-%   \lstinline{\ccUsePropertyEnv} macro.
+% \begin{macro}{\ccPI} is a Processing Instruction that executes
+%   \InlineArg{2} when a Property with the name \InlineArg{1} is
+%   currently processed with the \lstinline{\ccUsePropertyEnv} macro.
 %    \begin{macrocode}
 \DeclareRobustCommand\ccPI[2]{\ifcsdef{cc@#1@active}{#2}{}}
 %    \end{macrocode}
@@ -1061,8 +1131,8 @@
 % \subsection{Property Conditionals}\label{sec:kernel:prop:cond}
 %
 % \begin{macro}{\ccIfProp}
-%   checks if a Property with the name \#1 is defined and
-%   non-empty. If so, do \#2, otherwise do \#3.
+%   checks if a Property with the name \InlineArg{1} is defined and
+%   non-empty. If so, do \InlineArg{2}, otherwise do \InlineArg{3}.
 %    \begin{macrocode}
 \long\def\ccIfProp#1#2#3{%
   \expandafter\ifx\csname cc@\cc@cur@cont @#1\endcsname\relax#3\else
@@ -1072,8 +1142,8 @@
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccIfPropVal}
-%   checks if a Property \#1 expands to \#2.  If so, do \#3, otherwise
-%   do \#4.
+%   checks if a Property \InlineArg{1} expands to \InlineArg{2}.  If
+%   so, do \InlineArg{3}, otherwise do \InlineArg{4}.
 %
 %   \textbf{Warning}: Do not use this conditional in Properties that
 %   are used in \lstinline{\ccApplyCollection}!
@@ -1083,31 +1153,45 @@
 %    \end{macrocode}
 % \end{macro}
 %
+%
 % \section{Helper macros}
+%
 % \subsection{Handling of Optional Arguments}
+%
 % Two simple internal macros to ease up the handling of optional
 % arguments.
-% \begin{macro}{\cc@opt@curcont} overrides Container Names with the optional argument.
+% \begin{macro}{\cc@opt@curcont} overrides stores the currently active
+%   Container name as future \lstinline{#1}, unless the control
+%   sequence \InlineArg{1} is called with an optional argument. In
+%   this case, the future \lstinline{#1} is the value of that optional
+%   argument.
 %    \begin{macrocode}
 \long\def\cc@opt@curcont#1{\@ifnextchar[{#1}{#1[\cc@cur@cont]}}%]
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\cc@opt@empty} passes an empty string if the optional argument is missing.
+% \begin{macro}{\cc@opt@empty} passes an empty string as future
+%   \lstinline{#1} if the optional argument is missing.
 %    \begin{macrocode}
 \long\def\cc@opt@empty#1{\@ifnextchar[{#1}{#1[]}}%]
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\cc@opt@second} passes the first mandatory argument to
-%   the optional argument if the latter is missing.
+% \begin{macro}{\cc@opt@second} passes the first \textit{mandatory}
+%   argument as value to the \lstinline{optional} argument if the
+%   latter is missing.
 %    \begin{macrocode}
 \let\cc@opt@second\@dblarg
 %    \end{macrocode}
 % \end{macro}
+%
+%
 % \subsection{Iterators}
-% \begin{macro}{\cc@iterate}
-%   traverses in \#1-th steps (optional, defaults to $+1$) through
-%   counter \#2 start at number \#3 until and including number \#4 and
-%   do at every loop \#5 (from \lstinline{forloop.sty}):
+%
+% \begin{macro}{\cc@iterate} traverses in \InlineArg*{1}-th steps
+%   (defaults to $+1$) through counter \InlineArg{2}, starting at
+%   number \InlineArg{3} until and including number \InlineArg{4} and
+%   does \InlineArg{5} at every iteration (from
+%   \lstinline{forloop.sty}, \textbf{Be aware} that incrementation of
+%   counter \InlineArg{2} takes place after \InlineArg{5} is called!):
 %    \begin{macrocode}
 \long\def\cc@iterate{\@ifnextchar[{\@cc@iterate}{\@cc@iterate[\@ne]}}%]
 \long\def\@cc@iterate[#1]#2#3#4#5{%
@@ -1135,20 +1219,22 @@
 \begingroup
 \catcode`"=12
 %    \end{macrocode}
-% \begin{macro}{\ccParseAttributes}
-% High level wrapper for the attribute parser; \#1 is the parent node of the attribute, \#2 is the attribute chain
+% \begin{macro}{\ccParseAttributes} High level wrapper for the
+%   attribute parser.
+%   \DescribeArg{1}{is the domain of the attribute}
+%   \DescribeArg{2}{is the raw attribute list}
 %    \begin{macrocode}
 \gdef\ccParseAttributes#1#2{%
   \if!#1!\else
     \if!#2!\else
-      \def\cc@cur@node{#1}%
+      \def\cc@cur@domain{#1}%
       \cc@parse@attributes #2,,\@nil
     \fi\fi}
 %    \end{macrocode}
 % \end{macro}
 % The actual, recursively applying, parser comes in two parts:
-% \begin{macro}{\cc@parse@attributes}
-%   parses the single attributes in an optional argument,
+% \begin{macro}{\cc@parse@attributes} parses the single attributes in
+%   an optional argument,
 %    \begin{macrocode}
 \gdef\cc@parse@attributes #1,#2,\@nil{%
   \if!#1!\else
@@ -1159,25 +1245,25 @@
 %    \end{macrocode}
 % \end{macro}
 % and
-% \begin{macro}{\cc@parse@kv}
-% distinguishes between the parameter name and its value(s).
+% \begin{macro}{\cc@parse@kv} distinguishes between the attribute name
+%   and its value(s).
 %    \begin{macrocode}
 \gdef\cc@parse@kv#1=#2=#3\@nil{%
   \edef\@argii{#2}%
   \ifx\@argii\@empty
-    \expandafter\let\csname cc@\cc@cur@node @attr@#1\endcsname\@empty%
+    \expandafter\let\csname cc@\cc@cur@domain @attr@#1\endcsname\@empty%
   \else
     \ifx #2 =\else
-      \expandafter\def\csname cc@\cc@cur@node @attr@#1\endcsname{#2}%
+      \expandafter\def\csname cc@\cc@cur@domain @attr@#1\endcsname{#2}%
     \fi
   \fi}
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\cc@parse@csv} takes a fallback macro \#1 and feeds it
-%   as argument to each item of the comma-separated list in the
-%   control sequence \#2. The macro \#1 is stored internally as
-%   \lstinline{\cc@parser@callback}.
+% \begin{macro}{\cc@parse@csv} takes a fallback macro \InlineArg{1}
+%   and feeds it as argument to each item of the comma-separated list
+%   in the control sequence \InlineArg{2}. The macro \InlineArg{1} is
+%   stored internally as \lstinline{\cc@parser@callback}.
 %    \begin{macrocode}
 \gdef\cc@parse@csv#1#2{%
   \if!#1!\else
@@ -1206,54 +1292,57 @@
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccGetAttribute} returns the value of an attribute.
-%
-%   \#1 is the attribute node, \#2 is the attribute name.
+%   \DescribeArg{1}{is the attribute domain}
+%   \DescribeArg{2}{is the attribute name}
 %    \begin{macrocode}
 \def\ccGetAttribute#1#2{\csuse{cc@#1@attr@#2}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccIfAttr} can be used to call macros depending on
 %   whether an attribute is set, or not.
-%
-%   \#1 is the attribute node, \#2 is the attribute name, \#3 and \#4 are the true and false
-%   branch, respectively.
+%   \DescribeArg{1}{is the attribute domain}
+%   \DescribeArg{2}{is the attribute name}
+%   \DescribeArg{3}{is the \texttt{then} case}
+%   \DescribeArg{4}{is the \texttt{else} case}
 %    \begin{macrocode}
 \def\ccIfAttr#1#2#3#4{\ifcsdef{cc@#1@attr@#2}{#3}{#4}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccWhenAttr} is a variant of \lstinline{\ccIfAttr}
 %   that omits the \textit{else} branch.
-%
-%   \#1 is the attribute node, \#2 is the attribute name, \#3 is what
-%   happens if the attribute \textit{is set}.
+%   \DescribeArg{1}{is the attribute domain}
+%   \DescribeArg{2}{is the attribute name}
+%   \DescribeArg{3}{is the \texttt{then} case}
 %    \begin{macrocode}
 \def\ccWhenAttr#1#2#3{\ifcsdef{cc@#1@attr@#2}{#3}{}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccUnlessAttr} is a variant of \lstinline{\ccIfAttr}
 %   that omits the \textit{then} branch.
-%
-%   \#1 is the attribute node, \#2 is the attribute name, \#3 is what
-%   happens if the attribute \textit{is not set}.
+%   \DescribeArg{1}{is the attribute domain}
+%   \DescribeArg{2}{is the attribute name}
+%   \DescribeArg{3}{is the \texttt{else} case}
 %    \begin{macrocode}
 \def\ccUnlessAttr#1#2#3{\ifcsdef{cc@#1@attr@#2}{}{#3}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccIfAttrIsStr} can be used to call macros depending if
 %   an attribute is set to the current (sub)container or group and what value it has.
-%
-%   \#1 is the attribute node, \#2 is the attribute name, \#3 is the
-%   comparision value (a string!), \#4 and \#5 are the true and false
-%   branch, respectively.
+%   \DescribeArg{1}{is the attribute domain}
+%   \DescribeArg{2}{is the attribute name}
+%   \DescribeArg{3}{is the comparing value}
+%   \DescribeArg{4}{is the \texttt{then} case}
+%   \DescribeArg{5}{is the \texttt{else} case}
 %    \begin{macrocode}
 \def\ccIfAttrIsStr#1#2#3#4#5{\ccIfAttr{#1}{#2}{\ifcsstring{cc@#1@attr@#2}{#3}{#4}{#5}}{#5}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccIfAttrIsSet} can be used to check if a value-less
 %   attribute has been set (i.e., it expands to \lstinline{\@empty}).
-%
-%   \#1 is the attribute node, \#2 is the attribute name, \#3 and \#4
-%   are the true and false branch, respectively.
+%   \DescribeArg{1}{is the attribute domain}
+%   \DescribeArg{2}{is the attribute name}
+%   \DescribeArg{3}{is the \texttt{then} case}
+%   \DescribeArg{4}{is the \texttt{else} case}
 %    \begin{macrocode}
 \def\ccIfAttrIsSet#1#2#3#4{\ccIfAttr{#1}{#2}{\expandafter\ifx\csname cc@#1@attr@#2\endcsname\@empty#3\else#4\fi}{#4}}
 %    \end{macrocode}
@@ -1265,20 +1354,21 @@
 %
 % \begin{macro}{\ccDeclareClass}
 %   The top-level macro \lstinline|\ccDeclareClass[#1]{#2}[#3]{#4}|
-%   has four arguments, two of which are optional. \#2 is the name of
-%   the class. If this argument is empty, the special class name
-%   \lstinline{default} is used. \#4 is the declaration block of the
-%   class. This argument usually containsa set of property assignments
-%   using the \lstinline|\ccSetProperty{<prop>}{<val>}| macro, see
-%   Sect.~\ref{sec:kernel:props}. The first optional argument \#1 is
-%   the Style Class' parent Container. Using parent Containers, you
-%   can have Style Classes of the same name for different
-%   (sub-)Containers, e.g., a \lstinline{default} class for each float
-%   and heading Container. The second optional argument \#3 is the
-%   parent Style Class. Properties from that Style Class are loaded
-%   automatically prior to the loading of the current Style Class's
-%   Properties. This applies recursively allowing for a cascading of
-%   property values, as in CSS.
+%   has four arguments, two of which are optional. \InlineArg{2} is
+%   the name of the class. If this argument is empty, the special
+%   class name \lstinline{default} is used. \InlineArg{4} is the
+%   declaration block of the class. This argument usually contains a
+%   set of Property assignments using the
+%   \lstinline|\ccSetProperty{<prop>}{<val>}| macro, see
+%   Sect.~\ref{sec:kernel:props}. The first optional argument
+%   \InlineArg*{1} is the Style Class' parent Container. Using parent
+%   Containers, you can have Style Classes of the same name for
+%   different (sub-)Containers, e.g., a \lstinline{default} class for
+%   each float and heading Container. The second optional argument
+%   \InlineArg*{3} is the parent Style Class. Properties from that
+%   Style Class are loaded automatically prior to the loading of the
+%   current Style Class's Properties. This applies recursively
+%   allowing for a cascading of property values, as in CSS.
 %    \begin{macrocode}
 \long\def\ccDeclareClass{\@ifnextchar [{\@cc@set@class}{\@cc@set@class[default]}}%]
 \long\def\@cc@set@class[#1]#2{\cc@opt@empty{\cc@set@class[#1]{#2}}}%
@@ -1295,8 +1385,9 @@
 % \begin{macro}{\ccUseStyleClass}
 %   is a user-level macro to expand and “activate” a Style Class'
 %   Properties, those of its recursive ancestor Style Classes, and the
-%   default Style Class respecting the current Container. \#1 is the
-%   Style Class name, \#2 is the Container.
+%   default Style Class respecting the current Container.
+%   \DescribeArg{1}{is the Style Class name}
+%   \DescribeArg{2}{is the Container name}
 %    \begin{macrocode}
 \def\ccUseStyleClass#1#2{%
   \expandafter\ifx\csname cc@#2@class@#1\endcsname\relax

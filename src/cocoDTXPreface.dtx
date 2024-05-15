@@ -92,6 +92,30 @@
 \def\UsageMacro#1{\PrintMacroName{#1}\SpecialMacroIndex{#1}}
 \def\UsageComponent#1{\textcolor{compcolor}{\texttt{#1}}\index[components]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{usage}}}
 
+\newdimen\arg@list@indent \arg@list@indent=2.5em\relax
+\def\DescribeArg{\@ifstar{\let\is@opt\relax\describe@arg}{\describe@arg}}
+\def\describe@arg#1#2{%
+  \ifhmode\par\vskip\parskip\fi
+  \begingroup
+    \leftskip\arg@list@indent
+    \parskip\z@
+    \leavevmode
+    \hskip-\arg@list@indent
+    \hb@xt@\arg@list@indent{%
+      \color{spot}%
+      \ttfamily
+      \footnotesize
+      \ifx\is@opt\relax[\##1]\else\{\##1\}\fi\hss}%
+    #2\par%
+  \endgroup
+  \let\is@opt\@undefined}
+\def\InlineArg{\@ifstar{\let\is@opt\relax}{}\inline@arg}
+\def\inline@arg#1{\begingroup
+    \color{spot}\ttfamily\footnotesize
+    \ifx\is@opt\relax[\##1]\else\{\##1\}\fi
+  \endgroup
+  \let\is@opt\@undefined}
+
 \def\DescribeContainer#1{%
   \containersection{#1}%
   \index[containers]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\noexpand\doc@handleencap{main}}%

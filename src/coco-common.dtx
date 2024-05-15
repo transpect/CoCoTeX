@@ -228,16 +228,16 @@
 % \subsection{Arithmetics}
 %
 % \begin{macro}{\CalcRatio} is used to calculate the ratio between two
-%   integers.
+%   integers \InlineArg{1} and \InlineArg{2}.
 %    \begin{macrocode}
 \def\CalcRatio#1#2{\strip@pt\dimexpr\number\numexpr\number\dimexpr#1\relax*65536/\number\dimexpr#2\relax\relax sp}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\CalcModulo} is used to calculate the remainder of
-%   integer division of \#1 by \#2.
-%   This needs a different approach than the common modulo definition,
-%   which would return negative results in some cases, as TeX
-%   rounds up the quotient of \#1 and \#2 if the first decimal
+%   integer division of \InlineArg{1} by \InlineArg{2}.  This needs a
+%   different approach than the common modulo definition, which would
+%   return negative results in some cases, as TeX rounds up the
+%   quotient of \InlineArg{1} and \InlineArg{2} if the first decimal
 %   place is equal to or greater 5.
 %    \begin{macrocode}
 \def\CalcModulo#1#2{\number\numexpr#1+#2-((#1+#2/2)/#2)*#2\relax}
@@ -296,36 +296,41 @@
 % by an empty page. Therefore, we save the default page counter from
 % {\LaTeX} to evaluate it independently from the actual manner of
 % counting.
-% \begin{macro}{\the@cc@thispage}
+% \begin{macro}{\the@cc@thispage} temporarily stores the current page
+%   number.
 %    \begin{macrocode}
 \def\the@cc@thispage{}%
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\cc@abspage}
+% \begin{macro}{\cc@abspage} is a counter for the absolute page number.
 %    \begin{macrocode}
 \newcount\cc@abspage \cc@abspage\z@
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\thecc@abspage}
+% \begin{macro}{\thecc@abspage} is the output formatter for the
+%   \lstinline{\cc@abspage} counter.
 %    \begin{macrocode}
 \def\thecc@abspage{\the\cc@abspage}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\if@cc@odd}
+% \begin{macro}{\if@cc@odd} is a conditional that is set to true if
+%     the current absolute page number is not divisible by 2.
 %    \begin{macrocode}
 \newif\if@cc@odd \@cc@oddtrue
 %    \end{macrocode}
 % \end{macro}
+% The absolute page counter is injected directly into \LaTeX's output
+% routine:
 %    \begin{macrocode}
 \AtBeginDocument{%
   \global\cc@abspage=\c@page\relax%
   \g@addto@macro\@outputpage{\global\cc@abspage\c@page}%
 }
 %    \end{macrocode}
-% We split this into two parts:
-% \begin{macro}{\ccTestPage}
-%   The first one is run before the floating object is placed. It will
-%   store the page according to the placement in the tex source code.
+% We split the testing mechanism into two parts.
+% \begin{macro}{\ccTestPage} is run before the floating object is
+%   placed. It will store the page according to the placement in the
+%   tex source code.
 %    \begin{macrocode}
 \def\ccTestPage{%
   \expandafter\ifx\csname the@cc@thispage\endcsname\@empty
@@ -352,10 +357,8 @@
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccSavePage}
-% the second macro writes the actual position of the floating object
-% into the aux files. This macro has to be placed inside the float
-% environment/macro.
+% \begin{macro}{\ccSavePage} is the second macro, which writes the
+%   actual page number into the aux files.
 %    \begin{macrocode}
 \def\ccSavePage{%
   \protected@write\@auxout{\def\the@cc@cur@cont{\cc@cur@cont}\let\thecc@abspage\relax}{%
@@ -369,7 +372,7 @@
 %
 % \subsection{Keeping .aux-Files Up-to-Date}
 %
-% \begin{macro}{\ccBreak*} is a general line break macro intended to be
+% \begin{macro}{\ccBreak} is a general line break macro intended to be
 %   re-defined if necessary without touching LaTeX's kernel page and
 %   line breaking macros.
 %    \begin{macrocode}
@@ -402,13 +405,13 @@
 % declared, the corresponding properties are initialised, and its
 % Components are extracted
 %
-% \begin{macro}{\cc@init@l@}
-%   is a low-level macro used to dynamically define
-%   \lstinline{\cc@l@<level>} macros. Optional \#1 is an override for
-%   counters that have to be restored, \#2 is the list file ending
-%   (raw entries being stored in a file \lstinline{\jobname.#2}), \#3
-%   is a number that indicated the nesting depth, \#4 is the nested
-%   level's unique name.
+% \begin{macro}{\cc@init@l@} is a low-level macro used to dynamically
+%   define \lstinline{\cc@l@<level>} macros.
+%   \DescribeArg*{1}{is an override for counters that have to be restored}
+%   \DescribeArg{2}{is the list file ending (raw entries being stored in a file
+%     \texttt{\string\jobname.\#2})}
+%   \DescribeArg{3}{is a number that indicated the nesting depth}
+%   \DescribeArg{4}{is the nested level's unique name.}
 %    \begin{macrocode}
 \def\cc@init@l@{\cc@opt@empty\@cc@init@l@}%
 \def\@cc@init@l@[#1]#2#3#4{%
@@ -445,26 +448,39 @@
 % \end{macro}
 % \begin{macro}{\ccContentsline} is our version of \LaTeX's
 %   \lstinline{\contentsline}.
+%   \DescribeArg{1}{is the name of the list counter}
+%   \DescribeArg{2}{is the name of the list entry}
+%   \DescribeArg{3}{is the page number}
+%   \DescribeArg{4}{is the hyperref destination}
 %    \begin{macrocode}
 \long\def\ccContentsline#1#2#3#4{\gdef\@contentsline@destination{#4}%
   \csname cc@l@#1\endcsname{#2}{#3}}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\cc@extract@generic}
+% \begin{macro}{\cc@extract@generic} is a fallback extractor for a
+%   list entry. It is used when the list handler does not provide a
+%   case-specific extractor for the entries.
+%   \DescribeArg{1}{is the name of the list counter}
+%   \DescribeArg{2}{is the name of the list entry}
+%   \DescribeArg{3}{is the page number}
+%   \DescribeArg{4}{is the hyperref destination}
 %    \begin{macrocode}
 \def\cc@extract@generic#1#2#3#4{}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\cc@print@generic}
+% \begin{macro}{\cc@print@generic} is the fallback output generator
+%   for the composed list entry \InlineArg{1}.
 %    \begin{macrocode}
 \def\cc@print@generic#1{}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\cc@expand@l@contents}
 %   expands the content of the \lstinline{cc@l@<level>} macro and contains some code
-%   to catch and handle standard \LaTeX\ headings. \#1 is the content
-%   of the \lstinline{cc@l@}-macro, \#2 is the namespace, \#3 is the Component
-%   prefix and \#4 is the name of the Content component.
+%   to catch and handle standard \LaTeX\ headings.
+%   \DescribeArg{1}{is the content of the \texttt{cc@l@}-macro}
+%   \DescribeArg{2}{is the name of the handling Container}
+%   \DescribeArg{3}{is the Component prefix}
+%   \DescribeArg{4}{is the name of the Content component}
 %    \begin{macrocode}
 \def\cc@expand@l@contents#1#2#3#4{%
   \global\let\cc@tempa\relax
@@ -483,10 +499,11 @@
 %
 % \subsubsection{Custom Content Lists}
 %
-% \begin{macro}{\ccDeclareExtraToc} provides an interface for
-%   additional content lists. \#1 is the name of the custom content,
-%   \#2 is a comma separated list of container names, the instances of
-%   which should be listed in the custom contents list.
+% \begin{macro}{\ccDeclareContentList} provides an interface for
+%   additional content lists.
+%   \DescribeArg{1}{is the name of the custom content}
+%   \DescribeArg{2}{is a comma separated list of container names the instances of
+%     which should be listed in the custom contents list}
 %    \begin{macrocode}
 \def\ccDeclareContentList#1#2{%
   \def\cc@add@extra@cl##1{%
@@ -503,9 +520,12 @@
 % \end{macro}
 % \begin{macro}{\ccCreateContentListEntries} creates entries for
 %   Custom Content Lists. It is called during the proccessing of a
-%   container's instance. \#1 is the name of the calling Container,
-%   \#2 is the name of the file stream, \#3 is the level of the entry,
-%   \#4 is the current page counter, \#5 is the current Hyperref label.
+%   container's instance.
+%   \DescribeArg{1}{is the name of the calling Container}
+%   \DescribeArg{2}{is the name of the file stream}
+%   \DescribeArg{3}{is the level of the entry}
+%   \DescribeArg{4}{is the current page counter}
+%   \DescribeArg{5}{is the current hyperref label}
 %    \begin{macrocode}
 \def\ccCreateContentListEntries#1#2#3#4#5{%
   \def\cc@add@extra@cl##1{%
@@ -549,19 +569,20 @@
 % parameters.
 %
 % \begin{macro}{\cc@store@latest} is a low-level macro that stores the
-%   maximum value of a dimension Property \#1. An internal Property
-%   \lstinline{\#1-local} is constantly updated whenever the macro is
-%   called and the previously stored value is lower than the one given
-%   in \lstinline{#2}.
+%   maximum value of a dimension Property \InlineArg{1}. An internal
+%   Property \lstinline{\#1-local} is constantly updated whenever the
+%   macro is called and the previously stored value is lower than the
+%   one given in \InlineArg{2}.
 %
 %   The first call of the macro for a given Property triggers an
 %   addendum to the \lstinline{\@enddocumenthook} which causes the
 %   last value for that dimension to be stored in the .aux file. If
 %   the Property hasn't been set from a previous {\LaTeX} run or a
 %   previous call to the \lstinline{\cc@store@latest} macro for the
-%   same Property and the same level, it is set to \#2.
+%   same Property and the same level, it is set to \InlineArg{2}.
 %
-%   \#1 is the internal name of the property, \#2 is the check value.
+%   \DescribeArg{1}{is the internal name of the property}
+%   \DescribeArg{2}{is the check value.}
 %    \begin{macrocode}
 \def\cc@store@latest#1#2{%
   \expandafter\ifx\csname cc-\cc@cur@cont-#1\endcsname\relax
@@ -605,8 +626,9 @@
 %
 % \begin{macro}{\cc@format@number}
 %   calculates number widths and prepares macros to be used by the
-%   user. \#1 is the internal Property prefix, \#2 is the user-level
-%   Component prefix, \#3 is the numerical list level.
+%   user. \DescribeArg{1}{is the internal Property prefix}
+%   \DescribeArg{2}{is the user-level Component prefix}
+%   \DescribeArg{3}{is the numerical list level.}
 %    \begin{macrocode}
 \def\cc@format@number#1#2#3{%
   \ccSetPropertyVal{#1curr-number-level}{#3}%
@@ -648,7 +670,7 @@
 % \end{macro}
 %
 % \begin{macro}{\cc@set@hang} determines and sets the hanging indent
-%   of a counter. \#1 is the internal Property prefix.
+%   of a counter. \DescribeArg{1}{is the internal Property prefix}
 %    \begin{macrocode}
 \def\cc@set@hang#1{%
 %    \end{macrocode}
@@ -685,9 +707,8 @@
 %   level. ``Next-higher'' meaning ``hierarchically'', i.e., the level
 %   counter is \textit{lower}. Remember that for hang indent, the
 %   indent is negative, so \lstinline{margin-left} grows larger.
-%
-%   \#1 is the Property prefix, \#2 is the current numerical list
-%   level.
+%   \DescribeArg{1}{is the Property prefix}
+%   \DescribeArg{2}{is the current numerical list level.}
 %    \begin{macrocode}
 \def\cc@calc@margin@left#1#2{%
   \@tempcnta\numexpr#2-\@ne\relax
@@ -704,12 +725,14 @@
 %   Eventually, write the actually used values for margin-left and
 %   indent into the current container's Property list.
 %
-%   \#1 is the CS token of a method that is called to calculate the
-%   actual left margin of the list item. It defaults to above's
-%   \lstinline{\cc@calc@margin@left} and is fed the two mandatory
-%   arguments of the \lstinline{\cc@get@indent} macro, namely \#2 for
-%   the internal property prefix, and \#3 for the numerical list
-%   level. The callback method should set and store the
+%   \DescribeArg{1}{is the CS token of a method that is called to calculate the
+%     actual left margin of the list item. It defaults to above's
+%     \texttt{\string\cc@calc@margin@left} and is fed the two mandatory
+%     arguments of the \texttt{\string\cc@get@indent} macro, namely}
+%   \DescribeArg{2}{for the internal property prefix, and}
+%   \DescribeArg{3}{for the numerical list level.}
+%
+%   The callback method should set and store the
 %   \lstinline{#2margin-left} Property.
 %    \begin{macrocode}
 \def\cc@get@indent{\@ifnextchar[{\@cc@get@indent}{\@cc@get@indent[\cc@calc@margin@left]}}
@@ -815,8 +838,7 @@
 % \lstinline{0pt}.
 %    \begin{macrocode}
                {\ccSetProperty{#2indent}{\z@}%
-                \ccSetProperty{#2margin-left}{\z@}}}}}}%
-}
+                \ccSetProperty{#2margin-left}{\z@}}}}}}}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -841,8 +863,10 @@
 % \end{macro}
 %
 % \begin{macro}{\ccCreateLabel} is a high level macro to generate
-%   hyperref anchors and/or ref targets. \#1 is the type of
-%   anchor. This macro looks for both the label attribute in the begin
+%   hyperref anchors and/or ref targets.
+%   \DescribeArg{1}{is the type of anchor}
+%
+%   This macro looks for both the label attribute in the begin
 %   of a Container's environment, as well as for a
 %   \lstinline{RefLabel} Components inside the environment. If both
 %   exist, both apply. If none exists, we adopt the generic anchor
@@ -867,7 +891,8 @@
 % \end{macro}
 % \begin{macro}{\cc@create@label} generates the actual anchor for
 %   document-internal cross-references (i.e.,
-%   a~\LaTeX\space\lstinline{\label}). \#1 is the label ID.
+%   a~\LaTeX\space\lstinline{\label}).
+%   \DescribeArg{1}{is the label ID}
 %    \begin{macrocode}
 \def\cc@create@label#1{%
   \ccIfComp{Number}
@@ -893,9 +918,11 @@
 % \subsection{Linguistic Name generation and selection}
 %
 % \begin{macro}{\ccSetBabelLabel} defined a language-dependent string
-%   macro for German and English varieties.  \#1 is the language, \#2
-%   is the internal reference name, and \#3 is the language specific
-%   label.
+%   macro for German and English varieties.
+%
+%   \DescribeArg{1}{is the language}
+%   \DescribeArg{2}{is the internal reference name}
+%   \DescribeArg{3}{is the language specific label}
 %    \begin{macrocode}
 \def\ccSetBabelLabel#1#2#3{%
   \def\ccc@lang{#1}%
@@ -919,7 +946,8 @@
 % \subsection{Link Generation}
 %
 % \begin{macro}{\ccCompLink} creates a hyperlink with the target taken
-%   from Component with the name \#1 and the label \#2.
+%   from Component with the name \InlineArg{1} and the label
+%   \InlineArg{2}.
 %    \begin{macrocode}
 \def\ccCompLink#1#2{%
   \protected@edef\@argi{\expandonce{\ccUseComp{#1}}}%
@@ -927,8 +955,9 @@
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccPageLabel} enables referencing pages via \pageref
-%   by using \phantomsection to create a hyperref anchor for label \#1.
+% \begin{macro}{\ccPageLabel} enables referencing pages via
+%   \lstinline{\pageref} by using \DescribeArg{\phantomsection} to
+%   create a hyperref anchor for label \InlineArg{1}.
 %    \begin{macrocode}
 \def\ccPageLabel#1{\phantomsection\label{#1}}
 %    \end{macrocode}
