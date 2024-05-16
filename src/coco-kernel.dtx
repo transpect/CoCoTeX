@@ -49,10 +49,12 @@
 %
 % \begin{macro}{\ccPackageError} creates an error message specific to
 %   the Framework.
-%   \DescribeArg{1}{is the module}
-%   \DescribeArg{2}{is the type of error}
-%   \DescribeArg{3}{is the immediate error message}
-%   \DescribeArg{4}{is the help string}
+%   \begin{ArgList}
+%   \item[1] is the module
+%   \item[2] is the type of error
+%   \item[3] is the immediate error message
+%   \item[4] is the help string
+% \end{ArgList}
 %    \begin{macrocode}
 \def\ccPackageError#1#2#3#4{%
    \GenericError{%
@@ -65,9 +67,11 @@
 % \end{macro}
 % \begin{macro}{\ccPackageWarning} is a macro to create warnings
 %   specific to the Framework. 
-%   \DescribeArg{1}{is the module}
-%   \DescribeArg{2}{is the type of error}
-%   \DescribeArg{3}{is the immediate warning message}
+%   \begin{ArgList}
+%   \item[1] is the module
+%   \item[2] is the type of error
+%   \item[3] is the immediate warning message
+%   \end{ArgList}
 %    \begin{macrocode}
 \def\ccPackageWarning#1#2#3{%
    \GenericWarning{%
@@ -80,9 +84,11 @@
 % \end{macro}
 % \begin{macro}{\ccPackageInfo}
 %   is a macro to create shell output specific to the Framework.
-%   \DescribeArg{1}{is the module}
-%   \DescribeArg{2}{is the type of message}
-%   \DescribeArg{3}{is the immediate info string}
+%   \begin{ArgList}
+%   \item[1] is the module
+%   \item[2] is the type of message
+%   \item[3] is the immediate info string
+%   \end{ArgList}
 %    \begin{macrocode}
 \def\ccPackageInfo#1#2#3{%
   \GenericInfo{%
@@ -98,7 +104,9 @@
 %
 % \begin{macro}{\ccKernelDebugMsg} prints a debug message if and only
 %   if the \lstinline{debug} package option is set.
-%   \DescribeArg{1}{is the debug message}
+%   \begin{ArgList}
+%   \item[1] is the debug message
+%   \end{ArgList}
 %    \begin{macrocode}
 \def\ccKernelDebugMsg#1{\if@cc@debug\message{[CoCo Kernel Debug]\space\space#1^^J}\fi}
 %    \end{macrocode}
@@ -167,9 +175,11 @@
 %
 % \begin{macro}{\ccDeclareContainer} is the constructor for new
 %   Containers.
-%   \DescribeArg{1}{is the Container's name}
-%   \DescribeArg{2}{is its body, which conists of Inheritance
-%     instructions, Type and Env declarations.}
+%   \begin{ArgList}
+%   \item[1] is the Container's name
+%   \item[2] is its body, which conists of Inheritance
+%     instructions, Type and Env declarations.
+%   \end{ArgList}
 %    \begin{macrocode}
 \def\cc@warning@spaces{\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space\space}%
 \long\def\ccDeclareContainer#1#2{%
@@ -187,8 +197,12 @@
 % \begin{macro}{\ccInherit} The inherit mechanism is dynamic, i.e., we
 %   can load multiple type declarations from multiple containers at
 %   once.
-%   \DescribeArg{1}{is a comma-separated list of Types that should be inherited}
-%   \DescribeArg{2}{is a comma-separated list of Container names which the Types should be inherited from}
+%   \begin{ArgList}
+%   \item[1]is a comma-separated list of Types that should be
+%     inherited
+%   \item[2]is a comma-separated list of Container names which the
+%     Types should be inherited from
+%   \end{ArgList}
 %    \begin{macrocode}
     \def\ccInherit##1##2{\cc@inherit{##1}{##2}{#1}}%
 %    \end{macrocode}
@@ -196,9 +210,11 @@
 % \begin{macro}{\ccDeclareType}
 %   Each Container is defined by the data types it provides. These data
 %   types are declared with this macro.
-%   \DescribeArg{1}{is the name of the data type}
-%   \DescribeArg{2}{is code that is specific to this type, usually something like Component or
-%     Property declarations, handlers, and so forth}
+%   \begin{ArgList}
+%   \item[1] is the name of the data type
+%   \item[2] is code that is specific to this type, usually something like Component or
+%     Property declarations, handlers, and so forth
+%   \end{ArgList}
 %    \begin{macrocode}
     \long\def\ccDeclareType##1##2{\csgappto{cc@type@##1@#1}{##2}}%
 %    \end{macrocode}
@@ -207,12 +223,13 @@
 %   {\LaTeX} environment. The \lstinline{\ccDeclareEnv} macro is used
 %   to set up this environment. Usually, the environment has
 %   \textit{the same name as the Container}.
-%   \DescribeArg*{1}{overrides the environment's name.  However,
+%   \begin{ArgList}
+%   \item*[1] overrides the environment's name.  However,
 %     keep in mind that the Container's name is not changed by re-naming
-%     the corresponding environment.}
-%   \DescribeArg{2}{is used for the stuff done at the environment's beginning}
-%   \DescribeArg{3}{is the stuff done at the environment's end}
-%
+%     the corresponding environment.
+%   \item[2] is used for the stuff done at the environment's beginning
+%   \item[3] is the stuff done at the environment's end
+%   \end{ArgList}
 %   In the \lstinline{begin} part, the Types declared in the Container
 %   declaration's body should be evaluated using the
 %   \lstinline{\ccEvalType} macro, see below.
@@ -233,7 +250,9 @@
 % \end{macro}
 % \begin{macro}{\ccSetContainer} is used to change the currently
 %   active (Sub-)Container.
-%   \DescribeArg{1}{is the name of the new active Container}
+%   \begin{ArgList}
+%   \item[1] is the name of the new active Container
+%   \end{ArgList}
 %    \begin{macrocode}
 \def\ccSetContainer#1{\def\cc@cur@cont{#1}}
 %    \end{macrocode}
@@ -253,8 +272,8 @@
 \def\cc@eval@type[#1]#2{%
   \expandafter\ifx\csname cc@type@#2@#1\endcsname\relax
     \ccPackageError{Kernel}{Class}
-    {Data Type #2 in Container #1 undefined!}
-    {You try to evaluate a data type `#2' from container `#1', but that data type has not been declared.}%
+      {Data Type #2 in Container #1 undefined!}
+      {You try to evaluate a data type `#2' from container `#1', but that data type has not been declared.}%
   \else
     \ccKernelDebugMsg{Evaluating cc@type@#2@#1:^^J \csmeaning{cc@type@#2@#1}}%
     \csname cc@type@#2@#1\endcsname
@@ -278,9 +297,11 @@
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\cc@inherit} is the low-level inherit function.
-%   \DescribeArg{1}{is a comma-separated list of things to be inherited}
-%   \DescribeArg{2}{is the Container-list that should be inherited from}
-%   \DescribeArg{3}{is the name of the inherting Container}
+%   \begin{ArgList}
+%   \item[1] is a comma-separated list of things to be inherited
+%   \item[2] is the Container-list that should be inherited from
+%   \item[3] is the name of the inherting Container
+%   \end{ArgList}
 %    \begin{macrocode}
 \def\cc@inherit#1#2#3{\cc@parse@inherit #1,,\@nil #2,,\@nil #3\@@nil}
 %    \end{macrocode}
@@ -311,9 +332,11 @@
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\cc@do@inherit} is the macro that actually causes inheritance.
-%   \DescribeArg{1}{is the name of a Type}
-%   \DescribeArg{2}{is the name of the Container that Type \InlineArg{1} is \textit{inherited from}}
-%   \DescribeArg{3}{is the name of the Container that \textit{inherits} Type \InlineArg{1}}
+%   \begin{ArgList}
+%   \item[1] is the name of a Type
+%   \item[2] is the name of the Container that Type \InlineArg{1} is \textit{inherited} from
+%   \item[3] is the name of the Container that \textit{inherits} Type \InlineArg{1}
+%   \end{ArgList}
 %    \begin{macrocode}
 \def\cc@do@inherit#1#2#3{%
   \ccKernelDebugMsg{#3 inherits #1 from #2.}%
@@ -322,7 +345,7 @@
     \ccPackageError{Kernel}{Type}{Type `#1' was not declared}{Type `#1' was not declared for Container `#2'.}%
   \else
     \edef\x{\noexpand\csgappto{cc@type@#1@#3}}%
-    \expandafter\x\expandafter{\csname cc@type@#1@#2\endcsname}%
+    \expandafter\expandafter\expandafter\x\expandafter\expandafter\expandafter{\csname cc@type@#1@#2\endcsname}%
     \ccKernelDebugMsg{value cc@type@#1@#3:^^J \expandafter\meaning\csname cc@type@#1@#3\endcsname}%
   \fi
 }
@@ -340,11 +363,13 @@
 % \begin{macro}{\ccDeclareComponent} defines a simple Component macro.
 %   The internal macro that is used to store the Component's value is\\
 %   \lstinline{\csname cc@<current Container name>@<#1>\endcsname}.
-%   \DescribeArg*{1}{is the Component's identifier. If omitted,
-%     \InlineArg{1} is the same as \InlineArg{2}.}
-%   \DescribeArg{2}{is the Component's name}
-%   \DescribeArg{3}{is code that is executed \textit{before} assignment of the user's value}
-%   \DescribeArg{4}{is code that is executed \textit{after} assignment of the user's value}
+%   \begin{ArgList}
+%   \item*[1] is the Component's identifier. If omitted,
+%     \InlineArg{1} is the same as \InlineArg{2}.
+%   \item[2] is the Component's name
+%   \item[3] is code that is executed \textit{before} assignment of the user's value
+%   \item[4] is code that is executed \textit{after} assignment of the user's value
+%   \end{ArgList}
 %    \begin{macrocode}
 \def\ccDeclareComponent{\cc@opt@second\cc@declare@comp}
 \def\cc@declare@comp[#1]#2#3#4{%
@@ -372,8 +397,10 @@
 % \lstinline{\ccComponent} macro:
 % \begin{macro}{\ccComponent} is the preferred way to fill a Component
 %   with content.
-%   \DescribeArg{1}{is the Component's name}
-%   \DescribeArg{2}{is the Instance value}.
+%   \begin{ArgList}
+%   \item[1] is the Component's name
+%   \item[2] is the Instance value.
+%   \end{ArgList}
 %    \begin{macrocode}
 \long\protected\def\ccComponent#1#2{%
   \ifx\cc@is@counted\relax
@@ -425,9 +452,11 @@
 % \end{macro}
 % \begin{macro}{\cc@store@comp} is a generalized macro to store a
 %   component's unexpanded internal definition in a TeX macro.
-%   \DescribeArg{1}{is a scope quantifier (either `e' or `x')}
-%   \DescribeArg{2}{is a CS token}
-%   \DescribeArg{3}{is the name of a component}
+%   \begin{ArgList}
+%   \item[1] is a scope quantifier (either `e' or `x')
+%   \item[2] is a CS token
+%   \item[3] is the name of a component
+%   \end{ArgList}
 %    \begin{macrocode}
 \long\def\cc@store@comp#1#2#3{%
   \edef\@tempa{\expandonce{\csname protected@#1def\endcsname}\noexpand#2}%
@@ -476,29 +505,35 @@
 % \end{macro}
 % \begin{macro}{\ccWhenComp} is a high level variant of
 %   \lstinline{\ccIfComp} that omits the \lstinline{else}-branch. 
-%   \DescribeArg{1}{is the name of the Component}
-%   \DescribeArg{2}{is code that is expanded when the Component
-%     \InlineArg{1} is used in a container (empty or non-empty)}
+%   \begin{ArgList}
+%   \item[1] is the name of the Component
+%   \item[2] is code that is expanded when the Component
+%     \InlineArg{1} is used in a container (empty or non-empty)
+%   \end{ArgList}
 %    \begin{macrocode}
 \long\def\ccWhenComp#1#2{\expandafter\ifx\csname cc@\cc@cur@cont @#1\endcsname\relax\else#2\fi}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccUnlessComp} is a high level variant of
 %   \lstinline{\ccIfComp} that omits the \lstinline{then}-branch. 
-%   \DescribeArg{1}{is the name of the Component}
-%   \DescribeArg{2}{is the code that is expanded when a Container
+%   \begin{ArgList}
+%   \item[1] is the name of the Component
+%   \item[2] is the code that is expanded when a Container
 %     \InlineArg{1} is \textit{not} used in a Container (neither empty
-%     nor non-empty)}
+%     nor non-empty)
+%   \end{ArgList}
 %    \begin{macrocode}
 \long\def\ccUnlessComp#1#2{\expandafter\ifx\csname cc@\cc@cur@cont @#1\endcsname\relax#2\fi}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccIfCompFrom} is the global variant of
 %   \lstinline{\ccIfComp}. 
-%   \DescribeArg{1}{is the name of the Container}
-%   \DescribeArg{2}{is the name of the Component}
-%   \DescribeArg{3}{is the \texttt{then}-branch}
-%   \DescribeArg{4}{is the \texttt{else}-branch}
+%   \begin{ArgList}
+%   \item[1] is the name of the Container
+%   \item[2] is the name of the Component
+%   \item[3] is the \texttt{then}-branch
+%   \item[4] is the \texttt{else}-branch
+%   \end{ArgList}
 %    \begin{macrocode}
 \long\def\ccIfCompFrom#1#2#3#4{\expandafter\ifx\csname cc@#1@#2\endcsname\relax#4\else#3\fi}
 %    \end{macrocode}
@@ -519,10 +554,12 @@
 % \end{macro}
 % \begin{macro}{\ccIfCompFromEmpty} is a global variant of
 %   \lstinline{\ccIfCompEmpty}. 
-%   \DescribeArg{1}{is the name of the Container}
-%   \DescribeArg{2}{is the name of the Component}
-%   \DescribeArg{3}{is the \texttt{then}-branch}
-%   \DescribeArg{4}{is the \texttt{else}-branch}
+%   \begin{ArgList}
+%   \item[1] is the name of the Container
+%   \item[2] is the name of the Component
+%   \item[3] is the \texttt{then}-branch
+%   \item[4] is the \texttt{else}-branch
+%   \end{ArgList}
 %    \begin{macrocode}
 \long\def\ccIfCompFromEmpty#1#2#3#4{\expandafter\ifx\csname cc@#1@#2\endcsname\cc@long@empty#3\else#4\fi}
 %    \end{macrocode}
@@ -538,11 +575,12 @@
 %   If \lstinline{#4#3} is already \lstinline{\relax}, check if the
 %   fallback \lstinline{#1#3} is set. If so, make \lstinline{#4#3} an
 %   alias of \lstinline{#1#3}. If not, do nothing.
-%
-%   \DescribeArg*{1}{is the prefix of the fallback component}
-%   \DescribeArg{2}{is the Container name}
-%   \DescribeArg{3}{is the name of the Component}
-%   \DescribeArg{4}{is the Override's prefix}
+%   \begin{ArgList}
+%   \item*[1] is the prefix of the fallback component
+%   \item[2] is the Container name
+%   \item[3] is the name of the Component
+%   \item[4] is the Override's prefix
+%   \end{ArgList}
 %    \begin{macrocode}
 \def\cc@check@empty{\cc@opt@empty\@cc@check@empty}%]
 \def\@cc@check@empty[#1]#2#3#4{%
@@ -750,11 +788,14 @@
 % \end{macro}
 % \begin{macro}{\cc@comp@def} is used to pass a Counted Component into
 %   a TeX macro.
-%   \DescribeArg{1}{is a prefix to the def command, e.g.,
-%   \texttt{\string\global} or \texttt{\string\protected}}
-%   \DescribeArg{2}{is a CS token}
-%   \DescribeArg{3}{is the Name of the Counted Component}
-%   \DescribeArg{4}{is the Property that should be applied to all Members of the Counted Component}
+%   \begin{ArgList}
+%   \item[1] is a prefix to the def command, e.g., \lstinline{\global}
+%     or \lstinline{\protected}
+%   \item[2] is a CS token
+%   \item[3] is the Name of the Counted Component
+%   \item[4] is the Property that should be applied to all Members of
+%     the Counted Component
+%   \end{ArgList}
 %    \begin{macrocode}
 \def\cc@comp@def{\cc@opt@empty\@cc@comp@def}
 \def\@cc@comp@def[#1]#2#3#4{%
@@ -786,14 +827,18 @@
 %
 % \begin{macro}{\cc@counted@comp@scheme} gives the scheme how counted
 %   components are defined internally.
-%   \DescribeArg{1}{the name of the Counted Component}.
+%   \begin{ArgList}
+%   \item[1] the name of the Counted Component.
+%   \end{ArgList}
 %    \begin{macrocode}
 \def\cc@counted@comp@scheme#1{\cc@cnt@grp-#1-\csname \cc@cnt@grp Cnt\endcsname}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccDeclareCountedComponent}
 %   is a user-level macro to create a new Counted Component.
-%   \DescribeArg{1}{is the user-level name of the Component}
+%   \begin{ArgList}
+%   \item[1] is the user-level name of the Component
+%   \end{ArgList}
 %    \begin{macrocode}
 \def\ccDeclareCountedComponent#1{%
   \cc@def@counted@comp
@@ -805,13 +850,15 @@
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\cc@def@counted@comp} is used to declare Counted Components.
-%   \DescribeArg{1}{is the internal name of the
-%   Component which is composed out of the group name, the value of
-%   the group counter and the user-level macro name \InlineArg{2}}
-%   \DescribeArg{2}{is the name of the Counted Component}
-%   \DescribeArg{3}{is some custom code passed to the second argument of
-%   \texttt{\string\ccDeclareComponent}}
-%   \DescribeArg{4}{is a modifier to the internal macro definition.}
+%   \begin{ArgList}
+%   \item[1] is the internal name of the Component which is composed
+%     out of the group name, the value of the group counter and the
+%     user-level macro name \InlineArg{2}
+%   \item[2] is the name of the Counted Component
+%   \item[3] is some custom code passed to the second argument of
+%     \lstinline{\ccDeclareComponent}
+%   \item[4] is a modifier to the internal macro definition.
+%   \end{ArgList}
 %    \begin{macrocode}
 \def\cc@def@counted@comp#1#2#3#4{%
   \ccDeclareComponent[#1]{#2}
@@ -840,8 +887,9 @@
 %   container type to prevent bleeding of one container's components
 %   into the next one, specifically if a container occurs more than
 %   once in the same document.
-%
-%   \DescribeArg{1}{is the name of the Component Group}
+%   \begin{ArgList}
+%   \item[1] is the name of the Component Group
+%   \end{ArgList}
 %    \begin{macrocode}
 \def\cc@reset@components#1{%
   \csname @cc@reset@components@#1\endcsname
@@ -888,16 +936,18 @@
 %
 % \section{Hooks}
 %
-% TODO: Use latex3's hook facility instead.
+% TODO: Use latex3's hook facility instead. Look at latexreleases.sty to ensure forward compatibility
 %
 % Hooks are used to patch code into different parts of a Container's
 % processing chain.
 % \begin{macro}{\ccDeclareHook} registers a new hook.  Hooks always
 %   default to an empty string.
-%   \DescribeArg*{1}{is the Container for which the Hook is
+%   \begin{ArgList}
+%   \item*[1] is the Container for which the Hook is
 %     declared. If omitted, this defaults to the currently active
-%     Container (\texttt{\string\cc@cur@cont})}
-%   \DescribeArg{2}{is the Hook's user-level name}
+%     Container (\lstinline{\cc@cur@cont})
+%   \item[2] is the Hook's user-level name
+%   \end{ArgList}
 %    \begin{macrocode}
 \def\ccDeclareHook{\cc@opt@curcont\cc@declare@hook}
 \def\cc@declare@hook[#1]#2{\expandafter\global\expandafter\let\csname cc@hook@#1@#2\endcsname\@empty}
@@ -935,17 +985,21 @@
 % \begin{macro}{\ccSetProperty}
 %   is a user-level macro that provides the Property--Value interface
 %   for Containers.
-%   \DescribeArg{1}{is the name of the Property}
-%   \DescribeArg{2}{is the Value assigned to that Property.}
+%   \begin{ArgList}
+%   \item[1] is the name of the Property
+%   \item[2] is the Value assigned to that Property.
+%   \end{ArgList}
 %    \begin{macrocode}
 \long\def\ccSetProperty#1#2{\long\csdef{cc@\cc@cur@cont @#1}{#2}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccAppToProp} can be used add material to the
 %   \textit{end} of an existing Property vaue.
-%   \DescribeArg{1}{is the name of the Property}
-%   \DescribeArg{2}{is the material to be added to previous value of
-%     that Property}
+%   \begin{ArgList}
+%   \item[1] is the name of the Property
+%   \item[2] is the material to be added to previous value of
+%     that Property
+%   \end{ArgList}
 %    \begin{macrocode}
 \def\ccAppToProp#1#2{%
   \long\csappto{cc@\cc@cur@cont @#1}{#2}%
@@ -954,9 +1008,11 @@
 % \end{macro}
 % \begin{macro}{\ccPreToProp} can be used add material to the
 %   \textit{beginning} of an existing Property.
-%   \DescribeArg{1}{is the name of the Property}
-%   \DescribeArg{2}{is the material to be inserted before the previous
-%     value of that Property}
+%   \begin{ArgList}
+%   \item[1] is the name of the Property
+%   \item[2] is the material to be inserted before the previous
+%     value of that Property
+%   \end{ArgList}
 %    \begin{macrocode}
 \def\ccPreToProp#1#2{%
   \long\cspreto{cc@\cc@cur@cont @#1}{#2}%
@@ -1068,11 +1124,13 @@
 %
 % \begin{macro}{\cc@set@property@local} is a low-level macro to
 %   locally manipulate Properties. 
-%   \DescribeArg{1}{is the CS token representing a method to alter the
-%     property (\texttt{\string\ccSetProperty},
-%     \texttt{\string\ccAppToProp}, or \texttt{\string\ccPreToProp})}
-%   \DescribeArg{2}{is the name of the Property to be altered}
-%   \DescribeArg{3}{is the new (or added) Value}
+%   \begin{ArgList}
+%   \item[1] is the CS token representing a method to alter the
+%     property (\lstinline{\ccSetProperty}, \lstinline{\ccAppToProp},
+%     or \lstinline{\ccPreToProp})
+%   \item[2] is the name of the Property to be altered
+%   \item[3] is the new (or added) Value
+%   \end{ArgList}
 %    \begin{macrocode}
 \def\cc@set@property@locally#1#2#3{%
   \let\@cc@cur@cont\cc@cur@cont
@@ -1086,9 +1144,11 @@
 % be kept or be replaced.
 %
 % They all take two arguments:
-% \DescribeArg{1}{is the name of the Property}
-% \DescribeArg{2}{is the value to be set, appended, or prepended to that Property,
-%   respectively.}
+% \begin{ArgList}
+% \item[1] is the name of the Property
+% \item[2] is the value to be set, appended, or prepended to that
+%   Property, respectively.
+% \end{ArgList}
 % \begin{macro}{\ccSetPropLocal} sets a Property \InlineArg{1} to a
 %   new value \InlineArg{2}.
 %    \begin{macrocode}
@@ -1221,8 +1281,10 @@
 %    \end{macrocode}
 % \begin{macro}{\ccParseAttributes} High level wrapper for the
 %   attribute parser.
-%   \DescribeArg{1}{is the domain of the attribute}
-%   \DescribeArg{2}{is the raw attribute list}
+%   \begin{ArgList}
+%   \item[1] is the domain of the attribute
+%   \item[2] is the raw attribute list
+%   \end{ArgList}
 %    \begin{macrocode}
 \gdef\ccParseAttributes#1#2{%
   \if!#1!\else
@@ -1291,58 +1353,153 @@
 \endgroup
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{\ccEvalAttributes} is a special Type Evaluator for
+%   Containers that define their Instance's attributes as Data
+%   Type. The Type then contains a list of
+%   \lstinline{\ccDeclareAttributeHandler} statements for each of the
+%   allowed attributes.
+%   \begin{ArgList}
+%   \item*[1] is the Attribtue Domain (defaults to the current Container name)
+%   \item[2] is the Container Instance's raw Attribute list.
+%   \end{ArgList}
+%    \begin{macrocode}
+\def\ccEvalAttributes{\cc@opt@curcont\cc@eval@attributes}%
+\def\cc@eval@attributes[#1]#2{%
+%    \end{macrocode}
+% First we check if the Container Instance has a dedicated Attribtue Type defined
+%    \begin{macrocode}
+  \expandafter\ifx\csname cc@type@#1@Attributes\endcsname\relax
+%    \end{macrocode}
+% If so, we parse the Attribute list.
+%    \begin{macrocode}
+    \ccParseAttributes{#1}{#2}%
+%    \end{macrocode}
+% After reading the Attribute list, we prepare unpacking the Attribute
+% Data Type. Usually, the Type contains of a list of
+% \UsageMacro{\ccDeclareAttributeHandler} statements, but it can also
+% handle the Attributes directly. The Attribute handler macro is
+% defined locally:
+% \begin{macro}{\ccDeclareAttributeHandler*} declares an Attribute
+%   handler. The \textit{starred} version is for Attributes that are
+%   not expected to hold a value (i.\,e., switches), while the
+%   \textit{non-starred} version is for Attributes that hold a value
+%   (key-value pairs). The value(s) for each matching Attribute is
+%   stored in \UsageMacro{\ccAttrVal}. You may want to copy that value
+%   into another macro inside the third argument of the Handler macro
+%   for later evaluation, as it will be redefined by an Attribute
+%   Handler that is further down the Handler list.
+%   \begin{ArgList}
+%   \item[1] is the name of the attribute (i.\,e., the part before the
+%     `=')
+%   \item*[2] is code that is called when the Attribute does not occur
+%     in the Attribute list \InlineArg{1}
+%   \item[3] is code that is called when the Attribute does occur in
+%     the Attribute list \InlineArg{1}.
+%   \end{ArgList}
+%    \begin{macrocode}
+    \def\ccDeclareAttributeHandler{%
+      \let\cc@is@starred\@undefined
+      \@ifstar
+        {\let\cc@is@starred\relax\cc@declare@attribute@handler}
+        {\cc@declare@attribute@handler}}%
+    \def\cc@declare@attribute@handler##1{\cc@opt@empty{\@cc@declare@attribute@handler{##1}}}
+    \def\@cc@declare@attribute@handler##1[##2]##3{%
+      \let\ccAttrVal\relax
+      \ifx\cc@is@starred\relax
+        \ccIfAttrIsSet{#1}{##1}{##3}{##2}%
+      \else
+        \ccIfAttr{#1}{##1}
+          {\letcs\ccAttrVal{cc@#1@attr@##1}##3}
+          {##2}%
+      \fi
+    }%
+%    \end{macrocode}
+% \end{macro}
+% With the Handler macro in place, we evaluate the Attributes data
+% Type, thus parsing the Attributes.
+%    \begin{macrocode}
+    \ccEvalType{Attributes}%
+  \else
+%    \end{macrocode}
+% If the Container has no Attributes type defined, we check if the
+% Container instance has, in fact, Attributes
+%    \begin{macrocode}
+    \if!#2!\else
+%    \end{macrocode}
+% If so, we issue a warning since we cannot know how to deal with the
+% Attributes.
+%    \begin{macrocode}
+      \ccPackageWarning{Kernel}{Attribute}
+        {Container instance on line \inputlineno\space has Attributes,^^Jbut Container `#1' provides no Attribute handlers!}
+    \fi
+  \fi
+}
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\ccGetAttribute} returns the value of an attribute.
-%   \DescribeArg{1}{is the attribute domain}
-%   \DescribeArg{2}{is the attribute name}
+%   \begin{ArgList}
+%   \item[1] is the attribute domain
+%   \item[2] is the attribute name
+%   \end{ArgList}
 %    \begin{macrocode}
 \def\ccGetAttribute#1#2{\csuse{cc@#1@attr@#2}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccIfAttr} can be used to call macros depending on
 %   whether an attribute is set, or not.
-%   \DescribeArg{1}{is the attribute domain}
-%   \DescribeArg{2}{is the attribute name}
-%   \DescribeArg{3}{is the \texttt{then} case}
-%   \DescribeArg{4}{is the \texttt{else} case}
+%   \begin{ArgList}
+%   \item[1] is the attribute domain
+%   \item[2] is the attribute name
+%   \item[3] is the \texttt{then} case
+%   \item[4] is the \texttt{else} case
+%   \end{ArgList}
 %    \begin{macrocode}
 \def\ccIfAttr#1#2#3#4{\ifcsdef{cc@#1@attr@#2}{#3}{#4}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccWhenAttr} is a variant of \lstinline{\ccIfAttr}
 %   that omits the \textit{else} branch.
-%   \DescribeArg{1}{is the attribute domain}
-%   \DescribeArg{2}{is the attribute name}
-%   \DescribeArg{3}{is the \texttt{then} case}
+%   \begin{ArgList}
+%   \item[1] is the attribute domain
+%   \item[2] is the attribute name
+%   \item[3] is the \texttt{then} case
+%   \end{ArgList}
 %    \begin{macrocode}
 \def\ccWhenAttr#1#2#3{\ifcsdef{cc@#1@attr@#2}{#3}{}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccUnlessAttr} is a variant of \lstinline{\ccIfAttr}
 %   that omits the \textit{then} branch.
-%   \DescribeArg{1}{is the attribute domain}
-%   \DescribeArg{2}{is the attribute name}
-%   \DescribeArg{3}{is the \texttt{else} case}
+%   \begin{ArgList}
+%   \item[1] is the attribute domain
+%   \item[2] is the attribute name
+%   \item[3] is the \texttt{else} case
+%   \end{ArgList}
 %    \begin{macrocode}
 \def\ccUnlessAttr#1#2#3{\ifcsdef{cc@#1@attr@#2}{}{#3}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccIfAttrIsStr} can be used to call macros depending if
 %   an attribute is set to the current (sub)container or group and what value it has.
-%   \DescribeArg{1}{is the attribute domain}
-%   \DescribeArg{2}{is the attribute name}
-%   \DescribeArg{3}{is the comparing value}
-%   \DescribeArg{4}{is the \texttt{then} case}
-%   \DescribeArg{5}{is the \texttt{else} case}
+%   \begin{ArgList}
+%   \item[1] is the attribute domain
+%   \item[2] is the attribute name
+%   \item[3] is the comparing value
+%   \item[4] is the \texttt{then} case
+%   \item[5] is the \texttt{else} case
+%   \end{ArgList}
 %    \begin{macrocode}
 \def\ccIfAttrIsStr#1#2#3#4#5{\ccIfAttr{#1}{#2}{\ifcsstring{cc@#1@attr@#2}{#3}{#4}{#5}}{#5}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccIfAttrIsSet} can be used to check if a value-less
 %   attribute has been set (i.e., it expands to \lstinline{\@empty}).
-%   \DescribeArg{1}{is the attribute domain}
-%   \DescribeArg{2}{is the attribute name}
-%   \DescribeArg{3}{is the \texttt{then} case}
-%   \DescribeArg{4}{is the \texttt{else} case}
+%   \begin{ArgList}
+%   \item[1] is the attribute domain
+%   \item[2] is the attribute name
+%   \item[3] is the \texttt{then} case
+%   \item[4] is the \texttt{else} case
+%   \end{ArgList}
 %    \begin{macrocode}
 \def\ccIfAttrIsSet#1#2#3#4{\ccIfAttr{#1}{#2}{\expandafter\ifx\csname cc@#1@attr@#2\endcsname\@empty#3\else#4\fi}{#4}}
 %    \end{macrocode}
@@ -1386,8 +1543,10 @@
 %   is a user-level macro to expand and “activate” a Style Class'
 %   Properties, those of its recursive ancestor Style Classes, and the
 %   default Style Class respecting the current Container.
-%   \DescribeArg{1}{is the Style Class name}
-%   \DescribeArg{2}{is the Container name}
+%   \begin{ArgList}
+%   \item[1] is the Style Class name
+%   \item[2] is the Container name
+%   \end{ArgList}
 %    \begin{macrocode}
 \def\ccUseStyleClass#1#2{%
   \expandafter\ifx\csname cc@#2@class@#1\endcsname\relax
@@ -1402,6 +1561,10 @@
   \csname cc@#2@class@#1\endcsname}
 %    \end{macrocode}
 % \end{macro}
+%
+%
+% \subsection{The {\CoCoTeX} Logo}
+%
 % \begin{macro}{\CoCoTeX} the {\CoCoTeX} Logo.
 %    \begin{macrocode}
 \DeclareRobustCommand\CoCoTeX{\texorpdfstring{{C\kern-.1em o\kern-.033emC\kern-.1em o}\kern-.133em\TeX}{CoCoTeX}}

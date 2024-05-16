@@ -111,6 +111,16 @@
 \def\cc@str@figure{figure}
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{\cc@str@top} is a CS token that holds the string ``top'' for comparisons.
+%    \begin{macrocode}
+\def\cc@str@top{top}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\cc@str@bottom} is a CS token that holds the string ``bottom'' for comparisons.
+%    \begin{macrocode}
+\def\cc@str@bottom{bottom}
+%    \end{macrocode}
+% \end{macro}
 %
 %
 % \subsubsection{Box Registers}
@@ -407,11 +417,13 @@
 %
 % \begin{macro}{\cc@init@l@} is a low-level macro used to dynamically
 %   define \lstinline{\cc@l@<level>} macros.
-%   \DescribeArg*{1}{is an override for counters that have to be restored}
-%   \DescribeArg{2}{is the list file ending (raw entries being stored in a file
-%     \texttt{\string\jobname.\#2})}
-%   \DescribeArg{3}{is a number that indicated the nesting depth}
-%   \DescribeArg{4}{is the nested level's unique name.}
+% \begin{ArgList}
+%   \item*[1] is an override for counters that have to be restored
+%   \item[2] is the list file ending (raw entries being stored in a file
+%     \lstinline{\jobname.\#2})
+%   \item[3] is a number that indicated the nesting depth
+%   \item[4] is the nested level's unique name.
+% \end{ArgList}
 %    \begin{macrocode}
 \def\cc@init@l@{\cc@opt@empty\@cc@init@l@}%
 \def\@cc@init@l@[#1]#2#3#4{%
@@ -448,10 +460,12 @@
 % \end{macro}
 % \begin{macro}{\ccContentsline} is our version of \LaTeX's
 %   \lstinline{\contentsline}.
-%   \DescribeArg{1}{is the name of the list counter}
-%   \DescribeArg{2}{is the name of the list entry}
-%   \DescribeArg{3}{is the page number}
-%   \DescribeArg{4}{is the hyperref destination}
+%   \begin{ArgList}
+%   \item[1] is the name of the list counter
+%   \item[2] is the name of the list entry
+%   \item[3] is the page number
+%   \item[4] is the hyperref destination
+%   \end{ArgList}
 %    \begin{macrocode}
 \long\def\ccContentsline#1#2#3#4{\gdef\@contentsline@destination{#4}%
   \csname cc@l@#1\endcsname{#2}{#3}}
@@ -460,10 +474,12 @@
 % \begin{macro}{\cc@extract@generic} is a fallback extractor for a
 %   list entry. It is used when the list handler does not provide a
 %   case-specific extractor for the entries.
-%   \DescribeArg{1}{is the name of the list counter}
-%   \DescribeArg{2}{is the name of the list entry}
-%   \DescribeArg{3}{is the page number}
-%   \DescribeArg{4}{is the hyperref destination}
+%   \begin{ArgList}
+%   \item[1] is the name of the list counter
+%   \item[2] is the name of the list entry
+%   \item[3] is the page number
+%   \item[4] is the hyperref destination
+%   \end{ArgList}
 %    \begin{macrocode}
 \def\cc@extract@generic#1#2#3#4{}
 %    \end{macrocode}
@@ -477,10 +493,12 @@
 % \begin{macro}{\cc@expand@l@contents}
 %   expands the content of the \lstinline{cc@l@<level>} macro and contains some code
 %   to catch and handle standard \LaTeX\ headings.
-%   \DescribeArg{1}{is the content of the \texttt{cc@l@}-macro}
-%   \DescribeArg{2}{is the name of the handling Container}
-%   \DescribeArg{3}{is the Component prefix}
-%   \DescribeArg{4}{is the name of the Content component}
+%   \begin{ArgList}
+%   \item[1] is the content of the \lstinline{cc@l@}-Macro
+%   \item[2] is the name of the handling Container
+%   \item[3] is the Component prefix
+%   \item[4] is the name of the Content component
+%   \end{ArgList}
 %    \begin{macrocode}
 \def\cc@expand@l@contents#1#2#3#4{%
   \global\let\cc@tempa\relax
@@ -501,9 +519,11 @@
 %
 % \begin{macro}{\ccDeclareContentList} provides an interface for
 %   additional content lists.
-%   \DescribeArg{1}{is the name of the custom content}
-%   \DescribeArg{2}{is a comma separated list of container names the instances of
-%     which should be listed in the custom contents list}
+%   \begin{ArgList}
+%   \item[1] is the name of the custom content
+%   \item[2] is a comma separated list of container names the
+%     instances of which should be listed in the custom contents list
+%   \end{ArgList}
 %    \begin{macrocode}
 \def\ccDeclareContentList#1#2{%
   \def\cc@add@extra@cl##1{%
@@ -521,11 +541,13 @@
 % \begin{macro}{\ccCreateContentListEntries} creates entries for
 %   Custom Content Lists. It is called during the proccessing of a
 %   container's instance.
-%   \DescribeArg{1}{is the name of the calling Container}
-%   \DescribeArg{2}{is the name of the file stream}
-%   \DescribeArg{3}{is the level of the entry}
-%   \DescribeArg{4}{is the current page counter}
-%   \DescribeArg{5}{is the current hyperref label}
+%   \begin{ArgList}
+%   \item[1] is the name of the calling Container
+%   \item[2] is the name of the file stream
+%   \item[3] is the level of the entry
+%   \item[4] is the current page counter
+%   \item[5] is the current hyperref label
+%   \end{ArgList}
 %    \begin{macrocode}
 \def\ccCreateContentListEntries#1#2#3#4#5{%
   \def\cc@add@extra@cl##1{%
@@ -580,9 +602,10 @@
 %   the Property hasn't been set from a previous {\LaTeX} run or a
 %   previous call to the \lstinline{\cc@store@latest} macro for the
 %   same Property and the same level, it is set to \InlineArg{2}.
-%
-%   \DescribeArg{1}{is the internal name of the property}
-%   \DescribeArg{2}{is the check value.}
+%   \begin{ArgList}
+%   \item[1] is the internal name of the property
+%   \item[2] is the check value.
+%   \end{ArgList}
 %    \begin{macrocode}
 \def\cc@store@latest#1#2{%
   \expandafter\ifx\csname cc-\cc@cur@cont-#1\endcsname\relax
@@ -626,9 +649,12 @@
 %
 % \begin{macro}{\cc@format@number}
 %   calculates number widths and prepares macros to be used by the
-%   user. \DescribeArg{1}{is the internal Property prefix}
-%   \DescribeArg{2}{is the user-level Component prefix}
-%   \DescribeArg{3}{is the numerical list level.}
+%   user.
+%   \begin{ArgList}
+%   \item[1] is the internal Property prefix
+%   \item[2] is the user-level Component prefix
+%   \item[3] is the numerical list level.
+%   \end{ArgList}
 %    \begin{macrocode}
 \def\cc@format@number#1#2#3{%
   \ccSetPropertyVal{#1curr-number-level}{#3}%
@@ -670,7 +696,10 @@
 % \end{macro}
 %
 % \begin{macro}{\cc@set@hang} determines and sets the hanging indent
-%   of a counter. \DescribeArg{1}{is the internal Property prefix}
+%   of a counter.
+%   \begin{ArgList}
+%   \item[1] is the internal Property prefix
+%   \end{ArgList}
 %    \begin{macrocode}
 \def\cc@set@hang#1{%
 %    \end{macrocode}
@@ -707,8 +736,10 @@
 %   level. ``Next-higher'' meaning ``hierarchically'', i.e., the level
 %   counter is \textit{lower}. Remember that for hang indent, the
 %   indent is negative, so \lstinline{margin-left} grows larger.
-%   \DescribeArg{1}{is the Property prefix}
-%   \DescribeArg{2}{is the current numerical list level.}
+%   \begin{ArgList}
+%   \item[1] is the Property prefix
+%   \item[2] is the current numerical list level.
+%   \end{ArgList}
 %    \begin{macrocode}
 \def\cc@calc@margin@left#1#2{%
   \@tempcnta\numexpr#2-\@ne\relax
@@ -724,14 +755,14 @@
 % \begin{macro}{\cc@get@indent}
 %   Eventually, write the actually used values for margin-left and
 %   indent into the current container's Property list.
-%
-%   \DescribeArg{1}{is the CS token of a method that is called to calculate the
-%     actual left margin of the list item. It defaults to above's
-%     \texttt{\string\cc@calc@margin@left} and is fed the two mandatory
-%     arguments of the \texttt{\string\cc@get@indent} macro, namely}
-%   \DescribeArg{2}{for the internal property prefix, and}
-%   \DescribeArg{3}{for the numerical list level.}
-%
+%   \begin{ArgList}
+%   \item[1] is the CS token of a method that is called to calculate
+%     the actual left margin of the list item. It defaults to above's
+%     \lstinline{\cc@calc@margin@left} and is fed the two mandatory
+%     arguments of the \lstinline{\cc@get@indent} macro, namely
+%   \item[2] for the internal property prefix, and
+%   \item[3] for the numerical list level.
+%   \end{ArgList}
 %   The callback method should set and store the
 %   \lstinline{#2margin-left} Property.
 %    \begin{macrocode}
@@ -864,8 +895,9 @@
 %
 % \begin{macro}{\ccCreateLabel} is a high level macro to generate
 %   hyperref anchors and/or ref targets.
-%   \DescribeArg{1}{is the type of anchor}
-%
+%   \begin{ArgList}
+%   \item[1] is the type of anchor
+%   \end{ArgList}
 %   This macro looks for both the label attribute in the begin
 %   of a Container's environment, as well as for a
 %   \lstinline{RefLabel} Components inside the environment. If both
@@ -892,7 +924,9 @@
 % \begin{macro}{\cc@create@label} generates the actual anchor for
 %   document-internal cross-references (i.e.,
 %   a~\LaTeX\space\lstinline{\label}).
-%   \DescribeArg{1}{is the label ID}
+%   \begin{ArgList}
+%   \item[1] is the label ID
+%   \end{ArgList}
 %    \begin{macrocode}
 \def\cc@create@label#1{%
   \ccIfComp{Number}
@@ -919,10 +953,11 @@
 %
 % \begin{macro}{\ccSetBabelLabel} defined a language-dependent string
 %   macro for German and English varieties.
-%
-%   \DescribeArg{1}{is the language}
-%   \DescribeArg{2}{is the internal reference name}
-%   \DescribeArg{3}{is the language specific label}
+%   \begin{ArgList}
+%   \item[1] is the language
+%   \item[2] is the internal reference name
+%   \item[3] is the language specific label
+%   \end{ArgList}
 %    \begin{macrocode}
 \def\ccSetBabelLabel#1#2#3{%
   \def\ccc@lang{#1}%

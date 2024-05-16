@@ -93,23 +93,39 @@
 \def\UsageComponent#1{\textcolor{compcolor}{\texttt{#1}}\index[components]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{usage}}}
 
 \newdimen\arg@list@indent \arg@list@indent=2.5em\relax
+\newenvironment{ArgList}{%
+  \ifhmode\par\vskip\parskip\fi
+  \begingroup
+    \@tempcnta\z@
+    \leftskip\arg@list@indent
+    \parskip\z@
+    \def\item{\@ifstar{\let\is@opt\relax\@describe@arg}{\@describe@arg}}%
+}{\par\endgroup}
+
 \def\DescribeArg{\@ifstar{\let\is@opt\relax\describe@arg}{\describe@arg}}
 \def\describe@arg#1#2{%
-  \ifhmode\par\vskip\parskip\fi
+  \ifhmode\par\fi
   \begingroup
     \leftskip\arg@list@indent
     \parskip\z@
     \leavevmode
-    \hskip-\arg@list@indent
-    \hb@xt@\arg@list@indent{%
-      \color{spot}%
-      \ttfamily
-      \footnotesize
-      \ifx\is@opt\relax[\##1]\else\{\##1\}\fi\hss}%
-    #2\par%
+    \@describe@arg[#1]%
+    \ignorespaces#2\par%
   \endgroup
-  \let\is@opt\@undefined}
-\def\InlineArg{\@ifstar{\let\is@opt\relax}{}\inline@arg}
+}
+\def\@describe@arg{\@ifnextchar[{\@describe@@rg}{\advance\@tempcnta\@ne\@describe@@rg[\the\@tempcnta]}}%]
+\def\@describe@@rg[#1]{%
+  \ifhmode\par\fi
+  \hskip-\arg@list@indent
+  \hb@xt@\arg@list@indent{%
+    \color{spot}%
+    \ttfamily
+    \footnotesize
+    \ifx\is@opt\relax[\##1]\else\{\##1\}\fi\hss}%
+  \let\is@opt\@undefined
+  \ignorespaces}
+
+\def\InlineArg{\@ifstar{\let\is@opt\relax\inline@arg}{\inline@arg}}
 \def\inline@arg#1{\begingroup
     \color{spot}\ttfamily\footnotesize
     \ifx\is@opt\relax[\##1]\else\{\##1\}\fi
@@ -207,23 +223,8 @@
 \marginparwidth=0mm
 \emergencystretch=2em
 \marginparsep10mm
-\RequirePackage{framed}
-\FrameRule.5bp
-\FrameSep2mm
+
 \newskip\@leftskip \@leftskip\z@skip
-\def\endMakeFramed{%
-  \par
-  \rightskip\z@
-  \kern-1.33\baselineskip
-  \hrule\@width\hsize\@height\z@\@depth\z@
-  \penalty-100 %put depth into height
-  \null\hfill
-  \egroup
-  \begingroup
-    \fb@put@frame\FrameCommand\FirstFrameCommand
-  \endgroup
-  \vskip-0.67\baselineskip
-}
 
 \def\addvspace@#1{%
   \ifdim \lastskip =\z@
@@ -232,20 +233,6 @@
   \@tempskipb#1\relax
     \@xaddvskip
   \fi}
-
-\renewenvironment{shaded}[1][]{%
-  \def\argi{#1}%
-  %\addvspace@\baselineskip
-  \vskip1.2\baselineskip\vspace*{-1.2\baselineskip}%für Bündigkeit am Seitenanfang
-  \advance\hsize-2\FrameSep\linewidth\hsize
-  \def\FrameCommand{\fboxsep=\FrameSep\hspace*{2\FrameSep}\colorbox{shadecolor}}%
-  \MakeFramed{\vrule\@width\z@\@height5.98mm\@depth\z@\FrameRestore}%
-  \par
-  \vskip-9mm
-  \ifx\argi\@empty\else\leftskip10mm\fi
-  \@leftskip\leftskip
-  \ignorespaces}%
-{\endMakeFramed}
 
 \let\mybfseries\bfseries
 \let\sbseries\mybfseries
@@ -785,7 +772,7 @@
 % Whenever a Property is declared, the documentation contains a list
 % of expected values for that property. The following list gives an
 % overview over the various expected data types:
-% \begin{description}
+% \begin{description}[7em]
 % \item[\texttt{<dimen>}] means that the Property is expected to
 %   return a dimensional value (or ``length'') or a dimension
 %   register.
