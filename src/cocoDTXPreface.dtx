@@ -12,8 +12,8 @@
 \usepackage[hyperref]{doc}
 \AddToHook{begindocument}{%
   \hypersetup{%
-    colorlinks=true
-   ,allcolors=link
+    colorlinks=false
+   ,hidelinks
    ,pdfborder={0 0 0}
  }%
 \usepackage{bookmark}%
@@ -41,13 +41,15 @@
 \definecolor{link}{cmyk}{0.00,0.00,0.00,1.00}
 \definecolor{spot}{cmyk}{0.00,0.82,0.59,0.18}
 \definecolor{contcolor}{cmyk}{0.00,0.00,1.00,0.20}
-\definecolor{compcolor}{cmyk}{1.00,1.00,0.00,0.10}
+\definecolor{compcolor}{cmyk}{1.00,1.00,0.00,0.00}
 \definecolor{hookcolor}{cmyk}{1.00,0.00,1.00,0.00}
-\definecolor{propcolor}{cmyk}{0.00,1.00,0.00,0.00}
+\definecolor{propcolor}{cmyk}{0.09,0.90,0.00,0.15}
 \definecolor{tagscolor}{cmyk}{1.00,0.00,0.00,0.20}
+\definecolor{attrcolor}{cmyk}{0.70,0.00,0.23,0.28}
 \usepackage{listings}
 \makeatletter
 \PageIndex
+\newdimen\LeftMarg \LeftMarg=2.5em\relax
 \def\macro{\begingroup
    \catcode`\\12
    \let\is@m@cro@\relax
@@ -55,6 +57,7 @@
 \long\def\m@cro@#1{\endgroup \topsep\MacroTopsep%
   \edef\saved@macroname{\string#1}%
   \let\saved@indexname\saved@macroname
+  \ifhmode\par\fi
   \ifx\is@m@cro@\relax
     \submacrosection{\string#1}\ignorespaces
   \else
@@ -66,62 +69,62 @@
     \SpecialMainIndex{#1}\nobreak
   \endgroup
   \@esphack
+  \ignorespaces
 }
-\let\endmacro\relax
+\def\endmacro{\relax}
+\def\PrintMacroName#1{{\small\ttfamily\mybfseries\protect\textcolor{spot!75}{\string#1}}}
 
 \def\DescriptionDomain#1{\def\description@domain{#1}}
 \DescriptionDomain{Generic}
+
+\def\Component{\@ifnextchar[{\@component}{\@component[]}}%]
+\def\@component[#1]#2{%
+  \let\@argi\@empty
+  \if!#1!\else
+    \def\@argii{ (#1)}%
+  \fi
+  \componentsection{#2#1}%
+  \index[components]{#2\actualchar\string\verb\quotechar*\verbatimchar\string#2\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{main}}%
+  \ignorespaces
+  }%
+\let\endComponent\relax
 
 \def\@print@component#1#2{%
   \let\@argii\@empty
   \if!#2!\else
     \def\@argii{ (#2)}%
   \fi
-  \componentsection{#1\@argii}%
-  \index[components]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{main}}%
-}%
+  {\small\ttfamily\mybfseries\color{compcolor!75}#1\@argii}}%
+
 
 \def\DescribeComponent#1{\@print@component{#1}{}}
-\def\DescribeLabeledComp#1{\@print@component{#1}{Labeled Component}}
-\def\DescribeCountedComp#1{\@print@component{#1}{Counted Component}}
-\def\DescribeGroupComp#1{\@print@component{#1}{Group Component}}
-\def\DescribeCollectionComp#1{\@print@component{#1}{Collection Component}}
-\def\DescribeOverrideComp#1{\@print@component{#1}{Override}}
+\def\DescribeLabeledComp#1{\@print@component{#1}{LC}}
+\def\DescribeCountedComp#1{\@print@component{#1}{CC}}
+\def\DescribeGroupComp#1{\@print@component{#1}{GC}}
+\def\DescribeCollectionComp#1{\@print@component{#1}{CL}}
+\def\DescribeOverrideComp#1{\@print@component{#1}{OR}}
 \def\AlsoOverride#1{\index[components]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{main}}}
 
 \def\UsageMacro#1{\PrintMacroName{#1}\SpecialMacroIndex{#1}}
 \def\UsageComponent#1{\textcolor{compcolor}{\texttt{#1}}\index[components]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{usage}}}
 
-\newdimen\arg@list@indent \arg@list@indent=2.5em\relax
 \newenvironment{ArgList}{%
   \ifhmode\par\vskip\parskip\fi
   \begingroup
     \@tempcnta\z@
-    \leftskip\arg@list@indent
+    \leftskip\LeftMarg
     \parskip\z@
-    \def\item{\@ifstar{\let\is@opt\relax\@describe@arg}{\@describe@arg}}%
+    \def\item{\@ifstar{\let\is@opt\relax\describe@arg}{\describe@arg}}%
 }{\par\endgroup}
-
-\def\DescribeArg{\@ifstar{\let\is@opt\relax\describe@arg}{\describe@arg}}
-\def\describe@arg#1#2{%
+\def\describe@arg{\@ifnextchar[{\@describe@arg}{\advance\@tempcnta\@ne\@describe@arg[\the\@tempcnta]}}%]
+\def\@describe@arg[#1]{%
   \ifhmode\par\fi
-  \begingroup
-    \leftskip\arg@list@indent
-    \parskip\z@
-    \leavevmode
-    \@describe@arg[#1]%
-    \ignorespaces#2\par%
-  \endgroup
-}
-\def\@describe@arg{\@ifnextchar[{\@describe@@rg}{\advance\@tempcnta\@ne\@describe@@rg[\the\@tempcnta]}}%]
-\def\@describe@@rg[#1]{%
-  \ifhmode\par\fi
-  \hskip-\arg@list@indent
-  \hb@xt@\arg@list@indent{%
+  \hskip-\LeftMarg
+  \hb@xt@\LeftMarg{%
     \color{spot}%
     \ttfamily
     \footnotesize
-    \ifx\is@opt\relax[\##1]\else\{\##1\}\fi\hss}%
+    \ifx\is@opt\relax[\##1]\else\{\##1\}\fi\enskip\hss}%
   \let\is@opt\@undefined
   \ignorespaces}
 
@@ -138,13 +141,29 @@
 }
 \def\UsageContainer#1{\textcolor{contcolor}{\texttt{#1}}\index[containers]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\noexpand\doc@handleencap{usage}}}
 
-\def\DescribeProp#1#2{% #1 is the name, #2 is the data type
+\def\PrintProperty#1{{\small\ttfamily\mybfseries\color{propcolor!75}#1}}
+\def\Property#1#2{% #1 is the name, #2 is the data type
   \propertysection{#1}{\ttfamily\footnotesize\mybfseries #2}\enskip%
+  \@bsphack
   \index[properties]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{main}}%
+  \@esphack\ignorespaces
 }
+\let\endProperty\relax
+
+
+\def\PrintAttribute#1{{\small\ttfamily\mybfseries\color{attrcolor!75}#1}}
+\def\Attribute#1#2{%
+  \attrsection{#1}{\ttfamily\footnotesize\mybfseries #2}\enskip%
+  \@bsphack
+  \index[attributes]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{main}}%
+  \@esphack
+  \ignorespaces
+  }
+\let\endAttribute\relax
+
 \def\DescribeProperty#1{\index[properties]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{main}}}
 \def\UsageProperty#1{\index[properties]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{usage}}}
-\def\UsageProp#1{\textcolor{propcolor}{\texttt{#1}}\UsageProperty{#1}}
+\def\UsageProp#1{\PrintProperty{#1}\UsageProperty{#1}}
 
 \def\DescribeTagS#1{\textcolor{tagscolor}{\texttt{<#1>}}\index[tags]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\noexpand\doc@handleencap{usage}}}
 \def\DescribeTagE#1{\textcolor{tagscolor}{\texttt{</#1>}}\index[tags]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\noexpand\doc@handleencap{usage}}}
@@ -161,6 +180,7 @@
   firstnumber=last,
   inputencoding=utf8,
   language=[AlLaTeX]TeX,
+  xleftmargin=\leftskip,
   % basicstyle=\fontfamily{lmvtt}\selectfont\small,
   columns=fullflexible,
   numbers=left,
@@ -206,7 +226,7 @@
 
 
 \renewcommand\frontmatter{%
-    \cleardoublepage
+  \clearpage
   \@mainmatterfalse
   \def\thesection{\@arabic\the\c@section}
   \pagenumbering{roman}}
@@ -218,11 +238,13 @@
 \headsep\dimexpr16mm-\headheight\relax
 \textwidth=160mm
 \textheight=56\baselineskip
-\evensidemargin=25mm
 \oddsidemargin=25mm
-\marginparwidth=0mm
+\evensidemargin=25mm
 \emergencystretch=2em
-\marginparsep10mm
+
+\marginparwidth=40mm
+\marginparsep=5mm
+\marginparpush=\z@
 
 \newskip\@leftskip \@leftskip\z@skip
 
@@ -320,7 +342,8 @@
 \newdimen\pageskip \pageskip3em\relax
 \def\cleardoublepage{\clearpage\if@twoside \ifodd\c@page\else
     \hbox{}\thispagestyle{empty}\newpage\if@twocolumn\hbox{}\newpage\fi\fi\fi}
-\def\thechapter{Modul~\@arabic\c@chapter}
+\def\thechapter{Module~\@arabic\c@chapter}
+\def\@chaptermark{}%
 \def\ps@headings{%
   \let\@oddfoot\@empty\let\@evenfoot\@empty
   \def\@evenhead{\hskip-\pageskip\hbox to \pageskip{\hfill\bfseries\color{spot}\thepage\enskip}\htbar\enskip{\sffamily\leftmark}\hfil}%
@@ -338,32 +361,6 @@
 }
 
 \pagestyle{headings}
-\def\partname{Part}
-\renewcommand\part{%
-  \cleardoublepage
-  \@tempswafalse
-  \thispagestyle{empty}%
-  \null\vskip10\baselineskip
-  \secdef\@part\@spart}
-\def\@part[#1]#2{%
-    \ifnum \c@secnumdepth >-2\relax
-      \refstepcounter{part}%
-      \addcontentsline{toc}{part}{\partname~\thepart:\enskip#1}%
-    \else
-      \addcontentsline{toc}{part}{#1}%
-    \fi
-    \markboth{}{}%
-    {\interlinepenalty \@M
-     \sffamily
-     \color{spot}%
-     \ifnum \c@secnumdepth >-2\relax
-       \huge\bfseries \partname\nobreakspace\thepart
-       \par
-       \vskip 20\p@
-     \fi
-     \Huge \bfseries #2\par}%
-    \@endpart}
-
 \def\@chapter[#1]#2{%
   \thispagestyle{chapfirst}%
   \setcounter{lstnumber}{24}%
@@ -417,7 +414,7 @@
   \ifnum \c@tocdepth >\m@ne
     \addpenalty{-\@highpenalty}%
     \vskip 1.0em \@plus\p@
-    \setlength\@tempdima{6em}%
+    \setlength\@tempdima{7em}%
     \begingroup
       \parindent \z@ \rightskip \@pnumwidth
       \parfillskip -\@pnumwidth
@@ -425,6 +422,7 @@
       \advance\leftskip\@tempdima
       \hskip -\leftskip
       \large
+      \color{spot!75}%
       #1\nobreak\hfil
       \nobreak\hb@xt@\@pnumwidth{\hss #2%
                                  \kern-\p@\kern\p@}\par
@@ -485,7 +483,6 @@
   {0.5\baselineskip}%
   {-.5em}%
   {\small\ttfamily\mybfseries\color{spot!50}}*}
-
 \newcommand\propertysection{\@startsection{propsec}{99}{\z@}%
   {1sp}%
   {-.5em}%
@@ -502,6 +499,10 @@
   {0.5\baselineskip}%
   {-.5em}%
   {\small\ttfamily\mybfseries\color{hookcolor!75}}*}
+\newcommand\attrsection{\@startsection{attrsec}{99}{\z@}%
+  {0.5\baselineskip}%
+  {-.5em}%
+  {\small\ttfamily\mybfseries\color{attrcolor!75}}*}
 
 \lstdefinestyle{macrocode}{language=[AlLaTeX]TeX,
   keepspaces=false,                   % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
@@ -531,6 +532,7 @@
 \patchcmd{\lsthk@TextStyle}{\let\lst@DefEsc\@empty}{}{}{\errmessage{failed to patch}}
 \global\let\lst@doendpe\@empty
 \usepackage{multicol}
+\renewcommand\@dotsep{1}
 \renewcommand\tableofcontents{%
   \bgroup
     \let\noclearpage\relax
@@ -575,6 +577,7 @@
 \makeindex[name=components]
 \makeindex[name=hooks]
 \makeindex[name=tags]
+\makeindex[name=attributes]
 
 \long\def\PrintIndex{%
   \let\theindex\HDorg@theindex% otherwise all index sections get bookmarked as "Index..."
@@ -623,6 +626,12 @@
     \addcontentsline{toc}{section}{Tag Index}%
     \markboth{Index -- Tags}{Index -- Tags}}%
   \@input@{\jobname-tags.ind}%
+  \clearpage
+  \IndexPrologue{\gdef\indexcolor{attrcolor!75}%
+    \section*{\color{\indexcolor}Attribute Index}%
+    \addcontentsline{toc}{section}{Attribute Index}%
+    \markboth{Index -- Attributes}{Index -- Attributes}}%
+  \@input@{\jobname-attributes.ind}%
   \global\let\PrintIndex\@empty
 }
 
@@ -673,8 +682,7 @@
 % \chapter{Introduction}
 %
 %
-% \section{Basic concepts}
-%
+% \begin{multicols}{2}[\section{Basic concepts}]
 % The core concept of the {\CoCoTeX} Framework to view typographical
 % objects, such as floats, headings, title pages, etc., as closed
 % units that contain a fixed set of elements that determines the exact
@@ -700,9 +708,10 @@
 % first -- process later} approach, i.e., the LaTeX interpreter reads
 % the whole content of the environment and the processing is done at
 % the \lstinline{\end} macro of the corresponding environment.
+% \end{multicols}
 %
-% \subsection{Types, Inheritance and Abstract Containers}
 %
+% \begin{multicols}{2}[\subsection{Types, Inheritance and Abstract Containers}]
 % Components and Properties are both \textit{(data-)Types} specific to
 % an Container. A Container can be abstract, meaning that the
 % container is not directly used in an end-user's tex file, but serves
@@ -722,9 +731,10 @@
 % Property holds only a simple value, while another Property may
 % contain a complex set of instructions or even calls to other
 % Properties.
+% \end{multicols}
 %
-% \subsection{Complex Components}
 %
+% \begin{multicols}{2}[\subsection{Complex Components}]
 % Components can also be more complex than simple data storage
 % devices. Usually, a Component occurs only once in a Container, say,
 % for instance there can be only one (main) title in each heading.
@@ -742,6 +752,7 @@
 % Component}, in which all instances of a Group Component are
 % collected during processing. How this collection is put together is
 % controlled by a special \textit{Collection Property}.
+% \end{multicols}
 %
 % \section{How to Read This Documentation}
 %
@@ -755,17 +766,20 @@
 % \begin{lstlisting}[lastline=1,style=example,gobble=2]
 % This is a {\LaTeX} example.
 % \end{lstlisting}
+%
 % \subsection{Keyword Colors}
 %
-% Certain Parts of this documentation are color-coded:
+% \begin{multicols}{2}[Certain Parts of this documentation are color-coded:]
 % \begin{description}
 % \item[\textcolor{contcolor!75}{Containers}] are \textcolor{contcolor!75}{orange},
 % \item[\textcolor{hookcolor!75}{Hooks}] are \textcolor{hookcolor!75}{green},
 % \item[\textcolor{compcolor!75}{Components}] are \textcolor{compcolor!75}{blue},
-% \item[\textcolor{propcolor!75}{Properties}] are \textcolor{propcolor!75}{magenta},
+% \item[\textcolor{propcolor!75}{Properties}] are \textcolor{propcolor!75}{purple},
 % \item[\textcolor{tagscolor!75}{PDF-Tags}] are \textcolor{tagscolor!75}{cyan}
-% \item[\textcolor{spot!75}{\LaTeX-Macros}] are \textcolor{spot!75}{le-tex red}
+% \item[\textcolor{attrcolor!75}{Attributes}] are \textcolor{attrcolor!75}{dark green}
+% \item[\textcolor{spot!75}{\LaTeX-Macros}] are \textcolor{spot!75}{red}
 % \end{description}
+% \end{multicols}
 %
 % \subsection{Data Types of Properties}
 %
@@ -790,6 +804,17 @@
 % \item[<name>] means that the name of a specific Component, Property
 %   or Container is expected. Details are usually in the description.
 % \item[\texttt{<any>}] means that the Property can take any value.
+% \end{description}
+%
+%
+% \subsection{Types of Components}
+%
+% \begin{description}[7em]
+% \item[LC] means that the Component is a Labeled Component
+% \item[CC] means that the Component is a Counted Component
+% \item[GC] means that the Component is a Group Component
+% \item[CL] means that the Component is a Collection Component
+% \item[OR] means that the Component is an Override
 % \end{description}
 %
 % \mainmatter

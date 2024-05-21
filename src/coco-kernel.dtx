@@ -240,6 +240,9 @@
       \csgdef{end\ccPrefix ##1}{##3}\global\let\cc@cur@cont\reserved@cont}%
 %    \end{macrocode}
 % \end{macro}
+% The body of the Container is expanded outside the local group. That
+% way the user can define the Container globally using the locally
+% defined macros above.
 %    \begin{macrocode}
     \def\x{%
       #2%
@@ -361,7 +364,7 @@
 % processing at the end of the Container, or even beyond.
 %
 % \begin{macro}{\ccDeclareComponent} defines a simple Component macro.
-%   The internal macro that is used to store the Component's value is\\
+%   The internal macro that is used to store the Component's value is
 %   \lstinline{\csname cc@<current Container name>@<#1>\endcsname}.
 %   \begin{ArgList}
 %   \item*[1] is the Component's identifier. If omitted,

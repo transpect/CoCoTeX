@@ -115,7 +115,7 @@
 %
 % Since CoCoTeX is mainly developed for automatic typesetting and
 % float positioning, we set rather high tolerances for macros from
-% \LaTeX's standard \section{.clo} files:
+% \LaTeX's standard \lstinline{.clo} files:
 %    \begin{macrocode}
 \def\topfraction{0.9}
 \def\textfraction{0.1}
@@ -365,41 +365,53 @@
 %    \begin{macrocode}
     \def\cc@counted@comp@scheme##1{##1-\the\ccSubFloatCnt}%
 %    \end{macrocode}
-% \DescribeComponent{Content} is the main content holder of a float.
+% \begin{Component}{Content} is the main content holder of a float.
 %    \begin{macrocode}
     \ccfMakeComp{Content}%
 %    \end{macrocode}
-% \DescribeComponent{Caption} is the main caption of a float.
-% \DescribeComponent{ListofCaption} (O) is the corresponding list-of-entry
+% \end{Component}
+% \begin{Component}{Caption} is the main caption of a float.
+% \end{Component}
+% \begin{Component}[OR]{ListofCaption} is the corresponding
+%   list-of-entry
 %    \begin{macrocode}
     \ccfMakeCompL{Caption}%
 %    \end{macrocode}
-% \DescribeComponent{Legend} is a legend to a float.
-% \DescribeComponent{ListofLegend} (O) is the corresponding list-of-entry
+% \end{Component}
+% \begin{Component}{Legend} is a legend to a float.
+% \end{Component}
+% \begin{Component}[OR]{ListofLegend} is the corresponding list-of-entry
 %    \begin{macrocode}
     \ccfMakeCompL{Legend}%
 %    \end{macrocode}
-% \DescribeComponent{Source} is the source of a float.
-% \DescribeComponent{ListofSource} (O) is the corresponding list-of-entry
+% \end{Component}
+% \begin{Component}{Source} is the source of a float.
+% \end{Component}
+% \begin{Component}[OR]{ListofSource} is the corresponding list-of-entry
 %    \begin{macrocode}
     \ccfMakeCompL{Source}%
 %    \end{macrocode}
-% \DescribeComponent{Number} is the counter of the float (including the label)
-% \DescribeComponent{ListofNumber} (O) is the corresponding list-of-entry
+% \end{Component}
+% \begin{Component}{Number} is the counter of the float (including the label)
+% \end{Component}
+% \begin{Component}[OR]{ListofNumber} is the corresponding list-of-entry
 %    \begin{macrocode}
     \ccfMakeCompL{Number}%
 %    \end{macrocode}
-% \DescribeComponent{RefLabel} is the float's ID used for
-% cross-references (replaces \LaTeX's \lstinline{\label} command)
+% \end{Component}
+% \begin{Component}{RefLabel} is the float's ID used for
+%   cross-references (replaces \LaTeX's \lstinline{\label} command)
 %    \begin{macrocode}
     \ccfMakeComp{RefLabel}%
 %    \end{macrocode}
-% \DescribeComponent{ListofEntry} (OC) is the Collection Component for the
-% entire Listof entry.
+% \end{Component}
+% \begin{Component}[CL]{ListofEntry} is the Collection Component for
+%   the entire Listof entry.
 %    \begin{macrocode}
     \ccfMakeComp{ListofEntry}%
   }%
 %    \end{macrocode}
+% \end{Component}
 %
 %
 % \subsection{Common Float Properties}
@@ -411,125 +423,150 @@
 %
 % \subsubsection{Placement and Spacing}
 %
-% \DescribeProp{intext-skip-top}{<skip>} vertical space between the text
-%   body and following non-floating floats
+% \begin{Property}{intext-skip-top}{<skip>} vertical space between the
+%   text body and following non-floating floats
 %    \begin{macrocode}
     \ccSetProperty{intext-skip-top}{\intextsep}%
 %    \end{macrocode}
-% \DescribeProp{intext-skip-bottom}{<skip>} vertical space between
+% \end{Property}
+% \begin{Property}{intext-skip-bottom}{<skip>} vertical space between
 %   non-floating floats and the following text body
 %    \begin{macrocode}
     \ccSetProperty{intext-skip-bottom}{\intextsep}%
 %    \end{macrocode}
-% \DescribeProp{float-skip-top}{<skip>} vertical space between text body
-%   and following floating floats
+% \end{Property}
+% \begin{Property}{float-skip-top}{<skip>} vertical space between text
+%   body and following floating floats
 %    \begin{macrocode}
     \ccSetProperty{float-skip-top}{\z@}%
 %    \end{macrocode}
-% \DescribeProp{float-skip-bottom}{<skip>} vertical space between floating
+% \end{Property}
+% \begin{Property}{float-skip-bottom}{<skip>} vertical space between floating
 %   floats and following text body
 %    \begin{macrocode}
     \ccSetProperty{float-skip-bottom}{\z@}%
 %    \end{macrocode}
-% \DescribeProp{sub-float-sep}{<skip>} horizontal space between sub-floats
+% \end{Property}
+% \begin{Property}{sub-float-sep}{<skip>} horizontal space between
+%   sub-floats
 %    \begin{macrocode}
     \ccSetProperty{sub-float-sep}{\ccf@sub@sep}%
 %    \end{macrocode}
-% \DescribeProp{margin-inner}{<skip>} inner margins of floats in twopage
-%   mode, i.\,e., left margin on odd pages and right margin on even
-%   pages, respectively.
+% \end{Property}
+% \begin{Property}{margin-inner}{<skip>} inner margins of floats in
+%   twopage mode, i.\,e., left margin on odd pages and right margin on
+%   even pages, respectively.
 %    \begin{macrocode}
     \ccSetProperty{margin-inner}{\z@}%
 %    \end{macrocode}
-% \DescribeProp{margin-outer}{<skip>} outer margin of floats in twopage
-% mode, i.\,e., right margin on odd pages and left margin on even
-% pages, respectively.
+% \end{Property}
+% \begin{Property}{margin-outer}{<skip>} outer margin of floats in
+%   twopage mode, i.\,e., right margin on odd pages and left margin on
+%   even pages, respectively.
 %    \begin{macrocode}
     \ccSetProperty{margin-outer}{\z@}%
 %    \end{macrocode}
-% \DescribeProp{margin-left}{<skip>} horizontal space between the left page
-%   area boundary and the float.
+% \end{Property}
+% \begin{Property}{margin-left}{<skip>} horizontal space between the
+%   left page area boundary and the float.
 %    \begin{macrocode}
     \ccSetProperty{margin-left}{\z@}%
 %    \end{macrocode}
-% \DescribeProp{margin-right}{<skip>} horizontal space between the right
-%   page area boundary and the float.
+% \end{Property}
+% \begin{Property}{margin-right}{<skip>} horizontal space between the
+%   right page area boundary and the float.
 %    \begin{macrocode}
     \ccSetProperty{margin-right}{\z@}%
 %    \end{macrocode}
-% \DescribeProp{before-float}{<any>} is the code that is executed before
-%   a float's content is evaluated.
+% \end{Property}
+% \begin{Property}{before-float}{<any>} is the code that is executed
+%   before a float's content is evaluated.
 %    \begin{macrocode}
     \ccSetProperty{before-float}{\parindent\z@}%
 %    \end{macrocode}
+% \end{Property}
 %
 %
 % \subsubsection{Properties for Float-Type Handlers}
 %
-% \DescribeProp{subfloat-content}{<any>} is the material that is put
-% into the \lstinline{\ccf@sub@box} for further processing.
+% \begin{Property}{subfloat-content}{<any>} is the material that is
+%   put into the \lstinline{\ccf@sub@box} for further processing.
 %    \begin{macrocode}
     \ccSetProperty{subfloat-content}{\ccUseComp{Content}}%
 %    \end{macrocode}
-% \DescribeProp{float-render}{<any>} the output routine for top-level
-%   float type specific contents
+% \end{Property}
+% \begin{Property}{float-render}{<any>} the output routine for
+%   top-level float type specific contents
 %    \begin{macrocode}
     \ccSetProperty{float-render}{\ccUseComp{Content}}%
 %    \end{macrocode}
-% \DescribeProp{subfloat-render}{<any>} the output routine for
+% \end{Property}
+% \begin{Property}{subfloat-render}{<any>} the output routine for
 %   second-level float type specific contents.
 %    \begin{macrocode}
     \ccSetProperty{subfloat-render}{\ccUseComp{Content}}%
 %    \end{macrocode}
+% \end{Property}
 %
 %
 % \subsubsection{Properties for Captions}
 %
-% \DescribeProp{caption-face}{<any>} style applied to both top and
-% bottom placed captions
+% \begin{Property}{caption-face}{<any>} style applied to both top and
+%   bottom placed captions
 %    \begin{macrocode}
     \ccSetProperty{caption-face}{}%
 %    \end{macrocode}
-% \DescribeProp{caption-face-top}{<any>} style applied to top placed
-%   captions only
+% \end{Property}
+% \begin{Property}{caption-face-top}{<any>} style applied to top
+%   placed captions only
 %    \begin{macrocode}
     \ccSetProperty{caption-face-top}{}%
 %    \end{macrocode}
-% \DescribeProp{caption-face-bottom}{<any>} style applied to bottom
+% \end{Property}
+% \begin{Property}{caption-face-bottom}{<any>} style applied to bottom
 %   placed captions only
 %    \begin{macrocode}
     \ccSetProperty{caption-face-bottom}{}%
 %    \end{macrocode}
-% \DescribeProp{source-face}{<any>} style applied to the printed
-% \lstinline{Source} Component.
+% \end{Property}
+% \begin{Property}{source-face}{<any>} style applied to the printed
+%   \lstinline{Source} Component.
 %    \begin{macrocode}
     \ccSetProperty{source-face}{}%
 %    \end{macrocode}
-% \DescribeProp{legend-face}{<any>} style applied to the printed
-% \lstinline{Legend} Component.
+% \end{Property}
+% \begin{Property}{legend-face}{<any>} style applied to the printed
+%   \lstinline{Legend} Component.
 %    \begin{macrocode}
     \ccSetProperty{legend-face}{}%
 %    \end{macrocode}
-% \DescribeProp{caption-sep-top}{<skip>} vertical space between top
-% caption and content, i.\,e., the skip \textit{after} the top placed
-% caption.
+% \end{Property}
+% \begin{Property}{caption-sep-top}{<skip>} vertical space between top
+%   caption and content, i.\,e., the skip \textit{after} the top
+%   placed caption.
 %    \begin{macrocode}
     \ccSetProperty{caption-sep-top}{\z@}%
 %    \end{macrocode}
-% \DescribeProp{caption-sep-top}{<skip>} vertical space between bottom
-% caption and content, i.e., the skip \textit{before} the bottom
-% placed caption.
+% \end{Property}
+% \begin{Property}{caption-sep-top}{<skip>} vertical space between
+%   bottom caption and content, i.e., the skip \textit{before} the
+%   bottom placed caption.
 %    \begin{macrocode}
     \ccSetProperty{caption-sep-bottom}{\z@}%
 %    \end{macrocode}
-% \DescribeProp{caption-top}{<any>} the content of the top placed caption\UsageProperty{number-face}\UsageProperty{number-sep}
+% \end{Property}
+% \begin{Property}{caption-top}{<any>} the content of the top placed
+%   caption\UsageProperty{number-face}\UsageProperty{number-sep}
 %    \begin{macrocode}
     \ccSetProperty{caption-top}{%
       \ccIfComp{Number}{{\ccUseProperty{number-face}\ccUseComp{Number}\ccUseProperty{number-sep}}}{}%
       \ccUseComp{Caption}%
     }%
 %    \end{macrocode}
-% \DescribeProp{caption-bottom}{<any>} the content of the bottom placed caption\UsageProperty{legend-face}\UsageProperty{source-face}
+% \end{Property}
+% \begin{Property}{caption-bottom}{<any>} the content of the bottom
+%   placed
+%   caption\UsageProperty{legend-face}\UsageProperty{source-face}
 %    \begin{macrocode}
     \ccSetProperty{caption-bottom}{%
       \ccIfComp{Legend}{{\ccUseProperty{legend-face}\ccUseComp{Legend}}}{}%
@@ -538,166 +575,206 @@
           {\ccUseProperty{source-face}%
            \ccUseComp{Source}}}{}}%
 %    \end{macrocode}
-% \DescribeProp{subcaption-face}{<any>} the style of captions of second
-% level floats
+% \end{Property}
+% \begin{Property}{subcaption-face}{<any>} the style of captions of
+%   second level floats
 %    \begin{macrocode}
     \ccPropertyLet{subcaption-face}{caption-face}%
 %    \end{macrocode}
-% \DescribeProp{subcaption-face-top}{<any>} the style of top placed captions
-% of second level floats\UsageProperty{caption-face-top}
+% \end{Property}
+% \begin{Property}{subcaption-face-top}{<any>} the style of top placed
+%   captions of second level floats\UsageProperty{caption-face-top}
 %    \begin{macrocode}
     \ccSetProperty{subcaption-face-top}{\ccUseProperty{caption-face-top}}%
 %    \end{macrocode}
-% \DescribeProp{subcaption-face-bottom}{<any>} the style of bottom placed
-% captions of second level floats\UsageProperty{caption-face-bottom}
+% \end{Property}
+% \begin{Property}{subcaption-face-bottom}{<any>} the style of bottom
+%   placed captions of second level
+%   floats\UsageProperty{caption-face-bottom}
 %    \begin{macrocode}
     \ccSetProperty{subcaption-face-bottom}{\ccUseProperty{caption-face-bottom}}%
 %    \end{macrocode}
-% \DescribeProp{subcaption-add-sep-top}{<skip>} additional vertical
-% space between top caption and top sub-caption
+% \end{Property}
+% \begin{Property}{subcaption-add-sep-top}{<skip>} additional vertical
+%   space between top caption and top sub-caption
 %    \begin{macrocode}
     \ccSetProperty{subcaption-add-sep-top}{\z@}%
 %    \end{macrocode}
-% \DescribeProp{subcaption-add-sep-bottom}{<skip>} additional vertical
-% space between bottom sub-caption and bottom caption
+% \end{Property}
+% \begin{Property}{subcaption-add-sep-bottom}{<skip>} additional
+%   vertical space between bottom sub-caption and bottom caption
 %    \begin{macrocode}
     \ccSetProperty{subcaption-add-sep-bottom}{\z@}%
 %    \end{macrocode}
-% \DescribeProp{subcaption-sep-top}{<skip>} vertical space between top
-% placed sub-captions and content, i.\,e., the space \textit{after} top
-% placed sub-captions.\UsageProperty{caption-sep-top}
+% \end{Property}
+% \begin{Property}{subcaption-sep-top}{<skip>} vertical space between
+%   top placed sub-captions and content, i.\,e., the space
+%   \textit{after} top placed
+%   sub-captions.\UsageProperty{caption-sep-top}
 %    \begin{macrocode}
     \ccSetProperty{subcaption-sep-top}{\ccUseProperty{caption-sep-top}}%
 %    \end{macrocode}
-% \DescribeProp{subcaption-sep-top}{<skip>} vertical space between
-% content and top placed sub-captions, i.\,e., the space before bottom
-% placed sub-captions.\UsageProperty{caption-sep-bottom}
+% \end{Property}
+% \begin{Property}{subcaption-sep-top}{<skip>} vertical space between
+%   content and top placed sub-captions, i.\,e., the space before
+%   bottom placed sub-captions.\UsageProperty{caption-sep-bottom}
 %    \begin{macrocode}
     \ccSetProperty{subcaption-sep-bottom}{\ccUseProperty{caption-sep-bottom}}%
 %    \end{macrocode}
-% \DescribeProp{subcaption-top}{<any>} the content of top placed
-% sub-captions\UsageProperty{caption-top}
+% \end{Property}
+% \begin{Property}{subcaption-top}{<any>} the content of top placed
+%   sub-captions\UsageProperty{caption-top}
 %    \begin{macrocode}
     \ccSetProperty{subcaption-top}{\ccUseProperty{caption-top}}%
 %    \end{macrocode}
-% \DescribeProp{subcaption-bottom}{<any>} the content of bottom placed
-% sub-captions\UsageProperty{caption-bottom}
+% \end{Property}
+% \begin{Property}{subcaption-bottom}{<any>} the content of bottom
+%   placed sub-captions\UsageProperty{caption-bottom}
 %    \begin{macrocode}
-    \ccSetProperty{subcaption-bottom}{\ccUseProperty{caption-bottom}}% in case, sub-float captions diverge from main caption
+    \ccSetProperty{subcaption-bottom}{\ccUseProperty{caption-bottom}}%
 %    \end{macrocode}
-% \DescribeProp{subcaption-valign-top}{[top|bottom|middle]} vertical alignment of neighboring top-placed sub-captions
+% \end{Property}
+% \begin{Property}{subcaption-valign-top}{[top|bottom|middle]}
+%   vertical alignment of neighboring top-placed sub-captions
 %    \begin{macrocode}
     \ccSetProperty{subcaption-valign-top}{top}%
 %    \end{macrocode}
-% \DescribeProp{subcaption-valign-bottom}{[top|bottom|middle]} vertical alignment of neighboring bottom-placed sub-captions
+% \end{Property}
+% \begin{Property}{subcaption-valign-bottom}{[top|bottom|middle]}
+%   vertical alignment of neighboring bottom-placed sub-captions
 %    \begin{macrocode}
     \ccSetProperty{subcaption-valign-bottom}{top}%
 %    \end{macrocode}
+% \end{Property}
 %
 %
 % \subsubsection{Properties for Counters}
 %
-% \DescribeProp{auto-number-prefix}{<any>} Prefix for auto-generated
-%   Number components
+% \begin{Property}{auto-number-prefix}{<any>} Prefix for
+%   auto-generated Number components
 %    \begin{macrocode}
     \ccSetProperty{auto-number-prefix}{\csname\ccfCapType name\endcsname}%
 %    \end{macrocode}
-% \DescribeProp{auto-number-prefix-sep}{<any>} Separator between the
-% auto-generated number prefix and the auto-generated Number
-% component.
+% \end{Property}
+% \begin{Property}{auto-number-prefix-sep}{<any>} Separator between
+%   the auto-generated number prefix and the auto-generated Number
+%   component.
 %    \begin{macrocode}
     \ccSetProperty{auto-number-prefix-sep}{~}%
 %    \end{macrocode}
-% \DescribeProp{numbering}{[auto|<any>]} if \texttt{auto}, float counters
-% in instances without the Number component are generated
-% automatically. Any other value suppresses auto-numbering.
+% \end{Property}
+% \begin{Property}{numbering}{[auto|<any>]} if \texttt{auto}, float
+%   counters in instances without the Number component are generated
+%   automatically. Any other value suppresses auto-numbering.
 %    \begin{macrocode}
     \ccSetProperty{numbering}{auto}%
 %    \end{macrocode}
-% \DescribeProp{numbering}{[auto|<any>]} if \texttt{auto}, subfloat
-% counters in instances without the Number component are generated
-% automatically. Any other value suppresses
-% auto-numbering.
+% \end{Property}
+% \begin{Property}{numbering}{[auto|<any>]} if \texttt{auto}, subfloat
+%   counters in instances without the Number component are generated
+%   automatically. Any other value suppresses auto-numbering.
 %
-% \textbf{Note}: this Property has only effect when subfloats are
-% second-level. In first-level sub-floats, the \texttt{numbering}
-% Property is used.
+%   \textbf{Note}: this Property has only effect when subfloats are
+%   second-level. In first-level sub-floats, the \texttt{numbering}
+%   Property is used.
 %    \begin{macrocode}
     \ccSetProperty{sub-numbering}{}%
 %    \end{macrocode}
-% \DescribeProp{number-sep}{<any>} separator bewteen the printed float
-% number and the caption
+% \end{Property}
+% \begin{Property}{number-sep}{<any>} separator bewteen the printed
+%   float number and the caption
 %    \begin{macrocode}
     \ccSetProperty{number-sep}{\enskip}%
 %    \end{macrocode}
-% \DescribeProp{number-face}{<any>} style of number, additional to caption-format
+% \end{Property}
+% \begin{Property}{number-face}{<any>} style of number, additional to
+%   caption-format
 %    \begin{macrocode}
     \ccSetProperty{number-face}{\bfseries}%
 %    \end{macrocode}
-% \DescribeProp{sub-number-sep}{<any>} separator between number and
-% caption in sub-floats
+% \end{Property}
+% \begin{Property}{sub-number-sep}{<any>} separator between number and
+%   caption in sub-floats
 %    \begin{macrocode}
     \ccSetProperty{sub-number-sep}{\,}%
 %    \end{macrocode}
-% \DescribeProp{sub-number-style}{[arabic|Alph|alph|roman|Roman]}
-% numbering style for automatically generated subfloat counters
+% \end{Property}
+% \begin{Property}{sub-number-style}{[arabic|Alph|alph|roman|Roman]}
+%   numbering style for automatically generated subfloat counters
 %    \begin{macrocode}
     \ccSetProperty{sub-number-style}{alph}%
 %    \end{macrocode}
-% \DescribeProp{sub-number-face}{<any>} style of the number of a subfloat
+% \end{Property}
+% \begin{Property}{sub-number-face}{<any>} style of the number of a
+%   subfloat
 %    \begin{macrocode}
     \ccSetProperty{sub-number-face}{}%
 %    \end{macrocode}
-% \DescribeProp{sub-number-before}{<any>} stuff that is put immediately
-% before the automatically generated subfloat counter
+% \end{Property}
+% \begin{Property}{sub-number-before}{<any>} stuff that is put
+%   immediately before the automatically generated subfloat counter
 %    \begin{macrocode}
     \ccSetProperty{sub-number-before}{(}%
 %    \end{macrocode}
-% \DescribeProp{sub-number-before}{<any>} stuff that is put immediately
-% after the automatically generated subfloat counter
+% \end{Property}
+% \begin{Property}{sub-number-before}{<any>} stuff that is put
+%   immediately after the automatically generated subfloat counter
 %    \begin{macrocode}
     \ccSetProperty{sub-number-after}{)}%
 %    \end{macrocode}
-% \DescribeProp{sub-number-format}{<any>} the format of the number\UsageProperty{float-number}\UsageProperty{sub-number}\UsageProperty{sub-number-sep}
+% \end{Property}
+% \begin{Property}{sub-number-format}{<any>} the format of the
+%   number\UsageProperty{float-number}\UsageProperty{sub-number}\UsageProperty{sub-number-sep}
 %    \begin{macrocode}
     \ccSetProperty{sub-number-format}{%
       \ccUseProperty{float-number}%
       \ccUseProperty{sub-number-sep}%
       \ccUseProperty{sub-number}}%
 %    \end{macrocode}
-% \DescribeProp{label-pos}{[top|bottom]} position of the cross reference
-% anchor, refering to top or bottom placed captions.
+% \end{Property}
+% \begin{Property}{label-pos}{[top|bottom]} position of the cross
+%   reference anchor, refering to top or bottom placed captions.
 %    \begin{macrocode}
     \ccSetProperty{label-pos}{top}%
 %    \end{macrocode}
-% \DescribeProp{sublabel-pos}{[top|bottom]} position of the cross reference
-% anchor for sub-floats, refering to top or bottom placed sub-captions.
+% \end{Property}
+% \begin{Property}{sublabel-pos}{[top|bottom]} position of the cross
+%   reference anchor for sub-floats, refering to top or bottom placed
+%   sub-captions.
 %    \begin{macrocode}
     \ccSetProperty{sublabel-pos}{top}%
 %    \end{macrocode}
+% \end{Property}
 %
 % \subsubsection{Properties for List-Of Entries}
 %
-% \DescribeProp{list-of-page-sep}{<any>} separator between the
-% listof-entry and the page
+% \begin{Property}{list-of-page-sep}{<any>} separator between the
+%   listof-entry and the page
 %    \begin{macrocode}
     \ccSetProperty{list-of-page-sep}{\dotfill}%
 %    \end{macrocode}
-% \DescribeProp{list-of-number-face}{<any>} style of the listof-entry
+% \end{Property}
+% \begin{Property}{list-of-number-face}{<any>} style of the
+%   listof-entry
 %    \begin{macrocode}
     \ccPropertyLet{list-of-number-face}{list-of-caption-face}%
 %    \end{macrocode}
-% \DescribeProp{list-of-number-sep}{<any>} separator between the number
-% and the listof entry.
+% \end{Property}
+% \begin{Property}{list-of-number-sep}{<any>} separator between the
+%   number and the listof entry.
 %    \begin{macrocode}
     \ccSetProperty{list-of-number-sep}{\enskip}%
 %    \end{macrocode}
-% \DescribeProp{list-of-number-align}{[left|center|right]} horizontal
-% alignment of the listof number within its local hbox.
+% \end{Property}
+% \begin{Property}{list-of-number-align}{[left|center|right]}
+%   horizontal alignment of the listof number within its local hbox.
 %    \begin{macrocode}
     \ccSetProperty{list-of-number-align}{left}%
 %    \end{macrocode}
-% \DescribeProp{list-of-number-format}{<any>} format of the number in listof entries.\UsageProperty{list-of-number-face}\UsageProperty{list-of-number-sep}
+% \end{Property}
+% \begin{Property}{list-of-number-format}{<any>} format of the number
+%   in listof
+%   entries.\UsageProperty{list-of-number-face}\UsageProperty{list-of-number-sep}
 %    \begin{macrocode}
     \ccSetProperty{list-of-number-format}{%
       \bgroup
@@ -706,26 +783,34 @@
         \ccUseProperty{list-of-number-sep}%
       \egroup}%
 %    \end{macrocode}
-% \DescribeProp{list-of-parfillskip}{<skip>} parfillskip of an entry in
-% the listof
+% \end{Property}
+% \begin{Property}{list-of-parfillskip}{<skip>} parfillskip of an
+%   entry in the listof
 %    \begin{macrocode}
     \ccSetProperty{list-of-parfillskip}{-\rightskip}%
 %    \end{macrocode}
-% \DescribeProp{list-of-margin-right}{<skip>} right margin of the listof entry
+% \end{Property}
+% \begin{Property}{list-of-margin-right}{<skip>} right margin of the
+%   listof entry
 %    \begin{macrocode}
     \ccSetProperty{list-of-margin-right}{\@pnumwidth \@plus 1fil}%
 %    \end{macrocode}
-% \DescribeProp{list-of-margin-left}{[auto|<skip>]} right margin of the listof entry
+% \end{Property}
+% \begin{Property}{list-of-margin-left}{[auto|<skip>]} right margin of
+%   the listof entry
 %    \begin{macrocode}
     \ccSetProperty{list-of-margin-left}{auto}%
 %    \end{macrocode}
-% \DescribeProp{list-of-indent}{[auto|<dimen>]} horizontal offset of the
-% first line of an listof-entry, relative to \texttt{margin-left}.
+% \end{Property}
+% \begin{Property}{list-of-indent}{[auto|<dimen>]} horizontal offset
+%   of the first line of an listof-entry, relative to
+%   \texttt{margin-left}.
 %    \begin{macrocode}
     \ccSetProperty{list-of-indent}{auto}%
 %    \end{macrocode}
-% \DescribeProp{list-of-block}{<any>} format of the entire listof
-% entry.\UsageProperty{list-of-caption-sep}\UsageProperty{list-of-page-sep}
+% \end{Property}
+% \begin{Property}{list-of-block}{<any>} format of the entire listof
+%   entry.\UsageProperty{list-of-caption-sep}\UsageProperty{list-of-page-sep}
 %    \begin{macrocode}
     \ccSetProperty{list-of-block}{%
       \ccUseProperty{list-of-caption-face}%
@@ -736,8 +821,10 @@
       \ccUseProperty{list-of-page-sep}\ccUseComp{ListofPage}%
     }%
 %    \end{macrocode}
-% \DescribeProp{list-of-before-entry}{<any>} material inserted at the
-% beginning of each listof entry\UsageProperty{list-of-margin-left}\UsageProperty{list-of-margin-right}\UsageProperty{list-of-parfillskip}
+% \end{Property}
+% \begin{Property}{list-of-before-entry}{<any>} material inserted at
+%   the beginning of each listof
+%   entry\UsageProperty{list-of-margin-left}\UsageProperty{list-of-margin-right}\UsageProperty{list-of-parfillskip}
 %    \begin{macrocode}
     \ccSetProperty{list-of-before-entry}{%
       \ccGobble
@@ -751,20 +838,49 @@
       \null\nobreak
     }% list-of-float appearance
 %    \end{macrocode}
-% \DescribeProp{list-of-after-entry}{<any>} material inserted at the
-% end of a listof entry.
+% \end{Property}
+% \begin{Property}{list-of-after-entry}{<any>} material inserted at
+%   the end of a listof entry.
 %    \begin{macrocode}
     \ccSetProperty{list-of-after-entry}{\par}%
   }% /Properties
   \ccDeclareType{Attributes}{%
+%    \end{macrocode}
+% \begin{Attribute}{class}{<string>} is the class of the Float.
+%    \begin{macrocode}
     \ccDeclareAttributeHandler{class}{\ccf@attr@class{\ccAttrVal}}%
+%    \end{macrocode}
+% \end{Attribute}
+% \begin{Attribute}{break-caption}{<bool>} whether or not the caption is
+%   allowed to break across pages
+%    \begin{macrocode}
     \ccDeclareAttributeHandler*{break-caption}[\@ccf@break@captfalse]{\@ccf@break@capttrue}%
+%    \end{macrocode}
+% \end{Attribute}
+% \begin{Attribute}{float-pos}{[(h|t|p|b)*|h!]} the float position of
+%   the float. \texttt{h!} means that the float is not actually
+%   floating and is equivalent to omitting the Attribute.
+%    \begin{macrocode}
     \ccDeclareAttributeHandler{float-pos}[\let\ccf@floatpos\@empty]{\ccf@attr@pos{\ccAttrVal}}%
+%    \end{macrocode}
+% \end{Attribute}
+% \begin{Attribute}{orientation}{landscape} is whether the float is
+%   rotated by 90° (landscape) or not (if omitted, default)
+%    \begin{macrocode}
     \ccDeclareAttributeHandler{orientation}{\ccf@attr@orient{\ccAttrVal}}
+%    \end{macrocode}
+% \end{Attribute}
+% \begin{Attribute}{debug}{<flag>} if set, additional debugging is
+%   written into the shell and log file.
+%    \begin{macrocode}
     \ccDeclareAttributeHandler{debug}[\let\ccf@debug\relax]{\let\ccf@debug\ccf@attr@debug}
+%    \end{macrocode}
+% \end{Attribute}
+%    \begin{macrocode}
   }
 }% /Container
 %    \end{macrocode}
+% \end{Property}
 %
 %
 % \subsection{The Generic float Environment}
@@ -1185,12 +1301,14 @@
 %    \begin{macrocode}
 \def\ccf@set@subcounter{%
 %    \end{macrocode}
-% \DescribeProp{float-number}{<any>} the counter of a first-level float
+% \begin{Property}{float-number}{<any>} the counter of a first-level
+%   float
 %    \begin{macrocode}
   \ccSetPropertyVal{float-number}{\csname  cc@\cc@cur@cont @Number-0\endcsname}%
 %    \end{macrocode}
-% \DescribeProp{sub-number}{<any>} the counter of a second-level float%
-% \UsageProperty{sub-number-face}\UsageProperty{sub-number-before}\UsageProperty{sub-number-style}\UsageProperty{sub-number-after}\UsageProperty{sub-number-format}
+% \end{Property}
+% \begin{Property}{sub-number}{<any>} the counter of a second-level
+%   float\UsageProperty{sub-number-face}\UsageProperty{sub-number-before}\UsageProperty{sub-number-style}\UsageProperty{sub-number-after}\UsageProperty{sub-number-format}
 %    \begin{macrocode}
   \ccSetPropertyVal{sub-number}{%
     \begingroup
@@ -1202,6 +1320,7 @@
   \ccComponent{Number}{\ccUseProperty{sub-number-format}}%
 }
 %    \end{macrocode}
+% \end{Property}
 % \end{macro}
 %
 % \subsubsection{Generation of {\LaTeX} Labels}
@@ -1615,15 +1734,19 @@
   \ccDeclareType{Components}{%
     \def\cc@counted@comp@scheme##1{##1-\the\ccSubFloatCnt}%
 %    \end{macrocode}
-% \DescribeComponent{Fig} holds the includegraphics with the path to
-% and the options for the actual image file.
+% \begin{Component}{Fig} holds the includegraphics with the path to
+%   and the options for the actual image file.
 %    \begin{macrocode}
     \ccfMakeComp{Fig}%
 %    \end{macrocode}
-% \DescribeComponent{AltText} is the alternative text for
-% accessibility.
+% \end{Component}
+% \begin{Component}{AltText} is the alternative text for
+%   accessibility.
 %    \begin{macrocode}
     \ccfMakeComp{AltText}%
+%    \end{macrocode}
+% \end{Component}
+%    \begin{macrocode}
   }%
   \ccDeclareType{Properties}{}%
 }
@@ -1641,13 +1764,14 @@
   \ccInherit{Properties,Components}{Graphic}%
   \ccDeclareType{Properties}{%
 %    \end{macrocode}
-% \DescribeProp{subfloat-same-height}{[true|false]} Whether all images
-% in subfloats sould be scaled to the same height (\texttt{true}) or
-% not (\texttt{false}).
+% \begin{Property}{subfloat-same-height}{[true|false]} Whether all
+%   images in subfloats sould be scaled to the same height
+%   (\texttt{true}) or not (\texttt{false}).
 %    \begin{macrocode}
     \ccSetProperty{subfloat-same-height}{true}%
 %    \end{macrocode}
-% \DescribeProp{subfloat-content}{<any>}
+% \end{Property}
+% \begin{Property}{subfloat-content}{<any>}
 %    \begin{macrocode}
     \ccSetProperty{subfloat-content}{%
       \ifx\ccf@no@figs\relax
@@ -1656,17 +1780,21 @@
         \ccUseComp{Fig}%
       \fi}%
 %    \end{macrocode}
-% \DescribeProp{float-render}{<any>} figure specific output routine.
+% \end{Property}
+% \begin{Property}{float-render}{<any>} figure specific output
+%   routine.
 %    \begin{macrocode}
     \ccSetProperty{float-render}{\ccfFigureRender}%
 %    \end{macrocode}
-% \DescribeProp{subfloat-render}{<any>} figure specific output routine
-% for sub-floats.
+% \end{Property}
+% \begin{Property}{subfloat-render}{<any>} figure specific output
+%   routine for sub-floats.
 %    \begin{macrocode}
     \ccSetProperty{subfloat-render}{\ccfSubFigureRender}%
   }%
 }
 %    \end{macrocode}
+% \end{Property}
 %
 %
 % \subsection{Figure Output Routines}
@@ -1736,31 +1864,34 @@
   \ccDeclareType{Attributes}{}%
   \ccDeclareType{Properties}{%
 %    \end{macrocode}
-% \DescribeProp{smash}{[true|false]} whether the image is allowed to
-% stretch the line it is in (false) or not (true) if the height
-% exceeds \lstinline{\baselineskip}.
+% \begin{Property}{smash}{[true|false]} whether the image is allowed
+%   to stretch the line it is in (false) or not (true) if the height
+%   exceeds \lstinline{\baselineskip}.
 %    \begin{macrocode}
     \ccSetProperty{smash}{false}
 %    \end{macrocode}
-% \DescribeProp{vertical-align}{[top|middle|bottom]} the vertical
-% alignment of the inline image relative to the baseline of the
-% surrounding text. If the value is \lstinline{bottom}, the bottom
-% border of the image is aligned with the baseline, \lstinline{top}
-% aligns the top border of the image at
-% $\text{baseline} + \text{\texttt{\string\ht\string\strutbox}}$,
-% \lstinline{middle} centers the image at
-% $\text{baseline} +
-% 0.5\times\text{\texttt{\string\ht\string\strutbox}}$.
+% \end{Property}
+% \begin{Property}{vertical-align}{[top|middle|bottom]} the vertical
+%   alignment of the inline image relative to the baseline of the
+%   surrounding text. If the value is \lstinline{bottom}, the bottom
+%   border of the image is aligned with the baseline, \lstinline{top}
+%   aligns the top border of the image at
+%   $\text{baseline} + \text{\texttt{\string\ht\string\strutbox}}$,
+%   \lstinline{middle} centers the image at
+%   $\text{baseline} +
+%   0.5\times\text{\texttt{\string\ht\string\strutbox}}$.
 %    \begin{macrocode}
     \ccSetProperty{vertical-align}{bottom}
 %    \end{macrocode}
-% \DescribeProp{float-render}{<any>} specific output routine for
-% inline figures
+% \end{Property}
+% \begin{Property}{float-render}{<any>} specific output routine for
+%   inline figures
 %    \begin{macrocode}
     \ccSetProperty{float-render}{\ccUseComp{Fig}}
   }%
 }
 %    \end{macrocode}
+% \end{Property}
 %
 %
 % \subsubsection{Inline Figure User Macro}

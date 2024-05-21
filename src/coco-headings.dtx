@@ -57,24 +57,31 @@
 %    \end{macrocode}
 % The remaining Components are built as usual.
 %
-% \DescribeComponent{Title}\AlsoOverride{TocTitle}\AlsoOverride{BMTitle}\AlsoOverride{RunTitle} is the main title of the heading.
+% \begin{Component}{Title}\AlsoOverride{TocTitle}\AlsoOverride{BMTitle}\AlsoOverride{RunTitle} is the main title of the heading.
 %    \begin{macrocode}
     \cch@provide@comp{Title}%
 %    \end{macrocode}
-% \DescribeComponent{Subtitle}\AlsoOverride{TocSubtitle}\AlsoOverride{BMSubtitle}\AlsoOverride{RunSubtitle} is an optional second-level title of
-% the heading.
+% \end{Component}
+% \begin{Component}{Subtitle}\AlsoOverride{TocSubtitle}\AlsoOverride{BMSubtitle}\AlsoOverride{RunSubtitle} is an optional second-level title of
+%   the heading.
 %    \begin{macrocode}
     \cch@provide@comp{Subtitle}%
 %    \end{macrocode}
-% \DescribeComponent{Number}\AlsoOverride{TocNumber}\AlsoOverride{BMNumber}\AlsoOverride{RunNumber} is the heading's counter.
+% \end{Component}
+% \begin{Component}{Number}\AlsoOverride{TocNumber}\AlsoOverride{BMNumber}\AlsoOverride{RunNumber}
+%   is the heading's counter.
 %    \begin{macrocode}
     \cch@provide@comp{Number}%
 %    \end{macrocode}
-% \DescribeComponent{RefLabel} is a unique ID of an heading. It is
-% targeted by cross references and replaces \LaTeX's
-% \lstinline{\label} command.
+% \end{Component}
+% \begin{Component}{RefLabel} is a unique ID of an heading. It is
+%   targeted by cross references and replaces \LaTeX's
+%   \lstinline{\label} command.
 %    \begin{macrocode}
     \ccDeclareComponent{RefLabel}{}{}%
+%    \end{macrocode}
+% \end{Component}
+%    \begin{macrocode}
     \cch@provide@quotes
   }%
   \ccDeclareType{Properties}{}%
@@ -946,48 +953,62 @@
 %    \begin{macrocode}
 \def\cch@provide@quotes{%
 %    \end{macrocode}
-% \DescribeCollectionComp{QuoteBlock} is the Collection Component for
-% one or more \UsageComponent{Quote} Component Groups.
+% \begin{Component}[CL]{QuoteBlock} is the Collection
+%   Component for one or more \UsageComponent{Quote} Component Groups.
 %    \begin{macrocode}
   \ccDeclareComponent{QuoteBlock}{}{}%
 %    \end{macrocode}
-% \DescribeGroupComp{Quote} is a Component Group for quotes that
+% \end{Component}
+% \begin{Component}[GC]{Quote} is a Component Group for quotes that
 % belong to a heading.
 %    \begin{macrocode}
   \ccDeclareComponentGroup{Quote}{%
 %    \end{macrocode}
-% \DescribeCountedComp{QuoteText} is the quotation text
+% \end{Component}
+% \begin{Component}[CC]{QuoteText} is the quotation text
 %    \begin{macrocode}
     \ccDeclareCountedComponent{QuoteText}%
 %    \end{macrocode}
-% \DescribeCountedComp{QuoteText} is the source of the quotation.
+% \end{Component}
+% \begin{Component}[CC]{QuoteSource} is the source of the quotation.
 %    \begin{macrocode}
     \ccDeclareCountedComponent{QuoteSource}%
   }%
 }
 %    \end{macrocode}
+% \end{Component}
 % \end{macro}
 % \begin{macro}{\cch@provide@authors} sets up the additional Components for the \UsageComponent{Author} Role specific to headings.
 %    \begin{macrocode}
 \def\cch@provide@authors{%
   \ccAddToRole{Author}{%
 %    \end{macrocode}
-% \DescribeCountedComp{AuthorContact} holds the contact information of
+% \begin{Component}[CC]{AuthorContact} holds the contact information of
 % an author.
 %    \begin{macrocode}
     \ccDeclareCountedComponent{AuthorContact}%
   }%
 %    \end{macrocode}
-% \DescribeCollectionComp{AuthorContactBlock} is the Collection Component
-% for the Counted Component \UsageComponent{AuthorContact}.
+% \end{Component}
+% \begin{Component}[CL]{AuthorContactBlock} is the Collection
+%   Component for the Counted Component
+%   \UsageComponent{AuthorContact}.
 %    \begin{macrocode}
   \ccDeclareRoleBlock{Author}{ContactBlock}{author-contact-block-format}%
+%    \end{macrocode}
+% \end{Component}
+%    \begin{macrocode}
   \ccDeclareGroupHandler{Author}{%
     \ccIfComp{AuthorContact}{}{\ccComponent{AuthorContact}{\ccUseProperty{author-contact-format}}}{}%
   }%
+%    \end{macrocode}
+% \begin{Component}[CL]{AuthorNameList} is the Collection Component
+%   for the Author names.
+%    \begin{macrocode}
   \cc@provide@overrides{AuthorNameList}%
 }
 %    \end{macrocode}
+% \end{Component}
 % \end{macro}
 % \begin{macro}{\cch@provide@comp} is a wrapper that creates the
 %   user-level macros for the Component itself and its overrides. \#1
@@ -1019,18 +1040,20 @@
 %    \begin{macrocode}
 \ccAddToProperties{Heading}{%
 %    \end{macrocode}
-% \DescribeProp{interline-para}{<any>} is a switch that is
-% automatically set whenever an inline heading is not-yet sent to the
-% vertical list and another inline heading is processed.
+% \begin{Property}{interline-para}{<any>} is a switch that is
+%   automatically set whenever an inline heading is not-yet sent to
+%   the vertical list and another inline heading is processed.
 %    \begin{macrocode}
   \ccSetProperty{interline-para}{}%
 %    \end{macrocode}
-% \DescribeProp{interline-para-sep}{<any>} is the material that is
+% \end{Property}
+% \begin{Property}{interline-para-sep}{<any>} is the material that is
 % printed between to inline headings.
 %    \begin{macrocode}
   \ccSetProperty{interline-para-sep}{\space}
 %    \end{macrocode}
-% \DescribeProp{heading-par}{<any>} is the material added to the very
+% \end{Property}
+% \begin{Property}{heading-par}{<any>} is the material added to the very
 % beginning of a heading.
 %    \begin{macrocode}
   \ccSetProperty{heading-par}{%
@@ -1039,40 +1062,48 @@
     \global\@afterindenttrue
   }%
 %    \end{macrocode}
-% \DescribeProp{after-heading-par}{<any>} is expanded at the very end of
+% \end{Property}
+% \begin{Property}{after-heading-par}{<any>} is expanded at the very end of
 % non-inline headings.
 %    \begin{macrocode}
   \ccSetProperty{after-heading-par}{\par \nobreak}%
 %    \end{macrocode}
-% \DescribeProp{before-heading}{<any>} is expanded immediately before
+% \end{Property}
+% \begin{Property}{before-heading}{<any>} is expanded immediately before
 % any vertical skips of a heading are inserted, but after the
 % \UsageHook{begin-hook}.
 %    \begin{macrocode}
   \ccSetProperty{before-heading}{}%
 %    \end{macrocode}
-% \DescribeProp{title-face}{<any>} is the style of the heading's main title.
+% \end{Property}
+% \begin{Property}{title-face}{<any>} is the style of the heading's main title.
 %    \begin{macrocode}
   \ccSetProperty{title-face}{\bfseries}%
 %    \end{macrocode}
-% \DescribeProp{subtitle-face}{<any>} is the style of the heading's subtitle.
+% \end{Property}
+% \begin{Property}{subtitle-face}{<any>} is the style of the heading's subtitle.
 %    \begin{macrocode}
   \ccSetProperty{subtitle-face}{\normalfont}%
 %    \end{macrocode}
-% \DescribeProp{author-face}{<any>} is the face of the heading's printed
+% \end{Property}
+% \begin{Property}{author-face}{<any>} is the face of the heading's printed
 % \texttt{Author} Component.
 %    \begin{macrocode}
   \ccSetProperty{author-face}{\normalfont}%
 %    \end{macrocode}
-% \DescribeProp{quote-face}{<any>} is the style of a quotation.
+% \end{Property}
+% \begin{Property}{quote-face}{<any>} is the style of a quotation.
 %    \begin{macrocode}
   \ccSetProperty{quote-face}{\raggedleft}%
 %    \end{macrocode}
-% \DescribeProp{quote-source-face}{<any>} is the style of a quotation's
+% \end{Property}
+% \begin{Property}{quote-source-face}{<any>} is the style of a quotation's
 % source line.
 %    \begin{macrocode}
   \ccSetProperty{quote-source-face}{}%
 %    \end{macrocode}
-% \DescribeProp{quote-block-format}{<any>} is the format of a single
+% \end{Property}
+% \begin{Property}{quote-block-format}{<any>} is the format of a single
 % quotation. By default, it uses the \UsageComponent{QuoteText} and
 % \UsageComponent{QuoteSource} Components.
 %    \begin{macrocode}
@@ -1083,7 +1114,8 @@
       \ccIfComp{QuoteSource}{{\ccUseProperty{quote-source-face}--\space\ccUseComp{QuoteSource}}\par}{}%
     \egroup}
 %    \end{macrocode}
-% \DescribeProp{heading-block}{<any>} is the format of the main
+% \end{Property}
+% \begin{Property}{heading-block}{<any>} is the format of the main
 % heading. It uses the \UsageComponent{Subtitle},
 % \UsageComponent{AuthorNameList}, \UsageComponent{QuoteBlock} and
 % \UsageComponent{AffilBlock} Components.
@@ -1096,7 +1128,8 @@
      \ccIfComp{AffilBlock}{{\ccUseProperty{affil-block-face}\ccUseComp{AffilBlock}}\par}{}%
     }%
 %    \end{macrocode}
-% \DescribeProp{main-title-format}{<any>} is the format of the
+% \end{Property}
+% \begin{Property}{main-title-format}{<any>} is the format of the
 % heading's main title. It should also enclose the heading's
 % \UsageComponent{Number} and \UsageComponent{Title} Components with
 % Tags that are mapped to \DescribeTag{H} or \DescribeTag{Hn} with
@@ -1113,7 +1146,8 @@
     \par
   }
 %    \end{macrocode}
-% \DescribeProp{extended-heading}{<any>} is the format of extended
+% \end{Property}
+% \begin{Property}{extended-heading}{<any>} is the format of extended
 % headings whcih incorporates the \UsageComponent{Abstract} and
 % \UsageComponent{Keywords} Labeled Components. Requires the
 % \UsageProp{extended} Property to be non-empty.
@@ -1131,35 +1165,41 @@
      {}%
    }%
 %    \end{macrocode}
-% \DescribeProp{before-skip}{<skip>} the vertical space before
+% \end{Property}
+% \begin{Property}{before-skip}{<skip>} the vertical space before
 % heading. Positive values are set with \LaTeX's
 % \lstinline{\addvspace}, while negative values are set with
 % coco-common's \DescribeMacro{\minusvspace}.
 %    \begin{macrocode}
   \ccSetProperty{before-skip}{\z@skip}% TODOC: values < 0pt use \minusvspace, else \addvspace. LaTeX's default behaviour of @afterindent is relocated to the after-indent property.
 %    \end{macrocode}
-% \DescribeProp{after-heading-block}{<any>} is expanded at the very
+% \end{Property}
+% \begin{Property}{after-heading-block}{<any>} is expanded at the very
 % end of the printed heading.
 %    \begin{macrocode}
   \ccSetProperty{after-heading-block}{}%
 %    \end{macrocode}
-% \DescribeProp{before-heading-block}{<any>} is expanded at the very
+% \end{Property}
+% \begin{Property}{before-heading-block}{<any>} is expanded at the very
 % beginning of \lstinline{@svsec}.
 %    \begin{macrocode}
   \ccSetProperty{before-heading-block}{\parindent\z@ \parskip\z@}%
 %    \end{macrocode}
-% \DescribeProp{toc-hook}{<any>} is called after ToC and Bookmark
+% \end{Property}
+% \begin{Property}{toc-hook}{<any>} is called after ToC and Bookmark
 % entries are written and allows for material to be added to the toc
 % file.
 %    \begin{macrocode}
   \ccSetProperty{toc-hook}{}% Called, after ToC and BM entries have been written to the .aux file
 %    \end{macrocode}
-% \DescribeProp{after-indent}{<any>} if non-empty, the first paragraph
+% \end{Property}
+% \begin{Property}{after-indent}{<any>} if non-empty, the first paragraph
 % after the heading will be indented.
 %    \begin{macrocode}
   \ccSetProperty{after-indent}{}%
 %    \end{macrocode}
-% \DescribeProp{margin-left}{[auto|<dimen>|<empty>]} is the left margin
+% \end{Property}
+% \begin{Property}{margin-left}{[auto|<dimen>|<empty>]} is the left margin
 % of the heading. Its value can either be a fixed dimension, the
 % string \texttt{auto}, or empty. If the Property is set to
 % \texttt{auto} or an empty string, the margin is calculated from the
@@ -1167,54 +1207,62 @@
 %    \begin{macrocode}
   \ccSetProperty{margin-left}{}%
 %    \end{macrocode}
-% \DescribeProp{margin-right}{<skip>} is the right margin of the
+% \end{Property}
+% \begin{Property}{margin-right}{<skip>} is the right margin of the
 % heading block.
 %    \begin{macrocode}
   \ccSetProperty{margin-right}{\@flushglue}%
 %    \end{macrocode}
-% \DescribeProp{after-skip}{<skip>} is the vertical space after the
+% \end{Property}
+% \begin{Property}{after-skip}{<skip>} is the vertical space after the
 % heading block. If the value is greater than or equal to 0pt, the
 % heading is formatted in block, while it is formatted as inline
 % heading if the value is negative.
 %    \begin{macrocode}
   \ccSetProperty{after-skip}{1sp}%
 %    \end{macrocode}
-% \DescribeProp{indent}{[auto|auto-global|<dimen>]} is the offset of the
-% first line of the heading relative to \UsageProp{margin-left}.
+% \end{Property}
+% \begin{Property}{indent}{[auto|auto-global|<dimen>]} is the offset
+%   of the first line of the heading relative to
+%   \UsageProp{margin-left}.
 %
-% If the value is auto, the indent of the heading is the width of the
-% widest \UsageComponent{Number} Component of \textit{all headings
-% with the same level}.
+%   If the value is auto, the indent of the heading is the width of
+%   the widest \UsageComponent{Number} Component of \textit{all
+%   headings with the same level}.
 %
-% If the value is \texttt{auto-global}, the indent is the width of the
-% widest Number component across \textit{all heading levels}. Both
-% \texttt{auto} and \texttt{auto-global} require at least two {\LaTeX}
-% runs. See Sect.~\ref{sec:indent} in Module~\ref{chap:common} for more
-% details.
+%   If the value is \texttt{auto-global}, the indent is the width of
+%   the widest Number component across \textit{all heading
+%   levels}. Both \texttt{auto} and \texttt{auto-global} require at
+%   least two {\LaTeX} runs. See Sect.~\ref{sec:indent} in
+%   Module~\ref{chap:common} for more details.
 %    \begin{macrocode}
   \ccSetProperty{indent}{auto}%
 %    \end{macrocode}
-% \DescribeProp{number-width}{<dimen>} is the (actula) width of the
-% \texttt{Number} component.
+% \end{Property}
+% \begin{Property}{number-width}{<dimen>} is the (actula) width of the
+%   \texttt{Number} component.
 %    \begin{macrocode}
   \ccSetProperty{number-width}{}%
 %    \end{macrocode}
-% \DescribeProp{number-sep}{<any>} Is the separator between the \texttt{Number} and the \texttt{Title}
-% components
+% \end{Property}
+% \begin{Property}{number-sep}{<any>} Is the separator between the
+%   \texttt{Number} and the \texttt{Title} components
 %    \begin{macrocode}
   \ccSetProperty{number-sep}{\space}%
 %    \end{macrocode}
-% \DescribeProp{number-align}{[left|center|right]} is the horizontal
-% alignment of the \texttt{Number} component inside its surrounding
-% \lstinline{\hbox}.
+% \end{Property}
+% \begin{Property}{number-align}{[left|center|right]} is the
+%   horizontal alignment of the \texttt{Number} component inside its
+%   surrounding \lstinline{\hbox}.
 %    \begin{macrocode}
   \ccSetProperty{number-align}{left}%
 %    \end{macrocode}
-% \DescribeProp{number-format}{<any>} is the format of a heading's
-% counter. It prints the \UsageComponent{Number} component and the
-% \UsageProp{number-sep} Property, and stylizes them both with the
-% \UsageProp{title-face} \textit{and} \UsageProp{number-face}
-% Properties.
+% \end{Property}
+% \begin{Property}{number-format}{<any>} is the format of a heading's
+%   counter. It prints the \UsageComponent{Number} component and the
+%   \UsageProp{number-sep} Property, and stylizes them both with the
+%   \UsageProp{title-face} \textit{and} \UsageProp{number-face}
+%   Properties.
 %    \begin{macrocode}
   \ccSetProperty{number-format}{%
     \bgroup
@@ -1224,27 +1272,30 @@
       \ccUseProperty{number-sep}%
     \egroup}
 %    \end{macrocode}
-% \DescribeProp{numbering}{[auto|<any>]} if non-auto, headings are not
+% \end{Property}
+% \begin{Property}{numbering}{[auto|<any>]} if non-auto, headings are not
 % numbered automatically if no Number component is given. This
 % property can be overridden in a local instance with the
 % \lstinline{nonumber} Attribute.
 %    \begin{macrocode}
   \ccSetProperty{numbering}{auto}%
-  %% running header
 %    \end{macrocode}
-% \DescribeProp{running-level}{<name>} is an override that allows the
-% heading's running title to appear as another level's running
-% title. Usually, the \lstinline{RunTitle} Component is passed to
-% \lstinline{\<level>mark} for the page header, but if this Property
-% is non-empty, the heading will be passed to
-% \lstinline{\<runnning-level>mark}, instead.
+% \end{Property}
+% \begin{Property}{running-level}{<name>} is an override that allows
+%   the heading's running title to appear as another level's running
+%   title. Usually, the \lstinline{RunTitle} Component is passed to
+%   \lstinline{\<level>mark} for the page header, but if this Property
+%   is non-empty, the heading will be passed to
+%   \lstinline{\<runnning-level>mark}, instead.
 %    \begin{macrocode}
   \ccSetProperty{running-level}{}% override level for running title, name
 %    \end{macrocode}
-% \DescribeProp{running-heading}{<any>} is the format of the material
-% passed to the \lstinline{\<level>mark} or
-% \lstinline{\<running-level>mark} command. It uses the
-% \UsageComponent{RunTitle} and \UsageComponent{RunAuthorNameList} Components.
+% \end{Property}
+% \begin{Property}{running-heading}{<any>} is the format of the
+%   material passed to the \lstinline{\<level>mark} or
+%   \lstinline{\<running-level>mark} command. It uses the
+%   \UsageComponent{RunTitle} and \UsageComponent{RunAuthorNameList}
+%   Components.
 %    \begin{macrocode}
   \ccSetProperty{running-heading}{%
     \ccIfComp{RunAuthorNameList}{\ccUseComp{RunAuthorNameList}:\space}{}%
@@ -1252,68 +1303,86 @@
   }%
   %% ToC
 %    \end{macrocode}
-% \DescribeProp{no-toc}{[true|false]} whether or not the heading does
+% \end{Property}
+% \begin{Property}{no-toc}{[true|false]} whether or not the heading does
 % \textit{not} create an entry in the table of contents (\texttt{true}
 % means no toc entry, \texttt{false} means toc entry).
 %    \begin{macrocode}
   \ccSetProperty{no-toc}{false}% toc entries are generally disabled iff true
 %    \end{macrocode}
-% \DescribeProp{no-BM}{[true|false]} whether or not the heading does
-% \textit{not} create a bookmark (\texttt{true} means no bookmark,
-% \texttt{false} means bookmark).
+% \end{Property}
+% \begin{Property}{no-BM}{[true|false]} whether or not the heading
+%   does \textit{not} create a bookmark (\texttt{true} means no
+%   bookmark, \texttt{false} means bookmark).
 %    \begin{macrocode}
   \ccSetProperty{no-BM}{false}% bookmark entries are generally disabled, iff true
 %    \end{macrocode}
-% \DescribeProp{toc-margin-top}{<skip>} vertical space before the ToC entry.
+% \end{Property}
+% \begin{Property}{toc-margin-top}{<skip>} vertical space before the ToC entry.
 %    \begin{macrocode}
   \ccSetProperty{toc-margin-top}{\z@}% left indent of the whole entry
 %    \end{macrocode}
-% \DescribeProp{toc-margin-bottom}{<skip>} vertical space after the ToC entry.
+% \end{Property}
+% \begin{Property}{toc-margin-bottom}{<skip>} vertical space after the
+%   ToC entry.
 %    \begin{macrocode}
   \ccSetProperty{toc-margin-bottom}{\z@}% bottom margin of the whole entry
 %    \end{macrocode}
-% \DescribeProp{toc-margin-left}{[auto|<dimen>]} left margin of the toc
+% \end{Property}
+% \begin{Property}{toc-margin-left}{[auto|<dimen>]} left margin of the toc
 % entry. See \lstinline{margin-left} for the meaning of auto.
 %    \begin{macrocode}
   \ccSetProperty{toc-margin-left}{auto}% left indent of the whole entry
 %    \end{macrocode}
-% \DescribeProp{toc-margin-right}{<dimen>} right margin of the ToC
-% entry.
+% \end{Property}
+% \begin{Property}{toc-margin-right}{<dimen>} right margin of the ToC
+%   entry.
 %    \begin{macrocode}
   \ccSetProperty{toc-margin-right}{\@pnumwidth}% right margin of the whole entry
 %    \end{macrocode}
-% \DescribeProp{toc-title-face}{<any>} style of the title in the ToC entry.
+% \end{Property}
+% \begin{Property}{toc-title-face}{<any>} style of the title in the
+%   ToC entry.
 %    \begin{macrocode}
   \ccSetProperty{toc-title-face}{}% appearance of title
 %    \end{macrocode}
-% \DescribeProp{toc-indent}{[auto|auto-global|<dimen>]} offset of the
-% ToC entry's first line relative to margin-left. See \lstinline{indent}.
+% \end{Property}
+% \begin{Property}{toc-indent}{[auto|auto-global|<dimen>]} offset of
+%   the ToC entry's first line relative to margin-left. See
+%   \lstinline{indent}.
 %    \begin{macrocode}
   \ccSetProperty{toc-indent}{auto}%
 %    \end{macrocode}
-% \DescribeProp{toc-number-width}{<dimen>} the actual width of the
-% TocNumber Component.
+% \end{Property}
+% \begin{Property}{toc-number-width}{<dimen>} the actual width of the
+%   TocNumber Component.
 %    \begin{macrocode}
   \ccSetProperty{toc-number-width}{}% current width of the TocNumber
 %    \end{macrocode}
-% \DescribeProp{toc-number-align}{[left|center|right]} the alignment of
-% the TocNumber within the surrounding \lstinline{\hbox}.
+% \end{Property}
+% \begin{Property}{toc-number-align}{[left|center|right]} the
+%   alignment of the TocNumber within the surrounding
+%   \lstinline{\hbox}.
 %    \begin{macrocode}
   \ccSetProperty{toc-number-align}{left}% alignment of TocNumber within the hbox when hanging
 %    \end{macrocode}
-% \DescribeProp{toc-number-face}{<any>} style of the TocNumber component.
+% \end{Property}
+% \begin{Property}{toc-number-face}{<any>} style of the TocNumber
+%   component.
 %    \begin{macrocode}
   \ccPropertyLet{toc-number-face}{toc-title-face}% appearance of the TocNumber
 %    \end{macrocode}
-% \DescribeProp{toc-number-sep}{<any>} separator between the
-% \lstinline{TocNumber} and \lstinline{TocTitle} Components
+% \end{Property}
+% \begin{Property}{toc-number-sep}{<any>} separator between the
+%   \lstinline{TocNumber} and \lstinline{TocTitle} Components
 %    \begin{macrocode}
   \ccSetProperty{toc-number-sep}{\enskip}% thing between TocNumber and TocTitle
 %    \end{macrocode}
-% \DescribeProp{toc-number-format}{<any>} is the format of the
-% \UsageComponent{TocNumber} Component, using the
-% \UsageProp{toc-number-face} and \UsageProp{toc-number-sep}
-% Properties.
+% \end{Property}
+% \begin{Property}{toc-number-format}{<any>} is the format of the
+%   \UsageComponent{TocNumber} Component, using the
+%   \UsageProp{toc-number-face} and \UsageProp{toc-number-sep}
+%   Properties.
 %    \begin{macrocode}
   \ccSetProperty{toc-number-format}{% Format of the TocNumber
     \bgroup
@@ -1322,18 +1391,21 @@
       \ccUseProperty{toc-number-sep}%
     \egroup}
 %    \end{macrocode}
-% \DescribeProp{toc-page-sep}{<any>} separator between the TocTitle
-% and the page counter.
+% \end{Property}
+% \begin{Property}{toc-page-sep}{<any>} separator between the TocTitle
+%   and the page counter.
 %    \begin{macrocode}
   \ccSetProperty{toc-page-sep}{\dotfill}% between TocTitle and the page counter
 %    \end{macrocode}
-% \DescribeProp{toc-page-face}{<any>} style of the page counter
+% \end{Property}
+% \begin{Property}{toc-page-face}{<any>} style of the page counter
 %    \begin{macrocode}
   \ccSetProperty{toc-page-face}{}% appearance of the page value
 %    \end{macrocode}
-% \DescribeProp{toc-page-format}{<any>} format of the page counter
-% using the \UsageProp{toc-page-sep} and \UsageProp{toc-page-face}
-% Properties.
+% \end{Property}
+% \begin{Property}{toc-page-format}{<any>} format of the page counter
+%   using the \UsageProp{toc-page-sep} and \UsageProp{toc-page-face}
+%   Properties.
 %    \begin{macrocode}
   \ccSetProperty{toc-page-format}{% format of the page value
     \ccUseProperty{toc-page-sep}%
@@ -1342,15 +1414,17 @@
       \ccUseComp{TocPage}%
     \egroup}%
 %    \end{macrocode}
-% \DescribeProp{toc-level}{<name>} name of another heading level as
-% which the ToC entry should be rendered.
+% \end{Property}
+% \begin{Property}{toc-level}{<name>} name of another heading level as
+%   which the ToC entry should be rendered.
 %    \begin{macrocode}
   \ccSetProperty{toc-level}{}%
 %    \end{macrocode}
-% \DescribeProp{toc-before-entry}{<any>} is expanded before any ToC
-% entry is rendered. Should setup
-% margins\UsageProperty{toc-margin-top}\UsageProperty{toc-margin-right}\UsageProperty{toc-margin-left},
-% alignment, line-breaking rules, etc.
+% \end{Property}
+% \begin{Property}{toc-before-entry}{<any>} is expanded before any ToC
+%   entry is rendered. Should setup
+%   margins\UsageProperty{toc-margin-top}\UsageProperty{toc-margin-right}\UsageProperty{toc-margin-left},
+%   alignment, line-breaking rules, etc.
 %    \begin{macrocode}
   \ccSetProperty{toc-before-entry}{%
     \addvspace{\ccUseProperty{toc-margin-top}}%
@@ -1362,20 +1436,24 @@
     \leftskip\ccUseProperty{toc-margin-left}%
   }%
 %    \end{macrocode}
-% \DescribeProp{toc-after-entry}{<any>} is expanded at the very end of
-% a ToC entry. By default, it sets the skip after the entry to \UsageProp{toc-margin-bottom}.
+% \end{Property}
+% \begin{Property}{toc-after-entry}{<any>} is expanded at the very end
+%   of a ToC entry. By default, it sets the skip after the entry to
+%   \UsageProp{toc-margin-bottom}.
 %    \begin{macrocode}
   \ccSetProperty{toc-after-entry}{\par\addvspace{\ccUseProperty{toc-margin-bottom}}}%
 %    \end{macrocode}
-% \DescribeProp{toc-format}{<any>} format of the ToC entry itself. It
-% uses the \UsageProp{toc-title-face}, \UsageProp{toc-hang-number} and
-% \UsageProp{toc-page-format} Properties to print the
-% \UsageComponent{TocNumber}, \UsageComponent{TocAuthorNameList},
-% \UsageComponent{TocTitle}, and \UsageComponent{TocPage}
-% Components. Tagging should incorporate the \DescribeTag{TOCI},
-% \DescribeTag{P}, and \DescribeTag{Reference} tags for the entire
-% entry, as well as \DescribeTag{Lbl} for the \UsageComponent{TocNumber}, and
-% \DescribeTag{Span} for the rest of the entry.
+% \end{Property}
+% \begin{Property}{toc-format}{<any>} format of the ToC entry
+%   itself. It uses the \UsageProp{toc-title-face},
+%   \UsageProp{toc-hang-number} and \UsageProp{toc-page-format}
+%   Properties to print the \UsageComponent{TocNumber},
+%   \UsageComponent{TocAuthorNameList}, \UsageComponent{TocTitle}, and
+%   \UsageComponent{TocPage} Components. Tagging should incorporate
+%   the \DescribeTag{TOCI}, \DescribeTag{P}, and
+%   \DescribeTag{Reference} tags for the entire entry, as well as
+%   \DescribeTag{Lbl} for the \UsageComponent{TocNumber}, and
+%   \DescribeTag{Span} for the rest of the entry.
 %    \begin{macrocode}
   \ccSetProperty{toc-format}{%
     \ccUseProperty{toc-title-face}%
@@ -1394,32 +1472,36 @@
     \ccaStructEnd{TOCI}%
   }%
 %    \end{macrocode}
-% \DescribeProp{bookmark-level}{<num>} number(!) of the heading level as
-% which the Bookmark entry should be rendered.
+% \end{Property}
+% \begin{Property}{bookmark-level}{<num>} number(!) of the heading
+%   level as which the Bookmark entry should be rendered.
 %    \begin{macrocode}
   \ccSetProperty{bookmark-level}{}%
 %    \end{macrocode}
-% \DescribeProp{bookmark}{<any>} is the format of the bookmark, which
-% by default is built only from the \UsageComponent{BMNumber} and
-% \UsageComponent{BMTitle} Components.
+% \end{Property}
+% \begin{Property}{bookmark}{<any>} is the format of the bookmark,
+%   which by default is built only from the \UsageComponent{BMNumber}
+%   and \UsageComponent{BMTitle} Components.
 %    \begin{macrocode}
   \ccSetProperty{bookmark}{%
     \ccIfComp{BMNumber}{\ccUseComp{BMNumber}\space}{}%
     \ccUseComp{BMTitle}%
   }%
 %    \end{macrocode}
-% \DescribeProp{orcid-link}{<any>} how an \UsageComponent{ORCID} link is
-% rendered.
+% \end{Property}
+% \begin{Property}{orcid-link}{<any>} how an \UsageComponent{ORCID}
+%   link is rendered.
 %    \begin{macrocode}
   \ccSetProperty{orcid-link}{%
     \ccIfComp{ORCID}{\ccCompLink{ORCID}{\includegraphics[height=1em]{logos/ORCID.pdf}}}{}%
   }%
 %    \end{macrocode}
-% \DescribeProp{author-contact-format}{<any>} how a single Author
-% Component's contact information should be rendered. By default, it
-% uses the Author's \UsageComponent{FullName}, the value of the
-% \UsageComponent{AffilRef} component as superscript, and the
-% \UsageProp{orcid-link} Property.
+% \end{Property}
+% \begin{Property}{author-contact-format}{<any>} how a single Author
+%   Component's contact information should be rendered. By default, it
+%   uses the Author's \UsageComponent{FullName}, the value of the
+%   \UsageComponent{AffilRef} component as superscript, and the
+%   \UsageProp{orcid-link} Property.
 %    \begin{macrocode}
   %% a single Author's contact infomration block
   \ccSetProperty{author-contact-format}{%
@@ -1427,24 +1509,28 @@
     \ccUseProperty{orcid-link}%
   }%
 %    \end{macrocode}
-% \DescribeProp{author-list-format}{<any>} how a single entry in the
-% \UsageComponent{AuthorNameList} Collection Component should be
-% rendered.
+% \end{Property}
+% \begin{Property}{author-list-format}{<any>} how a single entry in
+%   the \UsageComponent{AuthorNameList} Collection Component should be
+%   rendered.
 %    \begin{macrocode}
   \ccPropertyLet{author-list-format}{author-list-print-format}%
 %    \end{macrocode}
-% \DescribeProp{author-contact-block-format}{<any>} is the Collection
-% Property for the \UsageComponent{AuthorContactBlock} Collection
-% Component and sets how each single entry in the Collection should be
-% formatted. By default, it uses the \UsageComponent{AuthorContact}
-% Counted Component and appends the \UsageProp{counted-name-sep} to
-% all instance of that Component but the last.
+% \end{Property}
+% \begin{Property}{author-contact-block-format}{<any>} is the
+%   Collection Property for the \UsageComponent{AuthorContactBlock}
+%   Collection Component and sets how each single entry in the
+%   Collection should be formatted. By default, it uses the
+%   \UsageComponent{AuthorContact} Counted Component and appends the
+%   \UsageProp{counted-name-sep} to all instance of that Component but
+%   the last.
 %    \begin{macrocode}
   \ccSetProperty{author-contact-block-format}{% Format of the whole contact information block
     \ccUseComp{AuthorContact}\ifnum\ccCurCount<\ccTotalCount\ccUseProperty{counted-name-sep}\fi
   }%
 }
 %    \end{macrocode}
+% \end{Property}
 %
 % \section{Miscellaneous}
 %

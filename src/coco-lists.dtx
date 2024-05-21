@@ -124,8 +124,8 @@
 %
 % \subsubsection{List Boundaries}
 %
-% \DescribeProp{before-list}{<any>} is expanded at the very
-% beginning of a (nested) list.
+% \begin{Property}{before-list}{<any>} is expanded at the very
+%   beginning of a (nested) list.
 %    \begin{macrocode}
     \ccSetProperty{before-list}{% at the very beginning of each (nested) list
       \if@noskipsec \leavevmode \fi
@@ -133,98 +133,113 @@
         \unskip \par
       \fi
 %    \end{macrocode}
-% \DescribeTagS{L} is the opening List tag
+%   \DescribeTagS{L} is the opening List tag
 %    \begin{macrocode}
       \ccaStructStart{L}%
     }%
 %    \end{macrocode}
-% \DescribeProp{after-list}{<any>} is expanded at the very end of a
-% (nested) list. By default, it calls the \UsageProp{after-item}
-% Property.
-% \DescribeTagE{L} is the closing List tag
+% \end{Property}
+% \begin{Property}{after-list}{<any>} is expanded at the very end of a
+%   (nested) list. By default, it calls the \UsageProp{after-item}
+%   Property.  \DescribeTagE{L} is the closing List tag
 %    \begin{macrocode}
     \ccSetProperty{after-list}{%
       \ccUseProperty{after-item}%
       \ccaStructEnd{L}% end tag for the (nested) list
     }%
 %    \end{macrocode}
+% \end{Property}
 %
 % \subsubsection{List Margins}
 %
-% \DescribeProp{margin-top}{<skip>} is the vertical skip at the
-% beginning of each List instance.
+% \begin{Property}{margin-top}{<skip>} is the vertical skip at the
+%   beginning of each List instance.
 %    \begin{macrocode}
     %% list margins
     \ccSetProperty{margin-top}{\z@}%
 %    \end{macrocode}
-% \DescribeProp{margin-bottom}{<skip>} is the vertical skip at the end
-% of each List instance.
+% \end{Property}
+% \begin{Property}{margin-bottom}{<skip>} is the vertical skip at the
+%   end of each List instance.
 %    \begin{macrocode}
     \ccSetProperty{margin-bottom}{\z@}% vertical space before the list.
 %    \end{macrocode}
-% \DescribeProp{margin-left}{[auto|<skip>]} is the horizontal space to
-% the left of each list instance, from left boundary of the page area.
-% \lstinline{auto} means that the left margin is set to the width of
-% widest label + \UsageProp{prev-margin-left}. The value is passed
-% through \lstinline{\dimexpr}, so basic arithmatic is allowed.
+% \end{Property}
+% \begin{Property}{margin-left}{[auto|<skip>]} is the horizontal space
+%   to the left of each list instance, from left boundary of the page
+%   area.  \lstinline{auto} means that the left margin is set to the
+%   width of widest label + \UsageProp{prev-margin-left}. The value is
+%   passed through \lstinline{\dimexpr}, so basic arithmatic is
+%   allowed.
 %    \begin{macrocode}
     \ccSetProperty{margin-left}{\csname leftmargin\@roman\cclCurDepth\endcsname-\ccUseProperty{label-sep}+\ccUseProperty{prev-margin-left}}%
 %    \end{macrocode}
-% \DescribeProp{margin-left}{<dimen>} is the maximum space reserved
-% for a list item's label.
+% \end{Property}
+% \begin{Property}{margin-left}{<dimen>} is the maximum space reserved
+%   for a list item's label.
 %    \begin{macrocode}
     \ccSetProperty{max-label-width}{.33\textwidth}%
 %    \end{macrocode}
-% \DescribeProp{margin-right}{<skip>} is the right margin of the list
-% instance.
+% \end{Property}
+% \begin{Property}{margin-right}{<skip>} is the right margin of the
+%   list instance.
 %    \begin{macrocode}
     \ccSetProperty{margin-right}{\z@}% horizontal space to the right of each list item
 %    \end{macrocode}
+% \end{Property}
 %
 % \subsubsection{Between List Items}
 %
-% \DescribeProp{item-sep}{<skip>} is the \textit{vertical} space
-% between two adjacent list items. Note that the real value value is
-% advanced by the value of the \UsageProp{par-skip} Property.
+% \begin{Property}{item-sep}{<skip>} is the \textit{vertical} space
+%   between two adjacent list items. Note that the real value value is
+%   advanced by the value of the \UsageProp{par-skip} Property.
 %    \begin{macrocode}
     \ccSetProperty{item-sep}{\z@}%
 %    \end{macrocode}
-% \DescribeProp{after-indent}{[true|false]} determins whether the text
-% paragraph after the (top-level) list is indented (\lstinline{true})
-% or not (\lstinline{false}).
+% \end{Property}
+% \begin{Property}{after-indent}{[true|false]} determins whether the
+%   text paragraph after the (top-level) list is indented
+%   (\lstinline{true}) or not (\lstinline{false}).
 %    \begin{macrocode}
     \ccSetProperty{after-indent}{false}%
 %    \end{macrocode}
-% \DescribeProp{at-begin-item-body}{<any>} is expanded right at the
-% beginning of a new item body and sets the \DescribeTagS{LBody} tag.
+% \end{Property}
+% \begin{Property}{at-begin-item-body}{<any>} is expanded right at the
+%   beginning of a new item body and sets the \DescribeTagS{LBody}
+%   tag.
 %    \begin{macrocode}
     \ccSetProperty{at-begin-item-body}{\ccaVstructStart{LBody}}%
 %    \end{macrocode}
-% \DescribeProp{at-end-item-body}{<any>} is expanded at the very end
-% of an item body, but before the final \lstinline{\par}. By default,
-% it only sets the closing \DescribeTagE{LBody} tag.
+% \end{Property}
+% \begin{Property}{at-end-item-body}{<any>} is expanded at the very
+%   end of an item body, but before the final \lstinline{\par}. By
+%   default, it only sets the closing \DescribeTagE{LBody} tag.
 %    \begin{macrocode}
     \ccSetProperty{at-end-item-body}{\ccaVstructEnd{LBody}}%
 %    \end{macrocode}
-% \DescribeProp{after-item}{<any>} is expanded after each list
-% item. It calls the \UsageProp{at-end-item-body} Property and closes
-% the item's final paragraph as well as the \DescribeTagE{LI} tag.
+% \end{Property}
+% \begin{Property}{after-item}{<any>} is expanded after each list
+%   item. It calls the \UsageProp{at-end-item-body} Property and
+%   closes the item's final paragraph as well as the \DescribeTagE{LI}
+%   tag.
 %    \begin{macrocode}
     \ccSetProperty{after-item}{%
       \ccUseProperty{at-end-item-body}%
       \ccaVstructEnd{LI}% Close list item tags
       \par}%
 %    \end{macrocode}
-% \DescribeProp{before-item}{<any>} is called at the very beginning of
-% each list item. If the current item is the first item, the
-% \UsageMacro{\ifcclFirst} conditional is set to false. All non-first
-%   items of the same List instance call the \UsageProp{after-item}
-%   Property and add a vertical skip of \UsageProp{item-sep} amount.
+% \end{Property}
+% \begin{Property}{before-item}{<any>} is called at the very beginning
+%   of each list item. If the current item is the first item, the
+%   \UsageMacro{\ifcclFirst} conditional is set to false. All
+%     non-first items of the same List instance call the
+%     \UsageProp{after-item} Property and add a vertical skip of
+%     \UsageProp{item-sep} amount.
 %
-%   After that, the paragraph formatting parameters for the list-item
-%   \UsageProp{par-indent}, \UsageProp{par-skip}, and
-%   \UsageProp{par-fill-skip}, as well as the starting
-%   \DescribeTagS{LI} tag are set.
+%     After that, the paragraph formatting parameters for the
+%     list-item \UsageProp{par-indent}, \UsageProp{par-skip}, and
+%     \UsageProp{par-fill-skip}, as well as the starting
+%     \DescribeTagS{LI} tag are set.
 %    \begin{macrocode}
     \ccSetProperty{before-item}{%
       \ifcclFirst
@@ -241,11 +256,12 @@
       \ccaVstructStart{LI}% Start tag for a list item
     }%
 %    \end{macrocode}
-% \DescribeProp{item-offset}{<any>} calculates
-% \UsageMacro{\cclItemIndent} from the \UsageProp{indent} and
-% \UsageProp{label-sep} Properties and sets the horizontal offset of
-% the first line of the list item. After that, the value of the macro
-% is unsigned.
+% \end{Property}
+% \begin{Property}{item-offset}{<any>} calculates
+%   \UsageMacro{\cclItemIndent} from the \UsageProp{indent} and
+%   \UsageProp{label-sep} Properties and sets the horizontal offset of
+%   the first line of the list item. After that, the value of the
+%   macro is unsigned.
 %    \begin{macrocode}
     \ccSetProperty{item-offset}{%
       \cclItemIndent\ccUseProperty{indent}%
@@ -258,63 +274,73 @@
       \fi
     }%
 %    \end{macrocode}
-% \DescribeProp{par-indent}{<skip>} is the indent of the first line of
-% a *new* paragraph inside a list item
+% \end{Property}
+% \begin{Property}{par-indent}{<skip>} is the indent of the first line
+%   of a *new* paragraph inside a list item
 %    \begin{macrocode}
     \ccSetProperty{par-indent}{\parindent}%
 %    \end{macrocode}
-% \DescribeProp{par-fill-skip}{<skip>} is the skip at the end of the
-% last line of each paragraph inside a list item
+% \end{Property}
+% \begin{Property}{par-fill-skip}{<skip>} is the skip at the end of
+%   the last line of each paragraph inside a list item
 %    \begin{macrocode}
     \ccSetProperty{par-fill-skip}{\@flushglue}%
 %    \end{macrocode}
-% \DescribeProp{par-skip}{<dimen>} vertical space between two adjacent
-% paragraphs inside the same List item
+% \end{Property}
+% \begin{Property}{par-skip}{<dimen>} vertical space between two
+%   adjacent paragraphs inside the same List item
 %    \begin{macrocode}
     \ccSetProperty{par-skip}{\z@}%
 %    \end{macrocode}
+% \end{Property}
 %
 % \subsubsection{Label Formatting}
 %
-% \DescribeProp{label}{<any>} prints the \UsageComponent{Label} component.
+% \begin{Property}{label}{<any>} prints the \UsageComponent{Label}
+%   component.
 %    \begin{macrocode}
     \ccSetProperty{label}{\ccUseComp{Label}}%
 %    \end{macrocode}
-% \DescribeProp{indent}{[auto|auto-global|<dimen>]} is the indent of
-% each List item's first line (relative to
-% \UsageProp{margin-left}).
+% \end{Property}
+% \begin{Property}{indent}{[auto|auto-global|<dimen>]} is the indent
+%   of each List item's first line (relative to
+%   \UsageProp{margin-left}).
 %
-% If the value is \lstinline{auto}, the real indent and left margin of
-% a item's first line is calculated using coco-common's indentation
-% mechanism (see Sect.~\ref{sec:indent} in
-% Module~\ref{chap:common}). The first-line indent will thereby be
-% calculated from the widest width of all labels of the same list type
-% and nesting level.
+%   If the value is \lstinline{auto}, the real indent and left margin
+%   of a item's first line is calculated using coco-common's
+%   indentation mechanism (see Sect.~\ref{sec:indent} in
+%   Module~\ref{chap:common}). The first-line indent will thereby be
+%   calculated from the widest width of all labels of the same list
+%   type and nesting level.
 %
-% \textbf{Note:} the value \lstinline{auto-global} is allowed, but it
-% causes *all* lists --~regarless of the nesting level~-- to have the
-% same left margin and indent!
+%   \textbf{Note:} the value \lstinline{auto-global} is allowed, but
+%   it causes *all* lists --~regarless of the nesting level~-- to have
+%   the same left margin and indent!
 %    \begin{macrocode}
     \ccSetProperty{indent}{-\dimexpr\csname leftmargin\@roman\cclCurDepth\endcsname-\ccUseProperty{label-sep}\relax}%
 %    \end{macrocode}
-% \DescribeProp{label-sep}{<dimen>} is the horizontal space between
-% the label and the item body.
+% \end{Property}
+% \begin{Property}{label-sep}{<dimen>} is the horizontal space between
+%   the label and the item body.
 %    \begin{macrocode}
     \ccSetProperty{label-sep}{.5em}%
 %    \end{macrocode}
-% \DescribeProp{label-face}{<any>} is the style of the label.
+% \end{Property}
+% \begin{Property}{label-face}{<any>} is the style of the label.
 %    \begin{macrocode}
     \ccSetProperty{label-face}{}%
 %    \end{macrocode}
-% \DescribeProp{label-align}{[left|center|right]} is the alignment of
-% the label within its local \lstinline{\hbox}.
+% \end{Property}
+% \begin{Property}{label-align}{[left|center|right]} is the alignment
+%   of the label within its local \lstinline{\hbox}.
 %    \begin{macrocode}
     \ccSetProperty{label-align}{left}%
 %    \end{macrocode}
-% \DescribeProp{label-format}{<any>} is the format of the label. It
-% should call the \UsageProp{label-face} and \UsageProp{label}
-% properties and enclose the latter with \DescribeTagS{Lbl} and
-% \DescribeTagE{Lbl}.
+% \end{Property}
+% \begin{Property}{label-format}{<any>} is the format of the label. It
+%   should call the \UsageProp{label-face} and \UsageProp{label}
+%   properties and enclose the latter with \DescribeTagS{Lbl} and
+%   \DescribeTagE{Lbl}.
 %    \begin{macrocode}
     \ccSetProperty{label-format}{%
       \ccUseProperty{label-face}%
@@ -323,10 +349,12 @@
       \ccaVstructEnd{Lbl}%
     }%
 %    \end{macrocode}
-% \DescribeProp{label-box}{<any>} is the property that builds a local
-% \lstinline{\hbox} into which the \UsageComponent{Label} Component is
-% printed. It should respect the \UsageProp{label-align} Property and
-% call \UsageProp{label-format}.
+% \end{Property}
+% \begin{Property}{label-box}{<any>} is the property that builds a
+%   local \lstinline{\hbox} into which the \UsageComponent{Label}
+%   Component is printed. It should respect the
+%   \UsageProp{label-align} Property and call
+%   \UsageProp{label-format}.
 %    \begin{macrocode}
     \ccSetProperty{label-box}{%
       \hbox to \cclItemIndent{%
@@ -335,10 +363,11 @@
         \ccIfPropVal{label-align}{right}{}{\hss}}%
     }%
 %    \end{macrocode}
-% \DescribeProp{item-format}{<any>} contains material printed at the
-% beginning of a new item. It should call the \UsageProp{before-item},
-% \UsageProp{item-offset}, \UsageProp{label-box} and
-% \UsageProp{label-sep} Properties.
+% \end{Property}
+% \begin{Property}{item-format}{<any>} contains material printed at
+%   the beginning of a new item. It should call the
+%   \UsageProp{before-item}, \UsageProp{item-offset},
+%   \UsageProp{label-box} and \UsageProp{label-sep} Properties.
 %    \begin{macrocode}
     \ccSetProperty{item-format}{%
       \ccUseProperty{before-item}%
@@ -348,15 +377,19 @@
     }%
   }%
 %    \end{macrocode}
+% \end{Property}
 %
 % \subsection{List Components}
 %
 %    \begin{macrocode}
   \ccDeclareType{Components}{%
 %    \end{macrocode}
-% \DescribeComponent{Label} represents a List item's local label.
+% \begin{Component}{Label} represents a List item's local label.
 %    \begin{macrocode}
     \ccDeclareComponent{Label}%
+%    \end{macrocode}
+% \end{Component}
+%    \begin{macrocode}
   }%
   \ccDeclareEnv{cc@list}{endcc@list}%
 }
@@ -393,9 +426,12 @@
     \ccInherit{Components,Properties}{List}%
     \ccDeclareType{Properties}{%
 %    \end{macrocode}
-% \DescribeProp{list-type}{<any>} holds the name of the list type.
+% \begin{Property}{list-type}{<any>} holds the name of the list type.
 %    \begin{macrocode}
       \ccSetProperty{list-type}{#1}%
+%    \end{macrocode}
+% \end{Property}
+%    \begin{macrocode}
       #3%
     }%
     \ccDeclareEnv[#1-list]{\cc@list}{\endcc@list}%
@@ -592,18 +628,20 @@
   \edef\ccl@rightskip{\the\dimexpr\leftskip\relax}%
 %    \end{macrocode}
 %
-% \DescribeProp{prev-margin-left}{<skip>} stores the left margin of
-% the next higher list level (i.\,e., the left margin of the list item
-% that the current list is nested into)
+% \begin{Property}{prev-margin-left}{<skip>} stores the left margin of
+%   the next higher list level (i.\,e., the left margin of the list
+%   item that the current list is nested into)
 %    \begin{macrocode}
   \ccSetPropertyX{prev-margin-left}{\ccl@leftskip}%
 %    \end{macrocode}
-% \DescribeProp{prev-margin-right}{<skip>} stores the superior list
-% item's right margin.
+% \end{Property}
+% \begin{Property}{prev-margin-right}{<skip>} stores the superior list
+%   item's right margin.
 %    \begin{macrocode}
   \ccSetPropertyX{prev-margin-right}{\ccl@rightskip}%
   \ccEvalType[\ccl@cur@cont]{Properties}%
 %    \end{macrocode}
+% \end{Property}
 % \begin{macro}{\ccl@list@type} locally stores the current value of
 %   the \UsageProp{list-type} Property.
 %    \begin{macrocode}
@@ -818,12 +856,13 @@
 %
 % \subsubsection{Itemize-Type List  Specific Properties}
 %
-% \DescribeProp{default-label}{<any>} is a property that holds a
-% fallback label which is used when the optional argument of
-% \UsageMacro{\Item} is omitted.
+% \begin{Property}{default-label}{<any>} is a property that holds a
+%   fallback label which is used when the optional argument of
+%   \UsageMacro{\Item} is omitted.
 %    \begin{macrocode}
   {\ccSetProperty{default-label}{-}}
 %    \end{macrocode}
+% \end{Property}
 %
 %
 % \subsubsection{Itemize-Style Default Lists}
@@ -904,13 +943,15 @@
 %
 % \paragraph{New Properties}
 %
-% \DescribeProp{enum-type}{[arabic|roman|Roman|Alph|alph]} controls how
-% the item counter is rendered when it is not given explicitly with
-% the optional argument of \lstinline{\item}. The default values are
-% borrowed from LaTeX's default enumerate types and defined below.
+% \begin{Property}{enum-type}{[arabic|roman|Roman|Alph|alph]} controls
+%   how the item counter is rendered when it is not given explicitly
+%   with the optional argument of \lstinline{\item}. The default
+%   values are borrowed from LaTeX's default enumerate types and
+%   defined below.
 %    \begin{macrocode}
   \ccSetProperty{enum-type}{arabic}%
 %    \end{macrocode}
+% \end{Property}
 %
 %
 % \paragraph{Properties with Deviating Default Values}
@@ -1004,22 +1045,22 @@
 %
 % \paragraph{New Properties}
 %
-% \DescribeProp{label-growth}{[up|down]} controls the direction labels
-% ``grow'' into when they need more space than
-% \UsageProp{max-label-width}. On \TeX-primitive level, it controlls
-% whether the label is put into a \lstinline{\vbox} or
-% \lstinline{\vtop} with \lstinline{\hsize=\cclItemIndent}.
+% \begin{Property}{label-growth}{[up|down]} controls the direction
+%   labels ``grow'' into when they need more space than
+%   \UsageProp{max-label-width}. On \TeX-primitive level, it controlls
+%   whether the label is put into a \lstinline{\vbox} or
+%   \lstinline{\vtop} with \lstinline{\hsize=\cclItemIndent}.
 %
-% \textbf{Improtant note:} If the \lstinline{label-growth} is set to
-% 'down' and the description of an item uses less lines than its
-% label, the label \textit{will} flow into the next item. There is no
-% (easy) way to catch that (automatically) without destroying the
-% possibility to nesting lists.
+%   \textbf{Improtant note:} If the \lstinline{label-growth} is set to
+%   'down' and the description of an item uses less lines than its
+%   label, the label \textit{will} flow into the next item. There is
+%   no (easy) way to catch that (automatically) without destroying the
+%   possibility to nesting lists.
 %
 %    \begin{macrocode}
  {\ccSetProperty{label-growth}{up}%
 %    \end{macrocode}
-% 
+% \end{Property}
 % \paragraph{Properties with Deviating Default Values}
 %
 %

@@ -890,9 +890,9 @@ from the Components given in the Meta Container.}}}
     {\def\cca@default@icc@iden{sRGB IEC61966-2.1}}
   \ccAddToType{Properties}{titlepage}{%
 %    \end{macrocode}
-% \DescribeProp{output-intent}{<see below>} sends the output intent
-% information to the \texttt{ltpdfa} package. It must contain of three
-% data fields:
+% \begin{Property}{output-intent}{<see below>} sends the output intent
+%   information to the \texttt{ltpdfa} package. It must contain of
+%   three data fields:
 %   \begin{description}
 %   \item[profile] with the name of the to-be-embedded
 %     \lstinline{.icc} file,
@@ -910,6 +910,7 @@ from the Components given in the Meta Container.}}}
       identifier=\ccIfComp{IccIdentifier}{\ccUseComp{IccIdentifier}}{\cca@default@icc@iden}%
     }}
 %    \end{macrocode}
+% \end{Property}
 % The Component Handler which links the new Components to that
 % Property is added to titlepage's \lstinline{document-meta-hook}:
 %    \begin{macrocode}
