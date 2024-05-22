@@ -19,44 +19,106 @@
 \ProvidesPackage{coco-notes}
     [\filedate \fileversion le-tex coco notes module]
 %    \end{macrocode}
-% internal switch for endnotes (\lstinline{\ccn@use@entrue}) or footnotes (\lstinline{\ccn@use@enfalse}, default).
+%
+%
+% \section{Internal Switches and Package Options}
+%
+% \subsection{Package Switches}
+%
+% \begin{macro}{\if@ccn@use@en} is an internal switch for endnotes
+%     (\lstinline{\ccn@use@entrue}) or footnotes
+%     (\lstinline{\ccn@use@enfalse}, default).
 %    \begin{macrocode}
 \newif\if@ccn@use@en \@ccn@use@enfalse
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\if@ccn@en@links} is an internal switch for
+%     back-referencing (\lstinline{\@ccn@en@linkstrue}) or plain
+%     endnotes (\lstinline{\@ccn@en@linksfalse}).
+%    \begin{macrocode}
 \newif\if@ccn@en@links \@ccn@en@linksfalse
 %    \end{macrocode}
-% package options:
-% \begin{itemize}
-% \item \lstinline{endnotes} activates endnotes.
-% \item \lstinline{ennotoc} prevents chapter headings in the Notes
-%   section from creating toc entries.
-% \item \lstinline{resetnotesperchapter} resets foot- and endnotes at
-%   the start of each chapter level heading. If omitted (default)
-%   foot- or endnotes are numbered throughout the whole document
-% \item \lstinline{endnotesperchapter} implies \lstinline{endnotes}
-%   and allows the output of all collected endnotes at the end of each
-%   chapter. It also sets the note's heading to section level
-%   (otherwise it is chapter level).
-% \end{itemize}
+% \end{macro}
+%
+%
+% \subsection{Package Options}
+%
+% The \lstinline{endnotes} option causes all footnotes to be rendered as endnotes.
 %    \begin{macrocode}
 \DeclareOption{endnotes}{\global\@ccn@use@entrue}
+%    \end{macrocode}
+% The option \lstinline{ennotoc} prevents headings in the Notes
+% section from creating entries in the Table of Contents.
+%    \begin{macrocode}
 \DeclareOption{ennotoc}{\global\let\ccn@en@no@toc\relax}
+%    \end{macrocode}
+% The option \lstinline{resetnotesperchapter} resets foot- and endnote
+% counters at the start of each \lstinline{chapter} level heading. If
+% omitted (default) foot- or endnotes are numbered throughout the
+% whole document
+%    \begin{macrocode}
 \DeclareOption{resetnotesperchapter}{\global\let\ccn@reset@notes@per@chapter\relax}
+%    \end{macrocode}
+% The option \lstinline{endnoteswithchapters} implies
+% \lstinline{endnotes} and allows the output of all collected endnotes
+% at the end of each chapter. It also sets the note's heading to the
+% level \lstinline{section} (otherwise it is \lstinline{chapter}).
+%    \begin{macrocode}
 \DeclareOption{endnoteswithchapters}{\global\@ccn@use@entrue\global\let\ccn@en@with@chapters\relax}
+%    \end{macrocode}
+% The option \lstinline{endnotelinks} causes endnotes to
+% back-reference to their Reference in the main text body.
+%    \begin{macrocode}
 \DeclareOption{endnotelinks}{\global\@ccn@en@linkstrue}
 \ProcessOptions
 %    \end{macrocode}
-% footnote package is mandatory since it provides the \lstinline{\savenotes} and \lstinline{\spewnotes} macros:
+%
+%
+% \subsection{Hard Requirements}
+%
+% The \lstinline{footnote} package is mandatory since it provides the
+% \lstinline{\savenotes} and \lstinline{\spewnotes} macros needed in
+% other {\CoCoTeX} modules.
 %    \begin{macrocode}
 \RequirePackage{footnote}
 %    \end{macrocode}
-% Handling of endnotes:
+%
+%
+% \section{Endnote Handling}
+%
+% \begin{macro}{\if@enotesopen} is a switch from the
+%     \lstinline{endnotes} package. but since the package is loaded
+%     only with the \lstinline{endnotes} options set, we need to
+%     define the conditional, anyhow.
 %    \begin{macrocode}
 \newif\if@enotesopen
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccn@parindent} is the par indent used in the endnotes
+%   section. It defaults to the value of parindent at the very end of
+%   the {\LaTeX} Preamble.
+%    \begin{macrocode}
 \AtBeginDocument{\edef\ccn@parindent{\the\parindent}}
+%    \end{macrocode}
+% \end{macro}
+% If endnotes are activated via a Package option, we include the
+% \lstinline{endnotes} package.
+%    \begin{macrocode}
 \if@ccn@use@en
   \RequirePackage{endnotes}
+%    \end{macrocode}
+% \begin{macro}{\ccn@use@TeX@heading} is a switch that defines itself
+%   when the {\CoCoTeX} Headings module is loaded.
+%    \begin{macrocode}
   \@ifpackageloaded{coco-headings}{\let\ccn@use@TeX@heading\relax}{}
-  % Allow linking endnotes to their respective occurrence in the document.
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\@endnotemark} is re-defined when endnotes should
+%   back-reference. In this case, we insert a {\LaTeX}
+%   \lstinline{\label} for later referencing.
+%
+%   TODO: This macro should be patched, not re-defined!
+%    \begin{macrocode}
   \if@ccn@en@links
     \global\newcount\endnoteLinkCnt \global\endnoteLinkCnt\z@
     \def\@endnotemark{%
@@ -69,10 +131,25 @@
       \relax%
     }
   \fi
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\footnote} is re-defined to be an alias of the
+%   \lstinline{\endnote} macro.
+%    \begin{macrocode}
   \let\footnote=\endnote
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\enotesize} holds the font size of the endnotes
+%   section.
+%    \begin{macrocode}
   \def\enotesize{\normalsize}%
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\enoteformat} is the format of an endnote. We create
+%   the label right at the start of the endnote text to prevent
+%   erroneous pointing to the next page.
+%    \begin{macrocode}
   \def\enoteformat{%
-    % Create the label right at the start of the endnote text to prevent erroneous pointing to the next page.
     \if@ccn@en@links%
       \phantomsection%
       \label{endnotetext-\currentEndnote}%
@@ -88,9 +165,22 @@
     }%
     \expandafter\parindent\ccn@parindent\relax\expandafter%
   }%
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\enoteheading} is a macro that is expanded at the
+%   beginning of the endnotes section. Originally, it was intended to
+%   hold the endnote section's heading, we mis-use it to set the
+%   leftskip. Apparently, the intention is to re-define the macro
+%   style-wise if needed...
+%    \begin{macrocode}
   \gdef\enoteheading{%
     \leftskip2em
   }%
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\printnotes} is the macro that eventually prints the
+%   endnote section in its stead.
+%    \begin{macrocode}
   \def\printnotes{%
     \ifx\ccn@en@with@chapters\relax
       \ifnum\c@endnote>\z@
@@ -100,16 +190,35 @@
     \if@enotesopen
       \global\c@endnote\z@%
       \bgroup
-      %\parindent\z@
       \parskip\z@
       \theendnotes
       \egroup
     \fi}
 \else
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\c@endnote} is defined to ensure
+%   upward-compatibility.
+%    \begin{macrocode}
   \newcount\c@endnote \c@endnote\z@
   \let\printnotes\relax
 \fi
-
+%    \end{macrocode}
+% \end{macro}
+%
+%
+% \section{Processing Package Options}
+%
+% \subsection{Endnotes With Chapters}
+%
+% If endnotes are printed chapter-wise, we need to hook into the
+% \lstinline{chapter} heading level using
+% \UsageHook{before-hook-chapter}. There, we check if the last chapter
+% did actually contain endnotes. If yes, we pass the chapter's
+% \UsageComp{Title} and \UsageComp{RunTitle} components into the
+% endnote temporary \lstinline{.ent} file as a \lstinline{section}
+% heading.
+%    \begin{macrocode}
 \newcount\realchap \realchap\z@
 \ifx\ccn@en@with@chapters\relax
   \AtBeginDocument{%
@@ -134,7 +243,12 @@
     }%
   }
 \fi
-
+%    \end{macrocode}
+%
+%
+% \subsection{Chapter-wise Resetting}
+%
+%    \begin{macrocode}
 \ifx\ccn@reset@notes@per@chapter\relax
   \AtBeginDocument{%
     \ccAddToHook[heading]{before-hook-chapter}{%
@@ -143,11 +257,45 @@
     }%
   }%
 \fi
-
 %    \end{macrocode}
-% Here we make a small adjustment to the \lstinline{\fn@fntext} macro
-% from the \lstinline{footnote} package by making it \lstinline{\long}
-% and therefore allowing \lstinline{\par} inside its argument.
+%
+%
+% \subsection{Back-Referencing Endnotes}
+%
+% Linking endnotes requires overwriting the \lstinline{\@endnotetext}
+% macro to save a global counter to the *.ent file.
+%    \begin{macrocode}
+\global\newif\if@haveenotes
+\long\def\@endnotetext#1{%
+  \global\@haveenotestrue
+  \if@enotesopen \else \@openenotes \fi
+  \immediate\write\@enotes{%
+    \if@ccn@en@links
+      \string\def\string\currentEndnote{\the\endnoteLinkCnt}%
+    \fi%
+    \@doanenote{\@theenmark}%
+  }%
+  \begingroup
+     \def\next{#1}%
+     \newlinechar='40
+     \immediate\write\@enotes{\meaning\next}%
+  \endgroup
+  \immediate\write\@enotes{\@endanenote}%
+  \if@ccn@en@links
+    \global\advance\endnoteLinkCnt\@ne%
+  \fi%
+}
+%    \end{macrocode}
+%
+%
+% \section{Adjusting Regular Footnotes}
+%
+% \subsection{Allowing Multiple Paragraphs in Footnotes}
+%
+% First, we make a small adjustment to the \lstinline{\fn@fntext}
+% macro from the \lstinline{footnote} package by making it
+% \lstinline{\long} and therefore allowing \lstinline{\par} inside its
+% argument.
 %    \begin{macrocode}
 \long\def\fn@fntext#1{%
   \ifx\ifmeasuring@\@@undefined%
@@ -169,11 +317,10 @@
   }%
 }
 %    \end{macrocode}
-% Adding artifact tagging to the footnoterule:
-%    \begin{macrocode}
-\pretocmd\footnoterule{\ccaVstructStart[document]{footnoterule}}{}{}
-\apptocmd\footnoterule{\ccaVstructEnd{footnoterule}}{}{}
-%    \end{macrocode}
+%
+%
+% \subsection{Allowing Non-Numeric Footnote Counters}
+%
 % Re-definition of \lstinline{footnote} package's footnote mark
 % retriever to allow non-numeric values in the optional argument of
 % \lstinline{\footnote}.
@@ -209,53 +356,54 @@
    \@footnotemark\@footnotetext%
 }
 %    \end{macrocode}
-% patching \lstinline{\@footnotemark}
+%
+%
+% \section{Tagging Footnotes}
+%
+% Adding artifact tagging to the footnoterule:
+%    \begin{macrocode}
+\pretocmd\footnoterule{\ccaVstructStart[document]{footnoterule}}{}{}
+\apptocmd\footnoterule{\ccaVstructEnd{footnoterule}}{}{}
+%    \end{macrocode}
+% patching \lstinline{\@footnotemark} to introduce the
+% \DescribeTag{FootnoteMark} tag which will be mapped to the
+% \DescribeTag{Reference} tag, later.
 %    \begin{macrocode}
 \pretocmd\@footnotemark{%
-  \ccaStructStart{Span}\protected@xdef\@lt@fn@parent{\ccaGetCurStruct{idx}}%
-  \ccaStructStart{footnotemark}%\addAltText{\@thefnmark}
+  \protected@xdef\@lt@fn@parent{\ccaGetCurStruct{idx}}%
+  \ccaStructStart{FootnoteMark}%
 }{}{}
 \apptocmd\@footnotemark{%
-  \ccaStructEnd{footnotemark}\ccaStructEnd{Span}%
+  \ccaStructEnd{FootnoteMark}%
 }{}{}
 %    \end{macrocode}
-% patching \lstinline{\@makefntext}
+% patching \lstinline{\@makefnmark} for the \DescribeTag{Lbl} tag both
+% in the text body and in the footnote insert.
+%    \begin{macrocode}
+\pretocmd\@makefnmark{%
+  \ccaStructStart{Lbl}%\addAltText{\@thefnmark}
+}{}{}
+\apptocmd\@makefnmark{%
+  \ccaStructEnd{Lbl}%\addAltText{\@thefnmark}
+}{}{}
+%    \end{macrocode}
+% patching \lstinline{\@makefntext} to introduce the
+% \DescribeTag{FootnoteText} tag, which will be mapped to
+% \DescribeTag{Note}, below.
 %    \begin{macrocode}
 \pretocmd\@makefntext{%
-  \ccaStructStart{footnotetext}%
-  \ifx\@lt@fn@parent\@empty\relax\else\addToStruct{\@lt@fn@parent}\fi%
+  \ccaStructStart{FootnoteText}%
+  \ifx\@lt@fn@parent\@empty\relax\else\ccaAddToStruct{\@lt@fn@parent}\fi%
 }{}{}
 \apptocmd\@makefntext{%
-  \ccaAddID{auto}\ccaStructEnd{footnotetext}%
+  \ccaAddID{auto}\ccaStructEnd{FootnoteText}%
 }{}{}
 %    \end{macrocode}
-% Adding footnotemark and footnotetext PDF tags to the rolemap
+% Finally, we add the \DescribeTag{FootnoteMark} and
+% \DescribeTag{FootnoteText} PDF tags to the rolemap.
 %    \begin{macrocode}
-\ccaAddRolemap{footnotemark}{Reference}
-\ccaAddRolemap{footnotetext}{Note}
-%    \end{macrocode}
-% Linking endnotes requires overwriting the \@endnotetext macro to save a global counter to the *.ent file.
-%    \begin{macrocode}
-\global\newif\if@haveenotes
-\long\def\@endnotetext#1{%
-  \global\@haveenotestrue
-  \if@enotesopen \else \@openenotes \fi
-  \immediate\write\@enotes{%
-    \if@ccn@en@links
-      \string\def\string\currentEndnote{\the\endnoteLinkCnt}%
-    \fi%
-    \@doanenote{\@theenmark}%
-  }%
-  \begingroup
-     \def\next{#1}%
-     \newlinechar='40
-     \immediate\write\@enotes{\meaning\next}%
-  \endgroup
-  \immediate\write\@enotes{\@endanenote}%
-  \if@ccn@en@links
-    \global\advance\endnoteLinkCnt\@ne%
-  \fi%
-}
+\ccaAddRolemap{FootnoteMark}{Reference}
+\ccaAddRolemap{FootnoteText}{Note}
 %    \end{macrocode}
 %    \begin{macrocode}[numbers=none,gobble=1]
 %</endnotes>
