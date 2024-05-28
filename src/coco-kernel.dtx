@@ -413,8 +413,25 @@
   \else
     \ifcsdef{cc@\cc@cur@cont @#1}{}{\ccDeclareComponent{#1}{}{}}%
     \csdef{cc@\cc@cur@cont @#1}{#2}%
-  \fi
-}
+  \fi}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccGlobalComponent} is a global variant of
+%   \lstinline{\ccComponent}.
+%   \begin{ArgList}
+%   \item[1] is the Component's name
+%   \item[2] is the Instance value.
+%   \end{ArgList}
+%    \begin{macrocode}
+\long\protected\global\def\ccGlobalComponent#1#2{%
+  \ifx\cc@is@counted\relax
+    \ifcsdef{cc@\cc@cur@cont @#1}{}
+      {\cc@def@counted@comp{\cc@counted@comp@scheme{#1}}{#1}{}{}}%
+    \csgdef{cc@\cc@cur@cont @\cc@counted@comp@scheme{#1}}{#2}%
+  \else
+    \ifcsdef{cc@\cc@cur@cont @#1}{}{\ccDeclareGlobalComponent{#1}{}{}}%
+    \csgdef{cc@\cc@cur@cont @#1}{#2}%
+  \fi}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccComponentEA} is a variant of
