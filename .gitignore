@@ -10,7 +10,7 @@
 *.ilg
 *.out
 *.hd
-
+*~
 
 # ignore the build, temp and log folders
 ./build

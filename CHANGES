@@ -1,0 +1,14 @@
+
+
+0.5.1
+
+- coco-floats.dtx
+  - changed how heights and widths of subfloats are calculated:
+    - sameheight mechanism is now only applied if neither sub-figure has an width or height key.
+    - added Attribute to locally de-activate sameheight mechanism
+
+- coco-kernel.dtx
+  - made group components long
+  - added some \ignorespaces at the end of Component macros
+
+0.5.0 (INITIAL STATUS)
