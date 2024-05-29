@@ -238,6 +238,11 @@
 \newif\if@ccf@break@capt   \@ccf@break@captfalse
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{}
+%    \begin{macrocode}
+\newif\if@ccf@sameheight   \@ccf@sameheighttrue
+%    \end{macrocode}
+% \end{macro}
 %
 %
 % \section{Internal macros}
@@ -876,6 +881,12 @@
     \ccDeclareAttributeHandler{debug}[\let\ccf@debug\relax]{\let\ccf@debug\ccf@attr@debug}
 %    \end{macrocode}
 % \end{Attribute}
+% \begin{Attribute}{no-same-height}{<flag>} if set, the same-height
+%   calculations are de-activated for this float.
+%    \begin{macrocode}
+    \ccDeclareAttributeHandler{no-same-height}{\@ccf@sameheightfalse}%
+%    \end{macrocode}
+% \end{Attribute}
 %    \begin{macrocode}
   }
 }% /Container
@@ -905,6 +916,7 @@
     \ccf@reset@defaults
     \ccToggleCountedConditionals
     \ccEvalType{Properties}%
+    \ccIfPropVal{subfloat-same-height}{true}{\global\@ccf@sameheighttrue}{\global\@ccf@sameheightfalse}
     \ccEvalAttributes[\ccfCapType]{#1}%
     \ccf@eval@class
     \ccf@set@hsize
@@ -913,9 +925,8 @@
     \ccUseProperty{before-float}%
     \ccf@set@env
     \ifx\ccf@floatpos\@empty\else\savenotes\fi
-    \ignorespaces
     \@cc@is@finaltrue
-  }
+    \ignorespaces}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\endccf@float} is the end of the common float
@@ -996,7 +1007,9 @@
 % \begin{macro}{\endccSubFloat} is the end of the sub-float environment\UsageProperty{subfloat-content}
 %    \begin{macrocode}
 \def\endccSubFloat{%
+  \ifhmode\unskip\fi
   \setbox\ccf@sub@box\hbox{\ccGobble
+    \let\includegraphics\ccf@measuresubgraphics
     \ccUseProperty{subfloat-content}%
   }%
   \expandafter\xdef\csname ccf@\cc@cur@cont @width-\the\ccSubFloatCnt\endcsname{\the\wd\ccf@sub@box}%
@@ -1438,31 +1451,37 @@
 %   each sub-float's height and the height of the largest sub-float
 %    \begin{macrocode}
 \def\ccf@calc@sameheight{%
-  \@tempdima=\z@\relax
-  \@tempcnta=\z@\relax
-  \ccf@calc@width=\ccf@total@width\relax
-  \advance\ccf@calc@width-\ccf@margin@l\relax
-  \cc@iterate{\@tempcnta}{\@ne}{\ccSubFloatCnt}{%
-    \edef\@tempa{\CalcRatio{\ccf@sub@maxheight}{\csname ccf@\cc@cur@cont @height-\the\@tempcnta\endcsname}}%
-    \ifnum\the\@tempcnta>\@ne\relax
-      \advance\ccf@calc@width-\ccf@sub@sep\relax%
-    \fi
-    \expandafter\@tempdimc\csname ccf@\cc@cur@cont @width-\the\@tempcnta\endcsname\relax
-    \@tempdimb=\@tempa\@tempdimc\relax
-    \expandafter\edef\csname   cc@\cc@cur@cont @adj@width-\the\@tempcnta\endcsname{\the\@tempdimb}%
-    \advance\@tempdima\@tempdimb
-  }%
-  \@tempcnta=\z@\relax
-  \@tempdimb=\z@\relax
-  \@tempdimc=\z@\relax
-  \cc@iterate{\@tempcnta}{\@ne}{\ccSubFloatCnt}{%
-    \edef\@tempa{\CalcRatio{\csname  cc@\cc@cur@cont @adj@width-\the\@tempcnta\endcsname}{\@tempdima}}%
-    \expandafter\edef\csname  cc@\cc@cur@cont @res@width-\the\@tempcnta\endcsname{\dimexpr\@tempa\ccf@calc@width\relax}%
-    \@tempdimc\dimexpr\csname ccf@\cc@cur@cont @height-\the\@tempcnta\endcsname\relax
-    \@tempdimc\dimexpr\@tempa\@tempdimc\relax
-    \ifdim\@tempa\@tempdimb<\@tempdimc\@tempdimb\@tempdimc\relax\fi
-  }%
-  \expandafter\edef\csname  cc@\cc@cur@cont @res@height\endcsname{\the\@tempdimb}%
+  \if@ccf@sameheight
+    \@tempdima=\z@\relax
+    \@tempcnta=\z@\relax
+    \ccf@calc@width=\ccf@total@width\relax
+    \advance\ccf@calc@width-\ccf@margin@l\relax
+    \cc@iterate{\@tempcnta}{\@ne}{\ccSubFloatCnt}{%
+      \edef\@tempa{\CalcRatio{\ccf@sub@maxheight}{\csname ccf@\cc@cur@cont @height-\the\@tempcnta\endcsname}}%
+      \ifnum\the\@tempcnta>\@ne\relax
+        \advance\ccf@calc@width-\ccf@sub@sep\relax%
+      \fi
+      \expandafter\@tempdimc\csname ccf@\cc@cur@cont @width-\the\@tempcnta\endcsname\relax
+      \@tempdimb=\@tempa\@tempdimc\relax
+      \csedef{cc@\cc@cur@cont @adj@width-\the\@tempcnta}{\the\@tempdimb}%
+      \advance\@tempdima\@tempdimb
+    }%
+    \@tempcnta=\z@\relax
+    \@tempdimb=\z@\relax
+    \@tempdimc=\z@\relax
+    \cc@iterate{\@tempcnta}{\@ne}{\ccSubFloatCnt}{%
+      \edef\@tempa{\CalcRatio{\csname  cc@\cc@cur@cont @adj@width-\the\@tempcnta\endcsname}{\@tempdima}}%
+      \csedef{cc@\cc@cur@cont @res@width-\the\@tempcnta}{\dimexpr\@tempa\ccf@calc@width\relax}%
+      \@tempdimc\dimexpr\csname ccf@\cc@cur@cont @height-\the\@tempcnta\endcsname\relax
+      \@tempdimc\dimexpr\@tempa\@tempdimc\relax
+      \ifdim\@tempa\@tempdimb<\@tempdimc\@tempdimb\@tempdimc\relax\fi
+    }%
+  \else
+    \cc@iterate{\@tempcnta}{\@ne}{\ccSubFloatCnt}{%
+      \csletcs{cc@\cc@cur@cont @res@width-\the\@tempcnta}{ccf@\cc@cur@cont @width-\the\@tempcnta}
+    }%
+  \fi
+  \csedef{cc@\cc@cur@cont @res@height}{\the\@tempdimb}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -1833,17 +1852,36 @@
 %    \begin{macrocode}
 \def\ccf@includesubgraphics{\cc@opt@empty\@ccf@includesubgraphics}%
 \def\@ccf@includesubgraphics[#1]#2{%
-  \ifx\ccf@current@class\relax
-    \def\@igopts{max width=\hsize,max height=\vsize}%
-  \else
-    \def\@igopts{width=\hsize}%
-  \fi
+  \def\@igopts{max width=\hsize,max height=\vsize,width=\hsize}%
   \if!#1!\else
-    \def\@igopts{#1,width=\hsize}%
+    \apptocmd\@igopts{,#1}{}{}%
   \fi
   \gdef\ccf@fig@path{#2}%
   \if@cc@is@final\ccaAddPlacement{Block}\fi%
   \expandafter\ccf@ltx@includegraphics\expandafter[\@igopts]{#2}%
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccf@measuresubgraphics} is an override of \LaTeX's
+%   \lstinline{\includegraphics} that is used to measure the natural
+%   dimensions of the included image. It also checks if the
+%   \lstinline{\includegraphics} has either an height or width
+%   explicitly given. if so, we de-activate the same-height
+%   calculations for the entire float.
+%    \begin{macrocode}
+\def\ccf@measuresubgraphics{\cc@opt@empty\@ccf@measuresubgraphics}
+\def\@ccf@measuresubgraphics[#1]#2{%
+  \begingroup
+    \setkeys{Gin}{#1}%
+    \ifx\Gin@ewidth\Gin@exclamation
+      \ifx\Gin@eheight\Gin@exclamation\else
+        \global\@ccf@sameheightfalse
+      \fi
+    \else
+      \global\@ccf@sameheightfalse
+    \fi
+  \endgroup
+  \ccf@ltx@includegraphics[#1]{#2}%
 }
 %    \end{macrocode}
 % \end{macro}

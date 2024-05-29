@@ -378,7 +378,7 @@
 \def\cc@declare@comp[#1]#2#3#4{%
   \ltx@LocalExpandAfter\global\expandafter\let\csname cc@\cc@cur@cont @#1\endcsname\relax
   \expandafter\long\expandafter\def\csname \ccPrefix#2\endcsname##1{%
-    #3\expandafter\long\expandafter\def\csname cc@\cc@cur@cont @#1\endcsname{##1}\ignorespaces#4}%
+    #3\expandafter\long\expandafter\def\csname cc@\cc@cur@cont @#1\endcsname{##1}#4\ignorespaces}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -629,15 +629,15 @@
 %    \begin{macrocode}
 \def\ccDeclareComponentGroup#1#2{%
   \csnumgdef{cc#1Cnt}{\z@}%
-  \csdef{\ccPrefix#1}{\cc@opt@empty{\csname cc@group@#1\endcsname}}%
-  \csdef{cc@group@#1}[##1]{%
+  \long\csdef{\ccPrefix#1}{\cc@opt@empty{\csname cc@group@#1\endcsname}}%
+  \long\csdef{cc@group@#1}[##1]{%
     \def\cc@cnt@grp{cc#1}%
     \csxdef{cc#1Cnt}{\expandafter\the\expandafter\numexpr\csname cc#1Cnt\endcsname+\@ne\relax}%
-    \if!##1!\else\csgdef{cc@\cc@cur@cont @#1-\csname cc#1Cnt\endcsname @attrs}{##1}\fi
+    \if!##1!\else\long\csgdef{cc@\cc@cur@cont @#1-\csname cc#1Cnt\endcsname @attrs}{##1\ignorespaces}\fi
     #2%
     \csname @#1@hook\endcsname
   }%
-  \csdef{end\ccPrefix#1}{{\ccToggleCountedConditionals\csuse{cc@compose@group@#1}}}%
+  \csdef{end\ccPrefix#1}{{\ccToggleCountedConditionals\csuse{cc@compose@group@#1}}\aftergroup\ignorespaces}%
 }
 %    \end{macrocode}
 % \end{macro}
