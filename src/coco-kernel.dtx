@@ -633,7 +633,7 @@
   \long\csdef{cc@group@#1}[##1]{%
     \def\cc@cnt@grp{cc#1}%
     \csxdef{cc#1Cnt}{\expandafter\the\expandafter\numexpr\csname cc#1Cnt\endcsname+\@ne\relax}%
-    \if!##1!\else\long\csgdef{cc@\cc@cur@cont @#1-\csname cc#1Cnt\endcsname @attrs}{##1\ignorespaces}\fi
+    \if!##1!\else\long\csgdef{cc@\cc@cur@cont @#1-\csname cc#1Cnt\endcsname @attrs}{##1}\fi
     #2%
     \csname @#1@hook\endcsname
   }%
