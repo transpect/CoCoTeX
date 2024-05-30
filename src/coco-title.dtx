@@ -220,8 +220,8 @@
 %    \begin{macrocode}
 \def\cct@title@process@bkt{%
   \cslet{\ccPrefix Break}\space
-  \pdfstringdef\@title{\ccUseComp{Title}}%
-  \cct@write@pdf@meta{pdftitle}{Title}{\ccUseComp{Title}}%
+  \pdfstringdef\@title{\tpUseProperty{doc-book-title}}%
+  \cct@write@pdf@meta{pdftitle}{Title}{\@title}%
   \ccpgdefFromProperty{RunBookTitle}{run-book-title}%
 }
 %    \end{macrocode}
@@ -448,91 +448,480 @@ from the Components given in the Meta Container.}}}
 % \begin{macro}{\cct@simple@comps} wrapper for the Titlepage's simple Components.
 %    \begin{macrocode}
 \def\cct@simple@comps{%
-  \ccDeclareGlobalComponent[\jobname]{XmpFile}             % File basename of the XMP file ('.xmp' is added automatically)
-  %% Cover
-  \ccDeclareGlobalComponent{Cover}                         % Path to Cover Image(!)
-  %% Titles
-  \ccDeclareGlobalComponent{Title}                         % Main Title
-  \ccDeclareGlobalComponent{ShortTitle}                    % Shortened main title
-  \ccDeclareGlobalComponent{RunTitle}                      % Shortened main title override for headers
-  \ccDeclareGlobalComponent{AltTitle}                      % Alternative main title (e.g. for bastard title page)
-  \ccDeclareGlobalComponent{Subtitle}                      % Sub Title
-  \ccDeclareGlobalComponent{TitleNote}                     % Additional Title Information (contributor list)
-  \ccDeclareGlobalComponent{RunNames}                      % Shortened list of names (authors and/or publishers)
-  \ccDeclareGlobalComponent{AltNames}                      % Alternative list of names (e.g. for bastard title page)
-  %% Series
-  \ccDeclareGlobalComponent{Series}                        % Series Title
-  \ccDeclareGlobalComponent{SubSeries}                     % Series Subtitle
-  \ccDeclareGlobalComponent{SeriesNote}                    % Series Notes
-  \ccDeclareGlobalComponent{Volume}                        % Series Volume
-  \ccDeclareGlobalComponent{Number}                        % Series Number
-  \ccDeclareGlobalComponent{EditorNameList}                % Editor Text Line
-  \ccDeclareGlobalComponent{SeriesEditorNameList}          % Series Editor Text Line
-  %% Publisher
-  \ccDeclareGlobalComponent{Publisher}                     % Publisher Name
-  \ccDeclareGlobalComponent{PubDivision}                   % Publishing Division
-  \ccDeclareGlobalComponent{PubDivInfo}                    % Publishing Division Info
-  \ccDeclareGlobalComponent{PubPlace}                      % Publisher Location
-  \ccDeclareGlobalComponent{PubLogo}                       % Publisher Logo
-  \ccDeclareGlobalComponent{PubNote}                       % Additional publisher notes
-  \ccDeclareGlobalComponent{PubWeb}                        % Publisher URL
-  %% Pubication Meta
-  \ccDeclareGlobalComponent{PDFCreator}                    % Creator for pdf metadata
-  \ccDeclareGlobalComponent[le-tex xerif with CoCoTeX v.\fileversion]{PDFProducer}     % PDF producer for pdf metadata
-  \ccDeclareGlobalComponent{Dedication}                    % Dedication
-  \ccDeclareGlobalComponent{Acknowledgements}              % Acknowledgements
-  \ccDeclareGlobalComponent{Statement}                     % Acknowledgements
-  \ccDeclareGlobalComponent{EditionNote}                   % Edition Note
-  \ccDeclareGlobalComponent{Editorial}                     % Editorial
-  \ccDeclareGlobalComponent{Edition}                       % Edition
-  \ccDeclareGlobalComponent{Year}                          % Publication Year
-  \ccDeclareGlobalComponent{ISBNPreText}                   % Text before ISBN block
-  \ccDeclareGlobalComponent{ISBN}                          % ISBN
-  \ccDeclareGlobalComponent{ISSN}                          % ISSN
-  \ccDeclareGlobalComponent{EISSN}                         % Ebook-ISSN
-  \ccDeclareGlobalComponent{EpubPreText}                   % Text between ISBN and eISBN
-  \ccDeclareGlobalComponent{EISBN}                         % Ebook-ISBN
-  \ccDeclareGlobalComponent{EpubISBN}                      % Epub-ISBN
-  \ccDeclareGlobalComponent{ElibPDF}                       % ???
-  \ccDeclareGlobalComponent{BiblISSN}                      % Bibl-ISBN
-  \ccDeclareGlobalComponent{BibleISSN}                     % Bible-ISBN
-  %% Funding
-  \ccDeclareGlobalComponent{FundingPreText}                % Text before the Funding list
-  \ccDeclareGlobalComponent{FundingPostText}               % Text after the Funding list
-  %% Imprint Meta
-  \ccDeclareGlobalComponent{Biblio}                        % Bibliographical Information
-  \ccDeclareGlobalComponent{BiblioTitle}                   % Heading Bibliographical Information
-  \ccDeclareGlobalComponent{Print}                         % Printer
-  \ccDeclareGlobalComponent{PrintNote}                     % Print Note
-  \ccDeclareGlobalComponent{Lectorate}                     % Lector
-  \ccDeclareGlobalComponent{Translator}                    % Translator
-  \ccDeclareGlobalComponent{CoverConcept}                  % Cover Concept
-  \ccDeclareGlobalComponent{CoverDesign}                   % Cover Designer
-  \ccDeclareGlobalComponent{CoverImage}                    % Cover Image Creator
-  \ccDeclareGlobalComponent{Typesetter}                    % Typesetting company
-  \ccDeclareGlobalComponent{QA}                            % Quality Assurance
-  \ccDeclareGlobalComponent{UsedFont}                      % Used Font(s)
-  \ccDeclareGlobalComponent{Conversion}                    % Data Converison
-  \ccDeclareGlobalComponent{EnvDisclaimer}                 % Environmental Disclaimer
-  \ccDeclareGlobalComponent{Advertise}                     % Advertisements
-  %% Licencing
-  \ccDeclareGlobalComponent{LicenceText}                   % License Description
-  \ccDeclareGlobalComponent{LicenceLogo}                   % License Logo
-  \ccDeclareGlobalComponent{LicenceLink}                   % License Link
-  \ccDeclareGlobalComponent{LicenceName}                   % License Name
-  \ccDeclareGlobalComponent{CopyrightDisclaimer}           % Copyright Disclaimer
-  %% for journals
-  \ccDeclareGlobalComponent{JournalName}                   % Full name of the journal
-  \ccDeclareGlobalComponent{JournalAbbrev}                 % Short name of the journal
-  \ccDeclareGlobalComponent{Issue}                         % Issue of the journal
-  \ccDeclareGlobalComponent{PubCycle}                      % Publication cycle
-  \ccDeclareGlobalComponent{Prices}                        % Prices of the journal issues or subscription models
-  \ccDeclareGlobalComponent{MemberList}                    % In case of publishing organizations, this macro may hold a list of members.
-  %% Generic additional information
-  \ccDeclareGlobalComponent{AddNoteI}                      % Additional information, title page I
-  \ccDeclareGlobalComponent{AddNoteII}                     % Additional information, title page II
-  \ccDeclareGlobalComponent{AddNoteIII}                    % Additional information, title page III
-  \ccDeclareGlobalComponent{AddNoteIV}                     % Additional information, title page IV
+%    \end{macrocode}
+%
+%
+% \subsubsection{General Information}
+%
+% \begin{Component}{Cover} holds the path(!) to the cover image
+%   (without \lstinline{\includegraphics}!)
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{Cover}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{Dedication} is a dedication.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{Dedication}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{Acknowledgements} self explanatory.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{Acknowledgements}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{Statement} additional publication statement
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{Statement}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{Editorial} generic statement by the editors of a
+%   periodical or collection.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{Editorial}%
+%    \end{macrocode}
+% \end{Component}
+%
+%
+% \subsubsection{Titles and Names}
+%
+% \begin{Component}{Title} is the document's (printed) main title.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{Title}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}[OR]{ShortTitle} is a shortened version of the document
+%   title. If set, this is the title that is written into the PDF meta
+%   data (unless DocTitle is also set) and stored as running title
+%   (unless RunTitle is also set). If the Component is not used, the
+%   Title component is used, instead.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{ShortTitle}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}[OR]{DocTitle} is an override for the title that is
+%   written into the PDF meta data (unless an XMP file is used). This
+%   Component's value should only contain alphanumeric characters,
+%   ideally from the ASCII code block, but must not contain any
+%   {\LaTeX} markup.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{DocTitle}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}[OR]{RunTitle} is an override for the title that is
+%   used as running title for page headers. It should contain only
+%   robust {\LaTeX} markup.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{RunTitle}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{AltTitle} is an alternative title for bastard
+%   title pages, etc. It is not used by {\CoCoTeX}, but some publisher
+%   styles may need it.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{AltTitle}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{Subtitle} is the document's subtitle.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{Subtitle}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{TitleNote} additional printed information tied to
+%   the document's title.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{TitleNote}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}[OR]{RunNames} is an override for the document
+%   author's names, which is intended to be used in running page
+%   headers. If not set, the (calculated)
+%   \ComponentUsage{AuthorNameList} or \ComponentUsage{EditorNameList}
+%   is used, instead.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{RunNames}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{AltNames} is an alternative data field for
+%   additional names.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{AltNames}%
+%    \end{macrocode}
+% \end{Component}
+%
+%
+% \subsubsection{Series}
+%
+% \begin{Component}{Series} is the series title.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{Series}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{SubSeries} is the subtitle for the series.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{SubSeries}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{SeriesNote} are additional notes concerning the
+%   series.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{SeriesNote}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{Volume} is the volume of the document within a
+%   series.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{Volume}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{Number} is the number of the document within the
+%   series.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{Number}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}[CC]{EditorNameList} is the Collection Component
+%   for the Editor's names.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{EditorNameList}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}[CC]{SeriesEditorNameList} is the Colection
+%   Component for the Series-Editor's names.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{SeriesEditorNameList}%
+%    \end{macrocode}
+% \end{Component}
+%
+%
+% \subsubsection{Publisher Information}
+%
+% \begin{Component}{Publisher} is the publisher name
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{Publisher}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{PubDivision} is the publisher division.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{PubDivision}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{PubDivInfo} holds additional information about the
+%   publisher division.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{PubDivInfo}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{PubPlace} holds the place of publication or the
+%   publisher's address.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{PubPlace}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{PubLogo} holds the publisher logo. Depending on
+%   the publisher style, this may be just a path, or a complete
+%   \ComponentUsage{\includegraphics} expression.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{PubLogo}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{PubNote} additional generic notes about the
+%   publisher.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{PubNote}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{PubWeb} holds the url or email contact address of
+%   a publisher.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{PubWeb}%
+%    \end{macrocode}
+% \end{Component}
+%
+%
+% \subsubsection{Publication Meta}
+%
+% \begin{Component}{XmpFile} is the basename of the XMP meta data file
+%   without the .xmp file ending (which is added automatically). The
+%   default value is \lstinline{\jobname}.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent[\jobname]{XmpFile}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{PDFCreator} is the creator of the PDF (usually the
+%   authors/editors), may be overridden by the values in the XMP file.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{PDFCreator}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{PDFProducer} is the PDF producer. Defaults to
+%   ``le-tex xerif with CoCoTeX v({\CoCoTeX} version)''.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent[le-tex xerif with CoCoTeX v.\fileversion]{PDFProducer}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{Year} the year of the publication
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{Year}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{Edition} the edition of the publication.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{Edition}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{EditionNote} additional notes about the particular edition.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{EditionNote}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{ISBNPreText} text added before the ISBN block
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{ISBNPreText}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{ISBN} the publication's international standard
+%   book number.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{ISBN}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{ISSN} the publication's international standard
+%   serial number for periodicals.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{ISSN}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{EISSN} additional ISSN for electronic publications
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{EISSN}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{EpubPreText} additional text between ISBN and eISBN
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{EpubPreText}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{EISBN} ISBN for electronic publications.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{EISBN}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{EpubISBN} ISBN for EPUBs.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{EpubISBN}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{ElibPDF} additional serial number for electronic
+%   libraries.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{ElibPDF}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{BiblISSN} additional ISSN for special libraries.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{BiblISSN}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{BibleISSN} additional electronic ISSN for special
+%   libraries.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{BibleISSN}%
+%    \end{macrocode}
+% \end{Component}
+%
+%
+% \subsubsection{Funding}
+%
+% \begin{Component}{FundingPreText}additional text before the funding
+%   list.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{FundingPreText}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{FundingPostText} additional text after the funding
+%   list.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{FundingPostText}%
+%    \end{macrocode}
+% \end{Component}
+%
+%
+% \subsubsection{Imprint Meta Data}
+%
+% \begin{Component}{Biblio} bibliographic information block.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{Biblio}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{BiblioTitle} the title of the bibliographic
+%   information block
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{BiblioTitle}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{Print} the name and address of the printing
+%   company.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{Print}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{PrintNote} additional information about the
+%   printing process.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{PrintNote}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{Lectorate} name and address of the lectorate
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{Lectorate}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{Translator} name of the document's translator
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{Translator}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{CoverConcept} concept creator of the front page cover
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{CoverConcept}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{CoverDesign} designer of the front page cover.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{CoverDesign}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{Component} creator of the front page cover image
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{CoverImage}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{Typesetter} name and address of the typesetter
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{Typesetter}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{QA} name of the person(s) responible for quality
+%   assurance.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{QA}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{UsedFont} information about the fonts used
+%   throughout the document
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{UsedFont}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{Conversion} name of the person(s) responsible for
+%   data conversion
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{Conversion}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{EnvDisclaimer} environmantal disclaimer, used paper, etc.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{EnvDisclaimer}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{Advertise} advertisements.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{Advertise}%
+%    \end{macrocode}
+% \end{Component}
+%
+%
+% \subsubsection{Licencing}
+%
+% \begin{Component}{LicenceText} License Description
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{LicenceText}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{LicenseLogo} the path(!) to the licence logo. \lstinline{\includegraphics} is added automatically.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{LicenceLogo}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{LicenceLink} URL to the license.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{LicenceLink}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{LicenceName} the plain name of the license.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{LicenceName}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{CopyrightDisclaimer} self explanatory...
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{CopyrightDisclaimer}%
+%    \end{macrocode}
+% \end{Component}
+%
+%
+% \subsubsection{Journal-specific Meta Data}
+%
+% \begin{Component}{JournalName} Full name of the journal.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{JournalName}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{JournalAbbrev} short name of the journal.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{JournalAbbrev}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{Issue} of the journal.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{Issue}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{PubCycle} Publication cycle
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{PubCycle}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{Prices} of the journal issues or subscription models
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{Prices}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{MemberList} in case of publishing organizations,
+%   this Component may hold a list of members.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{MemberList}%
+%    \end{macrocode}
+% \end{Component}
+%
+%
+% \subsubsection{Generic additional information}
+%
+% \begin{Component}{AddNoteI} additional information for the first
+%   title page.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{AddNoteI}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{AddNoteII} additional information for the second
+%   title page.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{AddNoteII}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{AddNoteIII} additional information for the third
+%   title page.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{AddNoteIII}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{AddNoteIV} additional information for the fourth
+%   title page.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{AddNoteIV}%
+%    \end{macrocode}
+% \end{Component}
+%    \begin{macrocode}
 }
 %    \end{macrocode}
 % \end{macro}
@@ -845,6 +1234,13 @@ from the Components given in the Meta Container.}}}
            {\ccUseComp{EditorNameList}}
            {no editor defined!}%
        \fi}%
+  }%
+  \ccSetProperty{doc-book-title}{%
+    \ccIfComp{DocTitle}
+      {\ccUseComp{DocTitle}}
+      {\ccIfComp{ShortTitle}
+        {\ccUseComp{ShortTitle}}
+        {\ccUseComp{Title}}}%
   }%
 }
 %    \end{macrocode}
