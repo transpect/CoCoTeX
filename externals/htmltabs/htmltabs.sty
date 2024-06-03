@@ -20,8 +20,8 @@
 %% original source files, as listed above, are part of the
 %% same distribution. (The sources need not necessarily be
 %% in the same archive or directory.)
-\def\fileversion{0.3.0}%
-\def\filedate{2024-05-08}%
+\def\fileversion{0.3.1}%
+\def\filedate{2024-06-03}%
 \NeedsTeXFormat{LaTeX2e}[2018/12/01]
 \ProvidesPackage{htmltabs}
     [\filedate\space\fileversion\space htmltabs]
@@ -317,6 +317,12 @@
 \def\ht@str@bottom{bottom}
 \def\ht@str@auto{auto}
 \def\ht@str@none{none}
+\AtBeginDocument{%
+  \@ifpackageloaded{hyperref}
+    {\def\ht@hy@safe@footnote{%
+       \let\ht@ltx@footnote\footnote
+       \def\footnote{\advance\c@Hfootnote\m@ne\relax\ht@ltx@footnote}}}
+    {\let\ht@hy@safe@footnote\relax}}
 
 \def\HTRegisterCSSProperty#1#2#3{{%
   \edef\ht@prop{#2}%
@@ -1762,6 +1768,7 @@
 }
 \def\ht@align@box#1{%
   \if@ht@final@render
+    \ht@hy@safe@footnote
     \ht@valign@box{\ht@halign#1}%
   \else
     \if@ht@nat@calc
@@ -1813,6 +1820,7 @@
     \ifdim\htRotate\p@>\z@\relax\hskip.25\dp\strutbox\else\hskip-.25\dp\strutbox\fi
     \leavevmode
     \ht@valign@box{%
+      \ht@hy@safe@footnote
       \ht@halign
       \leavevmode
       \ignorespaces
