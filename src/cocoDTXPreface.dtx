@@ -263,7 +263,6 @@
 \let\myttfamily\ttfamily
 \DeclareTextFontCommand{\mytexttt}{\myttfamily}
 \def\ttfamily{\myttfamily\small}
-
 \def\titlefont{\mybfseries\sffamily\color{spot}}
 
 \let\mytextbf\textbf
@@ -568,6 +567,7 @@
 }
 \DeclareRobustCommand\CoCoTeX{\texorpdfstring{{C\kern-.1em o\kern-.033emC\kern-.1em o}\kern-.133em\TeX}{CoCoTeX}}
 \def\Deprecated{\fcolorbox{red}{red!10}{\parbox{40mm}{\centering\bfseries\color{red} WARNING!\\The following section is deprecated and will be changed or deleted in future releases.}}\par}
+\def\TODO#1{{\fcolorbox{green}{green!10}{\parbox{40mm}{\centering\bfseries\color{green} TODO\\#1}}}}
 
 \usepackage[noautomatic,splitindex,truexindy]{imakeidx}
 \indexsetup{level=\section*}

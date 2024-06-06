@@ -496,6 +496,7 @@
         \ccIfProp{extended}{\ccUseProperty{extended-heading}}{}%
       \egroup%
       \cch@make@run% Running headers
+      \cch@use@hook{running-hook}{#2}%
       \ccUseProperty{after-heading-block}%
     }%
 %    \end{macrocode}
@@ -566,6 +567,7 @@
   \ccDeclareHook{toc-after-hook-#1}% Expanded after the toc entry is printed
   \ccDeclareHook{before-hook-#1}% Expanded before before-heading property is expanded
   \ccDeclareHook{before-print-hook-#1}% Expanded at the very beginning of the local definition of \@svsec
+  \ccDeclareHook{running-hook-#1}% Expanded after RunTitle has been generated
   \ccDeclareHook{attr-handler-#1}% Expanded before before-heading property is expanded
 }
 %    \end{macrocode}
@@ -878,14 +880,17 @@
 %    \end{macrocode}
 % Handling of the optional argument
 %
-% TODO: make into Type Attribute.
+% \TODO{make into Type Attribute.}
 %    \begin{macrocode}
   \ccParseAttributes{Heading}{#1}%
 %    \end{macrocode}
 % and treatment of heading-level specific style classes.
 %    \begin{macrocode}
   \ccWhenAttr{Heading}{class}
-    {\global\let\cch@current@class\cc@Heading@attr@class% TODO: check if still needed!
+%    \end{macrocode}
+% \TODO{check if still needed!}
+%    \begin{macrocode}
+    {\global\let\cch@current@class\cc@Heading@attr@class%
      \expandafter\ccUseStyleClass\expandafter{\cc@Heading@attr@class}{Heading}}%
 %    \end{macrocode}
 % \begin{macro}{\ccCurSecName} stores the name of the current heading
@@ -1172,8 +1177,13 @@
 % heading. Positive values are set with \LaTeX's
 % \lstinline{\addvspace}, while negative values are set with
 % coco-common's \DescribeMacro{\minusvspace}.
+%
+% \TODO{values $< 0pt$ use \lstinline{\minusvspace}, else
+% \lstinline{\addvspace}. LaTeX's default behaviour of
+% \lstinline{\@afterindent} is relocated to the after-indent
+% property.}
 %    \begin{macrocode}
-  \ccSetProperty{before-skip}{\z@skip}% TODOC: values < 0pt use \minusvspace, else \addvspace. LaTeX's default behaviour of @afterindent is relocated to the after-indent property.
+  \ccSetProperty{before-skip}{\z@skip}%
 %    \end{macrocode}
 % \end{Property}
 % \begin{Property}{after-heading-block}{<any>} is expanded at the very

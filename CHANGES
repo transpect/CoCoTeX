@@ -11,5 +11,7 @@
 - coco-kernel.dtx
   - made group components long
   - added some \ignorespaces at the end of Component macros
+- coco-headings.dtx
+  - added hook for capturing running titles
 
 0.5.0 (INITIAL STATUS)
