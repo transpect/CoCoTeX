@@ -220,16 +220,6 @@
 % each new heading with \lstinline{ltpdfa}'s autoclose mechanism.
 %    \begin{macrocode}
   \ccIfAlly{\cch@add@autoclose{#2}{#3}}{}% \AtBeginDocument\ccIfAlly
-%    \end{macrocode}
-% Finally, we check and update the counters for the lowest and highest
-% heading levels, resp.
-%    \begin{macrocode}
-  \ifnum#2<\cch@min@level\relax
-    \global\cch@min@level=\csname cch@#3@level\endcsname\relax
-  \fi
-  \ifnum#2>\cch@max@level\relax
-    \global\cch@max@level=\csname cch@#3@level\endcsname\relax
-  \fi
 }% \cc@declare@heading
 %    \end{macrocode}
 %   Each new heading level needs some configuration with the
@@ -465,6 +455,14 @@
 % fallback.
 %    \begin{macrocode}
     \ccIfProp{after-skip}{\expandafter\global\expandafter\@tempskipa\expandafter=\ccUseProperty{after-skip}\relax}{\global\@tempskipa=1sp\relax}%
+%    \end{macrocode}
+% Now, we store the counters for the actually used heading levels.
+%    \begin{macrocode}
+    \ifnum#1<\cch@min@level\relax\global\cch@min@level=#1\relax\fi
+    \ifnum#1>\cch@max@level\relax\global\cch@max@level=#1\relax\fi
+%    \end{macrocode}
+% 
+%    \begin{macrocode}
     \cch@use@hook{before-print-hook}{#2}%
     \def\@svsec{%
 %    \end{macrocode}

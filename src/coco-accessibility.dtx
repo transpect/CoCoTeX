@@ -651,6 +651,18 @@
   \ccaAddToConfig{artifact}{Artifact={Type:Layout}}
 }
 %    \end{macrocode}
+% 
+% \begin{macro}{\ccaArtifact} starts an Artifact environment within
+%   which all Tagging is disabled.
+%    \begin{macrocode}
+\def\ccaArtifact{\ccaStructStart[document]{Artifact}\ccaDisable}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\endccaArtifact} ends an Artifact environment.
+%    \begin{macrocode}
+\def\endccaArtifact{\ccaEnable\ccaStructEnd{Artifact}}
+%    \end{macrocode}
+% \end{macro}
 %
 % \subsection{Tagging for Floats}
 %
@@ -740,7 +752,7 @@
 %    \end{macrocode}
 % \end{macro}
 % 
-% \begin{macro}{\ccaAddKeep} is inserted into empty cells to tell the
+% \begin{macro}{\ccaAddKeep} is inserted into empty Tags to tell the
 %   ltpdfa-tagger to not remove the Tag even though it may be empty.
 %    \begin{macrocode}
 \DeclareAccessibilityCommand{\ccaAddKeep}{\relax\directlua{ltpdfa.tagger.addKeep()}}
