@@ -204,7 +204,7 @@
 %     Types should be inherited from
 %   \end{ArgList}
 %    \begin{macrocode}
-    \def\ccInherit##1##2{\cc@inherit{##1}{##2}{#1}}%
+    \def\ccInherit##1##2{\cc@inherit{##1}{##2}{#1}\ignorespaces}%
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccDeclareType}
@@ -216,7 +216,7 @@
 %     Property declarations, handlers, and so forth
 %   \end{ArgList}
 %    \begin{macrocode}
-    \long\def\ccDeclareType##1##2{\csgappto{cc@type@##1@#1}{##2}}%
+    \long\def\ccDeclareType##1##2{\csgappto{cc@type@##1@#1}{##2}\ignorespaces}%
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccDeclareEnv} Each container usually is realised as a
@@ -248,7 +248,7 @@
       #2%
     }%
   \expandafter\x\endgroup
-}
+\ignorespaces}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccSetContainer} is used to change the currently
@@ -257,7 +257,7 @@
 %   \item[1] is the name of the new active Container
 %   \end{ArgList}
 %    \begin{macrocode}
-\def\ccSetContainer#1{\def\cc@cur@cont{#1}}
+\def\ccSetContainer#1{\def\cc@cur@cont{#1}\ignorespaces}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccAddToType} add additional content (i.e., the next
@@ -280,8 +280,7 @@
   \else
     \ccKernelDebugMsg{Evaluating cc@type@#2@#1:^^J \csmeaning{cc@type@#2@#1}}%
     \csname cc@type@#2@#1\endcsname
-  \fi
-}
+  \fi\ignorespaces}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccCheckParent} checks if a Container \InlineArg{1} is
@@ -296,7 +295,7 @@
   \else
     \csgdef{cc@parent@#2}{#1}%
   \fi
-}
+  \ignorespaces}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\cc@inherit} is the low-level inherit function.
@@ -351,7 +350,7 @@
     \expandafter\expandafter\expandafter\x\expandafter\expandafter\expandafter{\csname cc@type@#1@#2\endcsname}%
     \ccKernelDebugMsg{value cc@type@#1@#3:^^J \expandafter\meaning\csname cc@type@#1@#3\endcsname}%
   \fi
-}
+  \ignorespaces}
 %    \end{macrocode}
 % \end{macro}
 % \end{macro}
@@ -379,7 +378,7 @@
   \ltx@LocalExpandAfter\global\expandafter\let\csname cc@\cc@cur@cont @#1\endcsname\relax
   \expandafter\long\expandafter\def\csname \ccPrefix#2\endcsname##1{%
     #3\expandafter\long\expandafter\def\csname cc@\cc@cur@cont @#1\endcsname{##1}#4\ignorespaces}%
-}
+  \ignorespaces}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccDeclareGlobalComponent} is a shortcut to declare
@@ -391,7 +390,7 @@
 \def\cc@declare@global@comp[#1]#2{%
   \ccDeclareComponent{#2}{\expandafter\global}{}%
   \if!#1!\else\csname \ccPrefix #2\endcsname{#1}\fi%
-}
+  \ignorespaces}
 %    \end{macrocode}
 % \end{macro}
 % Once declared, a component can be set in two ways: The first way is
@@ -413,7 +412,7 @@
   \else
     \ifcsdef{cc@\cc@cur@cont @#1}{}{\ccDeclareComponent{#1}{}{}}%
     \csdef{cc@\cc@cur@cont @#1}{#2}%
-  \fi}
+  \fi\ignorespaces}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccGlobalComponent} is a global variant of
@@ -431,7 +430,7 @@
   \else
     \ifcsdef{cc@\cc@cur@cont @#1}{}{\ccDeclareGlobalComponent{#1}{}{}}%
     \csgdef{cc@\cc@cur@cont @#1}{#2}%
-  \fi}
+  \fi\ignorespaces}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccComponentEA} is a variant of
@@ -441,7 +440,7 @@
 %    \begin{macrocode}
 \long\protected\def\ccComponentEA#1#2{%
   \def\x{\ccComponent{#1}}\expandafter\x\expandafter{#2}%
-}
+  \ignorespaces}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccUseComp} is a high level command to return (or
@@ -486,7 +485,7 @@
    \else
      \expandafter\@tempa\expandafter{\@tempb}%
   \fi
-}
+  \ignorespaces}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccUseComponentFrom} is a high level command to return
@@ -636,6 +635,7 @@
     \if!##1!\else\long\csgdef{cc@\cc@cur@cont @#1-\csname cc#1Cnt\endcsname @attrs}{##1}\fi
     #2%
     \csname @#1@hook\endcsname
+    \ignorespaces
   }%
   \csdef{end\ccPrefix#1}{{\ccToggleCountedConditionals\csuse{cc@compose@group@#1}}\aftergroup\ignorespaces}%
 }
@@ -655,7 +655,7 @@
       {\csgappto{cc@compose@group@#1}{#2}}
       {\csgdef{cc@compose@group@#1}{#2}}}
     {\ccPackageError{Kernel}{Type}{Component Group `#1' unknown!}{You tried to declare a Group Handler for a Component Group that has not been declared, yet! Use \string\ccDeclareComponentGroup{#1}{} to declare the Component Group first.}}%
-}
+\ignorespaces}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -866,7 +866,7 @@
     {#1}
     {}
     {\expandafter\global}%
-}
+  \ignorespaces}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\cc@def@counted@comp} is used to declare Counted Components.
@@ -887,8 +887,9 @@
      \edef\@tempb{\noexpand\csgundef{cc@\noexpand\cc@cur@cont @#1}}%
      \expandafter\expandafter\expandafter\csgappto\expandafter\@tempa\expandafter{\@tempb}%
      \egroup}%
+   \ignorespaces
    #4\expandafter\long\expandafter\def\csname cc@\cc@cur@cont @#2\endcsname{\csname cc@\cc@cur@cont @#1\endcsname}%
-}
+   \ignorespaces}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -987,7 +988,7 @@
     \ccDeclareHook[#1]{#2}%
   \fi
   \csgappto{cc@hook@#1@#2}{#3}%
-}
+\ignorespaces}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccUseHook} expands the current state of the hook with
@@ -995,7 +996,7 @@
 %   Container if omitted).
 %    \begin{macrocode}
 \def\ccUseHook{\cc@opt@curcont\cc@use@hook}
-\def\cc@use@hook[#1]#2{\csuse{cc@hook@#1@#2}}
+\def\cc@use@hook[#1]#2{\csuse{cc@hook@#1@#2}\ignorespaces}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -1010,7 +1011,7 @@
 %   \item[2] is the Value assigned to that Property.
 %   \end{ArgList}
 %    \begin{macrocode}
-\long\def\ccSetProperty#1#2{\long\csdef{cc@\cc@cur@cont @#1}{#2}}
+\long\def\ccSetProperty#1#2{\long\csdef{cc@\cc@cur@cont @#1}{#2}\ignorespaces}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccAppToProp} can be used add material to the
@@ -1023,7 +1024,7 @@
 %    \begin{macrocode}
 \def\ccAppToProp#1#2{%
   \long\csappto{cc@\cc@cur@cont @#1}{#2}%
-}
+\ignorespaces}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccPreToProp} can be used add material to the
@@ -1036,7 +1037,7 @@
 %    \begin{macrocode}
 \def\ccPreToProp#1#2{%
   \long\cspreto{cc@\cc@cur@cont @#1}{#2}%
-}
+\ignorespaces}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccPropertyLet} can be used to create an alias
@@ -1044,7 +1045,7 @@
 %   equivalent to
 %   \lstinline|\ccSetProperty{\#1}{\ccUseProperty{\#2}}|.
 %    \begin{macrocode}
-\long\def\ccPropertyLet#1#2{\long\csedef{cc@\cc@cur@cont @#1}{\expandonce{\csname cc@\cc@cur@cont @#2\endcsname}}}
+\long\def\ccPropertyLet#1#2{\long\csedef{cc@\cc@cur@cont @#1}{\expandonce{\csname cc@\cc@cur@cont @#2\endcsname}}\ignorespaces}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccPropertyLetX} creates a Property \InlineArg{1} with
@@ -1052,7 +1053,7 @@
 %   equivalent to
 %   \lstinline|\ccSetPropertyX{\#1}{\ccUseProperty{\#2}}|.
 %    \begin{macrocode}
-\long\def\ccPropertyLetX#1#2{\long\csedef{cc@\cc@cur@cont @#1}{\csname cc@\cc@cur@cont @#2\endcsname}}
+\long\def\ccPropertyLetX#1#2{\long\csedef{cc@\cc@cur@cont @#1}{\csname cc@\cc@cur@cont @#2\endcsname}\ignorespaces}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccSetPropertyVal}
@@ -1062,7 +1063,7 @@
 %   current value of a variable macro, dimension, counter or length to
 %   a Property.
 %    \begin{macrocode}
-\long\def\ccSetPropertyVal#1#2{\def\@tempa{\ccSetProperty{#1}}\expandafter\@tempa\expandafter{#2}}
+\long\def\ccSetPropertyVal#1#2{\def\@tempa{\ccSetProperty{#1}}\expandafter\@tempa\expandafter{#2}\ignorespaces}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccSetPropertyX}
@@ -1073,14 +1074,14 @@
 %   conditionals to determine the actual values of Properties that
 %   otherwise expect fixed named or dimensional values.
 %    \begin{macrocode}
-\long\def\ccSetPropertyX#1#2{\long\csedef{cc@\cc@cur@cont @#1}{#2}}
+\long\def\ccSetPropertyX#1#2{\long\csedef{cc@\cc@cur@cont @#1}{#2}\ignorespaces}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccAddToProperties} adds the material in \InlineArg{2}
 %   to a Container of name \InlineArg{1}'s \lstinline{Properties}
 %   List.
 %    \begin{macrocode}
-\long\def\ccAddToProperties#1#2{\ccAddToType{Properties}{#1}{#2}}
+\long\def\ccAddToProperties#1#2{\ccAddToType{Properties}{#1}{#2}\ignorespaces}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -1101,7 +1102,7 @@
 \long\def\@cc@store@prop[#1]#2#3{%
   \protected@edef\@tempa{\ccUseProperty{#3}}%
   #1\expandafter\def\expandafter#2\expandafter{\@tempa}%
-}
+\ignorespaces}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccdefFromProperty} expands an (implicit) Property
@@ -1369,7 +1370,7 @@
   \if!#2!\else
     \cc@@parse@csv#2,\@nil
   \fi
-}
+  \ignorespaces}
 \endgroup
 %    \end{macrocode}
 % \end{macro}
@@ -1431,7 +1432,7 @@
         \ccIfAttr{#1}{##1}
           {\letcs\ccAttrVal{cc@#1@attr@##1}##3}
           {##2}%
-      \fi
+      \fi\ignorespaces
     }%
 %    \end{macrocode}
 % \end{macro}
@@ -1453,7 +1454,7 @@
         {Container instance on line \inputlineno\space has Attributes,^^Jbut Container `#1' provides no Attribute handlers!}
     \fi
   \fi
-}
+  \ignorespaces}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccGetAttribute} returns the value of an attribute.
@@ -1559,7 +1560,7 @@
     \expandafter\long\expandafter\def\csname cc@#1@class@\@argii @parent\endcsname{#3}%
   \fi
   \expandafter\long\expandafter\def\csname cc@#1@class@\@argii\endcsname{#4}%
-}
+\ignorespaces}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccUseStyleClass}
@@ -1581,7 +1582,7 @@
   \expandafter\ifx\csname cc@#2@class@#1@parent\endcsname\relax\else
     \expandafter\ccUseStyleClass\expandafter{\csname cc@#2@class@#1@parent\endcsname}{#2}%
   \fi
-  \csname cc@#2@class@#1\endcsname}
+  \csname cc@#2@class@#1\endcsname\ignorespaces}
 %    \end{macrocode}
 % \end{macro}
 %

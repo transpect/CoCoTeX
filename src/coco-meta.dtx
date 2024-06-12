@@ -120,9 +120,7 @@
 % \end{macro}
 % \begin{macro}{\ccAddToRole} appends another Component declaration block \#2 to a pre-defined Role \#1.
 %    \begin{macrocode}
-\def\ccAddToRole#1#2{%
-  \csgappto{@#1@hook}{#2}%
-}
+\def\ccAddToRole#1#2{\csgappto{@#1@hook}{#2}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccDeclareRoleBlock} is used to create a new output
@@ -217,8 +215,7 @@
   \csxdef{labeled-meta-property-infix-\cc@cur@cont-#2}{#3}%
   \if!#1!\else
     \long\csgdef{cc@\cc@cur@cont @#2Label}{#1}%
-  \fi
-}
+  \fi\ignorespaces}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccUseLabeledComp} declares two Components: one named

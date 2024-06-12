@@ -532,7 +532,7 @@
     \expandafter\ccUseHook\expandafter{\@cch@parent}%
   \fi
   \ccUseHook{#1-\ccCurSecName}%
-}
+  \ignorespaces}
 %    \end{macrocode}
 % \end{macro}
 % 
@@ -856,19 +856,18 @@
 % the time of its expansion, the level of the heading isn't known, yet. So, we
 % need to take the ugly road, for now.
 %    \begin{macrocode}
+  \ifhmode\unskip\fi%
   \ccIfAlly
     {\global\let\cch@currenvir\@currenvir
      \endgroup
      \ccaVstructStart{#2}%
-     \ifnum\luatexversion>111\relax\UseHook{env/\ccPrefix Heading/before}\fi
+     \if@cc@modern\UseHook{env/\ccPrefix Heading/before}\fi
      \@ignorefalse
      \begingroup
        \@endpefalse
        \let\@currenvir\cch@currenvir
        \edef\@currenvline{\on@line}%
-       \ifnum\luatexversion>111\relax
-         \@execute@begin@hook{\ccPrefix Heading}%
-       \fi
+       \if@cc@modern\@execute@begin@hook{\ccPrefix Heading}\fi
     }{}%
 %    \end{macrocode}
 % Some {\LaTeX} kernel macros are saved, the namespace is
@@ -906,6 +905,7 @@
 % excluded into its own macro to simplify re-definition if necessary.
 %    \begin{macrocode}
   \ccEvalType[#2]{Components}%
+  \ignorespaces
 }
 %    \end{macrocode}
 % \end{macro}
@@ -932,13 +932,13 @@
 %    \begin{macrocode}
 \def\cch@reserve{%
   \ccSetContainer{Heading}%
-  \let\cch@ltx@dbl@backslash\\
-  \letcs\\{\ccPrefix Break}
-  \let\cc@ltx@label\label
+  \let\cch@ltx@dbl@backslash\\%
+  \letcs\\{\ccPrefix Break}%
+  \let\cc@ltx@label\label%
   \def\ccAuthorCnt{\z@}%
   \def\ccAffilCnt{\z@}%
   \cc@reset@components{\cc@cur@cont}%
-  }
+  \ignorespaces}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\cch@reset} restores \LaTeX's default definitions (however, this
