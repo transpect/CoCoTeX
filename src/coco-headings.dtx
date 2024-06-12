@@ -1467,7 +1467,7 @@
 %    \begin{macrocode}
   \ccSetProperty{toc-format}{%
     \ccUseProperty{toc-title-face}%
-    \ccaStructStart{TOCI}%
+    \ccaVstructStart{TOCI}%
     \ccIfComp{TocNumber}
       {\ccaStructStart{P}\ccaStructStart{Reference}\ccaStructStart{Lbl}\ccUseProperty{toc-hang-number}\ccaStructEnd{Lbl}}
       {\leftskip0pt\leavevmode}%
@@ -1479,7 +1479,7 @@
     }%
     \ccaVstructEnd{Span}%
     \ccWhenComp{TocNumber}{\ccaStructEnd{Reference}\ccaStructEnd{P}}%
-    \ccaStructEnd{TOCI}%
+    \ccaVstructEnd{TOCI}%
   }%
 %    \end{macrocode}
 % \end{Property}
