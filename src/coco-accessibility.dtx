@@ -774,6 +774,17 @@
 \pdfgentounicode = 1
 \fi
 %    \end{macrocode}
+% 
+% \begin{macro}{\ccaConvertPdfString} takes a \lstinline{utf-16}
+%   string as \InlineArg{1} and converts it to \lstinline{utf-8}. This
+%   is intended to resolve octal tokens in the output of hyperref's
+%   \lstinline{\pdfstringdef}, which \lstinline{ltpdfa}'s
+%   \lstinline[language={[5.3]lua}]{ltpdfa.setDocInfo()} method does
+%   not seem to handle well.
+%    \begin{macrocode}
+\DeclareAccessibilityCommand{\ccaConvertPdfString}[1]{\directlua{tex.print(ltpdfa.metadata.utf16ToUtf8('\luaescapestring{#1}'))}}
+%    \end{macrocode}
+% \end{macro}
 %
 % \subsection{Automatic PDF Tagging}
 %
@@ -840,7 +851,7 @@ local ltpdfa = require('ltpdfa')
 % extracted from the \lstinline{\jobname.xmp} file via its
 % \lstinline{extract} member.
 %    \begin{macrocode}[language={[5.3]Lua}]
-local meta = {
+meta = {
   Author = '',
   Title = '',
   Creator = '',
@@ -854,16 +865,17 @@ local meta = {
 % \lstinline{\cct@write@pdf@meta} from the coco-title module (see
 % Sect.~\ref{sect:coco-title:pdf-meta-data}).
 %    \begin{macrocode}[language={[5.3]Lua}]
-  extract = function ()
+  extract = function(self)
     local xmpfile = ltpdfa.metadata.xmphandler.fromFile(ltpdfa.config.metadata.xmpfile)
-    local f = io.open(xmpfile, "r")
+    local f = io.open(xmpfile, "rb")
     local content = f:read("*all")
+    -- log(">>>" .. content)
     f:close()
 
-
     if (content:find('<dc:title>')) then
-      Title = content:gsub('.*<dc:title>[^<]*<rdf:Alt>[^<]*<rdf:li[^>]*>(.*)</rdf:li>[^<]*</rdf:Alt>[^<]*</dc:title>.*', "%1")
-      -- log(">>>" .. meta.Title)
+      local title = content:gsub('.*<dc:title>[^<]*<rdf:Alt>[^<]*<rdf:li[^>]*>(.*)</rdf:li>[^<]*</rdf:Alt>[^<]*</dc:title>.*', "%1")
+      self.Title = title
+      -- log(">>>" .. self.Title)
     end
 
     local authors
@@ -873,7 +885,8 @@ local meta = {
       for k in string.gmatch(authors, "<rdf:li>([^>]+)</rdf:li>") do
         table.insert(author , k)
       end
-      Author = table.concat(author, ', ')
+      self.Author = table.concat(author, ', ')
+      -- log(">>>" .. self.Author)
     end
   end
 }

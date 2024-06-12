@@ -145,54 +145,76 @@
 %    \end{macrocode}
 % \begin{macro}{\cct@write@pdf@meta} is used to transfer the
 %   DocumentInfo meta date to the pdf writer.
+%   \begin{ArgList}
+%     \item[1] is the hyperref name for the meta datum
+%     \item[2] is the ltpdfa name for the meta datum
+%     \item[3] is the fallback value.
+%   \end{ArgList}
+%   The fallback value is only chosen if no XMP file exists or if the
+%   XMP file does not contain the required data field. In this case,
+%   the string is sanitized through hyperref's
+%   \lstinline{\pdfstringdef}, which may result in weird encoding
+%   errors, so be aware.
 %    \begin{macrocode}
   \def\cct@write@pdf@meta##1##2##3{%
     \let\cct@cur@data\@empty
 %    \end{macrocode}
-% First, we check, whether \lstinline{coco-accessibility.sty} is
-% used. If so, we check if the User has provided an \lstinline{xmp}
-% file by reading the required meta data field given in \#\#2 from
-% that xmp file. If there is an xmp file and the data field is
-% non-empty, we do nothing, because in this case, the PDF DocInfo is
-% auto-generated from the data in the xmp file by the
-% \lstinline{ltpdfa} package.
+% First, we check, whether \CoCoTeX's accessibility features are
+% activated. If so, we check if the User has provided an XMP file by
+% reading the required meta data field given in \#\#2 from that XMP
+% file.
 %    \begin{macrocode}
-    \ccIfAlly{\edef\cct@cur@data{\expandonce{\directlua{tex.print(cocotex.ally.meta.##2)}}}}{}%
+    \ccIfAlly{\protected@edef\cct@cur@data{\directlua{tex.print(cocotex.ally.meta.##2)}}}{}%
+%    \end{macrocode}
+% Now, we checkif the temporary meta data storage is empty:
+%    \begin{macrocode}
     \ifx\cct@cur@data\@empty
 %    \end{macrocode}
 % If the temporary storage \lstinline{\cct@cur@data} is still empty,
-% we take the value given in \lstinline{\#\#3} and store its plain
-% text in \lstinline{\cct@cur@data}. Data conversion is done with
-% \lstinline{hyperref}'s \lstinline{\pdfstringdef} macro.
+% we assume for the next step that no XMP file exists. Note that an
+% XMP file might well exist, as the previous if-statement also returns
+% \lstinline{true} if coco-accessibility is \textit{not} used, at
+% all. But as the next step is required either way, we treat both
+% cases equally for now.
+%
+% We take the value given in \lstinline{\#\#3} and store its plain
+% text in \lstinline{\cct@cur@data} by passing it through hyperref's
+% \lstinline{\pdfstringdef}.
 %    \begin{macrocode}
       \pdfstringdef\cct@cur@data{##3}%
 %    \end{macrocode}
 % If the storage is still empty (i.e. the field is also missing in the
-% \lstinline{Meta} environment), we do nothing.
+% \lstinline{Meta} environment), we do simply nothing.
 %    \begin{macrocode}
       \ifx\cct@cur@data\@empty\else
 %    \end{macrocode}
-% If the user has provided the data Component in the \lstinline{Meta}
-% environment, we pass it either to \lstinline{hyperref}'s
-% \lstinline{hypersetup} variable given in \lstinline{\#\#1} (when
-% \lstinline{coco-accessibility.sty} is \textit{not} used), or we pass
-% it to \lstinline{ltpdfa.setDocInfo} using the data field given in
-% \lstinline{\#\#2}. In this case, the ltpdfa automatically creates a
-% \lstinline{\jobname.xmp} from which the DocInfo will be generated during
-% subsequent {\LaTeX} run(s).
+% Otherwise, we check again for active accessibility features.
 %    \begin{macrocode}
         \ccIfAlly
 %    \end{macrocode}
-% If we use coco-accessibility, we invoke
-% \lstinline|\ccaSetDocinfo{\#\#2}{\#\#3}|,
+% If we use the \lstinline{coco-accessibility} module, we convert
+% \lstinline{\pdfstringdef}'s output to \lstinline{utf-8} before we
+% send it to \lstinline{ltpdfa} to be written into the DocumentInfo
+% and to generate a new XMP file to be read during future TeX
+% runs. With the \lstinline{hyperref} option
+% \lstinline{pdfencoding=unicode}, the \lstinline{\pdfstringdef}
+% output is encoded in \lstinline{utf-16} and contains octal tokens,
+% which causes some PDF viewers to display those character tokens
+% wrongly, so we convert them to \lstinline{utf-8} to get rid of those
+% octal tokens. Conversion is done with the
+% \lstinline[language={[5.3]Lua}]{ltpdfa.metadata.utf16ToUtf8()}
+% method from the \lstinline{ltpdfa} package.
 %    \begin{macrocode}
-          {\edef\x{\noexpand\ccaSetDocinfo{##2}}%
-           \expandafter\x\expandafter{\cct@cur@data}}%
+          {\protected@edef\@cct@cur@data{\expandafter\ccaConvertPdfString\expandafter{\cct@cur@data}}%
+           \edef\x{\noexpand\ccaSetDocinfo[pdfdoc]{##2}}%
+           \expandafter\x\expandafter{\@cct@cur@data}}%
 %    \end{macrocode}
-% or \lstinline{hyperref}'s \lstinline|\hypersetup{\#\#1=\#\#3}|, if
-% not. Note that we need to feed \lstinline{\#\#3} directly into
-% \lstinline{hypersetup} since it passes the values of pdf meta data
-% keys through \lstinline{pdfstringdef}. If we were to pass
+% If the \lstinline{coco-accessibility} module is \textit{not} active,
+% we use \lstinline{hyperref}'s \lstinline|\hypersetup{\#\#1=\#\#3}|
+% method to write the DocumentInfo. Note that we need to feed
+% \lstinline{\#\#3} directly into \lstinline{hypersetup} since it
+% passes the values of pdf meta data keys through
+% \lstinline{pdfstringdef} on it's own. If we were to pass
 % \lstinline{\cct@cur@data}, which already went through
 % \lstinline{pdfstringdef}, the octal byte sequences from the first
 % run are interpreted a second time, which leeds to weird glyphs in
@@ -201,6 +223,13 @@
 %    \begin{macrocode}
           {\protected@edef\x{\noexpand\hypersetup{##1={\expandonce{##3}}}}\x}%
       \fi
+    \else
+%    \end{macrocode}
+% If the XMP contains the required meta data, we also write it into
+% the DocumentInfo to make sure both ways to encode meta data share
+% the exact same value.
+%    \begin{macrocode}
+      {\protected@edef\x{\noexpand\ccaSetDocinfo{##2}}\expandafter\x\expandafter{\cct@cur@data}}%
     \fi
   }%
 %    \end{macrocode}
@@ -220,7 +249,7 @@
 %    \begin{macrocode}
 \def\cct@title@process@bkt{%
   \cslet{\ccPrefix Break}\space
-  \pdfstringdef\@title{\tpUseProperty{doc-book-title}}%
+  \protected@xdef\@title{\tpUseProperty{doc-book-title}}%
   \cct@write@pdf@meta{pdftitle}{Title}{\@title}%
   \ccpgdefFromProperty{RunBookTitle}{run-book-title}%
 }
@@ -312,7 +341,7 @@
   \edef\cca@xmp@file@name{\ccUseComponentFrom{titlepage}{XmpFile}.xmp}%
   \IfFileExists{\cca@xmp@file@name}
     {\ccaAddToConfig{metadata}{xmpfile=\cca@xmp@file@name}%
-     \directlua{ally.meta.extract()}}
+     \directlua{ally.meta:extract()}}
     {\ccPackageWarning{A11y}{File}{%
 \cca@xmp@file@name\space not found.^^J
 Note that the ltpdfa package will create one^^J

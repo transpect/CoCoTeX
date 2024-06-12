@@ -313,11 +313,13 @@
 % DocumentInfo and other direct-to-PDF data (bookmarks, etc.)
 % automatically
 %    \begin{macrocode}
-   ,pdfencoding=auto%
+   ,pdfencoding=unicode
+   ,unicode=true
 %    \end{macrocode}
 % Bookmarks are numbered by default.
 %    \begin{macrocode}
    ,bookmarksnumbered=true%
+   ,bookmarksopen=false%
 }
 %    \end{macrocode}
 % Disables PDF compression when the \lstinline{no-compress} document

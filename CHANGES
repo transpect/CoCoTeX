@@ -1,5 +1,4 @@
 
-
 0.5.1
 
 - coco-floats.dtx
@@ -8,10 +7,12 @@
     - added Attribute to locally de-activate sameheight mechanism
 - coco-title.dtx
   - added DocTitle Component and doc-book-title Properties to locally override the PDF-title meta datum
+  - FIX: XMP meta data now take preference over Meta container Components if the XMP does exist.
 - coco-kernel.dtx
   - made group components long
   - added some \ignorespaces at the end of Component macros
 - coco-headings.dtx
   - added hook for capturing running titles
+
 
 0.5.0 (INITIAL STATUS)
