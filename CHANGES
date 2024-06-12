@@ -1,6 +1,8 @@
 
 0.5.1
 
+- general
+  - improved whitespace handling in Container environments
 - coco-floats.dtx
   - changed how heights and widths of subfloats are calculated:
     - sameheight mechanism is now only applied if neither sub-figure has an width or height key.
