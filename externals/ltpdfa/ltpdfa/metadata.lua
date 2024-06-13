@@ -500,7 +500,7 @@ end
 local metadata = {
    getDocInfo = getDocInfo,
    xmphandler = xmphandler,
-   utf16ToUtf8=utf16ToUtf8
+   utf16ToUtf8 = utf16ToUtf8,
 }
 return metadata
 
