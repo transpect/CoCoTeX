@@ -1280,6 +1280,7 @@ from the Components given in the Meta Container.}}}
 % \subsection{Output Intent and ICC Profiles}
 %
 %    \begin{macrocode}
+\ifx\cc@color@enc\relax\else
 \ccWhenAlly{%
 %    \end{macrocode}
 % First, we declare some Components that represent the three necessary
@@ -1333,7 +1334,7 @@ from the Components given in the Meta Container.}}}
       profile=\ccIfComp{IccProfileFile}{\ccUseComp{IccProfileFile}}{suppl/\cc@color@enc.icc};%
       components=\ccIfComp{IccComponents}{\ccUseComp{IccComponents}}{\cca@default@icc@comp};%
       identifier=\ccIfComp{IccIdentifier}{\ccUseComp{IccIdentifier}}{\cca@default@icc@iden}%
-    }}
+  }}
 %    \end{macrocode}
 % \end{Property}
 % The Component Handler which links the new Components to that
@@ -1346,7 +1347,7 @@ from the Components given in the Meta Container.}}}
 % As before, the parameters for the PDF conformity level are encoded
 % via specific Components in the titlepage Container:
 %    \begin{macrocode}
-\ccAddToType{Components}{titlepage}{%
+  \ccAddToType{Components}{titlepage}{%
 %    \end{macrocode}
 %
 % \DescribeComponent{PDFAID} defines the PDF/A ID (Default: 2,
@@ -1395,6 +1396,7 @@ from the Components given in the Meta Container.}}}
 % 
 %    \begin{macrocode}
 }%ccWhenAlly
+\fi
 %    \end{macrocode}
 %
 %

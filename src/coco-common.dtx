@@ -34,7 +34,7 @@
 % package.
 %    \begin{macrocode}
 \def\cc@color@enc{cmyk}
-\define@choicekey{coco-common.sty}{color-enc}[\@cc@color@enc\nr]{srgb,rgb,gray,cmy,cmyk,natural}[cmyk]{%
+\define@choicekey{coco-common.sty}{color-enc}[\@cc@color@enc\nr]{srgb,rgb,gray,cmy,cmyk,natural,none}[cmyk]{%
   \let\cc@color@enc\@cc@color@enc
   \ifcase\nr\relax% srgb
     \def\cc@color@enc{rgb}%
@@ -43,7 +43,9 @@
   \or% cmy
     \def\cc@color@enc{cmyk}%
   \or% cmyk
-  \else% natural, i.e. no conversion of color spaces takes place
+  \or% natural, i.e. no conversion of color spaces takes place
+  \else%none
+    \global\let\cc@color@enc\relax
   \fi
 }
 \ProcessOptionsX
