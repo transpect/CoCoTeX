@@ -397,7 +397,7 @@
 %   \xdef\FryID{\ccaGetCurStruct{idx}}%
 % \ccaStructEnd{Fra}
 % \ccaStructStart{Hubert}
-%   \ccaAddToStruct{\CurrentNode}%
+%   \ccaAddToStruct{\FryID}%
 % \ccaStructEnd{Hubert}
 % \end{lstlisting}
 %   makes \lstinline{Hubert} into a child node of \lstinline{Fry} and
@@ -753,7 +753,7 @@
 % \end{macro}
 % 
 % \begin{macro}{\ccaAddKeep} is inserted into empty Tags to tell the
-%   ltpdfa-tagger to not remove the Tag even though it may be empty.
+%   ltpdfa-tagger to not remove the Tag even if it may be empty.
 %    \begin{macrocode}
 \DeclareAccessibilityCommand{\ccaAddKeep}{\relax\directlua{ltpdfa.tagger.addKeep()}}
 %    \end{macrocode}
