@@ -117,9 +117,15 @@
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccWhenAlly} is a variant of \lstinline{\ccIfAlly}
-%   that omits the else branch.
+%   that omits the \texttt{else} branch.
 %    \begin{macrocode}
 \def\ccWhenAlly{\ifx\cc@do@ally\relax\expandafter\@firstofone\else\expandafter\@gobble\fi}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccUnlessAlly} is a varant of \lstinline{\ccIfAlly}
+%   that omits the \texttt{then} branch.
+%    \begin{macrocode}
+\def\ccUnlessAlly{\ifx\cc@do@ally\relax\expandafter\@gobble\else\expandafter\@firstofone\fi}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -169,7 +175,9 @@
 %    \begin{macrocode}
   \directlua{ltpdfa = require('ltpdfa')}
   \directlua{ltpdfa.config.final = true}
-  \directlua{ltpdfa.config.debug = \if@cc@debug true\else false\fi}
+  \ifinlist{ltpdfa}\debug@domain@list
+    {\directlua{ltpdfa.config.debug = true}}
+    {\directlua{ltpdfa.config.debug = false}}
   \directlua{ltpdfa.config.nodetree = \ifx\cca@do@nodetree\relax true\else false\fi}
   \directlua{ltpdfa.config.showspaces = \ifx\cca@do@showspaces\relax true\else false\fi}
   \directlua{ltpdfa.config.dospaces = \ifx\cca@do@dospaces\relax true\else false\fi}
@@ -699,16 +707,8 @@
 % package's \lstinline{\Ginclude@graphics} macro, respectively.
 %    \begin{macrocode}
 \AtBeginDocument{%
-  \if@cc@modern
-    \let\ltx@Ginclulde@graphics\Ginclude@graphics
-    \def\Ginclude@graphics#1{\if@cc@is@final\ccaFigureStart{}\fi\ltx@Ginclulde@graphics{#1}\if@cc@is@final\ccaFigureEnd{}\fi}%
-  \else
-    \@ifpackageloaded{grffile}
-      {\pretocmd\grffile@Ginclude@graphics{\if@cc@is@final\ccaFigureStart{}\fi}{}{}%
-       \apptocmd\grffile@Ginclude@graphics{\if@cc@is@final\ccaFigureEnd{}\fi}{}{}}
-      {\pretocmd\Ginclude@graphics{\if@cc@is@final\ccaFigureStart{}\fi}{}{}%
-       \apptocmd\Ginclude@graphics{\if@cc@is@final\ccaFigureEnd{}\fi}{}{}}%
-  \fi
+  \let\ltx@Ginclulde@graphics\Ginclude@graphics
+  \def\Ginclude@graphics#1{\if@cc@is@final\ccaFigureStart{}\fi\ltx@Ginclulde@graphics{#1}\if@cc@is@final\ccaFigureEnd{}\fi}%
 }
 %    \end{macrocode}
 %

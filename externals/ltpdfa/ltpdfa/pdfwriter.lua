@@ -140,7 +140,7 @@ local function docInfo(infoarray, head)
    --  das übergebene infoarray wird in einen string konvertiert bei dem die Keys (z.B. Autor, Titel)
    --  mit / und die Werte in () gekennzeichnet werden
    for name, val in pairs(infoarray) do
-      nstr = nstr .. " /" .. name .. " (" .. val .. ") "
+      nstr = nstr .. " /" .. name .. " <" .. val .. "> "
    end
    pdf.setinfo(nstr)
    return head

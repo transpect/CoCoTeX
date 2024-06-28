@@ -6,6 +6,9 @@
 > The end user interface is currently being refactored, so expect
 > code-breaking changes in the next few weeks! Active development
 > branch is [ally](https://github.com/transpect/CoCoTeX/tree/ally)!
+>
+> Note that CoCoTeX from version 0.5.0 onwards needs a LaTeX
+> kernel from **2020/06/01** or later!
 
 > [!WARNING]  
 > The end-user documentation (`doc/manual.pdf`) is incomplete and to

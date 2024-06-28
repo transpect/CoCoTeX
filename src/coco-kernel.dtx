@@ -31,7 +31,24 @@
 % information messages to the shell.
 %    \begin{macrocode}
 \newif\if@cc@debug \@cc@debugfalse
-\DeclareOption{debug}{\global\@cc@debugtrue}%
+\DeclareOptionX{debug}{\global\@cc@debugtrue}
+%    \end{macrocode}
+% The \lstinline{debug-domain} option serves as a filter for log
+% messages. It takes a comma separated list of log message categories
+% as argument. Only messages whose domain match any item of that list
+% are printed. If the option is omitted or its argument empty, all
+% messages are printed.
+%
+% Implies \lstinline{debug}.
+%    \begin{macrocode}
+\global\let\debug@domain@list\relax
+\DeclareOptionX{debug-domain}{%
+  \global\@cc@debugtrue
+  \if!#1!\else
+    \def\do##1{\listadd\debug@domain@list{##1}}%
+    \docsvlist{#1}%
+  \fi
+}%
 %    \end{macrocode}
 % The \lstinline{prefix} option will be explained below in
 % Sect.~\ref{sec:kernel:global-switches}.
@@ -102,13 +119,45 @@
 % While the macros defined above are meant to be used in all
 % {\CoCoTeX} modules, the following is only for the Kernel.
 %
-% \begin{macro}{\ccKernelDebugMsg} prints a debug message if and only
-%   if the \lstinline{debug} package option is set.
-%   \begin{ArgList}
-%   \item[1] is the debug message
-%   \end{ArgList}
+% \begin{macro}{\cc@debug@@message} is a generic debug message that is
+%   displayed whenever the debug option is set. Otherwise, it gobbles
+%   its argument.
 %    \begin{macrocode}
-\def\ccKernelDebugMsg#1{\if@cc@debug\message{[CoCo Kernel Debug]\space\space#1^^J}\fi}
+\if@cc@debug
+  \def\do#1{\message{^^J==>defining cc@debug@#1@message}\csgdef{cc@debug@#1@message}##1{\typeout{[CoCo #1 Debug]\space##1}}}%
+  \dolistloop{\debug@domain@list}%
+  \def\cc@debug@@message#1{\typeout{[CoCo Debug]\space#1}}
+\else
+  \let\cc@debug@@message\@gobble
+\fi
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccDebugMsg} prints a domain specific debug message.
+%   \begin{ArgList}
+%   \item*[1] is the debug domain for filtering
+%   \item[2] is the message
+%   \end{ArgList}
+%   The whole mechanism works by \textit{dynamicly} defining the
+%   underlying, domain specific, debug message macros, which all
+%   follow the scheme \lstinline{cc@debug@<domain>@message}. If the
+%   debug domain is requested via the debug-domains class option, the
+%   macros whose domain is listed in this key are defined on
+%   runtime. Otherways, the mandatory argument gets gobbled.
+%    \begin{macrocode}
+\def\ccDebugMsg{\cc@opt@empty\cc@debug@msg}
+\def\cc@debug@msg[#1]#2{%
+  \expandafter\ifx\csname cc@debug@#1@message\endcsname\relax
+    \@gobble{#2}%
+  \else
+    \csname cc@debug@#1@message\endcsname{#2}%
+  \fi
+  }
+%    \end{macrocode}
+% 
+% \begin{macro}{\ccKernelDebugMsg} prints a {\CoCoTeX} kernel specific
+%   debug message.
+%    \begin{macrocode}
+\def\ccKernelDebugMsg{\cc@debug@msg[kernel]}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -147,6 +196,11 @@
 \let\ccWhenAlly\@gobble
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{\ccUnlessAlly} is a stub that does nothing.
+%    \begin{macrocode}
+\let\ccUnlessAlly\@iden
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\ccIfAlly} the same, but it takes two arguments, one
 %   for the \textit{true} case and a second for the \textit{false}
 %   case. We default to the \textit{else} case, so we always gobble
@@ -163,8 +217,10 @@
 \ifx\IfFormatAtLeastTF\@undefined
   \providecommand\IfFormatAtLeastTF{\@ifl@t@r\fmtversion}%
 \fi
-\newif\if@cc@modern
-\IfFormatAtLeastTF{2020/06/01}{\@cc@moderntrue}{\@cc@modernfalse}
+\IfFormatAtLeastTF{2020/06/01}{}%
+  {\ccPackageError{Kernel}{Comatibility}
+    {LaTeX kernel too old!}
+    {CoCoTeX v0.5.1 and newer needs at least LaTeX kernel version 2020/06/01!}}
 %    \end{macrocode}
 % \end{macro}
 %

@@ -366,7 +366,7 @@ local function docInfo(infoarray, head)
    local tail = node.tail(head)
    local nstr = "ps::["
    for name, val in pairs(infoarray) do
-      nstr = nstr .. "/" .. name .. '(' .. val .. ")\n"
+      nstr = nstr .. "/" .. name .. '<' .. val .. ">\n"
    end
    nstr = nstr .. "/DOCINFO pdfmark"
    n = node.new(a_whatsit_node, subtype_special)

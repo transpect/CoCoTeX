@@ -43,6 +43,7 @@
 \newcommand*{\@lt@nop@setLang}[1]{\relax}
 \newcommand*{\@lt@nop@ltOmitEnv}[1]{\relax}
 \newcommand*{\@lt@nop@moveStruct}[1]{\relax}
+\newcommand*{\@lt@nop@replaceStruct}[1]{\relax}
 
 \newcommand*{\@disableLtpdfa}{%
   \global\let\ltOmitEnv\@lt@nop@ltOmitEnv
@@ -82,6 +83,7 @@
   \global\let\pushStruct\@lt@nop@pushStruct
   \global\let\setLang\@lt@nop@setLang
   \global\let\moveStruct\@lt@nop@moveStruct
+  \global\let\replaceStruct\@lt@nop@replaceStruct
   \ifltpdfa@final\NoHyper\fi
 }
 

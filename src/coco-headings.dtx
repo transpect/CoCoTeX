@@ -266,7 +266,9 @@
 % and set the \lstinline{document} layer in the \lstinline{ltpdfa}'s
 % \lstinline{Sectioning} table to have that heading as its child
 %    \begin{macrocode}
+    \ccDebugMsg[a11y]{^^J===> Comparing #2 (\the\cch@tempcnta) with lowest \cch@lowest@level, and highest \cch@highest@level}%
     \ifnum\cch@tempcnta=\cch@highest@level
+      \ccDebugMsg[a11y]{^^J===> #2 is highest, setting it as child of document}%
       \edef\x{\noexpand\ccaAddToConfig{autoclose}{document={Type:Sectioning}{Child:\csname cch@#1@unique\endcsname}{Egroup:false}}}\x%
     \fi
 %    \end{macrocode}
@@ -278,6 +280,7 @@
 % per definition, Aliases of the one that has been defined first.
 %    \begin{macrocode}
     \ifnum\cch@tempcnta=\cch@lowest@level\relax
+      \ccDebugMsg[a11y]{^^J===> #2 is lowest, Setting Child to none}%
       \ifcsstring{cch@#1@unique}{#2}
         {\edef\x{\noexpand\ccaAddToConfig{autoclose}{#2={Type:Sectioning}{Child:none}{Egroup:false}}}\x}
         {\edef\x{\noexpand\ccaAddToConfig{autoclose}{#2={Type:Sectioning}{Child:none}{Egroup:false}{Alias:\csname cch@#1@unique\endcsname}}}\x}%
@@ -285,7 +288,12 @@
 %    \end{macrocode}
 % For all higher heading levels, we look for the next lower heading
 %    \begin{macrocode}
-      \@tempswatrue
+      \ifnum\the\cch@tempcnta<\cch@highest@level\relax
+        \@tempswafalse
+      \else
+        \ccDebugMsg[a11y]{^^J===> #2 goes into the Loop...}%
+        \@tempswatrue
+      \fi
       \loop
 %    \end{macrocode}
 % by incrementing the heading level counter by one
@@ -300,12 +308,14 @@
 % than the heading level with the highest level counter.
 %    \begin{macrocode}
         \ifnum\cch@tempcnta>\cch@lowest@level\relax
+          \ccDebugMsg[a11y]{^^J===> #2's next \csmeaning{cch@\the\cch@tempcnta @unique} is too low, breaking loop...}%
           \@tempswafalse
         \else
 %    \end{macrocode}
 % If we are below the highest level, we check if a heading with the current level is defined
 %    \begin{macrocode}
           \expandafter\ifx\csname cch@\the\cch@tempcnta @unique\endcsname\relax
+          \ccDebugMsg[a11y]{^^J===> #2's next \csmeaning{cch@\the\cch@tempcnta @unique} is in range, going on (cur: \the\cch@tempcnta)...}%
 %    \end{macrocode}
 % if not, we continue. This is the case, when heading levels are not
 % sequentially numbered. Which does (and did) happen. For reasons
@@ -320,6 +330,7 @@
 % \lstinline{Sectioning} table. As above, we distinguish between
 % original headings and Aliases.
 %    \begin{macrocode}
+            \ccDebugMsg[a11y]{^^J===> Setting \csmeaning{cch@\the\cch@tempcnta @unique} as Child of #2 with cnt: \the\cch@tempcnta...}%
             \ifcsstring{cch@#1@unique}{#2}
               {\edef\x{\noexpand\ccaAddToConfig{autoclose}{#2={Type:Sectioning}{Child:\csname cch@\the\cch@tempcnta @unique\endcsname}{Egroup:false}}}\x}
               {\edef\x{\noexpand\ccaAddToConfig{autoclose}{#2={Type:Sectioning}{Child:\csname cch@\the\cch@tempcnta @unique\endcsname}{Egroup:false}{Alias:\csname cch@#1@unique\endcsname}}}\x}%
@@ -352,14 +363,14 @@
 % \begin{macro}{\cch@highest@level} stores the level number of the
 %   highest \textit{used} heading level from the previous tex run.
 %    \begin{macrocode}
-\ifx\cch@highest@level\@undefined \def\cch@highest@level{99}\fi
+\ifx\cch@highest@level\@undefined \def\cch@highest@level{-99}\fi
 %    \end{macrocode}
 % 
 % \end{macro}
 % \begin{macro}{\cch@lowest@level} stores the level number of the
 %   lowest \textit{used} heading level from the previous tex run.
 %    \begin{macrocode}
-\ifx\cch@lowest@level\@undefined  \def\cch@lowest@level{-99}\fi
+\ifx\cch@lowest@level\@undefined  \def\cch@lowest@level{99}\fi
 %    \end{macrocode}
 % \end{macro}
 % both temporary counters are written into the aux file at the very
@@ -844,8 +855,8 @@
 %
 % \textbf{Warning}, the following code is incredibly ugly. In
 % principle, we close the semi-group opened by \lstinline{begin}, add
-% the tagging, and then re-build the rest of the code from older and
-% more modern \LaTeX's standard definitions of \lstinline{begin}.
+% the tagging, and then re-build the rest of the code from \LaTeX's
+% standard definitions of \lstinline{begin}.
 %
 % This is necessary, because otherwise we would need to either
 % manually add the starting sectioning tag outside the
@@ -861,13 +872,13 @@
     {\global\let\cch@currenvir\@currenvir
      \endgroup
      \ccaVstructStart{#2}%
-     \if@cc@modern\UseHook{env/\ccPrefix Heading/before}\fi
+     \UseHook{env/\ccPrefix Heading/before}%
      \@ignorefalse
      \begingroup
        \@endpefalse
        \let\@currenvir\cch@currenvir
        \edef\@currenvline{\on@line}%
-       \if@cc@modern\@execute@begin@hook{\ccPrefix Heading}\fi
+       \@execute@begin@hook{\ccPrefix Heading}%
     }{}%
 %    \end{macrocode}
 % Some {\LaTeX} kernel macros are saved, the namespace is

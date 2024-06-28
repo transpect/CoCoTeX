@@ -164,74 +164,41 @@
 % reading the required meta data field given in \#\#2 from that XMP
 % file.
 %    \begin{macrocode}
-    \ccIfAlly{\protected@edef\cct@cur@data{\directlua{tex.print(cocotex.ally.meta.##2)}}}{}%
+    \ccIfAlly{%
+      \pdfstringdef\cct@cur@data{\directlua{tex.print(cocotex.ally.meta.##2)}}%
 %    \end{macrocode}
-% Now, we checkif the temporary meta data storage is empty:
+% If the data is still empty, i.e., no xmp is given or the data Field
+% is empty, we retrieve the missing data from the \lstinline{Meta}
+% Container and pass it through hyperref's \lstinline{\pdfstringdef}
+% filter to get rid of any {\TeX} markup:
 %    \begin{macrocode}
-    \ifx\cct@cur@data\@empty
-%    \end{macrocode}
-% If the temporary storage \lstinline{\cct@cur@data} is still empty,
-% we assume for the next step that no XMP file exists. Note that an
-% XMP file might well exist, as the previous if-statement also returns
-% \lstinline{true} if coco-accessibility is \textit{not} used, at
-% all. But as the next step is required either way, we treat both
-% cases equally for now.
-%
-% We take the value given in \lstinline{\#\#3} and store its plain
-% text in \lstinline{\cct@cur@data} by passing it through hyperref's
-% \lstinline{\pdfstringdef}.
-%    \begin{macrocode}
-      \pdfstringdef\cct@cur@data{##3}%
-%    \end{macrocode}
-% If the storage is still empty (i.e. the field is also missing in the
-% \lstinline{Meta} environment), we do simply nothing.
-%    \begin{macrocode}
-      \ifx\cct@cur@data\@empty\else
-%    \end{macrocode}
-% Otherwise, we check again for active accessibility features.
-%    \begin{macrocode}
-        \ccIfAlly
-%    \end{macrocode}
-% If we use the \lstinline{coco-accessibility} module, we convert
-% \lstinline{\pdfstringdef}'s output to \lstinline{utf-8} before we
-% send it to \lstinline{ltpdfa} to be written into the DocumentInfo
-% and to generate a new XMP file to be read during future TeX
-% runs. With the \lstinline{hyperref} option
-% \lstinline{pdfencoding=unicode}, the \lstinline{\pdfstringdef}
-% output is encoded in \lstinline{utf-16} and contains octal tokens,
-% which causes some PDF viewers to display those character tokens
-% wrongly, so we convert them to \lstinline{utf-8} to get rid of those
-% octal tokens. Conversion is done with the
-% \lstinline[language={[5.3]Lua}]{ltpdfa.metadata.utf16ToUtf8()}
-% method from the \lstinline{ltpdfa} package.
-%    \begin{macrocode}
-          {\protected@edef\@cct@cur@data{\expandafter\ccaConvertPdfString\expandafter{\cct@cur@data}}%
-           \edef\x{\noexpand\ccaSetDocinfo[pdfdoc]{##2}}%
-           \expandafter\x\expandafter{\@cct@cur@data}}%
-%    \end{macrocode}
-% If the \lstinline{coco-accessibility} module is \textit{not} active,
-% we use \lstinline{hyperref}'s \lstinline|\hypersetup{\#\#1=\#\#3}|
-% method to write the DocumentInfo. Note that we need to feed
-% \lstinline{\#\#3} directly into \lstinline{hypersetup} since it
-% passes the values of pdf meta data keys through
-% \lstinline{pdfstringdef} on it's own. If we were to pass
-% \lstinline{\cct@cur@data}, which already went through
-% \lstinline{pdfstringdef}, the octal byte sequences from the first
-% run are interpreted a second time, which leeds to weird glyphs in
-% the final PDF'S DocInfo. Therefore, we stick with the original
-% input.
-%    \begin{macrocode}
-          {\protected@edef\x{\noexpand\hypersetup{##1={\expandonce{##3}}}}\x}%
+      \ifx\cct@cur@data\@empty
+        \pdfstringdef\cct@cur@data{##3}%
       \fi
-    \else
+%    \end{macrocode}
+% Then, we check again. If the field is still empty, we do
+% nothing. Otherwise, we send the data to ltdfa's
+% \lstinline[{lua[5.3]}]{setDocinfo()} method.
+%    \begin{macrocode}
+      \ifx\cct@cur@data\@empty
+        \ccDebugMsg[pdfmeta]{##2 is empty (3: ##3); doing nothing}%
+      \else
+        \ccDebugMsg[pdfmeta]{Writing \string\setDocinfo[utf-16]{##2}{\expandafter\strip@prefix\meaning\cct@cur@data}}%
+        \edef\x{\noexpand\ccaSetDocinfo[utf-16]{##2}}\expandafter\x\expandafter{\cct@cur@data}%
+      \fi
+    }%
+%    \end{macrocode}
+% If no accessibility features are active, we write the data directly
+% to the pdf using \lstinline{hyperref}'s \lstinline{\hypersetup}
+% macro and the key in \#\#1:
+%    \begin{macrocode}
+    {\protected@edef\x{\noexpand\hypersetup{##1={\expandonce{##3}}}}\x}%
 %    \end{macrocode}
 % If the XMP contains the required meta data, we also write it into
 % the DocumentInfo to make sure both ways to encode meta data share
 % the exact same value.
 %    \begin{macrocode}
-      {\protected@edef\x{\noexpand\ccaSetDocinfo{##2}}\expandafter\x\expandafter{\cct@cur@data}}%
-    \fi
-  }%
+}%
 %    \end{macrocode}
 % \end{macro}
 % After we decided how we want to process the PDF meta data, we now
@@ -269,17 +236,22 @@
       {\ccpgdefFromProperty{RunBookName}{AuthorPDFInfo}}
       {\ccIfComp{EditorPDFInfo}
          {\ccpgdefFromProperty{RunBookName}{EditorPDFInfo}}
-         {\ifnum\ccAuthorCnt>\z@
-            \@setpar{\@@par}%
-            \ccggdefFromCountedComp{RunBookName}{Author}{author-list-pdfinfo-format}%
-          \else
-            \ifnum\ccEditorCnt>\z@
-              \ccpgdefFromCountedComp{RunBookName}{Editor}{editor-list-pdfinfo-format}%
-            \else
-              \ccPackageWarning{transcript-title}{Meta Data}{No author or editor given!}%
-              \@tempswafalse
-            \fi
-          \fi}}%
+         {\ccIfComp{AuthorNameList}
+           {\ccpgdefFromProperty{RunBookName}{AuthorNameList}}
+           {\ccIfComp{EditorNameList}
+             {\ccpgdefFromProperty{RunBookName}{EditorNameList}}
+             {\ifnum\ccAuthorCnt>\z@
+                \@setpar{\@@par}%
+                \ccggdefFromCountedComp{RunBookName}{Author}{author-list-pdfinfo-format}%
+              \else
+                \ifnum\ccEditorCnt>\z@
+                  \ccpgdefFromCountedComp{RunBookName}{Editor}{editor-list-pdfinfo-format}%
+                \else
+                  \ccPackageWarning{transcript-title}{Meta Data}{No author or editor given!}%
+                  \@tempswafalse
+                \fi
+              \fi
+            }}}}%
     \if@tempswa
       \pdfstringdef\@author{\csname\ccPrefix RunBookName\endcsname}%
       \cct@write@pdf@meta{pdfauthor}{Author}{\csname\ccPrefix RunBookName\endcsname}%

@@ -95,6 +95,37 @@ local function escapePdfString(str)
    end
    return val
 end
+-- takes a utf8 encoded string and escapes '(',')', '\\' 
+local function escapePdfStringUTF8(str)
+   if str == nil then return false end
+   local bs = "\\"
+   local klo = "("
+   local klc = ")"
+   local bscnt = 0
+   local val = ""
+   for b in string.utfcharacters(str) do
+      if b == bs then
+         if bscnt == 1 then
+            bscnt = 0 --flop
+            val = val ..  a'\\'
+         else
+            bscnt = 1 -- flip
+            val = val .. '\\'
+         end
+         --log("BACKSLASH at %d %d:", idx, bscnt)
+      elseif (bscnt == 0 and b == klo) then
+         bscnt = 0
+         val = val .. '\\('
+      elseif (bscnt == 0 and b == klc) then
+         bscnt = 0
+         val = val .. '\\)'
+      else
+         val = val .. b
+         bscnt = 0
+      end
+   end
+   return val
+end
 
 -- helper reducing utf-8 to pdfdocencoding
 local function isDocEncoding(str)
@@ -112,7 +143,7 @@ local function isDocEncoding(str)
          end
       end
    end
-   return escapePdfString(val)
+   return val
 end
 
 local function pdfencToUtf8(str)
@@ -127,20 +158,7 @@ end
 -- convert UTF-8 to pdf UTF-16
 local function utf8ToUtf16(arg)
    local u16val = utf.utf8_to_utf16_be(arg)
-   local val = ""
-   for idx = 1, #u16val do
-      local c = u16val:byte(idx)
-      if c < 33 or c > 126 then
-         c = string.format("\\%.3o", c)
-         --if c == 40 or c == 41 or c == 92 then
-         --   return "\\" .. ch
-         -- end
-      else
-         c = string.char(c)
-      end
-      val = val .. c
-   end
-   return val
+   return u16val
 end
 -- convert UTF-16 from hyperref to pdf UTF-8
 local function utf16ToUtf8(arg)
@@ -151,6 +169,11 @@ local function utf16ToUtf8(arg)
    return u8val
 end
 
+local function expandOctal(str)
+   -- unescape octal \xxx
+   local val = str:gsub("\\([0-7][0-7][0-7])", function(k) return string.char(tonumber(k,8)) end)
+   return val
+end
 --------------------------------------------
 local xmphead = [[<?xpacket begin="" id="W5M0MpCehiHzreSzNTczkc9d"?>
 <x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="Adobe XMP Core 5.4-c005 78.147326, 2012/08/23-13:03:03        ">
@@ -378,14 +401,14 @@ function xmphandler.fromFile(filename)
 end
 
 -- writes jobname.xmp
--- TODO use config.metadata-table!!! handle encoding other than utf-8
+-- TODO use infoarray that always is utf-8
 function xmphandler.fromInfo()
    local body = ""
    if (config.metadata.Keywords and config.metadata.Keywords[1] ~= '') then
-      body = "<pdf:Keywords>" .. config.metadata.Keywords[1] .. "</pdf:Keywords>\n"
+      body = "<pdf:Keywords>" .. infoarray.Keywords[1] .. "</pdf:Keywords>\n"
    end
    if (config.metadata.Producer and config.metadata.Producer[1] ~= '') then
-      body = body .. "<pdf:Producer>" .. config.metadata.Producer[1] .. "</pdf:Producer>\n"
+      body = body .. "<pdf:Producer>" .. infoarray.Producer[1] .. "</pdf:Producer>\n"
    end
    -- dates
    local moddate = filemoddate(tex.jobname .. '.tex')
@@ -393,18 +416,18 @@ function xmphandler.fromInfo()
    body = body .. "<xmp:ModifyDate>" .. moddate .. "</xmp:ModifyDate>\n"
    body = body .. "<xmp:CreateDate>" .. moddate .. "</xmp:CreateDate>\n"
    if (config.metadata.Creator and config.metadata.Creator[1] ~= '') then
-      body = body .. "<xmp:CreatorTool>" .. config.metadata.Creator[1] .. "</xmp:CreatorTool>\n"
+      body = body .. "<xmp:CreatorTool>" .. infoarray.Creator[1] .. "</xmp:CreatorTool>\n"
    end
    -- <xapMM:DocumentID>uuid:3d51d5be-cfbc-11f1-0000-6e4afb5d3d68</xapMM:DocumentID>
    body = body .. "<dc:format>application/pdf</dc:format>\n"
    if (config.metadata.Author and config.metadata.Author[1]) then
-      body = body .. "<dc:creator>\n<rdf:Seq>\n<rdf:li>" .. config.metadata.Author[1] .. "</rdf:li>\n</rdf:Seq>\n</dc:creator>\n";
+      body = body .. "<dc:creator>\n<rdf:Seq>\n<rdf:li>" .. infoarray.Author[1] .. "</rdf:li>\n</rdf:Seq>\n</dc:creator>\n";
    end
    if (config.metadata.Title and config.metadata.Title[1] ~= '') then
-      body = body .. "<dc:title><rdf:Alt>\n<rdf:li xml:lang=\"x-default\">" .. config.metadata.Title[1] .. "</rdf:li>\n</rdf:Alt></dc:title>\n"
+      body = body .. "<dc:title><rdf:Alt>\n<rdf:li xml:lang=\"x-default\">" .. infoarray.Title[1] .. "</rdf:li>\n</rdf:Alt></dc:title>\n"
    end
    if (config.metadata.Subject and config.metadata.Subject[1] ~= '') then
-      body = body .. "<dc:description><rdf:Alt>\n<rdf:li xml:lang='x-default'>" .. config.metadata.Subject[1] .. "</rdf:li>\n</rdf:Alt></dc:description>\n"
+      body = body .. "<dc:description><rdf:Alt>\n<rdf:li xml:lang='x-default'>" .. infoarray.Subject[1] .. "</rdf:li>\n</rdf:Alt></dc:description>\n"
    end
    if config.metadata.conformance then
       pdfaver = pdfaver:gsub('PDFAID:PART', config.metadata.conformance.pdfaid)   
@@ -423,38 +446,26 @@ end
 --[[
    public/exported
 ]]--
--- 'import' values into infoarray => as utf-8
+-- 'import' values into infoarray => as utf-8 (always)
 local function fillDocInfo()
    infoarray = {}
    local moddate = filemoddate(tex.jobname .. '.tex')
    moddate = pdfdate(moddate)
-   infoarray['CreationDate'] = {moddate, 'pdfdoc'}
-   infoarray['ModDate'] = {moddate, 'pdfdoc'}
+   infoarray['CreationDate'] = {moddate, 'utf-8'}
+   infoarray['ModDate'] = {moddate, 'utf-8'}
    for key, val in pairs(config.metadata) do
       local str = val[1]
       local enc = val[2]
       local tmp;
       local newenc;
-      if (key ~= 'xmpfile') then
+      if (key ~= 'xmpfile' and key ~= 'conformance') then
+         str = expandOctal(str)
          if (enc == 'utf-8') then
-            tmp = isDocEncoding(str) -- false or string
-            if tmp then
-               newenc = 'pdfdoc'
-            else
-               tmp = str
-               newenc = enc
-            end
-            --      elseif (enc == 'latin-1') then
-            --         tmp = latin1ToUtf8(str) -- to utf-8
+            tmp = str
+            newenc = 'utf-8'
          elseif (enc == 'utf-16') then
-            str = utf16ToUtf8(str) -- to utf8
-            tmp = isDocEncoding(str) -- false or string
-            if tmp then
-               newenc = 'pdfdoc'
-            else
-               tmp = str
-               newenc = 'utf-8'
-            end
+            tmp = utf16ToUtf8(str) -- to utf8
+            newenc = 'utf-8'
          elseif (enc == 'literal') then
             tmp = str -- unchanged
             newenc = 'literal'
@@ -470,22 +481,25 @@ local function fillDocInfo()
    end
 end
 -- return new array with suitable pdf-encoded vals
+-- shall be return hex-Strings to writer.docInfo
 local function getDocInfo()
    fillDocInfo()
    local info = {}
-   for name, val in pairs(infoarray) do
+   for name, val in pairs(infoarray) do -- infoarray contains utf-8 per convention
       if name ~= 'conformance' then
          local enc = val[2]
-         local str = val[1]
-         if (enc == 'utf-8' or enc == 'utf-16') then
-            -- debug_log("RECODE %s, %s => %s", enc, name, str)
-            info[name] = utf8ToUtf16(str)
-         elseif (enc == 'pdfdoc' or enc == 'literal') then
-            -- debug_log("NO RECODE %s, %s => %s", enc, name, str)
-            info[name] = str
-         else
-            info[name] = str -- and hope the best
+         if (enc ~= 'utf-8') then
+            return nil
          end
+         local str = val[1]
+         local tmp = isDocEncoding(str) -- try to reduce to pdfenc
+         if (tmp == false) then
+            str = utf8ToUtf16(str)
+         else
+            str = tmp
+         end
+         str = str:gsub(".", function(char) return string.format("%02x", char:byte()) end)
+         info[name] = str
       end
    end
    if config.debug then
