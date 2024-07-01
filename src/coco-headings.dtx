@@ -84,6 +84,18 @@
 %    \begin{macrocode}
     \cch@provide@quotes
   }%
+  \ccDeclareType{Attributes}{%
+%    \end{macrocode}
+% \begin{Attribute}{class}{<string>} is the style class of the heading.
+%    \begin{macrocode}
+    \ccDeclareAttributeHandler{class}{%
+      \let\cch@current@class\ccAttrVal
+      \expandafter\ccUseStyleClass\expandafter{\ccAttrVal}{Heading}%
+    }%
+%    \end{macrocode}
+% \end{Attribute}
+%    \begin{macrocode}
+  }
   \ccDeclareType{Properties}{}%
   \ccDeclareEnv{\cch@heading}{\cch@end@heading}%
 }
@@ -448,7 +460,7 @@
 % Here, the actual construction of the heading begins.
 %    \begin{macrocode}
     \ccUseProperty{heading-par}%
-    \cch@use@hook{before-hook}{#2}%
+    \cch@use@hook{before}{#2}%
     \ccUseProperty{before-heading}%
 %    \end{macrocode}
 % Add vertical space before the heading
@@ -474,7 +486,7 @@
 %    \end{macrocode}
 % 
 %    \begin{macrocode}
-    \cch@use@hook{before-print-hook}{#2}%
+    \cch@use@hook{print/before}{#2}%
     \def\@svsec{%
 %    \end{macrocode}
 % The \lstinline{heading block} is the composition of all of the
@@ -505,8 +517,9 @@
         \ccIfProp{extended}{\ccUseProperty{extended-heading}}{}%
       \egroup%
       \cch@make@run% Running headers
-      \cch@use@hook{running-hook}{#2}%
+      \cch@use@hook{run/after}{#2}%
       \ccUseProperty{after-heading-block}%
+      \cch@use@hook{after}{#2}%
     }%
 %    \end{macrocode}
 % Finally, we decide whether the printable material we stored in
@@ -539,10 +552,10 @@
 %    \begin{macrocode}
 \def\cch@use@hook#1#2{%
   \expandafter\ifx\csname cc@parent@#2\endcsname\relax\else
-    \edef\@cch@parent{#1-\csname cc@parent@#2\endcsname}%
-    \expandafter\ccUseHook\expandafter{\@cch@parent}%
+    \letcs\@cch@parent{cc@parent@#2}%
+    \cch@use@hook{#1}{\csname cc@parent@#2\endcsname}%
   \fi
-  \ccUseHook{#1-\ccCurSecName}%
+  \UseHook{cc/headings/#2/#1}%
   \ignorespaces}
 %    \end{macrocode}
 % \end{macro}
@@ -572,12 +585,36 @@
 %   level \#1.
 %    \begin{macrocode}
 \def\cch@init@hooks#1{%
-  \ccDeclareHook{toc-before-hook-#1}% Expanded before the toc entry is printed
-  \ccDeclareHook{toc-after-hook-#1}% Expanded after the toc entry is printed
-  \ccDeclareHook{before-hook-#1}% Expanded before before-heading property is expanded
-  \ccDeclareHook{before-print-hook-#1}% Expanded at the very beginning of the local definition of \@svsec
-  \ccDeclareHook{running-hook-#1}% Expanded after RunTitle has been generated
-  \ccDeclareHook{attr-handler-#1}% Expanded before before-heading property is expanded
+%    \end{macrocode}
+% \DescribeHook{cc/headings/<level>/toc/before} is exanded before the
+% ToC entry is printed
+%    \begin{macrocode}
+  \NewHook{cc/headings/#1/toc/before}%
+%    \end{macrocode}
+% \DescribeHook{cc/headings/<level>/toc/after} is exanded after the
+% ToC entry is printed
+%    \begin{macrocode}
+  \NewHook{cc/headings/#1/toc/after}%
+%    \end{macrocode}
+% \DescribeHook{cc/headings/<level>/before} is expanded before the
+% before-heading property called
+%    \begin{macrocode}
+  \NewHook{cc/headings/#1/before}%
+%    \end{macrocode}
+% \DescribeHook{cc/headings/<level>/after} is expanded after the
+% \lstinline{after-heading-block} property was called.
+%    \begin{macrocode}
+  \NewHook{cc/headings/#1/after}%
+%    \end{macrocode}
+% \DescribeHook{cc/headings/<level>/print/before} is expanded just
+% before \lstinline{\@svsec} is locally defined.
+%    \begin{macrocode}
+  \NewHook{cc/headings/#1/print/before}%
+%    \end{macrocode}
+% \DescribeHook{cc/headings/<level>/run/after} is expanded after the
+% local \lstinline{RunTitle} has been generated
+%    \begin{macrocode}
+  \NewHook{cc/headings/#1/run/after}%% Expanded after the local RunTitle has been generated
 }
 %    \end{macrocode}
 % \end{macro}
@@ -713,10 +750,10 @@
 %    \begin{macrocode}
 \def\cc@toc@print@entry#1{%
   \bgroup
-    \ccUseHook{toc-before-hook-#1}%
+    \cch@use@hook{toc/before}{#1}%
     \ccUseProperty{toc-before-entry}%
     \ccUseProperty{toc-format}%
-    \ccUseHook{toc-after-hook-#1}%
+    \cch@use@hook{toc/after}{#1}%
     \ccUseProperty{toc-after-entry}%
   \egroup}
 %    \end{macrocode}
@@ -886,31 +923,14 @@
 %    \begin{macrocode}
   \cch@reserve
 %    \end{macrocode}
-% Handling of the optional argument
-%
-% \TODO{make into Type Attribute.}
-%    \begin{macrocode}
-  \ccParseAttributes{Heading}{#1}%
-%    \end{macrocode}
-% and treatment of heading-level specific style classes.
-%    \begin{macrocode}
-  \ccWhenAttr{Heading}{class}
-%    \end{macrocode}
-% \TODO{check if still needed!}
-%    \begin{macrocode}
-    {\global\let\cch@current@class\cc@Heading@attr@class%
-     \expandafter\ccUseStyleClass\expandafter{\cc@Heading@attr@class}{Heading}}%
-%    \end{macrocode}
 % \begin{macro}{\ccCurSecName} stores the name of the current heading
 %   level.
 %    \begin{macrocode}
   \edef\ccCurSecName{#2}%
 %    \end{macrocode}
 % \end{macro}
-% \DescribeHook{attr-handler} is used to handle the attributes in the
-% optional argument of \lstinline|\begin{heading}|.
 %    \begin{macrocode}
-  \cch@use@hook{attr-handler}{#2}%
+  \ccEvalAttributes[Heading]{#1}%
 %    \end{macrocode}
 % The cascaded Properties of the heading level are expanded. This is
 % excluded into its own macro to simplify re-definition if necessary.
@@ -949,6 +969,7 @@
   \def\ccAuthorCnt{\z@}%
   \def\ccAffilCnt{\z@}%
   \cc@reset@components{\cc@cur@cont}%
+  \let\cch@current@class\relax
   \ignorespaces}
 %    \end{macrocode}
 % \end{macro}

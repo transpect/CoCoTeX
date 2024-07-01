@@ -23,6 +23,10 @@
 \RequirePackage{xkeyval}
 \RequirePackage{etoolbox}
 %    \end{macrocode}
+% Default hook label for {\CoCoTeX} modules:
+%    \begin{macrocode}
+\SetDefaultHookLabel{cc}
+%    \end{macrocode}
 %
 %
 % \subsection{Package Options}
@@ -1632,6 +1636,8 @@
   \expandafter\ifx\csname cc@#2@class@#1\endcsname\relax
     \expandafter\ifx\csname cc@default@class@#1\endcsname\relax
       \PackageError{cocotex.cls}{Class `#1' with scope `#2' not defined!}{Please declare the class `#1'!}%
+    \else
+      \PackageWarning{cocotex.cls}{Class `#1' with scope `#2' not defined! Reverting to default.}%
     \fi
   \fi
   \csname cc@default@class@#1\endcsname%

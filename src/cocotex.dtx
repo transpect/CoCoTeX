@@ -26,6 +26,13 @@
 \RequirePackage{kvoptions-patch}
 \RequirePackage{xkeyval}
 %    \end{macrocode}
+% First,we set the default hook label for all {\CoCoTeX}
+% modules. Since some modules are ``stand-alone'', we do this in all
+% kernel files, i.e., here, in \lstinline{coco-kernel} and in
+% \lstinline{coco-common}.
+%    \begin{macrocode}
+\SetDefaultHookLabel{cc}
+%    \end{macrocode}
 %
 %
 % \section{Class Options}
