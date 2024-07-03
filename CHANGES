@@ -1,9 +1,15 @@
 
-0.5.1
+0.5.0
 
 - general
   - improved whitespace handling in Container environments
   - Added hard requirement for LaTeX kernel version > texlive 2020
+- coco-kernel.dtx
+  - made group components long
+  - added some \ignorespaces at the end of Component macros
+  - added default value for ccPrefix (=empty)
+- coco-common.dtx
+  - added option to suppress inclusion of color profile
 - coco-floats.dtx
   - changed how heights and widths of subfloats are calculated:
     - sameheight mechanism is now only applied if neither sub-figure has an width or height key.
@@ -11,13 +17,8 @@
 - coco-title.dtx
   - added DocTitle Component and doc-book-title Properties to locally override the PDF-title meta datum
   - FIX: XMP meta data now take preference over Meta container Components if the XMP does exist.
-- coco-kernel.dtx
-  - made group components long
-  - added some \ignorespaces at the end of Component macros
 - coco-headings.dtx
   - added hook for capturing running titles
-- coco-common.dtx
-  - added option to suppress inclusion of color profile
 
 
-0.5.0 (INITIAL STATUS)
+0.4.9 (INITIAL STATUS)

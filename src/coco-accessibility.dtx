@@ -235,16 +235,16 @@
 %    \end{macrocode}
 % \end{macro}
 % The next two macros are used to disable and enable accessibility
-% markup:
+% markup locally, iff accessibility features are globally activated:
 % \begin{macro}{\ccaDisable} disables all ltpdfa commands
 %    \begin{macrocode}
-\def\ccaDisable{\cca@relaxed@defs}
+\def\ccaDisable{\ccWhenAlly{\cca@relaxed@defs}}
 %    \end{macrocode}
 % \end{macro}
 % and
 % \begin{macro}{\ccaEnable} enables all ltpdfa commands.
 %    \begin{macrocode}
-\def\ccaEnable{\cca@saved@defs}
+\def\ccaEnable{\ccWhenAlly{\cca@saved@defs}}
 %    \end{macrocode}
 % \end{macro}
 % 
