@@ -20,8 +20,8 @@
 %% original source files, as listed above, are part of the
 %% same distribution. (The sources need not necessarily be
 %% in the same archive or directory.)
-\def\fileversion{0.3.1}%
-\def\filedate{2024-06-03}%
+\def\fileversion{0.3.2}%
+\def\filedate{2024-07-03}%
 \NeedsTeXFormat{LaTeX2e}[2018/12/01]
 \ProvidesPackage{htmltabs}
     [\filedate\space\fileversion\space htmltabs]
@@ -36,30 +36,31 @@
 \newif\if@ht@ally   \@ht@allyfalse
 \DeclareOptionX{a11y}{\global\@ht@allytrue}%
 \ProcessOptionsX*\relax
-\def\check@coco@ally{%
-  \@ifpackageloaded{coco-accessibility}{}
-    {\PackageWarning{htmltabs.sty}
+\@ifpackageloaded{coco-accessibility}{}
+  {\if@ht@ally
+      \PackageWarning{htmltabs.sty}
       {Accessibility features need coco-accessibility.sty loaded^^J
-       before htmltabs.sty. All Tagging features will be disabled!}
-     \global\@ht@allyfalse
-     \newif\if@cc@is@final\@cc@is@finaltrue
-     \newcommand\ccaStructStart[2][]{}%
-     \newcommand\ccaStructEnd[1]{}%
-     \newcommand\ccaVstructStart[2][]{}%
-     \newcommand\ccaVstructEnd[1]{}%
-     \newcommand\ccaAddPlacement[1]{}%
-     \newcommand\ccaAddScope[1]{}%
-     \newcommand\ccaAddRolemap[2]{}%
-     \newcommand\ccaAddToStruct[1]{}%
-     \newcommand\ccaGetCurStruct[1]{}%
-     \newcommand\ccaAddColSpan[1]{}%
-     \newcommand\ccaAddRowSpan[1]{}%
-     \newcommand\ccaReplaceStruct[1]{}%
-     \newcommand\ccaAddToConfig[2]{}%
-     \newcommand\ccaMoveStruct[1]{}%
-    }%
-}
-\if@ht@ally\check@coco@ally\fi
+        before htmltabs.sty. All Tagging features will be disabled!}
+   \fi
+   \global\@ht@allyfalse
+   \newif\if@cc@is@final\@cc@is@finaltrue
+   \newcommand\ccaStructStart[2][]{}%
+   \newcommand\ccaStructEnd[1]{}%
+   \newcommand\ccaVstructStart[2][]{}%
+   \newcommand\ccaVstructEnd[1]{}%
+   \newcommand\ccaAddPlacement[1]{}%
+   \newcommand\ccaAddScope[1]{}%
+   \newcommand\ccaAddRolemap[2]{}%
+   \newcommand\ccaAddToStruct[1]{}%
+   \newcommand\ccaGetCurStruct[1]{}%
+   \newcommand\ccaAddColSpan[1]{}%
+   \newcommand\ccaAddRowSpan[1]{}%
+   \newcommand\ccaReplaceStruct[1]{}%
+   \newcommand\ccaAddToConfig[2]{}%
+   \newcommand\ccaMoveStruct[1]{}%
+   \let\ccaEnable\relax
+   \let\ccaDisable\relax
+ }%
 \if@ht@silent
   \@ht@debugfalse
   \global\let\DebugLevel\@undefined
@@ -844,6 +845,7 @@
   \parfillskip\z@skip\relax
   \@ht@spaceskiptrue
   \@ht@setspaceskip
+  \apptocmd\selectfont{\@ht@setspaceskip}{}{}%
   }
 \def\ht@halign@left@none{%
   \leftskip\z@\relax
@@ -859,6 +861,7 @@
   \parfillskip\@flushglue\relax
   \@ht@spaceskiptrue
   \@ht@setspaceskip
+  \apptocmd\selectfont{\@ht@setspaceskip}{}{}%
 }
 \def\ht@halign@right@none{%
   \leftskip\@flushglue\relax
@@ -875,6 +878,7 @@
   \parfillskip\z@skip\relax
   \@ht@spaceskiptrue
   \@ht@setspaceskip
+  \apptocmd\selectfont{\@ht@setspaceskip}{}{}%
 }
 \def\ht@halign@justified@auto{%
   \let\\\@raggedtwoe@savedcr
@@ -885,6 +889,7 @@
   \parfillskip\@flushglue
   \@ht@spaceskipfalse
   \@ht@setspaceskip
+  \apptocmd\selectfont{\@ht@setspaceskip}{}{}%
 }
 \let\ht@halign@justified@none\ht@halign@justified@auto
 \def\ht@valign@box#1{%
@@ -1697,13 +1702,16 @@
   \if@ht@nat@calc
     \hskip\ht@framewidth
     \IfCellPropEmpty{internal-rotate}
-      {%
-        \setbox\z@\vtop{#6}%
-        \ifdim\dp\z@<\baselineskip\relax
-          \hbox{#6\ifhmode\strut\fi}%
-        \else
-          \hbox to \dimexpr\textwidth/\ht@maxcol\relax{\null}%
-        \fi}
+      {\ifx\ht@scope\ht@str@td
+         \setbox\z@\vtop{\hsize\maxdimen#6}%
+         \ifdim\dp\z@<\baselineskip\relax
+           \hbox{#6\ifhmode\strut\fi}%
+         \else
+           \hbox to \dimexpr\textwidth/\ht@maxcol\relax{\null}%
+         \fi
+       \else
+         \hbox{#6\ifhmode\strut\fi}%
+       \fi}
       {\ht@transform@box{calc}{#6}\hskip-\z@}%
   \else
     \if@ht@height@calc
@@ -2751,7 +2759,7 @@
 \long\def\ht@HTth[#1]#2{%
   \@ht@HTtd{\let\is@head@cell\relax}[#1]{#2}%
 }
-\def\@ht@HTtd#1[#2]#3{%
+\long\def\@ht@HTtd#1[#2]#3{%
   \begingroup
     \def\ht@ltx@cur@env{Td}%
     \ht@parse@attributes #2,,\@nil
