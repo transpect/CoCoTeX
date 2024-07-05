@@ -1,4 +1,3 @@
-
 0.5.0
 
 - general
@@ -8,15 +7,21 @@
   - made group components long
   - added some \ignorespaces at the end of Component macros
   - added default value for ccPrefix (=empty)
+  - Attributes of Component Groups now also use Attribute Handlers
+  - Fixed an issue where additions to a parent Container's Types were
+    not passed down to its decendents if those were declared earlier
 - coco-common.dtx
   - added option to suppress inclusion of color profile
 - coco-floats.dtx
   - changed how heights and widths of subfloats are calculated:
-    - sameheight mechanism is now only applied if neither sub-figure has an width or height key.
+    - sameheight mechanism is now only applied if neither sub-figure
+      has an width or height key.
     - added Attribute to locally de-activate sameheight mechanism
 - coco-title.dtx
-  - added DocTitle Component and doc-book-title Properties to locally override the PDF-title meta datum
-  - FIX: XMP meta data now take preference over Meta container Components if the XMP does exist.
+  - added DocTitle Component and doc-book-title Properties to locally
+    override the PDF-title meta datum
+  - FIX: XMP meta data now take preference over Meta container
+    Components if the XMP does exist.
 - coco-headings.dtx
   - added hook for capturing running titles
 

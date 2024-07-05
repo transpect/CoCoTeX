@@ -81,7 +81,9 @@
 %    \begin{macrocode}
 \def\ccDeclareRole{\cc@opt@second\cc@declare@role}%
 \def\cc@declare@role[#1]#2{%
-  \ccDeclareComponentGroup{#2}{%
+  \ccDeclareComponentGroup[%
+    {\ccDeclareAttributeHandler*{corresp}{\ccSetProperty{is-corresp}{true}}}%
+  ]{#2}{%
     \ccDeclareCountedComponent{FullName}%
     \ccDeclareCountedComponent{CiteName}%
     \ccDeclareCountedComponent{ShortCiteName}%
@@ -392,7 +394,7 @@
   \ccSetProperty{role-block-short-cite-format}{\ccUseComp{ShortCiteName}\ifnum\ccCurCount<\ccTotalCount\ccUseProperty{counted-name-sep}\fi}%  How each item in the Component <Role>ShortCitationList is formatted
   \ccSetProperty{role-block-pdfinfo-format}{\ccUseComp{PDFInfoName}\ifnum\ccCurCount<\ccTotalCount\ccUseProperty{counted-name-sep}\fi}% How each item in the Component <Role>PDFInfo is formatted
   \ccSetProperty{role-block-correspondence-format}{%
-    \ccIfAttrIsSet{\cc@cnt@grp\the\ccCurCount}{corresp}
+    \ccIfPropVal{is-corresp}{true}
       {\ifx\is@first@corresp\relax
          \ccUseProperty{corresp-sep}%
        \else

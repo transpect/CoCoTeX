@@ -917,7 +917,7 @@
     \ccToggleCountedConditionals
     \ccEvalType{Properties}%
     \ccIfPropVal{subfloat-same-height}{true}{\global\@ccf@sameheighttrue}{\global\@ccf@sameheightfalse}
-    \ccEvalAttributes[\ccfCapType]{#1}%
+    \ccEvalAttributes{#1}%
     \ccf@eval@class
     \ccf@set@hsize
     \ccf@get@seps
@@ -1701,7 +1701,7 @@
     \ifx\ccf@parent\@empty
       \ccInherit{Properties,Components,Attributes}{float}
     \else
-      \ccInherit{Properties,Components}{\ccf@parent}
+      \ccInherit{Properties,Components,Attributes}{\ccf@parent}
     \fi
     \ccDeclareType{FloatEnvInfo}{%
       \ccSetContainer{#2}%
@@ -1948,7 +1948,7 @@
     \def\ccfCapType{figure}%
     \ccToggleCountedConditionals
     \ccEvalType{Properties}%
-    \ccEvalAttributes[\ccfCapType]{#1}%
+    \ccEvalAttributes{#1}%
     \ccf@eval@class
     \ccEvalType{Components}%
     \ignorespaces
