@@ -40,6 +40,7 @@
 % Passing options down to the \LaTeX\space standard packages
 %    \begin{macrocode}
 \DeclareOptionX{main}{\PassOptionsToPackage{\CurrentOption}{babel}}
+\DeclareOption{no-hyperindex}{\global\let\cc@no@hyperindex\relax}
 \DeclareOption{es-noindentfirst}{\PassOptionsToPackage{es-noindentfirst}{babel}}
 \DeclareOption{es-noshorthands}{\PassOptionsToPackage{es-noshorthands}{babel}}
 \PassOptionsToPackage{shorthands=off}{babel}
@@ -329,6 +330,7 @@
 %    \begin{macrocode}
    ,bookmarksnumbered=true%
    ,bookmarksopen=false%
+   ,hyperindex=\ifx\cc@no@hyperindex\relax false\else true\fi
 }
 %    \end{macrocode}
 % Disables PDF compression when the \lstinline{no-compress} document
