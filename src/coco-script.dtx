@@ -20,6 +20,8 @@
 % systems that are used in the document. It is used to determine the
 % additional fonts that are to be loaded via the babel package.
 %    \begin{macrocode}
+\RequirePackage{coco-kernel}
+\RequirePackage{xkeyval}
 \let\usescript\relax
 \define@key{coco-script.sty}{usescript}{\def\usescript{#1}}
 \ProcessOptionsX
