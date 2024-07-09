@@ -26,7 +26,6 @@ module CoCoTeX
       $log.info("Generating end-user manual")
       install_kernel
       prepare_manual
-      prepare_doc
       build_manual
       create_or_exist(dir: @doc_dir)
       shell_command("mv #{@manual_out} #{@doc_dir}") if File.exists?(@manual_out)

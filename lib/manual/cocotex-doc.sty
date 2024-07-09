@@ -1,6 +1,4 @@
 %\usepackage[UKenglish]{babel}
-\usepackage[hyperref]{doc}
-
 \usepackage{amsmath}
 \RequirePackage{listings}
 
@@ -484,13 +482,11 @@
   \begin{Heading}[nonumber]{chapter}
     \Title{Index}
   \end{Heading}
-  \textit{Italic index terms} refer to general design concepts.  Page
-  entries in \textbf{bold face} refer to main sections that describe
-  the index term.  Entries in \texttt{mono-type} refer to \LaTeX\
-  commands and markup.  The symbol {\see{}{}} stands for “see”; the
-  symbol {\seealso{}{}} for “see also”.\par
-  %\raggedright
-  \IndexPrologue{\gdef\indexcolor{spot!75}%
+  Page entries in \textbf{bold face} refer to main sections that
+  describe the index term.  Entries in \texttt{mono-type} refer to
+  \LaTeX\ commands and markup.  The symbol {\see{}{}} stands for
+  “see”; the symbol {\seealso{}{}} for “see also”.\par
+  \raggedright \IndexPrologue{\gdef\indexcolor{spot!75}%
     \begin{Heading}[nonumber]{section}
       \Title{\color{\indexcolor}General Index}%
       \TocTitle{General Index}
@@ -552,16 +548,25 @@
   \global\let\PrintIndex\@empty
 }
 
-\setcounter{IndexColumns}{2}
+\def\Index#1{\index{#1|hyperpage}}
 
-\let\efill\hfill
-\let\pfill\dotfill
-\newif\ifscan@allowed
+\def\MainTerm{\cc@opt@second\main@term}
+\def\main@term[#1]#2{\textbf{#1}\index{#2|bfhyperpage}}
 
+\def\SeeIndex#1#2{\index{#1|see{#2}}}
+\def\PropIndex#1{\index[properties]{#1|hyperpage}}
+
+\def\bfhyperpage#1{{\bfseries\color{\indexcolor}\hyperpage{#1}}}
 \renewenvironment{theindex}
-{\begin{multicols}\c@IndexColumns[\index@prologue]%
-    \let\item\@idxitem \ignorespaces}%
+{\begin{multicols}{3}[\index@prologue]%
+  \parskip\z@
+  \small
+  \let\item\@idxitem \ignorespaces}%
 {\end{multicols}}
+
+\renewcommand\@idxitem{\par\hangindent .75em}
+\renewcommand\subitem{\par\hangindent 1.5em \hskip.75em\hb@xt@.75em{--\hss}}
+\renewcommand\subsubitem{\par\hangindent 2.25em\hskip1.5em\hb@xt@.75em{--\hss}}
 
 
 
