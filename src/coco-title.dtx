@@ -216,7 +216,7 @@
 %    \begin{macrocode}
 \def\cct@title@process@bkt{%
   \cslet{\ccPrefix Break}\space
-  \protected@xdef\@title{\tpUseProperty{doc-book-title}}%
+  \protected@xdef\@title{\ccUseProperty{doc-book-title}}%
   \cct@write@pdf@meta{pdftitle}{Title}{\@title}%
   \ccpgdefFromProperty{RunBookTitle}{run-book-title}%
 }
