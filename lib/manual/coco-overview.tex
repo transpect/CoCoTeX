@@ -1,16 +1,16 @@
-\begin{heading}{chapter}
-  \tpTitle{Overview}
-\end{heading}
+\begin{Heading}{chapter}
+  \Title{Overview}
+\end{Heading}
 
-\begin{heading}{section}
-  \tpTitle{Installation and Usage}
-\end{heading}
+\begin{Heading}{section}
+  \Title{Installation and Usage}
+\end{Heading}
 
-\begin{heading}{subsection}
-  \tpTitle{Installation}
-\end{heading}
+\begin{Heading}{subsection}
+  \Title{Installation}
+\end{Heading}
 
-The current build of the package can be obtained from GitHub:
+\index{Installation}The current build of the package can be obtained from GitHub:
 \begin{lstlisting}[style=tex,language=bash]
 git clone https://github.com/transpect/CoCoTeX.git
 \end{lstlisting}
@@ -18,11 +18,11 @@ The actual source files can be found in the \lstinline{src} sub-folder.
 
 The most recent stable version can be found in the
 \lstinline{releases} folder. It contains the \lstinline{cocotex.dtx}
-file, its corresponding \lstinline{cocotex.ins} file, and this
-Manual as a pre-rendered PDF.
+file, its corresponding \lstinline{cocotex.ins} file, and both the source code documentation and this
+End-User Manual as a pre-rendered PDFs.
 
 The package is installed via
-\begin{lstlisting}[style=tex]
+\begin{lstlisting}[style=bash]
 latex cocotex.ins
 \end{lstlisting}
 This will create the \lstinline{cocotex.cls} file, as well as some
@@ -31,29 +31,29 @@ additional modules that follow the naming convention
 greater detail below in \fullref{sec:modules}.
 
 The documentation of the framework's source code can be created via
-\begin{lstlisting}[style=tex]
-pdflatex cocotex.dtx
+\begin{lstlisting}[style=bash]
+lualatex cocotex.dtx
 \end{lstlisting}
-\textbf{Note:} You \textit{must} use \lstinline{pdflatex} in order to
+\textbf{Note:} You \textit{must} use \lstinline{lualatex} in order to
 create the source code documentation!
 
 \textbf{Note:} The source code documentation is a technical breakdown
 of the framework's source code; it is not the same document as the
 more user-oriented Manual you are currently reading.
 
-\begin{heading}{subsection}
-  \tpTitle{Usage}
-\end{heading}
+\begin{Heading}{subsection}
+  \Title{Usage}
+\end{Heading}
 
-{\CoCoTeX} follows a modular design. It comes with several
+{\CoCoTeX}\index{Usage} follows a modular design. It comes with several
 \lstinline{.sty} files that can be used independently from
 another. However, there is also a {\LaTeX} Document Class file
 \lstinline{cocotex.cls} which can be used to load the whole framework
 at once.
 
-\begin{heading}{subsubsection}
-  \tpTitle{Using cocotex.cls}
-\end{heading}
+\begin{Heading}{subsubsection}
+  \Title{Using cocotex.cls}
+\end{Heading}
 
 The \lstinline{cocotex.cls} serves as stand-in for the {\LaTeX}
 default document classes \lstinline{article} and \lstinline{book}. It
@@ -62,7 +62,7 @@ is called with the usual {\LaTeX} commmand:
 \documentclass[<options>]{cocotex}
 \end{lstlisting}
 
-The actual document type can be set with the \lstinline{pubtype} option:
+The actual document type can be set with the \lstinline{pubtype}\index{class option>pubtype}\index{pubtype|see{class option}} option:
 \begin{lstlisting}[style=tex]
 \documentclass[pubtype=<mono|article|collection|journal>]{cocotex}
 \end{lstlisting}
@@ -83,9 +83,9 @@ The allowed values are:
 % \textbf{lua\LaTeX}\footnote{{Xe\LaTeX} may work as well but is not
 %   officially supported.}!
 
-\begin{heading}[label=sec:modules]{subsubsection}
-  \tpTitle{Using Single Modules}
-\end{heading}
+\begin{Heading}[label=sec:modules]{subsubsection}
+  \Title{Using Single Modules}
+\end{Heading}
 
 {\CoCoTeX} is modular. That means you can use selected modules as
 packages together with \LaTeX's default or other third-party document
@@ -96,9 +96,9 @@ classes. Modules are included like any other package, e.g.,
 \RequirePackage[<options>]{coco-title}
 \end{lstlisting}
 
-\begin{heading}{section}
-  \tpTitle{Design Goals and Purpose}
-\end{heading}
+\begin{Heading}{section}
+  \Title{Design Goals and Purpose}
+\end{Heading}
 
 {\CoCoTeX} is a programming framework for {\LaTeX} developers, who
 need to build and maintain a number of (not too) different
@@ -140,9 +140,9 @@ those and other concepts are exlained in more detail.
 
 
 
-\begin{heading}[label=sec:concepts]{subsection}
-  \tpTitle{Basic Concepts}
-\end{heading}
+\begin{Heading}[label=sec:concepts]{subsection}
+  \Title{Basic Concepts}
+\end{Heading}
 
 One design goal of the {\CoCoTeX} Framework is to provide an easy and
 unified way to configure the typesetting of blocks of inter-connected
@@ -157,9 +157,9 @@ a~page, as well as in the table of contents, in some cases with
 slightly altered data.
 
 
-\begin{heading}[label=sec:overview.containers]{subsubsection}
-  \tpTitle{Containers}\index{Container|textbf}
-\end{heading}
+\begin{Heading}[label=sec:overview.containers]{subsubsection}
+  \Title{Containers}\index{Container|textbf}
+\end{Heading}
 
 Such a~bundle of structured information in the {\CoCoTeX} framework is
 referred to as a~\textbf{Container}. In the
@@ -176,9 +176,9 @@ levels. The mechanism to pass certain properties or constituents from
 one Container to another is called
 \textbf{Inheritance}\index{Inheritance|textbf}.
 
-\begin{heading}[label=sec:overview.components]{subsubsection}
-  \tpTitle{Components}\index{Component|textbf}
-\end{heading}
+\begin{Heading}[label=sec:overview.components]{subsubsection}
+  \Title{Components}\index{Component|textbf}
+\end{Heading}
 
 The inter-connected pieces of information that constitute a Container
 are called \textbf{Components} in the
@@ -203,9 +203,9 @@ the way both concepts are implemented in {\CoCoTeX}, Group Containers
 are always also Counted Containers and vice-versa, so both terms might
 be used interchangeably.
 
-\begin{heading}[label=sec:overview.properties]{subsubsection}
-  \tpTitle{Properties}\index{Properties|textbf}
-\end{heading}
+\begin{Heading}[label=sec:overview.properties]{subsubsection}
+  \Title{Properties}\index{Properties|textbf}
+\end{Heading}
 
 While headings of the same level are usually rendered in the same way
 for a given publisher style, the actual typeface may vary depending on
@@ -222,9 +222,9 @@ requirements. One of the design goals of {\CoCoTeX} is to keep the
 code behind those Properties as comprehensible and pointed as
 possible.
 
-\begin{heading}[label=sec:overview.types]{subsubsection}
-  \tpTitle{Types, Scope and Modular Inheritance}\index{Type|textbf}
-\end{heading}
+\begin{Heading}[label=sec:overview.types]{subsubsection}
+  \Title{Types, Scope and Modular Inheritance}\index{Type|textbf}
+\end{Heading}
 
 Properties and Components can be seen as Container‐specific Data
 \textbf{Type}s. They are only defined within the
@@ -232,9 +232,9 @@ scope of their parent Container and are usually not accessible from
 the outside. When a new Container is declared, it can inherit the Data
 Types from one or multiple other containers.
 
-\begin{heading}[label=sec:oop]{subsection}
-  \tpTitle{Concepts from Object-Oriented Programming}
-\end{heading}
+\begin{Heading}[label=sec:oop]{subsection}
+  \Title{Concepts from Object-Oriented Programming}
+\end{Heading}
 
 
 \textbf{Containers} are comparable to the concept of \textit{classes}
@@ -250,9 +250,9 @@ to \textit{Mixins} in some object-oriented programming languages like
 Ruby.
 
 
-\begin{heading}{subsection}
-  \tpTitle{Implementation of {\CoCoTeX} Concepts in LaTeX Documents}
-\end{heading}
+\begin{Heading}{subsection}
+  \Title{Implementation of {\CoCoTeX} Concepts in LaTeX Documents}
+\end{Heading}
 
 In the {\CoCoTeX} framework, \textit{Containers} are realised in the
 document source as {\LaTeX} environments. \textit{Simple Components}
@@ -289,12 +289,12 @@ start with the \lstinline{tp}\footnote{That the prefix is „tp“ has
   {\CoCoTeX} being the second).} prefix and the component's name
 begins with a capital letter. For instance,
 \begin{lstlisting}[style=tex]
-\begin{tpFigure}
-  \tpCaption{A~nice image.}
-\end{tpFigure}
+\begin{Figure}
+  \Caption{A~nice image.}
+\end{Figure}
 \end{lstlisting}
-utilizes a Component named \texttt{tpCaption} with the \texttt{Content}
-\textit{“A~nice image.”} within the container \texttt{tpFigure}.
+utilizes a Component named \texttt{Caption} with the \texttt{Content}
+\textit{“A~nice image.”} within the container \texttt{Figure}.
 
 Properties consist of two parts, the property's name and its
 value. Some Properties provided by the {\CoCoTeX} modules may have
@@ -330,15 +330,15 @@ provided by the {\CoCoTeX} modules, but basicly all properties can
 be set to \texttt{<empty>}.
 
 
-\begin{heading}{section}
-  \tpTitle{Overview: Modules}
-\end{heading}
+\begin{Heading}{section}
+  \Title{Overview: Modules}
+\end{Heading}
 
 The following modules are included in {\CoCoTeX}:
 
-\begin{heading}{subsection}
-  \tpTitle{User-Level Modules}
-\end{heading}
+\begin{Heading}{subsection}
+  \Title{User-Level Modules}
+\end{Heading}
 
 \begin{description}
 \item[\ttfamily coco-headings.sty] The \lstinline{headings}
@@ -363,9 +363,9 @@ The following modules are included in {\CoCoTeX}:
 % \item[\ttfamily coco-lists.sty]
 \end{description}
 
-\begin{heading}{subsection}
-  \tpTitle{Backend Modules}
-\end{heading}
+\begin{Heading}{subsection}
+  \Title{Backend Modules}
+\end{Heading}
 
 \begin{description}
 \item[\ttfamily coco-kernel.sty] The \lstinline{kernel}

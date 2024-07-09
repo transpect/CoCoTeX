@@ -26,6 +26,7 @@ module CoCoTeX
       $log.info("Generating end-user manual")
       install_kernel
       prepare_manual
+      prepare_doc
       build_manual
       create_or_exist(dir: @doc_dir)
       shell_command("mv #{@manual_out} #{@doc_dir}") if File.exists?(@manual_out)
@@ -68,11 +69,10 @@ module CoCoTeX
       run_while_status("1st TeX run") do do_tex_run end
       unless @options.quick
         run_while_status("2nd TeX run") do do_tex_run end
-        run_while_status("Generating general index") do do_index end
-        run_while_status("Property Index") do do_index(target: "p") end
-        run_while_status("TeX Index") do do_index(target: "t") end
         run_while_status("3rd TeX run") do do_tex_run end
+        run_while_status("Generating Index") do do_makeindex() end
         run_while_status("4th TeX run") do do_tex_run end
+        run_while_status("5th TeX run") do do_tex_run end
       end
       @manual_out = File.join(@temp_dir, "manual.pdf")
     end
@@ -107,10 +107,10 @@ module CoCoTeX
       end
     end
 
-    def do_makeindex
+    def do_makeindex(manual: false)
       makeindex = File.join(ENV["LATEXBIN"], "makeindex")
       raw_index_file = File.join(@temp_dir, "#{@doc_main}.idx")
-      preprocess_idx(index: raw_index_file)
+      preprocess_idx(index: raw_index_file, manual: manual)
       cmd = "cd #{@temp_dir} ; splitindex #{@doc_main}.idx -- -s cocotex.ist"
       _cmd = check_shell_command(cmd)
       st = nil
@@ -133,11 +133,15 @@ module CoCoTeX
       end
     end
 
-    def preprocess_idx(index: )
+    def preprocess_idx(index: ,manual: false)
       temp = Tempfile.new('tempindex.idx')
       File.open(index, "r") do |f|
         f.each_line do |line|
-          temp.puts(line.gsub(/\\indexentry\[cocotex\]{cc[a-z]?@?/, '\\indexentry[cocotex]{'))
+          if manual
+            temp.puts(line.gsub(/\\indexentry\[manual\]{cc[a-z]?@?/, '\\indexentry[manual]{'))
+          else
+            temp.puts(line.gsub(/\\indexentry\[cocotex\]{cc[a-z]?@?/, '\\indexentry[cocotex]{'))
+          end
         end
       end
       temp.close
@@ -172,19 +176,6 @@ module CoCoTeX
       end
     end
 
-    # issues a xindy run
-    def do_index(target: "")
-      cmd = "cd #{@temp_dir} ; ./index.sh #{@doc_main} #{target}"
-      _cmd = check_shell_command(cmd)
-      Open3.popen2e("umask 002 ; #{_cmd}") do |i,o,s|
-        if @options.debug == "debug"
-          o.each do |l|
-            puts l
-          end
-        end
-        raise StandardError.new("Xindy run failed: #{o}") unless s.value.success?
-      end
-    end
 
 
   end

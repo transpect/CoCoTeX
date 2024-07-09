@@ -1,58 +1,26 @@
 %\usepackage[UKenglish]{babel}
- \usepackage{amsmath}
+\usepackage[hyperref]{doc}
+
+\usepackage{amsmath}
 \RequirePackage{listings}
-\usepackage{newtxtext,newtxmath}
-\usepackage{bold-extra}
-\definecolor{spot}{cmyk}{0,0.82,0.59,0.18}
-\definecolor{mblue}{cmyk}{0,0.82,0.59,0.18}
-\definecolor{mpurp}{cmyk}{1,0.75,0,0}
+
+%%%%%%%%%%%
+% Colours %
+%%%%%%%%%%%
+
+\definecolor{link}{cmyk}{0.00,0.00,0.00,1.00}
+\definecolor{spot}{cmyk}{0.00,0.82,0.59,0.18}
+\definecolor{contcolor}{cmyk}{0.00,0.00,1.00,0.20}
+\definecolor{compcolor}{cmyk}{1.00,1.00,0.00,0.00}
+\definecolor{hookcolor}{cmyk}{1.00,0.00,1.00,0.00}
+\definecolor{propcolor}{cmyk}{0.09,0.90,0.00,0.15}
+\definecolor{tagscolor}{cmyk}{1.00,0.00,0.00,0.20}
+\definecolor{attrcolor}{cmyk}{0.70,0.00,0.23,0.28}
 
 
-\lstset{%
-  basicstyle=\ttfamily,
-  firstnumber=last,
-  literate={%
-    {Ö}{{\"O}}1
-    {Ä}{{\"A}}1
-    {Ü}{{\"U}}1
-    {ß}{{\ss}}1
-    {ü}{{\"u}}1
-    {ä}{{\"a}}1
-    {ö}{{\"o}}1
-    {¬}{{$\neg$}}1
-    {«}{{\guillemotright}}1
-    {»}{{\guillemotleft}}1
-    {~}{{\textasciitilde}}1},
-  inputencoding=utf8,
-  language=[LaTeX]TeX,
-  extendedchars=true,                % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
-  % basicstyle=\fontfamily{lmvtt}\selectfont\small,
-  columns=fullflexible,
-  numbers=none,
-  numberfirstline=1,
-  numberstyle=\scriptsize,
-  numbersep=5pt,
-  backgroundcolor=\color{spot!05}, % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
-  % basicstyle=\scriptsize,          % the size of the fonts that are used for the code
-  breakatwhitespace=false,           % sets if automatic breaks should only happen at whitespace
-  breaklines=true,                   % sets automatic line breaking
-  captionpos=t,                      % sets the caption-position
-  commentstyle={\color{spot!70}\itshape},      % comment style
-  frame=single,                      % adds a frame around the code
-  keepspaces=true,                  % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
-  keywordstyle=\color{spot!90},         % keyword style
-  rulecolor=\color{spot},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
-  showspaces=false,                  % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
-  showstringspaces=true,             % underline spaces within strings only
-  showtabs=true,                     % show tabs within strings adding particular underscores
-  stringstyle={\color{spot!80}},     % string literal style
-  tabsize=2,                         % sets default tabsize to 2 spaces
-}
-
-
-\usepackage{footnote}
-
-
+%%%%%%%%%%%%%
+% Type area %
+%%%%%%%%%%%%%
 
 \hoffset-1in
 \voffset-1in
@@ -66,68 +34,27 @@
 \emergencystretch=2em
 \marginparsep10mm
 
-
-\RequirePackage{framed}
-\FrameRule.5\p@
-\FrameSep2mm
-
-\newskip\@leftskip \@leftskip\z@skip
-\def\endMakeFramed{%
-  \par
-  \rightskip\z@
-  \kern-1.33\baselineskip
-  \hrule\@width\hsize\@height\z@\@depth\z@
-  \penalty-100 %put depth into height
-  \null\hfill
-  \egroup
-  \begingroup
-    \fb@put@frame\FrameCommand\FirstFrameCommand
-  \endgroup
-  \vskip-0.67\baselineskip
-}
-
-\def\addvspace@#1{%
-  \ifdim \lastskip =\z@
-    \vskip #1\relax
-  \else
-  \@tempskipb#1\relax
-    \@xaddvskip
-  \fi}
-
-\renewenvironment{shaded}[1][]{%
-  \def\argi{#1}%
-  %\addvspace@\baselineskip
-  \vskip1.2\baselineskip\vspace*{-1.2\baselineskip}%für Bündigkeit am Seitenanfang
-  \advance\hsize-2\FrameSep\linewidth\hsize
-  \def\FrameCommand{\fboxsep=\FrameSep\hspace*{2\FrameSep}\colorbox{shadecolor}}%
-  \MakeFramed{\vrule\@width\z@\@height5.98mm\@depth\z@\FrameRestore}%
-  \par
-  \vskip-9mm
-  \ifx\argi\@empty\else\leftskip10mm\fi
-  \@leftskip\leftskip
-  \ignorespaces}%
-{\endMakeFramed}
-
+%%%%%%%%%
+% Fonts %
+%%%%%%%%%
 \let\mybfseries\bfseries
-\def\bfseries{\mybfseries\sffamily\color{spot!95}}
+\let\sbseries\mybfseries
+\def\bfseries{\mybfseries\sffamily}
 
 \let\myttfamily\ttfamily
 \DeclareTextFontCommand{\mytexttt}{\myttfamily}
-\def\ttfamily{\myttfamily\small\color{spot!95}}
-
+\def\ttfamily{\myttfamily\small}
 \def\titlefont{\mybfseries\sffamily\color{spot}}
 
 \let\mytextbf\textbf
-\def\textbf#1{{\small\bfseries#1\/}}
+\def\textbf#1{{\small\bfseries\color{spot}#1\/}}
 
 \parindent\z@
 \parskip.5\baselineskip
 
-% \def\version#1{\subtitle{Version~#1}}\version{0.0}
-
 \RequirePackage{marginnote}\reversemarginpar
-\def\tpNew#1{\marginnote{\textcolor{spot!90}{\sffamily\bfseries New #1}}}
-\def\tpUpdate#1{\marginnote{\textcolor{spot!90}{\sffamily\bfseries Updated #1}}}
+\def\ccNew#1{\marginnote{\textcolor{spot!90}{\sffamily\bfseries New #1}}}
+\def\ccUpdate#1{\marginnote{\textcolor{spot!90}{\sffamily\bfseries Updated #1}}}
 \def\marginfont{\sffamily\mdseries\footnotesize}
 
 \let\hack\@firstofone
@@ -135,6 +62,12 @@
 \let\hackfor\@gobble
 \let\Hackfor\@gobble
 
+
+%%%%%%%%%
+% Lists %
+%%%%%%%%%
+
+% TODO: use coco-lists.sty
 \leftmargini1em
 \leftmargin\leftmargini
 \leftmarginii\leftmargini
@@ -196,6 +129,9 @@
        \def\makelabel##1{\hb@xt@\labelwidth{##1\hss}}}%
   \fi}
 
+%%%%%%%%%%%%%%%
+% page styles %
+%%%%%%%%%%%%%%%
 
 \def\htbar{{\color{spot}\rule[-\dp\strutbox]{.5\p@}{\dimexpr\ht\strutbox+\dp\strutbox\relax}}}
 \newdimen\pageskip \pageskip3em\relax
@@ -245,85 +181,243 @@
 
 \pagestyle{headings}
 
-\tpAddToDefault{heading}{%
-  \tpSetProperty{before-heading-block}{\parindent\z@ \parskip\z@ \leftskip\z@}
-  \tpSetProperty{heading-block}{%
-    \tpUseProperty{title-face}%
-    \tpIfComp{Number}{\tpUseProperty{hang-number}}{\leftskip0pt}%
-      {\tpUseComp{Title}}\par%
-       \tpIfComp{Subtitle}{{\tpUseProperty{subtitle-face}\tpUseComp{Subtitle}}\par}{}%
-       \tpIfComp{Author}{{\tpUseProperty{author-face}\tpUseComp{Author}}\par}{}%
-       \tpIfComp{Quote}{%
-         \bgroup\tpUseProperty{quote-format}%
-           \tpUseComp{Quote}\par
-           \tpIfComp{QuoteSource}{{\tpUseProperty{quote-source-format}--\space\tpUseComp{Quote}}\par}{}%
-         \egroup}{}%
-  }%
-  \tpSetProperty{indent}{auto-global}%
-  \tpSetProperty{number-sep}{\enskip}
+%%%%%%%%%%%%%
+% Titlepage %
+%%%%%%%%%%%%%
+
+\let\fileversion\@empty
+\let\filedate\@empty
+
+\def\Fileversion#1{\def\@fileversion{#1}}
+\def\Filedate#1{\def\@filedate{#1}}
+
+\AtBeginDocument{%
+\renewcommand\tableofcontents{%
+  {\begin{Heading}[notoc,nonumber]{toc}
+     \Title{\contentsname}%
+   \end{Heading}%
+   \thispagestyle{empty}%
+   \parskip\z@
+   \@starttoc{toc}}%
+}}
+
+\ccAddToProperties{titlepage}{%
+  \ccSetProperty{title-face}{\Huge\titlefont}%
+  \ccSetProperty{subtitle-face}{\Large\mybfseries\sffamily}%
+  \ccSetProperty{titlepage-roman}{%
+    \thispagestyle{empty}%
+    \vskip2\baselineskip
+    \bgroup
+      \raggedleft
+      \bgroup
+        \ccUseProperty{title-face}
+        \ccUseComp{Title}%
+        \par
+      \egroup
+      \vskip\baselineskip
+      \bgroup
+        \ccUseProperty{subtitle-face}
+        \ccUseComp{Subtitle}%
+        \par
+      \egroup
+      \vskip2\baselineskip
+      {\large Version~\@fileversion}\par
+      (\@filedate)\par
+      \vskip\baselineskip
+      \tableofcontents
+    \egroup
+  }
 }
 
-\tpDeclareHeading{0}{chapter}{%
-  \tpSetProperty{heading-par}{\ifx\noclearpage\relax\else\cleardoublepage\fi
+%%%%%%%%%%%%
+% Headings %
+%%%%%%%%%%%%
+
+\ccAddToType{Properties}{Heading}{%
+  \ccSetProperty{before-heading-block}{\parindent\z@ \parskip\z@ \leftskip\z@}
+  \ccSetProperty{heading-block}{%
+    \ccUseProperty{title-face}%
+    \ccIfComp{Number}{\ccUseProperty{hang-number}}{\leftskip0pt}%
+      {\ccUseComp{Title}}\par%
+       \ccWhenComp{Subtitle}{{\ccUseProperty{subtitle-face}\ccUseComp{Subtitle}}\par}%
+       \ccWhenComp{Author}{{\ccUseProperty{author-face}\ccUseComp{Author}}\par}%
+       \ccWhenComp{Quote}{%
+         \bgroup\ccUseProperty{quote-format}%
+           \ccUseComp{Quote}\par
+           \ccWhenComp{QuoteSource}{{\ccUseProperty{quote-source-format}--\space\ccUseComp{Quote}}\par}%
+         \egroup}%
+  }%
+  \ccSetProperty{indent}{auto-global}%
+  \ccSetProperty{number-sep}{\enskip}
+}
+
+\ccDeclareHeading{0}{chapter}{%
+  \ccSetProperty{heading-par}{\cleardoublepage
     \par
     \global\@afterindenttrue
   }
-  \tpSetProperty{before-heading}{%
+  \ccSetProperty{before-heading}{%
     \thispagestyle{chapfirst}%
     \addtocontents{lof}{\protect\addvspace{1\baselineskip}}%
     \addtocontents{lot}{\protect\addvspace{1\baselineskip}}%
     \setcounter{section}{0}%
   }
-  \tpSetProperty{title-face}{\huge\titlefont}
-  \tpSetProperty{after-skip}{3\baselineskip}%
-  \tpSetProperty{indent}{}
-  \tpSetProperty{toc-margin-top}{1\baselineskip}
-  \tpSetProperty{toc-title-face}{\bfseries\sffamily}
+  \ccSetProperty{title-face}{\huge\titlefont}
+  \ccSetProperty{after-skip}{3\baselineskip}%
+  \ccSetProperty{indent}{}
+  \ccSetProperty{toc-margin-top}{1\baselineskip}
+  \ccSetProperty{toc-title-face}{\bfseries\sffamily}
 }
 
-\tpDeclareHeading{1}{section}{%
-  \tpSetProperty{before-heading}{\raggedright\setcounter{subsection}{0}}%
-  \tpSetProperty{before-skip}{2.5\baselineskip}
-  \tpSetProperty{after-skip}{16bp}%
-  \tpSetProperty{title-format}{\LARGE\titlefont\color{spot!95}}%
-  \tpSetProperty{toc-margin-bottom}{\z@}
-  \tpSetProperty{toc-margin-top}{.5\baselineskip}
+\ccDeclareHeading[chapter]{0}{toc}{%
+  \ccSetProperty{heading-par}{\par
+    \global\@afterindenttrue
+  }%
 }
 
-\tpDeclareHeading{2}{subsection}{%
-  \tpSetProperty{before-heading}{\raggedright\setcounter{subsubsection}{0}}%
-  \tpSetProperty{before-skip}{2\baselineskip}
-  \tpSetProperty{after-skip}{6bp}%
-  \tpSetProperty{title-format}{\large\titlefont\color{spot!90}}%
-  \tpSetProperty{toc-margin-bottom}{\z@}
-  \tpSetProperty{toc-margin-top}{\z@}
+\ccDeclareHeading{1}{section}{%
+  \ccSetProperty{before-heading}{\raggedright\setcounter{subsection}{0}}%
+  \ccSetProperty{before-skip}{2.5\baselineskip}
+  \ccSetProperty{after-skip}{16bp}%
+  \ccSetProperty{title-format}{\LARGE\titlefont\color{spot!95}}%
+  \ccSetProperty{toc-margin-bottom}{\z@}
+  \ccSetProperty{toc-margin-top}{.5\baselineskip}
 }
 
-\tpDeclareHeading{3}{subsubsection}{%
-  \tpSetProperty{before-heading}{\raggedright}%
-  \tpSetProperty{before-skip}{1.5\baselineskip}
-  \tpSetProperty{before-heading}{\raggedright}%
-  \tpSetProperty{before-skip}{1.5\baselineskip}
-  \tpSetProperty{after-skip}{1sp}%
-  \tpSetProperty{title-format}{\normalsize\titlefont\color{spot!85}}%
+\ccDeclareHeading{2}{subsection}{%
+  \ccSetProperty{before-heading}{\raggedright\setcounter{subsubsection}{0}}%
+  \ccSetProperty{before-skip}{2\baselineskip}
+  \ccSetProperty{after-skip}{6bp}%
+  \ccSetProperty{title-format}{\large\titlefont\color{spot!90}}%
+  \ccSetProperty{toc-margin-bottom}{\z@}
+  \ccSetProperty{toc-margin-top}{\z@}
 }
 
-\tpDeclareHeading{4}{paragraph}{%
-  \tpSetProperty{before-skip}{1\baselineskip}
-  \tpSetProperty{after-skip}{1sp}%
-  \tpSetProperty{title-format}{\normalsize\titlefont\color{spot!80}}%
-  \tpSetProperty{numbering}{}
+\ccDeclareHeading{3}{subsubsection}{%
+  \ccSetProperty{before-heading}{\raggedright}%
+  \ccSetProperty{before-skip}{1.5\baselineskip}
+  \ccSetProperty{before-heading}{\raggedright}%
+  \ccSetProperty{before-skip}{1.5\baselineskip}
+  \ccSetProperty{after-skip}{1sp}%
+  \ccSetProperty{title-format}{\normalsize\titlefont\color{spot!85}}%
 }
 
-\tpDeclareHeading{5}{subparagraph}{%
-  \tpSetProperty{before-skip}{.5\baselineskip}%
-  \tpSetProperty{after-skip}{-.5em}%
-  \tpSetProperty{title-format}{\small\titlefont\color{spot!75}}%
-  \tpSetProperty{numbering}{}
+\ccDeclareHeading{4}{paragraph}{%
+  \ccSetProperty{before-skip}{1\baselineskip}
+  \ccSetProperty{after-skip}{1sp}%
+  \ccSetProperty{title-format}{\normalsize\titlefont\color{spot!80}}%
+  \ccSetProperty{numbering}{}
 }
 
-%\usepackage{booktabs}
-\usepackage{graphicx}
+\ccDeclareHeading{5}{subparagraph}{%
+  \ccSetProperty{before-skip}{.5\baselineskip}%
+  \ccSetProperty{after-skip}{-.5em}%
+  \ccSetProperty{title-format}{\small\titlefont\color{spot!75}}%
+  \ccSetProperty{numbering}{}
+}
+
+\usepackage{ragged2e}
+
+%%%%%%%%%%
+% Floats %
+%%%%%%%%%%
+
+\ccAddToType{Properties}{float}{%
+  \ccSetProperty{number-sep}{\enskip}%
+  \ccSetProperty{number-face}{\bfseries\small\sffamily}%
+  \ccSetProperty{caption-face}{\sffamily\small\RaggedRight}%
+  \ccSetProperty{intext-skip-above}{1\baselineskip}%
+  \ccSetProperty{intext-skip-below}{\dimexpr1\baselineskip-2.5bp\relax}%
+  \ccSetProperty{subcaption-valign-above}{bottom}%
+  \ccSetProperty{subcaption-valign-below}{top}%
+}
+
+\ccAddToType{Properties}{Figure}{%
+  \ccSetProperty{caption-bottom}{}%
+  \ccSetProperty{caption-top}{%
+    \ccWhenComp{Number}{{\ccUseProperty{number-face}\ccUseComp{Number}\ccUseProperty{number-sep}}}%
+    \ccUseComp{Caption}%
+  }%
+  \ccSetProperty{caption-sep-top}{1bp}
+  \ccSetProperty{caption-sep-bottom}{4bp}
+}
+
+\ccAddToType{Properties}{Table}{%
+  \ccSetProperty{caption-top}{%
+    \ccWhenComp{Number}{{\ccUseProperty{number-face}\ccUseComp{Number}\ccUseProperty{number-sep}}}%
+    \ccUseComp{Caption}%
+    \ccWhenComp{Source}{\\\ccUseComp{Source}}%
+  }%
+  \ccSetProperty{caption-bottom}{\ccUseComp{Legend}}%
+  \ccSetProperty{caption-sep-top}{1bp}%% vertical space between top caption and content
+  \ccSetProperty{caption-sep-bottom}{4bp}
+}
+
+\RequirePackage{htmltabs}
+\SetHTClass{}{%
+  \SetClassProp{table}{margin}{0bp}%
+  \SetClassProp{table}{break-table}{true}%
+  \SetClassProp{table}{border}{2bp solid spot}%
+  \SetClassProp{table}{border-top}{none}%
+  \SetClassProp[thead]{td}{background-color}{spot}%
+  \SetClassProp[thead]{td}{font-weight}{bold}%
+  \SetClassProp[thead]{td}{vertical-align}{middle}%
+  \SetClassProp[thead]{td}{color}{white}%
+  \SetClassProp{td}{padding}{2bp 0.5mm 1bp}%
+  \SetClassProp{td}{border-style}{none}%
+  \SetClassProp{td}{font-family}{sans-serif}%
+  \SetClassProp{td}{font-size}{x-small}%
+}
+
+\newcommand*{\fullref}[1]{\hyperref[{#1}]{\autoref*{#1} “\nameref*{#1}”}}
+
+%%%%%%%%%%%%
+% Listings %
+%%%%%%%%%%%%
+
+\lstset{%
+  basicstyle={\ttfamily},
+  firstnumber=last,
+  literate={%
+    {Ö}{{\"O}}1
+    {Ä}{{\"A}}1
+    {Ü}{{\"U}}1
+    {ß}{{\ss}}1
+    {ü}{{\"u}}1
+    {ä}{{\"a}}1
+    {ö}{{\"o}}1
+    {¬}{{$\neg$}}1
+    {«}{{\guillemotright}}1
+    {»}{{\guillemotleft}}1
+    {~}{{\textasciitilde}}1},
+  inputencoding=utf8,
+  language=[AlLaTeX]TeX,
+  xleftmargin=\leftskip,
+  % basicstyle=\fontfamily{lmvtt}\selectfont\small,
+  columns=fullflexible,
+  numbers=none,
+  numberfirstline=1,
+  numberstyle=\scriptsize,
+  numbersep=5pt,
+  backgroundcolor=\color{spot!04},  % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+  % basicstyle=\scriptsize,                    % the size of the fonts that are used for the code
+  breakatwhitespace=false,           % sets if automatic breaks should only happen at whitespace
+  breaklines=true,                   % sets automatic line breaking
+  captionpos=t,                      % sets the caption-position
+  commentstyle={\itshape\color{spot!70}},      % comment style
+  frame=single,                      % adds a frame around the code
+  keepspaces=true,                   % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  keywordstyle={\color{spot}\itshape},% keyword style
+  identifierstyle={},
+  texcsstyle={\color{spot}\mybfseries},% keyword style
+  rulecolor=\color{spot},            % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+  showspaces=false,                  % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=true,             % underline spaces within strings only
+  showtabs=true,                     % show tabs within strings adding particular underscores
+  stringstyle={\color{spot!80}},                    % string literal style
+  tabsize=2,                         % sets default tabsize to 2 spaces
+}
+
 \lstdefinestyle{tex}{language=[latex]TeX,
   basicstyle=\ttfamily,
   classoffset=0,
@@ -354,24 +448,11 @@
   showstringspaces=false % no special string spaces
 }
 
-\lstdefinestyle{html}{language=[html]XML,
+\lstdefinestyle{bash}{language=bash,
   basicstyle=\ttfamily,
-  classoffset=0,
-    morekeywords={defun,defcustom,defmacro,defsubst,defvar},
-    keywordstyle=\bfseries\itshape,
-    identifierstyle=\textup,
-  classoffset=1,
-    morekeywords={optional,rest,args},
-    keywordstyle=\color{black!85}\itshape,
-  classoffset=0,
   commentstyle=\color{black!60}\footnotesize, %
   stringstyle=\itshape, %
   showstringspaces=false % no special string spaces
-}
-
-\lstset{inputencoding=utf8,
-  style=texinline,
-  frame=single,
 }
 
 \usepackage{etoolbox}
@@ -379,85 +460,117 @@
 \global\let\lst@doendpe\@empty
 \usepackage{multicol}
 
+%%%%%%%%%
+% Index %
+%%%%%%%%%
 
+\usepackage[noautomatic,splitindex,truexindy]{imakeidx}
+\indexsetup{level=\section*}
+\makeindex
+\makeindex[name=macros]
+\makeindex[name=properties]
+\makeindex[name=containers]
+\makeindex[name=components]
+\makeindex[name=hooks]
+\makeindex[name=tags]
+\makeindex[name=attributes]
 
-\renewenvironment{theindex}{%
-  \columnseprule\z@
-  \columnsep 35\p@
-  % \thispagestyle{\indexpagestyle}\parindent\z@
-  \edef\indexname{\the\@nameuse{idxtitle@\@indextype}}%
-  \markboth{\indexname}{\indexname}%
-  \def\idx@heading{%
-    \def\@tempa{Index}%
-    \ifx\indexname\@tempa
-      \begin{heading}[nonumber]{chapter}%
-        \tpTitle{\indexname}%
-        \tpRunTitle{\indexname}%
-        \expandafter\tpTocTitle\expandafter{\indexname}%
-      \end{heading}%
-      {\small\textit{Italic index terms} refer to general design
-        concepts.  Page entries in \textbf{bold face} refer to main
-        sections that describe the index term.  Entries in
-        \texttt{mono-type} refer to \LaTeX\ commands and markup.  The
-        symbol \see{}{} stands for “see”; the symbol
-        \seealso{}{} for “see also”.}
-    \else
-      \clearpage
-      \begin{heading}[nonumber]{section}%
-        \tpTitle{\indexname}%
-        \tpRunTitle{\indexname}%
-        \expandafter\tpTocTitle\expandafter{\indexname}%
-      \end{heading}%
-      \sectionmark{\indexname}%
-      \ifx\firstindex\relax {\!\small Since most \LaTeX\ macros
-          in the {\CoCoTeX} framework share the
-          \texttt{tp} prefix, this index is sorted ignoring this
-          prefix.\\
-          Index terms with an asterisk (*) represent {\LaTeX}
-          environments.}%
-      \else \global\let\firstindex\relax \fi \fi  }
-  \begin{multicols}{2}[\idx@heading]
-    \small
-    \setlength{\parskip}{\z@ \@plus .3\p@}%
-    \setlength{\parfillskip}{\z@ \@plus 1fil}%
-    \let\item\@idxitem }{\end{multicols}}
-\def\seealso#1#2{\smash{\small$\downarrow$}#1}
-\def\see#1#2{\smash{\small$\uparrow$}#1}
+\def\seealso#1#2{\smash{\raise1\p@\hbox{\footnotesize$\downarrow$}}\kern.1667em#1}
+\def\see#1#2{\smash{\raise1\p@\hbox{\footnotesize$\uparrow$}}\kern.1667em#1}
 
-\newindex{prp}{p_idx}{p_ind}{Index of Properties}
-\newindex{tex}{t_idx}{t_ind}{Index of \LaTeX\space macros and environments}
-\newindex{hok}{h_idx}{h_ind}{Index of Hooks}
-
-\let\fileversion\@empty
-\let\filedate\@empty
-
-\def\Fileversion#1{\def\@fileversion{#1}}
-\def\Filedate#1{\def\@filedate{#1}}
-
-\def\subtitle#1{\def\@subtitle{#1}}
-
-\def\maketitle{%
-  \frontmatter
-  \vskip2\baselineskip
-  \bgroup
-    \raggedleft
-    {\Huge\titlefont
-      \@title}%
-    \par
-    \vskip\baselineskip
-    {\Large\mybfseries\sffamily
-      \@subtitle
-    }
-    \vskip2\baselineskip
-    {\large Version~\@fileversion}\par
-    (\@filedate)\par
-    \vskip3\baselineskip
-  \egroup
-  \thispagestyle{empty}
-  \tableofcontents
-  \clearpage
+\long\def\IndexPrologue#1{\long\gdef\index@prologue{#1}}
+\long\def\PrintIndex{%
+  \backmatter
+  \begin{Heading}[nonumber]{chapter}
+    \Title{Index}
+  \end{Heading}
+  \textit{Italic index terms} refer to general design concepts.  Page
+  entries in \textbf{bold face} refer to main sections that describe
+  the index term.  Entries in \texttt{mono-type} refer to \LaTeX\
+  commands and markup.  The symbol {\see{}{}} stands for “see”; the
+  symbol {\seealso{}{}} for “see also”.\par
+  %\raggedright
+  \IndexPrologue{\gdef\indexcolor{spot!75}%
+    \begin{Heading}[nonumber]{section}
+      \Title{\color{\indexcolor}General Index}%
+      \TocTitle{General Index}
+      \RunTitle{Index -- General}
+    \end{Heading}}%
+  \@input@{\jobname-manual.ind}%
+  \IndexPrologue{\gdef\indexcolor{spot!75}%
+    \begin{Heading}[nonumber]{section}
+      \Title{\color{\indexcolor}Macro and Environment Index}%
+      \TocTitle{Macro and Environment Index}
+      \RunTitle{Index -- Macros and Environments}
+    \end{Heading}
+    In this index, the \texttt{cc(@)}- and module specific \texttt{ccX(@)}-Prefixes were omitted when sorting the entries.}%
+  \@input@{\jobname-macro.ind}%
+  \IndexPrologue{\gdef\indexcolor{contcolor!75}%
+    \begin{Heading}[nonumber]{section}
+      \Title{\color{\indexcolor}Container Index}%
+      \TocTitle{Container Index}
+      \RunTitle{Index -- Containers}
+    \end{Heading}}
+  \@input@{\jobname-containers.ind}%
+  \IndexPrologue{\gdef\indexcolor{compcolor!75}%
+    \begin{Heading}[nonumber]{section}
+      \Title{\color{\indexcolor}Component Index}%
+      \TocTitle{Component Index}
+      \RunTitle{Index -- Components}
+    \end{Heading}
+  In this index, the name in parentheses denote the (abstract) Container within which the Component entry is defined.}%
+  \@input@{\jobname-components.ind}%
+  \IndexPrologue{\gdef\indexcolor{propcolor!75}%
+    \begin{Heading}[nonumber]{section}
+      \Title{\color{\indexcolor}Property Index}%
+      \TocTitle{Property Index}
+      \RunTitle{Index -- Properties}
+    \end{Heading}
+  In this index, the name in parentheses denote the (abstract) Container within which the Property entry is defined.}%
+  \@input@{\jobname-properties.ind}%
+  \IndexPrologue{\gdef\indexcolor{hookcolor!75}%
+    \begin{Heading}[nonumber]{section}
+      \Title{\color{\indexcolor}Hook Index}%
+      \TocTitle{Hook Index}
+      \RunTitle{Index -- Hooks}
+    \end{Heading}}
+  \@input@{\jobname-hooks.ind}%
+  \IndexPrologue{\gdef\indexcolor{tagscolor!75}%
+    \begin{Heading}[nonumber]{section}
+      \Title{\color{\indexcolor}Tag Index}%
+      \TocTitle{Tag Index}
+      \RunTitle{Index -- Tags}
+    \end{Heading}}
+  \@input@{\jobname-tags.ind}%
+  \IndexPrologue{\gdef\indexcolor{attrcolor!75}%
+    \begin{Heading}[nonumber]{section}
+      \Title{\color{\indexcolor}Attribute Index}%
+      \TocTitle{Attribute Index}
+      \RunTitle{Index -- Attributes}
+    \end{Heading}}
+  \@input@{\jobname-attributes.ind}%
+  \global\let\PrintIndex\@empty
 }
 
+\setcounter{IndexColumns}{2}
+
+\let\efill\hfill
+\let\pfill\dotfill
+\newif\ifscan@allowed
+
+\renewenvironment{theindex}
+{\begin{multicols}\c@IndexColumns[\index@prologue]%
+    \let\item\@idxitem \ignorespaces}%
+{\end{multicols}}
+
+
+
+
+%%%%%%%%%%%%%%%
+% CoCoTeX Doc %
+%%%%%%%%%%%%%%%
+
+% TODO: adapt macros from src/cocoDTXPreface.dtx
 \newenvironment{indented}{%
   \par
   \leftskip1em
@@ -465,22 +578,13 @@
   \tabcolsep4pt
 }{\par}
 
-\renewcommand\tableofcontents{%
-  {\let\noclearpage\relax
-   \begin{heading}[notoc,nonumber]{chapter}
-     \tpTitle{\contentsname}%
-   \end{heading}%
-   \thispagestyle{empty}%
-   \parskip\z@
-   \@starttoc{toc}}%
-}
 
 \def\describeProp#1#2#3{%
   \if@nobreak\vskip-\parskip\else\vskip\baselineskip\fi\par
     \bgroup
       \lstset{basicstyle=\ttfamily}%
       \let\do@empty\relax\if!#3!\else\let\do@empty\@undefined\fi%
-      {\bfseries\ttfamily #1}\enskip{\small\color{spot}[\ifx\do@empty\relax\texttt{<empty>}\else#3\fi]}\ifx\noindex\relax\else\index[prp]{#1@\texttt{#1}}\fi
+      {\bfseries\ttfamily #1}\enskip{\small\color{spot}[\ifx\do@empty\relax\texttt{<empty>}\else#3\fi]}\ifx\noindex\relax\else\index[properties]{#1@\texttt{#1}}\fi
       \hfill
       {\small #2}%
     \egroup\par
@@ -493,7 +597,7 @@
   \if@nobreak\vskip-\parskip\else\vskip\baselineskip\fi\par
     \bgroup
       \lstset{basicstyle=\ttfamily}%
-      {\bfseries\ttfamily #1-<name>}\ifx\noindex\relax\else\index[hok]{#1@\texttt{#1}}\fi
+      {\bfseries\ttfamily #1-<name>}\ifx\noindex\relax\else\index[hooks]{#1=\texttt{#1}}\fi
     \egroup\par
   \@noskipsecfalse
   \@afterindentfalse
@@ -502,77 +606,8 @@
 
 \def\describeUProp#1{%
   \vskip\baselineskip\par
-    {\bfseries\ttfamily #1}\ifx\noindex\relax\else\index[prp]{#1@\texttt{#1}}\fi}
+    {\bfseries\ttfamily #1}\ifx\noindex\relax\else\index[properties]{#1=\texttt{#1}}\fi}
 
-% \usepackage{caption}
-% \DeclareCaptionLabelSeparator{enskip}{\enskip}
-% \captionsetup{%
-%   labelfont={bf,footnotesize}
-%  ,font={sf,small}
-%  ,format=hang
-%  ,labelsep=enskip
-%  ,textformat=simple
-%  ,singlelinecheck=false
-%  ,justification=RaggedRight
-% }
 
-\let\Figure\figure
-\let\endFigure\endfigure
-% \colorlet{shadecolor}{spot!05}
-% \def\Figure{\@ifnextchar [{\@figure}{\@figure[ht!]}}%
-% \def\@figure[#1]{\figure[#1]%
-%   \def\FrameCommand{\fboxsep=\FrameSep\hspace*{2\FrameSep}\colorbox{shadecolor}}%
-%   \MakeFramed{\vrule\@width\z@\@height5.98mm\@depth\z@\FrameRestore}\centering}
-% \def\endFigure{\endMakeFramed\endfigure}
 
-\usepackage{ragged2e}
-
-\tpAddToDefault{float}{%
-  \tpSetProperty{number-sep}{\enskip}%
-  \tpSetProperty{number-face}{\bfseries\small\sffamily}%
-  \tpSetProperty{caption-face}{\sffamily\small\RaggedRight}%
-  \tpSetProperty{intext-skip-above}{1\baselineskip}%
-  \tpSetProperty{intext-skip-below}{\dimexpr1\baselineskip-2.5bp\relax}%
-  \tpSetProperty{subcaption-valign-above}{bottom}%
-  \tpSetProperty{subcaption-valign-below}{top}%
-}
-
-\tpAddToType{Properties}{tpFigure}{%
-  \tpSetProperty{caption-bottom}{}%
-  \tpSetProperty{caption-top}{%
-    \tpIfComp{Number}{{\tpUseProperty{number-face}\tpUseComp{Number}\tpUseProperty{number-sep}}}{}%
-    \tpUseComp{Caption}%
-  }%
-  \tpSetProperty{caption-sep-top}{1bp}
-  \tpSetProperty{caption-sep-bottom}{4bp}
-}
-
-\tpAddToType{Properties}{tpTable}{%
-  \tpSetProperty{caption-top}{%
-    \tpIfComp{Number}{{\tpUseProperty{number-face}\tpUseComp{Number}\tpUseProperty{number-sep}}}{}%
-    \tpUseComp{Caption}%
-    \tpIfComp{Source}{\\\tpUseComp{Source}}{}%
-  }%
-  \tpSetProperty{caption-bottom}{\tpUseComp{Legend}}%
-  \tpSetProperty{caption-sep-top}{1bp}%% vertical space between top caption and content
-  \tpSetProperty{caption-sep-bottom}{4bp}
-}
-
-\RequirePackage{htmltabs}
-\SetHTClass{}{%
-  \SetClassProp{table}{margin}{0bp}%
-  \SetClassProp{table}{break-table}{true}%
-  \SetClassProp{table}{border}{2bp solid spot}%
-  \SetClassProp{table}{border-top}{none}%
-  \SetClassProp[thead]{td}{background-color}{spot}%
-  \SetClassProp[thead]{td}{font-weight}{bold}%
-  \SetClassProp[thead]{td}{vertical-align}{middle}%
-  \SetClassProp[thead]{td}{color}{white}%
-  \SetClassProp{td}{padding}{2bp 0.5mm 1bp}%
-  \SetClassProp{td}{border-style}{none}%
-  \SetClassProp{td}{font-family}{sans-serif}%
-  \SetClassProp{td}{font-size}{x-small}%
-}
-
-\hypersetup{hyperindex=false,breaklinks,pdfborder={0 0 0},colorlinks=true,linkcolor=spot}
-\newcommand*{\fullref}[1]{\hyperref[{#1}]{\autoref*{#1} “\nameref*{#1}”}}
+\endinput

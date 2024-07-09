@@ -1,6 +1,6 @@
-\begin{heading}[label=chap:common]{chapter}
+\begin{Heading}[label=chap:common]{chapter}
   \tpTitle{coco-common.sty}
-\end{heading}
+\end{Heading}
 \index{coco-common|textbf}
 
 This module of the {\CoCoTeX} Framework is the core
@@ -8,13 +8,13 @@ that is used by (almost) all other modules in the framework. It
 provides the basic facilities for Component, Namespace, Hook, and
 Property handling.
 
-\begin{heading}[label=sec:use_props]{section}
+\begin{Heading}[label=sec:use_props]{section}
   \tpTitle{Using Properties}
-\end{heading}
+\end{Heading}
 
-\begin{heading}[label=sec:set_props]{subsection}
+\begin{Heading}[label=sec:set_props]{subsection}
   \tpTitle{Setting and Using Property}\index{Properties!Setup}\index{Properties!Usage}
-\end{heading}
+\end{Heading}
 
 Properties are set up using one of either commands
 \begin{lstlisting}[style=tex]
@@ -51,9 +51,9 @@ have no effect until they are used or evaluated against. Be aware not
 to wrongly mis-use pre-defined Properties of the {\CoCoTeX}
 modules.
 
-\begin{heading}{subsection}
+\begin{Heading}{subsection}
   \tpTitle{Default Property Sets}\index{Properties!Default}\index{Default Property Set|textbf}
-\end{heading}
+\end{Heading}
 
 Each Namespace has its own \textit{Default Property Set} that is
 evaluated before any user-defined specifications or that of child
@@ -67,13 +67,13 @@ using\index[tex]{AddToDefault@\texttt{\textbackslash tpAddToDefault}}
 where \lstinline{<setProperties>} is a list of \lstinline{\tpSetProperty}
 assignments.\Hack{\newpage}
 
-\begin{heading}{section}
+\begin{Heading}{section}
   \tpTitle{Evaluating Properties}
-\end{heading}
+\end{Heading}
 
-\begin{heading}{subsection}
+\begin{Heading}{subsection}
   \tpTitle{Conditionals}\index{Properties!Conditionals}
-\end{heading}
+\end{Heading}
 
 There are two conditionals:
 \begin{lstlisting}[style=tex]
@@ -94,9 +94,9 @@ Property are fully expanded before the comparision. If both expansions
 are equal, \lstinline{<then>} is executed, otherwise
 \lstinline{<else>} is executed.
 
-\begin{heading}{subsection}
+\begin{Heading}{subsection}
   \tpTitle{Evaluation and Inheritance of Properties}\index{Properties!Evaluation}\index{Properties!Inheritance}
-\end{heading}
+\end{Heading}
 
 The evaluation of macros is done with the macro\index[tex]{CascadeProp@\texttt{\textbackslash tpCascadeProp}}:
 \begin{lstlisting}[style=tex]
@@ -106,9 +106,9 @@ This macro recursivly loads a \lstinline{<namespace>}'s properties, the
 properties of the namespace's parent, and the default properties of the
 \lstinline{<top-level-namespace>} (in reverse order).
 
-\begin{heading}[label=sec:common:components]{section}
+\begin{Heading}[label=sec:common:components]{section}
   \tpTitle{Using Components}\index{Component!Usage}
-\end{heading}
+\end{Heading}
 
 The macro\index[tex]{tpUseComp@\texttt{\textbackslash tpUseComp}}
 \begin{lstlisting}[style=tex]
@@ -132,9 +132,9 @@ Component with the name \lstinline{<Component>} is undefined.
 In all other cases, \lstinline{<True>} is expanded. Is is also the
 case, when the arguent of the Component macro is left empty.
 
-\begin{heading}[label=sec:common:components]{section}
+\begin{Heading}[label=sec:common:components]{section}
   \tpTitle{Using Hooks}\index{Hooks!Usage}
-\end{heading}
+\end{Heading}
 
 Hooks are Namespace-specific, yet globally defined, landing points for
 custom adjustments.

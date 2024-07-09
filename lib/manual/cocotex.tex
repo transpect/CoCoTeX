@@ -1,13 +1,16 @@
 %% pdflatex texlive 2019
 % pdflatex cocotex.tex ; pdflatex cocotex.tex ; ./index.sh cocotex  ; ./index.sh cocotex t ; ./index.sh cocotex p ; pdflatex cocotex.tex ; pdflatex cocotex.tex ;
-\documentclass[UKenglish,a4paper,oneside]{cocotex}
+\documentclass[no-hyperindex,UKenglish,a4paper,oneside]{cocotex}
 \usepackage{cocotex-doc}
 
 \Fileversion{\fileversion}
 \Filedate{\filedate}
-\title{CoCoTeX}
-\subtitle{A Commmon {\LaTeX} Stylesheet Framework}
-\author{le-tex publishing services GmbH}
+
+\begin{Meta}
+  \Title{\protect\CoCoTeX}
+  \Subtitle{A Commmon {\LaTeX} Stylesheet Framework}
+  \AuthorNameList{le-tex publishing services GmbH}
+\end{Meta}
 
 \includeonly{%
   coco-overview,%
@@ -20,7 +23,8 @@
 }
 
 \begin{document}
-\maketitle
+\Maketitle
+\tableofcontents
 \mainmatter
 
 \include{coco-overview}
@@ -32,7 +36,5 @@
 \include{coco-title}
 \clearpage
 \backmatter
-\printindex
-\printindex[prp]
-\printindex[tex]
+\PrintIndex
 \end{document}
