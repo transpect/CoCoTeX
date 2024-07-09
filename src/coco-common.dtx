@@ -395,7 +395,7 @@
 %   line breaking macros.
 %    \begin{macrocode}
 \DeclareRobustCommand*{\ccBreak}{\hfill\break}
-\cslet{\ccPrefix break}\ccBreak
+\ifx\ccPrefix\@empty\else\cslet{\ccPrefix break}\ccBreak\fi
 %    \end{macrocode}
 % \end{macro}
 %
