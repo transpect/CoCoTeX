@@ -23,7 +23,6 @@
 % \section{Hard-coded requirements}
 %
 %    \begin{macrocode}
-\RequirePackage{kvoptions-patch}
 \RequirePackage{xkeyval}
 %    \end{macrocode}
 % First,we set the default hook label for all {\CoCoTeX}
@@ -37,18 +36,35 @@
 %
 % \section{Class Options}
 %
-% Passing options down to the \LaTeX\space standard packages
+% \subsection{Options passed down to mandatory standard {\LaTeX} packages}
+%
+% The main option controls the document's main language passed down to
+% the \lstinline{babel} package.
 %    \begin{macrocode}
 \DeclareOptionX{main}{\PassOptionsToPackage{\CurrentOption}{babel}}
-\DeclareOption{no-hyperindex}{\global\let\cc@no@hyperindex\relax}
+%    \end{macrocode}
+% The next two options are used for Spanish documents:
+%    \begin{macrocode}
 \DeclareOption{es-noindentfirst}{\PassOptionsToPackage{es-noindentfirst}{babel}}
 \DeclareOption{es-noshorthands}{\PassOptionsToPackage{es-noshorthands}{babel}}
+%    \end{macrocode}
+% By default, we disable babel shorthands as its character encoding
+% may interfere with some {\CoCoTeX} functionality.
+%    \begin{macrocode}
 \PassOptionsToPackage{shorthands=off}{babel}
 %    \end{macrocode}
+% The \lstinline{no-hyperindex} switch prevents \lstinline{hyperref}
+% from auto-linking index terms.
+%    \begin{macrocode}
+\DeclareOption{no-hyperindex}{\global\let\cc@no@hyperindex\relax}
+%    \end{macrocode}
+%
+% \subsection{The Publication Type}
+%
 % The option \lstinline{pubtype} (short for ``publication type'') has
-% possible four values: \lstinline{mono}, \lstinline{collection},
-% \lstinline{journal}, and \lstinline{article}. \lstinline{mono} (also
-% the default when no \lstinline{pubtype} is given) and
+% four possible values: \lstinline{mono}, \lstinline{collection},
+% \lstinline{journal}, and \lstinline{article}.  \lstinline{mono}
+% (also the default when no \lstinline{pubtype} is given) and
 % \lstinline{collection} are used to switch between single and
 % multiple contributor documents; \lstinline{collection} and
 % \lstinline{journal} to switch between one-time text collections and
@@ -81,28 +97,132 @@
     \global\monographtrue
   \fi
 }
-\DeclareOptionX*{\PassOptionsToClass{\CurrentOption}{article}}
-\DeclareOptionX*{\PassOptionsToClass{\CurrentOption}{book}}
 %    \end{macrocode}
-% Passing options down to various {\CoCoTeX} modules:
+%
+% \subsection{User-Level Macro Names  and Debugging Options}
+%
+% Next, we capture all options that needs passing down to the various {\CoCoTeX} modules.
+%
+% The prefix option is used to define prefix for user level macros. If
+% {\CoCoTeX} is used in conunction with \textit{xerif}, this will be
+% \lstinline{tp}.
 %    \begin{macrocode}
 \DeclareOptionX{prefix}{\PassOptionsToPackage{\CurrentOption}{coco-kernel}}
+%    \end{macrocode}
+% The debugging options: trigger \lstinline{debug} will toggle on
+% debug mode, valued \lstinline{debug-domain} will determine the kinds
+% of messages printed to the console.
+%    \begin{macrocode}
 \DeclareOptionX{debug}{\PassOptionsToPackage{\CurrentOption}{coco-kernel}}
 \DeclareOptionX{debug-domain}{\PassOptionsToPackage{\CurrentOption}{coco-kernel}}
-\DeclareOptionX{a11y}{\PassOptionsToPackage{init}{coco-accessibility}}
-\DeclareOptionX{lang-id}{\PassOptionsToPackage{\CurrentOption}{coco-accessibility}}
-\DeclareOptionX{nodetree}{\PassOptionsToPackage{\CurrentOption}{coco-accessibility}}
-\DeclareOptionX{showspaces}{\PassOptionsToPackage{\CurrentOption}{coco-accessibility}}
-\DeclareOptionX{no-spaces}{\PassOptionsToPackage{\CurrentOption}{coco-accessibility}}
-\DeclareOptionX{no-paras}{\PassOptionsToPackage{\CurrentOption}{coco-accessibility}}
-\DeclareOptionX{no-compress}{\let\cc@no@pdf@compression\relax}
-\DeclareOptionX{color-enc}{\PassOptionsToPackage{\CurrentOption}{coco-common}}
-\DeclareOptionX{usescript}{\PassOptionsToPackage{\CurrentOption}{coco-script}}
+%    \end{macrocode}
+% The \lstinline{nofigs} options disables the
+% \lstinline{\includegraphics} command and prints a placeholder
+% instead. This is inteded to ensure successful LaTeX runs even thou
+% image files may be missing.
+%    \begin{macrocode}
 \DeclareOptionX{nofigs}{\PassOptionsToPackage{\CurrentOption}{coco-floats}}
-\DeclareOptionX{ennotoc}{\PassOptionsToPackage{\CurrentOption}{coco-notes}}
+%    \end{macrocode}
+%
+%
+% \subsection{Accessibility Features}
+%
+% The next two options enable accessibility features and control the
+% PDF standard used: \lstinline{a11y} uses PDF version 1.7,
+% \lstinline{a11y20} uses PDF version 2.0.
+%    \begin{macrocode}
+\ExplSyntaxOn
+  \DeclareOptionX{a11y}{%
+    \sys_ensure_backend:
+    \pdf_version_gset:n{1.7}
+    \PassOptionsToPackage{init}{coco-accessibility}}
+  \DeclareOptionX{a11y20}{%
+    \sys_ensure_backend:
+    \pdf_version_gset:n{2.0}
+    \PassOptionsToPackage{init}{coco-accessibility}}
+\ExplSyntaxOff
+%    \end{macrocode}
+% \lstinline{lang-id} is the identifier of the document's main language
+%    \begin{macrocode}
+\DeclareOptionX{lang-id}{\PassOptionsToPackage{\CurrentOption}{coco-accessibility}}
+%    \end{macrocode}
+% if set, \lstinline{nodetree} triggers extensive debgging output from the ltpdfa package.
+%    \begin{macrocode}
+\DeclareOptionX{nodetree}{\PassOptionsToPackage{\CurrentOption}{coco-accessibility}}
+%    \end{macrocode}
+% \lstinline{showspaces} enables whitespaces processed by ltpdfa to be visible in the PDF.
+%    \begin{macrocode}
+\DeclareOptionX{showspaces}{\PassOptionsToPackage{\CurrentOption}{coco-accessibility}}
+%    \end{macrocode}
+% \lstinline{no-spaces} disabes whitespace processing by \lstinline{ltpdfa}.
+%    \begin{macrocode}
+\DeclareOptionX{no-spaces}{\PassOptionsToPackage{\CurrentOption}{coco-accessibility}}
+%    \end{macrocode}
+% \lstinline{no-paras} disables paragraph tagging via \lstinline{ltpdfa}.
+%    \begin{macrocode}
+\DeclareOptionX{no-paras}{\PassOptionsToPackage{\CurrentOption}{coco-accessibility}}
+%    \end{macrocode}
+% \lstinline{no-compress} disables PDF compression; useful for debugging the PDF source code.
+%    \begin{macrocode}
+\DeclareOptionX{no-compress}{\let\cc@no@pdf@compression\relax}
+%    \end{macrocode}
+% \lstinline{color-enc} serves two purposes: First, it controls the
+% colour space for colours invoked via the \lstinline{xcolor}
+% package. Second it controls which default ICC colour profile is
+% embedded into the PDF file when no explicit ICC profile is provided by
+% the user.
+%    \begin{macrocode}
+\DeclareOptionX{color-enc}{\PassOptionsToPackage{\CurrentOption}{coco-common}}
+%    \end{macrocode}
+%
+%
+% \subsection{Options for Other {\CoCoTeX} Modules}
+%
+% \subsubsection{Options for the Script Module}
+%
+% The option \lstinline{usescript} takes a comma-separated list of
+% language names. Languages that use non-latin scripts may require
+% fallback fonts when the script's glyphs are not included in the main
+% font. This option tells the coco-scripts module which fonts to
+% pre-load. The values in is also passed down to \lstinline{\babelprovide}.
+%    \begin{macrocode}
+\DeclareOptionX{usescript}{\PassOptionsToPackage{\CurrentOption}{coco-script}}
+%    \end{macrocode}
+%
+%
+% \subsubsection{Options for the Notes Module}
+%
+% The switch \lstinline{endnotes} triggers all footnotes to be
+% collected and printed in a specific endnote section at the end of
+% the document.
+%    \begin{macrocode}
 \DeclareOptionX{endnotes}{\PassOptionsToPackage{\CurrentOption}{coco-notes}}
+%    \end{macrocode}
+% The switch \lstinline{ennotoc} triggers headings in the Endnotes
+% area to \textit{not} appear in the table of contents (read:
+% End-Notes-NO-TOC).
+%    \begin{macrocode}
+\DeclareOptionX{ennotoc}{\PassOptionsToPackage{\CurrentOption}{coco-notes}}
+%    \end{macrocode}
+% The switch \lstinline{endnoteswithchapters} triggers chapter
+% headings to be repeated as subsections within the endnote section.
+%    \begin{macrocode}
+\DeclareOptionX{endnoteswithchapters}{\PassOptionsToPackage{\CurrentOption}{coco-notes}}
+%    \end{macrocode}
+% The switch \lstinline{resetnotesperchapter} causes foot- and endnote
+% counters to be reset at each new chapter.
+%    \begin{macrocode}
 \DeclareOptionX{resetnotesperchapter}{\PassOptionsToPackage{\CurrentOption}{coco-notes}}
-\DeclareOptionX{endnotesperchapter}{\PassOptionsToPackage{\CurrentOption}{coco-notes}}
+%    \end{macrocode}
+%
+%
+% \subsubsection{Remaining Options}
+%
+% All other unprocessed options are passed down to the base document
+% class:
+%    \begin{macrocode}
+\DeclareOptionX*{\PassOptionsToClass{\CurrentOption}{article}}
+\DeclareOptionX*{\PassOptionsToClass{\CurrentOption}{book}}
 \ProcessOptionsX
 %    \end{macrocode}
 %
