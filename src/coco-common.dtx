@@ -55,7 +55,7 @@
   \fi
 }
 \ProcessOptionsX
-\PassOptionsToPackage{\cc@color@enc}{xcolor}%
+\ifx\cc@color@enc\relax\else\PassOptionsToPackage{\cc@color@enc}{xcolor}\fi%
 %    \end{macrocode}
 % \begin{macro}{\ccIfPreamble} is true as long as there has not been a
 %   \lstinline|\begin{document}|.
