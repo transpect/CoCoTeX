@@ -499,6 +499,14 @@
 \DeclareAccessibilityCommand{\ccaAddAltText}[1]{\directlua{ltpdfa.tagger.addAltText('\luaescapestring{#1}')}}
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{\cca@Gin@alt} is the captured value of the
+%   \lstinline{alt} key from the optional argument of the
+%   \lstinline{\includegraphics} command. This can be used to pass its
+%   value to the \lstinline{\ccaAddAltText} macro defined above.
+%    \begin{macrocode}
+\define@key{Gin}{alt}{\gdef\cca@Gin@alt{#1}}
+%    \end{macrocode}
+% \end{macro}
 %
 % \begin{macro}{\ccaAddLastLink} adds the last Link node to the PDF
 %   structTree.
