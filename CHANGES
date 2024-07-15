@@ -14,6 +14,9 @@
     instead of 1.3 iff accessibility features are active
 - coco-common.dtx
   - added option to suppress inclusion of color profile
+  - improved handling of color encoding option
+- coco-meta.dtx
+  - remove transitive role-mapping
 - coco-floats.dtx
   - changed how heights and widths of subfloats are calculated:
     - sameheight mechanism is now only applied if neither sub-figure

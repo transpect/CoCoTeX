@@ -39,15 +39,17 @@
 % Default color encoding passed as option to the \lstinline{xcolor}
 % package.
 %    \begin{macrocode}
-\def\cc@color@enc{cmyk}
+\def\cc@str@cmyk{cmyk}
+\def\cc@str@rgb{rgb}
+\let\cc@color@enc\cc@str@cmyk
 \define@choicekey{coco-common.sty}{color-enc}[\@cc@color@enc\nr]{srgb,rgb,gray,cmy,cmyk,natural,none}[cmyk]{%
   \let\cc@color@enc\@cc@color@enc
   \ifcase\nr\relax% srgb
-    \def\cc@color@enc{rgb}%
+    \global\let\cc@color@enc\cc@str@rgb
   \or% rgb
   \or% gray
   \or% cmy
-    \def\cc@color@enc{cmyk}%
+    \global\let\cc@color@enc\cc@str@cmyk
   \or% cmyk
   \or% natural, i.e. no conversion of color spaces takes place
   \else%none
