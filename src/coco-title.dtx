@@ -268,8 +268,8 @@
 %   creator
 %    \begin{macrocode}
 \def\cct@title@process@bkc{%
-  \cct@write@pdf@meta{pdfcreator}{Creator}{\ccIfComp{PDFCreator}{\ccUseComp{PDFCreator}}{\ccUseComp{Publisher}\ccIfComp{PubPlace}{, \ccUseComp{PubPlace}}{}}}%
-  \cct@write@pdf@meta{pdfproducer}{Producer}{\ccUseComp{PDFProducer}}%
+  \cct@write@pdf@meta{pdfcreator}{Creator}{\ccIfComp{PDFCreator}{\ccUseComp{PDFCreator}}{}}%
+  \cct@write@pdf@meta{pdfproducer}{Producer}{\ccIfComp{PDFProducer}{\ccUseComp{PDFProducer}}{\ccUseComp{Publisher}\ccWhenComp{PubPlace}{, \ccUseComp{PubPlace}}}}%
   \cct@write@pdf@meta{pdfkeywords}{Keywords}{\ccUseComp{Keywords}}%
 }
 %    \end{macrocode}
@@ -648,16 +648,17 @@ from the Components given in the Meta Container.}}}
   \ccDeclareGlobalComponent[\jobname]{XmpFile}%
 %    \end{macrocode}
 % \end{Component}
-% \begin{Component}{PDFCreator} is the creator of the PDF (usually the
-%   authors/editors), may be overridden by the values in the XMP file.
+% \begin{Component}{PDFCreator} is the tool with which the PDF was
+%   created. Defaults to ``le-tex xerif with CoCoTeX v({\CoCoTeX}
+%   version)''.
 %    \begin{macrocode}
-  \ccDeclareGlobalComponent{PDFCreator}%
+  \ccDeclareGlobalComponent[le-tex xerif with CoCoTeX v.\fileversion]{PDFCreator}%
 %    \end{macrocode}
 % \end{Component}
-% \begin{Component}{PDFProducer} is the PDF producer. Defaults to
-%   ``le-tex xerif with CoCoTeX v({\CoCoTeX} version)''.
+% \begin{Component}{PDFProducer} is the PDF producer (usually the
+%   authors/editors), may be overridden by the values in the XMP file.
 %    \begin{macrocode}
-  \ccDeclareGlobalComponent[le-tex xerif with CoCoTeX v.\fileversion]{PDFProducer}%
+  \ccDeclareGlobalComponent{PDFProducer}%
 %    \end{macrocode}
 % \end{Component}
 % \begin{Component}{Year} the year of the publication

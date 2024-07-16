@@ -27,6 +27,8 @@
     override the PDF-title meta datum
   - FIX: XMP meta data now take preference over Meta container
     Components if the XMP does exist.
+  - FIX: pdfcreator and pdfproducer metadata were used the wrong way
+    around.
 - coco-headings.dtx
   - added hook for capturing running titles
 
