@@ -31,6 +31,7 @@
     around.
 - coco-headings.dtx
   - added hook for capturing running titles
-
+- coco-accessibility.dtx
+  - prevent hyperref from writing empty DocumentInfo fields
 
 0.4.9 (INITIAL STATUS)

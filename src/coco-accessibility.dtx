@@ -814,8 +814,26 @@
     \ccaVstructEnd{document}
     \directlua{ltpdfa.endDocument()}%
   }
+%    \end{macrocode}
+% \begin{macro}{\PDF@FinishDoc} is re-defined to disable
+%   \lstinline{hyperref} filling the PDF's DocumentInfo with empty
+%   strings, as they are written by \lstinline{ltpdfa}, instead.
+%    \begin{macrocode}
+  \renewcommand\PDF@FinishDoc{%
+    \Hy@DisableOption{pdfauthor}%
+    \Hy@DisableOption{pdftitle}%
+    \Hy@DisableOption{pdfsubject}%
+    \Hy@DisableOption{pdfcreator}%
+    \Hy@DisableOption{pdfcreationdate}%
+    \Hy@DisableOption{pdfmoddate}%
+    \Hy@DisableOption{pdfproducer}%
+    \Hy@DisableOption{pdfkeywords}%
+    \Hy@DisableOption{pdftrapped}%
+    \Hy@DisableOption{pdfinfo}%
+  }
 }
 %    \end{macrocode}
+% \end{macro}
 %
 %
 % \subsection{Default Role Mapping}
