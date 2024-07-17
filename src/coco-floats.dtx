@@ -947,15 +947,18 @@
       \bgroup
         \@cc@is@finaltrue
 %    \end{macrocode}
-% The entire float body is tagged with the Sub-Container's name, which
-% should be mapped to either \DescribeTag{Table}, \DescribeTag{Figure}
-% or \DescribeTag{Div}.
+% Floats as a whole are tagged as \DescribeTag{Aside} when PDF/UA
+% standard is 2.0, or else as \DescribeTag{Div}.
 %    \begin{macrocode}
-        \ccaStructStart{\cc@cur@cont}%
+        \ccIfCompFromVal{titlepage}{PDFUAID}{2}
+          {\ccaStructStart{Aside}}
+          {\ccaStructStart{Div}}%
         \edef\ccf@parstruct@id{\ccaGetCurStruct{idx}}%
         \hsize\ccf@total@width
         \ccf@process
-        \ccaStructEnd{\cc@cur@cont}%
+        \ccIfCompFromVal{titlepage}{PDFUAID}{2}
+          {\ccaStructEnd{Aside}}
+          {\ccaStructEnd{Div}}%
         \par
       \egroup
       \ccSavePage
@@ -1671,16 +1674,14 @@
 %     Container should inherit Properties (\textit{optional})
 %   \item[2] top-level name of the float environment (e.g.,
 %     \lstinline{\ccPrefix Table}, \lstinline{\ccPrefix Figure})
-%   \item*[3] the tagging Role (\textit{optional}, defaults to Div)
-%   \item[4] caption type (e.g., \texttt{table}, \texttt{figure})
-%   \item[5] list (e.g., \texttt{lot}, \texttt{lof})
-%   \item[6] additional Component body, use this to add to Types or
+%   \item[3] caption type (e.g., \texttt{table}, \texttt{figure})
+%   \item[4] list (e.g., \texttt{lot}, \texttt{lof})
+%   \item[5] additional Component body, use this to add to Types or
 %     introduce custom Handlers to the Float Container.
 %   \end{ArgList}
 %    \begin{macrocode}
 \def\ccDeclareFloat{\cc@opt@empty\ccf@declare@float}
-\def\ccf@declare@float[#1]#2{\@ifnextchar[{\@ccf@declare@float[#1]#2}{\@ccf@declare@float[#1]#2[Div]}}%]
-\long\def\@ccf@declare@float[#1]#2[#3]#4#5#6{%
+\long\def\ccf@declare@float[#1]#2#3#4#5{%
 %    \end{macrocode}
 % First, we check if the Container already exists. If so, we issue an
 % error message. May we force the style programmers learn to make use
@@ -1705,8 +1706,8 @@
     \fi
     \ccDeclareType{FloatEnvInfo}{%
       \ccSetContainer{#2}%
-      \def\ccfCapType{#4}%
-      \def\ccf@cap@list@type{#5}%
+      \def\ccfCapType{#3}%
+      \def\ccf@cap@list@type{#4}%
     }% /FloatEnvInfo
 %    \end{macrocode}
 % The macro actually defines two {\LaTeX} environments; a normal one
@@ -1721,23 +1722,15 @@
 % Generating the Handlers for the list-of entries and define the
 % corresponding \lstinline{l@} macros
 %    \begin{macrocode}
-    \ccf@generate@listof@handlers{#5}{#4}{#2}%
+    \ccf@generate@listof@handlers{#4}{#3}{#2}%
     \bgroup
       \def\cc@cur@cont{#2}%
-      \cc@init@l@[list-of]{#4}{0}{#4}% Generate listof-Entries for first level floats
-      \cc@init@l@[list-of]{#5}{1}{sub#4}% Generate listof-Entries for sub-floats
+      \cc@init@l@[list-of]{#3}{0}{#3}% Generate listof-Entries for first level floats
+      \cc@init@l@[list-of]{#4}{1}{sub#3}% Generate listof-Entries for sub-floats
     \egroup
-    #6
+    #5
   }% /container
-%    \end{macrocode}
-% Finally, we set the Rolemap for PDF Tagging. Since ``Figure'' and
-% ``Table'' are already valid Tags, we don't need to map those.
-%    \begin{macrocode}
-  \ccIfAlly{%
-    \ifstrequal{Table}{#2}{}
-      {\ifstrequal{Figure}{#2}{}
-          {\ccaAddRolemap{#2}{#3}}}%
-    }{}}
+}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -1829,7 +1822,6 @@
       {}%
     \let\includegraphics\ccf@includesubgraphics
     \hskip\ccf@margin@l
-    \ccWhenComp{AltText}{\ccaAddAltText{\ccUseComp{AltText}}}
     \strut\ccUseComp{Fig}\strut
   \egroup}
 %    \end{macrocode}
@@ -1850,6 +1842,15 @@
 %   \lstinline{\includegraphics} patched to adjust for maximum width
 %   and height, and to capture the \lstinline{alt} key in order to
 %   pass it down to \lstinline{ltpdfa}.
+%
+%   In order to capture multiple images in the same Figure Container
+%   (i.e. real or fake Sub-Floats), tagging as \DescribeTag{Figure} of
+%   images takes place here, as does assignment of alternative
+%   text(s). Those can be submitted by the \UsageComponent{AltText}
+%   Component or by the \lstinline{alt} key in the optional argument
+%   of \lstinline{\includegraphics}. If both are given, the
+%   \lstinline{alt} key takes precedence. If neither is given, a
+%   \lstinline{--} is inserted.
 %    \begin{macrocode}
 \def\ccf@includesubgraphics{\cc@opt@empty\@ccf@includesubgraphics}%
 \def\@ccf@includesubgraphics[#1]#2{%
@@ -1858,9 +1859,21 @@
     \apptocmd\@igopts{,#1}{}{}%
   \fi
   \gdef\ccf@fig@path{#2}%
-  \if@cc@is@final\ccaAddPlacement{Block}\fi%
+  \if@cc@is@final
+    \ccaStructStart{Figure}%
+    \ccaAddPlacement{Block}%
+  \fi%
   \expandafter\ccf@ltx@includegraphics\expandafter[\@igopts]{#2}%
-  \if@cc@is@final\ifx\relax\cca@Gin@alt\relax\else\ccaAddAltText{\cca@Gin@alt}\fi\fi
+  \if@cc@is@final
+    \ifx\relax\cca@Gin@alt\relax
+      \ccIfComp{AltText}
+        {\ccaAddAltText{\ccUseComp{AltText}}}
+        {\ccaAddAltText{--}}%
+    \else
+      \ccaAddAltText{\cca@Gin@alt}%
+    \fi
+    \ccaStructEnd{Figure}%
+  \fi
 }
 %    \end{macrocode}
 % \end{macro}
@@ -1957,10 +1970,7 @@
     #2%
     \ccSubFloatCnt=\z@\relax
     \bgroup
-      \ccaStructStart{Figure}%
-      \ccWhenComp{AltText}{\ccaAddAltText{\ccUseComp{AltText}}}%
       \ccUseProperty{float-render}%
-      \ccaStructEnd{Figure}%
     \egroup
     \ccf@debug%
     \ccf@store@dimens
@@ -2102,19 +2112,22 @@
   \ccfGetTableContent
   \ccComponent{Content}{\unvbox\ccf@floatbox}%
   \ccUseComp{Content}%
+  \ccaStructStart{Table}%
   \ifx\ht@structID@THead\@undefined\else\ccaMoveStruct{\ht@structID@THead}\fi%
   \ifx\ht@structID@TBody\@undefined\else\ccaMoveStruct{\ht@structID@TBody}\fi%
   \ifx\ht@structID@TFoot\@undefined\else\ccaMoveStruct{\ht@structID@TFoot}\fi%
   \par\if@ccf@break@capt\else\nopagebreak\fi
   \vskip\dp\strutbox
+  \ccaStructEnd{Table}%
 }
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccfSubTableRender} Is the content of the
 %   table-specific \UsageProperty{subfloat-render} Property
-%   (\textbf{Note} that table sub-floats aren't allowed yet, so this
+%
+%   \textbf{Note} that table sub-floats aren't allowed yet, so this
 %   definition is un-used at the moment. TeX will crash with an error
-%   message before this Property is ever expanded.)
+%   message before this Property is ever expanded.
 %    \begin{macrocode}
 \def\ccfSubTableRender{%
   \cc@iterate{\@tempcnta}{\@ne}{\ccSubFloatCnt}{%

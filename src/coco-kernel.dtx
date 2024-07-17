@@ -614,11 +614,24 @@
 %   \begin{ArgList}
 %   \item[1] is the name of the Container
 %   \item[2] is the name of the Component
-%   \item[3] is the \texttt{then}-branch
-%   \item[4] is the \texttt{else}-branch
+%   \item[3] is the \texttt{then} branch
+%   \item[4] is the \texttt{else} branch
 %   \end{ArgList}
 %    \begin{macrocode}
 \long\def\ccIfCompFrom#1#2#3#4{\expandafter\ifx\csname cc@#1@#2\endcsname\relax#4\else#3\fi}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccIfCompFromVal} is a conditional to check if a
+%   Global Component holds a specific value.
+%   \begin{ArgList}
+%   \item[1] is the name of the Container
+%   \item[2] is the name of the Component
+%   \item[3] is the comparison value
+%   \item[4] is the \texttt{then} branch
+%   \item[5] is the \texttt{else} branch
+%   \end{ArgList}
+%    \begin{macrocode}
+\long\def\ccIfCompFromVal#1#2#3#4#5{\protected@edef\@argiii{#3}\expandafter\ifx\csname cc@#1@#2\endcsname\@argiii#4\else#5\fi}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\cc@long@empty} is a helper macro used as comparator
