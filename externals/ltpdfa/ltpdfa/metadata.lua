@@ -404,9 +404,6 @@ end
 -- TODO use infoarray that always is utf-8
 function xmphandler.fromInfo()
    local body = ""
-   if (config.metadata.Keywords and config.metadata.Keywords[1] ~= '') then
-      body = "<pdf:Keywords>" .. infoarray.Keywords[1] .. "</pdf:Keywords>\n"
-   end
    if (config.metadata.Producer and config.metadata.Producer[1] ~= '') then
       body = body .. "<pdf:Producer>" .. infoarray.Producer[1] .. "</pdf:Producer>\n"
    end
@@ -428,6 +425,13 @@ function xmphandler.fromInfo()
    end
    if (config.metadata.Subject and config.metadata.Subject[1] ~= '') then
       body = body .. "<dc:description><rdf:Alt>\n<rdf:li xml:lang='x-default'>" .. infoarray.Subject[1] .. "</rdf:li>\n</rdf:Alt></dc:description>\n"
+   end
+   if (config.metadata.Keywords and config.metadata.Keywords[1] ~= '') then
+      body = body .. "<dc:subject>\n  <rdf:Seq>\n"
+      for str in string.gmatch(infoarray.Keywords[1], " *([^,]+)") do
+	 body = body .. "    <rdf:li>" .. str .. "</rdf:li>\n"
+      end
+      body =  body .. "  </rdf:Seq>\n</dc:subject>\n"
    end
    if config.metadata.conformance then
       pdfaver = pdfaver:gsub('PDFAID:PART', config.metadata.conformance.pdfaid)   
