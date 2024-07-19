@@ -1,3 +1,5 @@
+; -*- markdown -*-
+
 0.5.0
 
 - general
@@ -27,6 +29,8 @@
 - coco-title.dtx
   - added DocTitle Component and doc-book-title Properties to locally
     override the PDF-title meta datum
+  - XMP meta data are parsed and written into the Document Info
+    Dictionary when ltpdfa is used.
   - FIX: XMP meta data now take preference over Meta container
     Components if the XMP does exist.
   - FIX: pdfcreator and pdfproducer metadata were used the wrong way
@@ -34,6 +38,9 @@
 - coco-headings.dtx
   - added hook for capturing running titles
 - coco-accessibility.dtx
-  - prevent hyperref from writing empty DocumentInfo fields
+  - NEW: Keywords and Authors are now written as separated list items
+    into the generated XMP files, instead of one single string.
+  - FIX: prevented hyperref from writing redundant and empty
+    DocumentInfo fields
 
 0.4.9 (INITIAL STATUS)

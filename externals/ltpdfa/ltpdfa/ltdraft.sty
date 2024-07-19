@@ -44,6 +44,8 @@
 \newcommand*{\@lt@nop@ltOmitEnv}[1]{\relax}
 \newcommand*{\@lt@nop@moveStruct}[1]{\relax}
 \newcommand*{\@lt@nop@replaceStruct}[1]{\relax}
+\newcommand*{\@lt@nop@addToKeywords}[1]{\relax}
+\newcommand*{\@lt@nop@addToAuthors}[1]{\relax}
 
 \newcommand*{\@disableLtpdfa}{%
   \global\let\ltOmitEnv\@lt@nop@ltOmitEnv
@@ -84,6 +86,8 @@
   \global\let\setLang\@lt@nop@setLang
   \global\let\moveStruct\@lt@nop@moveStruct
   \global\let\replaceStruct\@lt@nop@replaceStruct
+  \global\let\addToKeywords\@lt@nop@addToKeywords
+  \global\let\addToAuthors\@lt@nop@addToAuthors
   \ifltpdfa@final\NoHyper\fi
 }
 

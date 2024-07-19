@@ -404,6 +404,16 @@ end
 -- TODO use infoarray that always is utf-8
 function xmphandler.fromInfo()
    local body = ""
+   if (config.metadata.KeywordList and config.metadata.KeywordList[1][1] ~= '') then
+      local list = ""
+      for key, val in pairs(config.metadata.KeywordList) do
+         list = list .. "    <rdf:li>" .. val[1] .. "</rdf:li>\n"
+      end
+      body = "<dc:subject>\n  <rdf:Bag>\n" .. list .. "  </rdf:Bag>\n</dc:subject>\n"
+   elseif (config.metadata.Keywords and config.metadata.Keywords[1] ~= '') then
+      body = "<pdf:Keywords>" .. infoarray.Keywords[1] .. "</pdf:Keywords>\n"
+   end
+
    if (config.metadata.Producer and config.metadata.Producer[1] ~= '') then
       body = body .. "<pdf:Producer>" .. infoarray.Producer[1] .. "</pdf:Producer>\n"
    end
@@ -417,21 +427,20 @@ function xmphandler.fromInfo()
    end
    -- <xapMM:DocumentID>uuid:3d51d5be-cfbc-11f1-0000-6e4afb5d3d68</xapMM:DocumentID>
    body = body .. "<dc:format>application/pdf</dc:format>\n"
-   if (config.metadata.Author and config.metadata.Author[1]) then
-      body = body .. "<dc:creator>\n<rdf:Seq>\n<rdf:li>" .. infoarray.Author[1] .. "</rdf:li>\n</rdf:Seq>\n</dc:creator>\n";
+   if (config.metadata.AuthorList and config.metadata.AuthorList[1][1] ~= '') then
+      local list = ""
+      for key, val in pairs(config.metadata.AuthorList) do
+         list = list .. "    <rdf:li>" .. val[1] .. "</rdf:li>\n"
+      end
+      body = body .. "<dc:creator>\n  <rdf:Seq>\n" .. list .. "  </rdf:Seq>\n</dc:creator>\n"
+   elseif (config.metadata.Author and config.metadata.Author[1]) then
+      body = body .. "<dc:creator>\n  <rdf:Seq>\n    <rdf:li>" .. infoarray.Author[1] .. "</rdf:li>\n  </rdf:Seq>\n</dc:creator>\n";
    end
    if (config.metadata.Title and config.metadata.Title[1] ~= '') then
       body = body .. "<dc:title><rdf:Alt>\n<rdf:li xml:lang=\"x-default\">" .. infoarray.Title[1] .. "</rdf:li>\n</rdf:Alt></dc:title>\n"
    end
    if (config.metadata.Subject and config.metadata.Subject[1] ~= '') then
       body = body .. "<dc:description><rdf:Alt>\n<rdf:li xml:lang='x-default'>" .. infoarray.Subject[1] .. "</rdf:li>\n</rdf:Alt></dc:description>\n"
-   end
-   if (config.metadata.Keywords and config.metadata.Keywords[1] ~= '') then
-      body = body .. "<dc:subject>\n  <rdf:Seq>\n"
-      for str in string.gmatch(infoarray.Keywords[1], " *([^,]+)") do
-	 body = body .. "    <rdf:li>" .. str .. "</rdf:li>\n"
-      end
-      body =  body .. "  </rdf:Seq>\n</dc:subject>\n"
    end
    if config.metadata.conformance then
       pdfaver = pdfaver:gsub('PDFAID:PART', config.metadata.conformance.pdfaid)   
@@ -462,7 +471,7 @@ local function fillDocInfo()
       local enc = val[2]
       local tmp;
       local newenc;
-      if (key ~= 'xmpfile' and key ~= 'conformance') then
+      if (key ~= 'xmpfile' and key ~= 'conformance' and key ~= 'KeywordList' and key ~= 'AuthorList') then
          str = expandOctal(str)
          if (enc == 'utf-8') then
             tmp = str
@@ -477,6 +486,26 @@ local function fillDocInfo()
             log("WARN: don't know how to handle this encoding for docinfo key %s (%s)", key, enc)
          end
          infoarray[key] = {tmp, newenc}
+      elseif (key == 'KeywordList') then
+         -- TODO encoding
+         local kwdstr = ""
+         local delim = ""
+         -- TODO encoding of KeywordList ????
+         for key, kwd in pairs(val) do
+            if (key > 1) then delim = ", " end
+            kwdstr = kwdstr .. delim .. kwd[1]
+         end
+         infoarray['Keywords'] = {kwdstr , 'utf-8'}
+      elseif (key == 'AuthorList') then
+         -- TODO encoding
+         local autstr = ""
+         local delim = ""
+         -- TODO encoding of KeywordList ????
+         for key, aut in pairs(val) do
+            if (key > 1) then delim = ", " end
+            autstr = autstr .. delim .. aut[1]
+         end
+         infoarray['Author'] = {autstr , 'utf-8'}
       end
    end
    if config.debug then

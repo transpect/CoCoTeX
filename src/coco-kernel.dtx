@@ -526,7 +526,14 @@
 \def\ccgdefFromComp#1#2{\cc@store@comp{x}#1{#2}}
 %    \end{macrocode}
 % \end{macro}
-%
+% \begin{macro}{\ccpgdefFromComp} is a global variant of
+%   \lstinline{\ccdefFromComp} that takes a CS name as \InlineArg{1}
+%   and prepends the \ccPrefix before assigning the Contents of
+%   Component \InlineArg2 to the resulting CS token.
+%    \begin{macrocode}
+\def\ccpgdefFromComp#1#2{\def\x{\cc@store@comp{x}}\expandafter\x\csname\ccPrefix #1\endcsname{#2}}
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\strip@longprefix} is a helper macro to strip the
 %   prefix from the \lstinline{\meaning} of a \lstinline{\long} macro.
 %    \begin{macrocode}
@@ -933,6 +940,14 @@
 %   \textit{global} \lstinline{\cc@comp@def}.
 %    \begin{macrocode}
 \def\ccgdefFromCountedComp{\cc@comp@def[\global]}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccpgdefFromCountedComp} is the user-level command for
+%   \textit{global} \lstinline{\cc@comp@def}. In contrast to
+%   \lstinline{\ccgdefFromCountedComp}, it takes a CS name as first
+%   argument and preprends the \lstinline{\ccPrefix} to the CS token
+%   to be defined.
+%    \begin{macrocode}
 \def\ccpgdefFromCountedComp#1{\expandafter\ccgdefFromCountedComp\csname \ccPrefix #1\endcsname}
 %    \end{macrocode}
 % \end{macro}
@@ -1210,6 +1225,13 @@
 %   of \lstinline{\ccdefFromProperty}.
 %    \begin{macrocode}
 \def\ccgdefFromProperty{\cc@store@prop[\global]}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccpgdefFromProperty} is a \lstinline{\global} variant
+%   of \lstinline{\ccdefFromProperty} that takes a CS name as
+%   \InlineArg{1} and prepends the \lstinline{\ccPrefix} to it before
+%   assigning the Property result to the macro.
+%    \begin{macrocode}
 \def\ccpgdefFromProperty#1{\expandafter\ccgdefFromProperty\csname \ccPrefix #1\endcsname}
 %    \end{macrocode}
 % \end{macro}

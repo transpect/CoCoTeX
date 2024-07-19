@@ -163,6 +163,10 @@
 \newcommand*{\setLang}[1]{\directlua{ltpdfa.tagger.setLang('\luaescapestring{#1}')}}
 \newcommand*{\moveStruct}[1]{\directlua{ltpdfa.tagger.moveStruct('\luaescapestring{#1}')}}
 \newcommand*{\replaceStruct}[1]{\directlua{ltpdfa.tagger.replaceStruct('\luaescapestring{#1}')}}
+%% add term to KeywordList that ends in dc:subject, must be UTF-8
+\newcommand*{\addToKeywords}[1]{\directlua{ltpdfa.tagger.addToKeywords('\luaescapestring{#1}')}}
+\newcommand*{\addToAuthors}[1]{\directlua{ltpdfa.tagger.addToAuthors('\luaescapestring{#1}')}}
+
 
 %% save definition of structuring commands
 \let\@lt@save@structStart\structStart
@@ -203,6 +207,8 @@
 \let\@lt@save@ltOmitEnv\ltOmitEnv
 \let\@lt@save@moveStruct\moveStruct
 \let\@lt@save@replaceStruct\replaceStruct
+\let\@lt@save@addToKeywords\addToKeywords
+\let\@lt@save@addToAuthors\addToAuthors
 
 \newcommand*{\@restoreLtpdfa}{%
   \global\let\ltOmitEnv\@lt@save@ltOmitEnv
@@ -243,6 +249,8 @@
   \global\let\setLang\@lt@save@setLang
   \global\let\moveStruct\@lt@save@moveStruct
   \global\let\replaceStruct\@lt@save@replaceStruct
+  \global\let\addToKeywords\@lt@save@addToKeywords
+  \global\let\addToAuthors\@lt@save@addToAuthors
   \endNoHyper
 }
 

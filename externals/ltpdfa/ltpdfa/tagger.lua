@@ -288,6 +288,8 @@ local inputtagger = {
    addFigure       = addFigure,
    moveStruct      = structtree.moveStruct,
    replaceStruct   = structtree.replaceStruct,
+   addToKeywords   = ltpdfa.addToKeywords,
+   addToAuthors    = ltpdfa.addToAuthors,
 }
 
 return inputtagger

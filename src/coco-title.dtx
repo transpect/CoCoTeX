@@ -86,6 +86,7 @@
   \ccParseAttributes{Meta}{#1}%
   \ccUseHook[Meta]{attr-handler}%
   \ccEvalType{Components}%
+  \let\and\relax
 }
 %    \end{macrocode}
 % \end{macro}
@@ -143,62 +144,94 @@
 %    \begin{macrocode}
 \def\cct@set@pdfmeta{%
 %    \end{macrocode}
-% \begin{macro}{\cct@write@pdf@meta} is used to transfer the
-%   DocumentInfo meta date to the pdf writer.
+% \begin{macro}{\cct@write@pdf@meta@string} handles meta data that are
+%   stored as plain \textit{strings} in the XMP file.
 %   \begin{ArgList}
 %     \item[1] is the hyperref name for the meta datum
 %     \item[2] is the ltpdfa name for the meta datum
 %     \item[3] is the fallback value.
 %   \end{ArgList}
-%   The fallback value is only chosen if no XMP file exists or if the
-%   XMP file does not contain the required data field. In this case,
-%   the string is sanitized through hyperref's
+%   The fallback value is only chosen if either no XMP file exists, or
+%   if the XMP file does not contain the required data field. In this
+%   case, the string is sanitized through hyperref's
 %   \lstinline{\pdfstringdef}, which may result in weird encoding
 %   errors, so be aware.
 %    \begin{macrocode}
-  \def\cct@write@pdf@meta##1##2##3{%
+  \def\cct@write@pdf@meta@string##1##2##3{%
     \let\cct@cur@data\@empty
+    \ccIfAlly
+      {\pdfstringdef\cct@cur@data{\directlua{tex.print(cocotex.ally.meta.##2)}}%
+       \ifx\cct@cur@data\@empty
+         \pdfstringdef\cct@cur@data{##3}%
+       \fi
+       \ifx\cct@cur@data\@empty
+         \ccDebugMsg[pdfmeta]{##2 is empty (3: ##3); doing nothing}%
+       \else
+         \ccDebugMsg[pdfmeta]{Writing \string\setDocinfo[utf-16]{##2}{\expandafter\strip@prefix\meaning\cct@cur@data}}%
+         \edef\x{\noexpand\ccaSetDocinfo[utf-16]{##2}}\expandafter\x\expandafter{\cct@cur@data}%
+       \fi}
+     {\cct@write@hr@infodict{##1}{##3}}}%
 %    \end{macrocode}
-% First, we check, whether \CoCoTeX's accessibility features are
-% activated. If so, we check if the User has provided an XMP file by
-% reading the required meta data field given in \#\#2 from that XMP
-% file.
+% \end{macro}
+% \begin{macro}{\cct@write@pdf@meta@list} handles meta data that are
+%   represented as \textit{lists} in the XMP file.
+%   \begin{ArgList}
+%     \item[1] is the hyperref name for the meta datum
+%     \item[2] is the ltpdfa name for the meta datum
+%     \item[3] is the fallback value.
+%     \item[4] is the handler for the list. This is a macro that takes
+%       one argument. Each item of the list will be passed to that
+%       macro as argument.
+%     \item[5] is the separator between the items
+%   \end{ArgList}
 %    \begin{macrocode}
-    \ccIfAlly{%
-      \pdfstringdef\cct@cur@data{\directlua{tex.print(cocotex.ally.meta.##2)}}%
+  \def\cct@write@pdf@meta@list##1##2##3##4##5{%
+    \let\cct@cur@data\@empty
+    \ccIfAlly
+      {\protected@edef\cct@cur@data{\directlua{tex.print(cocotex.ally.meta.##2)}}%
+       \ifx\cct@cur@data\@empty
+         \protected@edef\cct@cur@data{##3}%
+         \message{^^J===>##2: Splitting ##3 with \unexpanded{##5}.}
+         \edef\x{\noexpand\cct@split@pdf@meta{\noexpand##4}{##5}}\x%
+       \else
+         \cct@split@pdf@meta{##4}{\and}%
+       \fi}
+     {\cct@write@hr@infodict{##1}{##3}}}%
 %    \end{macrocode}
-% If the data is still empty, i.e., no xmp is given or the data Field
-% is empty, we retrieve the missing data from the \lstinline{Meta}
-% Container and pass it through hyperref's \lstinline{\pdfstringdef}
-% filter to get rid of any {\TeX} markup:
+% \end{macro}
+% \begin{macro}{\cct@split@pdf@meta} is a helper function to split the
+%   list-form meta datum stored \lstinline{\cct@cur@data} in into its
+%   items.
+%   \begin{ArgList}
+%   \item[1] is a CS token that takes one argument. Each item of the
+%     list is recursively passed to that CS token
+%   \item[2] is the separator between the items
+%   \end{ArgList}
 %    \begin{macrocode}
-      \ifx\cct@cur@data\@empty
-        \pdfstringdef\cct@cur@data{##3}%
-      \fi
-%    \end{macrocode}
-% Then, we check again. If the field is still empty, we do
-% nothing. Otherwise, we send the data to ltdfa's
-% \lstinline[{lua[5.3]}]{setDocinfo()} method.
-%    \begin{macrocode}
-      \ifx\cct@cur@data\@empty
-        \ccDebugMsg[pdfmeta]{##2 is empty (3: ##3); doing nothing}%
-      \else
-        \ccDebugMsg[pdfmeta]{Writing \string\setDocinfo[utf-16]{##2}{\expandafter\strip@prefix\meaning\cct@cur@data}}%
-        \edef\x{\noexpand\ccaSetDocinfo[utf-16]{##2}}\expandafter\x\expandafter{\cct@cur@data}%
+  \def\cct@split@pdf@meta##1##2{%
+    \def\@cct@split@pdf@meta####1##2####2\@nil####3{%
+      \if\relax\detokenize{####1}\relax\else
+        ####3{####1}%
+        \if!####2!\else
+          \edef\@argi{##2}%
+          \edef\@argii{####2}%
+          \ifx\@argi\@argii\else
+            \@cct@split@pdf@meta####2\@nil{####3}%
+          \fi
+        \fi
       \fi
     }%
+    \expandafter\@cct@split@pdf@meta\cct@cur@data##2\@nil{##1}%
+  }%
 %    \end{macrocode}
-% If no accessibility features are active, we write the data directly
-% to the pdf using \lstinline{hyperref}'s \lstinline{\hypersetup}
-% macro and the key in \#\#1:
+% \end{macro}
+% \begin{macro}{\cct@write@hr@infodict} writes the PDF info dictionary
+%   entry via \lstinline{hyperref} with the key \InlineArg{1} and the
+%   value \InlineArg{2}.
 %    \begin{macrocode}
-    {\protected@edef\x{\noexpand\hypersetup{##1={\expandonce{##3}}}}\x}%
-%    \end{macrocode}
-% If the XMP contains the required meta data, we also write it into
-% the DocumentInfo to make sure both ways to encode meta data share
-% the exact same value.
-%    \begin{macrocode}
-}%
+  \def\cct@write@hr@infodict##1##2{%
+    \protected@edef\x{\noexpand\hypersetup{##1={\expandonce{##2}}}}\x
+  }%
 %    \end{macrocode}
 % \end{macro}
 % After we decided how we want to process the PDF meta data, we now
@@ -207,6 +240,7 @@
   \cct@title@insert@xmp
   \cct@title@process@bkc
   \cct@title@process@bkt
+  \cct@title@process@bkk
   \cct@title@process@bka
 }
 %    \end{macrocode}
@@ -217,7 +251,7 @@
 \def\cct@title@process@bkt{%
   \cslet{\ccPrefix Break}\space
   \protected@xdef\@title{\ccUseProperty{doc-book-title}}%
-  \cct@write@pdf@meta{pdftitle}{Title}{\@title}%
+  \cct@write@pdf@meta@string{pdftitle}{Title}{\@title}%
   \ccpgdefFromProperty{RunBookTitle}{run-book-title}%
 }
 %    \end{macrocode}
@@ -233,16 +267,16 @@
     \ccGobble
     \renewcommand\foreignlanguage[2]{{##2}}%
     \ccIfComp{AuthorPDFInfo}
-      {\ccpgdefFromProperty{RunBookName}{AuthorPDFInfo}}
+      {\ccpgdefFromComp{RunBookName}{AuthorPDFInfo}}
       {\ccIfComp{EditorPDFInfo}
-         {\ccpgdefFromProperty{RunBookName}{EditorPDFInfo}}
+         {\ccpgdefFromComp{RunBookName}{EditorPDFInfo}}
          {\ccIfComp{AuthorNameList}
-           {\ccpgdefFromProperty{RunBookName}{AuthorNameList}}
+           {\ccpgdefFromComp{RunBookName}{AuthorNameList}}
            {\ccIfComp{EditorNameList}
-             {\ccpgdefFromProperty{RunBookName}{EditorNameList}}
+             {\ccpgdefFromComp{RunBookName}{EditorNameList}}
              {\ifnum\ccAuthorCnt>\z@
                 \@setpar{\@@par}%
-                \ccggdefFromCountedComp{RunBookName}{Author}{author-list-pdfinfo-format}%
+                \ccpgdefFromCountedComp{RunBookName}{Author}{author-list-pdfinfo-format}%
               \else
                 \ifnum\ccEditorCnt>\z@
                   \ccpgdefFromCountedComp{RunBookName}{Editor}{editor-list-pdfinfo-format}%
@@ -254,7 +288,7 @@
             }}}}%
     \if@tempswa
       \pdfstringdef\@author{\csname\ccPrefix RunBookName\endcsname}%
-      \cct@write@pdf@meta{pdfauthor}{Author}{\csname\ccPrefix RunBookName\endcsname}%
+      \cct@write@pdf@meta@list{pdfauthor}{Author}{\csname\ccPrefix RunBookName\endcsname}{\ccaAddAuthor}{\and}%
     \fi
   \endgroup
 }
@@ -265,12 +299,19 @@
 % \subsection{Processing of  the PDF's Creator, Producer, and Keywords Meta Data}
 %
 % \begin{macro}{\cct@title@process@bkc} processes the metadata for the pdf
-%   creator
+%   creator and producer.
 %    \begin{macrocode}
 \def\cct@title@process@bkc{%
-  \cct@write@pdf@meta{pdfcreator}{Creator}{\ccIfComp{PDFCreator}{\ccUseComp{PDFCreator}}{}}%
-  \cct@write@pdf@meta{pdfproducer}{Producer}{\ccIfComp{PDFProducer}{\ccUseComp{PDFProducer}}{\ccUseComp{Publisher}\ccWhenComp{PubPlace}{, \ccUseComp{PubPlace}}}}%
-  \cct@write@pdf@meta{pdfkeywords}{Keywords}{\ccUseComp{Keywords}}%
+  \cct@write@pdf@meta@string{pdfcreator}{Creator}{\ccIfComp{PDFCreator}{\ccUseComp{PDFCreator}}{}}%
+  \cct@write@pdf@meta@string{pdfproducer}{Producer}{\ccIfComp{PDFProducer}{\ccUseComp{PDFProducer}}{\ccUseComp{Publisher}\ccWhenComp{PubPlace}{, \ccUseComp{PubPlace}}}}%
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\cct@title@process@bkk} processed the metadata for the
+%   keywords.
+%    \begin{macrocode}
+\def\cct@title@process@bkk{%
+  \cct@write@pdf@meta@list{pdfkeywords}{Keywords}{\ccUseComp{Keywords}}{\ccaAddKeyword}{\ccUseProperty{keywords-sep}}%
 }
 %    \end{macrocode}
 % \end{macro}

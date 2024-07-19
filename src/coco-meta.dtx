@@ -392,7 +392,7 @@
   \ccSetProperty{role-block-print-format}{\ccUseComp{FullName}\ifnum\ccCurCount<\ccTotalCount\ccUseProperty{counted-name-sep}\fi}% How <Role>NameList for each name is build
   \ccSetProperty{role-block-cite-format}{\ccUseComp{CiteName}\ifnum\ccCurCount<\ccTotalCount\ccUseProperty{counted-name-sep}\fi}% How each item in Component <Role>CitationList is formatted
   \ccSetProperty{role-block-short-cite-format}{\ccUseComp{ShortCiteName}\ifnum\ccCurCount<\ccTotalCount\ccUseProperty{counted-name-sep}\fi}%  How each item in the Component <Role>ShortCitationList is formatted
-  \ccSetProperty{role-block-pdfinfo-format}{\ccUseComp{PDFInfoName}\ifnum\ccCurCount<\ccTotalCount\ccUseProperty{counted-name-sep}\fi}% How each item in the Component <Role>PDFInfo is formatted
+  \ccSetProperty{role-block-pdfinfo-format}{\ccUseComp{PDFInfoName}\ifnum\ccCurCount<\ccTotalCount\and\fi}% How each item in the Component <Role>PDFInfo is formatted
   \ccSetProperty{role-block-correspondence-format}{%
     \ccIfPropVal{is-corresp}{true}
       {\ifx\is@first@corresp\relax
@@ -420,6 +420,7 @@
   \ccSetProperty{name-and}{\space and\space}%
   \ccSetProperty{name-etal}{\space et~al.}%
   \ccSetProperty{name-sep}{,\space}%
+  \ccSetProperty{keywords-sep}{,\space}%
   \ccSetProperty{corresp-mark}{*}%
   \ccSetProperty{corresp-sep}{,\space}%
   %

@@ -52,13 +52,16 @@
 \newdimen\LeftMarg \LeftMarg=2.5em\relax
 \def\macro{\begingroup
    \catcode`\\12
+   \ifx\is@m@cro@\relax
+     \let\is@sub@m@cro@\relax
+   \fi
    \let\is@m@cro@\relax
    \MakePrivateLetters\m@cro@}
 \long\def\m@cro@#1{\endgroup \topsep\MacroTopsep%
   \edef\saved@macroname{\string#1}%
   \let\saved@indexname\saved@macroname
   \ifhmode\par\fi
-  \ifx\is@m@cro@\relax
+  \ifx\is@sub@m@cro@\relax
     \submacrosection{\string#1}\ignorespaces
   \else
     \macrosection{\string#1}\ignorespaces
@@ -124,14 +127,14 @@
     \color{spot}%
     \ttfamily
     \footnotesize
-    \ifx\is@opt\relax[\##1]\else\{\##1\}\fi\enskip\hss}%
+    \ifx\is@opt\relax[\ifx\is@sub@m@cro@\relax\#\fi\##1]\else\{\ifx\is@sub@m@cro@\relax\#\fi\##1\}\fi\enskip\hss}%
   \let\is@opt\@undefined
   \ignorespaces}
 
 \def\InlineArg{\@ifstar{\let\is@opt\relax\inline@arg}{\inline@arg}}
 \def\inline@arg#1{\begingroup
     \color{spot}\ttfamily\footnotesize
-    \ifx\is@opt\relax[\##1]\else\{\##1\}\fi
+    \ifx\is@opt\relax[\ifx\is@sub@m@cro@\relax\#\fi\##1]\else\{\ifx\is@sub@m@cro@\relax\#\fi\##1\}\fi
   \endgroup
   \let\is@opt\@undefined}
 

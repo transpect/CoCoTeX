@@ -337,6 +337,8 @@
 % Some macros from \lstinline{ltpdfa.sty}:
 %    \begin{macrocode}
 \DeclareAccessibilityCommand{\ccaAddToConfig}[2]{\directlua{ltpdfa.addToConfig('\luaescapestring{#1}','\luaescapestring{#2}')}}
+\DeclareAccessibilityCommand{\ccaAddKeyword}[1]{\directlua{ltpdfa.tagger.addToKeywords('\luaescapestring{#1}')}}
+\DeclareAccessibilityCommand{\ccaAddAuthor}[1]{\directlua{ltpdfa.tagger.addToAuthors('\luaescapestring{#1}')}}
 \@onlypreamble\ccaAddToConfig
 %    \end{macrocode}
 % \begin{macro}{\ccaStructStart} inserts a structural tag with the
@@ -895,15 +897,17 @@ meta = {
     local xmpfile = ltpdfa.metadata.xmphandler.fromFile(ltpdfa.config.metadata.xmpfile)
     local f = io.open(xmpfile, "rb")
     local content = f:read("*all")
-    -- log(">>>" .. content)
     f:close()
-
+%    \end{macrocode}
+% First, we extract the document title.
+%    \begin{macrocode}[language={[5.3]Lua}]
     if (content:find('<dc:title>')) then
       local title = content:gsub('.*<dc:title>[^<]*<rdf:Alt>[^<]*<rdf:li[^>]*>(.*)</rdf:li>[^<]*</rdf:Alt>[^<]*</dc:title>.*', "%1")
       self.Title = title
-      -- log(">>>" .. self.Title)
     end
-
+%    \end{macrocode}
+% Then, we extract the authors from the \lstinline{dc:creator} list.
+%    \begin{macrocode}[language={[5.3]Lua}]
     local authors
     local author = {}
     if (content:find('<dc:creator>')) then
@@ -911,8 +915,40 @@ meta = {
       for k in string.gmatch(authors, "<rdf:li>([^>]+)</rdf:li>") do
         table.insert(author , k)
       end
-      self.Author = table.concat(author, ', ')
-      -- log(">>>" .. self.Author)
+      self.Author = table.concat(author, '\\and ')
+    end
+%    \end{macrocode}
+% Then, we extract the keywords from the \lstinline{dc:subject}
+% list. If that doesn't exist, we try to extract the keywords from the
+% \lstinline{pdf:Keywords} Element, instead.
+%    \begin{macrocode}[language={[5.3]Lua}]
+    local keywords
+    local keyword = {}
+    if (content:find('dc:subject')) then
+      keywords = content:gsub('.*<dc:subject>[^<]*<rdf:Bag>(.*)</rdf:Bag>[^<]*</dc:subject>.*', "%1")
+      for k in string.gmatch(keywords, "<rdf:li>([^>]+)</rdf:li>") do
+        table.insert(keyword , k)
+      end
+      self.Keywords = table.concat(keyword, '\\and ')
+    elseif (content:find('pdf:Keywords')) then
+      local keyword = content:gsub('.*<pdf:keywords>(.*)</pdf:Keywords>.*', "%1")
+      self.Keywords = keyword
+    end
+%    \end{macrocode}
+% Then, we extract the PDF producer fom the \lstinline{pdf:Producer}
+% element, if it exists:
+%    \begin{macrocode}[language={[5.3]Lua}]
+    if (content:find('<pdf:Producer>')) then
+      local prod = content:gsub('.*<pdf:Producer>(.*)</pdf:Producer>.*', "%1")
+      self.Producer = prod
+    end
+%    \end{macrocode}
+% Finally, we extract the PDF CreatorTool fom the \lstinline{xmp:CreatorTool}
+% element, if it exists:
+%    \begin{macrocode}[language={[5.3]Lua}]
+    if (content:find('<xmp:CreatorTool>')) then
+      local creatortool = content:gsub('.*<xmp:CreatorTool>(.*)</xmp:CreatorTool>.*', "%1")
+      self.Creator = creatortool
     end
   end
 }

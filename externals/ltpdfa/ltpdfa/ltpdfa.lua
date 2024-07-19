@@ -271,6 +271,20 @@ local function endDocument()
    -- try to autoclose
    -- TODO CHECK ltpdfa.tagger.autoClose('document', nil, true)
 end
+-- for later dc:subject list in xmp 
+local function addToKeywords(arg)
+   if config.metadata['KeywordList'] == nil then
+      config.metadata['KeywordList'] = {}
+   end
+   table.insert(config.metadata['KeywordList'], {arg, 'utf-8'})
+end
+-- for later dc:creator list in xmp 
+local function addToAuthors(arg)
+   if config.metadata['AuthorList'] == nil then
+      config.metadata['AuthorList'] = {}
+   end
+   table.insert(config.metadata['AuthorList'], {arg, 'utf-8'})
+end
 
 -- public part
 ltpdfa = {}
@@ -284,7 +298,6 @@ ltpdfa.lastShippedOut = lastShippedOut
 ltpdfa.config = config
 -- sub modules
 ltpdfa.structtree = require("structtree")
-ltpdfa.tagger = require("tagger")
 ltpdfa.metadata = require("metadata")
 -- funcs
 ltpdfa.init = init
@@ -298,4 +311,7 @@ ltpdfa.setDocInfo   = setDocInfo
 --
 ltpdfa.pageprocessor = ltpdfa.structtree.pageprocessor -- called from \AtBeginShipout
 ltpdfa.configAutoclose = configAutoclose
+ltpdfa.addToKeywords = addToKeywords
+ltpdfa.addToAuthors = addToAuthors
+ltpdfa.tagger = require("tagger")
 return ltpdfa
