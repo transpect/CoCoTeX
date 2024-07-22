@@ -536,7 +536,7 @@
 \AtBeginDocument{%
     \patchcmd\Hy@StartlinkName
       {\pdfstartlink}
-      {\ccaStructStart{Link}\ccaAddAltText{#2}\edef\@ltpdfmy@parent{\ccaGetStructParent}%
+      {\pdfstringdef\@argii{#2}\ccaStructStart{Link}\ccaAddAltText{#2}\edef\@ltpdfmy@parent{\ccaGetStructParent}%
        \pdfstartlink}
       {}{\cca@patch@error\Hy@StartlinkName}
 %    \end{macrocode}
@@ -544,14 +544,14 @@
 %    \begin{macrocode}
     \patchcmd\Hy@StartlinkName
       {#1}
-      {#1 /StructParent \@ltpdfmy@parent}
+      {#1 /StructParent \@ltpdfmy@parent /Contents(\@argii)}
       {}{\cca@patch@error\Hy@StartlinkName}
 %    \end{macrocode}
 % then we patch hyperref's general link macro, twice. Once for the Link's start tag
 %    \begin{macrocode}
     \patchcmd\hyper@linkurl
       {\pdfstartlink}
-      {\ccaStructStart{Link}\ccaAddAltText{#2}\edef\@ltpdfmy@parent{\ccaGetStructParent}%
+      {\pdfstringdef\@argii{#2}\ccaStructStart{Link}\ccaAddAltText{#2}\edef\@ltpdfmy@parent{\ccaGetStructParent}%
         \pdfstartlink}
       {}{\cca@patch@error\hyper@linkurl}
 %    \end{macrocode}
@@ -563,8 +563,14 @@
       }
       {/C[\@urlbordercolor]%
         \fi
-        /StructParent \@ltpdfmy@parent%
+       /StructParent \@ltpdfmy@parent%
+       /Contents(\@argii)
       }{}{\cca@patch@error\hyper@linkurl}
+    % \patchcmd\hyper@linkurl
+    %   {\Hy@href@nextactionraw}
+    %   {
+    %    \Hy@href@nextactionraw}
+    %   {}{\cca@patch@error\hyper@linkurl}
 %    \end{macrocode}
 % finally, we patch the end tag for the link node into the
 % \lstinline{\close@pdflink} macro:
@@ -572,7 +578,7 @@
     \patchcmd\close@pdflink
       {\pdfendlink}
       {\pdfendlink
-        \ccaAddLastLink\ccaStructEnd{Link}}
+       \ccaAddLastLink\ccaStructEnd{Link}}
       {}{\cca@patch@error\close@pdflink}
 %    \end{macrocode}
 % For internal references, we patch the tagging into the

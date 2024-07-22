@@ -28,18 +28,6 @@
   \ifarticle\ccInherit{Components}{article-meta}\fi
   \ccDeclareType{Components}{%
     \cct@simple@comps
-%    \end{macrocode}
-% The following macro provides some meta data Components defined in
-% the \lstinline{coco-meta} module. They are:
-% \begin{itemize}
-% \item \lstinline{Abstract} and \lstinline{AbstractTitle},
-% \item \lstinline{Keywords} and \lstinline{KeywordsTitle},
-% \item \lstinline{DOI} and \lstinline{DOITitle}, and
-% \item \lstinline{TitleEn} and \lstinline{TitleEnTitle}, intended for
-%   foreign language publications where the title is translated into
-%   English.
-% \end{itemize}
-%    \begin{macrocode}
     \cct@fundings@comp
     \cct@role@handlers{author}{Author}%
     \cct@declare@role{editor}{Editor}%
@@ -191,8 +179,9 @@
       {\protected@edef\cct@cur@data{\directlua{tex.print(cocotex.ally.meta.##2)}}%
        \ifx\cct@cur@data\@empty
          \protected@edef\cct@cur@data{##3}%
-         \message{^^J===>##2: Splitting ##3 with \unexpanded{##5}.}
-         \edef\x{\noexpand\cct@split@pdf@meta{\noexpand##4}{##5}}\x%
+         \ifx\cct@cur@data\@empty\else
+           \edef\x{\noexpand\cct@split@pdf@meta{\noexpand##4}{##5}}\x%
+         \fi
        \else
          \cct@split@pdf@meta{##4}{\and}%
        \fi}
@@ -302,8 +291,8 @@
 %   creator and producer.
 %    \begin{macrocode}
 \def\cct@title@process@bkc{%
-  \cct@write@pdf@meta@string{pdfcreator}{Creator}{\ccIfComp{PDFCreator}{\ccUseComp{PDFCreator}}{}}%
-  \cct@write@pdf@meta@string{pdfproducer}{Producer}{\ccIfComp{PDFProducer}{\ccUseComp{PDFProducer}}{\ccUseComp{Publisher}\ccWhenComp{PubPlace}{, \ccUseComp{PubPlace}}}}%
+  \cct@write@pdf@meta@string{pdfcreator}{Creator}{\ccWhenComp{PDFCreator}{\ccUseComp{PDFCreator}}}%
+  \cct@write@pdf@meta@string{pdfproducer}{Producer}{\ccWhenComp{PDFProducer}{\ccUseComp{PDFProducer}}}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -311,7 +300,7 @@
 %   keywords.
 %    \begin{macrocode}
 \def\cct@title@process@bkk{%
-  \cct@write@pdf@meta@list{pdfkeywords}{Keywords}{\ccUseComp{Keywords}}{\ccaAddKeyword}{\ccUseProperty{keywords-sep}}%
+  \cct@write@pdf@meta@list{pdfkeywords}{Keywords}{\ccWhenComp{Keywords}{\ccUseComp{Keywords}}}{\ccaAddKeyword}{\ccUseProperty{keywords-sep}}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -693,13 +682,13 @@ from the Components given in the Meta Container.}}}
 %   created. Defaults to ``le-tex xerif with CoCoTeX v({\CoCoTeX}
 %   version)''.
 %    \begin{macrocode}
-  \ccDeclareGlobalComponent[le-tex xerif with CoCoTeX v.\fileversion]{PDFCreator}%
+  \ccDeclareGlobalComponent{PDFCreator}%
 %    \end{macrocode}
 % \end{Component}
 % \begin{Component}{PDFProducer} is the PDF producer (usually the
 %   authors/editors), may be overridden by the values in the XMP file.
 %    \begin{macrocode}
-  \ccDeclareGlobalComponent{PDFProducer}%
+  \ccDeclareGlobalComponent[le-tex xerif with CoCoTeX v.\fileversion]{PDFProducer}%
 %    \end{macrocode}
 % \end{Component}
 % \begin{Component}{Year} the year of the publication
@@ -1174,7 +1163,7 @@ from the Components given in the Meta Container.}}}
     \ccUseLabeledComp{Published}%
     \ccUseLabeledComp{Copyright}%
     \ccUseLabeledComp{COIStatement}%
-    \ccUseLabeledComp{Keywords}
+    \ccUseLabeledComp{Keywords}%
   }%
   \ccSetProperty{licence}{%
     \ccIfComp{LicenceLogo}{\includegraphics{\ccUseComp{LicenceLogo}}\par}{}%

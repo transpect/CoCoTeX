@@ -368,7 +368,7 @@
 % which is then valid for all Component declarations by locally
 % re-defining \UsageMacro{\cc@counted@comp@scheme}.
 %    \begin{macrocode}
-    \def\cc@counted@comp@scheme##1{##1-\the\ccSubFloatCnt}%
+    \def\cc@counted@comp@scheme#1{#1-\the\ccSubFloatCnt}%
 %    \end{macrocode}
 % \begin{Component}{Content} is the main content holder of a float.
 %    \begin{macrocode}
@@ -1744,7 +1744,7 @@
 %    \begin{macrocode}
 \ccDeclareContainer{Graphic}{%
   \ccDeclareType{Components}{%
-    \def\cc@counted@comp@scheme##1{##1-\the\ccSubFloatCnt}%
+    \def\cc@counted@comp@scheme#1{#1-\the\ccSubFloatCnt}%
 %    \end{macrocode}
 % \begin{Component}{Fig} holds the includegraphics with the path to
 %   and the options for the actual image file.

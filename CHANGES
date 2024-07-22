@@ -33,8 +33,7 @@
     Dictionary when ltpdfa is used.
   - FIX: XMP meta data now take preference over Meta container
     Components if the XMP does exist.
-  - FIX: pdfcreator and pdfproducer metadata were used the wrong way
-    around.
+  - FIX: pdfcreator and pdfproducer metadata were used the wrong way.
 - coco-headings.dtx
   - added hook for capturing running titles
 - coco-accessibility.dtx
@@ -42,5 +41,7 @@
     into the generated XMP files, instead of one single string.
   - FIX: prevented hyperref from writing redundant and empty
     DocumentInfo fields
+  - Links now have /Contents attribute to make VeraPDF's PDF/UA1 check
+    happy
 
 0.4.9 (INITIAL STATUS)
