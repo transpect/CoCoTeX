@@ -70,6 +70,15 @@
 % \item[\#4] argument(s) passed to \lstinline|\babelfont{sf}|
 % \end{description}
 %    \begin{macrocode}
+
+% A font and a text command for using plain, black emojis.
+%    \begin{macrocode}
+\newfontfamily\emojifont{NotoEmoji-Regular.ttf}%
+[BoldFont = NotoEmoji-Bold.ttf,%
+ Path = ./fonts/Noto/Emoji/]
+\DeclareTextFontCommand\textemoji{\emojifont}
+%    \end{macrocode}
+
 \def\tpDeclareBabelFont{\@ifnextchar[\tp@declare@babel@font{\tp@declare@babel@font[]}}%]
 \def\tp@declare@babel@font[#1]#2#3#4{%
   \expandafter\ifx\csname use@script@#2\endcsname\@empty
