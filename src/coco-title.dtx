@@ -678,15 +678,16 @@ from the Components given in the Meta Container.}}}
   \ccDeclareGlobalComponent[\jobname]{XmpFile}%
 %    \end{macrocode}
 % \end{Component}
-% \begin{Component}{PDFCreator} is the tool with which the PDF was
-%   created. Defaults to ``le-tex xerif with CoCoTeX v({\CoCoTeX}
-%   version)''.
+% \begin{Component}{PDFCreator} is the tool with which the original
+%   document was created (for \textit{xerif}, this is usually M\$
+%   Word).
 %    \begin{macrocode}
   \ccDeclareGlobalComponent{PDFCreator}%
 %    \end{macrocode}
 % \end{Component}
-% \begin{Component}{PDFProducer} is the PDF producer (usually the
-%   authors/editors), may be overridden by the values in the XMP file.
+% \begin{Component}{PDFProducer} is the tool with which the PDF was
+%   created.  Defaults to ``le-tex xerif with CoCoTeX v({\CoCoTeX}
+%   version)''
 %    \begin{macrocode}
   \ccDeclareGlobalComponent[le-tex xerif with CoCoTeX v.\fileversion]{PDFProducer}%
 %    \end{macrocode}

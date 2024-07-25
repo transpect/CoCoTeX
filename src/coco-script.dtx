@@ -40,13 +40,15 @@
   \def\ccs@callback#1{\expandafter\global\expandafter\let\csname use@script@#1\endcsname\@empty}%
   \expandafter\parse@script\usescript,,\relax
 \fi
-
-\message{^^J  [coco-script Fonts loaded: \meaning\usescript]^^J}
-
+\ccPackageInfo{Script}{Info}{Fonts loaded: \strip@prefix\meaning\usescript}
 %    \end{macrocode}
-% \section{Default fallback font}
-% The default fall backfont is the NotoSans Font Family
 %
+%
+% \section{Fallback fonts}
+%
+% \subsection{Default Fallback Font: Noto}
+%
+% The default fall backfont is the NotoSans Font Family
 %    \begin{macrocode}
 \newfontfamily\fallbackfont{NotoSerif-Regular.ttf}%
 [BoldFont = NotoSerif-Bold.ttf,%
@@ -63,7 +65,36 @@
 \DeclareTextFontCommand\textfallback{\fallbackfont}
 \DeclareTextFontCommand\textsffallback{\sffallbackfont}
 %    \end{macrocode}
+%
+%
+% \subsection{Emojis}
+%
+% A font and a text command for using plain, black emojis.
+%    \begin{macrocode}
+\newfontfamily\emojifont{NotoEmoji-Regular.ttf}%
+[BoldFont = NotoEmoji-Bold.ttf,%
+ Path = ./fonts/Noto/Emoji/]
+\DeclareTextFontCommand\textemoji{\emojifont}
+%    \end{macrocode}
+%
+%
+% \subsection{Support for medieval scripts and special characters}
+%
+% \textbf{Warning:} Junicode provides supports only for the
+% \lstinline{rm} font family!
+%    \begin{macrocode}
+\babelfont{mdv}[%
+Path=fonts/Junicode/,%
+ItalicFont = Junicode-Italic.ttf,%
+BoldFont = Junicode-Bold.ttf,%
+BoldItalicFont = Junicode-BoldItalic.ttf,%
+]{Junicode.ttf}
+\def\mdvfont#1{{\mdvfamily#1}}
+%    \end{macrocode}
+%
+%
 % \section{Generic Fonts Declaration Mechanism}
+%
 % \begin{description}
 % \item[\#1] Options passed to \lstinline|\babelprovide|
 % \item[\#2] language
@@ -309,21 +340,6 @@ derivate = no
     WordSpace = 1.25%
     ]{NotoSansSyriac-Regular.ttf}%
   }
-
-%    \end{macrocode}
-%
-% \subsection{Support for medieval scripts and special characters}
-% only \lstinline{rm}!
-%    \begin{macrocode}
-\babelfont{mdv}[%
-Path=fonts/Junicode/,%
-ItalicFont = Junicode-Italic.ttf,%
-BoldFont = Junicode-Bold.ttf,%
-BoldItalicFont = Junicode-BoldItalic.ttf,%
-]{Junicode.ttf}
-
-\def\mdvfont#1{{\mdvfamily#1}}
-
 %    \end{macrocode}
 %    \begin{macrocode}[numbers=none,gobble=1]
 %</script>
