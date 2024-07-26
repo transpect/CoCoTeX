@@ -238,7 +238,8 @@
 \newif\if@ccf@break@capt   \@ccf@break@captfalse
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{}
+% \begin{macro}{\if@ccf@sameheight} determins if subfloats should be
+%     scaled such that they are all the same height.
 %    \begin{macrocode}
 \newif\if@ccf@sameheight   \@ccf@sameheighttrue
 %    \end{macrocode}
@@ -1746,7 +1747,7 @@
   \ccDeclareType{Components}{%
     \def\cc@counted@comp@scheme#1{#1-\the\ccSubFloatCnt}%
 %    \end{macrocode}
-% \begin{Component}{Fig} holds the includegraphics with the path to
+% \begin{Component}{Fig} holds the \lstinline{includegraphics} with the path to
 %   and the options for the actual image file.
 %    \begin{macrocode}
     \ccfMakeComp{Fig}%

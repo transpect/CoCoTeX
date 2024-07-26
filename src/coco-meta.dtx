@@ -39,15 +39,32 @@
 %
 % \subsection{Generic Blocks}
 %
-% \begin{macro}{\ccm@generic@comp} is used to define a generic
-%   meta data block.It provides two Components for each instance, one
-%   for the block's Heading and one for its Content.
+% \begin{macro}{\ccm@generic@comp} is used to define a generic meta
+%   data block. It provides two Components for each instance, one for
+%   the block's Heading or Label, and one for its Content.
 %    \begin{macrocode}
 \def\ccm@generic@comp{%
+%    \end{macrocode}
+% \begin{Component}{CC} is the formatted list of all GenericMeta
+%   components.
+%    \begin{macrocode}
   \ccDeclareComponent{GenericMetaBlock}{\expandafter\global}{}%
+%    \end{macrocode}
+% \end{Component}
+%    \begin{macrocode}
   \ccDeclareComponentGroup{GenericMeta}{%
+%    \end{macrocode}
+% \begin{Component}{Heading}is the label of a generic meta datum
+%    \begin{macrocode}
     \ccDeclareCountedComponent{Heading}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{Heading}is the content of a generic meta datum
+%    \begin{macrocode}
     \ccDeclareCountedComponent{Content}%
+%    \end{macrocode}
+% \end{Component}
+%    \begin{macrocode}
   }}
 %    \end{macrocode}
 % \end{macro}
@@ -61,79 +78,33 @@
 }}
 %    \end{macrocode}
 % \end{macro}
+%
+%
 % \subsection{Contributor Roles}
 %
-% Contributors are counted sub-containers that represent the meta-data
-% of people that share a role in contributing content to a document.
+% Contributors are Counted Containers that represent the meta data of
+% people that share a role in contributing content to a document.
 % Examples for such roles are an article{\slash}chapter{\slash}book's
 % authors, or a collection{\slash}series' editors.
 %
-% \begin{macro}{\ccDeclareRole} is used to declare the Components that
-%   belong to each member of a contributor role. \#2 is the name of
-%   the role, optional \#1 is the internal name of the Role's
-%   formatting Property. If omitted, it is the same as \#2.
 %
-%   The output of all members of a role is controlled by a Component
-%   called ``\lstinline{<role>NameList}'' that is formatted according
-%   to the \lstinline{<role>-format} Property. For reasons of naming
-%   conventions, the role names for a Component and its respective
-%   Property do not necessarily need to be identical.
-%    \begin{macrocode}
-\def\ccDeclareRole{\cc@opt@second\cc@declare@role}%
-\def\cc@declare@role[#1]#2{%
-  \ccDeclareComponentGroup[%
-    {\ccDeclareAttributeHandler*{corresp}{\ccSetProperty{is-corresp}{true}}}%
-  ]{#2}{%
-    \ccDeclareCountedComponent{FullName}%
-    \ccDeclareCountedComponent{CiteName}%
-    \ccDeclareCountedComponent{ShortCiteName}%
-    \ccDeclareCountedComponent{PDFInfoName}%
-    \ccDeclareCountedComponent{Initial}%
-    \ccDeclareCountedComponent{LastName}%
-    \ccDeclareCountedComponent{FirstName}%
-    \ccDeclareCountedComponent{MidName}%
-    \ccDeclareCountedComponent{Honorific}%
-    \ccDeclareCountedComponent{Lineage}%
-    \ccDeclareCountedComponent{ORCID}%
-    \ccDeclareCountedComponent{AffilRef}% for references to the Affil Group
-    \ccDeclareCountedComponent{Affiliation}% for affiliations  as direct Author meta data
-    \ccDeclareCountedComponent{Email}%
-    \ccDeclareCountedComponent{CorrespondenceAs}%
-  }%
-  \ccDeclareGroupHandler{#2}{%
-    \ccUnlessComp{FullName}{\ccComponent{FullName}{\ccUseProperty{#1-full-name-format}}}%
-    \ccUnlessComp{Initial}{\ccComponent{Initial}{\ccUseProperty{initials-format}}}%
-    \ccUnlessComp{CiteName}{\ccComponent{CiteName}{\ccUseProperty{#1-cite-name-format}}}%
-    \ccUnlessComp{ShortCiteName}{\ccComponent{ShortCiteName}{\ccUseProperty{#1-short-cite-name-format}}}%
-    \ccUnlessComp{PDFInfoName}{\ccComponent{PDFInfoName}{\ccUseProperty{#1-pdfinfo-name-format}}}%
-    \ccUnlessComp{CorrespondenceAs}{\ccComponent{CorrespondenceAs}{\ccUseProperty{#1-correspondence-as-format}}}%
-    \ccWhenComp{AffilRef}{\ccWhenComp{Affiliation}{%
-        \ccPackageError{Meta}{Ambiguity}
-          {You cannot use both Containers AffilRef and Affiliation in the same `\ccPrefix#2' Sub-Container}
-          {At least one `\ccPrefix#2' Sub-Container contains both AffilRef and Affiliation. This is not allowed. Please decide for one affiliation strategy: Either two lists with cross-references, or affiliations directly as an author's meta-data.}}}%
-  }%
-  \ccDeclareRoleBlock{#2}{NameList}{#1-list-print-format}%
-  \ccDeclareRoleBlock{#2}{CitationList}{#1-list-cite-format}%
-  \ccDeclareRoleBlock{#2}{ShortCitationList}{#1-list-short-cite-format}%
-  \ccDeclareRoleBlock[apply]{#2}{PDFInfo}{#1-list-pdfinfo-format}%
-  \ccDeclareRoleBlock{#2}{Correspondence}{#1-list-correspondence-format}%
-}
-%    \end{macrocode}
-% \end{macro}
-% \begin{macro}{\ccAddToRole} appends another Component declaration block \#2 to a pre-defined Role \#1.
-%    \begin{macrocode}
-\def\ccAddToRole#1#2{\csgappto{@#1@hook}{#2}}
-%    \end{macrocode}
-% \end{macro}
-% \begin{macro}{\ccDeclareRoleBlock} is used to create a new output
-%   container (named \lstinline{\ccPrefix#2#3}) for a given Role \#2. A Role
-%   Block is a Component of the parent Container which contains
-%   certain Components of all members of the Role within its parent
-%   Container. Format and selection of the utilised Components are
-%   specified via the Property given in \#4. The optional argument \#1
-%   tells the evaluator in the Container's \lstinline{end} macro how
-%   the collector is to be composed. Valid values are
-%   \lstinline{compose} (default) or \lstinline{apply}.
+% \subsection{Declaring Contributor Role Blocks}
+%
+% \begin{macro}{\ccDeclareRoleBlock} is used to create a new
+%   Collection Container (named \lstinline{\ccPrefix#2#3}) for a Role
+%   with the name \InlineArg{2}. A Role Block\index{Role Block} is a
+%   Component of the Parent Container, which contains a formatted list
+%   of certain Components of all members of the Role. Format and
+%   selection of the utilised Components are specified via the
+%   Property given in \InlineArg{4}. Role Blocks can also be directly
+%   used inside the Parent Container as Overrides.
+%
+%   The optional argument \InlineArg*{1} tells the evaluator in the
+%   Parent Container's \lstinline{end} macro how the collector is to
+%   be composed. Valid values are \lstinline{compose}
+%   (\textit{default}), which uses \UsageMacro{\ccComposeCollection}
+%   to compose the Collection Component, or \lstinline{apply}, which
+%   uses \UsageMacro{\ccApplyCollection}, instead.
 %    \begin{macrocode}
 \def\ccDeclareRoleBlock{\@ifnextchar[\cc@declare@role@block{\cc@declare@role@block[compose]}}%]
 \def\cc@declare@role@block[#1]#2#3#4{%
@@ -148,17 +119,19 @@
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccm@role@eval} creates the name lists for the
-%   role. \#1 is the name of the role.
+%   role. \InlineArg{1} is the name of the role.
 %    \begin{macrocode}
 \def\ccm@role@eval#1{\csname @ccm@role@eval@\cc@cur@cont @#1\endcsname}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccm@eval@role} \#1 is the name of the macro
-%   used to compose the Collection (either
-%   \lstinline{\ccComposeCollection}, or
-%   \lstinline{\ccApplyCollection}), \#2 is the name of the role and
-%   \#3 is the name of the list. The access Component is
-%   \lstinline{#2#3}, i.e., both argumets together.
+% \begin{macro}{\ccm@eval@role}
+%   \begin{ArgList}
+%   \item[1] is the name of the macro used to compose the Collection (either \lstinline{\ccComposeCollection}, or \lstinline{\ccApplyCollection})
+%   \item[2] is the name of the role
+%   \item[3] is the name of the list.
+% \end{ArgList}
+% The access Component is \lstinline{\ccPrefix #2#3}, i.e., the prefix
+% and both argumets together.
 %    \begin{macrocode}
 \def\ccm@eval@role#1#2#3{%
 %    \end{macrocode}
@@ -201,14 +174,219 @@
 %    \end{macrocode}
 % \end{macro}
 %
+% \subsubsection{Declaring Contributor Roles}
+%
+% \begin{macro}{\ccDeclareRole} is used to declare the Components that
+%   belong to each member of a contributor role.
+%   \begin{ArgList}
+%   \item*[1] is the internal name of the Role's formatting
+%     Property. If omitted, it is the same as \InlineArg{2}
+%   \item[2] is the name of the role
+%   \end{ArgList}
+%   The output of all members of a role is controlled by a Component
+%   called “\lstinline{<role>NameList}” that is formatted according to
+%   the \lstinline{<role>-format} Property. For reasons of naming
+%   conventions, the role names for a Component and its respective
+%   Property do not necessarily need to be identical.
+%    \begin{macrocode}
+\def\ccDeclareRole{\cc@opt@second\cc@declare@role}%
+\def\cc@declare@role[#1]#2{%
+  \ccDeclareComponentGroup[%
+    {\ccDeclareAttributeHandler*{corresp}{\ccSetProperty{is-corresp}{true}}}%
+  ]{#2}{%
+%    \end{macrocode}
+%
+%
+% \paragraph{Contributor Role Components}
+%
+% \begin{Component}[OR]{FullName} is the full name of the Role
+%   member. If omitted, it is calculated by the
+%   \UsageProp{role-full-name-format} Property.
+%    \begin{macrocode}
+    \ccDeclareCountedComponent{FullName}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}[OR]{CiteName} is the Full Role member name that is
+%   used for citation advices.  If omitted, it is calculated
+%   by the \UsageProp{role-cite-name-format} Property.
+%    \begin{macrocode}
+    \ccDeclareCountedComponent{CiteName}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}[OR]{ShortCiteName} is a shortened version of the
+%   \UsageComponent{CiteName} Component. If omitted, it is calculated
+%   by the \UsageProp{role-short-cite-name-format} Property.
+%    \begin{macrocode}
+    \ccDeclareCountedComponent{ShortCiteName}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}[OR]{PDFInfoName} is the version of the Role member
+%   name that is used in the PDF Info dictionary.  If omitted, it is calculated
+%   by the \UsageProp{role-pdfinfo-name-format} Property.
+%    \begin{macrocode}
+    \ccDeclareCountedComponent{PDFInfoName}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}[OR]{Initial} holds the initials of the Role
+%   member. If omitted, the initials are attempted to be calculated
+%   from the \UsageComponent{FirstName} and \UsageComponent{MidName}
+%   Components via the \UsageProp{initials-format} Property.
+%    \begin{macrocode}
+    \ccDeclareCountedComponent{Initial}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{LastName} is the surname of the Role member.
+%    \begin{macrocode}
+    \ccDeclareCountedComponent{LastName}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{FirstName} is the first name of the Role member.
+%    \begin{macrocode}
+    \ccDeclareCountedComponent{FirstName}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{MidName} is/are the middle name(s) of the Role
+%   member.
+%    \begin{macrocode}
+    \ccDeclareCountedComponent{MidName}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{Honorific} is a other honorific title for the Role
+%   member.
+%    \begin{macrocode}
+    \ccDeclareCountedComponent{Honorific}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{Lineage} is the name suffix, typically something
+%   like “jr.” or “the 3rd”.
+%    \begin{macrocode}
+    \ccDeclareCountedComponent{Lineage}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{ORCID} is the ORCID (Open Researcher and
+%   Contributor ID) of the Role member. Depending on the publisher
+%   style, this can be a full URL or just the identifier.
+%    \begin{macrocode}
+    \ccDeclareCountedComponent{ORCID}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{AffilRef} is the ID of an entry in the Affil Component Group.
+%    \begin{macrocode}
+    \ccDeclareCountedComponent{AffilRef}% for references to the Affil Group
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{Affiliation} is the Affiliation of the Role
+%   member.
+%
+%   \textbf{Note} that only one \UsageComponent{AffilRef} or
+%   \UsageComponent{Affiliation} should be used for any Role member,
+%   not both at the same time.
+%    \begin{macrocode}
+    \ccDeclareCountedComponent{Affiliation}% for affiliations  as direct Author meta data
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{Email} is the email/contact address of the Role
+%   member.
+%    \begin{macrocode}
+    \ccDeclareCountedComponent{Email}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}[OR]{CorrespondenceAs} is how the Role member is to
+%   be addressed when she is the corresponding Role member. If
+%   omitted, it is calculated by the
+%   \UsageProp{role-correspondence-as-format} Property.
+%    \begin{macrocode}
+    \ccDeclareCountedComponent{CorrespondenceAs}%
+%    \end{macrocode}
+% \end{Component}
+%
+%
+% \subsubsection{Contributor Role Group Handlers}
+%
+% The Group Handlers fill the previously defined Override Components
+% when they are not explicitly given inside the Component Group.
+%    \begin{macrocode}
+  }%
+  \ccDeclareGroupHandler{#2}{%
+    \ccUnlessComp{FullName}{\ccComponent{FullName}{\ccUseProperty{#1-full-name-format}}}%
+    \ccUnlessComp{Initial}{\ccComponent{Initial}{\ccUseProperty{initials-format}}}%
+    \ccUnlessComp{CiteName}{\ccComponent{CiteName}{\ccUseProperty{#1-cite-name-format}}}%
+    \ccUnlessComp{ShortCiteName}{\ccComponent{ShortCiteName}{\ccUseProperty{#1-short-cite-name-format}}}%
+    \ccUnlessComp{PDFInfoName}{\ccComponent{PDFInfoName}{\ccUseProperty{#1-pdfinfo-name-format}}}%
+    \ccUnlessComp{CorrespondenceAs}{\ccComponent{CorrespondenceAs}{\ccUseProperty{#1-correspondence-as-format}}}%
+    \ccWhenComp{AffilRef}{\ccWhenComp{Affiliation}{%
+        \ccPackageError{Meta}{Ambiguity}
+          {You cannot use both Containers AffilRef and Affiliation in the same `\ccPrefix#2' Sub-Container}
+          {At least one `\ccPrefix#2' Sub-Container contains both AffilRef and Affiliation. This is not allowed. Please decide for one affiliation strategy: Either two lists with cross-references, or affiliations directly as an author's meta-data.}}}%
+  }%
+%    \end{macrocode}
+%
+%
+% \paragraph{Declaring the Contributor Role's Collection Components}
+%
+% Recall that the Collection Component's name are all prefixed by the
+% Role's name, e.g., the actual Collection Component
+% \UsageComponent{NameList} of a Role named “Author” is accessed by
+% calling the \UsageComponent{AuthorNameList} Component.
+%
+% \begin{Component}[CL]{NameList} is the formatted list of all Role
+%   member's \UsageComponent{FullName} Components according to the
+%   \UsageProp{role-block-print-format} Property.\DescribeComp{AuthorNameList}
+%    \begin{macrocode}
+  \ccDeclareRoleBlock{#2}{NameList}{#1-list-print-format}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}[CL]{CitationList} is the formatted list of all
+%   Role member's \UsageComponent{CiteName} according to the
+%   \UsageProp{role-block-cite-format} Property.\DescribeComp{AuthorCitationList}
+%    \begin{macrocode}
+  \ccDeclareRoleBlock{#2}{CitationList}{#1-list-cite-format}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}[CL]{ShortCitationList} is the formatted list of
+%   all Role member's \UsageComponent{ShortCiteName} Component
+%   \UsageProp{role-block-short-cite-format} Property.\DescribeComp{AuthorShortCitationList}
+%    \begin{macrocode}
+  \ccDeclareRoleBlock{#2}{ShortCitationList}{#1-list-short-cite-format}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}[CL]{PDFInfo} is the formatted string that is sent
+%   to the PDF's Info dictionary. Its format is determined by the
+%   \UsageProp{role-block-pdfinfo-format} Property.\DescribeComp{AuthorPDFInfo}
+%    \begin{macrocode}
+  \ccDeclareRoleBlock[apply]{#2}{PDFInfo}{#1-list-pdfinfo-format}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}[CL]{Correspondence} is the list of all Role
+%   member's \UsageComponent{CorrespondanceAs} Components according to
+%   the \UsageProp{role-block-correspondence-format} Property.\DescribeComp{AuthorCorrespondence}
+%    \begin{macrocode}
+  \ccDeclareRoleBlock{#2}{Correspondence}{#1-list-correspondence-format}%
+%    \end{macrocode}
+% \end{Component}
+%    \begin{macrocode}
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccAddToRole} appends another Component declaration
+%   block \InlineArg{2} to a pre-defined Role
+%   \InlineArg{1}. \TODO{make into LaTeX kernel hook}
+%    \begin{macrocode}
+\def\ccAddToRole#1#2{\csgappto{@#1@hook}{#2}}
+%    \end{macrocode}
+% \end{macro}
+%
 %
 % \section{Labeled Components}
 %
+% Labeled Components are two Components, one for the Content and one
+% for the Label.
+%
 % \begin{macro}{\ccDeclareLabeledComp} declares two Components: one
-%   named \lstinline{\ccPrefix #2} for the value and another
-%   one named \lstinline{\ccPrefix #2Label} for its
-%   corresponding label. \#3 is used for property overrides. The
-%   optional Argument \#1 allows to set a default value for the Label.
+%   named \lstinline{\ccPrefix #2} for the value, and another one
+%   named \lstinline{\ccPrefix #2Label} for its corresponding
+%   label. \#3 is used for Property overrides. The optional Argument
+%   \#1 allows to set a default value for the Label.
 %    \begin{macrocode}
 \def\ccDeclareLabeledComp{\cc@opt@empty\cc@declare@labeled@comp}
 \def\cc@declare@labeled@comp[#1]#2#3{%
@@ -220,24 +398,28 @@
   \fi\ignorespaces}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccUseLabeledComp} declares two Components: one named
-%   \lstinline{\ccPrefix#1} for the value and another one
-%   named \lstinline{\ccPrefix#1Label} for its
-%   corresponding label. An optional Argument allows to set a default
-%   value for the Label.
+% \begin{macro}{\ccUseLabeledComp} returns the Labeled Component with
+%   its label. The starred version omits automatic Tagging if the
+%   \lstinline{coco-accessibility} module is active.
 %    \begin{macrocode}
 \def\ccUseLabeledComp{\@ifstar{\global\let\ccm@no@tag\relax\cc@use@labeled@comp}{\cc@use@labeled@comp}}
 \def\cc@use@labeled@comp#1{%
   \ccWhenComp{#1}{%
 %    \end{macrocode}
 %
-% \begin{macro}{\ccCurInfix} stores the currently active property
-%   infix for the Labeled Component
+% \begin{macro}{\ccCurInfix} stores the currently active Property
+%   infix for the Labeled Component. Is is used to call the right
+%   format Property for the Labeled Component, which defaults to
+%   \UsageProp{labeled-meta-[ccCurInfix]-format}. If this Property
+%   doesn't exists, formatting falls back to
+%   \UsageProp{labeled-meta-format}.
 %    \begin{macrocode}
     \letcs\ccCurInfix{labeled-meta-property-infix-\cc@cur@cont-#1}%
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccCurComp} stores the currently active Component name
+% \begin{macro}{\ccCurComp} stores the currently active name of the
+%   Labeled Component, which is used in the generic
+%   \UsageProp{labeled-meta-format} Property.
 %    \begin{macrocode}
     \def\ccCurComp{#1}%
 %    \end{macrocode}
@@ -275,38 +457,96 @@
 % \begin{macro}{\ccm@declare@comp} defines some commonly used meta Components
 %    \begin{macrocode}
 \def\ccm@declare@comp{%
-    \ccDeclareComponent{Copyright}{\expandafter\global}{}% Copyright text
-    \ccDeclareComponent{DOI}{\expandafter\global}{}%         DOI
 %    \end{macrocode}
-% \DescribeComponent{LicenceLogo} is a component for a license
-% logo. This usually contains an \lstinline{\includegraphics}.
+% \begin{Component}{Copyright} holds the Copyright notice.
+%    \begin{macrocode}
+    \ccDeclareComponent{Copyright}{\expandafter\global}{}% Copyright text
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{LicenceLogo} is a component for a license
+%   logo. This usually contains an \lstinline{\includegraphics}.
 %    \begin{macrocode}
     \ccDeclareComponent{LicenceLogo}%
 %    \end{macrocode}
-% \DescribeComponent{LicenceName} is the name of the license.
+% \end{Component}
+% \begin{Component}{LicenceName} is the name of the license.
 %    \begin{macrocode}
     \ccDeclareComponent{LicenceName}%
+%    \end{macrocode}
+% \end{Component}
+%    \begin{macrocode}
 }%
 %    \end{macrocode}
 % \end{macro}
-% \DescribeContainer{article-meta} is an abstract container that holds
-% meta data specific to journal articles.
+% \DescribeContainer{article-meta} is an abstract Container that holds
+% meta data specific to a journal's Article.
 %    \begin{macrocode}
   %% for single articles
 \ccDeclareContainer{article-meta}{%
   \ccDeclareType{Components}{%
-    \ccDeclareGlobalComponent{StartPage}                     % Start page of a single article
-    \ccDeclareGlobalComponent{EndPage}                       % End page of a single article
-    \ccDeclareLabeledComp[Cite as]{CiteAs}{cite-as}          % As what the article should be cited
-    \ccDeclareLabeledComp[Submitted]{Submitted}{sumbitted}   % Date the article was submitted
-    \ccDeclareLabeledComp[Received]{Received}{received}      % Date the article was recieved
-    \ccDeclareLabeledComp[Revised]{Revised}{revised}         % Date the article was revised
-    \ccDeclareLabeledComp[Reviewed]{Reviewed}{reviewed}      % Date the article was reviewed
-    \ccDeclareLabeledComp[Accepted]{Accepted}{accepted}      % Date the article was accepted
-    \ccDeclareLabeledComp[Published]{Published}{published}   % Date the article was published
-    \ccDeclareLabeledComp[Conflict of Interest]{COIStatement}{coi-statement}% Conflict of Interest statement
-  }%
-}
+%    \end{macrocode}
+% \begin{Component}{StartPage} is the number of the starting page of
+%   an article
+%    \begin{macrocode}
+    \ccDeclareGlobalComponent{StartPage}
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{EndPage} is the number of the ending page of an
+%   article
+%    \begin{macrocode}
+    \ccDeclareGlobalComponent{EndPage}
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{CiteAs} holds a string as to how the article
+%   should be cited in other publications.
+%    \begin{macrocode}
+    \ccDeclareLabeledComp[Cite as]{CiteAs}{cite-as}
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{Submitted} holds the date when the article was
+%   submitted to the journal.
+%    \begin{macrocode}
+    \ccDeclareLabeledComp[Submitted]{Submitted}{sumbitted}
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{Received} holds the date when the article was
+%   received by the journal
+%    \begin{macrocode}
+    \ccDeclareLabeledComp[Received]{Received}{received}
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{Revised} holds the date when the article was
+%   revised by its author(s)
+%    \begin{macrocode}
+    \ccDeclareLabeledComp[Revised]{Revised}{revised}
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{Reviewed} holds the date when the article was
+%   reviewed by the editors or reviewers.
+%    \begin{macrocode}
+    \ccDeclareLabeledComp[Reviewed]{Reviewed}{reviewed}
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{Accepted} holds the date when the article was
+%   accepted for publication by the journal.
+%    \begin{macrocode}
+    \ccDeclareLabeledComp[Accepted]{Accepted}{accepted}
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{Published} holds the date when the article is due
+%   to be published.
+%    \begin{macrocode}
+    \ccDeclareLabeledComp[Published]{Published}{published}
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{COIStatement} holds the author's Conflict of
+%   Interest statement
+%    \begin{macrocode}
+    \ccDeclareLabeledComp[Conflict of Interest]{COIStatement}{coi-statement}
+%    \end{macrocode}
+% \end{Component}
+%    \begin{macrocode}
+  }}
 %    \end{macrocode}
 % 
 % \begin{macro}{\ccm@extended@common@macros}
@@ -315,10 +555,34 @@
 %   also loaded by article title pages.
 %    \begin{macrocode}
 \def\ccm@extended@common@macros{%
+%    \end{macrocode}
+% \begin{Component}{Abstract} holds the contribution's abstract or
+%   content summary.
+%    \begin{macrocode}
   \ccDeclareLabeledComp[Abstract]{Abstract}{abstract}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{Keywords} holds a list of keywords related to the
+%   contribution.
+%    \begin{macrocode}
   \ccDeclareLabeledComp[Keywords]{Keywords}{keyword}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{DOI} holds the Digital Object
+%   Identifier. Depending on the Publisher style, this may be the full
+%   URI, or just the identifier.
+%    \begin{macrocode}
   \ccDeclareLabeledComp{DOI}{doi}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{TitleEn} holds the English title of the
+%   publication when the contribution's main language is \textit{not}
+%   english.
+%    \begin{macrocode}
   \ccDeclareLabeledComp{TitleEn}{title-en}%
+%    \end{macrocode}
+% \end{Component}
+%    \begin{macrocode}
   \ccm@generic@comp
 }
 %    \end{macrocode}
@@ -331,14 +595,63 @@
 %   user-level macros for the affiliations.
 %    \begin{macrocode}
 \def\ccm@declare@affils{%
+%    \end{macrocode}
+% \begin{Component}[CC]{AffilBlock} is the Collection Component for
+%   the contribition's Affiliations list. \textbf{Note} that the
+%   \UsageComponent{AffilBlock} itself is not generated in this
+%   module. The two modules \lstinline{coco-headings} and
+%   \lstinline{coco-title} that both depend on the
+%   \lstinline{coco-meta} module have their own mechanisms to build
+%   their respective \UsageComponent{AffilBlock} Collection
+%   Components.
+%    \begin{macrocode}
   \ccDeclareComponent{AffilBlock}{\expandafter\global}{}%
+%    \end{macrocode}
+% \end{Component}
+%    \begin{macrocode}
   \ccDeclareComponentGroup{Affil}{%
+%    \end{macrocode}
+% \begin{Component}[OR]{Affiliation} is the fully formatted
+%   Affiliation string. If omitted, the Component is built using the
+%   \UsageProp{affiliation-format} Property.
+%    \begin{macrocode}
     \ccDeclareCountedComponent{Affiliation}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{Address} is the address where the Role member is
+%   working.
+%    \begin{macrocode}
     \ccDeclareCountedComponent{Address}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{Institute} is the name of the university,
+%   department or institution where the Role member is working
+%    \begin{macrocode}
     \ccDeclareCountedComponent{Institute}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{Country} is the country where the institution is
+%   locaed in.
+%    \begin{macrocode}
     \ccDeclareCountedComponent{Country}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}{Department} is the department where the Role
+%   member is working.
+%    \begin{macrocode}
     \ccDeclareCountedComponent{Department}%
+%    \end{macrocode}
+% \end{Component}
+% \begin{Component}[OR]{AffilID} is the internal identifier that is
+%   referenced by the Role member's \UsageComponent{AffilRef}
+%   Component. If omitted, the ID is the value of an automatic counter
+%   that is incremented by one at the beginning of each Affil Group
+%   Container counter in the same Parent Container.
+%    \begin{macrocode}
     \ccDeclareCountedComponent{AffilID}%
+%    \end{macrocode}
+% \end{Component}
+%    \begin{macrocode}
   }%
   \ccDeclareGroupHandler{Affil}{%
     \ccUnlessComp{AffilID}{\ccComponentEA{AffilID}{\ccAffilCnt}}%
@@ -349,9 +662,19 @@
 % \end{macro}
 %
 %
-% Defaut Property settings for the Meta Container.
+% \section{Meta Data Properties}
+%
 %    \begin{macrocode}
-\ccAddToProperties{CommonMeta}{%
+\ccAddToType{Properties}{CommonMeta}{%
+%    \end{macrocode}
+%
+%
+% \subsection{Initials}
+%
+% \begin{Property}{initials-format}{<any>} generates an Role member's
+%   initials from the \UsageComponent{FirstName} and
+%   \UsageComponent{MidName} Components.
+%    \begin{macrocode}
   \ccSetProperty{initials-format}{%
     \expandafter\ifx\csname cc@\cc@cur@cont @\cc@cnt@grp-FirstName-\the\ccCurCount\endcsname\cc@long@empty\else
       \expandafter\ifx\csname cc@\cc@cur@cont @\cc@cnt@grp-FirstName-\the\ccCurCount\endcsname\relax\else
@@ -363,11 +686,32 @@
         \fi\fi
     \fi\fi
   }
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{initials-sep}{<any>} is the separator between two
+%   \UsageComponent{Initial}s.
+%    \begin{macrocode}
   \ccSetProperty{initials-sep}{~}
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{initials-period}{<any>} is the symbol that is
+%   inserted at the end of each \UsageComponent{Initial}.
+%    \begin{macrocode}
   \ccSetProperty{initials-period}{.}
-  %
-  %% Properties that control how the composed compoents WITHIN each item in a Role are formatted:
-  %
+%    \end{macrocode}
+% \end{Property}
+%
+%
+% \subsection{Member Role Composition Properties}
+%
+% \subsection{Overrides Within a Role Counted Component}
+%
+% The next Properties control how the Compoent Overrides within a
+% single Role Counted Component are composed.
+% \begin{Property}{role-full-name-format}{<any>} how the
+%   \UsageComponent{FullName} Component for each Role member is
+%   generated.
+%    \begin{macrocode}
   \ccSetProperty{role-full-name-format}{%
     \if\ccUseComp{Honorific}\relax
     \else
@@ -383,16 +727,69 @@
     \else
       \space\ccUseComp{Lineage}%
     \fi%
-  }% How FullName for each name is built
+  }%
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{role-cite-name-format}{<any>} how the
+%   \UsageComponent{CiteName} for each Role member is formatted.
+%    \begin{macrocode}
   \ccSetProperty{role-cite-name-format}{\ccIfComp{LastName}{\ccUseComp{LastName},~\ccUseComp{Initial}}{\ccUseComp{FullName}}}% How CiteName for each name is built
-  \ccSetProperty{role-short-cite-name-format}{\ccUseComp{LastName}}% how ShortCiteName for each name is built
-  \ccPropertyLet{role-pdfinfo-name-format}{role-cite-name-format}% How PDFInfoName for each item is built
-  \ccSetProperty{role-correspondence-as-format}{\ccUseComp{Email}}% How PDFInfoName for each item is built
-  %% Properties that control how the single items in a compoent list are formatted:
-  \ccSetProperty{role-block-print-format}{\ccUseComp{FullName}\ifnum\ccCurCount<\ccTotalCount\ccUseProperty{counted-name-sep}\fi}% How <Role>NameList for each name is build
-  \ccSetProperty{role-block-cite-format}{\ccUseComp{CiteName}\ifnum\ccCurCount<\ccTotalCount\ccUseProperty{counted-name-sep}\fi}% How each item in Component <Role>CitationList is formatted
-  \ccSetProperty{role-block-short-cite-format}{\ccUseComp{ShortCiteName}\ifnum\ccCurCount<\ccTotalCount\ccUseProperty{counted-name-sep}\fi}%  How each item in the Component <Role>ShortCitationList is formatted
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{role-short-cite-name-format}{<any>} how the
+%   \UsageComponent{ShortCiteName} Component of a Role member is
+%   formatted
+%    \begin{macrocode}
+  \ccSetProperty{role-short-cite-name-format}{\ccUseComp{LastName}}%
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{role-pdfinfo-name-format}{<any>} how the
+%   \UsageComponent{PDFInfoName} of a Role member is formatted
+%    \begin{macrocode}
+  \ccPropertyLet{role-pdfinfo-name-format}{role-cite-name-format}%
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{role-correspondence-as-format}{<any>} How the
+%   \UsageComponent{CorrespondenceAs} string of a Role Member is
+%   formatted
+%    \begin{macrocode}
+  \ccSetProperty{role-correspondence-as-format}{\ccUseComp{Email}}%
+%    \end{macrocode}
+% \end{Property}
+%
+%
+% \subsection{Format of Single Role Collection Component Items}
+%
+% the next properties control how single items in the Parent
+% container's Collection Components are to be formatted.
+%
+% \begin{Property}{role-block-print-format}{<any>} How a single entry in
+%   the \UsageComponent{NameList} is formatted.
+%    \begin{macrocode}
+  \ccSetProperty{role-block-print-format}{\ccUseComp{FullName}\ifnum\ccCurCount<\ccTotalCount\ccUseProperty{counted-name-sep}\fi}%
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{role-block-cite-format}{<any>} how a single entry in
+%   the \UsageComponent{CitationList} is formatted
+%    \begin{macrocode}
+  \ccSetProperty{role-block-cite-format}{\ccUseComp{CiteName}\ifnum\ccCurCount<\ccTotalCount\ccUseProperty{counted-name-sep}\fi}%
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{role-block-short-cite-format}{<any>} how a single
+%   entry in the \UsageComponent{ShortCitationList} is formatted
+%    \begin{macrocode}
+  \ccSetProperty{role-block-short-cite-format}{\ccUseComp{ShortCiteName}\ifnum\ccCurCount<\ccTotalCount\ccUseProperty{counted-name-sep}\fi}%
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{role-block-pdfinfo-format}{<any>} how a single entry
+%   in the \UsageComponent{PDFInfo} Component is formatted
+%    \begin{macrocode}
   \ccSetProperty{role-block-pdfinfo-format}{\ccUseComp{PDFInfoName}\ifnum\ccCurCount<\ccTotalCount\and\fi}% How each item in the Component <Role>PDFInfo is formatted
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{role-block-correspondence-format}{<any>} how a single entry
+%   in the \UsageComponent{Correspondence} Component is formatted
+%    \begin{macrocode}
   \ccSetProperty{role-block-correspondence-format}{%
     \ccIfPropVal{is-corresp}{true}
       {\ifx\is@first@corresp\relax
@@ -401,39 +798,165 @@
          \global\let\is@first@corresp\relax
        \fi
        \ccUseComp{CorrespondenceAs}%
-     }{}}% How each item in the Component <Role>Correspondence is formatted
-  % Aliasses
-  % for Role "Author":
-  \ccPropertyLet{author-cite-name-format}            {role-cite-name-format}%
-  \ccPropertyLet{author-short-cite-name-format}      {role-short-cite-name-format}%
-  \ccPropertyLet{author-full-name-format}            {role-full-name-format}%
-  \ccPropertyLet{author-pdfinfo-name-format}         {role-pdfinfo-name-format}%
-  \ccPropertyLet{author-correspondence-as-format}    {role-correspondence-as-format}%
-  %
-  \ccPropertyLet{author-list-print-format}           {role-block-print-format}%
-  \ccPropertyLet{author-list-cite-format}            {role-block-cite-format}%
-  \ccPropertyLet{author-list-short-cite-format}      {role-block-short-cite-format}%
-  \ccPropertyLet{author-list-pdfinfo-format}         {role-block-pdfinfo-format}%
-  \ccPropertyLet{author-list-correspondence-format}  {role-block-correspondence-format}%
-  %
+     }{}}%
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{counted-name-sep}{<any>} how single entries in
+%   \UsageComponent{NameList} are separated
+%    \begin{macrocode}
   \ccSetProperty{counted-name-sep}{,\space}%
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{name-and}{<any>} is a Property that can be used when
+%   composing Role specific Collection Components. Is is usually used
+%   between the penultimate and the last entry in the Collection
+%   Component.
+%    \begin{macrocode}
   \ccSetProperty{name-and}{\space and\space}%
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{name-etal}{<any>} is a Property that can be used when
+%   composing Role specific Collection Components. Is is usually used
+%   after the first entry in the list, when the total number of
+%   entries is too large.
+%    \begin{macrocode}
   \ccSetProperty{name-etal}{\space et~al.}%
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{name-sep}{<any>} is the default separator between
+%   entries in a Role specific Collection Component.
+%    \begin{macrocode}
   \ccSetProperty{name-sep}{,\space}%
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{keywords-sep}{<any>} is the default separator between
+%   Entries in the Keywords list.
+%    \begin{macrocode}
   \ccSetProperty{keywords-sep}{,\space}%
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{corresp-mark}{<any>} is the default marker for the
+%   “Correspondence” Role member, i.e., the Role member who is
+%   designated the primary contact person of a contribution.
+%    \begin{macrocode}
   \ccSetProperty{corresp-mark}{*}%
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{corresp-sep}{<any>} is the default seperator between
+%   entries in the \UsageComponent{Correspondence} Collection
+%   Component.
+%    \begin{macrocode}
   \ccSetProperty{corresp-sep}{,\space}%
-  %
-  % Affiliation Properties
-  %
-  \ccSetProperty{affiliation-format}{% Format of the  affiliation block
+%    \end{macrocode}
+% \end{Property}
+%
+%
+% \subsection{Collection Component Properties Specific to Author Role}
+%
+% The Properties defined here are mostly aliases of the more generic Properties defined above.
+%
+%
+% \subsubsection{Author Instance Override Properties}
+%
+% \begin{Property}{author-cite-name-format}{<any>} how an Author's
+%   \UsageComponent{CiteName} is formatted.
+%    \begin{macrocode}
+  \ccPropertyLet{author-cite-name-format}            {role-cite-name-format}%
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{author-short-cite-name-format}{<any>} how an author's
+%   \UsageComponent{ShortCiteName} is formatted.
+%    \begin{macrocode}
+  \ccPropertyLet{author-short-cite-name-format}      {role-short-cite-name-format}%
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{author-full-name-format}{<any>} how an author's
+%   \UsageComponent{FullName} Component is composed
+%    \begin{macrocode}
+  \ccPropertyLet{author-full-name-format}            {role-full-name-format}%
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{author-pdfinfo-name-format}{<any>} how an author's
+%   \UsageComponent{PDFInfoName} Component is composed
+%    \begin{macrocode}
+  \ccPropertyLet{author-pdfinfo-name-format}         {role-pdfinfo-name-format}%
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{author-correspondence-as-format}{<any>} how an
+%   author's \UsageComponent{CorrespondenceAs} entry is to be
+%   formatted
+%    \begin{macrocode}
+  \ccPropertyLet{author-correspondence-as-format}    {role-correspondence-as-format}%
+%    \end{macrocode}
+% \end{Property}
+%
+%
+% \subsubsection{Author-Specific Collcection Component Override Properties}
+%
+% \begin{Property}{author-list-print-format}{<any>} is the format of
+%   each entry in the \UsageComponent{AuthorNameList} Component.
+%    \begin{macrocode}
+  \ccPropertyLet{author-list-print-format}           {role-block-print-format}%
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{author-list-cite-format}{<any>} is the format of each
+%   entry in the \UsageComponent{AuthorCitationList} Component.
+%    \begin{macrocode}
+  \ccPropertyLet{author-list-cite-format}            {role-block-cite-format}%
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{author-list-short-cite-format}{<any>} is the format
+%   of each entry in the \UsageComponent{AuthorShortCitationList}
+%   Component.
+%    \begin{macrocode}
+  \ccPropertyLet{author-list-short-cite-format}      {role-block-short-cite-format}%
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{author-list-pdfinfo-format}{<any>} is the format of
+%   each entry in the \UsageComponent{AuthorPDFInfo} Component.
+%    \begin{macrocode}
+  \ccPropertyLet{author-list-pdfinfo-format}         {role-block-pdfinfo-format}%
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{author-list-correspondence-format}{<any>} is the
+%   format of the \UsageComponent{AuthorContribution} Collection
+%   Component.
+%    \begin{macrocode}
+  \ccPropertyLet{author-list-correspondence-format}  {role-block-correspondence-format}%
+%    \end{macrocode}
+% \end{Property}
+%
+%
+% \subsection{Format of Affiliation Lists}
+%
+% \begin{Property}{affiliation-format}{<any>} is the format of the
+%   \UsageComponent{Affiliation} Component for each
+%   \UsageComponent{Affil} Instance.
+%    \begin{macrocode}
+  \ccSetProperty{affiliation-format}{%
     \ccWhenComp{Institute}{\ccUseComp{Institute}}%
     \ccWhenComp{Department}{, \ccUseComp{Department}}%
     \ccWhenComp{Address}{, \ccUseComp{Address}}%
   }%
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{affil-sep}{<any>} is the separator between the
+%   entries of the \UsageComponent{AffilBlock} Collection Component.
+%    \begin{macrocode}
   \ccSetProperty{affil-sep}{\par}
-  \ccSetProperty{affil-block-item-face}{}% Font of a single item in the affiliation list
-  \ccSetProperty{affil-block-item-format}{% Format of a single item in the affiliation list
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{affil-block-item-face}{<any>} are the font
+%   parameters used to print each entry in the
+%   \UsageComponent{AffilBlock} Collection Component.
+%    \begin{macrocode}
+  \ccSetProperty{affil-block-item-face}{}%
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{affil-block-item-format} is the format of each
+%   entry in the \UsageComponent{AffilBlock} list
+%    \begin{macrocode}
+  \ccSetProperty{affil-block-item-format}{%
     \textsuperscript{\ccUseComp{AffilID}}%
     \bgroup
       \ccUseProperty{affil-block-item-face}%
@@ -441,7 +964,17 @@
     \egroup%
     \ifnum\ccCurCount<\ccTotalCount\relax\ccUseProperty{affil-sep}\fi%
   }
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{affil-block-face}{<any>} is the font used to print
+%   the \UsageComponent{AffilBlock} Collection Component.
+%    \begin{macrocode}
   \ccSetProperty{affil-block-face}{\small\normalfont}%
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{affil-block-format}{<any>} prints the
+%   \UsageComponent{AffilBlock} Collection Component.
+%    \begin{macrocode}
   \ccSetProperty{affil-block-format}{%
     \ccWhenComp{AffilBlock}
       {\bgroup
@@ -450,9 +983,18 @@
        \egroup
        \par
      }}
-  %
-  % Labeled Meta Properties
-  %
+%    \end{macrocode}
+% \end{Property}
+%
+%
+% \subsection{Properties for Labeled Componetns}
+%
+% \begin{Property}{labeled-meta-format}{<any>}\DescribeProperty{labeled-meta-[infix]-format}
+%   is the generic Property that determins how Labeled Components are
+%   composed. It checks for implicit formatting properties speific to
+%   each labeled Component and falls back to generic defaults if those
+%   are not defined by the user or publisher style.
+%    \begin{macrocode}
   \ccSetProperty{labeled-meta-format}{%
     \ccIfProp{labeled-meta-before-\ccCurInfix}
       {\ccUseProperty{labeled-meta-before-\ccCurInfix}}
@@ -474,6 +1016,11 @@
       {\ccUseProperty{labeled-meta-after-\ccCurInfix}}
       {\ccUseProperty{labeled-meta-after}}%
   }
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{labeled-meta-label-format}{<any>}\DescribeProperty{labeled-meta-[infix]-label-format}\DescribeProperty{labeled-meta-before-[infix]-label}
+%   is the generic format of the label of a Labeled Component.\UsageComp{Label}
+%    \begin{macrocode}
   \ccSetProperty{labeled-meta-label-format}{%
     \ccWhenComp{\ccCurComp Label}{%
       \bgroup
@@ -487,11 +1034,48 @@
           {\ccUseProperty{labeled-meta-label-sep}}%
       \egroup
     }}
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{labeled-meta-label-face}{<any>}\DescribeProperty{labeled-meta-[infix]-label-face} is the font setting
+%   for the Label of a Labeled Component.
+%    \begin{macrocode}
   \ccSetProperty{labeled-meta-label-face}{\bfseries}
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{labeled-meta-label-sep}{<any>}\DescribeProperty{labeled-meta-[infix]-label-sep}
+%   is the default and fallback separator between the Labeled
+%   Component's \UsageComponent{Label} and its value.
+%    \begin{macrocode}
   \ccSetProperty{labeled-meta-label-sep}{:\enskip}
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{labeled-meta-face}{<any>}\DescribeProperty{labeled-meta-[infix]-face} is the face of a Labeled
+%   Component. It applies to bothe the Label and the Value, but can be
+%   locally overridden by the \UsageProp{labeled-meta-label-face}
+%   Property.
+%    \begin{macrocode}
   \ccSetProperty{labeled-meta-face}{}
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{labeled-meta-before}{<any>}\DescribeProperty{labeled-meta-[infix]-before}
+%   is the code expanded before the Labeled Component is printed. 
+%
+%   \textbf{Note} that the Property is expanded \textit{outside} the
+%   local group of the Labeled Compoent.
+%    \begin{macrocode}
   \ccSetProperty{labeled-meta-before}{}
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{labeled-meta-after}{<any>}\DescribeProperty{labeled-meta-[infix]-after}
+%   is the code expanded after the Labeled Component is printed.
+%
+%   \textbf{Note} that the Property is expanded \textit{outside} the
+%   local group of the Labeled Compoent.
+%    \begin{macrocode}
   \ccSetProperty{labeled-meta-after}{\par}
+%    \end{macrocode}
+% \end{Property}
+%    \begin{macrocode}
 }
 %    \end{macrocode}
 %    \begin{macrocode}[numbers=none,gobble=1]

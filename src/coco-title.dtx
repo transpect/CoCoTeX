@@ -79,7 +79,7 @@
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccAddTitleRole} is a user-level macro to add both a
-%   new Role with the name \#2 and a controlling Property \#1 to the
+%   new Role with the name \InlineArg{2} and a controlling Property \InlineArg{1} to the
 %   \lstinline{titlepage} container.
 %    \begin{macrocode}
 \def\ccAddTitleRole#1#2{%
@@ -566,7 +566,7 @@ from the Components given in the Meta Container.}}}
 % \begin{Component}[OR]{RunNames} is an override for the document
 %   author's names, which is intended to be used in running page
 %   headers. If not set, the (calculated)
-%   \ComponentUsage{AuthorNameList} or \ComponentUsage{EditorNameList}
+%   \UsageComponent{AuthorNameList} or \UsageComponent{EditorNameList}
 %   is used, instead.
 %    \begin{macrocode}
   \ccDeclareGlobalComponent{RunNames}%
@@ -650,7 +650,7 @@ from the Components given in the Meta Container.}}}
 % \end{Component}
 % \begin{Component}{PubLogo} holds the publisher logo. Depending on
 %   the publisher style, this may be just a path, or a complete
-%   \ComponentUsage{\includegraphics} expression.
+%   \lstinline{\includegraphics} expression.
 %    \begin{macrocode}
   \ccDeclareGlobalComponent{PubLogo}%
 %    \end{macrocode}

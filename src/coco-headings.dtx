@@ -586,32 +586,32 @@
 %    \begin{macrocode}
 \def\cch@init@hooks#1{%
 %    \end{macrocode}
-% \DescribeHook{cc/headings/<level>/toc/before} is exanded before the
+% \DescribeHook{cc/headings/[level]/toc/before} is exanded before the
 % ToC entry is printed
 %    \begin{macrocode}
   \NewHook{cc/headings/#1/toc/before}%
 %    \end{macrocode}
-% \DescribeHook{cc/headings/<level>/toc/after} is exanded after the
+% \DescribeHook{cc/headings/[level]/toc/after} is exanded after the
 % ToC entry is printed
 %    \begin{macrocode}
   \NewHook{cc/headings/#1/toc/after}%
 %    \end{macrocode}
-% \DescribeHook{cc/headings/<level>/before} is expanded before the
+% \DescribeHook{cc/headings/[level]/before} is expanded before the
 % before-heading property called
 %    \begin{macrocode}
   \NewHook{cc/headings/#1/before}%
 %    \end{macrocode}
-% \DescribeHook{cc/headings/<level>/after} is expanded after the
+% \DescribeHook{cc/headings/[level]/after} is expanded after the
 % \lstinline{after-heading-block} property was called.
 %    \begin{macrocode}
   \NewHook{cc/headings/#1/after}%
 %    \end{macrocode}
-% \DescribeHook{cc/headings/<level>/print/before} is expanded just
+% \DescribeHook{cc/headings/[level]/print/before} is expanded just
 % before \lstinline{\@svsec} is locally defined.
 %    \begin{macrocode}
   \NewHook{cc/headings/#1/print/before}%
 %    \end{macrocode}
-% \DescribeHook{cc/headings/<level>/run/after} is expanded after the
+% \DescribeHook{cc/headings/[level]/run/after} is expanded after the
 % local \lstinline{RunTitle} has been generated
 %    \begin{macrocode}
   \NewHook{cc/headings/#1/run/after}%% Expanded after the local RunTitle has been generated
@@ -1208,9 +1208,9 @@
 % \lstinline{\addvspace}, while negative values are set with
 % coco-common's \DescribeMacro{\minusvspace}.
 %
-% \TODO{values $< 0pt$ use \lstinline{\minusvspace}, else
-% \lstinline{\addvspace}. LaTeX's default behaviour of
-% \lstinline{\@afterindent} is relocated to the after-indent
+% \TODO{values $< 0pt$ use \string\minusvspace, else
+% \string\addvspace. LaTeX's default behaviour of
+% \string\@afterindent is relocated to the after-indent
 % property.}
 %    \begin{macrocode}
   \ccSetProperty{before-skip}{\z@skip}%

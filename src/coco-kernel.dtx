@@ -14,6 +14,18 @@
 \ProvidesPackage{coco-kernel}
     [\filedate \fileversion cocotex kernel]
 %    \end{macrocode}
+% Before we do anything, we check if the user uses a (more or less)
+% current {\LaTeX} kernel version. If not, we issue a hard error
+% message. The pivot that separates “new” from “old” is June 1, 2020.
+%    \begin{macrocode}
+\ifx\IfFormatAtLeastTF\@undefined
+  \providecommand\IfFormatAtLeastTF{\@ifl@t@r\fmtversion}%
+\fi
+\IfFormatAtLeastTF{2020/06/01}{}%
+  {\PackageError{CoCoTeX Kernel}
+    {LaTeX kernel too old!}
+    {CoCoTeX v0.5.0 and newer needs at least LaTeX kernel version 2020/06/01!}}
+%    \end{macrocode}
 %
 %
 % \subsection{Hard dependencies}
@@ -208,26 +220,14 @@
 \let\ccUnlessAlly\@iden
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccIfAlly} the same, but it takes two arguments, one
-%   for the \textit{true} case and a second for the \textit{false}
-%   case. We default to the \textit{else} case, so we always gobble
-%   the first argument. This will be altered if the
-%   \lstinline{coco-accessibility} package is loaded later.
+% \begin{macro}{\ccIfAlly} is the same as \lstinline{\ccWhenAlly}, but
+%   it takes two arguments, one for the \textit{true} case and a
+%   second for the \textit{false} case. We default to the
+%   \textit{else} case, so we always gobble the first argument. This
+%   will be altered if the \lstinline{coco-accessibility} package is
+%   loaded later.
 %    \begin{macrocode}
 \let\ccIfAlly\@gobble
-%    \end{macrocode}
-% \end{macro}
-% \begin{macro}{\if@cc@modern} is a switch to distinguish older
-%     versions of the {\LaTeX} Kernel from newer versions. The pivot
-%     date is defined to be 2020/06/01.
-%    \begin{macrocode}
-\ifx\IfFormatAtLeastTF\@undefined
-  \providecommand\IfFormatAtLeastTF{\@ifl@t@r\fmtversion}%
-\fi
-\IfFormatAtLeastTF{2020/06/01}{}%
-  {\ccPackageError{Kernel}{Comatibility}
-    {LaTeX kernel too old!}
-    {CoCoTeX v0.5.1 and newer needs at least LaTeX kernel version 2020/06/01!}}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -525,7 +525,7 @@
 % \end{macro}
 % \begin{macro}{\ccpgdefFromComp} is a global variant of
 %   \lstinline{\ccdefFromComp} that takes a CS name as \InlineArg{1}
-%   and prepends the \ccPrefix before assigning the Contents of
+%   and prepends the \lstinline{\ccPrefix} before assigning the Contents of
 %   Component \InlineArg2 to the resulting CS token.
 %    \begin{macrocode}
 \def\ccpgdefFromComp#1#2{\def\x{\cc@store@comp{x}}\expandafter\x\csname\ccPrefix #1\endcsname{#2}}
@@ -725,6 +725,9 @@
       \csgdef{cc@\cc@cur@cont @#2-\csname cc#2Cnt\endcsname @attrs}{##1}%
     \fi
     #3%
+%    \end{macrocode}
+% \TODO{make into LaTeX kernel hook!}
+%    \begin{macrocode}
     \csname @#2@hook\endcsname
     \ignorespaces
   }%
@@ -790,7 +793,7 @@
 %
 % While the first macro only writes the Property \textit{definition}
 % into the Collector Component, the second fully expands the macros inside the
-% Property and stores the result in Component \#3.
+% Property and stores the result in Component \InlineArg{3}.
 %
 % Use the former to print and the latter to further process the
 % respective results.

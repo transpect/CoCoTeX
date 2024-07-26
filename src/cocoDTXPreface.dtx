@@ -110,6 +110,8 @@
 
 \def\UsageMacro#1{\PrintMacroName{#1}\SpecialMacroIndex{#1}}
 \def\UsageComponent#1{\textcolor{compcolor}{\texttt{#1}}\index[components]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{usage}}}
+\def\UsageComp#1{\index[components]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{usage}}}
+\def\DescribeComp#1{\index[components]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{main}}}
 
 \newenvironment{ArgList}{%
   \ifhmode\par\vskip\parskip\fi
