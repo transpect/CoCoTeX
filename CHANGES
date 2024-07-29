@@ -6,22 +6,24 @@
   - improved whitespace handling in Container environments
   - Added hard requirement for LaTeX kernel version > texlive 2020
 - coco-kernel.dtx
-  - made group components long
-  - added some \ignorespaces at the end of Component macros
-  - added default value for ccPrefix (=empty)
+  - Added some \ignorespaces at the end of Component macros
+  - Added default value for ccPrefix (=empty)
   - Attributes of Component Groups now also use Attribute Handlers
-  - Fixed an issue where additions to a parent Container's Types were
-    not passed down to its decendents if those were declared earlier
+  - Added method to check global Components against a given value
+  - Added a way to define Macros from Counted Components without full
+    expansion
   - Default PDF version is now 1.7 (or 2.0 if explicitly required)
     instead of 1.3 iff accessibility features are active
-  - Added method to check global Components against a given value
+  - Fixed an issue where additions to a parent Container's Types were
+    not passed down to its decendents if those were declared earlier
+  - made group components long
 - coco-common.dtx
   - added option to suppress inclusion of color profile
   - improved handling of color encoding option
 - coco-meta.dtx
   - remove transitive role-mapping
 - coco-floats.dtx
-  - changed how heights and widths of subfloats are calculated:
+  - Changed how heights and widths of subfloats are calculated:
     - sameheight mechanism is now only applied if neither sub-figure
       has an width or height key.
     - added Attribute to locally de-activate sameheight mechanism

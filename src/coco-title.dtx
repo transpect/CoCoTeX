@@ -265,10 +265,10 @@
              {\ccpgdefFromComp{RunBookName}{EditorNameList}}
              {\ifnum\ccAuthorCnt>\z@
                 \@setpar{\@@par}%
-                \ccpgdefFromCountedComp{RunBookName}{Author}{author-list-pdfinfo-format}%
+                \ccpxdefFromCountedComp{RunBookName}{Author}{author-list-pdfinfo-format}%
               \else
                 \ifnum\ccEditorCnt>\z@
-                  \ccpgdefFromCountedComp{RunBookName}{Editor}{editor-list-pdfinfo-format}%
+                  \ccpxdefFromCountedComp{RunBookName}{Editor}{editor-list-pdfinfo-format}%
                 \else
                   \ccPackageWarning{transcript-title}{Meta Data}{No author or editor given!}%
                   \@tempswafalse

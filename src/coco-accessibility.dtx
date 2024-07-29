@@ -232,6 +232,7 @@
 %   \textit{enabled} ltpdfa interface command variants.
 %    \begin{macrocode}
 \def\cca@saved@defs{}
+\def\cca@protected@defs{}
 %    \end{macrocode}
 % \end{macro}
 % The next two macros are used to disable and enable accessibility
@@ -245,6 +246,7 @@
 % \begin{macro}{\ccaEnable} enables all ltpdfa commands.
 %    \begin{macrocode}
 \def\ccaEnable{\ccWhenAlly{\cca@saved@defs}}
+\def\ccaProtect{\ccWhenAlly{\cca@protected@defs}}
 %    \end{macrocode}
 % \end{macro}
 % 
@@ -319,13 +321,15 @@
 % \lstinline{\cca@relaxed@defs} list.
 %    \begin{macrocode}
   \edef\y{\noexpand\let\noexpand#1\expandafter\noexpand\csname cc@no@\CsToStr{#1}\endcsname}%
-  \expandafter\appto\expandafter\cca@relaxed@defs\expandafter{\y}%
+  \global\expandafter\appto\expandafter\cca@relaxed@defs\expandafter{\y}%
 %    \end{macrocode}
 % Now, we can decide which of the two \lstinline{\let}-sequences
 % should be the used to define the initial value of the \#1 CS token,
 % depending on the value of the \lstinline{\ccIfAlly} conditional:
 %    \begin{macrocode}
   \ccIfAlly{\x}{\y}%
+  \edef\z{\noexpand\protected\noexpand\def\noexpand#1{\noexpand#1}}%
+  \global\expandafter\appto\expandafter\cca@protected@defs\expandafter{\z}%
 %    \end{macrocode}
 % Finally, we reset the temporary argument signature macro.
 %    \begin{macrocode}
@@ -397,6 +401,7 @@
 %   \lstinline{\ccaMoveStruct}, as shown below.
 %    \begin{macrocode}
 \DeclareAccessibilityCommand{\ccaGetCurStruct}[1]{\directlua{ltpdfa.tagger.getCurrentStruct('\luaescapestring{#1}')}}
+\DeclareAccessibilityCommand{\ccaSaveCurStruct}[1]{\protected@csxdef{#1}{\ccaGetCurStruct{idx}}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccaAddToStruct} adds the current structural element

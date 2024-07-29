@@ -832,38 +832,11 @@
 %   \InlineArg{2}.
 %    \begin{macrocode}
 \def\ccComposeCollection#1#2#3{%
-  \ccIfComp{#3}{\cslet{cc@used@#3@override}\@empty}{%
-    \ifcsdef{cc#1Cnt}{%
-      \expandafter\ifnum\csname cc#1Cnt\endcsname > \z@\relax
-        \edef\cc@iterate@res{%
-          \noexpand\bgroup
-            \noexpand\def\noexpand\ccTotalCount{\csname cc#1Cnt\endcsname}%
-            \noexpand\ccToggleCountedConditionals
-            \noexpand\def\noexpand\cc@cnt@grp{cc#1}}%
-        \expandafter\@tempcntb=\csname cc#1Cnt\endcsname\relax
-        \cc@iterate{\@tempcnta}{\@ne}{\@tempcntb}{%
-            \edef\@tempb{%
-              \noexpand\begingroup
-              %% top-level counter for user interaction
-              \noexpand\ccCurCount=\the\@tempcnta
-              %% evaluating the current group's Attributes
-              \ifcsdef{cc@\cc@cur@cont @#1-\the\@tempcnta @attrs}
-                {\noexpand\ccEvalAttributes[\cc@cur@cont @cc#1]
-                  {\csname cc@\cc@cur@cont @#1-\the\@tempcnta @attrs\endcsname}}{}%
-              %% internal counter for macro grabbing
-              \noexpand\csnumdef{cc#1Cnt}{\ccCurCount}%
-              \noexpand\ccUseProperty{#2}%
-              \noexpand\endgroup
-            }%
-            \expandafter\expandafter\expandafter\def
-            \expandafter\expandafter\expandafter\cc@iterate@res
-            \expandafter\expandafter\expandafter{\expandafter\cc@iterate@res\@tempb}%
-          }%
-          \expandafter\def\expandafter\cc@iterate@res\expandafter{\cc@iterate@res\egroup}%
+  \ccIfComp{#3}{\cslet{cc@used@#3@override}\@empty}
+    {\ifcsdef{cc#1Cnt}{%
+          \cc@compose@collection{#1}{#2}%
           \cc@assign@res{\ccPrefix#3}%
-      \fi
-    }{}}%
-}
+        \fi}{}}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccApplyCollection}
@@ -880,9 +853,47 @@
 }
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{\cc@compose@collection} is a low-level macro used to
+%   compose a resource object from the unexpanded values of a
+%   Component Group \InlineArg{1} using Property \InlineArg{2}. The
+%   result is stored in \lstinline{\cc@iterate@res} and can be
+%   retrieved with \lstinline{\cc@assign@res}.
+%    \begin{macrocode}
+\def\cc@compose@collection#1#2{%
+  \expandafter\ifnum\csname cc#1Cnt\endcsname > \z@\relax
+    \edef\cc@iterate@res{%
+      \noexpand\bgroup
+        \noexpand\def\noexpand\ccTotalCount{\csname cc#1Cnt\endcsname}%
+        \noexpand\ccToggleCountedConditionals
+        \noexpand\def\noexpand\cc@cur@cont{\cc@cur@cont}%
+        \noexpand\def\noexpand\cc@cnt@grp{cc#1}}%
+      \expandafter\@tempcntb=\csname cc#1Cnt\endcsname\relax
+      \cc@iterate{\@tempcnta}{\@ne}{\@tempcntb}{%
+        \edef\@tempb{%
+          \noexpand\begingroup
+            %% top-level counter for user interaction
+            \noexpand\ccCurCount=\the\@tempcnta\relax
+            %% evaluating the current group's Attributes
+            \ifcsdef{cc@\cc@cur@cont @#1-\the\@tempcnta @attrs}
+              {\noexpand\ccEvalAttributes[\cc@cur@cont @cc#1]
+                {\csname cc@\cc@cur@cont @#1-\the\@tempcnta @attrs\endcsname}}{}%
+              %% internal counter for macro grabbing
+              \noexpand\csnumdef{cc#1Cnt}{\ccCurCount}%
+              \noexpand\ccUseProperty{#2}%
+              \noexpand\endgroup
+          }%
+          \expandafter\expandafter\expandafter\def
+          \expandafter\expandafter\expandafter\cc@iterate@res
+          \expandafter\expandafter\expandafter{\expandafter\cc@iterate@res\@tempb}%
+        }%
+        \expandafter\def\expandafter\cc@iterate@res\expandafter{\cc@iterate@res\egroup}%
+    }
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\cc@apply@collection} is the low-level macro used to
-%   fully expand a Component Group \InlineArg{1} into its Collection
-%   Component using Property \InlineArg{2}.
+%   fully expand a Component Group \InlineArg{1} using Property
+%   \InlineArg{2}. The result is stored in \lstinline{\cc@iterate@res}
+%   and can be retrieved with \lstinline{\cc@assign@res}.
 %    \begin{macrocode}
 \def\cc@apply@collection#1#2{%
   \begingroup
@@ -907,7 +918,7 @@
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\cc@comp@def} is used to pass a Counted Component into
+% \begin{macro}{\cc@comp@edef} is used to pass a Counted Component into
 %   a TeX macro.
 %   \begin{ArgList}
 %   \item[1] is a prefix to the def command, e.g., \lstinline{\global}
@@ -918,8 +929,8 @@
 %     the Counted Component
 %   \end{ArgList}
 %    \begin{macrocode}
-\def\cc@comp@def{\cc@opt@empty\@cc@comp@def}
-\def\@cc@comp@def[#1]#2#3#4{%
+\def\cc@comp@edef{\cc@opt@empty\@cc@comp@edef}
+\def\@cc@comp@edef[#1]#2#3#4{%
   \cc@apply@collection{#3}{#4}%
   \ifx\cc@iterate@res\relax
     #1\let#2\relax%
@@ -929,26 +940,44 @@
   \fi
 }
 %    \end{macrocode}
+% 
+%    \begin{macrocode}
+\def\cc@comp@def{\cc@opt@empty\@cc@comp@def}
+\def\@cc@comp@def[#1]#2#3#4{%
+  \cc@compose@collection{#3}{#4}%
+  \ifx\cc@iterate@res\relax
+    #1\let#2\relax%
+  \else
+    \def\@tempa{#1\def#2}%
+    \cc@assign@res{@tempa}%
+  \fi
+}
+%    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccdefFromCountedComp} is the user-level command for
-%   \textit{local} \lstinline{\cc@comp@def}.
+% 
 %    \begin{macrocode}
 \def\ccdefFromCountedComp{\cc@comp@def}
-%    \end{macrocode}
-% \end{macro}
-% \begin{macro}{\ccgdefFromCountedComp} is the user-level command for
-%   \textit{global} \lstinline{\cc@comp@def}.
-%    \begin{macrocode}
 \def\ccgdefFromCountedComp{\cc@comp@def[\global]}
 %    \end{macrocode}
+% \begin{macro}{\ccedefFromCountedComp} is the user-level command for
+%   \textit{local} \lstinline{\cc@comp@edef}.
+%    \begin{macrocode}
+\def\ccedefFromCountedComp{\cc@comp@edef}
+%    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccpgdefFromCountedComp} is the user-level command for
-%   \textit{global} \lstinline{\cc@comp@def}. In contrast to
-%   \lstinline{\ccgdefFromCountedComp}, it takes a CS name as first
+% \begin{macro}{\ccxdefFromCountedComp} is the user-level command for
+%   \textit{global} \lstinline{\cc@comp@edef}.
+%    \begin{macrocode}
+\def\ccxdefFromCountedComp{\cc@comp@edef[\global]}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccpxdefFromCountedComp} is the user-level command for
+%   \textit{global} \lstinline{\cc@comp@edef}. In contrast to
+%   \lstinline{\ccxdefFromCountedComp}, it takes a CS name as first
 %   argument and preprends the \lstinline{\ccPrefix} to the CS token
 %   to be defined.
 %    \begin{macrocode}
-\def\ccpgdefFromCountedComp#1{\expandafter\ccgdefFromCountedComp\csname \ccPrefix #1\endcsname}
+\def\ccpxdefFromCountedComp#1{\expandafter\ccxdefFromCountedComp\csname \ccPrefix #1\endcsname}
 %    \end{macrocode}
 % \end{macro}
 %
