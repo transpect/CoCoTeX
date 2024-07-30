@@ -214,29 +214,36 @@
 %
 % \subsection{Generic Macro to Declare Accessibility Features}
 %
-% In order to selectively enable and disable accessibility macros
-% during runtime, we need each tagging markup macro to exist in two
-% states, one where they trigger tagging into the pdf, and one where
-% they do nothing.
+% In order to selectively enable and (temporarily) disable
+% accessibility macros during runtime, we need each tagging markup
+% macro to exist in three states: one where they trigger tagging into
+% the pdf, one where they do nothing, and one where they can be
+% rescued for later expansion.
 %
-% The enabled and disabled versions of each macro are stored inside
-% two seperate lists:
+% The enabled, disabled and protected versions of each macro are
+% stored inside three seperate lists:
 % \begin{macro}{\cca@relaxed@defs} is the list that stores the
 %   \textit{disabled} ltpdfa interface command variants,
 %    \begin{macrocode}
 \def\cca@relaxed@defs{}
 %    \end{macrocode}
 % \end{macro}
-% and
 % \begin{macro}{\cca@saved@defs} is a list that stores the
 %   \textit{enabled} ltpdfa interface command variants.
 %    \begin{macrocode}
 \def\cca@saved@defs{}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\cca@protected@defs} stores the protected macros where
+%   they do nothing when called, but also are not removed from the
+%   token list.
+%    \begin{macrocode}
 \def\cca@protected@defs{}
 %    \end{macrocode}
 % \end{macro}
-% The next two macros are used to disable and enable accessibility
-% markup locally, iff accessibility features are globally activated:
+% The next three macros are used to disable, enable, and protect
+% accessibility markup locally, iff accessibility features are
+% globally activated:
 % \begin{macro}{\ccaDisable} disables all ltpdfa commands
 %    \begin{macrocode}
 \def\ccaDisable{\ccWhenAlly{\cca@relaxed@defs}}
@@ -246,10 +253,15 @@
 % \begin{macro}{\ccaEnable} enables all ltpdfa commands.
 %    \begin{macrocode}
 \def\ccaEnable{\ccWhenAlly{\cca@saved@defs}}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccaProtect} protects accessibility commands such that
+%   they expand to itself (useful when material containing tagging
+%   macros are stored in a macro using \lstinline{\protected@edef}.)
+%    \begin{macrocode}
 \def\ccaProtect{\ccWhenAlly{\cca@protected@defs}}
 %    \end{macrocode}
 % \end{macro}
-% 
 % \begin{macro}{\CsToStr} is a xparse helper macro which returns the name of
 %   a control sequence \#1.
 %    \begin{macrocode}
@@ -266,15 +278,15 @@
 \def\DeclareAccessibilityCommand#1{\@ifnextchar[{\cca@declare@cmd@firstopt#1}{\cca@declare@cmd#1}}%]
 %    \end{macrocode}
 %   First, we need to take care of the optional arguments:
-% \begin{macro}{\cca@temp@signature} is the temporary storage for the
-%   argument signature.
+%   \begin{macro}{\cca@temp@signature} is the temporary storage for the
+%     argument signature.
 %    \begin{macrocode}
 \let\cca@temp@signature\@empty
 %    \end{macrocode}
-% \end{macro}
-% \begin{macro}{\cca@declare@cmd@firstopt} is the handler for the
-%   first optional argument, which holds the overall number of the
-%   arguments of our interface macro:
+%   \end{macro}
+%   \begin{macro}{\cca@declare@cmd@firstopt} is the handler for the
+%     first optional argument, which holds the overall number of the
+%     arguments of our interface macro:
 %    \begin{macrocode}
 \def\cca@declare@cmd@firstopt#1[#2]{\edef\cca@temp@signature{[\unexpanded{#2}]}%
   \@ifnextchar[{\cca@declare@cmd@secopt#1}{\cca@declare@cmd#1}}%]
@@ -328,10 +340,15 @@
 % depending on the value of the \lstinline{\ccIfAlly} conditional:
 %    \begin{macrocode}
   \ccIfAlly{\x}{\y}%
+%    \end{macrocode}
+% Eventually, we define the protected version of the CS token
+% \InlineArg{1} which expands to itself, and thus is protected from
+% expansion inside \lstinline{\edef}, et al.
+%    \begin{macrocode}
   \edef\z{\noexpand\protected\noexpand\def\noexpand#1{\noexpand#1}}%
   \global\expandafter\appto\expandafter\cca@protected@defs\expandafter{\z}%
 %    \end{macrocode}
-% Finally, we reset the temporary argument signature macro.
+% Finally, we reset the macro that contained the argument signature.
 %    \begin{macrocode}
   \let\cca@temp@signature\@empty
 }
@@ -557,7 +574,7 @@
     \patchcmd\hyper@linkurl
       {\pdfstartlink}
       {\pdfstringdef\@argii{#2}\ccaStructStart{Link}\ccaAddAltText{#2}\edef\@ltpdfmy@parent{\ccaGetStructParent}%
-        \pdfstartlink}
+       \pdfstartlink}
       {}{\cca@patch@error\hyper@linkurl}
 %    \end{macrocode}
 % and secondly for the Parent:
