@@ -29,8 +29,8 @@
 %
 % If the \lstinline{replace} option is set, LaTeX's default lists are
 % replaced by \lstinline{coco-lists} module. This effects \LaTeX's
-% \lstinline{enumerate}, \lstinline{itemize}, and
-% \lstinline{description} environments.
+% \MacroString{enumerate}, \MacroString{itemize}, and
+% \MacroString{description} environments.
 %    \begin{macrocode}
 \newif\if@ccl@replace \@ccl@replacefalse
 \DeclareOptionX{replace}{\global\@ccl@replacetrue}%
@@ -43,20 +43,20 @@
 % the generic type definition.
 %
 % For example, if \lstinline{inherit=common}, 3rd level
-% \lstinline{itemize} and 2nd level \lstinline{itemize} both inherit
-% only the property values of the same generic \lstinline{itemize}
+% \MacroString{itemize} and 2nd level \MacroString{itemize} both inherit
+% only the property values of the same generic \MacroString{itemize}
 % list type. If \lstinline{inherit=conseq}, 3rd level inherits the
-% property lists from 2nd level \lstinline{itemize}.
+% property lists from 2nd level \MacroString{itemize}.
 %
 % Since inheritance is a transitive relation, 3rd level
-% \lstinline{itemize} will ultimately also inherit the Properties from
-% generic \lstinline{itemize}, but in contrast to \lstinline{common},
-% \lstinline{conseq} allows 2nd level \lstinline{itemize} to override
-% some Properties of generic \lstinline{itemize}, which will be
-% propagate down to 3rd level \lstinline{itemize}, while with
+% \MacroString{itemize} will ultimately also inherit the Properties from
+% generic \MacroString{itemize}, but in contrast to \lstinline{common},
+% \lstinline{conseq} allows 2nd level \MacroString{itemize} to override
+% some Properties of generic \MacroString{itemize}, which will be
+% propagate down to 3rd level \MacroString{itemize}, while with
 % \lstinline{inherit=common}, the override on 2nd level
-% \lstinline{itemize} would have no effect on 3rd level
-% \lstinline{itemize}.
+% \MacroString{itemize} would have no effect on 3rd level
+% \MacroString{itemize}.
 % \begin{macro}{\ccl@ih@common} is used for comparisons. It represents
 %   the \lstinline{inherit=common} package option.
 %    \begin{macrocode}

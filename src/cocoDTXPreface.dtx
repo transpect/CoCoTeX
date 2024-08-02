@@ -75,7 +75,8 @@
   \ignorespaces
 }
 \def\endmacro{\relax}
-\def\PrintMacroName#1{{\small\ttfamily\mybfseries\protect\textcolor{spot!75}{\string#1}}}
+
+\protected\def\PrintMacroName#1{{\ccDocString{spot!75}{}{\string#1}}}
 
 \def\DescriptionDomain#1{\def\description@domain{#1}}
 \DescriptionDomain{Generic}
@@ -97,7 +98,31 @@
   \if!#2!\else
     \def\@argii{ (#2)}%
   \fi
-  {\small\ttfamily\mybfseries\color{compcolor!75}#1\@argii}}%
+  {\ccDocString{compcolor!75}{\ComponentSymbol}{#1\@argii}}}%
+
+\RequirePackage{fontawesome}
+\def\ccDocSymbol#1{\ifvmode\leavevmode\fi\lower1\p@\hbox{#1}}
+\def\ccDocString#1#2#3{{\small\ttfamily\mybfseries\color{#1}\if!#2!\else#2\,\fi#3}}
+
+\def\ContainerSymbol{\ccDocSymbol\faCube}
+\def\ContainerString#1{\ccDocString{contcolor!75}{\ContainerSymbol}{#1}}
+
+\def\ComponentSymbol{\ccDocSymbol\faSignIn}
+\def\ComponentString#1{\ccDocString{compcolor!75}{\ComponentSymbol}{#1}}
+
+\def\PropertySymbol{\ccDocSymbol\faGear}
+\def\PropertyString#1{\ccDocString{propcolor!75}{\PropertySymbol}{#1}}
+
+\def\HookSymbol{\ccDocSymbol\faIndent}
+\def\HookString#1{\ccDocString{hookcolor!75}{\HookSymbol}{#1}}
+
+\def\TagSymbol{\ccDocSymbol\faTag}
+\def\TagString#1{\ccDocString{tagscolor!75}{\TagSymbol}{#1}}
+
+\def\AttrSymbol{\ccDocSymbol\faChain}
+\def\AttrString#1{\ccDocString{attrcolor!75}{\AttrSymbol}{#1}}
+
+\def\MacroString#1{\ccDocString{spot!75}{}{#1}}
 
 
 \def\DescribeComponent#1{\@print@component{#1}{}}
@@ -109,7 +134,9 @@
 \def\AlsoOverride#1{\index[components]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{main}}}
 
 \def\UsageMacro#1{\PrintMacroName{#1}\SpecialMacroIndex{#1}}
-\def\UsageComponent#1{\textcolor{compcolor}{\texttt{#1}}\index[components]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{usage}}}
+\def\UsageComponent#1{%
+  \ccDocString{compcolor}{\ComponentSymbol}{#1}%
+  \index[components]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{usage}}}
 \def\UsageComp#1{\index[components]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{usage}}}
 \def\DescribeComp#1{\index[components]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{main}}}
 
@@ -144,9 +171,9 @@
   \containersection{#1}%
   \index[containers]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\noexpand\doc@handleencap{main}}%
 }
-\def\UsageContainer#1{\textcolor{contcolor}{\texttt{#1}}\index[containers]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\noexpand\doc@handleencap{usage}}}
+\def\UsageContainer#1{\ccDocString{contcolor}{\ContainerSymbol}{#1}\index[containers]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\noexpand\doc@handleencap{usage}}}
 
-\def\PrintProperty#1{{\small\ttfamily\mybfseries\color{propcolor!75}#1}}
+\def\PrintProperty#1{{\ccDocString{propcolor!75}{\PropertySymbol}{#1}}}
 \def\Property#1#2{% #1 is the name, #2 is the data type
   \propertysection{#1}{\ttfamily\footnotesize\mybfseries #2}\enskip%
   \@bsphack
@@ -156,7 +183,7 @@
 \let\endProperty\relax
 
 
-\def\PrintAttribute#1{{\small\ttfamily\mybfseries\color{attrcolor!75}#1}}
+\def\PrintAttribute#1{\ccDocString{attrcolor!75}{\AttrSymbol}{#1}}
 \def\Attribute#1#2{%
   \attrsection{#1}{\ttfamily\footnotesize\mybfseries #2}\enskip%
   \@bsphack
@@ -170,15 +197,16 @@
 \def\UsageProperty#1{\index[properties]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{usage}}}
 \def\UsageProp#1{\PrintProperty{#1}\UsageProperty{#1}}
 
-\def\DescribeTagS#1{\textcolor{tagscolor}{\texttt{<#1>}}\index[tags]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\noexpand\doc@handleencap{usage}}}
-\def\DescribeTagE#1{\textcolor{tagscolor}{\texttt{</#1>}}\index[tags]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\noexpand\doc@handleencap{usage}}}
-\def\DescribeTag#1{\textcolor{tagscolor}{\texttt{<#1/>}}\index[tags]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\noexpand\doc@handleencap{usage}}}
+\def\DescribeTagS#1{\ccDocString{tagscolor}{\TagSymbol}{<#1>}\index[tags]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\noexpand\doc@handleencap{usage}}}
+\def\DescribeTagE#1{\ccDocString{tagscolor}{\TagSymbol}{</#1>}\index[tags]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\noexpand\doc@handleencap{usage}}}
+\def\DescribeTag#1{\ccDocString{tagscolor}{\TagSymbol}{<#1/>}\index[tags]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\noexpand\doc@handleencap{usage}}}
+
 
 \def\DescribeHook#1{%
   \hooksection{#1}\enskip%
   \index[hooks]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\noexpand\doc@handleencap{main}}%
 }
-\def\UsageHook#1{#1\index[hooks]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\noexpand\doc@handleencap{usage}}}
+\def\UsageHook#1{\ccDocString{hookcolor}{\HookSymbol}{#1}\index[hooks]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\noexpand\doc@handleencap{usage}}}
 
 \lstset{%
   basicstyle={\ttfamily\color{spot}},
@@ -688,76 +716,137 @@
 %
 %
 % \begin{multicols}{2}[\section{Basic concepts}]
-% The core concept of the {\CoCoTeX} Framework to view typographical
-% objects, such as floats, headings, title pages, etc., as closed
-% units that contain a fixed set of elements that determines the exact
-% nature of each occurrence. For a heading, such elements may be the
-% heading's title, an optional subtitle, a counter or a list of
-% authors responsible for the section that is introduced by the
-% heading.
+%   The core concept of the {\CoCoTeX} Framework to view typographical
+%   objects, such as \textit{floats}, \textit{headings}, \textit{title
+%   pages}, etc., as closed units that contain a fixed set of elements
+%   that determine the exact nature of each occurrence. For a
+%   \textit{heading}, such elements may be the heading's
+%   \textit{title}, an optional \textit{subtitle}, a \textit{counter}
+%   or a list of \textit{authors} responsible for the part of a
+%   publication introduced by the \textit{heading}.
 %
-% In {\CoCoTeX} those typographical units are called
-% \textit{Containers}, the elements inside a Container are called
-% \textit{Components}. The occurrence of a Container in a specific TeX
-% document is an \textit{Instance} of that Container.
+%   In {\CoCoTeX} those typographical units are referred to as
+%   \textit{Containers}. The occurrence of a Container in a specific
+%   TeX document is an \textit{Instance} of that Container. The
+%   elements inside each Container instance are called
+%   \textit{Components}.
 %
-% The exact realization of a Container is done in local style files
-% with so-called \textit{Properties}; short snippets of TeX code that
-% tell the LaTeX interpreter how the Components in the Instances of
-% Containers are to be read, processed and eventually rendered.
+%   The final realization of a \textit{Container} in the rendered
+%   output is done in local style files with so-called
+%   \textit{Properties}; short snippets of {\LaTeX} code, which tell
+%   the {\LaTeX} interpreter how the Components in the Instances of
+%   Containers are to be read, processed and eventually rendered.
 %
-% Typically, Containers are {\LaTeX} environments that contain the
-% Components in the form of {\TeX} macros that in turn take as their
-% mandatory argument the value for the Component in that specific
-% Instance of the Container. Most Containers follow an \textit{read
-% first -- process later} approach, i.e., the LaTeX interpreter reads
-% the whole content of the environment and the processing is done at
-% the \lstinline{\end} macro of the corresponding environment.
+%   Typically, Containers are {\LaTeX} environments that
+%   contain the Components in the form of {\LaTeX} macros or
+%   other, embedded, environments. In the simpler cases,
+%   Component macros take the value for the
+%   Component in that specific \textit{Instance} of the
+%   Container as their mandatory argument. Most
+%   Containers follow an \textit{read first -- process later}
+%   approach, i.e., the {\LaTeX} interpreter reads the whole content
+%   of the Container and the processing is done at the
+%   \lstinline{\end} macro of the corresponding environment.
 % \end{multicols}
 %
-%
 % \begin{multicols}{2}[\subsection{Types, Inheritance and Abstract Containers}]
-% Components and Properties are both \textit{(data-)Types} specific to
-% an Container. A Container can be abstract, meaning that the
-% container is not directly used in an end-user's tex file, but serves
-% as blueprint for other, user-level, Containers. As such, Containers
-% can \textit{inherit} the Types (i.\,e., the Properties and
-% Components) of another Container. Containers that inherit Types from
-% other Containers are called \textit{Sub-} or
-% \textit{Child-Containers}, the inherited Container is called a
-% \textit{Parent Container}.
+%   Components and Properties are both seen as \textit{(Data-)Types}
+%   specific to each Container. A~Container can be abstract, meaning
+%   that the Container is by itself not directly used in an end-user's
+%   tex file, but serves as “blueprint” for other, more “user-level”,
+%   Containers. As such, Containers can \textit{inherit} the Types of
+%   another Container. Containers that inherit Types from
+%   other Containers are called \textit{Sub Containers} or
+%   \textit{Child Containers}, while the inherited Container
+%   is called a \textit{Parent Container}.
 %
-% Containers are therefore somewhat comparable to \textit{classes} in
-% object‐oriented programming languages, an Instance of a Container
-% can be seen as an \textit{object} (i.\,e., an Instance of a
-% Class). Components are then object variables, while Properties take
-% the place of \textit{class variables} and/or \textit{class methods},
-% depending on how exactly a Property is implemented. Sometimes, a
-% Property holds only a simple value, while another Property may
-% contain a complex set of instructions or even calls to other
-% Properties.
+%   Containers are therefore somewhat comparable to \textit{classes}
+%   in object‐oriented programming languages, an Instance of a
+%   Container can be seen as an \textit{object} (i.\,e., an
+%   \textit{instance of a~class}). Components are \textit{object
+%   variables}, while Properties take the place of \textit{class
+%   variables} and/or \textit{methods}, depending on how exactly a
+%   certain Property is implemented. Sometimes, a~Property
+%   holds only a simple value (which makes it a~\textit{class
+%   variable}), while another Property may contain a complex
+%   set of instructions and calls to other Properties and
+%   Component values (which would make it a~\textit{method}).
 % \end{multicols}
 %
 %
 % \begin{multicols}{2}[\subsection{Complex Components}]
-% Components can also be more complex than simple data storage
-% devices. Usually, a Component occurs only once in a Container, say,
-% for instance there can be only one (main) title in each heading.
+%   Components can also be more complex than simple data
+%   storage devices. Usually, a~Component occurs only once in
+%   a Container, for instance, there can be only one (main)
+%   “Title” in each “Heading”.
 %
-% Other Components may occur more than once in the same Container
-% instance, e.\,g. a chapter (which itself may be a Sub-Container of
-% the abstract Parent Container \texttt{Heading}) may have more than
-% one Author. Such Components are called \textit{Group
-% Components}. They are usually realized as {\LaTeX} environments
-% within a Container's environment and contains in itself
-% Components. Those second-level Components are called \textit{Counted
-% Components}, as they are ``numbered'' across all Group Component
-% instances within the same Container Instance. For each Group
-% Component, there is another Container-unique \textit{Collection
-% Component}, in which all instances of a Group Component are
-% collected during processing. How this collection is put together is
-% controlled by a special \textit{Collection Property}.
+%   Other Components may occur more than once in the same Container
+%   Instance, for example, a “chapter” (which itself may be a Sub
+%   Container of a more abstract Parent Container “Heading”) may have
+%   more than one “Author”. Such Components are called \textit{Group
+%   Components}. They are usually realized as {\LaTeX} environments
+%   within a Container's environment and contain themselves other
+%   Components. Those “second-level” Components are called
+%   \textit{Counted Components}, as they are “enumerated” across all
+%   Group Component instances within the same Container Instance. For
+%   each Group Component, there is a~\textit{Collection Component}, in
+%   which all instances of a~Group Component are collected
+%   during processing. How this collection is put together is
+%   controlled by a~special \textit{Collection Property}.
 % \end{multicols}
+%
+% \begin{multicols}{2}[\subsection{Relation to {\LaTeX} Templates}]
+%   Newer version of {\LaTeX} adopt a quite similar design principle
+%   with the introduction of \textit{Templates} into the {\LaTeX}
+%   Kernel in mid 2024\footnote{It is however noteworthy that the
+%   principal functionality has been available for much longer in form
+%   of the \lstinline{xtemplate} package.}
+%
+%   The template system in {\LaTeX} provides three levels of
+%   abstraction: \textit{Object Types}, \textit{Templates} and
+%   \textit{Template Instances}. An \textit{Object Type} represents
+%   the general idea of a typographical element, like “heading”,
+%   “float”, or “list”. The \textit{Object Type} also determines the
+%   exact number of “Arguments” each \textit{Template Instance} must
+%   or may have. \textit{Templates} define how the instances may be
+%   manipulated by the end-user by adding a list of pre-defined
+%   key-value pairs. Finally, \textit{Template Instances} are what the
+%   end-user is supposed to be using in their documents, often masked
+%   behind more user-friendly interface macros.
+%
+%   As an example, an \textit{Object Type} may be “sectioning” that
+%   provides the Arguments \texttt{title}, \texttt{short title} and
+%   \texttt{number}. A~\textit{Template} \texttt{heading} derived from
+%   that \textit{Object Type} may introduce the Interface key-value
+%   pairs \texttt{pre-skip}, \texttt{font-size} and
+%   \textit{after-skip}. A~\textit{Template Instance} then might be
+%   \textit{subsection}, which defines the \texttt{pre-skip} to
+%   \lstinline{2\baselineskip}, the \texttt{after-skip} to
+%   \lstinline{1\baselineskip} and the \texttt{font-size} to
+%   \lstinline|{10}{12}|. The \textit{Template Instance} is then being
+%   called in the definition of a~user level macro like
+%   \lstinline|\subsection[<label>][<shorttitle>]{<title>}|.
+%
+%   In {\CoCoTeX} terms, an \textit{Object Type} would be an abstract
+%   Container that defines the exact number and nature of Components
+%   each Instance of that Container could have, but does not declare
+%   any Properties.  {\LaTeX} \textit{Templates} are equivalent to
+%   {\CoCoTeX}'s second-level Child Containers whose parent is the
+%   abstract \textit{Object-Type} Container, but it only declares the
+%   Properties that can be used to manipulate the output of each
+%   Container Instance.  \textit{Template Instances} are equivalent to
+%   third-level Sub Containers of the \textit{Template} Child
+%   Container, that define fixed values for some or all of the
+%   \textit{Properties}.
+%
+%   In summary, {\CoCoTeX} has no formal distinction between
+%   \textit{Object Types}, \textit{Templates} and \textit{Template
+%   Instaces}.  However, those “layers of abstraction” can be realized
+%   by the \textit{Inheritance} mechanism, but there is no hard
+%   restrictions about \textit{if} and \textit{when}
+%   \textit{Properties} and/or \textit{Components} are introduced.
+% \end{multicols}
+%
 %
 % \section{How to Read This Documentation}
 %
@@ -772,19 +861,19 @@
 % This is a {\LaTeX} example.
 % \end{lstlisting}
 %
-% \subsection{Keyword Colors}
+% \subsection{Keyword Markings}
 %
-% \begin{multicols}{2}[Certain Parts of this documentation are color-coded:]
+% Certain Parts of this documentation are icon- and color-coded:
 % \begin{description}
-% \item[\textcolor{contcolor!75}{Containers}] are \textcolor{contcolor!75}{orange},
-% \item[\textcolor{hookcolor!75}{Hooks}] are \textcolor{hookcolor!75}{green},
-% \item[\textcolor{compcolor!75}{Components}] are \textcolor{compcolor!75}{blue},
-% \item[\textcolor{propcolor!75}{Properties}] are \textcolor{propcolor!75}{purple},
-% \item[\textcolor{tagscolor!75}{PDF-Tags}] are \textcolor{tagscolor!75}{cyan}
-% \item[\textcolor{attrcolor!75}{Attributes}] are \textcolor{attrcolor!75}{dark green}
-% \item[\textcolor{spot!75}{\LaTeX-Macros}] are \textcolor{spot!75}{red}
+% \item[\ContainerString{Containers}] are \textcolor{contcolor!75}{orange} and  marked with a box symbol \ContainerSymbol,
+% \item[\HookString{Hooks}] are \textcolor{hookcolor!75}{green} and marked with an insertion icon \HookSymbol,
+% \item[\ComponentString{Components}] are \textcolor{compcolor!75}{blue} and marked with an arrow to box symbol \ComponentSymbol,
+% \item[\PropertyString{Properties}] are \textcolor{propcolor!75}{purple} and marked with a gear symbol \PropertySymbol,
+% \item[\TagString{PDF-Tags}] are \textcolor{tagscolor!75}{cyan} and marked with a tag symbol \TagSymbol,
+% \item[\AttrString{Attributes}] are \textcolor{attrcolor!75}{dark green} and marked with a chain symbol \AttrSymbol, and
+% \item[\MacroString{\LaTeX-Macros}] are \textcolor{spot!75}{red} and have no symbol.
 % \end{description}
-% \end{multicols}
+% 
 %
 % \subsection{Data Types of Properties}
 %
