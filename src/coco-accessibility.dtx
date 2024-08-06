@@ -833,10 +833,14 @@
 % root node:
 %    \begin{macrocode}
 \ccWhenAlly{%
-  \ccDeclareHook[document]{cca/at/begin/document}
+%    \end{macrocode}
+% \DescribeHook{cca/document/begin} is a hook to add accessibility
+% specific declarations right before begin document.
+%    \begin{macrocode}
+  \NewHook{cca/document/begin}%
   \AtBeginDocument{%
     \directlua{ltpdfa.beginDocument('\luaescapestring{\ltpdfa@last@page}')}
-    \ccUseHook[document]{cca/at/begin/document}%
+    \UseHook{cca/document/begin}%
     \directlua{ltpdfa.configAutoclose()}
     \ccaVstructStart{document}%
 %    \end{macrocode}

@@ -306,6 +306,7 @@
 % The body of the Container is expanded last and should make use of
 % the macros defined above.
 %    \begin{macrocode}
+    \ccDeclareType{Attributes}{}%
     #2%
   \endgroup
 \ignorespaces}
@@ -575,11 +576,12 @@
 %   active.
 %    \begin{macrocode}
 \def\ccGetComp{\@ifstar\cc@sget@comp\cc@get@comp}
-\def\cc@get@comp#1{\ccWhenComp{#1}{%
-    \ccWhenAlly{\ccaStructStart{Para}}%
-    \ccUseComp{#1}%
-    \ccWhenAlly{\ccaStructEnd{Para}}%
-    \par}}
+\def\cc@get@comp#1{%
+  \ccWhenComp{#1}
+    {\ccWhenAlly{\ccaStructStart{Para}}%
+     \ccUseComp{#1}%
+     \ccWhenAlly{\ccaStructEnd{Para}}%
+     \par}}
 \def\cc@sget@comp#1{\ccWhenComp{#1}{\ccUseComp{#1}\par}}
 %    \end{macrocode}
 % \end{macro}
@@ -725,14 +727,18 @@
       \csgdef{cc@\cc@cur@cont @#2-\csname cc#2Cnt\endcsname @attrs}{##1}%
     \fi
     #3%
-%    \end{macrocode}
-% \TODO{make into LaTeX kernel hook!}
-%    \begin{macrocode}
-    \csname @#2@hook\endcsname
+    \csname cc@group@#2@hook\endcsname
     \ignorespaces
   }%
   \csdef{end\ccPrefix#2}{{\ccToggleCountedConditionals\csuse{cc@compose@group@#2}}\aftergroup\ignorespaces}%
 }
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccAddToComponentGroup} can be used to locally add
+%   code \InlineArg{2} to a previously defined Component Group
+%   \InlineArg{1}.
+%    \begin{macrocode}
+\def\ccAddToComponentGroup#1#2{\csappto{cc@group@#1@hook}{#2}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccDeclareGroupHandler} is used to declare a new group
@@ -832,11 +838,10 @@
 %   \InlineArg{2}.
 %    \begin{macrocode}
 \def\ccComposeCollection#1#2#3{%
-  \ccIfComp{#3}{\cslet{cc@used@#3@override}\@empty}
-    {\ifcsdef{cc#1Cnt}{%
-          \cc@compose@collection{#1}{#2}%
-          \cc@assign@res{\ccPrefix#3}%
-        \fi}{}}}
+  \ccIfComp{#3}
+    {\cslet{cc@used@#3@override}\@empty}
+    {\cc@compose@collection{#1}{#2}%
+     \cc@assign@res{\ccPrefix#3}}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccApplyCollection}
@@ -846,11 +851,10 @@
 %   \InlineArg{3}.
 %    \begin{macrocode}
 \def\ccApplyCollection#1#2#3{%
-  \ccIfComp{#3}{\cslet{cc@used@#3@override}\@empty}
+  \ccIfComp{#3}
+    {\cslet{cc@used@#3@override}\@empty}
     {\cc@apply@collection{#1}{#2}%
-     \cc@assign@res{\ccPrefix#3}%
-   }%
-}
+     \cc@assign@res{\ccPrefix#3}}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\cc@compose@collection} is a low-level macro used to
@@ -887,7 +891,7 @@
           \expandafter\expandafter\expandafter{\expandafter\cc@iterate@res\@tempb}%
         }%
         \expandafter\def\expandafter\cc@iterate@res\expandafter{\cc@iterate@res\egroup}%
-    }
+  \fi}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\cc@apply@collection} is the low-level macro used to
@@ -1093,52 +1097,9 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \section{Hooks}
-%
-% \TODO{Use latex3's hook facility instead. Look at latexreleases.sty to ensure forward compatibility}
-%
-% Hooks are used to patch code into different parts of a Container's
-% processing chain.
-% \begin{macro}{\ccDeclareHook} registers a new hook.  Hooks always
-%   default to an empty string.
-%   \begin{ArgList}
-%   \item*[1] is the Container for which the Hook is
-%     declared. If omitted, this defaults to the currently active
-%     Container (\lstinline{\cc@cur@cont})
-%   \item[2] is the Hook's user-level name
-%   \end{ArgList}
-%    \begin{macrocode}
-\def\ccDeclareHook{\cc@opt@curcont\cc@declare@hook}
-\def\cc@declare@hook[#1]#2{\expandafter\global\expandafter\let\csname cc@hook@#1@#2\endcsname\@empty}
-%    \end{macrocode}
-% \end{macro}
-% \begin{macro}{\ccAddToHook} adds new material to a Hook. If the hook
-%   has not yet been declared, a \lstinline{\ccDeclareHook} for that
-%   hook is applied first. In that case, use the optional
-%   \InlineArg*{1} to specify the Container name that hook is intended
-%   for. If it is omitted, the current Container is
-%   used. \InlineArg{2} is the name of the hook the material in
-%   \InlineArg{3} is to be appended to.
-%    \begin{macrocode}
-\def\ccAddToHook{\cc@opt@curcont\cc@add@to@hook}
-\def\cc@add@to@hook[#1]#2#3{%
-  \expandafter\ifx\csname cc@hook@#1@#2\endcsname\relax
-    \ccDeclareHook[#1]{#2}%
-  \fi
-  \csgappto{cc@hook@#1@#2}{#3}%
-\ignorespaces}
-%    \end{macrocode}
-% \end{macro}
-% \begin{macro}{\ccUseHook} expands the current state of the hook with
-%   the name \InlineArg{2} from Container \InlineArg*{1} (current
-%   Container if omitted).
-%    \begin{macrocode}
-\def\ccUseHook{\cc@opt@curcont\cc@use@hook}
-\def\cc@use@hook[#1]#2{\csuse{cc@hook@#1@#2}\ignorespaces}
-%    \end{macrocode}
-% \end{macro}
 %
 % \section{Properties}\label{sec:kernel:props}
+%
 % \subsection{Setting Properties}\label{sec:kernel:prop:set}
 %
 % \begin{macro}{\ccSetProperty}

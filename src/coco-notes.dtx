@@ -222,7 +222,7 @@
 \newcount\realchap \realchap\z@
 \ifx\ccn@en@with@chapters\relax
   \AtBeginDocument{%
-    \ccAddToHook[heading]{before-hook-chapter}{%
+    \AddToHook{env/heading/chapter/begin}{%
       \ifnum\c@endnote>\z@\relax
         \expandafter\global\expandafter\let\csname enotes@in@\the\realchap\endcsname\@empty
       \fi
@@ -251,7 +251,7 @@
 %    \begin{macrocode}
 \ifx\ccn@reset@notes@per@chapter\relax
   \AtBeginDocument{%
-    \ccAddToHook[heading]{before-hook-chapter}{%
+    \AddToHook{env/heading/chapter/begin}{%
       \global\c@footnote\z@
       \global\c@endnote\z@
     }%

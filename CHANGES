@@ -12,6 +12,7 @@
   - Added method to check global Components against a given value
   - Added a way to define Macros from Counted Components without full
     expansion
+  - Replaced old custom hook mechanism with LaTeX kernel hooks
   - Default PDF version is now 1.7 (or 2.0 if explicitly required)
     instead of 1.3 iff accessibility features are active
   - Fixed an issue where additions to a parent Container's Types were

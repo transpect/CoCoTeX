@@ -71,8 +71,8 @@
 %    \begin{macrocode}
 \def\cctmeta{\cc@opt@empty\cct@meta}
 \def\cct@meta[#1]{%
-  \ccParseAttributes{Meta}{#1}%
-  \ccUseHook[Meta]{attr-handler}%
+  \UseHook{env/meta/begin}%
+  \ccEvalAttributes[titlepage]{#1}%
   \ccEvalType{Components}%
   \let\and\relax
 }
@@ -115,9 +115,9 @@
   \cct@add@eval
   \cc@if@preamble\cct@set@pdfmeta\relax
 %    \end{macrocode}
-% Now, we expand the \UsageHook{document-meta-hook}.
+% Now, we expand the \UsageHook{cct/document/meta}.
 %    \begin{macrocode}
-  \ccUseHook{document-meta-hook}%
+  \UseHook{cct/document/meta}%
   \let\cc@cur@cont\@empty
 }
 %    \end{macrocode}
@@ -355,20 +355,26 @@ from the Components given in the Meta Container.}}}
 %
 % \section{Intermediate Level Interfaces}
 %
-% \DescribeHook{before-maketitle-hook} is expanded right before the
+% \DescribeHook{cct/maketitle/before} is expanded right before the
 %   titlepage is printed.
 %    \begin{macrocode}
-\ccDeclareHook[titlepage]{before-maketitle-hook}
+\NewHook{cct/maketitle/before}
 %    \end{macrocode}
-% \DescribeHook{document-meta-hook} is expanded at the very end of
+% \DescribeHook{cct/maketitle/after} is expanded at the end of the
+% titlepage.
+%    \begin{macrocode}
+\NewHook{cct/maketitle/after}
+%    \end{macrocode}
+% \DescribeHook{cct/document/meta} is expanded at the very end of
 %   the \texttt{Meta} Container.
 %    \begin{macrocode}
-\ccDeclareHook[titlepage]{document-meta-hook}
+\NewHook{cct/document/meta}
 %    \end{macrocode}
-% \DescribeHook{attr-handler} is used to handle the attributes in the
-% optional argument of \lstinline|\begin{\ccPrefix Meta}|.
+% \DescribeHook{env/meta/begin} is used to add code to be executed at
+% the very beginning of the Meta Container's main environment, before
+% the Attribtues are evaluated.
 %    \begin{macrocode}
-\ccDeclareHook[titlepage]{attr-handler}
+\NewHook{env/meta/begin}
 %    \end{macrocode}
 % \begin{macro}{\cct@article@titlepage} is the prototype for article
 %   title pages.
@@ -409,9 +415,9 @@ from the Components given in the Meta Container.}}}
   \expandafter\gdef\csname\ccPrefix Maketitle\endcsname{%
     \let\cc@cnt@grp\@empty
 %    \end{macrocode}
-% Here, we expand the \UsageHook{before-maketitle-hook}.
+% Here, we expand the \UsageHook{cct/maketitle/before}.
 %    \begin{macrocode}
-    \ccUseHook[titlepage]{before-maketitle-hook}%
+    \UseHook{cct/maketitle/before}%
     \bgroup
       \ccSetContainer{titlepage}%
       \ccEvalType{Properties}%
@@ -425,7 +431,7 @@ from the Components given in the Meta Container.}}}
         \fi
       \fi
     \egroup
-    \ccUseHook[titlepage]{after-maketitle-hook}%
+    \UseHook{cct/maketitle/after}%
   }%
 }
 %    \end{macrocode}
@@ -1347,9 +1353,9 @@ from the Components given in the Meta Container.}}}
 %    \end{macrocode}
 % \end{Property}
 % The Component Handler which links the new Components to that
-% Property is added to titlepage's \lstinline{document-meta-hook}:
+% Property is added to titlepage's \lstinline{cct/document/meta}:
 %    \begin{macrocode}
-  \ccAddToHook[titlepage]{document-meta-hook}{\edef\x{\noexpand\ccaAddToConfig{intent}{\ccUseProperty{output-intent}}}\x}
+  \AddToHook{cct/document/meta}{\edef\x{\noexpand\ccaAddToConfig{intent}{\ccUseProperty{output-intent}}}\x}
 %    \end{macrocode}
 %
 % \subsection{Encoding of the PDF-A Conformance}
@@ -1378,11 +1384,11 @@ from the Components given in the Meta Container.}}}
 %    \end{macrocode}
 % The checking if the values are valid, and the separation of the
 % various parts of the standard is done via a lua script in the
-% \lstinline{document-meta-hook}. The \lstinline{conformance}
+% \lstinline{cct/document/meta}. The \lstinline{conformance}
 % DocumentInfo nodes are only written, if \textit{neither}
 % \lstinline{PDFAID}, \textit{nor} \lstinline{PDFALevel} is empty.
 %    \begin{macrocode}
-\ccAddToHook[titlepage]{document-meta-hook}{%
+\AddToHook{cct/document/meta}{%
   \ccIfCompEmpty{PDFAID}{}{\ccIfCompEmpty{PDFALevel}{}{%
       \edef\x{\noexpand\ccaSetDocinfo{conformance}{%
           pdfaid=\ccUseComp{PDFAID};%

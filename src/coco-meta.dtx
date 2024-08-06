@@ -372,7 +372,7 @@
 %   block \InlineArg{2} to a pre-defined Role
 %   \InlineArg{1}. \TODO{make into LaTeX kernel hook}
 %    \begin{macrocode}
-\def\ccAddToRole#1#2{\csgappto{@#1@hook}{#2}}
+\def\ccAddToRole#1#2{\csgappto{cc@group@#1@hook}{#2}}
 %    \end{macrocode}
 % \end{macro}
 %

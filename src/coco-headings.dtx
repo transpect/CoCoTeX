@@ -150,7 +150,7 @@
 %    \begin{macrocode}
     \ccAddToType{Properties}{#3}{#4}%
 %    \end{macrocode}
-% Finally, we need to re-define the \lstinline{\ccUseHeading} macro so
+% Finally, we need to re-define the \UsageMacro{\ccUseHeading} macro so
 % that changes to the heading's Property list will be taken into
 % account for all dependend constructions like list-ofs and
 % toc-entries.
@@ -216,7 +216,7 @@
 % Unlike other Sub-Containers, headings form no own {\LaTeX}
 % environment.  Instead, headings are specifications of one common
 % \lstinline{\ccPrefix Heading} environment. Is is outsourced into the internal
-% \lstinline{\cch@declare@heading} macro, which is defined below.
+% \UsageMacro{\cch@declare@heading} macro, which is defined below.
 %
 % The reason for that is that we don't want to define versions of the
 % same property macros for each and every single heading
@@ -248,7 +248,7 @@
 %    \begin{macrocode}
 \newcount\cch@tempcnta \cch@tempcnta\z@
 \def\cch@add@autoclose#1#2{%
-  \ccAddToHook[document]{cca/at/begin/document}{%
+  \AddToHook{cca/document/begin}[cch/autoclose]{%
 %    \end{macrocode}
 % First, we assign the Sectioning tag and the tag for the section's
 % head itself to the \lstinline{Sect} and \lstinline{H#} tags,
@@ -614,7 +614,16 @@
 % \DescribeHook{cc/headings/[level]/run/after} is expanded after the
 % local \lstinline{RunTitle} has been generated
 %    \begin{macrocode}
-  \NewHook{cc/headings/#1/run/after}%% Expanded after the local RunTitle has been generated
+  \NewHook{cc/headings/#1/run/after}%
+%    \end{macrocode}
+% \DescribeHook{env/heading/[level]/begin} is the hook that is called
+% at the begin of each defined heading level with the name
+% \lstinline{[name]}. It is called at the beginning of every
+% \lstinline{Heading} environment whose mandatory argument matches
+% \lstinline{[name]} immediately before the Instance's Attributes are
+% evaluated.
+%    \begin{macrocode}
+  \NewHook{env/heading/#1/begin}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -927,6 +936,11 @@
 %   level.
 %    \begin{macrocode}
   \edef\ccCurSecName{#2}%
+%    \end{macrocode}
+% Then, we call the heading level specific
+% \HookUsage{env/heading/[level]/begin} hook.
+%    \begin{macrocode}
+  \UseHook{env/heading/#2/begin}%
 %    \end{macrocode}
 % \end{macro}
 %    \begin{macrocode}
