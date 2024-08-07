@@ -24,6 +24,8 @@
   - improved handling of color encoding option
 - coco-meta.dtx
   - remove transitive role-mapping
+  - added MetaDatumBlock tag for complex meta data values that may
+    contain multiple paragraphs
 - coco-floats.dtx
   - Changed how heights and widths of subfloats are calculated:
     - sameheight mechanism is now only applied if neither sub-figure
