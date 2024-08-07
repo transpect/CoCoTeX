@@ -20,8 +20,8 @@
 %% original source files, as listed above, are part of the
 %% same distribution. (The sources need not necessarily be
 %% in the same archive or directory.)
-\def\fileversion{0.3.2}%
-\def\filedate{2024-07-03}%
+\def\fileversion{0.3.3}%
+\def\filedate{2024-08-07}%
 \NeedsTeXFormat{LaTeX2e}[2018/12/01]
 \ProvidesPackage{htmltabs}
     [\filedate\space\fileversion\space htmltabs]
@@ -58,6 +58,7 @@
    \newcommand\ccaReplaceStruct[1]{}%
    \newcommand\ccaAddToConfig[2]{}%
    \newcommand\ccaMoveStruct[1]{}%
+   \newcommand\ccaAddKeep[1]{}%
    \let\ccaEnable\relax
    \let\ccaDisable\relax
  }%
@@ -1590,6 +1591,7 @@
               \def\ht@cell@struct{TD}%
             \fi
             \ccaStructStart{\ht@cell@struct}%
+            \ccaAddKeep{}%
             \ifnum\int@colspan>\@ne\relax
               \ccaAddColSpan{\int@colspan}%
             \fi
