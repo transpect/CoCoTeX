@@ -870,6 +870,22 @@
 % \end{macro}
 %
 %
+% \subsection{Math Tagging}
+%
+%    \begin{macrocode}
+\AtBeginDocument{%
+  \apptocmd{\(}{\ccaStructStart{Formula}}{}{\cca@patch@error\(}
+  \pretocmd{\)}{\ccaStructEnd{Formula}}{}{\cca@patch@error\)}
+  \apptocmd{\[}{\ccaVstructStart{Para}\ccaStructStart{Formula}}{}{\cca@patch@error\[}
+  \pretocmd{\]}{\ccaStructEnd{Formula}\ccaVstructEnd{Para}}{}{\cca@patch@error\]}
+
+  \pretocmd{\start@align}{\ccaVstructStart{Para}\ccaStructStart{Formula}}{}{\cca@patch@error\start@align}%
+  \apptocmd{\endalign}{\ccaStructEnd{Formula}\ccaVstructEnd{Para}}{}{\cca@patch@error\endalign}%
+}
+
+%    \end{macrocode}
+%
+%
 % \subsection{Default Role Mapping}
 %
 % Note that this section contains only the role mappings that didn't
