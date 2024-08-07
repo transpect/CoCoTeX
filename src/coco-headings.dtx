@@ -102,7 +102,8 @@
 %    \end{macrocode}
 %
 % \begin{macro}{\ccDeclareHeading} is the user-level macro to declare
-%   new headings.
+%   new headings. There also exists a \textit{starred} version of this
+%   macro, which exempts the declared heading from auto-tagging.
 % \begin{description}[2em]
 % \item[\#1] (optional) inherit-from: load all properties from that heading level, first.
 % \item[\#2] level: used for toc entries. -1 for part, 0 for chapter, 1 for section, etc.
@@ -110,8 +111,9 @@
 % \item[\#4] Property definitions and switches
 % \end{description}
 %    \begin{macrocode}
-\long\def\ccDeclareHeading{\cc@opt@empty\cc@declare@heading}
-\long\def\cc@declare@heading[#1]#2#3#4{%
+\long\def\ccDeclareHeading{\global\let\cch@star@hdg\@undefined\@ifstar{\global\let\cch@star@hdg\relax\cc@declare@heading}{\cc@declare@heading}}
+\long\def\cc@declare@heading{\cc@opt@empty\@cc@declare@heading}
+\long\def\@cc@declare@heading[#1]#2#3#4{%
 %    \end{macrocode}
 % First, we check if the heading has already been declared.
 %    \begin{macrocode}
@@ -228,10 +230,18 @@
     }% \ccDeclareContainer{#3}
   }% \ifcsdef cc@container@#3 fi
 %    \end{macrocode}
-% If \CoCoTeX's accessibility features are active, we need to register
-% each new heading with \lstinline{ltpdfa}'s autoclose mechanism.
+% If \CoCoTeX's accessibility features are active and the heading is
+% declared with the non-starred version of
+% \UsageMacro{\ccDeclareHeading}, we need to register each new heading
+% with \lstinline{ltpdfa}'s autoclose mechanism.
 %    \begin{macrocode}
-  \ccIfAlly{\cch@add@autoclose{#2}{#3}}{}% \AtBeginDocument\ccIfAlly
+  \ccWhenAlly{%
+    \ifx\cch@star@hdg\relax
+      \expandafter\global\expandafter\let\csname cch@notag@#3\endcsname\@empty
+    \else
+      \cch@add@autoclose{#2}{#3}%
+    \fi
+  }%
 }% \cc@declare@heading
 %    \end{macrocode}
 %   Each new heading level needs some configuration with the
@@ -245,6 +255,9 @@
 %   \lstinline{cca/before/begin/document} hook, since we need to know
 %   \textit{all} locally defined heading levels beforehand in order to
 %   build the Sectioning tree correctly.
+%
+%   Note that this whole method is only called for headings declared
+%   with the non-starred version of \UsageMacro{\ccDeclareHeading}.
 %    \begin{macrocode}
 \newcount\cch@tempcnta \cch@tempcnta\z@
 \def\cch@add@autoclose#1#2{%
@@ -264,6 +277,11 @@
     \cch@tempcnta=\numexpr\tw@-\cch@highest@level\relax
     \advance\cch@tempcnta by #1\relax
     \ccaAddRolemap{#2head}{H\the\cch@tempcnta}%
+%    \end{macrocode}
+% \TODO{Mixing numbered and plain H-Tags like that should be
+%   incompatible to the PDF/UA standard! On the other hand, H7
+%   and higher is not recognized by neither VeraPDF nor PAC.}
+%    \begin{macrocode}
     \ifnum\cch@tempcnta>6\relax
       \ccaAddRolemap{H\the\cch@tempcnta}{H}%
     \fi
@@ -481,8 +499,10 @@
 %    \end{macrocode}
 % Now, we store the counters for the actually used heading levels.
 %    \begin{macrocode}
-    \ifnum#1<\cch@min@level\relax\global\cch@min@level=#1\relax\fi
-    \ifnum#1>\cch@max@level\relax\global\cch@max@level=#1\relax\fi
+    \expandafter\ifx\csname cch@notag@#2\endcsname\@empty\else
+      \ifnum#1<\cch@min@level\relax\global\cch@min@level=#1\relax\fi
+      \ifnum#1>\cch@max@level\relax\global\cch@max@level=#1\relax\fi
+    \fi
 %    \end{macrocode}
 % 
 %    \begin{macrocode}
@@ -914,18 +934,22 @@
 % need to take the ugly road, for now.
 %    \begin{macrocode}
   \ifhmode\unskip\fi%
-  \ccIfAlly
-    {\global\let\cch@currenvir\@currenvir
-     \endgroup
-     \ccaVstructStart{#2}%
-     \UseHook{env/\ccPrefix Heading/before}%
-     \@ignorefalse
-     \begingroup
-       \@endpefalse
-       \let\@currenvir\cch@currenvir
-       \edef\@currenvline{\on@line}%
-       \@execute@begin@hook{\ccPrefix Heading}%
-    }{}%
+  \expandafter\ifx\csname cch@notag@#2\endcsname\@empty\else
+    \ccWhenAlly{%
+      \global\let\cch@currenvir\@currenvir
+      \endgroup
+      \ifnum\cch@lowest@level=99\relax\else
+        \ccaVstructStart{#2}%
+      \fi
+      \UseHook{env/\ccPrefix Heading/before}%
+      \@ignorefalse
+      \begingroup
+        \@endpefalse
+        \let\@currenvir\cch@currenvir
+        \edef\@currenvline{\on@line}%
+        \@execute@begin@hook{\ccPrefix Heading}%
+    }%
+  \fi
 %    \end{macrocode}
 % Some {\LaTeX} kernel macros are saved, the namespace is
 % set and counted groups from previous headings are reset.
@@ -1188,12 +1212,12 @@
 %    \begin{macrocode}
   \ccSetProperty{main-title-format}{%
     \ccUseProperty{title-face}%
-    \ccaVstructStart{\ccCurSecName head}%
+    \cchHeadTagStart
     \ccIfComp{Number}%
     {\ccUseProperty{hang-number}}%
     {\leftskip0pt}%
     \ccUseComp{Title}%
-    \ccaVstructEnd{\ccCurSecName head}%
+    \cchHeadTagEnd
     \par
   }
 %    \end{macrocode}
@@ -1583,10 +1607,33 @@
 %    \begin{macrocode}
   \ccSetProperty{author-contact-block-format}{% Format of the whole contact information block
     \ccUseComp{AuthorContact}\ifnum\ccCurCount<\ccTotalCount\ccUseProperty{counted-name-sep}\fi
-  }%
-}
+  }}
 %    \end{macrocode}
 % \end{Property}
+% 
+% \begin{macro}{\cchHeadTagStart} is used inside Property declarations
+%   to insert the start tag of the current section, unless the heading
+%   level was declared with the starred version of
+%   \UsageMacro{\ccDeclareHeading}.
+%    \begin{macrocode}
+\def\cchHeadTagStart{%
+    \expandafter\ifx\csname cch@notag@\ccCurSecName\endcsname\@empty\else
+      \ccaVstructStart{\ccCurSecName head}%
+    \fi}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\cchHeadTagEnd} is used inside Property declarations
+%   to insert the end tag of the current section, unless the heading
+%   level was declared with the starred version of
+%   \usageMacro{\ccDeclareHeading}.
+%    \begin{macrocode}
+\def\cchHeadTagEnd{%
+  \expandafter\ifx\csname cch@notag@\ccCurSecName\endcsname\@empty\else
+    \ccaVstructEnd{\ccCurSecName head}%
+  \fi}
+%    \end{macrocode}
+% \end{macro}
+%
 %
 % \section{Miscellaneous}
 %
