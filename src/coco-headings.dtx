@@ -962,7 +962,7 @@
   \edef\ccCurSecName{#2}%
 %    \end{macrocode}
 % Then, we call the heading level specific
-% \HookUsage{env/heading/[level]/begin} hook.
+% \UsageHook{env/heading/[level]/begin} hook.
 %    \begin{macrocode}
   \UseHook{env/heading/#2/begin}%
 %    \end{macrocode}
@@ -1625,7 +1625,7 @@
 % \begin{macro}{\cchHeadTagEnd} is used inside Property declarations
 %   to insert the end tag of the current section, unless the heading
 %   level was declared with the starred version of
-%   \usageMacro{\ccDeclareHeading}.
+%   \UsageMacro{\ccDeclareHeading}.
 %    \begin{macrocode}
 \def\cchHeadTagEnd{%
   \expandafter\ifx\csname cch@notag@\ccCurSecName\endcsname\@empty\else

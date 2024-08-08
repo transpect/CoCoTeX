@@ -128,8 +128,8 @@
 % \subsection{Accessibility Features}
 %
 % The next two options enable accessibility features and control the
-% PDF standard used: \lstinline{a11y} uses PDF version 1.7,
-% \lstinline{a11y20} uses PDF version 2.0.
+% PDF standard used: \lstinline{a11y} generates PDF version 1.7,
+% \lstinline{a11y20} generates PDF version 2.0.
 %    \begin{macrocode}
 \ExplSyntaxOn
   \DeclareOptionX{a11y}{%
@@ -142,11 +142,14 @@
     \PassOptionsToPackage{init}{coco-accessibility}}
 \ExplSyntaxOff
 %    \end{macrocode}
-% \lstinline{lang-id} is the identifier of the document's main language
+% \lstinline{lang-id} is the ISO-639/2 identifier of the document's
+% main language. This is neccessary for the PDF meta data and
+% \textit{different} from the main language name given via the
+% \lstinline{main} key.
 %    \begin{macrocode}
 \DeclareOptionX{lang-id}{\PassOptionsToPackage{\CurrentOption}{coco-accessibility}}
 %    \end{macrocode}
-% if set, \lstinline{nodetree} triggers extensive debgging output from the ltpdfa package.
+% If set, \lstinline{nodetree} triggers extensive debgging output from the ltpdfa package.
 %    \begin{macrocode}
 \DeclareOptionX{nodetree}{\PassOptionsToPackage{\CurrentOption}{coco-accessibility}}
 %    \end{macrocode}
@@ -168,9 +171,9 @@
 %    \end{macrocode}
 % \lstinline{color-enc} serves two purposes: First, it controls the
 % colour space for colours invoked via the \lstinline{xcolor}
-% package. Second it controls which default ICC colour profile is
-% embedded into the PDF file when no explicit ICC profile is provided by
-% the user.
+% package. Second, it controls which default ICC colour profile is
+% embedded into the PDF file when no explicit ICC profile is provided
+% by the user.
 %    \begin{macrocode}
 \DeclareOptionX{color-enc}{\PassOptionsToPackage{\CurrentOption}{coco-common}}
 %    \end{macrocode}
@@ -200,7 +203,7 @@
 %    \end{macrocode}
 % The switch \lstinline{ennotoc} triggers headings in the Endnotes
 % area to \textit{not} appear in the table of contents (read:
-% End-Notes-NO-TOC).
+% \textit{e}nd-\textit{n}otes-\textit{no}-\textit{toc}).
 %    \begin{macrocode}
 \DeclareOptionX{ennotoc}{\PassOptionsToPackage{\CurrentOption}{coco-notes}}
 %    \end{macrocode}
@@ -210,7 +213,7 @@
 \DeclareOptionX{endnoteswithchapters}{\PassOptionsToPackage{\CurrentOption}{coco-notes}}
 %    \end{macrocode}
 % The switch \lstinline{resetnotesperchapter} causes foot- and endnote
-% counters to be reset at each new chapter.
+% counters to be reset at the beginning of each new chapter.
 %    \begin{macrocode}
 \DeclareOptionX{resetnotesperchapter}{\PassOptionsToPackage{\CurrentOption}{coco-notes}}
 %    \end{macrocode}
@@ -223,6 +226,9 @@
 %    \begin{macrocode}
 \DeclareOptionX*{\PassOptionsToClass{\CurrentOption}{article}}
 \DeclareOptionX*{\PassOptionsToClass{\CurrentOption}{book}}
+%    \end{macrocode}
+% Process the options.
+%    \begin{macrocode}
 \ProcessOptionsX
 %    \end{macrocode}
 %
@@ -236,21 +242,17 @@
 %   the old names to the new ones. Those are defined in the
 %   \lstinline{coco-xerif} module (which is \textit{not} part of
 %   {\CoCoTeX} itself, but included in \lstinline{xerif}'s common
-%   files). The hook is expanded at the very end of the
-%   \lstinline{cocotex.cls} file. The \lstinline{coco-xerif} module
-%   itself is loaded early in \lstinline{coco-common.sty}.
-%
-%   Note that this hook is temporary. As soon as all legacy styles are
-%   adjusted to the new macro names, this hook will be removed!
+%   files\footnote{see
+%   \url{https://github.com/transpect/xerif-latex}}). The hook is
+%   expanded at the very end of the \lstinline{cocotex.cls} file. The
+%   \lstinline{coco-xerif} module itself is loaded early in
+%   \lstinline{coco-common.sty}.
 %    \begin{macrocode}
 \def\ccAfterClassHook{}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccToggleCountedConditionalsHook} is a hook to ensure
 %   backwards-compatibility within the processing of Counted Components
-%
-%   Note that this hook is temporary. As soon as all legacy styles are
-%   adjusted to the new macro names, this hook will be removed!
 %    \begin{macrocode}
 \def\ccToggleCountedConditionalsHook{}%
 %    \end{macrocode}
@@ -267,7 +269,9 @@
 % \section{Loading and Adjusting Underlying DocumentClass}
 %
 % All publication types supported by {\CoCoTeX} are based on one of
-% \LaTeX's default classes \lstinline{book} or \lstinline{article}:
+% \LaTeX's default classes \lstinline{article}
+% (when \lstinline{pubtype=article}) or \lstinline{book} (all other
+% pubtypes):
 %    \begin{macrocode}
 \ifarticle
   \LoadClass[10pt,a4paper]{article}
@@ -466,7 +470,7 @@
 %    \end{macrocode}
 %
 %
-% \section{End of Dcument Class Hook}
+% \section{End of Document Class Hook}
 %
 % Expanding backwards-compatibility aliases from the coco-xerif module:
 %    \begin{macrocode}
