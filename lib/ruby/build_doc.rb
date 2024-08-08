@@ -137,9 +137,9 @@ module CoCoTeX
       File.open(index, "r") do |f|
         f.each_line do |line|
           if manual
-            temp.puts(line.gsub(/\\indexentry\[manual\]{cc[a-z]?@?/, '\\indexentry[manual]{'))
+            temp.puts(line.gsub(/\\indexentry\[manual\]{cc@?/, '\\indexentry[manual]{'))
           else
-            temp.puts(line.gsub(/\\indexentry\[cocotex\]{cc[a-z]?@?/, '\\indexentry[cocotex]{'))
+            temp.puts(line.gsub(/\\indexentry\[cocotex\]{cc@?/, '\\indexentry[cocotex]{'))
           end
         end
       end
