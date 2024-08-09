@@ -879,13 +879,13 @@
 % \begin{Attribute}{debug}{<flag>} if set, additional debugging is
 %   written into the shell and log file.
 %    \begin{macrocode}
-    \ccDeclareAttributeHandler{debug}[\let\ccf@debug\relax]{\let\ccf@debug\ccf@attr@debug}
+    \ccDeclareAttributeHandler*{debug}[\let\ccf@debug\relax]{\let\ccf@debug\ccf@attr@debug}
 %    \end{macrocode}
 % \end{Attribute}
 % \begin{Attribute}{no-same-height}{<flag>} if set, the same-height
 %   calculations are de-activated for this float.
 %    \begin{macrocode}
-    \ccDeclareAttributeHandler{no-same-height}{\@ccf@sameheightfalse}%
+    \ccDeclareAttributeHandler*{no-same-height}{\@ccf@sameheightfalse}%
 %    \end{macrocode}
 % \end{Attribute}
 %    \begin{macrocode}
