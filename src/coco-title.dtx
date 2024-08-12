@@ -17,6 +17,8 @@
 \ProvidesPackage{coco-title}
     [\filedate \fileversion CoCoTeX title module]
 \RequirePackage{coco-meta}
+\DeclareOptionX{lang-id}{\gdef\cct@lang@id{#1}}
+\ProcessOptionX
 %    \end{macrocode}
 % \section{Top-Level Interface}
 %
@@ -231,10 +233,30 @@
   \cct@title@process@bkt
   \cct@title@process@bkk
   \cct@title@process@bka
+  \cct@title@process@bkl
 }
 %    \end{macrocode}
 % \end{macro}
+%
+%
+% \subsection{Processing of the Document's Main Language}
+%
+% \begin{macro}{\cct@title@process@bkl} writes the document's main
+%   language into the Info dictionary if no accessibility features are
+%   active. If it \textit{is} active, the document language is handled
+%   by ltpdfa.
+%    \begin{macrocode}
+\def\cct@title@process@bkl{%
+  \ifx\cct@lang@id\@undefined\else
+    \ccUnlessAlly{\cct@write@hr@infodict{pdflang}{\cct@lang@id}}}%
+  \fi
+}
+%    \end{macrocode}
+% \end{macro}
+%
+%
 % \subsection{Processing of the Document's Title}
+%
 % \begin{macro}{\cct@title@process@bkt} processes the document's main title
 %    \begin{macrocode}
 \def\cct@title@process@bkt{%
@@ -245,7 +267,10 @@
 }
 %    \end{macrocode}
 % \end{macro}
+%
+%
 % \subsection{Processing of the Document's Author}
+%
 % \begin{macro}{\cct@title@process@bka} processes the document's main
 %   author or, if that doesn't exist, the main editor, or throws a
 %   warning if neither exist.

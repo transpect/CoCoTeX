@@ -147,7 +147,10 @@
 % \textit{different} from the main language name given via the
 % \lstinline{main} key.
 %    \begin{macrocode}
-\DeclareOptionX{lang-id}{\PassOptionsToPackage{\CurrentOption}{coco-accessibility}}
+\DeclareOptionX{lang-id}{%
+  \PassOptionsToPackage{\CurrentOption}{coco-accessibility}%
+  \PassOptionsToPackage{\CurrentOption}{coco-title}%
+}
 %    \end{macrocode}
 % If set, \lstinline{nodetree} triggers extensive debgging output from the ltpdfa package.
 %    \begin{macrocode}

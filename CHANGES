@@ -35,8 +35,9 @@
 - coco-title.dtx
   - NEW: added DocTitle Component and doc-book-title Properties to
 		 locally override the PDF-title meta datum
-  - XMP meta data are parsed and written into the Document Info
-        Dictionary when ltpdfa is used.
+  - NEW: XMP meta data are parsed and written into the Document Info
+         Dictionary when ltpdfa is used.
+  - NEW: Write document language with disabled a11y features
   - FIX: XMP meta data now take preference over Meta container
          Components if the XMP does exist.
   - FIX: pdfcreator and pdfproducer metadata were used the wrong way.
