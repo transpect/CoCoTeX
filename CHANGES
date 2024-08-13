@@ -52,5 +52,8 @@
   - Links now have /Contents attribute to make VeraPDF's PDF/UA1 check
     happy
   - Added minimal math tagging
+- coco-lists.dtx
+  - FIX: typo in doc string
+  - FIX: counting error
 
 0.4.9 (INITIAL STATUS)

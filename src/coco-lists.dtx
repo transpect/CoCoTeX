@@ -175,7 +175,7 @@
     \ccSetProperty{margin-left}{\csname leftmargin\@roman\cclCurDepth\endcsname-\ccUseProperty{label-sep}+\ccUseProperty{prev-margin-left}}%
 %    \end{macrocode}
 % \end{Property}
-% \begin{Property}{margin-left}{<dimen>} is the maximum space reserved
+% \begin{Property}{max-label-width}{<dimen>} is the maximum space reserved
 %   for a list item's label.
 %    \begin{macrocode}
     \ccSetProperty{max-label-width}{.33\textwidth}%
@@ -471,8 +471,8 @@
 %    \begin{macrocode}
 \def\ccDeclareNested#1#2#3{%
   \@tempcnta=#2\relax
-  \ifx\@tempcnta<\@ne\relax
-    \ccPackageError{lists}{Nesting}{Invalid nesting level!}{You cannot declare nesting levels less than 1!}%
+  \ifx\@tempcnta<\z@\relax
+    \ccPackageError{lists}{Nesting}{Invalid nesting level!}{You cannot declare nesting levels less than 0!}%
   \fi
   \advance\@tempcnta\@ne\relax
   \ccDeclareContainer{#1-\the\@tempcnta}{%
@@ -663,7 +663,7 @@
 %    \begin{macrocode}
   \csdef{\ccPrefix Item}{\cc@opt@empty\ccl@item}%
   \def\ccl@item[##1]{%
-    \edef\ccl@item@label{##1}%
+    \protected@edef\ccl@item@label{##1}%
     \ifx\ccl@item@label\@empty
       \cclUseLabelHandler%
     \else
