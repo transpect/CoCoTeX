@@ -27,7 +27,6 @@
 \ProcessOptionsX
 
 \RequirePackage[quiet]{fontspec}
-\RequirePackage[bidi=basic,silent]{babel}
 \def\parse@script#1,#2,\relax{%
   \ccs@callback{#1}%
   \edef\@argii{#2}%
@@ -41,6 +40,20 @@
   \expandafter\parse@script\usescript,,\relax
 \fi
 \ccPackageInfo{Script}{Info}{Fonts loaded: \meaning\usescript}
+%    \end{macrocode}
+% If babel's bidirectional feature is loaded without need, there might be errors, so we do some checks first:
+%    \begin{macrocode}
+\def\cc@bidi{}
+\@tempswafalse
+\ifx\usescript\relax\else
+  \ifx\csname use@script@arabic\endcsname\@empty\@tempswatrue
+  \else\ifx\csname use@script@hebrew\endcsname\@empty\@tempswatrue
+    \else\ifx\csname use@script@amharic\endcsname\@empty\@tempswatrue
+      \else\ifx\csname use@script@ethiop\endcsname\@empty\@tempswatrue
+        \else\ifx\csname use@script@syriac\endcsname\@empty\@tempswatrue
+          \fi\fi\fi\fi\fi\fi
+\if@tempswa\def\cc@bidi{,bidi=basic}\fi
+\RequirePackage[silent\cc@bidi]{babel}
 %    \end{macrocode}
 %
 %

@@ -55,5 +55,7 @@
 - coco-lists.dtx
   - FIX: typo in doc string
   - FIX: counting error
+- coco-script.dtx
+  - FIX: Avoid babel-lua errors when bidi is not needed
 
 0.4.9 (INITIAL STATUS)
