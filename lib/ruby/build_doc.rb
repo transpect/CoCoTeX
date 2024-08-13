@@ -69,7 +69,7 @@ module CoCoTeX
       unless @options.quick
         run_while_status("2nd TeX run") do do_tex_run end
         run_while_status("3rd TeX run") do do_tex_run end
-        run_while_status("Generating Index") do do_makeindex() end
+        run_while_status("Generating Index") do do_makeindex(manual: true) end
         run_while_status("4th TeX run") do do_tex_run end
         run_while_status("5th TeX run") do do_tex_run end
       end
@@ -95,7 +95,7 @@ module CoCoTeX
       xf = resolve_path(@options.xerif_fonts) if @options.xerif_fonts
       if xf && Dir.exists?(xf)
         $log.info("using #{xf}.")
-        shell_command("cd #{@temp_dir} ; ln -s #{xf} fonts")
+        shell_command("cd #{@temp_dir} ; ln -s #{xf} fonts") unless File.exists?(File.join(@temp_dir, "fonts"))
       else
         $log.info("Collecting xerif-fonts (this may take a while, you can checkout the svn repo yourself and use the --xerif-fonts option to specify the path to the fonts)")
         o,e,s = shell_command_capture("cd #{@temp_dir} ; svn co https://subversion.le-tex.de/common/xerif-fonts/ fonts")
@@ -137,7 +137,7 @@ module CoCoTeX
       File.open(index, "r") do |f|
         f.each_line do |line|
           if manual
-            temp.puts(line.gsub(/\\indexentry\[manual\]{cc@?/, '\\indexentry[manual]{'))
+            temp.puts(line.gsub(/\\indexentry\[macros\]{cc@?/, '\\indexentry[macros]{'))
           else
             temp.puts(line.gsub(/\\indexentry\[cocotex\]{cc@?/, '\\indexentry[cocotex]{'))
           end

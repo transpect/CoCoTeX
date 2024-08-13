@@ -1,13 +1,24 @@
-%\usepackage[UKenglish]{babel}
-\usepackage{amsmath}
+\RequirePackage[hyperref]{doc}
+\codeline@indexfalse
+\let\special@index\index
 \RequirePackage{listings}
+\usepackage{amsmath}
+
+\AddToHook{begindocument}{%
+  \hypersetup{%
+    colorlinks=false
+   ,hidelinks
+   ,pdfborder={0 0 0}
+ }%
+ \usepackage{bookmark}%
+}
 
 %%%%%%%%%%%
 % Colours %
 %%%%%%%%%%%
-
 \definecolor{link}{cmyk}{0.00,0.00,0.00,1.00}
 \definecolor{spot}{cmyk}{0.00,0.82,0.59,0.18}
+
 \definecolor{contcolor}{cmyk}{0.00,0.00,1.00,0.20}
 \definecolor{compcolor}{cmyk}{1.00,1.00,0.00,0.00}
 \definecolor{hookcolor}{cmyk}{1.00,0.00,1.00,0.00}
@@ -27,14 +38,15 @@
 \headsep\dimexpr16mm-\headheight\relax
 \textwidth=140mm
 \textheight=56\baselineskip
-\oddsidemargin=50mm
-\marginparwidth=25mm
+\oddsidemargin=56mm
+\marginparwidth=46mm
 \emergencystretch=2em
-\marginparsep10mm
+\marginparsep4mm
 
 %%%%%%%%%
 % Fonts %
 %%%%%%%%%
+\usepackage{newtxtext,newtxmath}
 \let\mybfseries\bfseries
 \let\sbseries\mybfseries
 \def\bfseries{\mybfseries\sffamily}
@@ -50,10 +62,13 @@
 \parindent\z@
 \parskip.5\baselineskip
 
-\RequirePackage{marginnote}\reversemarginpar
+\RequirePackage{marginnote}
+\reversemarginpar
+
 \def\ccNew#1{\marginnote{\textcolor{spot!90}{\sffamily\bfseries New #1}}}
 \def\ccUpdate#1{\marginnote{\textcolor{spot!90}{\sffamily\bfseries Updated #1}}}
 \def\marginfont{\sffamily\mdseries\footnotesize}
+\def\marginnotevadjust{1.5bp}
 
 \let\hack\@firstofone
 \let\Hack\@firstofone
@@ -65,67 +80,20 @@
 % Lists %
 %%%%%%%%%
 
-% TODO: use coco-lists.sty
-\leftmargini1em
-\leftmargin\leftmargini
-\leftmarginii\leftmargini
-\leftmarginiii\leftmargini
-\leftmarginiv\leftmargini
-\leftmarginv\leftmargini
+\RequirePackage[replace]{coco-lists}
+\ccAddToType{Properties}{Itemize}{%
+  \ccSetProperty{label-sep}{\z@}%
+  \ccSetProperty{indent}{-1em}%
+  \ccSetProperty{label-align}{left}%
+  \ccSetProperty{margin-left}{auto}%
+}
+
 \def\myitemlabel#1{\raise.25ex\hbox{\color{spot!#1}\rule{1ex}{1ex}}}
-\def\labelitemi{\myitemlabel{100}}
-\def\labelitemii{\myitemlabel{50}}
-\def\labelitemiii{\myitemlabel{30}}
-\def\labelitemiv{\myitemlabel{10}}
+\ccAddToType{Properties}{Itemize-1}{\ccSetProperty{default-label}{\myitemlabel{100}}}
+\ccAddToType{Properties}{Itemize-2}{\ccSetProperty{default-label}{\myitemlabel{50}}}
+\ccAddToType{Properties}{Itemize-3}{\ccSetProperty{default-label}{\myitemlabel{30}}}
+\ccAddToType{Properties}{Itemize-4}{\ccSetProperty{default-label}{\myitemlabel{10}}}
 
-\renewenvironment{description}[1][]
-{\list{}{%
-    \labelwidth=\z@
-    \if!#1!\else\labelwidth#1\relax\fi%
-    \ifdim\labelwidth=\z@\labelwidth 30mm\fi
-    \topsep.25\baselineskip
-    \labelsep   -\labelwidth\relax
-    \leftmargin  \labelwidth\relax
-    \itemsep\z@
-    \partopsep\z@
-    \let\makelabel\descriptionlabel}}
-{\endlist}
-\renewcommand*\descriptionlabel[1]{%
-  \setbox\z@\hbox{\normalfont\myttfamily\small#1}%
-  \hskip\labelsep
-  \ifdim\wd\z@>\labelwidth
-    {\normalfont\ttfamily #1\enskip}%
-    \hskip-\labelsep
-  \else
-    \hbox to \labelwidth{\normalfont\ttfamily #1\hfill}%
-  \fi}
-
-\usepackage{enumerate}
-\def\@enum@{%
-  \list{\csname label\@enumctr\endcsname}%
-  {\labelsep\z@
-   \itemsep\z@
-   \leftmargin\parindent
-   \labelwidth\parindent
-   \usecounter\@enumctr%
-   \def\makelabel##1{\small##1\hss}}}
-
-\def\itemize{%
-  \ifnum \@itemdepth >\thr@@\@toodeep\else
-    \advance\@itemdepth\@ne
-    \@enumdepth=\@itemdepth
-    \edef\@itemitem{labelitem\romannumeral\the\@itemdepth}%
-    \expandafter
-    \list
-      \csname\@itemitem\endcsname
-      {\topsep\z@
-       \labelwidth\csname leftmargin\romannumeral\the\@itemdepth\endcsname
-       \leftmargin\labelwidth
-       \labelsep\z@
-       \itemsep\z@
-       \parsep\z@
-       \def\makelabel##1{\hb@xt@\labelwidth{##1\hss}}}%
-  \fi}
 
 %%%%%%%%%%%%%%%
 % page styles %
@@ -473,19 +441,19 @@
 \makeindex[name=tags]
 \makeindex[name=attributes]
 
-\def\seealso#1#2{\smash{\raise1\p@\hbox{\footnotesize$\downarrow$}}\kern.1667em#1}
-\def\see#1#2{\smash{\raise1\p@\hbox{\footnotesize$\uparrow$}}\kern.1667em#1}
+\def\seealso#1#2{\textit{see also}~#1}
+\def\see#1#2{\textit{see}~#1}
 
 \long\def\IndexPrologue#1{\long\gdef\index@prologue{#1}}
 \long\def\PrintIndex{%
+  \let\theindex\HDorg@theindex% otherwise all index sections get bookmarked as "Index..."
   \backmatter
   \begin{Heading}[nonumber]{chapter}
     \Title{Index}
   \end{Heading}
-  Page entries in \textbf{bold face} refer to main sections that
-  describe the index term.  Entries in \texttt{mono-type} refer to
-  \LaTeX\ commands and markup.  The symbol {\see{}{}} stands for
-  “see”; the symbol {\seealso{}{}} for “see also”.\par
+  In general, page entries in \textbf{bold face} refer to main sections that
+  describe the index term in greater detail. Roman page numbers refer
+  to pages where the entry is used.\par
   \raggedright \IndexPrologue{\gdef\indexcolor{spot!75}%
     \begin{Heading}[nonumber]{section}
       \Title{\color{\indexcolor}General Index}%
@@ -499,8 +467,9 @@
       \TocTitle{Macro and Environment Index}
       \RunTitle{Index -- Macros and Environments}
     \end{Heading}
-    In this index, the \texttt{cc(@)}- and module specific \texttt{ccX(@)}-Prefixes were omitted when sorting the entries.}%
-  \@input@{\jobname-macro.ind}%
+    In this index, the \texttt{cc(@)}-Prefixes are omitted when
+    sorting the entries.}%
+  \@input@{\jobname-macros.ind}%
   \IndexPrologue{\gdef\indexcolor{contcolor!75}%
     \begin{Heading}[nonumber]{section}
       \Title{\color{\indexcolor}Container Index}%
@@ -514,7 +483,8 @@
       \TocTitle{Component Index}
       \RunTitle{Index -- Components}
     \end{Heading}
-  In this index, the name in parentheses denote the (abstract) Container within which the Component entry is defined.}%
+    In this index, the specification in parentheses denote the
+    (Parent) Container inside of which the Component is valid.}%
   \@input@{\jobname-components.ind}%
   \IndexPrologue{\gdef\indexcolor{propcolor!75}%
     \begin{Heading}[nonumber]{section}
@@ -522,7 +492,8 @@
       \TocTitle{Property Index}
       \RunTitle{Index -- Properties}
     \end{Heading}
-  In this index, the name in parentheses denote the (abstract) Container within which the Property entry is defined.}%
+    In this index, the specification in parentheses denote the
+    (Parent) Container inside of which the Property is valid.}%
   \@input@{\jobname-properties.ind}%
   \IndexPrologue{\gdef\indexcolor{hookcolor!75}%
     \begin{Heading}[nonumber]{section}
@@ -536,33 +507,38 @@
       \Title{\color{\indexcolor}Tag Index}%
       \TocTitle{Tag Index}
       \RunTitle{Index -- Tags}
-    \end{Heading}}
+    \end{Heading}%
+    In this index, \texttt{<tag>} refers to start tags,
+    \texttt{</tag>} refers to end tags, and \texttt{</tag>} to tags in
+    general.}
   \@input@{\jobname-tags.ind}%
   \IndexPrologue{\gdef\indexcolor{attrcolor!75}%
     \begin{Heading}[nonumber]{section}
       \Title{\color{\indexcolor}Attribute Index}%
       \TocTitle{Attribute Index}
       \RunTitle{Index -- Attributes}
-    \end{Heading}}
-  \@input@{\jobname-attributes.ind}%
-  \global\let\PrintIndex\@empty
-}
+    \end{Heading}%
+    In this index, the specification in parentheses denote the
+    (Parent) Container's Environment inside of which the Attribute is
+    valid.}  \@input@{\jobname-attributes.ind}%
+  \global\let\PrintIndex\@empty }
 
-\def\Index#1{\index{#1|hyperpage}}
+\let\Index\index
 
 \def\MainTerm{\cc@opt@second\main@term}
-\def\main@term[#1]#2{\textbf{#1}\index{#2|bfhyperpage}}
+\def\main@term[#1]#2{\marginnote{#2}\textbf{#1}\index{#2|bfhyperpage}}
 
 
 \def\SeeIndex#1#2{\index{#1|see{#2}}}
 \def\PropIndex#1{\index[properties]{#1|hyperpage}}
 
 \def\bfhyperpage#1{{\bfseries\color{\indexcolor}\hyperpage{#1}}}
+
+\setcounter{IndexColumns}{2}
+
 \renewenvironment{theindex}
-{\begin{multicols}{3}[\index@prologue]%
-  \parskip\z@
-  \small
-  \let\item\@idxitem \ignorespaces}%
+{\begin{multicols}\c@IndexColumns[\index@prologue][\IndexMin]%
+    \IndexParms \let\item\@idxitem \ignorespaces}%
 {\end{multicols}}
 
 \renewcommand\@idxitem{\par\hangindent .75em}
@@ -576,44 +552,248 @@
 % CoCoTeX Doc %
 %%%%%%%%%%%%%%%
 
-% TODO: adapt macros from src/cocoDTXPreface.dtx
+
+%% Generic
+\RequirePackage{fontawesome}
+\def\ccDocSymbol#1{\ifvmode\leavevmode\fi\lower1\p@\hbox{#1}}
+\def\ccDocString#1#2#3{{\small\ttfamily\mybfseries\color{#1}\if!#2!\else#2\,\fi#3}}
+
+%% abstract container for doc elements
+\ccDeclareContainer{CoCoDoc}{%
+  \ccDeclareType{Components}{%
+    \ccDeclareComp{Name}%
+  }%
+  \ccDeclareType{Attributes}{%
+    \ccDeclareAttributeHandler*{noindex}{\let\noindex\relax}%
+  }%
+  \ccDeclareType{Properties}{%
+    \ccSetProperty{color}{spot}
+    \ccSetProperty{print-name}{\ccUseProperty{string-command}}%
+    \ccSetProperty{index}{\index[\ccUseProperty{index-key}]{\actualchar\string\verb\quotechar*\verbatimchar\ccUseComp{Name}\verbatimchar\noexpand\doc@handleencap{main}}}%
+    \ccSetProperty{index-key}{}%
+    \ccSetProperty{string-command}{\ccDocString{\ccUseProperty{color}}{\ccUseProperty{symbol-command}}{\ccUseComp{Name}}%
+    }%
+    \ccSetProperty{symbol-command}{}
+  }%
+}
+
+\def\DescriptonDomain#1{\def\description@domain{#1}}
+\DescriptonDomain{}
+
+%% intermediary, abstract container for doc elements that are sensitive to a description domain
+\ccDeclareContainer{DomainedDoc}{%
+  \ccInherit{Components,Properties,Attributes}{CoCoDoc}%
+  \ccDeclareType{Properties}{%
+    \ccSetProperty{index}{\index[\ccUseProperty{index-key}]{\actualchar\string\verb\quotechar*\verbatimchar\ccUseComp{Name}\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{main}}}%
+  }
+}
+
+\def\ccDoc{\cc@opt@empty\cc@doc}
+\def\cc@doc[#1]#2#3{%
+  \if@nobreak\vskip-\parskip\else\vskip\baselineskip\fi\par
+  \bgroup
+    \ccSetContainer{#2}%
+    \ccEvalType{Properties}%
+    \ccEvalAttributes[CoCoDoc]{#1}%
+    #3%
+    \ccUseProperty{print-name}%
+    \ifx\noindex\relax\else\ccUseProperty{index}\fi%
+  \egroup\par
+  \@noskipsecfalse
+  \@afterindentfalse
+  \nopagebreak
+  \@afterheading
+}
+
+%%%%%%%%%%%%%%
+% Properties %
+%%%%%%%%%%%%%%
+\def\PropertySymbol{\ccDocSymbol\faGear}
+\def\PropertyString#1{\ccDocString{propcolor!75}{\PropertySymbol}{#1}}
+
+\ccDeclareContainer{Properties}{%
+  \ccInherit{Components,Attributes,Properties}{DomainedDoc}%
+  \ccDeclareType{Components}{%
+    \ccDeclareComp{Args}%
+    \ccDeclareComp{Default}%
+  }%
+  \ccDeclareType{Properties}{%
+    \ccSetProperty{print-name}{%
+      \PropertyString{\ccUseComp{Name}}%
+      \enskip
+      \bgroup
+        \small\color{propcolor!50}[\ccIfCompEmpty{Default}{<empty>}{\ccUseComp{Default}}]%
+      \egroup
+      \ccWhenComp{Args}{\hfill{\small \ccUseComp{args}}}%
+    }%
+    \ccSetProperty{index-key}{properties}%
+  }%
+}
+
+\newcommand\DescribeProp[4][]{%
+  \cc@doc[#1]{Properties}{%
+    \ccComponent{Name}{#2}%
+    \ccComponent{Args}{#3}%
+    \ccComponent{Default}{#4}%
+  }%
+}
+
+% Index only
+\def\UsageProperty#1{\index[properties]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{usage}}}
+% Print and Index
+\def\UsageProp#1{\PropertyString{#1}\UsageProperty{#1}}
+% for Properties that are not declared by the user, but result from CoCoTeX internal processes
+\def\DescribeImplicitProp#1{% \describeUProp
+  \vskip\baselineskip\par
+    {\bfseries\ttfamily #1}\ifx\noindex\relax\else\index[properties]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{main}}\fi}
+
+
+
+%%%%%%%%%%%%%%
+% Containers %
+%%%%%%%%%%%%%%
+\def\ContainerSymbol{\ccDocSymbol\faCube}
+\def\ContainerString#1{\ccDocString{contcolor!75}{\ContainerSymbol}{#1}}
+\ccDeclareContainer{Container}{%
+  \ccInherit{Components,Attributes,Properties}{CoCoDoc}%
+  \ccDeclareType{Properties}{%
+    \ccSetProperty{color}{contcolor!75}
+    \ccSetProperty{index-key}{containers}
+    \ccSetProperty{symbol-command}{\ContainerSymbol}
+  }}
+\newcommand\DescribeContainer[2][]{\cc@doc[#1]{Container}{\ccComponent{Name}{#2}}}
+\def\UsageContainer#1{\ccDocString{contcolor}{\ContainerSymbol}{#1}\index[containers]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\noexpand\doc@handleencap{usage}}}
+
+%%%%%%%%%%%%%%
+% Components %
+%%%%%%%%%%%%%%
+\def\ComponentSymbol{\ccDocSymbol\faSignIn}
+\def\ComponentString#1{\ccDocString{compcolor!75}{\ComponentSymbol}{#1}}
+\ccDeclareContainer{Component}{%
+  \ccInherit{Components,Attributes,Properties}{DomainedDoc}%
+  \ccDeclareType{Components}{%
+    \ccDeclareComp{Add}%
+  }
+  \ccDeclareType{Properties}{%
+    \ccSetProperty{color}{compcolor!75}
+    \ccSetProperty{index-key}{components}
+    \ccSetProperty{symbol-command}{\ComponentSymbol}
+    \ccSetProperty{print-name}{%
+      \ccUseProperty{string-command}%
+      \ccWhenComp{Add}{\space(\ccUseComp{Add})}
+      \egroup
+    }
+  }}
+\newcommand\DescribeComponent[2][]{\cc@doc[#1]{Component}{\ccComponent{Name}{#2}}}
+\newcommand\DescribeLabeledComp[2][]{\cc@doc[#1]{Component}{\ccComponent{Name}{#2}\ccComponent{Add}{LC}}}
+\newcommand\DescribeCountedComp[2][]{\cc@doc[#1]{Component}{\ccComponent{Name}{#2}\ccComponent{Add}{CC}}}
+\newcommand\DescribeGroupComp[2][]{\cc@doc[#1]{Component}{\ccComponent{Name}{#2}\ccComponent{Add}{GC}}}
+\newcommand\DescribeCollectionComp[2][]{\cc@doc[#1]{Component}{\ccComponent{Name}{#2}\ccComponent{Add}{CL}}}
+\newcommand\DescribeOverrideComp[2][]{\cc@doc[#1]{Component}{\ccComponent{Name}{#2}\ccComponent{Add}{OR}}}
+\def\UsageComp#1{\index[components]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{usage}}}
+
+%%%%%%%%%
+% Hooks %
+%%%%%%%%%
+\def\HookSymbol{\ccDocSymbol\faIndent}
+\def\HookString#1{\ccDocString{hookcolor!75}{\HookSymbol}{#1}}
+\ccDeclareContainer{Hook}{%
+  \ccInherit{Components,Attributes,Properties}{CoCoDoc}%
+  \ccDeclareType{Properties}{%
+    \ccSetProperty{color}{hookcolor!75}
+    \ccSetProperty{index-key}{hooks}
+    \ccSetProperty{symbol-command}{\HookSymbol}
+  }}
+\newcommand\DescribeHook[2][]{\cc@doc[#1]{Hook}{\ccComponent{Name}{#2}}}
+\def\UsageHook#1{\ccDocString{hookcolor}{\HookSymbol}{#1}\index[hooks]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\noexpand\doc@handleencap{usage}}}
+
+
+%%%%%%%%
+% Tags %
+%%%%%%%%
+\def\TagSymbol{\ccDocSymbol\faTag}
+\def\TagString#1{\ccDocString{tagscolor!75}{\TagSymbol}{#1}}
+% Tag Description
+\def\DescribeTag#1{\ccDocString{tagscolor}{\TagSymbol}{<#1/>}\index[tags]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\noexpand\doc@handleencap{main}}}
+% Tag usage
+\def\UsageTag#1{\TagString{#1}\index[tags]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\noexpand\doc@handleencap{usage}}}
+% Start tag usage
+\def\UsageTagS#1{\ccDocString{tagscolor}{\TagSymbol}{<#1>}\index[tags]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\noexpand\doc@handleencap{usage}}}
+% End tag usage
+\def\UsageTagE#1{\ccDocString{tagscolor}{\TagSymbol}{</#1>}\index[tags]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\noexpand\doc@handleencap{usage}}}
+
+%%%%%%%%%%%%%%
+% Attributes %
+%%%%%%%%%%%%%%
+\def\AttrSymbol{\ccDocSymbol\faChain}
+\def\AttrString#1{\ccDocString{attrcolor!75}{\AttrSymbol}{#1}}
+% Attr Description, #1 name, #2 expected value
+\ccDeclareContainer{Attribute}{%
+  \ccInherit{Components,Attributes,Properties}{DomainedDoc}%
+  \ccDeclareType{Components}{%
+    \ccDeclareComp{ExpVal}%
+  }%
+  \ccDeclareType{Properties}{%
+    \ccSetProperty{color}{attrcolor!75}
+    \ccSetProperty{index-key}{attributes}
+    \ccSetProperty{symbol-command}{\AttrSymbol}
+    \ccSetProperty{print-name}{%
+      \ccUseProperty{string-command}\enskip
+      \bgroup
+        \ttfamily\footnotesize\mybfseries\color{attrcolot!50}%
+        \ccUseComp{ExpVal}
+      \egroup
+    }}}
+\newcommand\DescribeAttr[3][]{\cc@doc[#1]{Hook}{\ccComponent{Name}{#2}\ccComponent{ExpVal}{#3}}}
+\def\UsageAttr#1{\AttrString{#1}\index[attributes]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{usage}}}
+
+%%%%%%%%%%
+% Macros %
+%%%%%%%%%%
+\def\MacroString#1{\ccDocString{spot!75}{}{#1}}
+
+\def\DeclareMacro#1{\marginnote{\string#1}\MacroString{\string#1}\bgroup\def\HDorg@index{\index[macros]}\SpecialMainMacroIndex{#1}\egroup}
+\def\UsageMacro#1{\MacroString{\string#1}\bgroup\let\cclt@index\index\def\index{\cclt@index[macros]}\SpecialMacroIndex{#1}\egroup}
+\def\main#1{\textbf{#1}}
+\def\usage#1{#1}
+%%%%%%%%%%%%%
+% Arguments %
+%%%%%%%%%%%%%
+
+\newdimen\LeftMarg \LeftMarg=2.5em\relax
+\newenvironment{ArgList}{%
+  \ifhmode\par\vskip\parskip\fi
+  \begingroup
+    \@tempcnta\z@
+    \leftskip\LeftMarg
+    \parskip\z@
+    \def\item{\@ifstar{\let\is@opt\relax\describe@arg}{\describe@arg}}%
+}{\par\endgroup}
+\def\describe@arg{\@ifnextchar[{\@describe@arg}{\advance\@tempcnta\@ne\@describe@arg[\the\@tempcnta]}}%]
+\def\@describe@arg[#1]{%
+  \ifhmode\par\fi
+  \hskip-\LeftMarg
+  \hb@xt@\LeftMarg{%
+    \color{spot}%
+    \ttfamily
+    \footnotesize
+    \ifx\is@opt\relax[\##1]\else\{\##1\}\fi\enskip\hss}%
+  \let\is@opt\@undefined
+  \ignorespaces}
+
+\def\InlineArg{\@ifstar{\let\is@opt\relax\inline@arg}{\inline@arg}}
+\def\inline@arg#1{\begingroup
+    \color{spot}\ttfamily\footnotesize
+    \ifx\is@opt\relax[\##1]\else\{\##1\}\fi
+  \endgroup
+  \let\is@opt\@undefined}
+
+
 \newenvironment{indented}{%
   \par
   \leftskip1em
   \small
   \tabcolsep4pt
 }{\par}
-
-
-\def\describeProp#1#2#3{%
-  \if@nobreak\vskip-\parskip\else\vskip\baselineskip\fi\par
-    \bgroup
-      \lstset{basicstyle=\ttfamily}%
-      \let\do@empty\relax\if!#3!\else\let\do@empty\@undefined\fi%
-      {\bfseries\ttfamily #1}\enskip{\small\color{spot}[\ifx\do@empty\relax\texttt{<empty>}\else#3\fi]}\ifx\noindex\relax\else\index[properties]{#1@\texttt{#1}}\fi
-      \hfill
-      {\small #2}%
-    \egroup\par
-  \@noskipsecfalse
-  \@afterindentfalse
-  \nopagebreak
-  \@afterheading}
-
-\def\describeHook#1{%
-  \if@nobreak\vskip-\parskip\else\vskip\baselineskip\fi\par
-    \bgroup
-      \lstset{basicstyle=\ttfamily}%
-      {\bfseries\ttfamily #1-<name>}\ifx\noindex\relax\else\index[hooks]{#1=\texttt{#1}}\fi
-    \egroup\par
-  \@noskipsecfalse
-  \@afterindentfalse
-  \nopagebreak
-  \@afterheading}
-
-\def\describeUProp#1{%
-  \vskip\baselineskip\par
-    {\bfseries\ttfamily #1}\ifx\noindex\relax\else\index[properties]{#1=\texttt{#1}}\fi}
-
-
 
 \endinput

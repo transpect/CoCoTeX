@@ -10,3 +10,48 @@ supposed to be rendered in a similar way.
 
 In this section, we discuss how to declare custom Containers.
 
+A new, custom Container can be declared with the
+\DeclareMacro{\ccDeclareContainer} command:
+\begin{lstlisting}
+\ccDeclareContainer{<name>}{<body>}
+\end{lstlisting}
+where \lstinline{<name>} is the name of the Container, and
+\lstinline{<body>} is a list of Container Type Declarations.
+
+Data Types are declared with the \DeclareMacro{\ccDeclareType} command:
+\begin{lstlisting}
+\ccDeclareType{<name>}{<body>}
+\end{lstlisting}
+where \lstinline{<name>} is the name of the Data Type, and
+\lstinline{<body>} a list of type-specific variable declarations. The
+most commonly used Data Types are \textit{Properties},
+\textit{Attributes}, and \textit{Components}, but essentially, they
+can be named anything.
+
+Another common command inside the Container body is the
+\DeclareMacro{\ccInherit} command. It takes two arguments:
+\InlineArg{1} is a~comma-separated list of Data Types, and
+\lstinline{2}~is a~comma-separated list of Container names. The newly
+defined Contianer will then inherit all Data Type declarations from
+the parent Containers. For instance,
+\begin{lstlisting}
+\ccDeclareContainer{Parent 1}{%
+  \ccDeclareType{Properties}{...}%
+  \ccDeclareType{Components}{...}%
+  \ccDeclareType{Junk}{...}%
+}
+\ccDeclareContainer{Parent 2}{%
+  \ccDeclareType{Properties}{...}%
+  \ccDeclareType{Components}{...}%
+}
+\ccDeclareContainer{Child}{%
+  \ccInherit{Properties,Components}{Parent 1,Parent 2}%
+}
+\end{lstlisting}
+means that the Container named \lstinline{Child} will inherit the
+\textit{Components} and \textit{Properties} Data Types from both
+Containers \lstinline{Parent 1} and \lstinline{Parent 2},
+respectively, but not the Data Type \lstinline{Junk} from \lstinline{Parent 1}.
+
+Note that both \UsageMacro{\ccDeclareType} and \UsageMacro{\ccInherit}
+can only be used inside the body of a Container Declaration!

@@ -11,16 +11,23 @@
   \Title{Installation}
 \end{Heading}
 
-\Index{Installation}The current build of the package can be obtained from GitHub:
+\index{Installation}The current build of the package can be obtained from GitHub:
 \begin{lstlisting}[style=tex,language=bash]
 git clone https://github.com/transpect/CoCoTeX.git
 \end{lstlisting}
 The actual source files can be found in the \lstinline{src} sub-folder.
 
-The most recent stable version can be found in the
-\lstinline{releases} folder. It contains the \lstinline{cocotex.dtx}
-file, its corresponding \lstinline{cocotex.ins} file, and both the source code documentation and this
-End-User Manual as a pre-rendered PDFs.
+% The latest stable version can be found inside the\lstinline{releases}
+% folder. It contains the \lstinline{cocotex.dtx} file, its
+% corresponding \lstinline{cocotex.ins} file, and both the source code
+% documentation and this End-User Manual as a pre-rendered PDFs.
+
+The most recent stable version that is in active use on the
+\textit{xerif} servers can be found at
+\url{https://github.com/transpect/xerif-latex}. Note, however, that is
+version might be several minor versions behind the source code release
+and contains additional, xerif-specific, files that are not part of
+the official {\CoCoTeX} build.
 
 The package is installed via
 \begin{lstlisting}[style=bash]
@@ -35,12 +42,67 @@ The documentation of the framework's source code can be created via
 \begin{lstlisting}[style=bash]
 lualatex cocotex.dtx
 \end{lstlisting}
-\textbf{Note:} You \textit{must} use \lstinline{lualatex} in order to
+\textbf{Note 1:} You \textit{must} use \lstinline{lualatex} in order to
 create the source code documentation!
 
-\textbf{Note:} The source code documentation is a technical breakdown
+\textbf{Note 2:} The source code documentation is a technical breakdown
 of the framework's source code; it is not the same document as the
 more user-oriented Manual you are currently reading.
+
+
+\begin{Heading}{subsection}
+  \Title{Dependencies}
+\end{Heading}
+
+{\CoCoTeX}\Index{Dependencies} requires a fairly recent LaTeX kernel. It is recommended to
+use the latest TeXlive build, but not older than texlive 2022, since
+it uses some newly added concepts like Hooks and Sockets..
+
+The following packages are requied by the various {\CoCoTeX} modules:
+\begin{description}
+\item[\ttfamily coco-kernel*] requires \texttt{kvoptions-patch},
+  \texttt{xkeyval}, and \texttt{etoolbox}
+\item[\ttfamily coco-common*] requires \texttt{coco-kernel}, \texttt{iftex},
+  \texttt{xcolor}, and \texttt{graphicx}
+\item[\ttfamily coco-floats*] requires \texttt{coco-common} and
+  \texttt{rotating}, \texttt{grffile}, \texttt{footnote},
+  \texttt{adjustbox}, and \texttt{stfloats} and supports
+  \texttt{tabularx}, \texttt{tabulary}, and
+  \texttt{htmltabs}\footnote{The \texttt{htmltabs.sty} is included in
+    \CoCoTeX's main GitHub Repository in the
+    \texttt{externals/htmltabs/} folder}
+\item[\ttfamily coco-meta*] requires \texttt{coco-common}
+\item[\ttfamily coco-heading*] requires \texttt{coco-meta}, and
+  \texttt{bookmark}
+\item[\ttfamily coco-notes*] requires \texttt{footnote}, and \texttt{endnotes}
+\item[\ttfamily coco-title*] requires \texttt{coco-meta}
+\item[\ttfamily coco-accessibility] requires lua\LaTeX, \texttt{coco-kernel},
+  and \texttt{ltpdfa}\footnote{\texttt{ltpfa} is included in the
+    \texttt{externals/ltpdfa} folder in CoCoTeX's GitHub
+    repository. Note that CoCoTeX uses only the .lua files from that
+    package}. Older {\LaTeX} kernel versions require
+  \texttt{atbegshi}, \texttt{xparse}, \texttt{luatexbase-attr}, and
+  \texttt{atveryend}
+\item[\ttfamily coco-lists] requires \texttt{coco-common}, \texttt{footnote},
+  and \texttt{endnotes}
+\item[\ttfamily coco-frame] requires \texttt{luatex85}, and \texttt{crop}
+\item[\ttfamily coco-script] requires \texttt{coco-kernel}, \texttt{babel},
+  \texttt{fontspec} (and therefore {lua\LaTeX} or Xe\LaTeX), and
+  \texttt{filecontents}
+\end{description}
+
+The {\CoCoTeX} class file \texttt{cocotex.cls} includes most (namely
+those indicated with an asterisk in the list above) {\CoCoTeX} modules
+and requires \textit{additionally} the \texttt{index} and
+\texttt{hyperref} packages. Note that all those packages might have
+secondary dependencies.
+
+{\CoCoTeX} itself is designed to run with all {\LaTeX} engines,
+however, in partiular the \texttt{coco-script} and
+\texttt{coco-accessibility} modules require {lua\LaTeX}, therefore
+those modules are either not loaded (coco-script), or it is
+loaded but not activated (coco-accessibility) by default.
+
 
 \begin{Heading}{subsection}
   \Title{Usage}
@@ -83,9 +145,10 @@ The allowed values are:
   \Title{Using Single Modules}
 \end{Heading}
 
-{\CoCoTeX} is modular. That means you can use selected modules as
-packages together with \LaTeX's default or other third-party document
-classes. Modules are included like any other package, e.g.,
+{\CoCoTeX} is designed to be used modularly. That means you can use
+selected modules as packages together with \LaTeX's default or other
+third-party document classes. Modules are included like any other
+package, e.g.,
 \begin{lstlisting}[style=tex]
 \RequirePackage[<options>]{coco-floats}
 \RequirePackage[<options>]{coco-headings}
@@ -96,12 +159,13 @@ classes. Modules are included like any other package, e.g.,
   \Title{Design Goals and Purpose}
 \end{Heading}
 
-{\CoCoTeX} is a programming framework for {\LaTeX} developers, who
-need to build and maintain a number of (not too) different
-publisher-specific style sheets and partly or fully automatted
+{\CoCoTeX} is a programming framework for {\LaTeX} developers who need
+to build and maintain a number of (not too) different
+publisher-specific style sheets in partly or fully automatted
 typesetting processes. Its original purpose is to serve as a rendering
-backend for the typesetting tool \textit{xerif}\footnote{see \url{https://www.le-tex.de/en/xerif.html}}, but it is also usable
-as a standalone extension to plain {\LaTeX}.
+backend for the typesetting tool \textit{xerif}\footnote{see
+  \url{https://www.le-tex.de/en/xerif.html}}, but it is also usable as
+a standalone extension to plain {\LaTeX}.
 
 The following features are the main design goals of the {\CoCoTeX}
 framework:
@@ -172,6 +236,7 @@ levels. The mechanism to pass certain properties or constituents from
 one Container to another is called
 \MainTerm{Inheritance}.
 
+
 \begin{Heading}[label=sec:overview.components]{subsubsection}
   \Title{Components}
 \end{Heading}
@@ -182,22 +247,56 @@ are called \MainTerm[Components]{Component} in the
 that take one argument for the content that is to be stored inside
 that Component for the respective Container.
 
-Some Components can be collections of other Components. An “Author”
-Component of a “heading” Container, for example, can contain a~first,
-a~middle and a~last name, an~academic title, an~affiliation, or
-an~email address, among other things. Those complex Components are
-called \MainTerm[Component Groups]{Component Group}.
+Some Components can be collections of other Components. An
+\texttt{Author} Component of a \texttt{Heading} Container, for
+example, can contain a~first, a~middle and a~last name, an~academic
+title, an~affiliation, or an~email address, among many other
+things. Those complex Components are called \MainTerm{Group
+  Components}, a Group Component together with its (possible) Child
+Components is called a \MainTerm{Component Group}.
 
 Some Components may occur multiple times in the same parent
-Container. A~good example are mutliple Authors that contibuted to the
+Container. A~good example are multiple Authors that contibuted to the
 same chapter in a collection. Those Components are called
-\MainTerm[Counted Components]{Counted Component}. Note that
-despite the name, it is not necessarily the case that those Counted
-Components are numbered or even ordered in any way. Rather,
-``Counted'' refers to the way they are processed internally. Due to
-the way both concepts are implemented in {\CoCoTeX}, Group Containers
-are always also Counted Containers and vice-versa, so both terms might
-be used interchangeably.
+\MainTerm[Counted Components]{Counted Component}. Note that despite
+the name, it is not necessarily the case that those Counted Components
+are numbered or even ordered in any way. Rather, “Counted” refers to
+the way they are processed internally. Due to the way both concepts
+are implemented in {\CoCoTeX}, Group Components are always also
+Counted Containers.
+
+Usually, Counted Components are printed in such a way that all
+instances of the Component are concatenated in some way or
+another. The result is again stored inside a Component, called an
+\MainTerm{Collection Component}. Those particuar Components can be
+used standalone in spite of the single Group Components, and are
+therefore also called \MainTerm{Overrides}.
+
+As an example, take the Author Group Component. It consists of a
+\texttt{FirstName} and a \texttt{LastName} component. The Collection
+Component \texttt{FullName} is generated from those two Components,
+but the user could opt to give the \texttt{FullName} directly, as
+well, and therefore \textit{override} what {\CoCoTeX} would otherwise
+generate. The same holds for multiple Authors: There is a
+\texttt{AuthorNameList} Collection Component, that holds the a comma
+separated list of all the Author's \texttt{FullName} values. As with
+the \texttt{FullName} Override earlier, the \texttt{AuthorNameList}
+can as well be given directly, thus reducing the need to list each
+author seperately.  Note, however, that the \texttt{LastName}
+Components might be used by other Collection Components (e.g., for a
+Citation advice), so it is likely, that the user needs to give more
+than one Override for a layout to work as intended.
+
+Note that each Collection Component is always an Override, but not
+vice-versa: The version of a heading's title that is printed in the
+table of contents is usually generated from the \texttt{Title}
+Component of a \texttt{Heading} (Child) Container and stored in a
+Component \texttt{TocTitle}. The user can override the
+\texttt{TocTitle} directly by assigning it a~value in the
+\texttt{Heading} Instance, therefore, \texttt{TocTitle} is an
+\textit{Override}, but \textit{not} a~\textit{Collection Component},
+as it is not derived from a Group Component.
+
 
 \begin{Heading}[label=sec:overview.properties]{subsubsection}
   \Title{Properties}
@@ -223,15 +322,68 @@ possible.
 \end{Heading}
 
 Properties and Components can be seen as Container‐specific Data
-\MainTerm[Types]{Type}. They are only defined within the
-scope of their parent Container and are usually not accessible from
-the outside. When a new Container is declared, it can inherit the Data
-Types from one or multiple other containers.
+\MainTerm[Types]{Type}. They are only defined within the scope of
+their parent Container and are usually not accessible from the
+outside. When a new Container is declared, it can
+\MainTerm[inherit]{Inheritance} the Data Types from one or multiple
+other containers. A~Container that is inherited \textit{from} is
+called the \MainTerm{Parent Container}, the Container that inherits is
+the \MainTerm{Child Container}.
+
+For example, there might be an abstract Container named
+\texttt{Floats} that defines the Components \texttt{Caption} and
+\texttt{ListofCaption} for the float's caption and it's entry in the
+list of figures or tables, respectively, as well as a bunch of
+Properties that tell us how the Caption and the list-of entry is to be
+rendered. We can then declare two more Containers, \texttt{Figure} and
+\texttt{Table}, that both inherit both the Components,
+\texttt{Caption} and \texttt{ListofCaption}, as well as the Properties
+and add their own Components and Properties, like \texttt{Fig} for the
+image file, or \texttt{Table} for the tabular environment. Thanks to
+the inheritance mechanism, there is no need to define the
+\texttt{Caption} and \texttt{ListofCaption} Components again for the
+two Child containers.
+
+\begin{Heading}[label=sec:overview.types]{subsubsection}
+  \Title{Style Classes and Attributes}
+\end{Heading}
+
+Instances of Containers can further be specialized by Attributes and
+Style Classes. \MainTerm{Style Classes} are comparable to the
+\texttt{class} term that is used in HTML or CSS, respectively.  They
+are a way to further specify Instances of user-lvel Containers without
+the need to declare new Child Containers. Container instances of the
+same Style Class share Properties that diverge somewhat from the
+standard Property list of their respective Containers.
+
+\MainTerm{Attributes} are a way to alter the functionality of a
+Container in a pre-defined way. They are defined for a Container, but
+called per Instance. Usually, they are predefined keys and values (or
+switches without values) in an optional argument of a Container's
+{\LaTeX} environment or macro.
+
+Take, for instance, the \texttt{Figure} Container we defined
+earlier. We built in a functionality that allows us to exclude certain
+Instances from generating a list-of entry, but we need a way to tell
+LaTeX which instance of the Figure Container should make use of that
+function. This is where Attributes come in handy: By simply adding a
+value-less switch to the optional argument of the \texttt{Figure}
+Container's environment, we can prevent the list-of entry to be
+generated. Another example for a valued attribute would be the
+\texttt{float-pos} parameter that tells us where the float is to be
+placed (top, bottom, here, single page).
+
+An example for a Style Class would be a pre-defined set of widths that
+image files are allowed to be printed. Instead of defining new Figure
+containers for each allowed width, we can simply define a style class
+that overrides one single Property for the Container. It is noteworthy
+that Style Classes are usually activated by Attributes at the
+Container instance.
+
 
 \begin{Heading}[label=sec:oop]{subsection}
   \Title{Concepts from Object-Oriented Programming}
 \end{Heading}
-
 
 \textbf{Containers} are comparable to the concept of \textit{classes}
 in object-oriented programming. A concrete heading in a document is an
@@ -277,20 +429,14 @@ environments. Outside, Container sensitive Components may have
 different meaning or even throw an \texttt{Undefined control sequence}
 error.
 
-Components provided by the modules of the {\CoCoTeX} framework usually
-start with the \lstinline{tp}\footnote{That the prefix is „tp“ has
-  historic reasons: The earliest version of {\CoCoTeX} was called
-  „transpect-tex“ after the XML conversion tool \textit{transpect},
-  which constitutes the first major component of \textit{xerif} (with
-  {\CoCoTeX} being the second).} prefix and the component's name
-begins with a capital letter. For instance,
+An example for a Container instance is the following:
 \begin{lstlisting}[style=tex]
 \begin{Figure}
   \Caption{A~nice image.}
 \end{Figure}
 \end{lstlisting}
 utilizes a Component named \texttt{Caption} with the \texttt{Content}
-\textit{“A~nice image.”} within the container \texttt{Figure}.
+\textit{“A~nice image.”} within a~Container named \texttt{Figure}.
 
 Properties consist of two parts, the property's name and its
 value. Some Properties provided by the {\CoCoTeX} modules may have
@@ -300,7 +446,7 @@ set and used.
 In this manual, the properties provided by the various modules are
 documented in the following way:
 
-{\let\noindex\relax\describeProp{<name>}{\texttt{<allowed values>}}{\texttt{<default value>}}}
+\DescribeProp[noindex]{<name>}{\texttt{<allowed values>}}{\texttt{<default value>}}
 
 A property with the name \texttt{<name>} is set by default to
 \texttt{<default value>}. The user may chose to set it to any of the
@@ -338,19 +484,19 @@ The following modules are included in {\CoCoTeX}:
 
 \begin{description}
 \item[\ttfamily coco-headings.sty] The \lstinline{headings}
-  module\Index{headings}\Index{module!headings} provides a new way to declare and
+  module\Index{headings}\Index{module>headings} provides a new way to declare and
   use chapter, section and paragraph titles. It is described in
   greater detail in \fullref{chap:headings}.
-\item[\ttfamily coco-floats.sty] The \lstinline{floats}\Index{module!floats}
+\item[\ttfamily coco-floats.sty] The \lstinline{floats}\Index{module>floats}
   module provides some extended handling for
   floating objects like tables or figures. It is described in greater
   detail in \fullref{chap:floats}.
 \item[\ttfamily coco-title.sty] The
-  \lstinline{title}\Index{title}\Index{module!title} module provides meta data
+  \lstinline{title}\Index{title}\Index{module>title} module provides meta data
   handlers for title pages. It is described in greater detail in
   \fullref{chap:title}.
-\item[\ttfamily coco-frame.sty] \Index{frame}\Index{module!frame}
-\item[\ttfamily coco-notes.sty] The \lstinline{notes}\Index{module!notes}
+\item[\ttfamily coco-frame.sty] \Index{frame}\Index{module>frame}
+\item[\ttfamily coco-notes.sty] The \lstinline{notes}\Index{module>notes}
   module\Index{notes module} handles the easy switching between
   footnotes and endnotes, as well as the position where and in what
   way endnotes are printed. It is described in greater detail in
@@ -364,19 +510,20 @@ The following modules are included in {\CoCoTeX}:
 \end{Heading}
 
 \begin{description}
-\item[\ttfamily coco-kernel.sty] The \lstinline{kernel}\Index{module!kernel}
+\item[\ttfamily coco-kernel.sty] The \lstinline{kernel}\Index{module>kernel}
   module\Index{kernel} is the heart of the CoCoTeX
   framwork. As such, it is a hard dependency for all other modules and
   loaded automatically.
-\item[\ttfamily coco-common.sty] The \lstinline{common}\Index{module!common}
+\item[\ttfamily coco-common.sty] The \lstinline{common}\Index{module>common}
   module\Index{common} is a collection helper macros and
   functions, that are not per-se part of the {\CoCoTeX} Framework, but
   utilised by multiple other modules. The common module is loaded
   automatically by some of the other modules, but not by all.
-\item[\ttfamily coco-meta.sty] The \lstinline{meta}\Index{module!meta}
+\item[\ttfamily coco-meta.sty] The \lstinline{meta}\Index{module>meta}
   module\Index{common} collects methods and concepts that are
   used by both the \lstinline{title} and \lstinline{headings}
   modules. It is therefore auto-loaded by both modules.
 \end{description}
 
 
+\UsageMacro{\ccDeclareContainer}
