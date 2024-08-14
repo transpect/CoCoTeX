@@ -19,6 +19,7 @@
   - Fixed an issue where additions to a parent Container's Types were
     not passed down to its decendents if those were declared earlier
   - made group components long
+  - FIX: LaTeX error when \cc@iterate@res is undefined
 - coco-common.dtx
   - added option to suppress inclusion of color profile
   - improved handling of color encoding option

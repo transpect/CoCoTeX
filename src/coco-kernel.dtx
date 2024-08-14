@@ -815,10 +815,14 @@
 %   resets the temporary storage.
 %    \begin{macrocode}
 \def\cc@assign@res#1{%
-  \ifx\cc@iterate@res\relax
+  \ifx\cc@iterate@res\@undefined
     \cslet{#1}\relax
   \else
-    \expandafter\csname #1\expandafter\endcsname\expandafter{\cc@iterate@res}%
+    \ifx\cc@iterate@res\relax
+      \cslet{#1}\relax
+    \else
+      \expandafter\csname #1\expandafter\endcsname\expandafter{\cc@iterate@res}%
+    \fi
   \fi
   \global\let\cc@iterate@res\relax
 }
