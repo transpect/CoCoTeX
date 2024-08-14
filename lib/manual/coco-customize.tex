@@ -1,5 +1,6 @@
 \begin{Heading}{chapter}
   \Title{Custom Containers}
+  \RefLabel{chap:customize}
 \end{Heading}
 
 
@@ -55,3 +56,48 @@ respectively, but not the Data Type \lstinline{Junk} from \lstinline{Parent 1}.
 
 Note that both \UsageMacro{\ccDeclareType} and \UsageMacro{\ccInherit}
 can only be used inside the body of a Container Declaration!
+
+
+
+
+
+
+
+
+
+
+
+Sometimes, it is neccessary to check whether a Property yields any
+Content, at all. This can be done with the macro
+\DescribeMacro{\ccIfProp}, which takes three arguments:
+\begin{ArgList}
+\item[1] the name of the Property
+\item[2] code that is executed when the Property exists and yields a
+  non-empty string
+\item[3] code that is executed when either the Property does not exist
+  or if yields an empty string
+\end{ArgList}
+An example could be:
+\begin{lstlisting}
+\ccSetProperty{}{}
+\end{lstlisting}
+
+Some Properties have pre-defined values. To check for a~given value,
+the macro \DescribeMacro{\ccIfPropVal} can be used. It has four
+arguments:
+\begin{ArgList}
+\item[1] the name of the Property
+\item[2] the string to compare the Property's expansion against
+\item[3] code that is executed when the Property's expansion matches
+  \InlineArg{2}
+\item[4] code that is expanded when either the Property does not exist
+  or its expansion value does not match \DescribeMacro{2}.
+\end{ArgList}
+\begin{Warning}
+  Since Properties are LaTeX macros that are always defined
+  \lstinline{\long}, the comparison value \InlineArg2 is also stored
+  in a~temporary macro using \lstinline{\long\def}. Therefore,
+  \lstinline{\ccIfPropVal} cannot be used in contexts that fully
+  expand the Property list, in particular
+  \UsageMacro{\ccApplyCollection}!
+\end{Warning}

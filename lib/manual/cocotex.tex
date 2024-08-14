@@ -11,28 +11,55 @@
 \end{Meta}
 
 \includeonly{%
-  coco-overview,%
-  % coco-common,%
-  % coco-headings,%
-  % coco-floats,%
-  % coco-scripts,%
-  % coco-notes,%
-  % coco-title,%
-  coco-customize
+   coco-overview%
+  ,coco-design%
+  % ,coco-headings%
+  % ,coco-floats%
+  % ,coco-scripts%
+  % ,coco-notes%
+  % ,coco-title%
+  % ,coco-lists%
+  % ,coco-frame%
+  % ,coco-accessibility%
+  % ,coco-cls%
+  % ,coco-common%
+  ,coco-customize%
 }
 
 \begin{document}
 \Maketitle
 \mainmatter
-
 \include{coco-overview}
-\include{coco-common}
+\include{coco-design}
+
+\begin{Heading}{part}
+  \Title{\CoCoTeX's Container-Based Modules}
+  \BMTitle{CoCoTeX's Container-Based Modules}
+\end{Heading}
+
 \include{coco-headings}
 \include{coco-floats}
+\include{coco-title}
+\include{coco-lists}
+
+
+\begin{Heading}{part}
+  \Title{Additional Modules}
+\end{Heading}
+
 \include{coco-script}
 \include{coco-notes}
-\include{coco-title}
-%
+\include{coco-frame}
+\include{coco-accessibility}
+
+
+\begin{Heading}{part}
+  \Title{\CoCoTeX's Backend}
+  \BMTitle{CoCoTeX's Backend}
+\end{Heading}
+
+\include{coco-cls}
+\include{coco-common}
 \include{coco-customize}
 \clearpage
 \backmatter

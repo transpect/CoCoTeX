@@ -1,0 +1,568 @@
+\begin{Heading}{chapter}
+  \Title{\CoCoTeX's Design Principles}
+  \BMTitle{CoCoTeX's Design Principles}
+  \RefLabel{chap:design}
+\end{Heading}
+
+In this chapter, we discuss the major design principles of the
+{\CoCoTeX} framework, how they are represented in the remainder of the
+Manual, and introduce some user-level macros to influence the
+behaviour of those design concepts.
+
+
+\begin{Heading}{section}
+  \Title{Containers and Data Types}
+  \RefLabel{sec:container}
+\end{Heading}
+
+One design goal of the {\CoCoTeX} Framework is to provide an easy and
+unified way to configure the typesetting of blocks of inter-connected
+data.
+
+For instance, take \textit{headings}: They always consist of
+a~\textit{Title}, but also may have some sort of \textit{Numbering},
+some have a~\textit{Subtitle}, some might have a~dedicated
+\textit{Author}, some are followed by a~\textit{Quote} or
+a~\textit{Motto}. They may re-appear (partly) in the head-line of
+a~page, as well as in the table of contents, in some cases with
+slightly altered data. Another part of the idea behinf a heading is
+that it is always rendered in the same way, for instance, the Title is
+always bold (or italic or normal) and in a certain font size; if there
+is an author, it always preceeds (or succeeds) the title in this or
+that font; and so on.
+
+
+\begin{Heading}{subsection}
+  \Title{Containers}
+  \RefLabel{sec:containers}
+\end{Heading}
+
+Such a~bundle of structured constituents and the instructions how they
+are presented are called \MainTerm[Containers]{Container} in the
+{\CoCoTeX} framework. In this manual, whenever a pre-defined Container
+is mentioned, it is colored orange and preceeded by the Symbol
+{\ContainerSymbol}, for instance \ContainerString{Heading}. By
+convention, Container names are (almost) always Capitalized.
+
+One particular manifestation of an abstact Container in a~document is
+called an \MainTerm{Instance} of that Container. For instance, the
+(particular) heading with the (particular) title “Introduction” is an
+Instance of the abstract concept (or “Container“) “Heading”.
+
+The general concept of Containers and Instances is quite similar to
+the notion of \textit{classes} and \textit{objects} in Object Oriented
+Programming, whereas classes are representations of abstract concepts
+and objects are concrete instantiations of that abstract class.
+
+
+\begin{Heading}{subsection}
+  \Title{Data Types}
+  \RefLabel{sec:types}
+\end{Heading}
+
+As mentioned above, a Container in {\CoCoTeX} is defined by a specific
+set of (possible) constituents and a specific set of (conditional)
+rendering instructions.  Those two are fundamentally different in
+nature, but they share that they define what a Container actually
+is. CoCoTeX refers to those different sets of Container-defining
+building blocks as (Data) \MainTerm[Types]{Type}.  The aforementioned
+set of structured constituents of a Container form one Type, which we
+call \textit{Components}, while the set of instructions that tell the
+engine how those Components are to be processed and rendered form
+another Type, which we call \textit{Properties}.
+
+
+\begin{Heading}{subsection}
+  \Title{Inheritance}
+  \RefLabel{sec:inheritance}
+\end{Heading}
+
+Containers can be derived from one another by passing all or some Data
+Types from one Container to another. For instance, the abstract
+concept “heading” might be extended to various levels, like “section”,
+“chapter”, “paragraph”, or “part”. Some of the abstract constituents,
+like \texttt{Title} or \texttt{Number}, are shared among all those
+derivations of the concept “heading”, while others might
+not. E.g. “Author” is usualy used only on the “chapter” level, but
+rarely on “section” or even deeper heading levels. The mechanism to
+pass certain Types from one Container to another is called
+\MainTerm{Inheritance}. A~Container that is inherited \textit{from} is
+called the \MainTerm{Parent Container}, the Container that recieves
+the Type from the Parent is the called the \MainTerm{Child Container}.
+
+For example, there might be an abstract Container named
+\texttt{Floats} that comprises of the constituents \texttt{Caption}
+and \texttt{ListofCaption} for the float's caption and it's entry in
+the list of figures (or tables), respectively, as well as a bunch of
+instructions that tell us how the list-of entry is generated from the
+Caption. We can then declare two more Containers, say, \texttt{Figure}
+and \texttt{Table}, that both inherit the constituents, as well as the
+generator instructions from the abstract Container. They then can add
+their own constituents and instructions, like \texttt{Fig} for the
+image file of the \texttt{Figure} Container, or \texttt{tabular} for
+the content body of the \texttt{Table} Container. Thanks to the
+inheritance mechanism, there is no need to define the \texttt{Caption}
+Component and the \texttt{ListofCaption} Generator for the two Child
+containers seperately.
+
+
+\begin{Heading}{section}
+  \Title{Components}
+  \RefLabel{sec:components}
+\end{Heading}
+
+
+\begin{Heading}{subsection}
+  \Title{General Concept}
+  \RefLabel{sec:components:general}
+\end{Heading}
+
+As mentioned above, the inter-connected pieces of information that
+constitute a Container are called \MainTerm[Components]{Component} in
+the {\CoCoTeX} framework. In this manual, Components are marked by the
+symbol {\ComponentSymbol} and colored blue. By convention, Component
+names are Capitalized or use CamelCase when they are more complex,
+e.g., \ComponentString{Author} or \ComponentString{TocTitle}.
+
+Some Components can themselves be collections of other Components. An
+\texttt{Author} Component of a \texttt{Heading} Container, for
+instance, can contain a~first, a~middle and a~last name, an~academic
+title, an~affiliation, an~email address, and many other pieces of
+information that describe the Author. Those complex Components are
+called \MainTerm{Group Components}, a Group Component together with
+its (possible) Child Components is called a \MainTerm{Component
+  Group}.
+
+Some Components may occur multiple times in the same parent
+Container. A~good example are multiple Authors that contibuted to the
+same article in a journal. Those Components are called
+\MainTerm[Counted Components]{Counted Component}.  Despite the name,
+it is not necessarily the case that those Components are enumerated,
+the name “Counted” merely refers to the way they are processed
+internally. Due to the way both concepts are implemented in
+{\CoCoTeX}, Group Components are always also Counted Components.
+
+Usually, Counted Components are printed in such a way that all
+instances of the Component that occur in the same Container Instance
+are concatenated.  The result is stored inside a special Component
+that is called a~\MainTerm{Collection Component}. Those particuar
+Components can be used standalone in spite of the Group Components,
+and are therefore also called \MainTerm{Overrides}.
+
+As an example, take an \texttt{Author} Group Component, which consists
+of a~\texttt{FirstName} and a~\texttt{LastName} Component. The
+Collection Component \texttt{FullName} is generated from those two
+Components, but the user could opt to give the \texttt{FullName}
+directly, and therefore \textit{override} what {\CoCoTeX} would
+otherwise generate from the \texttt{FirstName} and \texttt{LastName}
+Components. The same holds for multiple Authors: There is a Collection
+Component \texttt{AuthorNameList} that holds the comma separated list
+of all the Author's \texttt{FullName} values in the same Container
+Instance. As with the \texttt{FullName} Override earlier, the
+\texttt{AuthorNameList} can as well be given directly, thus
+eliminating the need to list each author seperately.
+
+Note that each Collection Component is always an Override, but not
+vice-versa: The version of a heading's title that is printed in the
+table of contents is usually generated from the \texttt{Title}
+Component of a \texttt{Heading} (Child) Container and stored in a
+Component \texttt{TocTitle}. The user can override the
+\texttt{TocTitle} directly by assigning it a~value in the
+\texttt{Heading} Instance, therefore, \texttt{TocTitle} is an
+\textit{Override}, but \textit{not} a~\textit{Collection Component},
+as it is not derived from a Group Component.
+
+The \texttt{coco-meta} module introduces another type of Components,
+the \MainTerm{Labeled Component}. It is a simple Component with a
+\texttt{Name}, that automatically defines an additional Component
+\texttt{NameLabel}. Usually, Labeled Components are expanded together
+with the label's value first, then a~separator, and then the simple
+Component's value.
+
+\begin{Heading}{subsection}
+  \Title{How to Use Components}
+  \RefLabel{sec:components:usage}
+\end{Heading}
+
+Most Components in Container Instances and Group Components are
+{\LaTeX} macros that take one Argument, e.g.
+\begin{lstlisting}[style=tex]
+\begin{Figure}
+  \Caption{One nice figure.}
+  \Fig{\includegraphics{example.eps}}
+\end{Figure}
+\end{lstlisting}
+In this example, the Container \ContainerString{Figure} is
+instanciated with two Components, \ComponentString{Caption} and
+\ComponentString{Fig}. The Argument of the Component Macros is the
+Component's \textit{value}.
+
+Another way to pass Content to a Component is to use the
+\DeclareMacro{\ccComponent} macro:
+\begin{lstlisting}[style=tex]
+\begin{Figure}
+  \ccComponent{Caption}{One nice figure.}
+  \ccComponent{Fig}{\includegraphics{example.eps}}
+\end{Figure}
+\end{lstlisting}
+It takes two arguments, the first being the name of the Component, the
+second being the Content that is assigned to the component in that
+particular Container Instance.
+
+Container Groups are usually LaTeX environments inside the Container
+instance environment, for instance:
+\begin{lstlisting}[style=tex]
+\begin{Heading}{Section}
+  \ccComponent{Title}{Section Title}
+  \begin{Author}
+    \FirstName{Jane}
+    \LastName{Doe}
+  \end{Author}
+  \begin{Author}
+    \FirstName{John}
+    \LastName{Doe}
+  \end{Author}
+\end{Heading}
+\end{lstlisting}
+In this example, the Container \ContainerString{Section} (for the
+special syntax of \ContainerString{Heading}'s Child Container
+Instances, see~\fullref{chap:headings}) is instanciated with three
+Components, two of which are Instances of Counted Components. The
+value \textit{Section Title} is assigned to the simple Component
+\ComponentString{Title}.  The Counted Component
+\ComponentString{Author} is instanciated twice, once with the values
+\textit{Jane} and \textit{Doe} assigned to the Components
+\ComponentString{FirstName} and \ComponentString{LastName},
+respectively, and second, with the values John and Doe assigned to two
+different instances of the Components \ComponentString{FirstName} and
+\ComponentString{LastName}. As seen in this example, Group Components
+can repeat multiple times.
+
+When processed, the Values of the Components
+\ComponentString{FirstName} and \ComponentString{LastName} are
+concatenated and the result is stored in a Collection Component
+\ComponentString{FullName} inside each instance of the Group Component
+\ComponentString{Author}, so the following example is equivalent to
+above's example, assuming that the instructions on how to build the
+Collection Component \ComponentString{FullName} results in the same
+strings:
+\begin{lstlisting}[style=tex]
+\begin{Heading}{Section}
+  \ccComponent{Title}{Section Title}
+  \begin{Author}
+    \FullName{Jane Doe}
+  \end{Author}
+  \begin{Author}
+    \FullName{John Doe}
+  \end{Author}
+\end{Heading}
+\end{lstlisting}
+The two instances of the Group Component \ComponentString{Author} are
+further concatenated to a Container-level Collection Component
+\ComponentString{AuthorNameList}. Assuming, the instructions that tell
+the engine how to build this Collection Component does so by joining
+the two \ComponentString{FullName} values with an “and”, the following
+line is equivalent to both previous examples:
+\begin{lstlisting}[style=tex]
+\begin{Heading}{Section}
+  \ccComponent{Title}{Section Title}
+  \ccComponent{AuthorNameList}{Jane Doe and John Doe}
+\end{Heading}
+\end{lstlisting}
+
+
+
+\begin{Heading}{section}
+  \Title{Properties}
+  \RefLabel{sec:properties}
+\end{Heading}
+
+\begin{Heading}{subsection}
+  \Title{General Concept}
+  \RefLabel{sec:properties:general}
+\end{Heading}
+
+While headings of the same level are usually rendered in the same way
+for a given publisher style, the actual typeface may vary depending on
+the Components that are actually filled with content for a given
+heading: A~numbered heading might look slightly different than one
+without a~number; a~heading with a~subtitle might have different
+spacing than one without a~subtitle, and so on.
+
+How the Components of a Container Instance are processed and ultimatly
+rendered is controlled by so-called
+\MainTerm[Properties]{Property}. Properties are mostly short pieces of
+{\LaTeX} code that are usually set by the stylesheet developer
+according to a publisher's guidelines and requirements. One of the
+design goals of {\CoCoTeX} is to keep the code behind those Properties
+as comprehensible and pointed as possible. In this manual, pre-defined
+Properties are indicated by violet text color and the symbol
+{\PropertySymbol}, e.g., \PropertyString{title-format}. By convention,
+Property names are always lower case and words are separated by
+hyphen.
+
+
+\begin{Heading}{subsection}
+  \Title{How to Use Properties}
+  \RefLabel{sec:properties:general}
+\end{Heading}
+
+As mentioned in \fullref{sec:types}, Properties are Types. Most
+{\CoCoTeX} modules pre-define Properties. In order to change the
+behaviour of pre-defined Properties, the Type needs to be
+appended. This is done with the macro \DescribeMacro{\ccAddToType}, which taked three arguments:
+\begin{ArgList}
+\item[1] is the name of the Type
+\item[2] is the name of the Container whose Type list should be altered
+\item[3] is a list of instructions
+\end{ArgList}
+For instance
+\begin{lstlisting}[style=tex]
+\ccAddToType{Properties}{Heading}{\foo}
+\end{lstlisting}
+add \lstinline{\foo} to the end of the \ContainerString{Heading}
+Container's Properties list.
+
+For Property lists in particular there exists a shorter macro
+\DescribeMacro{\ccAddToProperties} that takes two arguments:
+\begin{ArgList}
+\item[1] is the name of the Container
+\item[2] is a list of instructions
+\end{ArgList}
+The line
+\begin{lstlisting}[style=tex]
+\ccAddToProperties{Heading}{\foo}
+\end{lstlisting}
+is equivalent to above's example.
+
+In the following, we discuss the macros that can be used in the list of instruction in the last argument of
+\lstinline|\ccAddToType{Properties}| and
+\lstinline|\ccAddToProperties|, respectively.
+
+The most basic way to set the value of a Proerty is the
+\DescribeMacro{\ccSetProperty} macro, that takes two arguments:
+\begin{ArgList}
+\item[1] the name of the Property to set
+\item[2] the new value of the Property
+\end{ArgList}
+Returning to our examples from \fullref{sec:components:usage}, the
+instructions that tell the engine how to put together the values of
+\ComponentString{FirstName} and \ComponentString{LastName} to generate
+the value of the \ComponentString{FullName} Component, might look
+someting like that:
+\begin{lstlisting}[style=tex]
+\ccAddToProperties{Heading}{%
+  \ccSetProperty
+    {author-full-name-format}
+    {\ccUseComp{FirstName}\ccWhenComp{MidName}{ \ccUseComp{MidName}} \ccUseComp{LastName}}
+}
+\end{lstlisting}
+Note that the definition of the Property
+\PropertyString{author-full-name-format} contains a conditional
+\UsageMacro{\ccWhenComp} that takes a Component name as first argument
+\InlineArg{1} and processes its second argument \InlineArg{2} if and
+only if the Component has a value assigned to in a given Container
+instance: If the \ComponentString{MidName} Component is non-empty, it
+is written in between the \ComponentString{FirstName} and
+\ComponentString{LastName} values, which are otherwise put next to
+each other with a simple space as separator.
+
+The second important macro that is used in this example is
+\DescribeMacro{\ccUseComp} which takes as its only argument
+\InlineArg{1} the name of a Component and is expanded to the value of
+that Component.
+
+A macro similar to \UsageMacro{\ccWhenComp} is
+\DescribeMacro{\ccIfComp}, which takes three arguments: \InlineArg{1}
+is the name of the Component, \InlineArg{2} is the branch that is
+expanded when the Component is assigned a value to in the processed
+Container, and \InlineArg{3} is the code that is expanded when the
+Component is \textit{not} assigned a value to within the currently
+processed Container or Group Component instance.
+
+Another variant is \DescribeMacro{\ccUnlessComp} which also takes two
+arguments: \InlineArg{1} for the Component's name, and \InlineArg{2}
+that is only expanded when the Component is \textit{not} assigned a
+value in the current instance.
+
+The macro \DescribeMacro{\ccGetComp} is a combination of
+\UsageMacro{\ccWhenComp} and \UsageMacro{\ccUseComp}. It takes one
+argument~\InlineArg{1}, the name of the Component. The two lines in the
+following example are equivalent:
+\begin{lstlisting}
+\ccWhenComp{Subtitle}{\ccUseComp{Subtitle}}
+\ccGetComp{Subtitle}
+\end{lstlisting}
+
+Often, Properties make use of other Properties. In the definition of a
+Property this is done with the \DescribeMacro{\ccUseProperty} macro,
+which takes as its only argument~\InlineArg{1}, the name of the
+Property. In the following example, this is used to pass the font
+commands for the main title down to the facility that expands the
+value of the \ComponentString{Title} Component:
+\begin{lstlisting}
+\ccSetProperty{title-face}{\itshape\bfseries}
+\ccSetProperty{main-title-format}{%
+  \bgroup
+    \ccUseProperty{title-face}
+    \ccUseComp{Title}
+  \egroup}
+\end{lstlisting}
+This will internally be resolved to
+\begin{lstlisting}
+\ccSetProperty{main-title-format}{%
+  \bgroup
+    \itshape\bfseries
+    \ccUseComp{Title}
+  \egroup}
+\end{lstlisting}
+This mechanism allows Properties to be relatively clear and slender:
+We can change the font of the \ComponentString{Title} by changing the
+\PropertyString{title-face} Property without the need to take care
+about the expansion and compositon of the actual title. And, via
+Inheritance, we can change the \PropertyString{title-font} once for
+all Child Containers, while each Child Container might define the
+\PropertyString{main-title-format} Property slightly differently.
+
+To add code to a Property, the macros \DescribeMacro{\ccAppToProp} and
+\DescribeMacro{\ccPreToProp} can be used. This allows to add code to
+the beginning and end of an existing Property, respectively, without
+changing its original definition. Both macros take two arguments:
+\begin{ArgList}
+\item[1] is the name of the Property
+\item[2] is the code that should be added to the beginning or end of
+  the previous definition, respectively.
+\end{ArgList}
+\begin{lstlisting}
+\ccSetProperty{title-face}{\bfseries}
+\ccPreToProp{title-face}{\itshape}
+\ccAppToProp{title-face}{\large}
+\end{lstlisting}
+is equivalent to
+\begin{lstlisting}
+\ccSetProperty{title-face}{\itshape\bfseries\large}
+\end{lstlisting}
+
+
+---
+TODO:
+
+\begin{lstlisting}[style=tex]
+\ccSetProperty{<name>}{<val>}
+\ccSetPropVal{<name>}{<val>}
+\ccSetPropertyX{<name>}{<val>}
+\end{lstlisting}
+With \lstinline{\ccSetPropVal}, the second argument is expanded \textit{once}
+prior to the assignment. Use this if you want to assign the current
+value of a {\LaTeX} control sequence (e.g., a length register) to a
+property.
+
+
+---
+
+
+Properties consist of two parts, the property's name and its
+value. Some Properties provided by the {\CoCoTeX} modules may have
+a~fixed set of string values, while others are completely free to be
+set and used.
+
+In this manual, the properties provided by the various modules are
+documented in the following way:
+
+\DescribeProp[noindex]{<name>}{\texttt{<allowed values>}}{\texttt{<default value>}}
+
+A property with the name \texttt{<name>} is set by default to
+\texttt{<default value>}. The user may chose to set it to any of the
+\texttt{<allowed values>}.
+\begin{description}
+\item[\texttt{<any>}]  the user is completely free to set this
+  property to any value she wants.
+\item[\texttt{<dimen>}] It is expected the property to be a
+  dimension. This may be a length or dimension register, a fix
+  value-unit pair that is understood by \TeX, or a macro that expands
+  to a dimension/length.
+\item[\texttt{<num>}] It is expected the property to be a numeric
+  value. This may be a counter register, a fix value, or a macro that
+  expands to a number.
+\end{description}
+\lstinline{<allowed values>} without angles mean that those are fixes
+strings that have a special meaning. Those are explained in the
+descriptions below the property header.
+
+The “data type” \texttt{<empty>} is used to indicate that the property
+is un-set or empty. This is the default for some of the properties
+provided by the {\CoCoTeX} modules, but basicly all properties can
+be set to \texttt{<empty>}.
+
+
+\begin{Heading}{section}
+  \Title{Attributes and Style Classes}
+  \RefLabel{sec:design:attrclass}
+\end{Heading}
+
+
+\begin{Heading}{subsection}
+  \Title{Attributes}
+  \RefLabel{sec:design:attr}
+\end{Heading}
+
+
+Instances of Containers can further be specialized by Attributes and
+Style Classes. \MainTerm{Style Classes} are comparable to the
+\texttt{class} term that is used in HTML or CSS, respectively.  They
+are a way to further specify Instances of user-lvel Containers without
+the need to declare new Child Containers. Container instances of the
+same Style Class share Properties that diverge somewhat from the
+standard Property list of their respective Containers.
+
+In \CoCoTeX, \MainTerm{Attributes} are a way to alter the
+functionality of a Container Instance in a pre-defined way. They are
+defined for a Container, but called per Instance. Next to Components
+and Properties, Attributes are the third major Type that defined a
+Container. Usually, Attributes are predefined key-value pairs or
+switches without values, and are set by the user in an optional
+argument of a Container's {\LaTeX} environment or macro. In this
+documentation, pre-defined Attributes are colored green and preceeded
+by the symbol \AttrSymbol, for instance \AttrString{float-pos}.
+
+Take, for instance, the \ContainerString{Figure} Container we
+discussed earlier. We built in a functionality that allows us to
+exclude certain Instances from generating a list-of entry, but we need
+a way to tell LaTeX which instance of the Figure Container should make
+use of that function. This is where Attributes come in handy: By
+simply adding a value-less switch \AttrString{nolist} to the optional
+argument of the \ContainerString{Figure} Container's environment, we
+can prevent the list-of entry to be generated. Another example for
+a~valued Attribute would be the \AttrString{float-pos} parameter that
+tells the engine where the float is to be placed (with possible values
+could be t(op), b(ottom), h(ere), and/or p(age)).
+
+
+\begin{Heading}{subsection}
+  \Title{Style Classes}
+  \RefLabel{sec:design:styleclass}
+\end{Heading}
+
+An example for a Style Class would be a pre-defined set of widths that
+image files are allowed to be printed in. Instead of defining new
+\ContainerString{Figure} Containers, each with a Property list that
+restricts the total width of the printed image either allowed width,
+we can simply define a style class that overrides one single Property
+for the one \ContainerString{Figure} Container. It is noteworthy that
+Style Classes are usually activated by the \AttrString{class} Attribute
+at the Container Instance.
+
+
+
+
+
+
+
+
+
+\begin{Heading}{section}
+  \Title{Accessibility Features}
+  \RefLabel{sec:design:ally}
+\end{Heading}
+
+TODO

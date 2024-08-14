@@ -125,6 +125,12 @@
       \fi
       ##1}}}
 
+\def\ps@part{%
+  \let\@oddfoot\@empty\let\@evenfoot\@empty
+  \let\@oddhead\@empty\let\@evenhead\@empty
+}
+
+
 \def\ps@chapfirst{%
   \let\@oddfoot\@empty\let\@evenfoot\@empty
   \let\@evenhead\@empty%
@@ -204,21 +210,42 @@
   \ccSetProperty{heading-block}{%
     \ccUseProperty{title-face}%
     \ccIfComp{Number}{\ccUseProperty{hang-number}}{\leftskip0pt}%
-      {\ccUseComp{Title}}\par%
-       \ccWhenComp{Subtitle}{{\ccUseProperty{subtitle-face}\ccUseComp{Subtitle}}\par}%
-       \ccWhenComp{Author}{{\ccUseProperty{author-face}\ccUseComp{Author}}\par}%
-       \ccWhenComp{Quote}{%
-         \bgroup\ccUseProperty{quote-format}%
-           \ccUseComp{Quote}\par
-           \ccWhenComp{QuoteSource}{{\ccUseProperty{quote-source-format}--\space\ccUseComp{Quote}}\par}%
-         \egroup}%
+    \ccUseComp{Title}\par%
+    \ccWhenComp{Subtitle}{{\ccUseProperty{subtitle-face}\ccUseComp{Subtitle}}\par}%
   }%
   \ccSetProperty{indent}{auto-global}%
   \ccSetProperty{number-sep}{\enskip}
 }
 
+\ccDeclareHeading{-1}{part}{%
+  \ccSetProperty{heading-par}{\clearpage
+    \par\global\@afterindenttrue
+  }
+  \ccSetProperty{before-heading}{%
+    \thispagestyle{part}%
+  }
+  \ccSetProperty{title-face}{\Huge\titlefont}
+  \ccSetProperty{after-heading-block}{\vfill}
+  \ccSetProperty{heading-block}{%
+    \ccUseProperty{title-face}%
+    \cchHeadTagStart
+    \ccWhenComp{Number}{Part~\ccUseComp{Number}:}%
+    \par
+    \ccUseComp{Title}%
+    \cchHeadTagEnd
+    \par
+  }
+  \ccSetProperty{indent}{}
+  \ccSetProperty{toc-margin-top}{2\baselineskip}
+  \ccSetProperty{toc-title-face}{\bfseries\sffamily}
+  \ccSetProperty{toc-margin-left}{\z@}
+  \ccSetProperty{toc-indent}{\z@}
+  \ccSetProperty{toc-page-format}{\hfill}
+  \ccSetProperty{toc-number-format}{Part~\ccUseComp{TocNumber}\enskip}
+}
+
 \ccDeclareHeading{0}{chapter}{%
-  \ccSetProperty{heading-par}{\cleardoublepage
+  \ccSetProperty{heading-par}{\clearpage
     \par
     \global\@afterindenttrue
   }
@@ -245,16 +272,16 @@
   \ccSetProperty{before-heading}{\raggedright\setcounter{subsection}{0}}%
   \ccSetProperty{before-skip}{2.5\baselineskip}
   \ccSetProperty{after-skip}{16bp}%
-  \ccSetProperty{title-format}{\LARGE\titlefont\color{spot!95}}%
+  \ccSetProperty{title-face}{\LARGE\titlefont\color{spot!95}}%
   \ccSetProperty{toc-margin-bottom}{\z@}
-  \ccSetProperty{toc-margin-top}{.5\baselineskip}
+  \ccSetProperty{toc-margin-top}{\z@}
 }
 
 \ccDeclareHeading{2}{subsection}{%
   \ccSetProperty{before-heading}{\raggedright\setcounter{subsubsection}{0}}%
   \ccSetProperty{before-skip}{2\baselineskip}
   \ccSetProperty{after-skip}{6bp}%
-  \ccSetProperty{title-format}{\large\titlefont\color{spot!90}}%
+  \ccSetProperty{title-face}{\large\titlefont\color{spot!90}}%
   \ccSetProperty{toc-margin-bottom}{\z@}
   \ccSetProperty{toc-margin-top}{\z@}
 }
@@ -271,14 +298,14 @@
 \ccDeclareHeading{4}{paragraph}{%
   \ccSetProperty{before-skip}{1\baselineskip}
   \ccSetProperty{after-skip}{1sp}%
-  \ccSetProperty{title-format}{\normalsize\titlefont\color{spot!80}}%
+  \ccSetProperty{title-face}{\normalsize\titlefont\color{spot!80}}%
   \ccSetProperty{numbering}{}
 }
 
 \ccDeclareHeading{5}{subparagraph}{%
   \ccSetProperty{before-skip}{.5\baselineskip}%
   \ccSetProperty{after-skip}{-.5em}%
-  \ccSetProperty{title-format}{\small\titlefont\color{spot!75}}%
+  \ccSetProperty{title-face}{\small\titlefont\color{spot!75}}%
   \ccSetProperty{numbering}{}
 }
 
@@ -788,6 +815,12 @@
   \endgroup
   \let\is@opt\@undefined}
 
+%% TODO
+\newenvironment{Warning}{%
+  \indented
+  WARNING!\enskip
+  \ignorespaces
+}{\endindented}
 
 \newenvironment{indented}{%
   \par
