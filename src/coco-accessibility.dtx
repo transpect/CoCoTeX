@@ -879,8 +879,10 @@
   \apptocmd{\[}{\ccaVstructStart{Para}\ccaStructStart{Formula}}{}{\cca@patch@error\[}
   \pretocmd{\]}{\ccaStructEnd{Formula}\ccaVstructEnd{Para}}{}{\cca@patch@error\]}
 
-  \pretocmd{\start@align}{\ccaVstructStart{Para}\ccaStructStart{Formula}}{}{\cca@patch@error\start@align}%
-  \apptocmd{\endalign}{\ccaStructEnd{Formula}\ccaVstructEnd{Para}}{}{\cca@patch@error\endalign}%
+  \@ifpackageloaded{amsmath}{%
+    \pretocmd{\start@align}{\ccaVstructStart{Para}\ccaStructStart{Formula}}{}{\cca@patch@error\start@align}%
+    \apptocmd{\endalign}{\ccaStructEnd{Formula}\ccaVstructEnd{Para}}{}{\cca@patch@error\endalign}%
+  }{}%
 }
 
 %    \end{macrocode}

@@ -47,6 +47,8 @@
 - coco-accessibility.dtx
   - NEW: Keywords and Authors are now written as separated list items
          into the generated XMP files, instead of one single string.
+  - NEW: made auto tagging of align-like environments sensitive to the
+         amsmath packages loaded
   - FIX: prevented hyperref from writing redundant and empty
          DocumentInfo fields
   - Links now have /Contents attribute to make VeraPDF's PDF/UA1 check
