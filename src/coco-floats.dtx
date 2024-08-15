@@ -854,7 +854,7 @@
 %    \end{macrocode}
 % \begin{Attribute}{class}{<string>} is the class of the Float.
 %    \begin{macrocode}
-    \ccDeclareAttributeHandler{class}{\ccf@attr@class{\ccAttrVal}}%
+    \ccDeclareAttributeHandler{class}{\xdef\ccf@current@class{\ccAttrVal}}%
 %    \end{macrocode}
 % \end{Attribute}
 % \begin{Attribute}{break-caption}{<bool>} whether or not the caption is
@@ -1070,16 +1070,6 @@
 % \subsection{Attribute Handlers}
 %
 % The following macros handle the Attributes of Float Container instances.
-% \begin{macro}{\ccf@attr@class} handles the style class of the float.
-%   \begin{ArgList}
-%   \item[1] is the value of the ``class'' Attribute.
-% \end{ArgList}
-%    \begin{macrocode}
-\def\ccf@attr@class#1{%
-  \gdef\ccf@current@class{#1}%%
-}
-%    \end{macrocode}
-% \end{macro}
 % \begin{macro}{\ccf@eval@class} expands the style class specific
 %   Properties.
 %    \begin{macrocode}
@@ -1244,7 +1234,7 @@
   \ccWhenComp{ListofCaption}{\csgappto{ccf@listof@entry}{\string\ccComponent{ListofCaption}{\ccUseComp{ListofCaption}}}}%
   \ccWhenComp{ListofNumber}{\csgappto{ccf@listof@entry}{\string\ccComponent{ListofNumber}{\ccUseComp{ListofNumber}}}}%
   \ccWhenComp{ListofLegend}{\csgappto{ccf@listof@entry}{\string\ccComponent{ListofLegend}{\ccUseComp{ListofLegend}}}}%
-  \ccWhenComp{ListofSource}{\csgappto{ccf@listof@entry}{\string\ccCompoennt{ListofSource}{\ccUseComp{ListofSource}}}}%
+  \ccWhenComp{ListofSource}{\csgappto{ccf@listof@entry}{\string\ccComponent{ListofSource}{\ccUseComp{ListofSource}}}}%
   \ifx\ccf@listof@entry\relax\else
     \bgroup
       \ccGobble

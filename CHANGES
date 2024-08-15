@@ -33,6 +33,8 @@
       has an width or height key.
     - added Attribute to locally de-activate sameheight mechanism
   - Changed tagging of float environments to account for subfloats
+  - FIX: Typo in generation of Listof entry
+  - FIX: value of class Attribute was expanded too late
 - coco-title.dtx
   - NEW: added DocTitle Component and doc-book-title Properties to
 		 locally override the PDF-title meta datum
