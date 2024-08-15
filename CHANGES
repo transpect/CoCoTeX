@@ -35,6 +35,7 @@
   - Changed tagging of float environments to account for subfloats
   - FIX: Typo in generation of Listof entry
   - FIX: value of class Attribute was expanded too late
+  - FIX: orientation Attribute was not evaluated correctly
 - coco-title.dtx
   - NEW: added DocTitle Component and doc-book-title Properties to
 		 locally override the PDF-title meta datum

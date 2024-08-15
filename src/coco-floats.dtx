@@ -268,6 +268,7 @@
   \let\ccf@prefix\@empty
   \let\ht@cur@element\ccfCapType
   \global\let\ccf@current@class\relax
+  \global\let\ccf@landscape\relax
 }
 %    \end{macrocode}
 % \end{macro}
@@ -285,13 +286,15 @@
     \let\ccf@begin@env\bgroup
     \let\ccf@end@env\egroup
   \else
-    \ccIfAttrIsStr{\ccfCapType}{orientation}{landscape}
-      {\edef\ccf@env@name{sideways\ccfCapType}%
+    \ifx\ccf@landscape\@empty
+      \edef\ccf@env@name{sideways\ccfCapType}%
        \edef\ccf@begin@env{\noexpand\begin{\ccf@env@name\ifx\ccf@do@dbl\relax*\fi}}%
-       \edef\ccf@end@env{\noexpand\end{\ccf@env@name\ifx\ccf@do@dbl\relax*\fi}}}
-      {\edef\ccf@env@name{\ifx\ccf@do@dbl\relax dbl\fi float}%
-       \edef\ccf@begin@env{\expandafter\noexpand\csname @x\ccf@env@name\endcsname {\ccfCapType}[\ccf@floatpos]}%
-       \edef\ccf@end@env{\expandafter\noexpand\csname end@\ccf@env@name\endcsname}}%
+       \edef\ccf@end@env{\noexpand\end{\ccf@env@name\ifx\ccf@do@dbl\relax*\fi}}
+   \else
+      \edef\ccf@env@name{\ifx\ccf@do@dbl\relax dbl\fi float}%
+      \edef\ccf@begin@env{\expandafter\noexpand\csname @x\ccf@env@name\endcsname {\ccfCapType}[\ccf@floatpos]}%
+      \edef\ccf@end@env{\expandafter\noexpand\csname end@\ccf@env@name\endcsname}%
+    \fi
   \fi}
 %    \end{macrocode}
 % \end{macro}
@@ -304,12 +307,13 @@
   \else
     \expandafter\ccf@sep@top\dimexpr\ccUseProperty{float-skip-top}\relax%
   \fi
-    \ccIfAttrIsStr{\ccfCapType}{orientation}{landscape}{}
-      {\ifx\ccf@floatpos\@empty
-         \expandafter\ccf@sep@bottom\dimexpr\ccUseProperty{intext-skip-bottom}\relax%
-       \else
-         \expandafter\ccf@sep@bottom\dimexpr\ccUseProperty{float-skip-bottom}\relax%
-       \fi}}
+  \ifx\ccf@landscape\@empty
+    \ifx\ccf@floatpos\@empty
+      \expandafter\ccf@sep@bottom\dimexpr\ccUseProperty{intext-skip-bottom}\relax%
+    \else
+      \expandafter\ccf@sep@bottom\dimexpr\ccUseProperty{float-skip-bottom}\relax%
+    \fi
+  \fi}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccf@set@*@sep} Hooks to apply top and bottom skips,
@@ -1114,9 +1118,10 @@
 % \end{ArgList}
 %    \begin{macrocode}
 \def\ccf@attr@orient#1{%
-  \ccIfAttrIsStr{#1}{orientation}{landscape}
+  \ccIfStrEqual{#1}{landscape}
     {\linewidth\textheight
      \hsize\linewidth
+     \global\let\ccf@landscape\@empty
      \def\ccf@floatpos{p}}{}}
 %    \end{macrocode}
 % \end{macro}
@@ -1583,11 +1588,12 @@
   \ccf@capt@top@offset{#1}%
   \ifnum\the\ccSubFloatCnt=\z@\relax
     \def\ccf@caption@box{%
-      \ccIfAttrIsStr{\ccfCapType}{orientation}{landscape}
-        {\setbox\@tempboxa\vbox\bgroup\hsize\textheight}
-        {\hskip\ccf@margin@l%
-         \setbox\@tempboxa\vbox\bgroup\advance\hsize-\ccf@margin@l}%
-      }%
+      \ifx\ccf@landscape\@empty
+        \setbox\@tempboxa\vbox\bgroup\hsize\textheight
+      \else
+        \hskip\ccf@margin@l%
+         \setbox\@tempboxa\vbox\bgroup\advance\hsize-\ccf@margin@l%
+      \fi}%
   \else
     \expandafter\cc@tempskipa\csname ccf@capt@row@height@#1\endcsname\relax
     \expandafter\advance\expandafter\cc@tempskipa\dimexpr-\baselineskip+\topskip\relax
@@ -1808,9 +1814,9 @@
 %    \begin{macrocode}
 \def\ccfFigureRender{%
   \bgroup
-    \ccIfAttrIsStr{\ccfCapType}{orientation}{landscape}
-      {\hsize\dimexpr\textwidth-\ccf@margin@r-\ccf@margin@l\relax}%
-      {}%
+    \ifx\ccf@landscape\@empty
+      \hsize\dimexpr\textwidth-\ccf@margin@r-\ccf@margin@l\relax%
+    \fi
     \let\includegraphics\ccf@includesubgraphics
     \hskip\ccf@margin@l
     \strut\ccUseComp{Fig}\strut
