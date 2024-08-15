@@ -414,7 +414,7 @@ from the Components given in the Meta Container.}}}
 %    \begin{macrocode}
 \def\cct@journal@titlepage{%
   \ccUseProperty{before-titlepage}%
-  \ccUseProperty{coverpage}%Cover ist kein Bild, wird von uns gebaut
+  \ccWhenComp{Cover}{\ccUseProperty{coverpage}}%Cover ist kein Bild, wird von uns gebaut
   \ccUseProperty{before-titlepage-roman}%
   \ccUseProperty{titlepage-roman}%
   \ccUseProperty{after-titlepage}%

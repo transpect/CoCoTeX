@@ -47,6 +47,7 @@
   - FIX: XMP meta data now take preference over Meta container
          Components if the XMP does exist.
   - FIX: pdfcreator and pdfproducer metadata were used the wrong way.
+  - FIX: Query for Cover when pubtype=journal
 - coco-headings.dtx
   - NEW: added hook for capturing running titles
   - NEW: added way to exempt headings from auto-tagging
