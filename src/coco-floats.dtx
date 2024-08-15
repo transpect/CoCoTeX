@@ -1176,8 +1176,9 @@
 %   \item[\#\#4] is the page number associated with that entry.\UsageProperty{list-of-page-face}
 %   \end{description}
 %    \begin{macrocode}
-  \expandafter\gdef\csname cc@#1@extract@data\endcsname##1##2##3##4{%
+  \expandafter\gdef\csname cc@#2@extract@data\endcsname##1##2##3##4{%
     \ccSetContainer{#3}%
+    \def\ccfCapType{#2}%
     \ccEvalType[#3]{Properties}%
     \ccDeclareComponent{ListofCaption}{}{}%
     \ccDeclareComponent{ListofLegend}{}{}%
@@ -1195,14 +1196,25 @@
 %   applies the Listof properties and selects the components to be
 %   printed. \#\#1 is the caption type of the float.\UsageProperty{list-of-before-entry}\UsageProperty{list-of-block}\UsageProperty{list-of-after-entry}
 %    \begin{macrocode}
-  \expandafter\gdef\csname cc@#1@print@entry\endcsname##1{%
+  \expandafter\gdef\csname cc@#2@print@entry\endcsname##1{%
     \bgroup
-      \ccUseHook{list-of-before-hook-##1}%
+      \UseHook{cc/listof/##1/before}% was list-of-before-hook-##1
       \ccUseProperty{list-of-before-entry}%
       \ccUseProperty{list-of-block}%
-      \ccUseHook{list-of-after-hook-##1}%
+      \UseHook{cc/listof/##1/after}% was list-of-after-hook-##1
       \ccUseProperty{list-of-after-entry}%
     \egroup}%
+%    \end{macrocode}
+% \DescribeHook{cc/listof/[type]/before} is exanded before the List-of
+% entry for a float of type \lstinline{[type]} is printed
+%    \begin{macrocode}
+  \NewHook{cc/listof/#2/before}%
+%    \end{macrocode}
+% \DescribeHook{cc/listof/[type]/after} is exanded after the Listof
+% entry for a float of type \lstinline{[type]} is printed, but before
+% the Property \UsageProp{list-of-after-entry} is called.
+%    \begin{macrocode}
+  \NewHook{cc/listof/#2/after}%
 }
 %    \end{macrocode}
 % \end{macro}
