@@ -458,7 +458,15 @@
 % Once declared, a component can be set in two ways: The first way is
 % to use \lstinline{\ccPrefix<name>} with one argument for its
 % value. The second, preferred, way is to use the
-% \lstinline{\ccComponent} macro:
+% \lstinline{\ccComponent} macro.
+% \begin{macro}{\ccCompWarning} issues a warning if a value is
+%   assigned to a non-existing Component. \InlineArg{1} is the name of
+%   the unknown Component.
+%    \begin{macrocode}
+\def\ccCompWarning#1{\ccPackageWarning{Kernel}{}{Assigning value to previously undeclared^^J%
+    \cc@warning@spaces Component `#1'. Declaring now.}}
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\ccComponent} is the preferred way to fill a Component
 %   with content.
 %   \begin{ArgList}
@@ -469,10 +477,11 @@
 \long\protected\def\ccComponent#1#2{%
   \ifx\cc@is@counted\relax
     \ifcsdef{cc@\cc@cur@cont @#1}{}
-      {\cc@def@counted@comp{\cc@counted@comp@scheme{#1}}{#1}{}{}}%
+      {\ccCompWarning{#1}\cc@def@counted@comp{\cc@counted@comp@scheme{#1}}{#1}{}{}}%
     \csgdef{cc@\cc@cur@cont @\cc@counted@comp@scheme{#1}}{#2}%
   \else
-    \ifcsdef{cc@\cc@cur@cont @#1}{}{\ccDeclareComponent{#1}{}{}}%
+    \ifcsdef{cc@\cc@cur@cont @#1}{}
+      {\ccCompWarning{#1}\ccDeclareComponent{#1}{}{}}%
     \csdef{cc@\cc@cur@cont @#1}{#2}%
   \fi\ignorespaces}
 %    \end{macrocode}
@@ -487,10 +496,11 @@
 \long\protected\global\def\ccGlobalComponent#1#2{%
   \ifx\cc@is@counted\relax
     \ifcsdef{cc@\cc@cur@cont @#1}{}
-      {\cc@def@counted@comp{\cc@counted@comp@scheme{#1}}{#1}{}{}}%
+      {\ccCompWarning{#1}\cc@def@counted@comp{\cc@counted@comp@scheme{#1}}{#1}{}{}}%
     \csgdef{cc@\cc@cur@cont @\cc@counted@comp@scheme{#1}}{#2}%
   \else
-    \ifcsdef{cc@\cc@cur@cont @#1}{}{\ccDeclareGlobalComponent{#1}{}{}}%
+    \ifcsdef{cc@\cc@cur@cont @#1}{}
+       {\ccCompWarning{#1}\ccDeclareGlobalComponent{#1}{}{}}%
     \csgdef{cc@\cc@cur@cont @#1}{#2}%
   \fi\ignorespaces}
 %    \end{macrocode}
