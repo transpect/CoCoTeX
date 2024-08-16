@@ -307,7 +307,7 @@
   \else
     \expandafter\ccf@sep@top\dimexpr\ccUseProperty{float-skip-top}\relax%
   \fi
-  \ifx\ccf@landscape\@empty
+  \ifx\ccf@landscape\relax
     \ifx\ccf@floatpos\@empty
       \expandafter\ccf@sep@bottom\dimexpr\ccUseProperty{intext-skip-bottom}\relax%
     \else
