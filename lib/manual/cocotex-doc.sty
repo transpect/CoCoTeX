@@ -780,6 +780,7 @@
 \def\MacroString#1{\ccDocString{spot!75}{}{#1}}
 
 \def\DeclareMacro#1{\marginnote{\string#1}\MacroString{\string#1}\bgroup\def\HDorg@index{\index[macros]}\SpecialMainMacroIndex{#1}\egroup}
+
 \def\UsageMacro#1{\MacroString{\string#1}\bgroup\let\cclt@index\index\def\index{\cclt@index[macros]}\SpecialMacroIndex{#1}\egroup}
 \def\main#1{\textbf{#1}}
 \def\usage#1{#1}

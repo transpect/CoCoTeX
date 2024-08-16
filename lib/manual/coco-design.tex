@@ -45,14 +45,25 @@ is mentioned, it is colored orange and preceeded by the Symbol
 convention, Container names are (almost) always Capitalized.
 
 One particular manifestation of an abstact Container in a~document is
-called an \MainTerm{Instance} of that Container. For instance, the
+called an \MainTerm{Instance} of that Container. For example, the
 (particular) heading with the (particular) title “Introduction” is an
 Instance of the abstract concept (or “Container“) “Heading”.
 
+In {\CoCoTeX}, Containers are (usually) LaTeX environments that are
+(usually) named the same as the Container, thus
+\begin{lstlisting}
+\begin{Heading}
+  ...
+\end{Heading}
+\end{lstlisting}
+in the .tex file is an \textit{Instantiation} of the abstract idea (or
+\textit{Container}) \ContainerString{Heading}.
+
 The general concept of Containers and Instances is quite similar to
 the notion of \textit{classes} and \textit{objects} in Object Oriented
-Programming, whereas classes are representations of abstract concepts
-and objects are concrete instantiations of that abstract class.
+Programming, whereas \textit{classes} are abstract representations of
+generalised concepts, and \textit{objects} are concrete instantiations
+of that abstract class.
 
 
 \begin{Heading}{subsection}
@@ -105,6 +116,25 @@ inheritance mechanism, there is no need to define the \texttt{Caption}
 Component and the \texttt{ListofCaption} Generator for the two Child
 containers seperately.
 
+In CoCoTeX, Child Containers are usually represented by their own
+LaTeX environments, e.g.,
+\begin{lstlisting}
+\begin{Figure}
+  ...
+\end{Figure}
+\end{lstlisting}
+is an Instance of the Container \ContainerString{Figure}, but Child
+Containers of the \ContainerString{Heading} Parent are instantiated by
+an mandatory argument to the parent Container's environment:
+\begin{lstlisting}
+\begin{Heading}{chapter}
+  ...
+\end{Heading}
+\end{lstlisting}
+This is an instance of the Container \ContainerString{chapter}, which
+in turn is a Child Container of the Parent Container
+\ContainerString{Heading}. Different modules of the {\CoCoTeX}
+framework handle instantiations of Containers slightly differently.
 
 \begin{Heading}{section}
   \Title{Components}
@@ -184,6 +214,11 @@ Component's value.
   \RefLabel{sec:components:usage}
 \end{Heading}
 
+\begin{Heading}{subsubsection}
+  \Title{Simple Components}
+  \RefLabel{sec:components:usage:simple}
+\end{Heading}
+
 Most Components in Container Instances and Group Components are
 {\LaTeX} macros that take one Argument, e.g.
 \begin{lstlisting}[style=tex]
@@ -193,11 +228,12 @@ Most Components in Container Instances and Group Components are
 \end{Figure}
 \end{lstlisting}
 In this example, the Container \ContainerString{Figure} is
-instanciated with two Components, \ComponentString{Caption} and
+instantiated by the {\LaTeX} environment \lstinline{Figure} and
+consists of two Components, \ComponentString{Caption} and
 \ComponentString{Fig}. The Argument of the Component Macros is the
 Component's \textit{value}.
 
-Another way to pass Content to a Component is to use the
+Another way to assign a Value to a Component is to use the
 \DeclareMacro{\ccComponent} macro:
 \begin{lstlisting}[style=tex]
 \begin{Figure}
@@ -206,11 +242,31 @@ Another way to pass Content to a Component is to use the
 \end{Figure}
 \end{lstlisting}
 It takes two arguments, the first being the name of the Component, the
-second being the Content that is assigned to the component in that
+second being the Content that is assigned to the Component in that
 particular Container Instance.
 
-Container Groups are usually LaTeX environments inside the Container
-instance environment, for instance:
+The \UsageMacro{\ccComponent} does check whether a Component with the
+name in \InlineArg{1} already exists. If no such Component exists, it
+issues a warning and declares the Component for later use. If the
+output is unexpected, check the .log file or the shell output for
+CoCoTeX Kernel warnings like that one:
+\begin{lstlisting}
+[CoCoTeX Kernel Warning]  Assigning value to previously undeclared
+                          Component `<name>'. Declaring now.
+\end{lstlisting}
+This indicates that you tried to assign a value to a Component that
+wasn't defined earlier, probably because of a typo in the first
+argument.
+
+\begin{Heading}{subsubsection}
+  \Title{Component Groups}
+  \RefLabel{sec:components:usage:cg}
+\end{Heading}
+
+In contrast to the simple Components we introduced earlier, Component
+Groups are usually too complex for simple macros. They are therefore
+realized as {\LaTeX} environments that occur inside the Container
+Instance environment, for example:
 \begin{lstlisting}[style=tex]
 \begin{Heading}{Section}
   \ccComponent{Title}{Section Title}
@@ -224,41 +280,47 @@ instance environment, for instance:
   \end{Author}
 \end{Heading}
 \end{lstlisting}
-In this example, the Container \ContainerString{Section} (for the
-special syntax of \ContainerString{Heading}'s Child Container
-Instances, see~\fullref{chap:headings}) is instanciated with three
-Components, two of which are Instances of Counted Components. The
-value \textit{Section Title} is assigned to the simple Component
-\ComponentString{Title}.  The Counted Component
-\ComponentString{Author} is instanciated twice, once with the values
+In this example, the Container \ContainerString{Section} is
+instantiated\footnote{for the special syntax of
+  \ContainerString{Heading}'s Child Container Instances,
+  see~\fullref{sec:inheritance} and \fullref{chap:headings}} with
+three Components: one instance of the simple Component
+\ComponentString{Title} that is the value \textit{Section Title}
+assigned to, and two instances of the Counted Component
+\ComponentString{Author}. The first Instance has the values
 \textit{Jane} and \textit{Doe} assigned to the Components
 \ComponentString{FirstName} and \ComponentString{LastName},
-respectively, and second, with the values John and Doe assigned to two
-different instances of the Components \ComponentString{FirstName} and
-\ComponentString{LastName}. As seen in this example, Group Components
-can repeat multiple times.
+respectively, and the second instance has the values \textit{John} and
+\textit{Doe} assigned to two different instances of the Components
+\ComponentString{FirstName} and
+\ComponentString{LastName}. \ComponentString{FirstName} and
+\ComponentString{LastName} are both counted components, because they
+can (and do) occur more than once in the enclosing Container.
 
-When processed, the Values of the Components
+When processed, the Values of the Counted Components
 \ComponentString{FirstName} and \ComponentString{LastName} are
-concatenated and the result is stored in a Collection Component
-\ComponentString{FullName} inside each instance of the Group Component
-\ComponentString{Author}, so the following example is equivalent to
-above's example, assuming that the instructions on how to build the
-Collection Component \ComponentString{FullName} results in the same
-strings:
+combined in a special way (more on that later), and the result is
+stored in a generated Collection Component \ComponentString{FullName}
+inside each instance of the Group Component
+\ComponentString{Author}. Since Collection Components are also
+Overrides and Collection Components are not generated when the
+Override is used explicitly, the following example is equivalent to
+above's example\footnote{assuming that the instructions that tell the engine
+how to build the Collection Component \ComponentString{FullName}
+results in the same strings}:
 \begin{lstlisting}[style=tex]
 \begin{Heading}{Section}
   \ccComponent{Title}{Section Title}
   \begin{Author}
-    \FullName{Jane Doe}
+    \ccComponent{FullName}{Jane Doe}
   \end{Author}
   \begin{Author}
-    \FullName{John Doe}
+    \ccComponent{FullName}{John Doe}
   \end{Author}
 \end{Heading}
 \end{lstlisting}
 The two instances of the Group Component \ComponentString{Author} are
-further concatenated to a Container-level Collection Component
+further concatenated to a Container-level Collection Component named
 \ComponentString{AuthorNameList}. Assuming, the instructions that tell
 the engine how to build this Collection Component does so by joining
 the two \ComponentString{FullName} values with an “and”, the following
@@ -271,7 +333,6 @@ line is equivalent to both previous examples:
 \end{lstlisting}
 
 
-
 \begin{Heading}{section}
   \Title{Properties}
   \RefLabel{sec:properties}
@@ -282,6 +343,11 @@ line is equivalent to both previous examples:
   \RefLabel{sec:properties:general}
 \end{Heading}
 
+In the previous section, we mentioned ``instructions'' that tell the
+enginge how Components are o be processed, and in some instances,
+combined to other Components. Those instructions are called
+\MainTerm[Properties]{Property}.
+
 While headings of the same level are usually rendered in the same way
 for a given publisher style, the actual typeface may vary depending on
 the Components that are actually filled with content for a given
@@ -289,28 +355,25 @@ heading: A~numbered heading might look slightly different than one
 without a~number; a~heading with a~subtitle might have different
 spacing than one without a~subtitle, and so on.
 
-How the Components of a Container Instance are processed and ultimatly
-rendered is controlled by so-called
-\MainTerm[Properties]{Property}. Properties are mostly short pieces of
-{\LaTeX} code that are usually set by the stylesheet developer
-according to a publisher's guidelines and requirements. One of the
-design goals of {\CoCoTeX} is to keep the code behind those Properties
-as comprehensible and pointed as possible. In this manual, pre-defined
-Properties are indicated by violet text color and the symbol
-{\PropertySymbol}, e.g., \PropertyString{title-format}. By convention,
-Property names are always lower case and words are separated by
-hyphen.
+Properties are mostly short pieces of {\LaTeX} code that are usually
+set by the stylesheet developer according to a publisher's guidelines
+and requirements. One of the design goals of {\CoCoTeX} is to keep the
+code behind those Properties as comprehensible and pointed as
+possible. In this manual, pre-defined Properties are indicated by
+violet text color and the symbol {\PropertySymbol}, e.g.,
+\PropertyString{title-format}. By convention, Property names are
+always lower case and words are separated by hyphen.
 
 
 \begin{Heading}{subsection}
   \Title{How to Use Properties}
-  \RefLabel{sec:properties:general}
+  \RefLabel{sec:properties:usage}
 \end{Heading}
 
 As mentioned in \fullref{sec:types}, Properties are Types. Most
 {\CoCoTeX} modules pre-define Properties. In order to change the
 behaviour of pre-defined Properties, the Type needs to be
-appended. This is done with the macro \DescribeMacro{\ccAddToType}, which taked three arguments:
+appended. This is done with the macro \DeclareMacro{\ccAddToType}, which taked three arguments:
 \begin{ArgList}
 \item[1] is the name of the Type
 \item[2] is the name of the Container whose Type list should be altered
@@ -324,7 +387,7 @@ add \lstinline{\foo} to the end of the \ContainerString{Heading}
 Container's Properties list.
 
 For Property lists in particular there exists a shorter macro
-\DescribeMacro{\ccAddToProperties} that takes two arguments:
+\DeclareMacro{\ccAddToProperties} that takes two arguments:
 \begin{ArgList}
 \item[1] is the name of the Container
 \item[2] is a list of instructions
@@ -335,67 +398,27 @@ The line
 \end{lstlisting}
 is equivalent to above's example.
 
-In the following, we discuss the macros that can be used in the list of instruction in the last argument of
+
+
+\begin{Heading}{subsubsection}
+  \Title{Defining and Using Properties}
+  \RefLabel{sec:properties:useprops}
+\end{Heading}
+
+In the following, we discuss the macros that can be used in the list
+of instructions in the last argument of
 \lstinline|\ccAddToType{Properties}| and
 \lstinline|\ccAddToProperties|, respectively.
 
 The most basic way to set the value of a Proerty is the
-\DescribeMacro{\ccSetProperty} macro, that takes two arguments:
+\DeclareMacro{\ccSetProperty} macro, that takes two arguments:
 \begin{ArgList}
 \item[1] the name of the Property to set
 \item[2] the new value of the Property
 \end{ArgList}
-Returning to our examples from \fullref{sec:components:usage}, the
-instructions that tell the engine how to put together the values of
-\ComponentString{FirstName} and \ComponentString{LastName} to generate
-the value of the \ComponentString{FullName} Component, might look
-someting like that:
-\begin{lstlisting}[style=tex]
-\ccAddToProperties{Heading}{%
-  \ccSetProperty
-    {author-full-name-format}
-    {\ccUseComp{FirstName}\ccWhenComp{MidName}{ \ccUseComp{MidName}} \ccUseComp{LastName}}
-}
-\end{lstlisting}
-Note that the definition of the Property
-\PropertyString{author-full-name-format} contains a conditional
-\UsageMacro{\ccWhenComp} that takes a Component name as first argument
-\InlineArg{1} and processes its second argument \InlineArg{2} if and
-only if the Component has a value assigned to in a given Container
-instance: If the \ComponentString{MidName} Component is non-empty, it
-is written in between the \ComponentString{FirstName} and
-\ComponentString{LastName} values, which are otherwise put next to
-each other with a simple space as separator.
-
-The second important macro that is used in this example is
-\DescribeMacro{\ccUseComp} which takes as its only argument
-\InlineArg{1} the name of a Component and is expanded to the value of
-that Component.
-
-A macro similar to \UsageMacro{\ccWhenComp} is
-\DescribeMacro{\ccIfComp}, which takes three arguments: \InlineArg{1}
-is the name of the Component, \InlineArg{2} is the branch that is
-expanded when the Component is assigned a value to in the processed
-Container, and \InlineArg{3} is the code that is expanded when the
-Component is \textit{not} assigned a value to within the currently
-processed Container or Group Component instance.
-
-Another variant is \DescribeMacro{\ccUnlessComp} which also takes two
-arguments: \InlineArg{1} for the Component's name, and \InlineArg{2}
-that is only expanded when the Component is \textit{not} assigned a
-value in the current instance.
-
-The macro \DescribeMacro{\ccGetComp} is a combination of
-\UsageMacro{\ccWhenComp} and \UsageMacro{\ccUseComp}. It takes one
-argument~\InlineArg{1}, the name of the Component. The two lines in the
-following example are equivalent:
-\begin{lstlisting}
-\ccWhenComp{Subtitle}{\ccUseComp{Subtitle}}
-\ccGetComp{Subtitle}
-\end{lstlisting}
 
 Often, Properties make use of other Properties. In the definition of a
-Property this is done with the \DescribeMacro{\ccUseProperty} macro,
+Property this is done with the \DeclareMacro{\ccUseProperty} macro,
 which takes as its only argument~\InlineArg{1}, the name of the
 Property. In the following example, this is used to pass the font
 commands for the main title down to the facility that expands the
@@ -424,10 +447,11 @@ Inheritance, we can change the \PropertyString{title-font} once for
 all Child Containers, while each Child Container might define the
 \PropertyString{main-title-format} Property slightly differently.
 
-To add code to a Property, the macros \DescribeMacro{\ccAppToProp} and
-\DescribeMacro{\ccPreToProp} can be used. This allows to add code to
-the beginning and end of an existing Property, respectively, without
-changing its original definition. Both macros take two arguments:
+To add code to a Property without changing its previous definition,
+the macros \DeclareMacro{\ccAppToProp} and
+\DeclareMacro{\ccPreToProp} can be used. This allows to add code to
+the beginning and end of an existing Property, respectively. Both
+macros take two arguments:
 \begin{ArgList}
 \item[1] is the name of the Property
 \item[2] is the code that should be added to the beginning or end of
@@ -443,20 +467,105 @@ is equivalent to
 \ccSetProperty{title-face}{\itshape\bfseries\large}
 \end{lstlisting}
 
-
----
-TODO:
-
-\begin{lstlisting}[style=tex]
-\ccSetProperty{<name>}{<val>}
-\ccSetPropVal{<name>}{<val>}
-\ccSetPropertyX{<name>}{<val>}
+Sometimes, a pre-defined Property's purpose is it to call another
+Property (for instance, to make the former re-definable without
+altering the latter). For this, the macro
+\DeclareMacro{\ccPropertyLet} can be used, which takes the names of
+two Properties as its arguments, and makes Property \InlineArg{1} an
+alias of Property \InlineArg{2}:
+\begin{lstlisting}
+\ccPropertyLet{toc-number-face}{toc-title-face}
 \end{lstlisting}
-With \lstinline{\ccSetPropVal}, the second argument is expanded \textit{once}
-prior to the assignment. Use this if you want to assign the current
-value of a {\LaTeX} control sequence (e.g., a length register) to a
-property.
+in this case, the font of a heading's \ComponentString{Number} in the
+table of contents is set to be the same as the font of the entries
+\ComponentString{Title}. If we change the
+\PropertyString{toc-title-face} Property afterwards,
+\PropertyString{toc-number-face} changes as well, as the line above is
+equivalent to
+\begin{lstlisting}
+\ccSetProperty{toc-number-face}{\ccUseProperty{toc-title-face}}
+\end{lstlisting}
+A variant of \UsageMacro{\ccPropertyLet} is
+\DeclareMacro{\ccPropertyLetX}, which fully expands (using
+\lstinline{\edef}) the Property in \InlineArg{2} before its remainder
+is assigned to the Property in \InlineArg{1}. If we change
+\PropertyString{toc-title-face} after using
+\begin{lstlisting}
+\ccPropertyLetX{toc-number-face}{toc-title-face}
+\end{lstlisting}
+the Property \PropertyString{toc-number-face} retains the original
+value of \PropertyString{toc-title-face}.
 
+Two more macros to set Properties are
+\DeclareMacro{\ccSetPropVal} and \DeclareMacro{\ccSetPropertyX}
+which both have the same syntax as \UsageMacro{\ccSetProperty} with
+the difference that \UsageMacro{\ccSetPropVal} expands the value
+once before it is assigned to the property, and
+\UsageMacro{\ccSetPropertyX} expands the value fully before it is
+assigned to the Property.
+
+
+
+
+\begin{Heading}{subsubsection}
+  \Title{Calling Component Values}
+  \RefLabel{sec:properties:usecomp}
+\end{Heading}
+
+Returning to our examples from \fullref{sec:components:usage}, the
+instructions that tell the engine how to put together the values of
+\ComponentString{FirstName} and \ComponentString{LastName} to generate
+the value of the \ComponentString{FullName} Component, might look
+someting like that:
+\begin{lstlisting}[style=tex]
+\ccAddToProperties{Heading}{%
+  \ccSetProperty
+    {author-full-name-format}
+    {\ccUseComp{FirstName}\ccWhenComp{MidName}{ \ccUseComp{MidName}} \ccUseComp{LastName}}
+}
+\end{lstlisting}
+Note that the definition of the Property
+\PropertyString{author-full-name-format} contains a conditional
+\UsageMacro{\ccWhenComp} that takes a Component name as first argument
+\InlineArg{1} and processes its second argument \InlineArg{2} if and
+only if the Component has a value assigned to in a given Container
+instance: If the \ComponentString{MidName} Component is non-empty, it
+is written in between the \ComponentString{FirstName} and
+\ComponentString{LastName} values, which are otherwise put next to
+each other with a simple space as separator.
+
+The second important macro that is used in this example is
+\DeclareMacro{\ccUseComp} which takes as its only argument
+\InlineArg{1} the name of a Component and is expanded to the value
+that is assigned to that Component.
+
+A macro similar to \UsageMacro{\ccWhenComp} is
+\DeclareMacro{\ccIfComp}, which takes three arguments: \InlineArg{1}
+is the name of the Component, \InlineArg{2} is the branch that is
+expanded when the Component is assigned a value to in the processed
+Container, and \InlineArg{3} is the code that is expanded when the
+Component is \textit{not} assigned a value to within the currently
+processed Container or Group Component instance.
+
+Another variant is \DeclareMacro{\ccUnlessComp} which also takes two
+arguments: \InlineArg{1} for the Component's name, and \InlineArg{2}
+that is only expanded when the Component is \textit{not} assigned a
+value in the current instance.
+
+The macro \DeclareMacro{\ccGetComp} is a combination of
+\UsageMacro{\ccWhenComp} and \UsageMacro{\ccUseComp}. It takes one
+argument~\InlineArg{1}, the name of the Component. The two lines in the
+following example are equivalent:
+\begin{lstlisting}
+\ccWhenComp{Subtitle}{\ccUseComp{Subtitle}}
+\ccGetComp{Subtitle}
+\end{lstlisting}
+
+
+
+
+
+TODO
 
 ---
 
@@ -557,7 +666,78 @@ at the Container Instance.
 
 
 
+\begin{Heading}{section}
+  \Title{Optional Macro and Environment Prefix}
+  \RefLabel{sec:design:prefix}
+\end{Heading}
 
+If you use {\CoCoTeX} in conjunction with \textit{xerif}, you might
+notice that in the .tex file that is generated by the converter as an
+intermediary by-product, Container environments and Components macros
+all start with the prefix \texttt{tp}:
+\begin{lstlisting}
+\begin{tpFigure}
+  \tpCaption{One nice figure.}
+  \tpFig{\includegraphics{example.eps}}
+\end{tpFigure}
+\end{lstlisting}
+This has historic reasons: in an earlier incarnation, when the
+{\CoCoTeX} framework still had the name \textit{transpect-tex} (“TeX
+for transpect”), all internal and external macros used that prefix to
+avoid clashing with macros from other packages and to indicate that
+the macros and environments were specific to the \textit{transpect}
+typesetting automation.
+
+However, when the Framework was made standalone and the name changed
+to \CoCoTeX, the \lstinline{tp} prefix made no longer sense. But in
+order to keep the output that \textit{xerif} produced without having
+to change its entire xml-to-tex mapping, we introduced a way to
+globally attach a prefix to all automatically generated end-user
+macros and environments: whenever an interface macro is generated
+(i.e., macros to pass values to Components, and environments that
+instantiate Containers and/or Component Groups), it is preprended by
+\DeclareMacro{\ccPrefix}.
+
+In order to change the prefix, you can either re-define
+\UsageMacro{\ccPrefix} prior to loading \texttt{coco-kernel.sty}, or
+use the \lstinline{prefix=<prefix>} package option when loading
+\texttt{coco-kernel.sty}, or the same as class
+option\SeeIndex{prefix}{Class Options}\index{Class Options>prefix}
+when loading the \lstinline{cocotex.cls}.
+
+By default, \UsageMacro{\ccPrefix} is defined to be an empty string,
+but when {\CoCoTeX} is used in conjunction with \textit{xerif}, then
+the \textit{xerif}-specific file \texttt{coco-xerif.sty}\footnote{see
+  \url{https://github.com/transpect/xerif-latex/blob/ally/coco-xerif.sty}}
+is loaded, which re-defines the Prefix to \texttt{tp}.
+
+For example, the line
+\begin{lstlisting}
+\documentclass[prefix=my]{cocotex}
+\end{lstlisting}
+will cause all generated macros to start with \texttt{my}, e.g.,
+\begin{lstlisting}
+\begin{myFigure}
+  \myCaption{One nice figure.}
+  \myFig{\includegraphics{example.eps}}
+\end{myFigure}
+\end{lstlisting}
+However, note that the \UsageMacro{\ccComponent} macro takes an
+\textit{un-prefixed} Component name as its first argument, so the
+following example is equvalent to the one above
+\begin{lstlisting}
+\begin{myFigure}
+  \ccComponent{Caption}{One nice figure.}          % uses the existing "Caption" Component
+  \ccComponent{Fig}{\includegraphics{example.eps}} % uses the existing "Fig" Component
+\end{myFigure}
+\end{lstlisting}
+but the next one will probably lead to unexpected behavior:
+\begin{lstlisting}
+\begin{myFigure}
+  \ccComponent{myCaption}{One nice figure.}          % generates a new Component "myCaption"
+  \ccComponent{myFig}{\includegraphics{example.eps}} % generates a new Component "myFig"
+\end{myFigure}
+\end{lstlisting}
 
 
 \begin{Heading}{section}
