@@ -1667,7 +1667,7 @@
 %   \lstinline{bottom}).\UsageProperty{subcaption-valign-top}\UsageProperty{subcaption-valign-bottom}\UsageProperty{caption-valign-bottom}\UsageProperty{caption-valign-bottom}
 %    \begin{macrocode}
 \def\ccf@make@subcaption#1{%
-  \expandafter\ifx\csname cc@has@\ccf@prefix capt@#1\endcsname\@empty
+  \expandafter\ifx\csname ccf@has@\ccf@prefix capt@#1\endcsname\@empty
     \ccf@make@caption{#1}{\ccUseProperty{\ccf@prefix caption-valign-#1}}%
   \fi}
 %    \end{macrocode}
