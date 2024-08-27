@@ -961,6 +961,15 @@
 %    \begin{macrocode}
   \edef\ccCurSecName{#2}%
 %    \end{macrocode}
+% Look up the parent of this heading level and execute its \begin hook.
+% This is needed especially for the resetnotesperchapter option, more precise:
+% for the heading levels derived from the chapter level.
+%    \begin{macrocode}
+  \expandafter\ifx\csname cc@parent@#2\endcsname\relax
+  \else
+    \UseHook{env/heading/\csname cc@parent@#2\endcsname/begin}%
+  \fi
+%    \end{macrocode}
 % Then, we call the heading level specific
 % \UsageHook{env/heading/[level]/begin} hook.
 %    \begin{macrocode}
