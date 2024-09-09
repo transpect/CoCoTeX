@@ -20,8 +20,8 @@
 %% original source files, as listed above, are part of the
 %% same distribution. (The sources need not necessarily be
 %% in the same archive or directory.)
-\def\fileversion{0.3.2}%
-\def\filedate{2024-07-03}%
+\def\fileversion{0.3.4}%
+\def\filedate{2024-09-09}%
 \NeedsTeXFormat{LaTeX2e}[2018/12/01]
 \ProvidesPackage{htmltabs}
     [\filedate\space\fileversion\space htmltabs]
@@ -58,6 +58,7 @@
    \newcommand\ccaReplaceStruct[1]{}%
    \newcommand\ccaAddToConfig[2]{}%
    \newcommand\ccaMoveStruct[1]{}%
+   \newcommand\ccaAddKeep[1]{}%
    \let\ccaEnable\relax
    \let\ccaDisable\relax
  }%
@@ -1590,6 +1591,7 @@
               \def\ht@cell@struct{TD}%
             \fi
             \ccaStructStart{\ht@cell@struct}%
+            \ccaAddKeep{}%
             \ifnum\int@colspan>\@ne\relax
               \ccaAddColSpan{\int@colspan}%
             \fi
@@ -2198,7 +2200,7 @@
 \newtoks\HT@ftn
 \long\def\HT@ftntext#1{%
   \edef\@tempa{\the\HT@ftn\noexpand\footnotetext
-                    [\the\csname c@\@mpfn\endcsname]}%
+    [\ifx\@thefnmark\@undefined\the\csname c@\@mpfn\endcsname\else\@thefnmark\fi]}%
   \global\HT@ftn\expandafter{\@tempa{#1}}}%
 \long\def\HT@xftntext[#1]#2{%
   \global\HT@ftn\expandafter{\the\HT@ftn\footnotetext[#1]{#2}}}
