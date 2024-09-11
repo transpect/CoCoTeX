@@ -180,19 +180,19 @@
 \newdimen\ccf@total@width  \ccf@total@width=\textwidth\relax
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccf@calc@width} is an internal dimension used
-%   to calculate the ratio between mutiple sub-floats that should be
-%   scaled to the same height
+% \begin{macro}{\ccf@total@height} is the overall height of a float
 %    \begin{macrocode}
 \newdimen\ccf@total@height \ccf@total@height=\textwidth\relax
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccf@total@height} is the overall height of a float
+% \begin{macro}{\ccf@total@depth} is the overall depth of a float
 %    \begin{macrocode}
 \newdimen\ccf@total@depth  \ccf@total@depth=\textwidth\relax
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccf@total@depth} is the overall depth of a float
+% \begin{macro}{\ccf@calc@width} is an internal dimension used to
+%   calculate the ratio between mutiple sub-floats that should be
+%   scaled to the same height
 %    \begin{macrocode}
 \newdimen\ccf@calc@width      \ccf@calc@width=\ccf@total@width\relax
 %    \end{macrocode}
@@ -493,6 +493,14 @@
 %   before a float's content is evaluated.
 %    \begin{macrocode}
     \ccSetProperty{before-float}{\parindent\z@}%
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{fix-dimen}{[true|false]} if \texttt{true}, the
+%   content is \textit{always} scaled to \lstinline{\hsize}, i.e., the
+%   \lstinline{\textwidth} minus the left and right margins, even if
+%   it means to scale \textit{up} an image file.
+%    \begin{macrocode}
+    \ccSetProperty{fix-dimen}{false}%
 %    \end{macrocode}
 % \end{Property}
 %
@@ -1863,7 +1871,8 @@
 %    \begin{macrocode}
 \def\ccf@includesubgraphics{\cc@opt@empty\@ccf@includesubgraphics}%
 \def\@ccf@includesubgraphics[#1]#2{%
-  \def\@igopts{max width=\hsize,max height=\vsize,width=\hsize}%
+  \def\@igopts{max width=\hsize,max height=\vsize}%
+  \ccIfPropVal{fix-dimen}{true}{\apptocmd\@igopts{,width=\hsize}{}{}}{}%
   \if!#1!\else
     \apptocmd\@igopts{,#1}{}{}%
   \fi

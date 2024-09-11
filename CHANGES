@@ -1,79 +1,92 @@
 ; -*- markdown -*-
 
-0.5.0
 
-- general
-  - FIX: improved whitespace handling in Container environments
-  - NEW: Added hard requirement for LaTeX kernel version > texlive
-         2020
-  - FIX: update htmltabs.sty external to account Tagging of empty
-		 cells
-- coco-kernel.dtx
-  - NEW: Added some \ignorespaces at the end of Component macros
-  - NEW: Added default value for ccPrefix (=empty)
-  - NEW: Attributes of Component Groups now also use Attribute
-         Handlers
-  - NEW: Added method to check global Components against a given value
-  - NEW: Added a way to define Macros from Counted Components without
-         full expansion
-  - NEW: Replaced old custom hook mechanism with LaTeX kernel hooks
-  - NEW: Default PDF version is now 1.7 (or 2.0 if explicitly
-         required) instead of 1.3 iff accessibility features are
-         active
-  - NEW: Fixed an issue where additions to a parent Container's Types
-         were not passed down to its decendents if those were declared
-         earlier
-  - NEW: Warning when a value is attempted to be assigned to a
-         Component that is undefined
-  - FIX: made group components long
-  - FIX: LaTeX error when \cc@iterate@res is undefined
-- coco-common.dtx
-  - NEW: added option to suppress inclusion of color profile
-  - FIX: improved handling of color encoding option
-- coco-meta.dtx
-  - NEW: remove transitive role-mapping
-  - NEW: added MetaDatumBlock tag for complex meta data values that
-		 may contain multiple paragraphs
-  - FIX: Error when defined simple Components
-- coco-floats.dtx
-  - NEW: Changed how heights and widths of subfloats are calculated:
-	     - sameheight mechanism is now only applied if neither
-           sub-figure has an width or height key.
-		 - added Attribute to locally de-activate sameheight mechanism
-  - NEW: Changed tagging of float environments to account for
-         subfloats
-  - FIX: Typo in generation of Listof entry
-  - FIX: value of class Attribute was expanded too late
-  - FIX: orientation Attribute was not evaluated correctly
-  - FIX: Hooks in list-of were still cocotex's own
-  - FIX: wrong expansion of \ccContentsline in Listof
-- coco-title.dtx
-  - NEW: added DocTitle Component and doc-book-title Properties to
-		 locally override the PDF-title meta datum
-  - NEW: XMP meta data are parsed and written into the Document Info
-         Dictionary when ltpdfa is used.
-  - NEW: Write document language with disabled a11y features
-  - FIX: XMP meta data now take preference over Meta container
-         Components if the XMP does exist.
-  - FIX: pdfcreator and pdfproducer metadata were used the wrong way.
-  - FIX: Query for Cover when pubtype=journal
-- coco-headings.dtx
-  - NEW: added hook for capturing running titles
-  - NEW: added way to exempt headings from auto-tagging
-- coco-accessibility.dtx
-  - NEW: Keywords and Authors are now written as separated list items
-         into the generated XMP files, instead of one single string.
-  - NEW: Added minimal math tagging
-  - NEW: made auto tagging of align-like environments sensitive to the
-         amsmath packages loaded
-  - FIX: prevented hyperref from writing redundant and empty
-         DocumentInfo fields
-  - FIX: Links now have /Contents attribute to make VeraPDF's PDF/UA1
-         check happy
-- coco-lists.dtx
-  - FIX: typo in doc string
-  - FIX: counting error
-- coco-script.dtx
-  - FIX: Avoid babel-lua errors when bidi is not needed
+# 0.5.0
 
-0.4.9 (INITIAL STATUS)
+## general
+- FIX: improved whitespace handling in Container environments
+- NEW: Added hard requirement for LaTeX kernel version > texlive
+       2020
+- FIX: update `htmltabs.sty` external to account Tagging of empty
+	   cells
+
+## coco-kernel.dtx
+- NEW: Added some `\ignorespaces` at the end of Component macros
+- NEW: Added default value for ccPrefix (=empty)
+- NEW: Attributes of Component Groups now also use Attribute
+       Handlers
+- NEW: Added method to check global Components against a given value
+- NEW: Added a way to define Macros from Counted Components without
+       full expansion
+- NEW: Replaced old custom hook mechanism with LaTeX kernel hooks
+- NEW: Default PDF version is now 1.7 (or 2.0 if explicitly
+       required) instead of 1.3 iff accessibility features are
+       active
+- NEW: Fixed an issue where additions to a parent Container's Types
+       were not passed down to its decendents if those were declared
+       earlier
+- NEW: Warning when a value is attempted to be assigned to a
+       Component that is undefined
+- FIX: made group components long
+- FIX: LaTeX error when `\cc@iterate@res` is undefined
+
+## coco-common.dtx
+- NEW: added option to suppress inclusion of color profile
+- FIX: improved handling of color encoding option
+
+## coco-meta.dtx
+- NEW: remove transitive role-mapping
+- NEW: added MetaDatumBlock tag for complex meta data values that
+	   may contain multiple paragraphs
+- FIX: Error when defined simple Components
+
+## coco-floats.dtx
+- NEW: Changed how heights and widths of subfloats are calculated:
+       - sameheight mechanism is now only applied if neither
+         sub-figure has an width or height key.
+       - added Attribute to locally de-activate sameheight mechanism
+       - added Property `fix-dimen` which if not true prevents image
+         files from being scaled to `\hsize`.
+- NEW: Changed tagging of float environments to account for
+       subfloats
+- FIX: Typo in generation of Listof entry
+- FIX: value of class Attribute was expanded too late
+- FIX: orientation Attribute was not evaluated correctly
+- FIX: Hooks in list-of were still cocotex's own
+- FIX: wrong expansion of \ccContentsline in Listof
+
+## coco-title.dtx
+- NEW: added DocTitle Component and doc-book-title Properties to
+	   locally override the PDF-title meta datum
+- NEW: XMP meta data are parsed and written into the Document Info
+       Dictionary when ltpdfa is used.
+- NEW: Write document language with disabled a11y features
+- FIX: XMP meta data now take preference over Meta container
+       Components if the XMP does exist.
+- FIX: pdfcreator and pdfproducer metadata were used the wrong way.
+- FIX: Query for Cover when pubtype=journal
+
+## coco-headings.dtx
+- NEW: added hook for capturing running titles
+- NEW: added way to exempt headings from auto-tagging
+
+## coco-accessibility.dtx
+- NEW: Keywords and Authors are now written as separated list items
+       into the generated XMP files, instead of one single string.
+- NEW: Added minimal math tagging
+- NEW: made auto tagging of align-like environments sensitive to the
+       amsmath packages loaded
+- FIX: prevented hyperref from writing redundant and empty
+       DocumentInfo fields
+- FIX: Links now have /Contents attribute to make VeraPDF's PDF/UA1
+       check happy
+
+## coco-lists.dtx
+- FIX: typo in doc string
+- FIX: counting error
+
+## coco-script.dtx
+- FIX: Avoid `babel-lua` errors when `bidi` is not needed
+
+
+# 0.4.9 (INITIAL STATUS)
