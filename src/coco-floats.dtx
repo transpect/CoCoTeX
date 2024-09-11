@@ -1883,6 +1883,7 @@
   \fi%
   \expandafter\ccf@ltx@includegraphics\expandafter[\@igopts]{#2}%
   \if@cc@is@final
+    \ifx\cca@Gin@alt\@undefined\let\cca@Gin@alt\relax\fi
     \ifx\relax\cca@Gin@alt\relax
       \ccIfComp{AltText}
         {\ccaAddAltText{\ccUseComp{AltText}}}
