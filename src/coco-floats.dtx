@@ -1025,6 +1025,7 @@
 \def\endccSubFloat{%
   \ifhmode\unskip\fi
   \setbox\ccf@sub@box\hbox{\ccGobble
+    \@cc@is@finalfalse
     \let\includegraphics\ccf@measuresubgraphics
     \ccUseProperty{subfloat-content}%
   }%

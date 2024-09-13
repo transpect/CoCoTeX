@@ -54,6 +54,7 @@
 - FIX: orientation Attribute was not evaluated correctly
 - FIX: Hooks in list-of were still cocotex's own
 - FIX: wrong expansion of \ccContentsline in Listof
+- FIX: disabled tagging while measuring sub-floats
 
 ## coco-title.dtx
 - NEW: added DocTitle Component and doc-book-title Properties to
