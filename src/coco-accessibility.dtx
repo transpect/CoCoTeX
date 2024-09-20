@@ -675,10 +675,12 @@
 % The standard pagestyles from the {\LaTeX} kernel are patched
 % by the module.
 %    \begin{macrocode}
-\apptocmd\ps@empty{\ccaPagestyleArtifacts}{}{}
-\apptocmd\ps@plain{\ccaPagestyleArtifacts}{}{}
-\apptocmd\ps@headings{\ccaPagestyleArtifacts}{}{}
-\apptocmd\ps@myheadings{\ccaPagestyleArtifacts}{}{}
+\AtBeginDocument{%
+  \apptocmd\ps@empty{\ccaPagestyleArtifacts}{}{}%
+  \apptocmd\ps@plain{\ccaPagestyleArtifacts}{}{}%
+  \apptocmd\ps@headings{\ccaPagestyleArtifacts}{}{}%
+  \apptocmd\ps@myheadings{\ccaPagestyleArtifacts}{}{}%
+}
 %    \end{macrocode}
 % Finally, we register the \lstinline{footer} and \lstinline{header}
 % PDF tags as \lstinline{artifacts} with \lstinline{ltpdfa}:
