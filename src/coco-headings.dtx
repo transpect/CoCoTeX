@@ -1197,25 +1197,27 @@
 %    \begin{macrocode}
   \ccSetProperty{heading-block}
     {\ccUseProperty{main-title-format}%
-     \ccIfComp{Subtitle}{{\ccUseProperty{subtitle-face}\ccUseComp{Subtitle}}\par}{}%
-     \ccIfComp{AuthorNameList}{{\ccUseProperty{author-face}\ccUseComp{AuthorNameList}}\par}{}%
-     \ccIfComp{QuoteBlock}{\ccUseComp{QuoteBlock}}{}%
-     \ccIfComp{AffilBlock}{{\ccUseProperty{affil-block-face}\ccUseComp{AffilBlock}}\par}{}%
+     \ccaStructStart{Div}%
+     \ccWhenComp{Subtitle}{{\ccUseProperty{subtitle-face}\ccaStructStart{P}\ccUseComp{Subtitle}\ccaStructEnd{P}}\par}%
+     \ccWhenComp{AuthorNameList}{{\ccUseProperty{author-face}\ccaStructStart{P}\ccUseComp{AuthorNameList}\ccaStructEnd{P}}\par}%
+     \ccWhenComp{QuoteBlock}{\ccaStructStart{Div}\ccUseComp{QuoteBlock}\ccaStructStart{Div}}%
+     \ccWhenComp{AffilBlock}{{\ccUseProperty{affil-block-face}\ccaStructStart{Div}\ccUseComp{AffilBlock}\ccaStructStart{Div}}\par}%
+     \ccaStructEnd{Div}%
     }%
 %    \end{macrocode}
 % \end{Property}
 % \begin{Property}{main-title-format}{<any>} is the format of the
-% heading's main title. It should also enclose the heading's
-% \UsageComponent{Number} and \UsageComponent{Title} Components with
-% Tags that are mapped to \DescribeTag{H} or \DescribeTag{Hn} with
-% $1<n<6$.
+%   heading's main title. It should also enclose the heading's
+%   \UsageComponent{Number} and \UsageComponent{Title} Components with
+%   Tags that are mapped to \DescribeTag{H} or \DescribeTag{Hn} with
+%   $1<n<6$. The number is tagged as \DescribeTag{Lbl} if present.
 %    \begin{macrocode}
   \ccSetProperty{main-title-format}{%
     \ccUseProperty{title-face}%
     \cchHeadTagStart
     \ccIfComp{Number}%
-    {\ccUseProperty{hang-number}}%
-    {\leftskip0pt}%
+      {\ccaStructStart{Lbl}\ccUseProperty{hang-number}\ccaStructEnd{Lbl}}%
+      {\leftskip0pt}%
     \ccUseComp{Title}%
     \cchHeadTagEnd
     \par
@@ -1237,8 +1239,7 @@
       {\par\vskip\baselineskip
        {\bfseries\ccIfComp{KeywordsLabel}{\ccUseComp{KeywordsLabel}}{Keywords}}\par
        {\itshape\small\ccUseComp{Keywords}\par}}
-     {}%
-   }%
+      {}}%
 %    \end{macrocode}
 % \end{Property}
 % \begin{Property}{before-skip}{<skip>} the vertical space before
@@ -1473,9 +1474,10 @@
 %    \end{macrocode}
 % \end{Property}
 % \begin{Property}{toc-page-sep}{<any>} separator between the TocTitle
-%   and the page counter.
+%   and the page counter. The dotted line is tagged as
+%   \DescribeTag{leaders}, which is mapped to be an artifact.
 %    \begin{macrocode}
-  \ccSetProperty{toc-page-sep}{\dotfill}% between TocTitle and the page counter
+  \ccSetProperty{toc-page-sep}{\ccTocLink{\ccaAddKeep\ccaStructStart[document]{leaders}\dotfill\ccaStructEnd{leaders}}}% between TocTitle and the page counter
 %    \end{macrocode}
 % \end{Property}
 % \begin{Property}{toc-page-face}{<any>} style of the page counter
@@ -1485,14 +1487,14 @@
 % \end{Property}
 % \begin{Property}{toc-page-format}{<any>} format of the page counter
 %   using the \UsageProp{toc-page-sep} and \UsageProp{toc-page-face}
-%   Properties.
+%   Properties. The number itself is tagged as a \DescribeTag{Span}.
 %    \begin{macrocode}
   \ccSetProperty{toc-page-format}{% format of the page value
     \ccUseProperty{toc-page-sep}%
     \bgroup
       \ccUseProperty{toc-page-face}%
-      \ccUseComp{TocPage}%
-    \egroup}%
+      \ccaStructStart{Span}\ccTocLink{\ccUseComp{TocPage}}\ccaStructEnd{Span}%
+    \egroup}%%
 %    \end{macrocode}
 % \end{Property}
 % \begin{Property}{toc-level}{<name>} name of another heading level as
@@ -1533,7 +1535,7 @@
 %   the \DescribeTag{TOCI}, \DescribeTag{P}, and
 %   \DescribeTag{Reference} tags for the entire entry, as well as
 %   \DescribeTag{Lbl} for the \UsageComponent{TocNumber}, and
-%   \DescribeTag{Span} for the rest of the entry.
+%   \DescribeTag{Span} for the remaining Components of the entry.
 %    \begin{macrocode}
   \ccSetProperty{toc-format}{%
     \ccUseProperty{toc-title-face}%
@@ -1541,13 +1543,9 @@
     \ccIfComp{TocNumber}
       {\ccaStructStart{P}\ccaStructStart{Reference}\ccaStructStart{Lbl}\ccUseProperty{toc-hang-number}\ccaStructEnd{Lbl}}
       {\leftskip0pt\leavevmode}%
-    \ccaVstructStart{Span}%
-    \ccTocLink{%
-      \ccWhenComp{TocAuthorNameList}{\ccUseComp{TocAuthorNameList}:\space}%
-      \ccUseComp{TocTitle}%
-      \ccUseProperty{toc-page-format}%
-    }%
-    \ccaVstructEnd{Span}%
+    \ccWhenComp{TocAuthorNameList}{\ccaStructStart{Span}\ccTocLink{\ccUseComp{TocAuthorNameList}:\space}\ccaStructEnd{Span}}%
+    \ccaStructStart{Span}\ccTocLink{\ccUseComp{TocTitle}}\ccaStructEnd{Span}%
+    \ccUseProperty{toc-page-format}%
     \ccWhenComp{TocNumber}{\ccaStructEnd{Reference}\ccaStructEnd{P}}%
     \ccaVstructEnd{TOCI}%
   }%

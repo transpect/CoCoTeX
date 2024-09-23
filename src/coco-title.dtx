@@ -1085,37 +1085,48 @@ from the Components given in the Meta Container.}}}
     \def\thepage{\roman{page}}%
   }%
   \ccSetProperty{titlepage-i}{%
+    \ccaStructStart{Titlepage}%
+    \ccaStructStart{Span}%
     \ifmonograph
       \ccUseComp{AuthorNameList}%
     \else
       \ccUseProperty{EditorNameList}%
     \fi%
+    \ccaStructEnd{Span}%
     \vskip\baselineskip
     \bgroup
-      \ccUseProperty{title-face}\ccUseComp{Title}%
+      \ccUseProperty{title-face}\ccaStructStart{Title}\ccUseComp{Title}\ccaStructEnd{Title}%
     \egroup
+    \ccaStructEnd{Titlepage}%
   }%
   \ccSetProperty{titlepage-ii}{%
+    \ccaStructStart{Titlepage}%
     \ccGetComp{Editorial}%
     \ccGetComp{SeriesNote}%
     \ccGetComp{GenericMetaBlock}%
     \vfill
     \ccUseProperty{bio-output}%
+    \ccaStructEnd{Titlepage}%
   }%
   \ccSetProperty{titlepage-iii}{%
+    \ccaStructStart{Titlepage}%
+    \ccaStructStart{Span}%
     \ifmonograph
       \ccUseComp{AuthorNameList}%
     \else
       \ccUseProperty{EditorNameList}%
     \fi%
+    \ccaStructEnd{Span}%
     \par
     \ccUseProperty{title-format}
     \ccGetComp{Edition}%
     \ccGetComp{EditionNote}%
+    \ccaStructEnd{Titlepage}%
     \vfill
     \clearpage
   }%
   \ccSetProperty{titlepage-iv}{%
+    \ccaStructStart{Titlepage}%
     \ccGetComp{Dedication}%   Dedication
     \ccGetComp{Acknowledgements}%   Dedication
     \ccUseProperty{imprint-format}%
@@ -1127,6 +1138,7 @@ from the Components given in the Meta Container.}}}
       \ccUseProperty{imprint-sep}%
       \ccUseProperty{imprint}%
     \egroup
+    \ccaStructEnd{Titlepage}
     \clearpage
   }%
   %% predefined face and format Properties
