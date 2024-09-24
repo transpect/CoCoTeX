@@ -88,6 +88,7 @@
 
 ## coco-script.dtx
 - FIX: Avoid `babel-lua` errors when `bidi` is not needed
-
+- FIX: Removed old fallback for Armenian and replaced by usescript
+       system
 
 # 0.4.9 (INITIAL STATUS)
