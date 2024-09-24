@@ -846,6 +846,23 @@
     \directlua{ltpdfa.configAutoclose()}
     \ccaVstructStart{document}%
 %    \end{macrocode}
+% \begin{macro}{\cca@id@document} is the internal ID of the document
+%   root node.
+%    \begin{macrocode}
+    \ccaSaveCurStruct{cca@id@document}%
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\cca@id@document@dummy} is the internal ID of a
+%   placeholder tag node inserted immediately after the root tag node
+%   is opened. This can be used to be replaced by the document's main
+%   title tag node using the \UsageMacro{\ccaReplaceStruct} command,
+%   which should get this macro as its sole argument.
+%    \begin{macrocode}
+    \ccaStructStart{dummy}%
+      \ccaSaveCurStruct{cca@id@document@dummy}%
+    \ccaStructEnd{dummy}%
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\PDF@FinishDoc} is re-defined to disable
 %   \lstinline{hyperref} filling the PDF's DocumentInfo with empty
 %   strings, as they are written by \lstinline{ltpdfa}, instead.
@@ -862,11 +879,11 @@
       \Hy@DisableOption{pdftrapped}%
       \Hy@DisableOption{pdfinfo}%
     }%
-  }
+  }%
   \AtEndDocument{%
     \ccaVstructEnd{document}
     \directlua{ltpdfa.endDocument()}%
-  }
+  }%
 }
 %    \end{macrocode}
 % \end{macro}

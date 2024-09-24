@@ -574,24 +574,26 @@
 \def\ccUseComponentFrom#1#2{\csname cc@#1@#2\endcsname}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccGetComp*} is a user-level command to return the
+% \begin{macro}{\ccGetComp} is a user-level command to return the
 %   contents stored in a Component of name \InlineArg{1} as a
 %   paragraph iff the Component is neither empty nor
 %   \lstinline{\relax}. If Accessibility features are activated, the
 %   returned content of the Component is autmatically tagged with a
-%   \lstinline{Para} tag.
-%
-%   The starred version of \lstinline{\ccGetComp} supresses automated
-%   tagging for that Component when the accessibility features are
-%   active.
+%   \DescribeTag{P} tag.
 %    \begin{macrocode}
 \def\ccGetComp{\@ifstar\cc@sget@comp\cc@get@comp}
 \def\cc@get@comp#1{%
   \ccWhenComp{#1}
-    {\ccWhenAlly{\ccaStructStart{Para}}%
+    {\ccWhenAlly{\ccaStructStart{P}}%
      \ccUseComp{#1}%
-     \ccWhenAlly{\ccaStructEnd{Para}}%
+     \ccWhenAlly{\ccaStructEnd{P}}%
      \par}}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccGetComp*} The starred version of
+%   \UsageMacro{\ccGetComp} supresses automated tagging for that
+%   Component (only if accessibility features are active).
+%    \begin{macrocode}
 \def\cc@sget@comp#1{\ccWhenComp{#1}{\ccUseComp{#1}\par}}
 %    \end{macrocode}
 % \end{macro}
@@ -878,6 +880,7 @@
 %   retrieved with \lstinline{\cc@assign@res}.
 %    \begin{macrocode}
 \def\cc@compose@collection#1#2{%
+  \ccaProtect
   \expandafter\ifnum\csname cc#1Cnt\endcsname > \z@\relax
     \edef\cc@iterate@res{%
       \noexpand\bgroup
@@ -905,7 +908,8 @@
           \expandafter\expandafter\expandafter{\expandafter\cc@iterate@res\@tempb}%
         }%
         \expandafter\def\expandafter\cc@iterate@res\expandafter{\cc@iterate@res\egroup}%
-  \fi}
+  \fi
+  \ccaEnable}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\cc@apply@collection} is the low-level macro used to
@@ -914,6 +918,7 @@
 %   and can be retrieved with \lstinline{\cc@assign@res}.
 %    \begin{macrocode}
 \def\cc@apply@collection#1#2{%
+  \ccaProtect
   \begingroup
     \global\let\cc@iterate@res\relax
     \letcs\ccTotalCount{cc#1Cnt}%
@@ -933,6 +938,7 @@
       \egroup
     }%
   \endgroup
+  \ccaEnable
 }
 %    \end{macrocode}
 % \end{macro}

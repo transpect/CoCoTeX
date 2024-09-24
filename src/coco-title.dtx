@@ -1061,20 +1061,27 @@ from the Components given in the Meta Container.}}}
   \ccSetProperty{fund-format}{% Format of a single fund/grant/sponsor
     \strut\vtop{%
       \hsize\ccUseProperty{fund-width}%
-      \ccIfComp{FundName}{\ccUseComp{FundName}\\[1ex]}{}%
-      \includegraphics[width=\ccUseProperty{fund-width}]{\ccUseComp{FundLogo}}}%
+      \ccWhenComp{FundName}{\ccaStructStart{P}\ccUseComp{FundName}\ccaStructEnd{P}\\[1ex]}%
+      \ccaStructStart{Figure}%
+      \ccaAddPlacement{Block}%
+      \ccaAddAltText{\ccGetComp*{FundName} Logo}%
+      \includegraphics[width=\ccUseProperty{fund-width}]{\ccUseComp{FundLogo}}%
+      \ccaStructEnd{Figure}%
+    }%
     \ccUseProperty{fund-sep}%
   }%
   \ccSetProperty{funding-sep}{4mm}%
   \ccSetProperty{funding-block}{%
     \bgroup
 %    \end{macrocode}
-% We set \lstinline{fund-width} here so that the value is calculated only once and only the result is stored in the \lstinline{fund-width} Property.
+% We set \lstinline{fund-width} here so that the value is calculated
+% only once and only the result is stored in the
+% \lstinline{fund-width} Property.
 %    \begin{macrocode}
       \ccSetPropertyX{fund-width}{\dimexpr(\textwidth/\ccUseProperty{funding-columns})-(\ccUseProperty{funding-sep}/\ccUseProperty{funding-columns})\relax}
       \ccUseProperty{funding-format}%
       \ccGetComp{FundingPreText}%
-      \ccGetComp{FundingBlock}%
+      \ccGetComp*{FundingBlock}%
       \ccGetComp{FundingPostText}%
       \par
     \egroup
@@ -1086,16 +1093,14 @@ from the Components given in the Meta Container.}}}
   }%
   \ccSetProperty{titlepage-i}{%
     \ccaStructStart{Titlepage}%
-    \ccaStructStart{Span}%
     \ifmonograph
-      \ccUseComp{AuthorNameList}%
+      \ccaStructStart{Authors}\ccUseComp{AuthorNameList}\ccaStructEnd{Authors}%
     \else
-      \ccUseProperty{EditorNameList}%
+      \ccaStructStart{Editors}\ccUseProperty{EditorNameList}\ccaStructEnd{Editors}%
     \fi%
-    \ccaStructEnd{Span}%
     \vskip\baselineskip
     \bgroup
-      \ccUseProperty{title-face}\ccaStructStart{Title}\ccUseComp{Title}\ccaStructEnd{Title}%
+      \ccUseProperty{title-face}\ccaStructStart{Title}\ccaReplaceNode{\cca@id@document@dummy}\ccUseComp{Title}\ccaStructEnd{Title}%
     \egroup
     \ccaStructEnd{Titlepage}%
   }%
@@ -1110,13 +1115,11 @@ from the Components given in the Meta Container.}}}
   }%
   \ccSetProperty{titlepage-iii}{%
     \ccaStructStart{Titlepage}%
-    \ccaStructStart{Span}%
     \ifmonograph
-      \ccUseComp{AuthorNameList}%
+      \ccaStructStart{Authors}\ccUseComp{AuthorNameList}\ccaStructEnd{Authors}%
     \else
-      \ccUseProperty{EditorNameList}%
+      \ccaStructStart{Editors}\ccUseProperty{EditorNameList}\ccaStructEnd{Editors}%
     \fi%
-    \ccaStructEnd{Span}%
     \par
     \ccUseProperty{title-format}
     \ccGetComp{Edition}%
@@ -1129,14 +1132,26 @@ from the Components given in the Meta Container.}}}
     \ccaStructStart{Titlepage}%
     \ccGetComp{Dedication}%   Dedication
     \ccGetComp{Acknowledgements}%   Dedication
-    \ccUseProperty{imprint-format}%
     \ccUseProperty{funding-block}%
     \vfill
     \bgroup
       \ccUseProperty{imprint-face}%
-      \ccIfComp{Biblio}{{\bfseries\ccGetComp{BiblioTitle}}\ccGetComp{Biblio}}{}%
+      \ccaStructStart{MetaDatumBlock}%
+      \ccWhenComp{Biblio}{%
+        \ccaStructStart{MetaDatum}%
+          {\bfseries
+           \ccaStructStart{MetaDatumLabel}%
+           \ccGetComp*{BiblioTitle}%
+           \ccaStructEnd{MetaDatumLabel}%
+          }%
+        \ccaStructStart{MetaDatumValue}%
+        \ccGetComp*{Biblio}%
+        \ccaStructEnd{MetaDatumValue}%
+        \ccaStructEnd{MetaDatum}%
+      }%
       \ccUseProperty{imprint-sep}%
       \ccUseProperty{imprint}%
+      \ccaStructEnd{MetaDatumBlock}%
     \egroup
     \ccaStructEnd{Titlepage}
     \clearpage
@@ -1219,10 +1234,12 @@ from the Components given in the Meta Container.}}}
     \ccGetComp{LicenceText}%
   }%
   \ccSetProperty{copyright}{%
+    \ccaStructStart{MetaDatumBlock}%
     \ccIfComp{Copyright}
       {\ccUseComp{Copyright}\par}
       {\textcopyright\space\ccUseComp{Year}\space\ccUseComp{Publisher},\space\ccUseComp{PubPlace}\par}%
-    }%
+    \ccaStructEnd{MetaDatumBlock}%
+  }%
   \ccSetProperty{publisher}{%
     \ccGetComp{PubDivInfo}%
     \ccUseProperty{copyright}%
