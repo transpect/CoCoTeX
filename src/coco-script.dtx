@@ -125,21 +125,31 @@
   \fi}
 
 %    \end{macrocode}
+%
+%
 % \section{Predefined script systems}
+%
 % \subsection{Support for Armenian script}
+%
 %    \begin{macrocode}
-\ifx\use@script@armenian\@empty
-  \message{^^J  [coco-script Loaded Script: Armenian]^^J}
-  \def\NotoArmenianPath{./fonts/Noto/Armenian/}
-  \newfontfamily\fallbackfont@armenian{NotoSansArmenian-Regular.ttf}%
-    [BoldFont = NotoSansArmenian-Bold.ttf,%
-     Path = \NotoArmenianPath,%
-     WordSpace = 1.25]
-  \DeclareTextFontCommand\armenian{\fallbackfont@armenian}
-  \let\tp@no@fallback@armenian\@empty%
-\fi
+\ccDeclareBabelFont{armenian}{[%
+    Path=./fonts/Noto/Armenian/,
+    BoldFont = NotoSerifArmenian-Bold.ttf,%
+    WordSpace = 1.25]{NotoSerifArmenian-Regular.ttf}}
+  {[%
+    Path=./fonts/Noto/Armenian/,
+    BoldFont = NotoSansArmenian-Bold.ttf,%
+    WordSpace = 1.25]{NotoSansArmenian-Regular.ttf}%
+  }
 %    \end{macrocode}
+% Legacy and backwards compatibility:
+%    \begin{macrocode}
+\def\armenian{\foreignlanuage{armenian}}
+%    \end{macrocode}
+%
+%
 % \subsection{Support for Chinese script}
+%
 %    \begin{macrocode}
 \tpDeclareBabelFont{chinese}{[%
     Path=./fonts/Noto/Chinese/,
@@ -152,7 +162,10 @@
   }
 
 %    \end{macrocode}
+%
+%
 % \subsection{Support for Japanese script}
+%
 %    \begin{macrocode}
 \tpDeclareBabelFont{japanese}{[%
     Path=./fonts/Noto/Japanese/,
@@ -164,7 +177,10 @@
     WordSpace = 1.25]{NotoSansJP-Regular.otf}
   }
 %    \end{macrocode}
+%
+%
 % \subsection{Support for Korean script}
+%
 %    \begin{macrocode}
 \tpDeclareBabelFont{korean}{[%
   BoldFont = NotoSerifKR-Bold.otf,%
@@ -182,7 +198,10 @@
   ]{NotoSansKR-Regular.otf}%
 }
 %    \end{macrocode}
+%
+%
 % \subsection{Support for Hebrew script}
+%
 %    \begin{macrocode}
 \tpDeclareBabelFont{hebrew}{[%
     Scale=MatchUppercase,%
@@ -197,7 +216,10 @@
 }
 
 %    \end{macrocode}
+%
+%
 % \subsection{Support for Arabic script}
+%
 %    \begin{macrocode}
 \tpDeclareBabelFont{arabic}{[%
     BoldFont = NotoNaskhArabic-Bold.ttf,%
@@ -210,7 +232,10 @@
   }
 
 %    \end{macrocode}
+%
+%
 % \subsection{Support for Greek script}
+%
 %    \begin{macrocode}
 \tpDeclareBabelFont{greek}{[%
     BoldFont = NotoSerif-Bold.ttf,%
@@ -228,7 +253,10 @@
   }
 
 %    \end{macrocode}
+%
+%
 % \subsection{Support for Ethiopian/Amharic script}
+%
 %    \begin{macrocode}
 \tpDeclareBabelFont{ethiop}{[%
     BoldFont = NotoSerifEthiopic-Bold.ttf,%
@@ -260,7 +288,10 @@
   }
 
 %    \end{macrocode}
+%
+%
 % \subsection{Support for Georgian script}
+%
 %    \begin{macrocode}
 \tpDeclareBabelFont{georgian}{%
   [%
@@ -280,6 +311,8 @@
   ]{NotoSerifGeorgian-Regular.ttf}%
 }
 %    \end{macrocode}
+%
+%
 % \subsection{Support for Syrian script}
 %
 % Since Babel does not support the Syrian script natively, we create a
@@ -342,6 +375,7 @@ derivate = no
 %    \end{macrocode}
 %
 % \subsection{Support for medieval scripts and special characters}
+%
 % only \lstinline{rm}!
 %    \begin{macrocode}
 \babelfont{mdv}[%
