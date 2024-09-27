@@ -1343,7 +1343,17 @@
 %    \begin{macrocode}
 \long\def\ccIfProp#1#2#3{%
   \expandafter\ifx\csname cc@\cc@cur@cont @#1\endcsname\relax#3\else
-    \expandafter\ifx\csname cc@\cc@cur@cont @#1\endcsname\cc@long@empty #3\else#2\fi
+    \expandafter\ifx\csname cc@\cc@cur@cont @#1\endcsname\cc@long@empty#3\else#2\fi
+  \fi
+\ignorespaces}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccWhenProp} is the same as \UsageMacro{\ccIfProp} but
+%   omits the \lstinline{else}-branch.
+%    \begin{macrocode}
+\long\def\ccWhenProp#1#2{%
+  \expandafter\ifx\csname cc@\cc@cur@cont @#1\endcsname\relax\else
+    \expandafter\ifx\csname cc@\cc@cur@cont @#1\endcsname\cc@long@empty\else#2\fi
   \fi
 \ignorespaces}
 %    \end{macrocode}

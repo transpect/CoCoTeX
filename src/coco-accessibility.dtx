@@ -183,13 +183,10 @@
   \directlua{ltpdfa.config.dospaces = \ifx\cca@do@dospaces\relax true\else false\fi}
   \directlua{ltpdfa.config.doparas = \ifx\cca@do@doparas\relax true\else false\fi}
 %    \end{macrocode}
-% \lstinline{ltpdfa} provides two ways to tag heading heads. One by
-% tagging headers as \lstinline{H1..H6}, and one where all headings
-% are tagged as \lstinline{H} and a heading's depth is implied by
-% nesting. Since most of our projects require way more than 6 heading
-% levels, we hard-code the nesting approach:
+% We implement our own auto-close mechanism to end document
+% partitions, so we disable ltpdfa's native one:
 %    \begin{macrocode}
-  \directlua{ltpdfa.config.headnums = false}
+  \directlua{ltpdfa.tagger.doautoclose = false}
 %    \end{macrocode}
 % CoCoTeX with accessibility support is \lstinline{\luaTeX} only, so
 % we hard-code \lstinline{pdftex} as render engine:
@@ -843,7 +840,6 @@
   \AtBeginDocument{%
     \directlua{ltpdfa.beginDocument('\luaescapestring{\ltpdfa@last@page}')}
     \UseHook{cca/document/begin}%
-    \directlua{ltpdfa.configAutoclose()}
     \ccaVstructStart{document}%
 %    \end{macrocode}
 % \begin{macro}{\cca@id@document} is the internal ID of the document
@@ -881,6 +877,9 @@
     }%
   }%
   \AtEndDocument{%
+    \ccDebugMsg[a11y]{Final AutoClose. \meaning\ccPrevSecLevel, \meaning\ccCurSecLevel}%
+    \cchResetNesting
+    \ccDebugMsg[a11y]{End Document}%
     \ccaVstructEnd{document}
     \directlua{ltpdfa.endDocument()}%
   }%

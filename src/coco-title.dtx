@@ -728,6 +728,12 @@ from the Components given in the Meta Container.}}}
   \ccDeclareGlobalComponent{Year}%
 %    \end{macrocode}
 % \end{Component}
+% \begin{Component}{Date} the date of writing/finishing. Defaults to
+%   \lstinline{\today}.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent[\today]{Date}%
+%    \end{macrocode}
+% \end{Component}
 % \begin{Component}{Edition} the edition of the publication.
 %    \begin{macrocode}
   \ccDeclareGlobalComponent{Edition}%
@@ -999,7 +1005,38 @@ from the Components given in the Meta Container.}}}
 %
 %    \begin{macrocode}
 \ccAddToProperties{titlepage}{%
-  \ccSetProperty{article-title}{}%
+%    \end{macrocode}
+% 
+% \begin{Property}{article-title}{<any>} is the title of a single
+%   article. It defaults to what standard {\LaTeX} does with
+%   \lstinline{\maketitle} in the \lstinline{article} class without
+%   the \lstinline{titlepage} class option and uses the
+%   \UsageComponent{Title}, \UsageComponent{AuthorNameList}, and
+%   \UsageComponent{Date} Components.
+%    \begin{macrocode}
+  \ccSetProperty{article-title}{%
+    \newpage
+    \null
+    \vskip 2em
+    \begin{center}%
+      \ccaStructStart{Titlepage}%
+      \let \footnote \thanks
+      {\LARGE\ccaStructStart{Title}\ccaReplaceStruct{\cca@id@document@dummy}\ccUseComp{Title}\ccaStructEnd{Title}\par}%
+      \vskip 1.5em%
+      {\large
+        \lineskip .5em%
+        \ccaStructStart{Authors}\ccUseComp{AuthorNameList}\ccaStructEnd{Authors}\par
+      }%
+      \vskip 1em%
+      {\large \ccaStructStart{P}\ccUseComp{Date}\ccaStructEnd{P}}%       % Set date in \large size.
+      \end{center}%
+      \ccaStructEnd{Titlepage}%
+      \par
+      \vskip 1.5em
+  }%
+%    \end{macrocode}
+% \end{Property}
+%    \begin{macrocode}
   % Title page hooks
   % Before \ccPrefix Maketitle and outside the group
   \ccSetProperty{before-titlepage}{%

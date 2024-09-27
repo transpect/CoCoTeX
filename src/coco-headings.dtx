@@ -173,13 +173,6 @@
       \csgdef{cch@#3@level}{#2}%
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\cch@2@unique} is a unique name for the
-%      heading's level. Is is always the name of the \textit{first}
-%      heading that is defined with a given heading level counter.
-%    \begin{macrocode}
-      \ifcsdef{cch@#2@unique}{}{\csgdef{cch@#2@unique}{#3}}%%
-%    \end{macrocode}
-% \end{macro}
 % 
 %    \begin{macrocode}
       \ccPackageInfo{Headings}{}{Declaring heading `#3'}%
@@ -228,189 +221,13 @@
 %    \begin{macrocode}
       \cch@declare@heading{#2}{#3}%
     }% \ccDeclareContainer{#3}
+    \ccWhenAlly{\ccaAddRolemap{#3}{Sect}}%
   }% \ifcsdef cc@container@#3 fi
-%    \end{macrocode}
-% If \CoCoTeX's accessibility features are active and the heading is
-% declared with the non-starred version of
-% \UsageMacro{\ccDeclareHeading}, we need to register each new heading
-% with \lstinline{ltpdfa}'s autoclose mechanism.
-%    \begin{macrocode}
-  \ccWhenAlly{%
-    \ifx\cch@star@hdg\relax
-      \expandafter\global\expandafter\let\csname cch@notag@#3\endcsname\@empty
-    \else
-      \cch@add@autoclose{#2}{#3}%
-    \fi
-  }%
 }% \cc@declare@heading
 %    \end{macrocode}
 %   Each new heading level needs some configuration with the
 % \lstinline{ltpdfa} package in order to automatically close heading
 % tags with the beginning of a new heading.
-% \end{macro}
-%
-% \begin{macro}{\cch@add@autoclose} adds the new heading level to
-%   \lstinline{ltpdfa}'s autoclose mechanism. \#1 is the numeric
-%   level, \#2 is the name of the heading. We do this inside the
-%   \lstinline{cca/before/begin/document} hook, since we need to know
-%   \textit{all} locally defined heading levels beforehand in order to
-%   build the Sectioning tree correctly.
-%
-%   Note that this whole method is only called for headings declared
-%   with the non-starred version of \UsageMacro{\ccDeclareHeading}.
-%    \begin{macrocode}
-\newcount\cch@tempcnta \cch@tempcnta\z@
-\def\cch@add@autoclose#1#2{%
-  \AddToHook{cca/document/begin}[cch/autoclose]{%
-%    \end{macrocode}
-% First, we assign the Sectioning tag and the tag for the section's
-% head itself to the \lstinline{Sect} and \lstinline{H#} tags,
-% respectively.
-%    \begin{macrocode}
-    \ccaAddRolemap{#2}{Sect}%
-%    \end{macrocode}
-% Then we determine the hierarchical heading level we need to assign
-% to the PDF tags. H1 is always reserved for the entire document's
-% title, so we need to calculate the difference of the lowest used
-% value and 2 and add this to the actual level of the current heading.
-%    \begin{macrocode}
-    \cch@tempcnta=\numexpr\tw@-\cch@highest@level\relax
-    \advance\cch@tempcnta by #1\relax
-    \ccaAddRolemap{#2head}{H\the\cch@tempcnta}%
-%    \end{macrocode}
-% \TODO{Mixing numbered and plain H-Tags like that should be
-%   incompatible to the PDF/UA standard! On the other hand, H7
-%   and higher is not recognized by neither VeraPDF nor PAC.}
-%    \begin{macrocode}
-    \ifnum\cch@tempcnta>6\relax
-      \ccaAddRolemap{H\the\cch@tempcnta}{H}%
-    \fi
-%    \end{macrocode}
-% Next, we tell \lstinline{ltpdfa} for each heading level which other
-% heading level is the next down the Sectioning hierarchy. For that,
-% we first put the current heading level in a calculable counter.
-%    \begin{macrocode}
-    \cch@tempcnta=#1\relax
-%    \end{macrocode}
-% Then we catch the heading with the highest level (from the aux file)
-% and set the \lstinline{document} layer in the \lstinline{ltpdfa}'s
-% \lstinline{Sectioning} table to have that heading as its child
-%    \begin{macrocode}
-    \ccDebugMsg[a11y]{^^J===> Comparing #2 (\the\cch@tempcnta) with lowest \cch@lowest@level, and highest \cch@highest@level}%
-    \ifnum\cch@tempcnta=\cch@highest@level
-      \ccDebugMsg[a11y]{^^J===> #2 is highest, setting it as child of document}%
-      \edef\x{\noexpand\ccaAddToConfig{autoclose}{document={Type:Sectioning}{Child:\csname cch@#1@unique\endcsname}{Egroup:false}}}\x%
-    \fi
-%    \end{macrocode}
-% Then, we catch the lowest level to tell \lstinline{ltpdfa}'s
-% \lstinline{Sectioning} table that this level has no
-% children. Another switch is made to distinguish first-born heading
-% levels from aliases, since the \lstinline{Sectioning} table can only
-% hold one heading per level. All other hadings of the same level are,
-% per definition, Aliases of the one that has been defined first.
-%    \begin{macrocode}
-    \ifnum\cch@tempcnta=\cch@lowest@level\relax
-      \ccDebugMsg[a11y]{^^J===> #2 is lowest, Setting Child to none}%
-      \ifcsstring{cch@#1@unique}{#2}
-        {\edef\x{\noexpand\ccaAddToConfig{autoclose}{#2={Type:Sectioning}{Child:none}{Egroup:false}}}\x}
-        {\edef\x{\noexpand\ccaAddToConfig{autoclose}{#2={Type:Sectioning}{Child:none}{Egroup:false}{Alias:\csname cch@#1@unique\endcsname}}}\x}%
-    \else
-%    \end{macrocode}
-% For all higher heading levels, we look for the next lower heading
-%    \begin{macrocode}
-      \ifnum\the\cch@tempcnta<\cch@highest@level\relax
-        \@tempswafalse
-      \else
-        \ccDebugMsg[a11y]{^^J===> #2 goes into the Loop...}%
-        \@tempswatrue
-      \fi
-      \loop
-%    \end{macrocode}
-% by incrementing the heading level counter by one
-%    \begin{macrocode}
-        \advance\cch@tempcnta\@ne\relax
-%    \end{macrocode}
-% and checking the variable \lstinline{repeat} condition:
-%    \begin{macrocode}
-      \if@tempswa
-%    \end{macrocode}
-% We don't go further when the current loop counter is already larger
-% than the heading level with the highest level counter.
-%    \begin{macrocode}
-        \ifnum\cch@tempcnta>\cch@lowest@level\relax
-          \ccDebugMsg[a11y]{^^J===> #2's next \csmeaning{cch@\the\cch@tempcnta @unique} is too low, breaking loop...}%
-          \@tempswafalse
-        \else
-%    \end{macrocode}
-% If we are below the highest level, we check if a heading with the current level is defined
-%    \begin{macrocode}
-          \expandafter\ifx\csname cch@\the\cch@tempcnta @unique\endcsname\relax
-          \ccDebugMsg[a11y]{^^J===> #2's next \csmeaning{cch@\the\cch@tempcnta @unique} is in range, going on (cur: \the\cch@tempcnta)...}%
-%    \end{macrocode}
-% if not, we continue. This is the case, when heading levels are not
-% sequentially numbered. Which does (and did) happen. For reasons
-% unknown\dots
-%    \begin{macrocode}
-            \@tempswatrue
-          \else
-%    \end{macrocode}
-% If the heading level is defined, we configure \lstinline{autoclose}
-% such that the level with the iterator counter is set to be the child
-% of the current heading level in \lstinline{ltpdfa}'s
-% \lstinline{Sectioning} table. As above, we distinguish between
-% original headings and Aliases.
-%    \begin{macrocode}
-            \ccDebugMsg[a11y]{^^J===> Setting \csmeaning{cch@\the\cch@tempcnta @unique} as Child of #2 with cnt: \the\cch@tempcnta...}%
-            \ifcsstring{cch@#1@unique}{#2}
-              {\edef\x{\noexpand\ccaAddToConfig{autoclose}{#2={Type:Sectioning}{Child:\csname cch@\the\cch@tempcnta @unique\endcsname}{Egroup:false}}}\x}
-              {\edef\x{\noexpand\ccaAddToConfig{autoclose}{#2={Type:Sectioning}{Child:\csname cch@\the\cch@tempcnta @unique\endcsname}{Egroup:false}{Alias:\csname cch@#1@unique\endcsname}}}\x}%
-            \@tempswafalse
-          \fi
-        \fi
-%    \end{macrocode}
-% We repeat this as long as \lstinline{\@tempswa} is false. This
-% ensures that all heading levels have exactly one child assigned to
-% them.
-%    \begin{macrocode}
-      \repeat
-    \fi
-  }}
-%    \end{macrocode}
-% \end{macro}
-% \begin{macro}{\cch@min@level} is a temporary counter that stores and
-%   constantly updates the \textit{lowest} value for the used heading
-%   level.
-%    \begin{macrocode}
-\newcount\cch@min@level \cch@min@level=99\relax
-%    \end{macrocode}
-% \begin{macro}{\cch@max@level} is a temporary counter that stores and
-%   constantly updates the \textit{highest} value for the used heading
-%   level.
-%    \begin{macrocode}
-\newcount\cch@max@level \cch@max@level=-99\relax
-%    \end{macrocode}
-% \end{macro}
-% \begin{macro}{\cch@highest@level} stores the level number of the
-%   highest \textit{used} heading level from the previous tex run.
-%    \begin{macrocode}
-\ifx\cch@highest@level\@undefined \def\cch@highest@level{-99}\fi
-%    \end{macrocode}
-% 
-% \end{macro}
-% \begin{macro}{\cch@lowest@level} stores the level number of the
-%   lowest \textit{used} heading level from the previous tex run.
-%    \begin{macrocode}
-\ifx\cch@lowest@level\@undefined  \def\cch@lowest@level{99}\fi
-%    \end{macrocode}
-% \end{macro}
-% both temporary counters are written into the aux file at the very
-% end of the document for consecutive tex runs.
-%    \begin{macrocode}
-\AtEndDocument{%
-  \immediate\write\@mainaux{\string\gdef\string\cch@highest@level{\the\cch@min@level}}%
-  \immediate\write\@mainaux{\string\gdef\string\cch@lowest@level{\the\cch@max@level}}%
-}%
-%    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\cch@create@parent} stores the heading level's name and its
 %   parent, if it exists.
@@ -496,13 +313,6 @@
 % fallback.
 %    \begin{macrocode}
     \ccIfProp{after-skip}{\expandafter\global\expandafter\@tempskipa\expandafter=\ccUseProperty{after-skip}\relax}{\global\@tempskipa=1sp\relax}%
-%    \end{macrocode}
-% Now, we store the counters for the actually used heading levels.
-%    \begin{macrocode}
-    \expandafter\ifx\csname cch@notag@#2\endcsname\@empty\else
-      \ifnum#1<\cch@min@level\relax\global\cch@min@level=#1\relax\fi
-      \ifnum#1>\cch@max@level\relax\global\cch@max@level=#1\relax\fi
-    \fi
 %    \end{macrocode}
 % 
 %    \begin{macrocode}
@@ -862,9 +672,8 @@
 \newbox\cch@inline@sec@box
 \def\cch@make@inline{%
   \ccIfProp{after-indent}{\global\@afterindenttrue}{\global\@afterindentfalse}%
-  \ccIfProp{interline-para}
-    {\global\setbox\cch@inline@sec@box\hbox{\ifvoid\cch@inline@sec@box\else\unhbox\cch@inline@sec@box\ccUseProperty{interline-para-sep}\fi\@svsec}}%
-    {\global\setbox\cch@inline@sec@box\hbox{\@svsec}}
+  \global\setbox\cch@inline@sec@box\hbox{\ifvoid\cch@inline@sec@box\else\unhbox\cch@inline@sec@box\ccUseProperty{interline-para-sep}\fi\@svsec}%
+  \ccaEnable
   \@nobreakfalse
   \global\@noskipsectrue
   \gdef\next{%
@@ -915,42 +724,6 @@
 \def\cch@heading{\cc@opt@empty\@cch@heading}%
 \def\@cch@heading[#1]#2{%
 %    \end{macrocode}
-% Adding start tags for the contents that ``belong'' to a document
-% section. They are tagged with individual names, but all are mapped
-% to the \DescribeTagS{Sect} tag.
-%
-% \textbf{Warning}, the following code is incredibly ugly. In
-% principle, we close the semi-group opened by \lstinline{begin}, add
-% the tagging, and then re-build the rest of the code from \LaTeX's
-% standard definitions of \lstinline{begin}.
-%
-% This is necessary, because otherwise we would need to either
-% manually add the starting sectioning tag outside the
-% \lstinline{\ccPrefix Heading} environment, or, if we want to keep
-% \lstinline{ltpdfa}'s \lstinline{autoclose} mechanism, the sectioning
-% tag is auto-ended at \lstinline|\end{Heading}|. Using the
-% \lstinline{env/Heading/before} hook won't work either, because at
-% the time of its expansion, the level of the heading isn't known, yet. So, we
-% need to take the ugly road, for now.
-%    \begin{macrocode}
-  \ifhmode\unskip\fi%
-  \expandafter\ifx\csname cch@notag@#2\endcsname\@empty\else
-    \ccWhenAlly{%
-      \global\let\cch@currenvir\@currenvir
-      \endgroup
-      \ifnum\cch@lowest@level=99\relax\else
-        \ccaVstructStart{#2}%
-      \fi
-      \UseHook{env/\ccPrefix Heading/before}%
-      \@ignorefalse
-      \begingroup
-        \@endpefalse
-        \let\@currenvir\cch@currenvir
-        \edef\@currenvline{\on@line}%
-        \@execute@begin@hook{\ccPrefix Heading}%
-    }%
-  \fi
-%    \end{macrocode}
 % Some {\LaTeX} kernel macros are saved, the namespace is
 % set and counted groups from previous headings are reset.
 %    \begin{macrocode}
@@ -959,12 +732,50 @@
 % \begin{macro}{\ccCurSecName} stores the name of the current heading
 %   level.
 %    \begin{macrocode}
-  \edef\ccCurSecName{#2}%
+  \xdef\ccCurSecName{#2}%
+%    \end{macrocode}
+% \end{macro}
+% After opening the environment, if accessibility Features are
+% enabled, we check the current absolute nesting level and close all
+% open Sectioning tags if the nominal level of the current heading is
+% lower than the \textit{nominal} level of the last opened
+% heading. \textit{Nominal} in this case refers the level given to the
+% heading when it was defined in contrast to the actual,
+% \textit{absolute}, nesting level in the tex document.
+%    \begin{macrocode}
+  \ccWhenAlly{%
+%    \end{macrocode}
+% \begin{macro}{\ccPrevSecLevel} is the previously opened,
+%   \textit{nomimal}, heading level.
+%    \begin{macrocode}
+    \global\let\ccPrevSecLevel=\ccCurSecLevel\relax
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccCurSecLevel} stores the nominal level of the current
+%   heading.
+%    \begin{macrocode}
+    \xdef\ccCurSecLevel{\csname cch@#2@level\endcsname}%
+%    \end{macrocode}
+% \end{macro}
+% Now, we call the auto-close mechanism defined below in
+% Sect.~\ref{sect:heading:a11y},
+%    \begin{macrocode}
+    \cchAutoClose%
+    \ccDebugMsg[a11y]{Level after close: \the\cch@total@nesting@level}%
+%    \end{macrocode}
+% and create a \DescribeTagS{SectMeta} that contains all meta data
+% belonging to the heading (i.e. all heading Components sans the
+% title, which is made into the head of the section). We immediately
+% retrieve the Tag's ID since we will move it, later.
+%    \begin{macrocode}
+    \ccaVstructStart{SectMeta}%
+    \ccaSaveCurStruct{cch@id@cur@meta}%
+  }%
 %    \end{macrocode}
 % Then, we call the heading level specific
-% \UsageHook{env/heading/[level]/begin} hook.
+% \UsageHook{env/Heading/[level]/begin} hook.
 %    \begin{macrocode}
-  \UseHook{env/heading/#2/begin}%
+  \UseHook{env/\ccPrefix Heading/#2/begin}%
 %    \end{macrocode}
 % \end{macro}
 %    \begin{macrocode}
@@ -1115,15 +926,15 @@
 %    \begin{macrocode}
 \ccAddToProperties{Heading}{%
 %    \end{macrocode}
-% \begin{Property}{interline-para}{<any>} is a switch that is
-%   automatically set whenever an inline heading is not-yet sent to
-%   the vertical list and another inline heading is processed.
+% \begin{Property}{interline-para}{[true|<empty>]} is a switch that if
+%   non-empty prevents two adjacent inline headings from being set in
+%   the same paragraph.
 %    \begin{macrocode}
   \ccSetProperty{interline-para}{}%
 %    \end{macrocode}
 % \end{Property}
 % \begin{Property}{interline-para-sep}{<any>} is the material that is
-% printed between to inline headings.
+% printed between to adjacent inline headings.
 %    \begin{macrocode}
   \ccSetProperty{interline-para-sep}{\space}
 %    \end{macrocode}
@@ -1132,7 +943,7 @@
 % beginning of a heading.
 %    \begin{macrocode}
   \ccSetProperty{heading-par}{%
-    \ccIfProp{interline-para}{\if@noskipsec \leavevmode \fi}{}%
+    \ccWhenProp{interline-para}{\if@noskipsec \leavevmode \fi}%
     \par
     \global\@afterindenttrue
   }%
@@ -1608,7 +1419,105 @@
   }}
 %    \end{macrocode}
 % \end{Property}
-% 
+%
+%
+% \section{Accessibility Features}\label{sect:heading:a11y}
+%
+% \begin{macro}{\cch@total@nesting@level} stores the absolute nesting
+%   level opened with each heading.
+%    \begin{macrocode}
+\newcount\cch@total@nesting@level \cch@total@nesting@level=\z@\relax
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\cchAutoClose} checks if any open \DescribeTag{Sect}
+%   tags (or Tagging mapped to \DescribeTag{Sect}) need to be closed
+%   and closes them if applicable.
+%
+%   For that, we check if the value of \UsageMacro{\ccPrevSecLevel}
+%   (i.e., the \textit{nominal} heading level of the last opened
+%   heading) is larger or equal to the \textit{nominal} level of the
+%   currently opened heading. If so, we add closing \DescribeTagE{Sect}
+%   tags until either the \textit{absolute} nesting level is 1 or an
+%   decrementing counter that starts at \UsageMacro{\ccPrevSecLevel}
+%   gets less than \UsageMacro{\ccCurSecLevel}. At each step, we also
+%   decrease the \UsageMacro{\cch@total@nesting@level} counter by one.
+%    \begin{macrocode}
+\def\cchAutoClose{%
+  \let\cca@next\relax
+  \ccDebugMsg[a11y]{Calling AutoClose for \ccCurSecName\space (\ccCurSecLevel).}
+  \ifx\ccPrevSecLevel\@undefined\else
+    \ifx\ccCurSecLevel\@undefined\else
+      \ccDebugMsg[a11y]{prev: \ccPrevSecLevel, cur: \ccCurSecLevel, abs: \the\cch@total@nesting@level.}
+      \ifnum\ccPrevSecLevel=\ccCurSecLevel\relax
+        \ccDebugMsg[a11y]{Closing \the\cch@total@nesting@level.}
+        \global\advance\cch@total@nesting@level\m@ne\relax
+        \ccaVstructEnd{\csname cch@sec@\the\cch@total@nesting@level @name\endcsname}%
+      \else
+        \ifnum\ccPrevSecLevel<\ccCurSecLevel\relax
+          \csxdef{cch@prev@parent@level@\ccCurSecLevel}{\ccPrevSecLevel}%
+        \else
+          \ifnum\ccPrevSecLevel>\ccCurSecLevel\relax
+            \ccDebugMsg[a11y]{Closing (inner) \the\cch@total@nesting@level.}
+            \global\advance\cch@total@nesting@level\m@ne\relax
+            \ccaVstructEnd{\csname cch@sec@\the\cch@total@nesting@level @name\endcsname}%
+            \ifnum\cch@total@nesting@level=\@ne\relax\else
+              \xdef\ccPrevSecLevel{\csname cch@prev@parent@level@\ccPrevSecLevel\endcsname}%
+              \let\cca@next\cchAutoClose
+            \fi
+          \fi
+        \fi
+      \fi
+    \fi
+  \fi
+  \cca@next
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\cchResetNesting} resets the \textit{absolute} heading
+%   nesting level to 0 by closing all currently open \DescribeTagE{Sect}
+%   tags. This macro is intended to be used at the very end of the
+%   document or at major document partitions (e.g.,
+%   \lstinline{\mainmatter}, \lstinline{\appendix}, etc.)
+%    \begin{macrocode}
+\def\cchResetNesting{%
+  \ifnum\cch@total@nesting@level>\z@\relax
+    \loop
+      \ccaVstructEnd{\csname cch@sec@\the\cch@total@nesting@level @name\endcsname}%
+      \global\advance\cch@total@nesting@level\m@ne\relax
+    \ifnum\cch@total@nesting@level>\z@\relax
+    \repeat
+  \fi
+}
+%    \end{macrocode}
+% \end{macro}
+% The advancement of the \UsageMacro{\cch@total@nesting@level} counter
+% is done in the \UsageHook{env/Heading/before} hook.
+%    \begin{macrocode}
+\AddToHook{env/\ccPrefix Heading/before}{%
+  \ccDebugMsg[a11y]{Processing heading}%
+  \global\advance\cch@total@nesting@level\@ne\relax
+}
+%    \end{macrocode}
+% The \DescribeTagsE{SectMeta} Tag is closed in the
+% \UsageHook{env/Heading/end} hook.
+%    \begin{macrocode}
+\AddToHook{env/\ccPrefix Heading/end}{\ccaVstructEnd{SectMeta}}%
+%    \end{macrocode}
+% The opening tag for the current \DescribeTagS{Sect} is actually set
+% after the heading environment via the \UsageHook{env/Heading/after}
+% hook. Here, we also define the actual name of the Tag to be re-used
+% later in the \lstinline{\cchAutoClose} mechanism. Finally, we move
+% the \DescribeTag{Hn} Tagging node (which tags the section's title)
+% and the \DescribeTag{SectMeta} node into the \DescribeTag{Sect}
+% node.
+%    \begin{macrocode}
+\AddToHook{env/\ccPrefix Heading/after}{%
+  \ccaVstructStart{\ccCurSecName}%
+  \csxdef{cch@sec@\the\cch@total@nesting@level @name}{\ccCurSecName}%
+  \ccaMoveStruct{\cch@id@cur@head}%
+  \ccaMoveStruct{\cch@id@cur@meta}%
+}
+%    \end{macrocode}
 % \begin{macro}{\cchHeadTagStart} is used inside Property declarations
 %   to insert the start tag of the current section, unless the heading
 %   level was declared with the starred version of
@@ -1616,7 +1525,8 @@
 %    \begin{macrocode}
 \def\cchHeadTagStart{%
     \expandafter\ifx\csname cch@notag@\ccCurSecName\endcsname\@empty\else
-      \ccaVstructStart{\ccCurSecName head}%
+      \ccaVstructStart{H\the\numexpr\cch@total@nesting@level+\@ne\relax}%
+      \ccaSaveCurStruct{cch@id@cur@head}%
     \fi}
 %    \end{macrocode}
 % \end{macro}
@@ -1627,7 +1537,7 @@
 %    \begin{macrocode}
 \def\cchHeadTagEnd{%
   \expandafter\ifx\csname cch@notag@\ccCurSecName\endcsname\@empty\else
-    \ccaVstructEnd{\ccCurSecName head}%
+    \ccaVstructEnd{H\the\numexpr\cch@total@nesting@level+\@ne\relax}%
   \fi}
 %    \end{macrocode}
 % \end{macro}
