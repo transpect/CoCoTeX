@@ -69,7 +69,11 @@
 
 ## coco-headings.dtx
 - NEW: added hook for capturing running titles
-- NEW: added way to exempt headings from auto-tagging
+- NEW: Tagging of headings now (mostly) independent from LaTeX's own
+       sectioning hierarchies. This allows "jumps" between (TeX)
+       sectioning levels while keeping the Tagging hierarchy intact.
+- NEW: heading Components other than Title are now all tagged inside a
+       SectMeta container, mapped to Div.
 
 ## coco-accessibility.dtx
 - NEW: Keywords and Authors are now written as separated list items
