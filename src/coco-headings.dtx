@@ -1498,20 +1498,18 @@
   \global\advance\cch@total@nesting@level\@ne\relax
 }
 %    \end{macrocode}
-% The \DescribeTagsE{SectMeta} Tag is closed in the
-% \UsageHook{env/Heading/end} hook.
-%    \begin{macrocode}
-\AddToHook{env/\ccPrefix Heading/end}{\ccaVstructEnd{SectMeta}}%
-%    \end{macrocode}
-% The opening tag for the current \DescribeTagS{Sect} is actually set
-% after the heading environment via the \UsageHook{env/Heading/after}
-% hook. Here, we also define the actual name of the Tag to be re-used
-% later in the \lstinline{\cchAutoClose} mechanism. Finally, we move
-% the \DescribeTag{Hn} Tagging node (which tags the section's title)
-% and the \DescribeTag{SectMeta} node into the \DescribeTag{Sect}
-% node.
+% In the \UsageHook{env/Heading/after} hook, first, the
+% \DescribeTagsE{SectMeta} Tag is closed. Only then, we open the tag
+% for actual \DescribeTagS{Sect}. Here, we also define the name of the
+% Tag to be re-used later in the \lstinline{\cchAutoClose}
+% mechanism. Finally, we move the \DescribeTag{Hn} Tagging node (which
+% tags the section's title) and the \DescribeTag{SectMeta} node (which
+% contains the tagged meta data realized by the
+% \UsageContainer{Heading} Container's other Components) into the
+% \DescribeTag{Sect} node.
 %    \begin{macrocode}
 \AddToHook{env/\ccPrefix Heading/after}{%
+  \ccaVstructEnd{SectMeta}%
   \ccaVstructStart{\ccCurSecName}%
   \csxdef{cch@sec@\the\cch@total@nesting@level @name}{\ccCurSecName}%
   \ccaMoveStruct{\cch@id@cur@head}%
@@ -1541,6 +1539,10 @@
   \fi}
 %    \end{macrocode}
 % \end{macro}
+% The \UsageTag{SectMeta} tag is mapped to a simple \UsageTag{Div}.
+%    \begin{macrocode}
+\ccaAddRolemap{SectMeta}{Div}
+%    \end{macrocode}
 %
 %
 % \section{Miscellaneous}
