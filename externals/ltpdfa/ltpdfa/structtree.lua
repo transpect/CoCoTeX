@@ -73,6 +73,8 @@ local removed = false -- structRemove sets this, ignoreNext too
 local inmath = 0
 local ignore = false
 
+local found_empty = true
+
 --[[ this is our main struct
    'root' => contains tree of StructElem objects
    classmap, rolemap
@@ -319,7 +321,7 @@ local function process_node(parentbox, curr, level) -- standard processing, mayb
    else
       -- check if parent changed and open new element of same type!!!
       if (pattr ~= lastnode[3]) then
-         log("Split env due to new Parent! %s %s", pattr, lastnode[3])
+         debug_log("Split env due to new Parent! %s %s", pattr, lastnode[3])
          head = writer.endMC(head, curr, node.get_attribute(lastnode[2], typeattr), false) -- head, node, typeattr, after
          head = markElement(head,curr,sparent,currattr)
          parentbox.head = head
@@ -414,7 +416,7 @@ end
 -- to inject from TeX (graphics), args is bounding box, not BBox :-(
 -- let readPosStart and readPosEnd save their values in subkey 'ppos'
 local function addFigure(llx, lly, urx, ury, xscale, yscale, clip)
-   log("addFigure llx=%s, lly=%s, urx=%s, ury=%s xscale=%s yscale=%s clip=%s", llx, lly, urx, ury, xscale, yscale, clip)
+   debug_log("addFigure llx=%s, lly=%s, urx=%s, ury=%s xscale=%s yscale=%s clip=%s", llx, lly, urx, ury, xscale, yscale, clip)
    local parent = stree.current.idx
    local xscale = tonumber(xscale)
    local yscale = tonumber(yscale)
@@ -546,8 +548,10 @@ local function postProcessFigs()
          log("Warning: very small x-ppos %d", v.parent)
       end
       if ( (ppos.y2 - ppos.y1) < 100) then
-         log("Warning: very small y-ppos %d (%d/%d)(%.2f/%.2f)\n => %.2f", v.parent, ppos.y1, ppos.y2, fbox.y1, fbox.y2, (fbox.y2 - fbox.y1))
-         dumpArray(v,true)
+	 if config.debug then
+	    log("Warning: very small y-ppos %d (%d/%d)(%.2f/%.2f)\n => %.2f", v.parent, ppos.y1, ppos.y2, fbox.y1, fbox.y2, (fbox.y2 - fbox.y1))
+	    dumpArray(v,true)
+	 end
          -- set y2 from fpos
          ppos.y2 = ppos.y1 + (fbox.y2 - fbox.y1) 
       end
@@ -629,6 +633,7 @@ local function removeEmptyStructs_(parent)
             else
                debug_log("Removing empty Struct %s(%d) from parent %s(%d)", child.type, child.idx, parent.type, parent.idx)
                table.remove(parent.childs, i)
+	       found_empty = true
             end
          else
             i = i + 1
@@ -642,7 +647,10 @@ local function removeEmptyStructs_(parent)
 end
 
 local function removeEmptyStructs()
-   removeEmptyStructs_(stree.root)
+   while found_empty do
+      found_empty = false
+      removeEmptyStructs_(stree.root)
+   end
 end
 
 local function splitPath(nstr, delimiter)
@@ -856,9 +864,9 @@ local function finalizeDoc(head)
       ltpdfa.spaceprocessor.cleanUp()      
    end
    postProcessFigs() -- Fig BBoxes
-   log("List of environments:")
-   dumpArray(config.bdcs)
    if config.debug then
+      log("List of environments:")
+      dumpArray(config.bdcs)
       log("ParentTree:")
       dumpParentTree()
       log("StructTree:")
@@ -879,7 +887,7 @@ local function finalizeDoc(head)
    end
    removeArtifacts()
    removeEmptyStructs()
-   log("==== finalizeDoc: at line %d of %s", tex.inputlineno, tex.jobname)
+   debug_log("==== finalizeDoc: at line %d of %s", tex.inputlineno, tex.jobname)
    head = writer.finalize(head)
    if (config.intent ~= nil) then
       writer.intent(head)
@@ -906,8 +914,10 @@ local function finalizeDoc(head)
    head = writer.roleMap(ltpdfa.structtree.stree, head)
    head = writer.IDTree(ltpdfa.structtree.stree, head)
    head = writer.docLang(ltpdfa.config.lang, head)
-   log("dump of opened")
-   dumpArray(ltpdfa.structtree.stree.openedarray)
+   if config.debug then
+      log("dump of opened")
+      dumpArray(ltpdfa.structtree.stree.openedarray)
+   end
 end
 --[[
    public/exported part
@@ -918,7 +928,7 @@ local currtexstruct = nil
 local function buildpage( pagebox )
    if (nextparent == nil) then nextparent = ltpdfa.lastpage end
    currtexstruct = stree.current
-   log("**** shipout: page=%d at %d lastattr=%d input selem=%s/%d", status.total_pages + 1, tex.inputlineno, lastattr, currtexstruct.type, currtexstruct.idx)
+   debug_log("**** shipout: page=%d at %d lastattr=%d input selem=%s/%d", status.total_pages + 1, tex.inputlineno, lastattr, currtexstruct.type, currtexstruct.idx)
    mcidcnt = 0
    lastattr = unsetattr -- unset or beginning of page
    stree.parenttree[status.total_pages + 1] = {}
@@ -943,7 +953,7 @@ local function buildpage( pagebox )
    end
    -- reset open struct to view of input
    stree.current = currtexstruct
-   log("==== end shipout: at line %d opened=%d pg=%d(%d) current=%s/%d", tex.inputlineno, lastattr, status.total_pages + 1, ltpdfa.lastpage, stree.current.type, stree.current.idx)
+   debug_log("==== end shipout: at line %d opened=%d pg=%d(%d) current=%s/%d", tex.inputlineno, lastattr, status.total_pages + 1, ltpdfa.lastpage, stree.current.type, stree.current.idx)
    -- ltpdfa.finishOutput depends on ltpdfa.lastpage, this ist not especially robust
    -- maybe we need to remember head, tail in odriver
    -- last page is not shipped out yet
