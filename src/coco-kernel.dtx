@@ -1713,7 +1713,7 @@
     \expandafter\ifx\csname cc@default@class@#1\endcsname\relax
       \PackageError{cocotex.cls}{Class `#1' with scope `#2' not defined!}{Please declare the class `#1'!}%
     \else
-      \PackageWarning{cocotex.cls}{Class `#1' with scope `#2' not defined! Reverting to default.}%
+      \PackageInfo{cocotex.cls}{Class `#1' with scope `#2' not defined; using unscoped class.}%
     \fi
   \fi
   \csname cc@default@class@#1\endcsname%
