@@ -555,7 +555,7 @@
 \AtBeginDocument{%
     \patchcmd\Hy@StartlinkName
       {\pdfstartlink}
-      {\pdfstringdef\@argii{#2}\ccaStructStart{Link}\ccaAddAltText{#2}\edef\@ltpdfmy@parent{\ccaGetStructParent}%
+      {\if@cc@is@final\pdfstringdef\@argii{#2}\ccaStructStart{Link}\ccaAddAltText{#2}\edef\@ltpdfmy@parent{\ccaGetStructParent}\fi%
        \pdfstartlink}
       {}{\cca@patch@error\Hy@StartlinkName}
 %    \end{macrocode}
@@ -563,14 +563,14 @@
 %    \begin{macrocode}
     \patchcmd\Hy@StartlinkName
       {#1}
-      {#1 /StructParent \@ltpdfmy@parent /Contents(\@argii)}
+      {#1\if@cc@is@final /StructParent \@ltpdfmy@parent /Contents(\@argii)\fi}
       {}{\cca@patch@error\Hy@StartlinkName}
 %    \end{macrocode}
 % then we patch hyperref's general link macro, twice. Once for the Link's start tag
 %    \begin{macrocode}
     \patchcmd\hyper@linkurl
       {\pdfstartlink}
-      {\pdfstringdef\@argii{#2}\ccaStructStart{Link}\ccaAddAltText{#2}\edef\@ltpdfmy@parent{\ccaGetStructParent}%
+      {\if@cc@is@final\pdfstringdef\@argii{#2}\ccaStructStart{Link}\ccaAddAltText{#2}\edef\@ltpdfmy@parent{\ccaGetStructParent}\fi%
        \pdfstartlink}
       {}{\cca@patch@error\hyper@linkurl}
 %    \end{macrocode}
@@ -582,8 +582,10 @@
       }
       {/C[\@urlbordercolor]%
         \fi
+        \if@cc@is@final
        /StructParent \@ltpdfmy@parent%
        /Contents(\@argii)
+       \fi
       }{}{\cca@patch@error\hyper@linkurl}
     % \patchcmd\hyper@linkurl
     %   {\Hy@href@nextactionraw}
@@ -597,7 +599,7 @@
     \patchcmd\close@pdflink
       {\pdfendlink}
       {\pdfendlink
-       \ccaAddLastLink\ccaStructEnd{Link}}
+       \if@cc@is@final\ccaAddLastLink\ccaStructEnd{Link}\fi}
       {}{\cca@patch@error\close@pdflink}
 %    \end{macrocode}
 % For internal references, we patch the tagging into the
@@ -612,11 +614,11 @@
     \let\@setref\real@setref
     \patchcmd\@setref
       {\else}
-      {\else\ccaStructStart{Reference}}
+      {\else\if@cc@is@final\ccaStructStart{Reference}\fi}
       {}{\cca@patch@error\orig@setref@new}%
     \patchcmd\@setref
       {\fi}
-      {\ccaStructEnd{Reference}\fi}
+      {\if@cc@is@final\ccaStructEnd{Reference}\fi\fi}
       {}{\cca@patch@error\orig@setref@new}%
 %    \end{macrocode}
 % Now, we restore hyperref's version and inject the tagging there as
@@ -626,11 +628,11 @@
     \let\@setref\cca@hy@setref
     \patchcmd\@setref
       {\expandafter\Hy@setref@link}
-      {\ccaStructStart{Reference}\expandafter\Hy@setref@link}
+      {\if@cc@is@final\ccaStructStart{Reference}\fi\expandafter\Hy@setref@link}
       {}{\cca@patch@error\@setref}
     \patchcmd\@setref
       {{#2}}
-      {{#2}\ccaStructEnd{Reference}}
+      {{#2}\if@cc@is@final\ccaStructEnd{Reference}\fi}
       {}{\cca@patch@error\@setref}
     }% /AtBeginDocument
 }% /ccWhenAlly
