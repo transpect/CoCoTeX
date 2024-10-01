@@ -1532,7 +1532,7 @@
 %   fails and no caption is printed!\UsageProperty{caption-top}\UsageProperty{caption-bottom}\UsageProperty{subcaption-top}\UsageProperty{subcaption-bottom}
 %    \begin{macrocode}
 \def\ccf@test@caption#1#2#3{%
-  \@cc@is@finalfalse
+  \ccaDisable\@cc@is@finalfalse
   \setbox\cc@tempboxa\hbox{\ccGobble\ccSubFloatCnt=0#1\relax\ccUseProperty{#2caption-#3}\relax}%
   \setbox\cc@tempboxb\hbox{\ccGobble\ccSubFloatCnt\m@ne\relax\ccUseProperty{#2caption-#3}\relax}%
   \edef\my@wda{\expandafter\strip@pt\wd\cc@tempboxa sp}%
@@ -1540,7 +1540,7 @@
   \ifdim\my@wda>\my@wdb\relax
     \expandafter\global\expandafter\let\csname ccf@has@#2capt@#3\endcsname\@empty
   \fi
-  \@cc@is@finaltrue
+  \ccaEnable\@cc@is@finaltrue
 }
 %    \end{macrocode}
 % \end{macro}
@@ -1660,7 +1660,6 @@
     }%
     \immediate\write\@auxout{\string\expandafter\string\gdef\string\csname\space ccFloat\the\ccf@int@cnt Cap#1\string\endcsname{\the\dimexpr \ht\z@+\dp\z@\relax}}%
     \bgroup
-      \@cc@is@finaltrue
       \savenotes
       \if@ccf@break@capt\else\nopagebreak\fi
       \ccSubFloatCnt\z@
