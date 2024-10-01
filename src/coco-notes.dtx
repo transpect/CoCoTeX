@@ -251,7 +251,7 @@
 %    \begin{macrocode}
 \ifx\ccn@reset@notes@per@chapter\relax
   \AtBeginDocument{%
-    \AddToHook{env/heading/chapter/begin}{%
+    \AddToHook{env/\ccPrefix Heading/chapter/begin}{%
       \global\c@footnote\z@
       \global\c@endnote\z@
     }%

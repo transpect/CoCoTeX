@@ -225,9 +225,6 @@
   }% \ifcsdef cc@container@#3 fi
 }% \cc@declare@heading
 %    \end{macrocode}
-%   Each new heading level needs some configuration with the
-% \lstinline{ltpdfa} package in order to automatically close heading
-% tags with the beginning of a new heading.
 % \end{macro}
 % \begin{macro}{\cch@create@parent} stores the heading level's name and its
 %   parent, if it exists.
@@ -331,6 +328,17 @@
       \leftskip\ccUseProperty{margin-left}%
       \rightskip\ccUseProperty{margin-right}%
       \bgroup
+%    \end{macrocode}
+% If Accessibility features are active, we add the start Tag for
+% \DescribeTagS{SectMeta} that contains all meta data belonging to the
+% heading (i.e. all heading Components sans the title, which is made
+% into the head of the section). We immediately retrieve the Tag's ID
+% since we will move it, later.
+%    \begin{macrocode}
+        \ccWhenAlly{%
+          \ccaStructStart{SectMeta}%
+          \ccaSaveCurStruct{cch@id@cur@meta}%
+        }%
         \ccUseProperty{heading-block}%
 %    \end{macrocode}
 % Generate entries for ToC, bookmarks and page headers. This has to be
@@ -345,6 +353,10 @@
         \ccIfPropVal{no-BM}{true}{}{\cch@make@bookmarks}% Bookmarks
         \ccUseProperty{toc-hook}%
         \ccIfProp{extended}{\ccUseProperty{extended-heading}}{}%
+%    \end{macrocode}
+% Here, we end the \UsageTagE{SectMeta} tag.
+%    \begin{macrocode}
+        \ccWhenAlly{\ccaStructEnd{SectMeta}}%
       \egroup%
       \cch@make@run% Running headers
       \cch@use@hook{run/after}{#2}%
@@ -446,14 +458,21 @@
 %    \begin{macrocode}
   \NewHook{cc/headings/#1/run/after}%
 %    \end{macrocode}
-% \DescribeHook{env/heading/[level]/begin} is the hook that is called
+% \DescribeHook{env/Heading/[level]/begin} is the hook that is called
 % at the begin of each defined heading level with the name
 % \lstinline{[name]}. It is called at the beginning of every
 % \lstinline{Heading} environment whose mandatory argument matches
 % \lstinline{[name]} immediately before the Instance's Attributes are
 % evaluated.
 %    \begin{macrocode}
-  \NewHook{env/heading/#1/begin}%
+  \NewHook{env/\ccPrefix Heading/#1/begin}%
+%    \end{macrocode}
+% If the current heading is derived from a parent, we want the
+% parent's hooks to also apply to the child:
+%    \begin{macrocode}
+  \ifcsname cc@parent@#1\endcsname
+    \AddToHook{env/\ccPrefix Heading/#1/begin}{\UseHook{env/\ccPrefix Heading/\csname cc@parent@#1\endcsname/begin}}%
+  \fi
 }
 %    \end{macrocode}
 % \end{macro}
@@ -762,14 +781,6 @@
 %    \begin{macrocode}
     \cchAutoClose%
     \ccDebugMsg[a11y]{Level after close: \the\cch@total@nesting@level}%
-%    \end{macrocode}
-% and create a \DescribeTagS{SectMeta} that contains all meta data
-% belonging to the heading (i.e. all heading Components sans the
-% title, which is made into the head of the section). We immediately
-% retrieve the Tag's ID since we will move it, later.
-%    \begin{macrocode}
-    \ccaVstructStart{SectMeta}%
-    \ccaSaveCurStruct{cch@id@cur@meta}%
   }%
 %    \end{macrocode}
 % Then, we call the heading level specific
@@ -819,6 +830,8 @@
   \def\ccAffilCnt{\z@}%
   \cc@reset@components{\cc@cur@cont}%
   \let\cch@current@class\relax
+  \global\let\cch@id@cur@meta\@undefined
+  \global\let\cch@id@cur@head\@undefined
   \ignorespaces}
 %    \end{macrocode}
 % \end{macro}
@@ -1509,11 +1522,27 @@
 % \DescribeTag{Sect} node.
 %    \begin{macrocode}
 \AddToHook{env/\ccPrefix Heading/after}{%
-  \ccaVstructEnd{SectMeta}%
   \ccaVstructStart{\ccCurSecName}%
   \csxdef{cch@sec@\the\cch@total@nesting@level @name}{\ccCurSecName}%
-  \ccaMoveStruct{\cch@id@cur@head}%
-  \ccaMoveStruct{\cch@id@cur@meta}%
+%    \end{macrocode}
+% For inline headings, the actual title is not yet printed by the time
+% the heading Container's environment is closed. In this case, we
+% don't move the node. For one, because it is likely not yet set, and
+% second because it most likely already is in the “right” spot,
+% i.e. inside the \UsageTag{Sect} tag.
+%    \begin{macrocode}
+  \ifx\cch@id@cur@head\@undefined\else
+    \ccaMoveStruct{\cch@id@cur@head}%
+  \fi
+%    \end{macrocode}
+% If \UsageMacro{\cch@id@cur@meta} is undefined when the Heading
+% container's environment is closed, then this indicates an inline
+% heading. In this case, we don't need to move the \UsageTag{SectMeta}
+% node, as it most likely already is in the right place.
+%    \begin{macrocode}
+  \ifx\cch@id@cur@meta\@undefined\else
+    \ccaMoveStruct{\cch@id@cur@meta}%
+  \fi%
 }
 %    \end{macrocode}
 % \begin{macro}{\cchHeadTagStart} is used inside Property declarations
