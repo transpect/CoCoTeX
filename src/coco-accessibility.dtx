@@ -50,9 +50,15 @@
 \DeclareOptionX{lang-id}{\gdef\cca@lang@id{#1}}
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{\if@cc@do@ally} is a simple switch that indicates active
+%   (\lstinline{\relax}) or inactive (everything else) accessibility
+%   features.
 %    \begin{macrocode}
-\DeclareOptionX{init}{\global\let\cc@do@ally\relax}
+\newif\if@cc@do@ally \@cc@do@allyfalse
+\DeclareOptionX{init}{\global\@cc@do@allytrue}
+\DeclareOptionX{init-20}{\global\@cc@do@allytrue\global\@cc@pdf@twotrue}
 %    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\cca@do@nodetree} if \lstinline{\relax}, show the node tree in
 %   the log and in the shell output.
 %    \begin{macrocode}
@@ -112,20 +118,20 @@
 % \begin{macro}{\ccIfAlly} is a switch to distinct between compilation
 %   with (implicit \#1) or without (implicit \#2) activated accessibility features.
 %    \begin{macrocode}
-\def\cc@if@ally{\ifx\cc@do@ally\relax\expandafter\@firstoftwo\else\expandafter\@secondoftwo\fi}
+\def\cc@if@ally{\if@cc@do@ally\expandafter\@firstoftwo\else\expandafter\@secondoftwo\fi}
 \let\ccIfAlly\cc@if@ally
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccWhenAlly} is a variant of \lstinline{\ccIfAlly}
 %   that omits the \texttt{else} branch.
 %    \begin{macrocode}
-\def\ccWhenAlly{\ifx\cc@do@ally\relax\expandafter\@firstofone\else\expandafter\@gobble\fi}
+\def\ccWhenAlly{\if@cc@do@ally\expandafter\@firstofone\else\expandafter\@gobble\fi}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccUnlessAlly} is a varant of \lstinline{\ccIfAlly}
 %   that omits the \texttt{then} branch.
 %    \begin{macrocode}
-\def\ccUnlessAlly{\ifx\cc@do@ally\relax\expandafter\@gobble\else\expandafter\@firstofone\fi}
+\def\ccUnlessAlly{\if@cc@do@ally\expandafter\@gobble\else\expandafter\@firstofone\fi}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -463,6 +469,7 @@
 %   node.
 %    \begin{macrocode}
 \DeclareAccessibilityCommand{\ccaReplaceStruct}[1]{\relax\directlua{ltpdfa.tagger.replaceStruct('\luaescapestring{#1}')}}
+\DeclareAccessibilityCommand{\ccaMoveChildren}[1]{\relax\directlua{ltpdfa.tagger.moveChilds('\luaescapestring{#1}')}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccaAddID} renames the index attribute of the current
@@ -647,19 +654,19 @@
 %    \begin{macrocode}
 \DeclareAccessibilityCommand{\ccaPagestyleArtifacts}{%
   \ifx\@oddhead\@empty\else
-    \pretocmd\@oddhead{\ccaStructStart[document]{header}}{}{}%
+    \pretocmd\@oddhead{\ccaStructStart[Document]{header}}{}{}%
     \apptocmd\@oddhead{\ccaStructEnd{header}}{}{}%
   \fi
   \ifx\@evenhead\@empty\else
-    \pretocmd\@evenhead{\ccaStructStart[document]{header}}{}{}%
+    \pretocmd\@evenhead{\ccaStructStart[Document]{header}}{}{}%
     \apptocmd\@evenhead{\ccaStructEnd{header}}{}{}%
   \fi
   \ifx\@oddfoot\@empty\else
-    \pretocmd\@oddfoot{\ccaStructStart[document]{footer}}{}{}%
+    \pretocmd\@oddfoot{\ccaStructStart[Document]{footer}}{}{}%
     \apptocmd\@oddfoot{\ccaStructEnd{footer}}{}{}%
   \fi
   \ifx\@evenfoot\@empty\else
-    \pretocmd\@evenfoot{\ccaStructStart[document]{footer}}{}{}%
+    \pretocmd\@evenfoot{\ccaStructStart[Document]{footer}}{}{}%
     \apptocmd\@evenfoot{\ccaStructEnd{footer}}{}{}%
   \fi}
 %    \end{macrocode}
@@ -695,7 +702,7 @@
 % \begin{macro}{\ccaArtifact} starts an Artifact environment within
 %   which all Tagging is disabled.
 %    \begin{macrocode}
-\def\ccaArtifact{\ccaStructStart[document]{Artifact}\ccaDisable}
+\def\ccaArtifact{\ccaStructStart[Document]{Artifact}\ccaDisable}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\endccaArtifact} ends an Artifact environment.
@@ -835,7 +842,7 @@
   \AtBeginDocument{%
     \directlua{ltpdfa.beginDocument('\luaescapestring{\ltpdfa@last@page}')}
     \UseHook{cca/document/begin}%
-    \ccaVstructStart{document}%
+    \ccaVstructStart{Document}%
 %    \end{macrocode}
 % \begin{macro}{\cca@id@document} is the internal ID of the document
 %   root node.
@@ -875,7 +882,13 @@
     \ccDebugMsg[a11y]{Final AutoClose. \meaning\ccPrevSecLevel, \meaning\ccCurSecLevel}%
     \cchResetNesting
     \ccDebugMsg[a11y]{End Document}%
-    \ccaVstructEnd{document}
+    \if@backmatter\ccaVstructEnd{Backmatter}\fi
+    \ccaVstructEnd{Document}
+    \ifarticle\else
+      \ccaAddRolemap{Frontmatter}{Part}%
+      \ccaAddRolemap{Mainmatter}{Part}%
+      \ccaAddRolemap{Backmatter}{Part}%
+    \fi
     \directlua{ltpdfa.endDocument()}%
   }%
 }
@@ -889,15 +902,14 @@
 \AtBeginDocument{%
   \apptocmd{\(}{\ccaStructStart{Formula}}{}{\cca@patch@error\(}
   \pretocmd{\)}{\ccaStructEnd{Formula}}{}{\cca@patch@error\)}
-  \apptocmd{\[}{\ccaVstructStart{Para}\ccaStructStart{Formula}}{}{\cca@patch@error\[}
-  \pretocmd{\]}{\ccaStructEnd{Formula}\ccaVstructEnd{Para}}{}{\cca@patch@error\]}
+  \apptocmd{\[}{\ccaVstructStart{P}\ccaStructStart{Formula}}{}{\cca@patch@error\[}
+  \pretocmd{\]}{\ccaStructEnd{Formula}\ccaVstructEnd{P}}{}{\cca@patch@error\]}
 
   \@ifpackageloaded{amsmath}{%
-    \pretocmd{\start@align}{\ccaVstructStart{Para}\ccaStructStart{Formula}}{}{\cca@patch@error\start@align}%
-    \apptocmd{\endalign}{\ccaStructEnd{Formula}\ccaVstructEnd{Para}}{}{\cca@patch@error\endalign}%
+    \pretocmd{\start@align}{\ccaVstructStart{P}\ccaStructStart{Formula}}{}{\cca@patch@error\start@align}%
+    \apptocmd{\endalign}{\ccaStructEnd{Formula}\ccaVstructEnd{P}}{}{\cca@patch@error\endalign}%
   }{}%
 }
-
 %    \end{macrocode}
 %
 %
@@ -907,8 +919,7 @@
 % thematically fit into other {\CoCoTeX} modules.
 %
 %    \begin{macrocode}
-\ccaAddRolemap{document}{Document}
-\ccaAddRolemap{Para}{P}
+ % none so far.
 %    \end{macrocode}
 % Finally, we hook \lstinline{ltpdfa}'s page processor into
 % \lstinline{AtBeginShipoutBox}:

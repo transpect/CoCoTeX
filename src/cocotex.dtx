@@ -130,16 +130,27 @@
 % The next two options enable accessibility features and control the
 % PDF standard used: \lstinline{a11y} generates PDF version 1.7,
 % \lstinline{a11y20} generates PDF version 2.0.
+% \begin{macro}{\if@cc@pdf@two} is a switch that indicates PDF version
+%     2.0 is used (\texttt{true}) instead of 1.x (\texttt{false}).
+%    \begin{macrocode}
+\newif\if@cc@pdf@two \@cc@pdf@twofalse
+%    \end{macrocode}
+% \end{macro}
+% {\CoCoTeX} supports two accessibility standards, PDF/UA-1 and
+% PDF/UA-2. If the \texttt{a11y}\index{a11y} class option is set,
+% PDF/UA-1 is produced, if \texttt{a11y20}\index{a11y20} is set,
+% PDF/UA-2 is produced.
 %    \begin{macrocode}
 \ExplSyntaxOn
   \DeclareOptionX{a11y}{%
     \sys_ensure_backend:
-    \pdf_version_gset:n{1.7}
-    \PassOptionsToPackage{init}{coco-accessibility}}
+    \pdf_version_gset:n{1.7}%
+    \PassOptionsToPackage{init}{coco-accessibility}}%
   \DeclareOptionX{a11y20}{%
+    \global\@cc@pdf@twotrue
     \sys_ensure_backend:
-    \pdf_version_gset:n{2.0}
-    \PassOptionsToPackage{init}{coco-accessibility}}
+    \pdf_version_gset:n{2.0}%
+    \PassOptionsToPackage{init}{coco-accessibility}}%
 \ExplSyntaxOff
 %    \end{macrocode}
 % \lstinline{lang-id} is the ISO-639/2 identifier of the document's
@@ -331,26 +342,36 @@
 %    \begin{macrocode}
 \ifarticle\else
   \newif\if@frontmatter  \@frontmatterfalse
+  \newif\if@backmatter   \@backmatterfalse
   \renewcommand\frontmatter{%
     \cleardoublepage
-    \@mainmatterfalse
-    \@frontmattertrue
+    \cchResetNesting
+    \global\@mainmatterfalse
+    \global\@backmatterfalse
+    \global\@frontmattertrue
+    \ccaVstructStart{Frontmatter}%
     \pagenumbering{arabic}}
 
   \renewcommand\mainmatter{%
+    \if@frontmatter\ccaVstructEnd{Frontmatter}\fi
     \cleardoublepage
-    \@frontmatterfalse
-    \@mainmattertrue}
+    \cchResetNesting
+    \global\@frontmatterfalse
+    \global\@backmatterfalse
+    \global\@mainmattertrue
+    \ccaVstructStart{Mainmatter}%
+  }
 
   \renewcommand\backmatter{%
+    \if@mainmatter\ccaStructEnd{Mainmatter}\fi%
     \cleardoublepage
-    \@mainmatterfalse
-    \@frontmatterfalse}
-\fi
-%    \end{macrocode}
-% \Deprecated
-%    \begin{macrocode}
-\usepackage{soul}
+    \cchResetNesting
+    \global\@mainmatterfalse
+    \global\@frontmatterfalse
+    \global\@backmattertrue
+    \ccaVstructStart{Backmatter}%
+  }
+\fi% \ifarticle
 %    \end{macrocode}
 %
 %

@@ -1234,6 +1234,19 @@ local function replaceStruct(idx)
    end
 end
 
+-- deletes source at idx and moves all child nodes to current
+local function moveChilds(idx)
+   local idx = tonumber(idx)
+   local source = stree.structarray[idx]
+   if source then
+      debug_log("===> Moving Children of %s to %s", idx, stree.current.type)
+      source.parent:removeChild(source)
+      for k,v in pairs(source.childs) do
+	 table.insert(stree.current.childs, v)
+      end
+   end
+end
+
 -- deletes source at idx and inserts as child into current
 local function moveToStruct(idx)
    local idx = tonumber(idx)
@@ -1287,6 +1300,7 @@ local structtree = { -- module table
    pushStruct       = pushStruct,
    addFigure        = addFigure,
    moveStruct       = moveToStruct,
+   moveChilds       = moveChilds,
    replaceStruct    = replaceStruct,
 }
 

@@ -287,6 +287,7 @@ local inputtagger = {
    setLang         = setLang,
    addFigure       = addFigure,
    moveStruct      = structtree.moveStruct,
+   moveChilds      = structtree.moveChilds,
    replaceStruct   = structtree.replaceStruct,
    addToKeywords   = ltpdfa.addToKeywords,
    addToAuthors    = ltpdfa.addToAuthors,

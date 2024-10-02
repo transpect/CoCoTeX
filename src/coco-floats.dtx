@@ -963,15 +963,11 @@
 % Floats as a whole are tagged as \DescribeTag{Aside} when PDF/UA
 % standard is 2.0, or else as \DescribeTag{Div}.
 %    \begin{macrocode}
-        \ccIfCompFromVal{titlepage}{PDFUAID}{2}
-          {\ccaStructStart{Aside}}
-          {\ccaStructStart{Div}}%
+        \ccaStructStart{\if@cc@pdf@two\relax Aside\else Div\fi}%
         \edef\ccf@parstruct@id{\ccaGetCurStruct{idx}}%
         \hsize\ccf@total@width
         \ccf@process
-        \ccIfCompFromVal{titlepage}{PDFUAID}{2}
-          {\ccaStructEnd{Aside}}
-          {\ccaStructEnd{Div}}%
+        \ccaStructEnd{\if@cc@pdf@two Aside\else Div\fi}%
         \par
       \egroup
       \ccSavePage
@@ -2132,8 +2128,12 @@
   \ccComponent{Content}{\unvbox\ccf@floatbox}%
   \ccUseComp{Content}%
   \ccaStructStart{Table}%
-  \ifx\ht@structID@THead\@undefined\else\ccaMoveStruct{\ht@structID@THead}\fi%
-  \ifx\ht@structID@TBody\@undefined\else\ccaMoveStruct{\ht@structID@TBody}\fi%
+  \ifx\ht@structID@THead\@undefined
+    \ccaMoveChildren{\ht@structID@TBody}%
+  \else
+    \ccaMoveStruct{\ht@structID@THead}%
+    \ifx\ht@structID@TBody\@undefined\else\ccaMoveStruct{\ht@structID@TBody}\fi%
+  \fi
   \ifx\ht@structID@TFoot\@undefined\else\ccaMoveStruct{\ht@structID@TFoot}\fi%
   \par\if@ccf@break@capt\else\nopagebreak\fi
   \vskip\dp\strutbox

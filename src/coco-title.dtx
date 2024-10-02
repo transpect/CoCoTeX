@@ -1197,8 +1197,7 @@ from the Components given in the Meta Container.}}}
   \ccSetProperty{title-face}{\Huge\sffamily\bfseries}%
 %    \end{macrocode}
 % The document's main title is tagged with the \DescribeTag{Title}
-% tag, which in PDF-Versions less than 2.0 should be mapped to
-% \DescribeTag{H1}.
+% tag, which in PDF/UA-1 should be mapped to \DescribeTag{H1}.
 %    \begin{macrocode}
   \ccSetProperty{title-format}{%
     \bgroup
@@ -1471,7 +1470,7 @@ from the Components given in the Meta Container.}}}
 %   nothing) to make the document conform to the PDF/A standard, but
 %   \textbf{not} to the PDF/UA standard.
 %    \begin{macrocode}
-  \ccDeclareGlobalComponent[1]{PDFUAID}}%
+  \ccDeclareGlobalComponent[\if@cc@pdf@two2\else1\fi]{PDFUAID}}%
 %    \end{macrocode}
 % The checking if the values are valid, and the separation of the
 % various parts of the standard is done via a lua script in the
@@ -1479,13 +1478,13 @@ from the Components given in the Meta Container.}}}
 % DocumentInfo nodes are only written, if \textit{neither}
 % \lstinline{PDFAID}, \textit{nor} \lstinline{PDFALevel} is empty.
 %    \begin{macrocode}
-\AddToHook{cct/document/meta}{%
-  \ccIfCompEmpty{PDFAID}{}{\ccIfCompEmpty{PDFALevel}{}{%
-      \edef\x{\noexpand\ccaSetDocinfo{conformance}{%
-          pdfaid=\ccUseComp{PDFAID};%
-          level=\ccUseComp{PDFALevel}%
-          \ccIfCompEmpty{PDFUAID}{}{;pdfuaid=\ccUseComp{PDFUAID}}}}%
-      \x}}}
+  \AddToHook{cct/document/meta}{%
+    \ccIfCompEmpty{PDFAID}{}{\ccIfCompEmpty{PDFALevel}{}{%
+        \edef\x{\noexpand\ccaSetDocinfo{conformance}{%
+            pdfaid=\ccUseComp{PDFAID};%
+            level=\ccUseComp{PDFALevel}%
+            \ccIfCompEmpty{PDFUAID}{}{;pdfuaid=\ccUseComp{PDFUAID}}}}%
+        \x}}}
 %    \end{macrocode}
 %
 %
@@ -1496,8 +1495,8 @@ from the Components given in the Meta Container.}}}
 % \DescribeTag{P} until the more appropriate \DescribeTag{Title} tag
 % becomes widely accepted with the PDF 2.0 Standard.
 %    \begin{macrocode}
-\ccaAddRolemap{Title}{H1}
-\ccaAddRolemap{Titlepage}{Div}
+  \if@cc@pdf@two\else\ccaAddRolemap{Title}{H1}\fi
+  \ccaAddRolemap{Titlepage}{Div}
 %    \end{macrocode}
 % 
 %    \begin{macrocode}

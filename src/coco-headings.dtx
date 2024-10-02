@@ -1297,7 +1297,7 @@
 %   and the page counter. The dotted line is tagged as
 %   \DescribeTag{leaders}, which is mapped to be an artifact.
 %    \begin{macrocode}
-  \ccSetProperty{toc-page-sep}{\ccTocLink{\ccaAddKeep\ccaStructStart[document]{leaders}\dotfill\ccaStructEnd{leaders}}}% between TocTitle and the page counter
+  \ccSetProperty{toc-page-sep}{\ccaAddKeep\ccaStructStart[Document]{leaders}\dotfill\ccaStructEnd{leaders}}% between TocTitle and the page counter
 %    \end{macrocode}
 % \end{Property}
 % \begin{Property}{toc-page-face}{<any>} style of the page counter
@@ -1313,7 +1313,7 @@
     \ccUseProperty{toc-page-sep}%
     \bgroup
       \ccUseProperty{toc-page-face}%
-      \ccaStructStart{Span}\ccTocLink{\ccUseComp{TocPage}}\ccaStructEnd{Span}%
+      \ccaStructStart{Span}\ccUseComp{TocPage}\ccaStructEnd{Span}%
     \egroup}%%
 %    \end{macrocode}
 % \end{Property}
@@ -1352,20 +1352,26 @@
 %   Properties to print the \UsageComponent{TocNumber},
 %   \UsageComponent{TocAuthorNameList}, \UsageComponent{TocTitle}, and
 %   \UsageComponent{TocPage} Components. Tagging should incorporate
-%   the \DescribeTag{TOCI}, \DescribeTag{P}, and
-%   \DescribeTag{Reference} tags for the entire entry, as well as
-%   \DescribeTag{Lbl} for the \UsageComponent{TocNumber}, and
-%   \DescribeTag{Span} for the remaining Components of the entry.
+%   the \DescribeTag{TOCI}, as well as for numbered ToC entries the
+%   \DescribeTag{P} and \DescribeTag{Reference} tags that span the
+%   entire entry, as well as \DescribeTag{Lbl} for the
+%   \UsageComponent{TocNumber}, and \DescribeTag{Span} for the
+%   remaining Components of the entry. Unnumbered Entries are simply
+%   \DescribeTag{TOCI} with \DescribeTag{Spans} for the various
+%   Components.
 %    \begin{macrocode}
   \ccSetProperty{toc-format}{%
     \ccUseProperty{toc-title-face}%
     \ccaVstructStart{TOCI}%
-    \ccIfComp{TocNumber}
-      {\ccaStructStart{P}\ccaStructStart{Reference}\ccaStructStart{Lbl}\ccUseProperty{toc-hang-number}\ccaStructEnd{Lbl}}
-      {\leftskip0pt\leavevmode}%
-    \ccWhenComp{TocAuthorNameList}{\ccaStructStart{Span}\ccTocLink{\ccUseComp{TocAuthorNameList}:\space}\ccaStructEnd{Span}}%
-    \ccaStructStart{Span}\ccTocLink{\ccUseComp{TocTitle}}\ccaStructEnd{Span}%
-    \ccUseProperty{toc-page-format}%
+    \ccWhenComp{TocNumber}{\ccaStructStart{P}\ccaStructStart{Reference}}%
+    \ccTocLink{%
+      \ccIfComp{TocNumber}
+        {\ccaStructStart{Lbl}\ccUseProperty{toc-hang-number}\ccaStructEnd{Lbl}}
+        {\leftskip0pt\leavevmode}%
+      \ccWhenComp{TocAuthorNameList}{\ccaStructStart{Span}\ccUseComp{TocAuthorNameList}:\space\ccaStructEnd{Span}}%
+      \ccaStructStart{Span}\ccUseComp{TocTitle}\ccaStructEnd{Span}%
+      \ccUseProperty{toc-page-format}%
+    }%
     \ccWhenComp{TocNumber}{\ccaStructEnd{Reference}\ccaStructEnd{P}}%
     \ccaVstructEnd{TOCI}%
   }%
@@ -1438,6 +1444,34 @@
 \newcount\cch@total@nesting@level \cch@total@nesting@level=\z@\relax
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{\cch@max@nesting@level} stores the highest absolute
+%   nesting level throughout the document.
+%    \begin{macrocode}
+\newcount\cch@max@nesting@level   \cch@max@nesting@level=\z@\relax
+%    \end{macrocode}
+% Since PDF 1.7 allows only \DescribeTag{H1}--\DescribeTag{H6}, more
+% nesting levels need to be mapped to one of the Standard tags. The
+% Tagged PDF Best Practice Guide recommends mapping higher levels to
+% \DescribeTag{P}, which we do at the end of the document. All this is
+% not necessary if PDF/UA-2 is used, since first it allows any H$n$
+% for as long as H$n$s are nested sequentially, and second, because
+% then we use the \DescribeTag{Title} tag instead of \DescribeTag{Hn}.
+%    \begin{macrocode}
+\ccWhenAlly{\if@cc@pdf@two\else\AtEndDocument{\cch@add@h@rolemap}\fi}%
+%    \end{macrocode}
+% \begin{macro}{\cch@add@h@rolemap} adds the Rolemap entries for H$n$,
+%   where $n>6$.
+%    \begin{macrocode}
+\def\cch@add@h@rolemap{%
+  \@tempcnta=7\relax
+  \loop
+  \unless\ifnum\@tempcnta>\cch@max@nesting@level\relax
+    \ccaAddRolemap{H\the\@tempcnta}{P}%
+    \advance\@tempcnta\@ne\relax
+  \repeat
+}
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\cchAutoClose} checks if any open \DescribeTag{Sect}
 %   tags (or Tagging mapped to \DescribeTag{Sect}) need to be closed
 %   and closes them if applicable.
@@ -1489,14 +1523,15 @@
 %   \lstinline{\mainmatter}, \lstinline{\appendix}, etc.)
 %    \begin{macrocode}
 \def\cchResetNesting{%
-  \ifnum\cch@total@nesting@level>\z@\relax
-    \loop
-      \ccaVstructEnd{\csname cch@sec@\the\cch@total@nesting@level @name\endcsname}%
-      \global\advance\cch@total@nesting@level\m@ne\relax
+  \ccWhenAlly{%
     \ifnum\cch@total@nesting@level>\z@\relax
-    \repeat
-  \fi
-}
+      \loop
+        \ccaVstructEnd{\csname cch@sec@\the\cch@total@nesting@level @name\endcsname}%
+        \global\advance\cch@total@nesting@level\m@ne\relax
+      \ifnum\cch@total@nesting@level>\z@\relax
+      \repeat
+    \fi
+  }}
 %    \end{macrocode}
 % \end{macro}
 % The advancement of the \UsageMacro{\cch@total@nesting@level} counter
@@ -1542,15 +1577,19 @@
 }
 %    \end{macrocode}
 % \begin{macro}{\cchHeadTagStart} is used inside Property declarations
-%   to insert the start tag of the current section, unless the heading
-%   level was declared with the starred version of
-%   \UsageMacro{\ccDeclareHeading}.
+%   to insert the start tag of the current section
 %    \begin{macrocode}
 \def\cchHeadTagStart{%
-    \expandafter\ifx\csname cch@notag@\ccCurSecName\endcsname\@empty\else
-      \ccaVstructStart{H\the\numexpr\cch@total@nesting@level+\@ne\relax}%
-      \ccaSaveCurStruct{cch@id@cur@head}%
-    \fi}
+  \if@cc@pdf@two
+    \ccaVstructStart{Title}%
+  \else
+    \ccaVstructStart{H\the\numexpr\cch@total@nesting@level+\@ne\relax}%
+    \ifnum\cch@total@nesting@level>\cch@max@nesting@level
+      \global\cch@max@nesting@level=\cch@total@nesting@level\relax
+    \fi
+  \fi
+  \ccaSaveCurStruct{cch@id@cur@head}%
+}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\cchHeadTagEnd} is used inside Property declarations
@@ -1559,7 +1598,9 @@
 %   \UsageMacro{\ccDeclareHeading}.
 %    \begin{macrocode}
 \def\cchHeadTagEnd{%
-  \expandafter\ifx\csname cch@notag@\ccCurSecName\endcsname\@empty\else
+  \if@cc@pdf@two
+    \ccaVstructEnd{Title}%
+  \else
     \ccaVstructEnd{H\the\numexpr\cch@total@nesting@level+\@ne\relax}%
   \fi}
 %    \end{macrocode}
