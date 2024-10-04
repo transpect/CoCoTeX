@@ -484,7 +484,9 @@ from the Components given in the Meta Container.}}}
 \def\cct@fundings@eval{{%
     \def\cc@cur@cont{titlepage}%
     \ccComposeCollection{Funding}{fund-format}{FundingBlock}%
+    \UseHook{cc/titlepage/funding}%
 }}
+\NewHook{cc/titlepage/funding}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\cct@eds@eval} evaluator for the editors
