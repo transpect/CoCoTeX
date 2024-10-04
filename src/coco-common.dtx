@@ -47,10 +47,12 @@
   \ifcase\nr\relax% srgb
     \global\let\cc@color@enc\cc@str@rgb
   \or% rgb
+    \global\let\cc@color@enc\cc@str@rgb
   \or% gray
   \or% cmy
     \global\let\cc@color@enc\cc@str@cmyk
   \or% cmyk
+    \global\let\cc@color@enc\cc@str@cmyk
   \or% natural, i.e. no conversion of color spaces takes place
   \else%none
     \global\let\cc@color@enc\relax
