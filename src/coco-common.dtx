@@ -59,7 +59,16 @@
   \fi
 }
 \ProcessOptionsX
-\ifx\cc@color@enc\relax\else\PassOptionsToPackage{\cc@color@enc}{xcolor}\fi%
+%    \end{macrocode}
+% First, we set up the requested color model with both the newer LaTeX
+% Kernel and the xcolor package.
+%    \begin{macrocode}
+\ifx\cc@color@enc\relax\else
+  \ExplSyntaxOn
+    \tl_gset:Nn \l_color_fixed_model_tl {\cc@color@enc}%
+  \ExplSyntaxOff
+  \PassOptionsToPackage{\cc@color@enc}{xcolor}%
+\fi%
 %    \end{macrocode}
 % \begin{macro}{\ccIfPreamble} is true as long as there has not been a
 %   \lstinline|\begin{document}|.
