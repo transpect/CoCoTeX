@@ -94,6 +94,20 @@
     }%
 %    \end{macrocode}
 % \end{Attribute}
+% \begin{Attribute}{notag}{} is a flag that if set tags the entire
+%   heading and its Components as Artifacts. Content after the heading
+%   is \textit{not} tagged as its own \UsageTag{Sect}, but belongs to
+%   the \Usagetag{Sect} of the last, non-flagged, heading.
+%    \begin{macrocode}
+    \ccDeclareAttributeHandler*{notag}{%
+      \let\ccaEnable\relax
+      \let\ccaProtect\ccaDisable
+      \global\let\cch@notag\relax
+      \global\advance\cch@total@nesting@level\m@ne\relax
+      \ccaArtifact\ccaDisable
+    }%
+%    \end{macrocode}
+% \end{Attribute}
 %    \begin{macrocode}
   }
   \ccDeclareType{Properties}{}%
@@ -493,8 +507,7 @@
 \def\cch@auto@number#1#2{%
   \ccIfPropVal{numbering}{auto}
     {\expandafter\ifx\csname c@#2\endcsname\relax\cch@init@cnt{#2}\fi
-     \ccIfAttrIsSet{Heading}{nonumber}
-       {}
+     \ccIfAttrIsSet{Heading}{nonumber}{}
        {\ccIfComp{Number}
          {}
          {\ifnum #1>\c@secnumdepth\relax\else
@@ -667,8 +680,7 @@
   \cc@check@empty[Toc]{Heading}{Number}{BM}%
   \cc@check@empty[Toc]{Heading}{AuthorNameList}{BM}%
   \cc@check@empty[Toc]{Heading}{Subtitle}{BM}%
-  \ccIfAttrIsSet{Heading}{noBM}
-    {}
+  \ccIfAttrIsSet{Heading}{noBM}{}
     {\ccIfProp{bookmark-level}{\edef\Hy@toclevel{\ccUseProperty{bookmark-level}}}{}%
      \begingroup
        \ccGobble
@@ -752,6 +764,7 @@
 %   level.
 %    \begin{macrocode}
   \xdef\ccCurSecName{#2}%
+  \ccEvalAttributes[Heading]{#1}%
 %    \end{macrocode}
 % \end{macro}
 % After opening the environment, if accessibility Features are
@@ -762,26 +775,27 @@
 % heading when it was defined in contrast to the actual,
 % \textit{absolute}, nesting level in the tex document.
 %    \begin{macrocode}
-  \ccWhenAlly{%
+  \ifx\cch@notag\relax\else
+    \ccWhenAlly{%
 %    \end{macrocode}
 % \begin{macro}{\ccPrevSecLevel} is the previously opened,
 %   \textit{nomimal}, heading level.
 %    \begin{macrocode}
-    \global\let\ccPrevSecLevel=\ccCurSecLevel\relax
+      \global\let\ccPrevSecLevel=\ccCurSecLevel\relax
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccCurSecLevel} stores the nominal level of the current
 %   heading.
 %    \begin{macrocode}
-    \xdef\ccCurSecLevel{\csname cch@#2@level\endcsname}%
+      \xdef\ccCurSecLevel{\csname cch@#2@level\endcsname}%
 %    \end{macrocode}
 % \end{macro}
 % Now, we call the auto-close mechanism defined below in
 % Sect.~\ref{sect:heading:a11y},
 %    \begin{macrocode}
-    \cchAutoClose%
-    \ccDebugMsg[a11y]{Level after close: \the\cch@total@nesting@level}%
-  }%
+      \cchAutoClose%
+      \ccDebugMsg[a11y]{Level after close: \the\cch@total@nesting@level}}%
+  \fi
 %    \end{macrocode}
 % Then, we call the heading level specific
 % \UsageHook{env/Heading/[level]/begin} hook.
@@ -790,7 +804,6 @@
 %    \end{macrocode}
 % \end{macro}
 %    \begin{macrocode}
-  \ccEvalAttributes[Heading]{#1}%
   \ccEvalType[#2]{Components}%
   \ignorespaces
 }
@@ -828,6 +841,9 @@
   \let\cch@current@class\relax
   \global\let\cch@id@cur@meta\@undefined
   \global\let\cch@id@cur@head\@undefined
+  \global\let\cch@no@tag\@undefined%
+  \global\let\cch@ccaEnable\ccaEnable
+  \global\let\cch@ccaProtect\ccaProtect
   \ignorespaces}
 %    \end{macrocode}
 % \end{macro}
@@ -840,6 +856,9 @@
   \let\\\cch@ltx@dbl@backslash
   \let\label\cc@ltx@label
   \let\ccCurSecName\relax
+  \global\let\ccaEnable\cch@ccaEnable
+  \global\let\ccaProtect\cch@ccaProtect
+  \ifx\cch@notag\relax\endccaArtifact\fi
   }
 %    \end{macrocode}
 % \end{macro}
@@ -1485,7 +1504,7 @@
 %   gets less than \UsageMacro{\ccCurSecLevel}. At each step, we also
 %   decrease the \UsageMacro{\cch@total@nesting@level} counter by one.
 %    \begin{macrocode}
-\def\cchAutoClose{%
+\DeclareAccessibilityCommand\cchAutoClose{%
   \let\cca@next\relax
   \ccDebugMsg[a11y]{Calling AutoClose for \ccCurSecName\space (\ccCurSecLevel).}
   \ifx\ccPrevSecLevel\@undefined\else
@@ -1522,7 +1541,7 @@
 %   document or at major document partitions (e.g.,
 %   \lstinline{\mainmatter}, \lstinline{\appendix}, etc.)
 %    \begin{macrocode}
-\def\cchResetNesting{%
+\DeclareAccessibilityCommand\cchResetNesting{%
   \ccWhenAlly{%
     \ifnum\cch@total@nesting@level>\z@\relax
       \loop
@@ -1553,8 +1572,11 @@
 % \DescribeTag{Sect} node.
 %    \begin{macrocode}
 \AddToHook{env/\ccPrefix Heading/after}{%
-  \ccaVstructStart{\ccCurSecName}%
-  \csxdef{cch@sec@\the\cch@total@nesting@level @name}{\ccCurSecName}%
+  \ifx\cch@notag\relax
+    \global\let\cch@notag\@undefined
+  \else
+    \ccaVstructStart{\ccCurSecName}%
+    \csxdef{cch@sec@\the\cch@total@nesting@level @name}{\ccCurSecName}%
 %    \end{macrocode}
 % For inline headings, the actual title is not yet printed by the time
 % the heading Container's environment is closed. In this case, we
@@ -1562,18 +1584,19 @@
 % second because it most likely already is in the “right” spot,
 % i.e. inside the \UsageTag{Sect} tag.
 %    \begin{macrocode}
-  \ifx\cch@id@cur@head\@undefined\else
-    \ccaMoveStruct{\cch@id@cur@head}%
-  \fi
+    \ifx\cch@id@cur@head\@undefined\else
+      \ccaMoveStruct{\cch@id@cur@head}%
+    \fi
 %    \end{macrocode}
 % If \UsageMacro{\cch@id@cur@meta} is undefined when the Heading
 % container's environment is closed, then this indicates an inline
 % heading. In this case, we don't need to move the \UsageTag{SectMeta}
 % node, as it most likely already is in the right place.
 %    \begin{macrocode}
-  \ifx\cch@id@cur@meta\@undefined\else
-    \ccaMoveStruct{\cch@id@cur@meta}%
-  \fi%
+    \ifx\cch@id@cur@meta\@undefined\else
+      \ccaMoveStruct{\cch@id@cur@meta}%
+    \fi%
+  \fi
 }
 %    \end{macrocode}
 % \begin{macro}{\cchHeadTagStart} is used inside Property declarations

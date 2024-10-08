@@ -99,6 +99,15 @@
 }
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{\cc@patch@error} issues an error when a CoCoTeX module
+%   \InlineArg{1} could not patch macro \InlineArg{2}.
+%    \begin{macrocode}
+\def\cc@patch@error#1#2{%
+  \ccPackageError{#1}{compatibility}
+  {Could not patch \noexpand#2}
+  {You probably use a LaTeX package that re-defines the \noexpand#1 control sequence. It is apparently not compatbile with CoCoTeX. Sorry}}
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\ccPackageWarning} is a macro to create warnings
 %   specific to the Framework. 
 %   \begin{ArgList}

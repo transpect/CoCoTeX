@@ -27,6 +27,7 @@
        earlier
 - NEW: Warning when a value is attempted to be assigned to a
        Component that is undefined
+- NEW: Added general error facility for patch commands
 - FIX: made group components long
 - FIX: LaTeX error when `\cc@iterate@res` is undefined
 
@@ -74,6 +75,10 @@
        sectioning levels while keeping the Tagging hierarchy intact.
 - NEW: heading Components other than Title are now all tagged inside a
        SectMeta container, mapped to Div.
+- NEW: headings, their Components, and the sect tags that they open
+       can now be excluded from being tagged with the notag
+       Attribute. Headings with this Attribute are tagged as
+       Artifacts.
 
 ## coco-accessibility.dtx
 - NEW: Keywords and Authors are now written as separated list items
@@ -94,5 +99,12 @@
 - FIX: Avoid `babel-lua` errors when `bidi` is not needed
 - FIX: Removed old fallback for Armenian and replaced by usescript
        system
+
+## coco-notes.dtx
+- NEW: Added automatic tagging of endnotes
+- CHANGE: footnotes and endnotes are no longer reset at the beginning
+       of a new chapter unless the resetnotesperchapter package option
+       is set.
+- CHANGE: \printnotes no longer resets the endnote counter.
 
 # 0.4.9 (INITIAL STATUS)

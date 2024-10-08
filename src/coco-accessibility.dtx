@@ -105,10 +105,7 @@
 %   messes with the macro's original definition. \#1 is the CS token
 %   of the un-patchable macro.
 %    \begin{macrocode}
-\def\cca@patch@error#1{%
-  \ccPackageError{a11y}{compatibility}
-  {Could not patch \noexpand#1}
-  {You probably use a LaTeX package that re-defines the \noexpand#1 control sequence. It is apparently not compatbile with coco-accessibility.sty. Sorry}}
+\def\cca@patch@error{\cc@patch@error{a11y}}
 %    \end{macrocode}
 % \end{macro}
 %
