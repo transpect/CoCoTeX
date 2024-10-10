@@ -41,19 +41,25 @@
 %    \begin{macrocode}
 \def\cc@str@cmyk{cmyk}
 \def\cc@str@rgb{rgb}
+\def\cc@str@gray{gray}
+\def\cc@str@natural{natural}
 \let\cc@color@enc\cc@str@cmyk
-\define@choicekey{coco-common.sty}{color-enc}[\@cc@color@enc\nr]{srgb,rgb,gray,cmy,cmyk,natural,none}[cmyk]{%
+\define@choicekey{coco-common.sty}{color-enc}[\@cc@color@enc\nr]{srgb,rgb,gray,grey,cmy,cmyk,natural,none}[cmyk]{%
   \let\cc@color@enc\@cc@color@enc
   \ifcase\nr\relax% srgb
     \global\let\cc@color@enc\cc@str@rgb
   \or% rgb
     \global\let\cc@color@enc\cc@str@rgb
   \or% gray
+    \global\let\cc@color@enc\cc@str@gray
+  \or% grey
+    \global\let\cc@color@enc\cc@str@gray
   \or% cmy
     \global\let\cc@color@enc\cc@str@cmyk
   \or% cmyk
     \global\let\cc@color@enc\cc@str@cmyk
   \or% natural, i.e. no conversion of color spaces takes place
+    \global\let\cc@color@enc\cc@str@natural
   \else%none
     \global\let\cc@color@enc\relax
   \fi

@@ -1415,12 +1415,17 @@ from the Components given in the Meta Container.}}}
 % Properties list (\lstinline{\cc@color@enc} is set via the
 % \lstinline{coco-common} module):
 %    \begin{macrocode}
-  \ifdefstring\cc@color@enc{cmyk}
-    {\def\cca@default@icc@comp{4}}
-    {\def\cca@default@icc@comp{3}}
-  \ifdefstring\cc@color@enc{cmyk}
-    {\def\cca@default@icc@iden{Coated FOGRA39}}
-    {\def\cca@default@icc@iden{sRGB IEC61966-2.1}}
+  \ifx\cc@color@enc\cc@str@cmyk
+    \def\cca@default@icc@comp{4}%
+    \def\cca@default@icc@iden{Coated FOGRA39}%
+  \else\ifx\cc@color@enc\cc@str@rgb
+      \def\cca@default@icc@comp{3}%
+      \def\cca@default@icc@iden{IEC 61966-2.1 Default RGB colour space - sRGB}%
+    \else
+      \def\cca@default@icc@comp{1}%
+      \def\cca@default@icc@iden{ISO Coated v2 - GREY 1c - (basICColor)}%
+    \fi
+  \fi
   \ccAddToType{Properties}{titlepage}{%
 %    \end{macrocode}
 % \begin{Property}{output-intent}{<see below>} sends the output intent

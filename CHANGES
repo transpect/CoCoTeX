@@ -33,7 +33,9 @@
 
 ## coco-common.dtx
 - NEW: added option to suppress inclusion of color profile
+- NEW: added gray as one default colour profile
 - FIX: improved handling of color encoding option
+- CHANGE: replaced default .icc profile for cmyk
 
 ## coco-meta.dtx
 - NEW: remove transitive role-mapping
