@@ -961,7 +961,7 @@
         \@cc@is@finaltrue
 %    \end{macrocode}
 % Floats as a whole are tagged as \DescribeTag{Aside} when PDF/UA
-% standard is 2.0, or else as \DescribeTag{Div}.
+% standard is 2.0, or as \DescribeTag{Div}, otherwise.
 %    \begin{macrocode}
         \ccaStructStart{\if@cc@pdf@two\relax Aside\else Div\fi}%
         \edef\ccf@parstruct@id{\ccaGetCurStruct{idx}}%
@@ -1053,7 +1053,7 @@
 \long\def\ccfRenderSubFloats#1#2{%
   \leavevmode
   \savenotes
-  \ifnum#1>\@ne\hfill\fi
+  \ifnum#1>\@ne\relax\hskip\ccf@sub@sep\fi%\hfill\fi
   \vtop\bgroup
     \expandafter\hsize\csname  cc@\cc@cur@cont @res@width-#1\endcsname\relax
     \let\includegraphics\ccf@includesubgraphics
@@ -1423,13 +1423,15 @@
     \egroup
   \else
     \ccf@test@subcapt
-    \@cc@is@finalfalse
     \ccf@calc@sameheight
     \def\ccf@prefix{sub}%
     \ifx\ccf@has@subcapt@top\@empty\ccf@calc@row@ht{top}\fi%
     \ifx\ccf@has@subcapt@bottom\@empty\ccf@calc@row@ht{bottom}\fi%
-    \@cc@is@finaltrue
-    \ccUseProperty{subfloat-render}%
+    \bgroup
+      \advance\hsize-\ccf@margin@l
+      \@cc@is@finaltrue
+      \ccUseProperty{subfloat-render}%
+    \egroup
     \let\ccf@prefix\@empty
   \fi
   \ccf@make@outer@caption{bottom}%
@@ -1463,40 +1465,137 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\ccf@calc@sameheight} calculates the ratio between
-%   each sub-float's height and the height of the largest sub-float
+% \begin{macro}{\ccf@calc@sameheight} calculates the target width of
+%   each sub-image in the \UsageContainer{Figure} Container if each of
+%   the sub-images is required to match a~uniform height.
 %    \begin{macrocode}
 \def\ccf@calc@sameheight{%
   \if@ccf@sameheight
+%    \end{macrocode}
+% If all sub figures should be scaled to the same height, we reserve
+% two registers: dimension \lstinline{\@tempdima}, which holds the
+% cumulated widths of all adjusted sub images, and
+% \lstinline{\@tempcnta}, which serves as a temporary index for each
+% processed sub float.
+%    \begin{macrocode}
     \@tempdima=\z@\relax
     \@tempcnta=\z@\relax
+%    \end{macrocode}
+% The \UsageMacro{\ccf@calc@width} dimension register holds the target
+% width of the total sub float block. It is initialized to
+% \UsageMacro{\ccf@total@width} and reduced by the amount of the left
+% margin.
+%    \begin{macrocode}
     \ccf@calc@width=\ccf@total@width\relax
     \advance\ccf@calc@width-\ccf@margin@l\relax
+%    \end{macrocode}
+% now, we iterate through the sub floats, storing the current index in
+% \lstinline{\@tempcnta}.
+%    \begin{macrocode}
     \cc@iterate{\@tempcnta}{\@ne}{\ccSubFloatCnt}{%
+%    \end{macrocode}
+% First, we calculate the ratio between the height of the largest
+% image in the Figure container, and the height of the current image,
+% resulting in \lstinline{\@tempa} being a rational number $\geq 1$.
+%    \begin{macrocode}
       \edef\@tempa{\CalcRatio{\ccf@sub@maxheight}{\csname ccf@\cc@cur@cont @height-\the\@tempcnta\endcsname}}%
+%    \end{macrocode}
+% Now, we subtract the mandatory space between to sub images (as
+% indicated by the \UsageProperty{sub-float-sep} Property) to the
+% total target width \UsageMacro{\ccf@calc@width}.
+%    \begin{macrocode}
       \ifnum\the\@tempcnta>\@ne\relax
         \advance\ccf@calc@width-\ccf@sub@sep\relax%
       \fi
+%    \end{macrocode}
+% Temporary length register \lstinline{\@tempdimc} holds the natural
+% width of the current image.
+%    \begin{macrocode}
       \expandafter\@tempdimc\csname ccf@\cc@cur@cont @width-\the\@tempcnta\endcsname\relax
+%    \end{macrocode}
+% Temporary length register \lstinline{\@tempdimb} holds the width of
+% the down-scaled image. The scaling factor is \lstinline{\@tempa}
+% calculated earlier.
+%    \begin{macrocode}
       \@tempdimb=\@tempa\@tempdimc\relax
+%    \end{macrocode}
+% This values is stored in \lstinline{cc@\cc@cur@cont
+% @adj@width-\the\@tempcnta} for each image.
+%    \begin{macrocode}
       \csedef{cc@\cc@cur@cont @adj@width-\the\@tempcnta}{\the\@tempdimb}%
+%    \end{macrocode}
+% This width is added to the \lstinline{\@tempdima} register.
+%    \begin{macrocode}
       \advance\@tempdima\@tempdimb
     }%
+%    \end{macrocode}
+% Once we calculated the new width of each image, we reset the
+% temporary sub-float counter \lstinline{\@tempcnta}, and the
+% temporary length registers \lstinline{\@tempdimb} and
+% \lstinline{\tempdimc}.
+%    \begin{macrocode}
     \@tempcnta=\z@\relax
     \@tempdimb=\z@\relax
     \@tempdimc=\z@\relax
+%    \end{macrocode}
+% Up to this point, we calculated the ratio of each image in relation
+% to the laregst image and what width each image would have if we
+% scaled it \textit{up} to this maximum height. As a by-product, we
+% also calculated the target width of all sub images by substracting
+% the separator space inserted between each image.
+%
+% Now, we need to calculate the acual scaling factor. For that, we
+% loop through all subfloats once more, re-using the temproary counter
+% \lstinline{\@tempcnta} as index of the current image.
+%    \begin{macrocode}
     \cc@iterate{\@tempcnta}{\@ne}{\ccSubFloatCnt}{%
+%    \end{macrocode}
+% {\@tempdima} stores the sum of the widths of all images if they were
+% upscaled to match the highest image. We now calculate the ratio
+% between the width of the current, upscaled, image and and sum of the
+% widths of all upscaled images. The result is stored in {\@tempa} as
+% a rational number between $0$ and $1$.
+%    \begin{macrocode}
       \edef\@tempa{\CalcRatio{\csname  cc@\cc@cur@cont @adj@width-\the\@tempcnta\endcsname}{\@tempdima}}%
+%    \end{macrocode}
+% We now use this factor to calculate the target width of the sub
+% float by multiplying this scaling factor with the actually available
+% width of the Container stored in \UsageMacro{\@ccf@calc@width}.
+%    \begin{macrocode}
       \csedef{cc@\cc@cur@cont @res@width-\the\@tempcnta}{\dimexpr\@tempa\ccf@calc@width\relax}%
+%    \end{macrocode}
+% We now store the natural height of the current image in
+% \lstinline{\@tempdimc}…
+%    \begin{macrocode}
       \@tempdimc\dimexpr\csname ccf@\cc@cur@cont @height-\the\@tempcnta\endcsname\relax
+%    \end{macrocode}
+% …and also multiply it by the scaling factor such that
+% \lstinline{\@tempdimc} now holds the actual height of the current
+% image after down-scaling.
+%    \begin{macrocode}
       \@tempdimc\dimexpr\@tempa\@tempdimc\relax
-      \ifdim\@tempa\@tempdimb<\@tempdimc\@tempdimb\@tempdimc\relax\fi
+%    \end{macrocode}
+% \lstinline{\@tempdimb} stores the total height of the down-scaled
+% images. If all calculations are correct, \lstinline{\@tempdimb}
+% should be equal for each iteration.
+%    \begin{macrocode}
+      \ifdim\@tempa\@tempdimb<\@tempdimc\relax
+        \@tempdimb=\@tempdimc\relax
+      \fi
     }%
   \else
+%    \end{macrocode}
+% If images should not be scaled to the same height, we simply set the
+% target width of each sub image to its natural value.
+%    \begin{macrocode}
     \cc@iterate{\@tempcnta}{\@ne}{\ccSubFloatCnt}{%
-      \csletcs{cc@\cc@cur@cont @res@width-\the\@tempcnta}{ccf@\cc@cur@cont @width-\the\@tempcnta}
+      \csletcs{cc@\cc@cur@cont @res@width-\the\@tempcnta}{ccf@\cc@cur@cont @width-\the\@tempcnta}%
     }%
   \fi
+%    \end{macrocode}
+% In any case, the total height of the entire image Container is
+% stored in \lstinline{cc@\cc@cur@cont @res@height}.
+%    \begin{macrocode}
   \csedef{cc@\cc@cur@cont @res@height}{\the\@tempdimb}%
 }
 %    \end{macrocode}
@@ -1848,7 +1947,7 @@
   \hskip\ccf@margin@l
   \cc@iterate{\@tempcnta}{\@ne}{\ccSubFloatCnt}{%
     \ccfRenderSubFloats{\the\@tempcnta}{Fig}%
-  }}
+  }\par}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccf@includesubgraphics} is an override of \LaTeX's
