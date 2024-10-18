@@ -1053,7 +1053,7 @@
 \long\def\ccfRenderSubFloats#1#2{%
   \leavevmode
   \savenotes
-  \ifnum#1>\@ne\relax\hskip\ccf@sub@sep\fi%\hfill\fi
+  \ifnum#1>\@ne\relax\hfill\fi
   \vtop\bgroup
     \expandafter\hsize\csname  cc@\cc@cur@cont @res@width-#1\endcsname\relax
     \let\includegraphics\ccf@includesubgraphics
@@ -1762,6 +1762,13 @@
       \spewnotes
     \egroup
     \ccIfStrEqual{#1}{top}{\if@ccf@break@capt\else\nopagebreak\fi}{}%
+  \else
+%    \end{macrocode}
+% If no caption at \InlineArg{1} is given, we need to issue
+% a~\lstinline{\par}, which otherwise would come from
+% \lstinline{\ccf@capt@top@offset}:
+%    \begin{macrocode}
+    \par
   \fi}
 %    \end{macrocode}
 % \end{macro}
@@ -1947,7 +1954,7 @@
   \hskip\ccf@margin@l
   \cc@iterate{\@tempcnta}{\@ne}{\ccSubFloatCnt}{%
     \ccfRenderSubFloats{\the\@tempcnta}{Fig}%
-  }\par}
+  }}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccf@includesubgraphics} is an override of \LaTeX's
