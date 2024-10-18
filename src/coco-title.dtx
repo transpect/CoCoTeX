@@ -1103,7 +1103,9 @@ from the Components given in the Meta Container.}}}
       \ccWhenComp{FundName}{\ccaStructStart{P}\ccUseComp{FundName}\ccaStructEnd{P}\\[1ex]}%
       \ccaStructStart{Figure}%
       \ccaAddPlacement{Block}%
-      \ccaAddAltText{\ccGetComp*{FundName} Logo}%
+      \ccdefFromComp\cca@Gin@alt{FundName}%
+      \pdfstringdef\@cca@Gin@alt{\cca@Gin@alt}%
+      \ccaAddAltText{\@cca@Gin@alt}%
       \includegraphics[width=\ccUseProperty{fund-width}]{\ccUseComp{FundLogo}}%
       \ccaStructEnd{Figure}%
     }%
