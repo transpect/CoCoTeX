@@ -13,9 +13,9 @@
 %%
 %% Maintainer: p.schulz@le-tex.de
 %%
-%% lualatex  -  texlive >= 2019
+%% lualatex  -  texlive >= 2020
 %%
-\NeedsTeXFormat{LaTeX2e}[2018/12/01]
+\NeedsTeXFormat{LaTeX2e}[2020/06/01]
 \ProvidesPackage{coco-headings}
     [\filedate \fileversion CoCoTeX headings module]
 \RequirePackage{coco-meta}
@@ -1067,18 +1067,56 @@
 % headings whcih incorporates the \UsageComponent{Abstract} and
 % \UsageComponent{Keywords} Labeled Components. Requires the
 % \UsageProp{extended} Property to be non-empty.
+%
+% \UsageComponent{Abstract} and \UsageComponent{Keywords} are tagged
+% with \UsageTag{Abstract} and \UsageTag{Keyword}, their labels with
+% \UsageTag{AbstractLabel} and \UsageTag{KeywordsLabel}, and their
+% values with \UsageTag{AbstractText} and \UsageTag{KeywordsText},
+% respectively.
 %    \begin{macrocode}
   \ccSetProperty{extended-heading}{%
-    \ccIfComp{Abstract}
-      {\par\vskip\baselineskip
-       {\bfseries\ccIfComp{AbstractLabel}{\ccUseComp{AbstractLabel}}{Abstract}}\par\nobreak
-       {\itshape\small\ccUseComp{Abstract}}\par}
-      {}%
-    \ccIfComp{Keywords}
-      {\par\vskip\baselineskip
-       {\bfseries\ccIfComp{KeywordsLabel}{\ccUseComp{KeywordsLabel}}{Keywords}}\par\nobreak
-       {\itshape\small\ccUseComp{Keywords}\par}}
-      {}}%
+    \ccWhenComp{Abstract}{%
+      \par\vskip\baselineskip
+      \ccaStructStart{Abstract}%
+      \bgroup
+        \bfseries
+        \ccaStructStart{AbstractLabel}%
+        \ccIfComp{AbstractLabel}
+          {\ccUseComp{AbstractLabel}}
+          {Abstract}%
+        \ccaStructEnd{AbstractLabel}%
+      \egroup
+      \par\nobreak
+      \bgroup
+        \itshape\small
+        \ccaStructStart{AbstractText}%
+        \ccUseComp{Abstract}%
+        \ccaStructEnd{AbstractText}%
+      \egroup
+      \par
+      \ccaStructEnd{Abstract}%
+    }%
+    \ccWhenComp{Keywords}{%
+      \par\vskip\baselineskip
+      \ccaStructStart{Keywords}%
+      \bgroup
+        \bfseries
+        \ccaStructStart{KeywordsLabel}%
+        \ccIfComp{KeywordsLabel}
+          {\ccUseComp{KeywordsLabel}}
+          {Keywords}%
+        \ccaStructEnd{KeywordsLabel}%
+      \egroup%
+      \par\nobreak
+      \bgroup
+        \itshape\small
+        \ccaStructStart{KeywordsText}%
+        \ccUseComp{Keywords}%
+        \ccaStructEnd{KeywordsText}%
+        \par%
+      \egroup
+      \ccaStructEnd{Keywords}%
+    }}%
 %    \end{macrocode}
 % \end{Property}
 % \begin{Property}{before-skip}{<skip>} the vertical space before
@@ -1228,43 +1266,43 @@
 % \textit{not} create an entry in the table of contents (\texttt{true}
 % means no toc entry, \texttt{false} means toc entry).
 %    \begin{macrocode}
-  \ccSetProperty{no-toc}{false}% toc entries are generally disabled iff true
+  \ccSetProperty{no-toc}{false}%
 %    \end{macrocode}
 % \end{Property}
 % \begin{Property}{no-BM}{[true|false]} whether or not the heading
 %   does \textit{not} create a bookmark (\texttt{true} means no
 %   bookmark, \texttt{false} means bookmark).
 %    \begin{macrocode}
-  \ccSetProperty{no-BM}{false}% bookmark entries are generally disabled, iff true
+  \ccSetProperty{no-BM}{false}%
 %    \end{macrocode}
 % \end{Property}
 % \begin{Property}{toc-margin-top}{<skip>} vertical space before the ToC entry.
 %    \begin{macrocode}
-  \ccSetProperty{toc-margin-top}{\z@}% left indent of the whole entry
+  \ccSetProperty{toc-margin-top}{\z@}%
 %    \end{macrocode}
 % \end{Property}
 % \begin{Property}{toc-margin-bottom}{<skip>} vertical space after the
 %   ToC entry.
 %    \begin{macrocode}
-  \ccSetProperty{toc-margin-bottom}{\z@}% bottom margin of the whole entry
+  \ccSetProperty{toc-margin-bottom}{\z@}%
 %    \end{macrocode}
 % \end{Property}
 % \begin{Property}{toc-margin-left}{[auto|<dimen>]} left margin of the toc
 % entry. See \lstinline{margin-left} for the meaning of auto.
 %    \begin{macrocode}
-  \ccSetProperty{toc-margin-left}{auto}% left indent of the whole entry
+  \ccSetProperty{toc-margin-left}{auto}%
 %    \end{macrocode}
 % \end{Property}
 % \begin{Property}{toc-margin-right}{<dimen>} right margin of the ToC
 %   entry.
 %    \begin{macrocode}
-  \ccSetProperty{toc-margin-right}{\@pnumwidth}% right margin of the whole entry
+  \ccSetProperty{toc-margin-right}{\@pnumwidth}%
 %    \end{macrocode}
 % \end{Property}
 % \begin{Property}{toc-title-face}{<any>} style of the title in the
 %   ToC entry.
 %    \begin{macrocode}
-  \ccSetProperty{toc-title-face}{}% appearance of title
+  \ccSetProperty{toc-title-face}{}%
 %    \end{macrocode}
 % \end{Property}
 % \begin{Property}{toc-indent}{[auto|auto-global|<dimen>]} offset of
@@ -1277,26 +1315,26 @@
 % \begin{Property}{toc-number-width}{<dimen>} the actual width of the
 %   TocNumber Component.
 %    \begin{macrocode}
-  \ccSetProperty{toc-number-width}{}% current width of the TocNumber
+  \ccSetProperty{toc-number-width}{}%
 %    \end{macrocode}
 % \end{Property}
 % \begin{Property}{toc-number-align}{[left|center|right]} the
 %   alignment of the TocNumber within the surrounding
 %   \lstinline{\hbox}.
 %    \begin{macrocode}
-  \ccSetProperty{toc-number-align}{left}% alignment of TocNumber within the hbox when hanging
+  \ccSetProperty{toc-number-align}{left}%
 %    \end{macrocode}
 % \end{Property}
 % \begin{Property}{toc-number-face}{<any>} style of the TocNumber
 %   component.
 %    \begin{macrocode}
-  \ccPropertyLet{toc-number-face}{toc-title-face}% appearance of the TocNumber
+  \ccPropertyLet{toc-number-face}{toc-title-face}%
 %    \end{macrocode}
 % \end{Property}
 % \begin{Property}{toc-number-sep}{<any>} separator between the
 %   \lstinline{TocNumber} and \lstinline{TocTitle} Components
 %    \begin{macrocode}
-  \ccSetProperty{toc-number-sep}{\enskip}% thing between TocNumber and TocTitle
+  \ccSetProperty{toc-number-sep}{\enskip}%
 %    \end{macrocode}
 % \end{Property}
 % \begin{Property}{toc-number-format}{<any>} is the format of the
@@ -1304,7 +1342,7 @@
 %   \UsageProp{toc-number-face} and \UsageProp{toc-number-sep}
 %   Properties.
 %    \begin{macrocode}
-  \ccSetProperty{toc-number-format}{% Format of the TocNumber
+  \ccSetProperty{toc-number-format}{%
     \bgroup
       \ccUseProperty{toc-number-face}%
       \ccUseComp{TocNumber}%
@@ -1314,21 +1352,22 @@
 % \end{Property}
 % \begin{Property}{toc-page-sep}{<any>} separator between the TocTitle
 %   and the page counter. The dotted line is tagged as
-%   \DescribeTag{leaders}, which is mapped to be an artifact.
+%   \DescribeTag{leaders}, which is mapped to be an artifact of type
+%   \UsageTag{leaders}.
 %    \begin{macrocode}
-  \ccSetProperty{toc-page-sep}{\ccaAddKeep\ccaStructStart[Document]{leaders}\dotfill\ccaStructEnd{leaders}}% between TocTitle and the page counter
+  \ccSetProperty{toc-page-sep}{\ccaAddKeep\ccaStructStart[Document]{leaders}\dotfill\ccaStructEnd{leaders}}%
 %    \end{macrocode}
 % \end{Property}
 % \begin{Property}{toc-page-face}{<any>} style of the page counter
 %    \begin{macrocode}
-  \ccSetProperty{toc-page-face}{}% appearance of the page value
+  \ccSetProperty{toc-page-face}{}%
 %    \end{macrocode}
 % \end{Property}
 % \begin{Property}{toc-page-format}{<any>} format of the page counter
 %   using the \UsageProp{toc-page-sep} and \UsageProp{toc-page-face}
 %   Properties. The number itself is tagged as a \DescribeTag{Span}.
 %    \begin{macrocode}
-  \ccSetProperty{toc-page-format}{% format of the page value
+  \ccSetProperty{toc-page-format}{%
     \ccUseProperty{toc-page-sep}%
     \bgroup
       \ccUseProperty{toc-page-face}%
@@ -1448,7 +1487,7 @@
 %   \UsageProp{counted-name-sep} to all instance of that Component but
 %   the last.
 %    \begin{macrocode}
-  \ccSetProperty{author-contact-block-format}{% Format of the whole contact information block
+  \ccSetProperty{author-contact-block-format}{%
     \ccUseComp{AuthorContact}\ifnum\ccCurCount<\ccTotalCount\ccUseProperty{counted-name-sep}\fi
   }}
 %    \end{macrocode}

@@ -81,6 +81,7 @@
        can now be excluded from being tagged with the notag
        Attribute. Headings with this Attribute are tagged as
        Artifacts.
+- NEW: Added tagging in default Properties
 
 ## coco-accessibility.dtx
 - NEW: Keywords and Authors are now written as separated list items
