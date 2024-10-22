@@ -1988,10 +1988,10 @@
     \ifx\cca@Gin@alt\@undefined\let\cca@Gin@alt\relax\fi
     \ifx\relax\cca@Gin@alt\relax
       \ccIfComp{AltText}
-        {\pdfstringdef\@cca@Gin@alt{\ccUseComp{AltText}}}
+        {\ccSanitizeStr\@cca@Gin@alt{\ccUseComp{AltText}}}
         {\def\@cca@Gin@alt{--}}%
     \else
-      \pdfstringdef\@cca@Gin@alt{\cca@Gin@alt}%
+      \ccSanitizeStr\@cca@Gin@alt{\cca@Gin@alt}%
     \fi
     \ccaAddAltText{\@cca@Gin@alt}%
     \ccaStructEnd{Figure}%

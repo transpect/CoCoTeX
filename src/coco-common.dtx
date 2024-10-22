@@ -205,6 +205,23 @@
     \fi}}
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{\ccSanitizeStr} is used to clean macro content from
+%   any non-expansible markup. It is intended to sanitize strings
+%   before they are sent to the PDF writer, like DocumentInfo strings
+%   or alternative texts.
+%   \begin{ArgList}
+%   \item[1] is the macro that is defined to hold the sanitized text
+%   \item[2] is the content to be sanitized
+%   \end{ArgList}
+%    \begin{macrocode}
+\ExplSyntaxOn
+\cs_new:Npn\ccSanitizeStr #1 #2
+  {
+    \edef #1 { \text_purify:n { #2 } }
+  }
+\ExplSyntaxOff
+%    \end{macrocode}
+% \end{macro}
 %
 %
 % \subsection{Masks}
