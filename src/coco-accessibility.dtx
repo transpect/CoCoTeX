@@ -513,15 +513,23 @@
 \ccWhenAlly{\directlua{ally = require('coco-accessibility')}}
 %    \end{macrocode}
 %
+% \subsection{Alternative Text Elements}
 %
-% \subsection{Hyperlink handling}
-%
-% To tag hyperlinks, we define some ltpdfa interface macros.
+% Some structure elements in the PDF/UA standards require alternative
+% texts.
 %
 % \begin{macro}{\ccaAddAltText} is used to add an Alternative Text
-%   node, given in \#1, to the PDF structTree.
+%   node, given in \InlineArg{1}, to the PDF structTree.
+%
+%   It is assumed that the input is always UTF-8, so we convert the
+%   value in \InlineArg{1} to PDF encoding using the
+%   \lstinline{utf8toPDFenc} method from \lstinline{ltpdfa}. If the
+%   entire string contains only the 256 ASCII characters, the string
+%   is written as-is into the PDF. However, if it also contains
+%   characters further down the Unicode range, the entire string is
+%   converted to hexadecimal UTF-16.
 %    \begin{macrocode}
-\DeclareAccessibilityCommand{\ccaAddAltText}[1]{\if@cc@is@final\directlua{ltpdfa.tagger.addAltText('\luaescapestring{#1}')}\fi}
+\DeclareAccessibilityCommand{\ccaAddAltText}[1]{\if@cc@is@final\directlua{ltpdfa.tagger.addAltText(ltpdfa.metadata.utf8toPDFenc('\luaescapestring{#1}'))}\fi}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\cca@Gin@alt} is the captured value of the
@@ -532,6 +540,9 @@
 \define@key{Gin}{alt}{\gdef\cca@Gin@alt{#1}}
 %    \end{macrocode}
 % \end{macro}
+%
+%
+% \subsection{Hyperlink handling}
 %
 % \begin{macro}{\ccaAddLastLink} adds the last Link node to the PDF
 %   structTree.
