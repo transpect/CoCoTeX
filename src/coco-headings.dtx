@@ -588,10 +588,11 @@
        {\edef\cch@toc@sec@name{\ccUseProperty{toc-level}}}
        {\let\cch@toc@sec@name\ccCurSecName}%
      \protected@write\@auxout
-       {\ccGobble}%
+       {\ccGobble\ccaProtect}%
        {\string\@writefile{toc}{\protect\ccContentsline{\cch@toc@sec@name}{\cch@toc@entry}{\thepage}{\@currentHref}\protected@file@percent}}\relax
      \ccCreateContentListEntries{Heading}{\cch@toc@sec@name}{\cch@toc@entry}{\thepage}{\@currentHref}%
      \ccCreateContentListEntries{\cch@toc@sec@name}{\cch@toc@sec@name}{\cch@toc@entry}{\thepage}{\@currentHref}%
+     \protected@write\@auxout{\ccaEnable}{}%
    }}
 %    \end{macrocode}
 % \end{macro}

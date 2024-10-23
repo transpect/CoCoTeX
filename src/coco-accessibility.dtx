@@ -345,7 +345,7 @@
 % \InlineArg{1} which expands to itself, and thus is protected from
 % expansion inside \lstinline{\edef}, et al.
 %    \begin{macrocode}
-  \edef\z{\noexpand\protected\noexpand\def\noexpand#1{\noexpand#1}}%
+  \edef\z{\noexpand\def\noexpand#1{\noexpand\protect\noexpand#1}}%
   \global\expandafter\appto\expandafter\cca@protected@defs\expandafter{\z}%
 %    \end{macrocode}
 % Finally, we reset the macro that contained the argument signature.

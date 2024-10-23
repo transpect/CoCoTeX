@@ -597,8 +597,10 @@
 \def\ccCreateContentListEntries#1#2#3#4#5{%
   \def\cc@add@extra@cl##1{%
     \expandafter\protected@write\csname cc@cl@##1\endcsname
-      {\ccGobble}%
+      {\ccGobble\ccaProtect}%
       {\protect\ccContentsline{#2}{#3}{#4}{#5}\protected@file@percent}\relax
+    \expandafter\protected@write\csname cc@cl@##1\endcsname
+      {\ccaEnable}{}%
   }%
   \ifcsdef{cc@#1@extra@cl}{%
     \cc@parse@csv\cc@add@extra@cl{cc@#1@extra@cl}}{}%
@@ -979,7 +981,7 @@
       \def\cc@labelname@comp{Title}%
     \fi
     \begingroup
-      \ccGobble
+      \ccGobble\ccaProtect
       \ccgdefFromComp\@currentlabel{Number}%
       \ccgdefFromComp\@currentlabelname{\cc@labelname@comp}%
     \endgroup}%
@@ -987,7 +989,10 @@
   %% leaving this will generate lots of "duplicate destination"
   %% messages from pdfbackend
   %\expandafter\hypertarget\expandafter{#1}{}%
+  \@tempswafalse\ifx\cc@saved@ccaStructStart\ccaStructStart\@tempswatrue\fi
+  \ccaProtect
   \expandafter\label\expandafter{#1}%
+  \if@tempswa\ccaEnable\else\ccaDisable\fi
 }
 \def\cc@fallback@anchor{\phantomsection}%
 %    \end{macrocode}

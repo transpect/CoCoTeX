@@ -89,6 +89,7 @@
 - NEW: Added minimal math tagging
 - NEW: made auto tagging of align-like environments sensitive to the
        amsmath packages loaded
+- CHANGE: \ccaProtect now saves cca macros when used in \write
 - FIX: prevented hyperref from writing redundant and empty
        DocumentInfo fields
 - FIX: Links now have /Contents attribute to make VeraPDF's PDF/UA1

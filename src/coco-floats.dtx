@@ -769,7 +769,7 @@
 % \begin{Property}{list-of-page-sep}{<any>} separator between the
 %   listof-entry and the page
 %    \begin{macrocode}
-    \ccSetProperty{list-of-page-sep}{\dotfill}%
+    \ccSetProperty{list-of-page-sep}{\ccaVstructStart[Document]{leaders}\dotfill\ccaVstructEnd{leaders}}%
 %    \end{macrocode}
 % \end{Property}
 % \begin{Property}{list-of-number-face}{<any>} style of the
@@ -832,11 +832,17 @@
 %    \begin{macrocode}
     \ccSetProperty{list-of-block}{%
       \ccUseProperty{list-of-caption-face}%
+      \ccaStructStart{TOCI}%
+      \ccaStructStart{P}\ccaStructStart{Reference}%
       \ccIfComp{ListofNumber}
-        {\ccUseComp{list-of-hang-number}}
+        {\ccaStructStart{Lbl}\ccUseComp{list-of-hang-number}\ccaStructEnd{Lbl}}
         {\leftskip0pt}%
+      \ccaStructStart{Span}%
       \ccUseComp{ListofCaption}%
       \ccUseProperty{list-of-page-sep}\ccUseComp{ListofPage}%
+      \ccaStructEnd{Span}%
+      \ccaStructEnd{Reference}\ccaStructEnd{P}%
+      \ccaStructEnd{TOCI}%
     }%
 %    \end{macrocode}
 % \end{Property}
@@ -1205,6 +1211,7 @@
     \bgroup
       \UseHook{cc/listof/##1/before}% was list-of-before-hook-##1
       \ccUseProperty{list-of-before-entry}%
+      \@cc@is@finaltrue
       \ccUseProperty{list-of-block}%
       \UseHook{cc/listof/##1/after}% was list-of-after-hook-##1
       \ccUseProperty{list-of-after-entry}%
@@ -1230,13 +1237,16 @@
 \def\ccf@addcontentsline{%
   \ccWhenComp{ListofEntry}{%
     \protected@write\@auxout
-      {\ccGobble}%
+      {\ccGobble\ccaProtect}%
       {\string\@writefile{\ccf@cap@list@type}
         {\protect\ccContentsline
           {\ifnum\ccSubFloatCnt>\z@\ccIfAttr{\ccfCapType}{subfloat}{sub}{}\fi\ccfCapType}
           {\ccUseComp{ListofEntry}}
           {\thepage}
-          {\@currentHref}\protected@file@percent}}\relax}}
+          {\@currentHref}\protected@file@percent}}\relax%
+    \protected@write\@auxout{\ccaEnable}{\relax}%
+  }%
+}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccf@check@empty} is a wrapper for CoCoTeX kernel's \lstinline{\cc@check@empty}
@@ -1260,6 +1270,7 @@
   \ifx\ccf@listof@entry\relax\else
     \bgroup
       \ccGobble
+      \ccaProtect
       \protected@edef\@ccf@listof@entry{\ccf@listof@entry}%
       \ccComponentEA{ListofEntry}{\@ccf@listof@entry}%
     \egroup
