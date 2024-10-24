@@ -59,6 +59,48 @@
 %
 % \section{Fallback fonts}
 %
+% \begin{macro}{\ccsTestFont} is used to test the currently active
+%   font family. For that, we compare the base name of
+%   \lstinline{\f@family} with the (fully expanded) value given in the
+%   first argument.
+%   \begin{ArgList}
+%   \item[1] is the comparison value that is testes against \LaTeX's
+%     \lstinline{\f@family}.
+%   \item[2] is the \lstinline{true} branch, executed if the base name
+%     of \InlineArg{1} matches against the base name
+%     \lstinline{\f@family}.
+%   \item[3] is the \lstinline{else} branch.
+%   \end{ArgList}
+%    \begin{macrocode}
+\def\ccsTestFont#1#2#3{\edef\@argi{#1}\expandafter\expandafter\expandafter\ccs@testfont\expandafter\f@family\expandafter.\expandafter\@nil\@argi.\@nil{#2}{#3}\@nil}
+\def\ccs@testfont #1.#2\@nil#3.#4\@nil#5#6\@nil{\expandafter\ifnum\pdf@strcmp{#1}{#3}=\z@\relax#5\else#6\fi}
+%    \end{macrocode}
+% \end{macro}
+% Comparison values of the three basic font families of LateX
+% (\texttt{roman}, \texttt{sans-serif} and \texttt{monospace}) are
+% defined after all packages are loaded. Macros for comparing Custom
+% font families need to be defined, manually.
+%    \begin{macrocode}
+\AddToHook{begindocument}{%
+%    \end{macrocode}
+% \begin{macro}{\ccs@rmdefault} holds the default roman font
+%    \begin{macrocode}
+  \begingroup\rmfamily\xdef\ccs@rmdefault{\f@family}\endgroup%
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccs@sfdefault} holds the default sans-serif font
+%    \begin{macrocode}
+  \begingroup\sffamily\xdef\ccs@sfdefault{\f@family}\endgroup%
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccs@ttdefault} holds the default monospace font
+%    \begin{macrocode}
+  \begingroup\ttfamily\xdef\ccs@ttdefault{\f@family}\endgroup%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+%
 % \subsection{Default Fallback Font: Noto}
 %
 % The default fall backfont is the NotoSans Font Family
@@ -75,8 +117,15 @@
  BoldItalicFont = NotoSans-BoldItalic.ttf,%
  Path = ./fonts/Noto/Sans/,%
  WordSpace = 1.25]
+\newfontfamily\ttfallbackfont{NotoSansMono-Regular.ttf}%
+[BoldFont = NotoSansMono-Bold.ttf,%
+ ItalicFont = NotoSansMono-Light.ttf,%
+ BoldItalicFont = NotoSansMono-SemiBold.ttf,%
+ Path = ./fonts/Noto/Mono/,%
+ WordSpace = 1.25]
 \DeclareTextFontCommand\textfallback{\fallbackfont}
 \DeclareTextFontCommand\textsffallback{\sffallbackfont}
+\DeclareTextFontCommand\textttfallback{\ttfallbackfont}
 %    \end{macrocode}
 %
 %
@@ -104,6 +153,50 @@ BoldItalicFont = Junicode-BoldItalic.ttf,%
 ]{Junicode.ttf}
 \def\mdvfont#1{{\mdvfamily#1}}
 %    \end{macrocode}
+%
+%
+% \subsection{International Phonetic Alphabet}
+%
+% Since the IPA character inventory seems to be included in the Noto
+% fonts, we simply define the \UsageMacro{\ccTextipa} as a
+% context-sensitive alias.
+% \begin{macro}{\ccTextipa} is a text command for the International
+%   Phonetic Alphabet. By default, the global Noto fallback font is
+%   used and sensitive to \texttt{rm}, \texttt{sf}, and \texttt{tt}
+%   contexts.
+%
+%   \textbf{Warning!} Noto has been chosen because it contains all IPA
+%   symbols, but there are some short-commings: in italic contexts,
+%   [a] and [ɑ] become indistinguishable for roman and hardly
+%   distinguishable in sans-serif contexts. Also, the bow used to bind
+%   vowels is misplaced in NotoSerif. We therefore provide an easy way
+%   to locally re-define alternative IPA fonts:
+% \begin{macro}{\ccIpaFont} for roman contexts,
+%    \begin{macrocode}
+\let\ccIpaFont\fallbackfont
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccIpaSfFont} for sans-serif contexts, and
+%    \begin{macrocode}
+\let\ccIpaSfFont\sffallbackfont
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccIpaTtFont} for monospace contexts.
+%    \begin{macrocode}
+\let\ccIpaTtFont\ttfallbackfont
+%    \end{macrocode}
+% \end{macro}
+% Those macros are used to select the appropriate IPA font inside the
+% \UsageMacro{\ccTextipa} text command:
+%    \begin{macrocode}
+\DeclareTextFontCommand\ccTextipa{%
+  \ccsTestFont{\ccs@rmdefault}
+    {\ccIpaFont}
+    {\ccsTestFont{\ccs@sfdefault}
+      {\ccIpaSfFont}
+      {\ccIpaTtFont}}}%
+%    \end{macrocode}
+% \end{macro}
 %
 %
 % \section{Generic Fonts Declaration Mechanism}
