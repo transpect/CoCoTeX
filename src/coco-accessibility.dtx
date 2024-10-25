@@ -751,12 +751,11 @@
 %    \end{macrocode}
 % \end{macro}
 % which we add to the beginning and the end of \lstinline{graphics}
-% package's \lstinline{\Ginclude@graphics} macro, respectively.
+% package's \lstinline{\Gin@setfile} macro, respectively.
 %    \begin{macrocode}
 \AtBeginDocument{%
-  \let\ltx@Ginclulde@graphics\Ginclude@graphics
-  \def\Ginclude@graphics#1{\if@cc@is@final\ccaFigureStart{}\fi\ltx@Ginclulde@graphics{#1}\if@cc@is@final\ccaFigureEnd{}\fi}%
-}
+  \pretocmd{\Gin@setfile}{\if@cc@is@final\ccaFigureStart{}\fi}{}{}%
+  \apptocmd{\Gin@setfile}{\if@cc@is@final\ccaFigureEnd{}\fi}{}{}}
 %    \end{macrocode}
 %
 %    \begin{macrocode}

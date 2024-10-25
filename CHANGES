@@ -90,6 +90,9 @@
 - NEW: made auto tagging of align-like environments sensitive to the
        amsmath packages loaded
 - CHANGE: \ccaProtect now saves cca macros when used in \write
+- CHANGE: Tag figures at \Gin@setfile instead of \Ginclude@graphics,
+       since the former is patchable and we don't need to tag the
+       mechanism that determins the image's file extension
 - FIX: prevented hyperref from writing redundant and empty
        DocumentInfo fields
 - FIX: Links now have /Contents attribute to make VeraPDF's PDF/UA1
