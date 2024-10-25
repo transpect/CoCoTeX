@@ -110,8 +110,8 @@ function dumpStructs(T, level)
    if (T.childs) then
       log("%sNumChilds %d", indent, #T.childs)
       for k,v in ipairs(T.childs) do
-         log("%sdumping child %s", indent, k)
-         dumpStructs(v, level + 1)
+	 log("%sdumping child %s", indent, k)
+	 dumpStructs(v, level + 1)
       end
    end
 end
@@ -422,7 +422,9 @@ local function addFigure(llx, lly, urx, ury, xscale, yscale, clip)
    local yscale = tonumber(yscale)
    -- get figure dimensions from engine
    local fbox = writer.scaleFigure(llx, lly, urx, ury, xscale, yscale, clip, transform_) -- driver dependent scale to embedsize
-   dumpArray(fbox)
+   if (config.debug) then
+      dumpArray(fbox)
+   end
    -- fix origin at 0,0 and convert to sp
    fbox['x2'] = (fbox['x2']-fbox['x1']) * bpsp_sc
    fbox['x1'] = 0.0
@@ -435,7 +437,7 @@ local function addFigure(llx, lly, urx, ury, xscale, yscale, clip)
    else
       debug_log("\t%s idx=%d scale:%.2f/%.2f urx=%s / ury=%s ", parent, #figures, xscale, yscale, urx, ury)
    end
-   log("\ttransformed %.2f,%.2f/%.2f,%.2f", fbox['x1'], fbox['y1'], fbox['x2'], fbox['y2'])
+   debug_log("\ttransformed %.2f,%.2f/%.2f,%.2f", fbox['x1'], fbox['y1'], fbox['x2'], fbox['y2'])
    --dumpArray(fbox)
 end
 
@@ -453,8 +455,8 @@ local function process_rule(parentbox, curr, level)
       if (curr.height == 0 and curr.depth == 0) then return end
    elseif (curr.subtype == 2) then    --subtype 2 are images ONLY FOR PDFOUTPUT
       -- could be artifact
-      log("Figure (rule): page %d at %d index=%d\n\t %d %d %d", status.total_pages + 1, tex.inputlineno, curr.index, curr.width, curr.height, curr.depth)
-      log("Figure (rule): width=%f height=%f depth=%s matrix=%s", curr.width/65536.0, curr.height/65536.0, curr.depth/65536.0, pdf.hasmatrix())
+      debug_log("Figure (rule): page %d at %d index=%d\n\t %d %d %d", status.total_pages + 1, tex.inputlineno, curr.index, curr.width, curr.height, curr.depth)
+      debug_log("Figure (rule): width=%f height=%f depth=%s matrix=%s", curr.width/65536.0, curr.height/65536.0, curr.depth/65536.0, pdf.hasmatrix())
       -- DEPRECATE addFigure_(curr.width, curr.height, curr.depth, pattr)
       --insert a savepos before and after and read values back => latelua
       -- local head, new = writer.savepos(parentbox.list, curr, #figures, true) -- true means start
@@ -860,6 +862,7 @@ local function finalizeDoc(head)
    -- if config.doparas then
    --    processParas()
    -- end
+   if not config.debug then log("==> ltpdfa fininalizing...") end
    if config.dospaces then
       ltpdfa.spaceprocessor.cleanUp()      
    end
@@ -917,6 +920,8 @@ local function finalizeDoc(head)
    if config.debug then
       log("dump of opened")
       dumpArray(ltpdfa.structtree.stree.openedarray)
+   else
+      log("==> Done.\n")
    end
 end
 --[[

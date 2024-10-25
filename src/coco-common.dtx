@@ -64,6 +64,19 @@
     \global\let\cc@color@enc\relax
   \fi
 }
+%    \end{macrocode}
+%
+%
+% \subsection{Output Options}
+%
+% The \lstinline{silent} options attempts to supress most unneccessary
+% messages sent to the shell.
+%    \begin{macrocode}
+\newif\if@cc@silent  \@cc@silentfalse
+\DeclareOptionX{silent}{\global\@cc@silenttrue}%
+%    \end{macrocode}
+% Process the options
+%    \begin{macrocode}
 \ProcessOptionsX
 %    \end{macrocode}
 % First, we set up the requested color model with both the newer LaTeX
@@ -113,6 +126,7 @@
 % graphics file's endings from Word:
 %    \begin{macrocode}
 \RequirePackage{graphicx}
+\if@cc@silent\let\Gin@log\@gobble\fi
 \DeclareGraphicsRule{.EPS}{eps}{.EPS}{}
 %    \end{macrocode}
 %

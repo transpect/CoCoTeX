@@ -38,8 +38,8 @@
 %
 % \subsection{Options passed down to mandatory standard {\LaTeX} packages}
 %
-% The main option controls the document's main language passed down to
-% the \lstinline{babel} package.
+% The \lstinline{main} option controls the document's main language
+% passed down to the \lstinline{babel} package.
 %    \begin{macrocode}
 \DeclareOptionX{main}{\PassOptionsToPackage{\CurrentOption}{babel}}
 %    \end{macrocode}
@@ -115,6 +115,11 @@
 %    \begin{macrocode}
 \DeclareOptionX{debug}{\PassOptionsToPackage{\CurrentOption}{coco-kernel}}
 \DeclareOptionX{debug-domain}{\PassOptionsToPackage{\CurrentOption}{coco-kernel}}
+%    \end{macrocode}
+% The \lstinline{silent} options attempts to supress most unneccessary
+% messages sent to the shell.
+%    \begin{macrocode}
+\DeclareOptionX{silent}{\PassOptionsToPackage{\CurrentOption}{coco-common}}
 %    \end{macrocode}
 % The \lstinline{nofigs} options disables the
 % \lstinline{\includegraphics} command and prints a placeholder

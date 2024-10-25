@@ -211,7 +211,7 @@ end
 local function roleMap(stree, head)
    local nstr = ""
    for k,v in pairs(stree.rolemap) do
-      log("\t %s => %s",k, v)
+      debug_log("\t %s => %s",k, v)
       nstr = nstr .. '/' .. k .. ' /' .. v .. '\n'
    end
    return head, nstr
@@ -254,8 +254,10 @@ local function parentTree(stree, head)
       else
          for k, v in pairs(value) do
             if (not v.pdfobj) then
-               dumpArray(v)
-               log("parenttree (length=%d) at %d/%d idx=%d has no treeval (pdfobj)",#value, key, k, v.idx)
+	       if (config.debug) then
+		  dumpArray(v)
+		  log("parenttree (length=%d) at %d/%d idx=%d has no treeval (pdfobj)",#value, key, k, v.idx)
+	       end
             end
             astr = astr .. v.pdfobj .. " 0 R "
          end
@@ -263,8 +265,10 @@ local function parentTree(stree, head)
          treeval = mcrarray
       end
       if (not treeval) then
-         dumpArray(value)
-         log("parenttree (length=%d) at %d has no treeval", #value, key)
+	 if (config.debug) then
+	    dumpArray(value)
+	    log("parenttree (length=%d) at %d has no treeval", #value, key)
+	 end
          goto continue
       end
       tstr = tstr .. key .. " " .. treeval .. " 0 R "
@@ -317,7 +321,7 @@ local function intent(head)
       log("Profile %s could not be found!!!", profile)
       return
    else
-      log("Using profile %s", filename)
+      debug_log("Using profile %s", filename)
    end
    local iccstream = pdf.immediateobj("streamfile", filename, "/N " .. config.intent.components)
    local nstr = "<</Type/OutputIntent /RegistryName(http://www.color.org) /S/GTS_PDFA1 /OutputCondition() /OutputConditionIdentifier (" .. config.intent.identifier .. ") /DestOutputProfile " .. iccstream .. " 0 R>>"
