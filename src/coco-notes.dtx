@@ -380,7 +380,7 @@
 %    \end{macrocode}
 % And the same for plain \LaTeX:
 %    \begin{macrocode}
-\def\@xfootnote[#1]#2{%
+\long\def\@xfootnote[#1]#2{%
    \ccaStructStart{Footnote}%
    \begingroup
      \sbox\z@{\@tempcnta0#1\relax}%
