@@ -343,11 +343,19 @@
 %
 % \subsubsection{Book Parts}
 %
-% re-defined to make front- and backmatter components distinguish-able
+% The macros \UsageMacro{\frontmatter}, \UsageMacro{\mainmatter} and
+% \UsageMacro{\backmatter} are re-defined to make front- and
+% backmatter components in book derivates distinguish-able.
+%
+% Note that we need to (re-)define the conditionals outside, because
+% \lstinline{\if@mainmatter} is undefined for articles and the
+% coditional inside the definition of \lstinline{\mainmatter}
+% disturbs the outer \lstinline{\ifarticle}.
 %    \begin{macrocode}
+\newif\if@frontmatter  \@frontmatterfalse
+\newif\if@mainmatter   \@mainmatterfalse
+\newif\if@backmatter   \@backmatterfalse
 \ifarticle\else
-  \newif\if@frontmatter  \@frontmatterfalse
-  \newif\if@backmatter   \@backmatterfalse
   \renewcommand\frontmatter{%
     \cleardoublepage
     \cchResetNesting
