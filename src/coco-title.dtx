@@ -1274,13 +1274,13 @@ from the Components given in the Meta Container.}}}
     \ccGetComp{LicenceText}%
   }%
   \ccSetProperty{copyright}{%
-    \ccaStructStart{MetaDatumBlock}%
+    \ccaStructStart{MetaDatum}%
     \ccaStructStart{P}%
     \ccIfComp{Copyright}
       {\ccUseComp{Copyright}\par}
       {\textcopyright\space\ccUseComp{Year}\space\ccUseComp{Publisher},\space\ccUseComp{PubPlace}\par}%
     \ccaStructEnd{P}%
-    \ccaStructEnd{MetaDatumBlock}%
+    \ccaStructEnd{MetaDatum}%
   }%
   \ccSetProperty{publisher}{%
     \ccGetComp{PubDivInfo}%
