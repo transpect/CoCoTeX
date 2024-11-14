@@ -437,7 +437,7 @@
 %   also the current parent of \lstinline{Foo}). Note that the parent
 %   has to be tagged \textit{before} the child node.
 %    \begin{macrocode}
-\DeclareAccessibilityCommand{\ccaAddToStruct}[1]{\directlua{ltpdfa.tagger.addToStruct('\luaescapestring{#1}')}}
+\DeclareAccessibilityCommand{\ccaAddToStruct}[1]{\ifdef{#1}{\directlua{ltpdfa.tagger.addToStruct('\luaescapestring{#1}')}}{}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccaMoveStruct} removes the Node with the ID \#1 from

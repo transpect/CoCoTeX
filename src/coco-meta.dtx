@@ -425,7 +425,10 @@
 %    \end{macrocode}
 % \end{macro}
 %    \begin{macrocode}
-    \ifx\ccm@no@tag\relax\else\ccaStructStart{MetaDatum}\fi
+    \ifx\ccm@no@tag\relax\else
+      \ccaStructStart{MetaDatum}%
+      \ccaAddToStruct{\cch@id@cur@meta}%
+    \fi
     \ccIfProp{labeled-meta-\ccCurInfix-format}
       {\ccUseProperty{labeled-meta-\ccCurInfix-format}}
       {\ccUseProperty{labeled-meta-format}}%
