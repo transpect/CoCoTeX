@@ -1275,13 +1275,11 @@ from the Components given in the Meta Container.}}}
   }%
   \ccSetProperty{copyright}{%
     \ccaStructStart{MetaDatumBlock}%
-    \ccaStructStart{MetaDatum}%
-    \ccaStructStart{MetaDatumValue}%
+    \ccaStructStart{P}%
     \ccIfComp{Copyright}
       {\ccUseComp{Copyright}\par}
       {\textcopyright\space\ccUseComp{Year}\space\ccUseComp{Publisher},\space\ccUseComp{PubPlace}\par}%
-    \ccaStructEnd{MetaDatumValue}%
-    \ccaStructEnd{MetaDatum}%
+    \ccaStructEnd{P}%
     \ccaStructEnd{MetaDatumBlock}%
   }%
   \ccSetProperty{publisher}{%
