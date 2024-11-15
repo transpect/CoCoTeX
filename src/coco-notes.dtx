@@ -287,7 +287,7 @@
   \immediate\write\@enotes{%
     \string\def\string\currentEndnote{\the\endnoteLinkCnt}%
     \noexpand\ccaVstructStart{FootnoteText}%
-    \noexpand\ccaAddToStruct{\noexpand\csname abs@enote@\the\endnoteLinkCnt\noexpand\endcsname}%
+    \noexpand\expandafter\noexpand\ccaAddToStruct\noexpand\expandafter{\noexpand\csname abs@enote@\the\endnoteLinkCnt\noexpand\endcsname}%
     \@doanenote{\@theenmark}%
   }%
   \begingroup
