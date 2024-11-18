@@ -1044,8 +1044,10 @@
 %
 % \subsection{Link Generation}
 %
+% \subsubsection{Links to Components}
+%
 % \begin{macro}{\ccCompLink} creates a hyperlink with the target taken
-%   from Component with the name \InlineArg{1} and the label
+%   from a Component with the name \InlineArg{1} and the label
 %   \InlineArg{2}.
 %    \begin{macrocode}
 \def\ccCompLink#1#2{%
@@ -1061,6 +1063,102 @@
 \def\ccPageLabel#1{\phantomsection\label{#1}}
 %    \end{macrocode}
 % \end{macro}
+%
+%
+% \subsubsection{Breakable URLs}
+%
+% The following macros define a command to markup plain URLs that are
+% allowed to breaks either after each character or after a special
+% character. This character can be given individually for each URL or
+% set globally by re-defining \DescribeMacro{\ccBurlTokenSep}. By
+% default, no hyphenchar is set to avoid ambiguities, and there is
+% minimal glue after each breaking point to keep lines nicely
+% justified. Alternatively, one could insert a~discretionary by using
+% the \UsageMacro{\ccUrlSep} macro.
+%
+% \begin{macro}{\ccBurlTokenSep} is the default break point
+%   character. The gobal default is \lstinline{\@empty}, which means
+%   that plain URLs may break after each character.
+%    \begin{macrocode}
+\let\ccBurlTokenSep\@empty
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccBurl} is the high-level user macro for breakable
+%   URLs. It takes two arguments, \InlineArg*{1} is an optional break
+%   point marker and \InlineArg{2} the URL. Special characters like
+%   \lstinline{#} or \lstinline{%} can (but don't need to) be escaped,
+%   since the value is sanitized through hyperref's
+%   \lstinline{\hyper@normalise} macro.
+%
+%   The break point marker in the optional argument is a single
+%   character that may or may not occur in the URL to designate where
+%   the URL may break across lines. The character is neither printed
+%   nor does it occur in the hyperlink destination.
+%    \begin{macrocode}
+\DeclareRobustCommand*{\ccBurl}[1][\ccBurlTokenSep]{\begingroup\edef\ccBurlTokenSep{#1}\hyper@normalise\cc@url}
+\cslet{\ccPrefix Burl}\ccBurl
+%    \end{macrocode}
+% \begin{macro}{\cc@url} is where the break point character is
+%   processed. It is handled differently for the actual URI, where it
+%   is simply removed, and the text that is printed on a page, where
+%   it is replaced by the value of \UsageMacro{\ccUrlSep}. If no break
+%   point character is given, the URL may break after any character.
+%    \begin{macrocode}
+\def\cc@url#1{%
+  \toks@{#1}\edef\Url@String{\the\toks@}%
+  \edef\Url@String{\expandafter\strip@prefix\meaning\Url@String}%
+  \edef\x{%
+    \noexpand\def\noexpand\cc@break@link\unexpanded{##1}\ccBurlTokenSep\unexpanded{##2}\ccBurlTokenSep\noexpand\@nil{%
+      \unexpanded{##1}\noexpand\cc@url@sep%
+      \noexpand\if\relax\unexpanded{##2}\relax\noexpand\else
+        \noexpand\cc@break@link\unexpanded{##2}\ccBurlTokenSep\noexpand\@nil
+        \noexpand\fi
+    }}\x
+  \begingroup
+    \let\cc@url@sep\@empty
+    \edef\x{\noexpand\cc@break@link\unexpanded{#1}\ccBurlTokenSep\ccBurlTokenSep\noexpand\@nil}%
+    \xdef\Url@String{\x}%
+  \endgroup
+  \expandafter\def\expandafter\x\expandafter{\expandafter\href\expandafter{\Url@String}}%
+  \expandafter\x\expandafter{\@cc@url{#1}}}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\@cc@url} correspond's to the \texttt{url} package's
+%   \lstinline{\Url} macro, just without the “movable” check.
+%    \begin{macrocode}
+\def\@cc@url{%
+ \let\do\@makeother \dospecials % verbatim catcodes
+ \catcode`{\@ne \catcode`}\tw@ % with exceptions
+ \catcode`\ =10 % allow "\url {x}"
+ \catcode`\#=6  % always # -> ##, so I can later convert ## -> #
+ \obeyspaces\obeylines\cc@urlz}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\cc@urlz} is a fork of url package's
+%   \lstinline{\@urlz}. Note that \InlineArg{1} is the
+%   \textit{printed} URL, not the URI written into the PDF as
+%   hyperlink destination.
+%    \begin{macrocode}
+\def\cc@urlz#1{\toks@{#1}\edef\Url@String{\the\toks@}%
+  \edef\Url@String{\expandafter\strip@prefix\meaning\Url@String}%
+  \Url@ObeySp %
+  \Url@acthash
+  \Url@actpercent
+  \Url@HyperHook
+  \edef\z{\noexpand\expandafter\noexpand\cc@break@link\noexpand\Url@String\ccBurlTokenSep\ccBurlTokenSep\noexpand\@nil}\z
+  \endgroup}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccUrlSep} is used to set the code inserted in between
+%   each token of a breakable link. By default, this is an 0pt
+%   \lstinline{\hskip} with 1sp glue, but it can also be a
+%   \UsageMacro{\discretionary}.
+%    \begin{macrocode}
+\def\ccUrlSep#1{\def\cc@url@sep{#1}}\ccUrlSep{\hskip0sp\@plus1sp}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
 %    \begin{macrocode}[numbers=none,gobble=1]
 %</common>
 %    \end{macrocode}
