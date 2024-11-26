@@ -43,7 +43,6 @@ function StructElem:new(type)
    elem.startpage = 0
    elem.lastUsed  = 0 -- remember last child, some mcid was added
    elem.created   = false
-   elem.language  = false
    return elem
 end
 -- remove child or nothing, return next free
@@ -166,10 +165,6 @@ function StructElem:addToAttributes(key, arg)
    table.insert(self.attributes[key], arg)
    --log("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ %s", self.idx)
    --dumpArray(self.attributes.Table)
-end
-
-function StructElem:addLanguage(lang)
-   self.language = lang
 end
 
 function StructElem:hasContentChilds()

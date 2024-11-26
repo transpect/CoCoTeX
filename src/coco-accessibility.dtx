@@ -508,7 +508,7 @@
 % \begin{macro}{\ccaAddLang} adds a \texttt{/Lang}(uage) attribute to
 %   the current node with the value \InlineArg{1}.
 %    \begin{macrocode}
-\DeclareAccessibilityCommand{\ccaAddLang}[1]{\directlua{ltpdfa.tagger.addLanguage('\luaescapestring{#1}')}}
+\DeclareAccessibilityCommand{\ccaAddLang}[1]{\directlua{ltpdfa.tagger.setLang('\luaescapestring{#1}')}}
 %    \end{macrocode}
 % \end{macro}
 % The following code patches the unstarred

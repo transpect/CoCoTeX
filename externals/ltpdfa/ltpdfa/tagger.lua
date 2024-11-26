@@ -212,10 +212,6 @@ local function addNumbering(name)
    stree.current:addToAttributes('List','/ListNumbering/' .. name)
 end
 
-local function addLanguage(val)
-   stree.current:addLanguage(val)
-end
-
 local function figureStart()
    structtree.savePosStart()
 end
@@ -269,7 +265,6 @@ local inputtagger = {
    addLastLink     = structtree.addLastLink,
    addNumbering    = addNumbering,
    addPlacement    = addPlacement,
-   addLanguage     = addLanguage,
    addToStruct     = structtree.addToStruct,
    doautoclose     = doautoclose,
    getCurrentStruct= structtree.getCurrentStruct,
