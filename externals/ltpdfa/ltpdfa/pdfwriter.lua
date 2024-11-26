@@ -199,7 +199,12 @@ local function structElems(childs, ppdfobj)
             end
             nstr = nstr .. astr .. "] "
          end
-         nstr = nstr .. "/K [".. kids .."] >>"
+         nstr = nstr .. "/K [".. kids .."]"
+	 if (v.language) then
+	    local lstr = " /Lang(".. v.language ..")"
+	    nstr = nstr .. lstr
+	 end
+	 nstr = nstr .. " >>"
          pdfobj = pdf.immediateobj(pdfobj, nstr)
       else
          cstr = cstr .. "<</Type /MCR /Pg " .. pdf.pageref(v.startpage) .. " 0 R /MCID " .. v.mcid .. " >> "

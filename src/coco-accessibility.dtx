@@ -503,6 +503,33 @@
 %    \end{macrocode}
 % \end{macro}
 %
+% \subsection{Language Tagging}
+%
+% \begin{macro}{\ccaAddLang} adds a \texttt{/Lang}(uage) attribute to
+%   the current node with the value \InlineArg{1}.
+%    \begin{macrocode}
+\DeclareAccessibilityCommand{\ccaAddLang}[1]{\directlua{ltpdfa.tagger.addLanguage('\luaescapestring{#1}')}}
+%    \end{macrocode}
+% \end{macro}
+% The following code patches the unstarred
+% \lstinline{\foreignlanguage} command in such a way that it
+% automatically tags its content with a \UsageTag{/Span} and adds a
+% \lstinline{/Lang} attribute to the Tag that is colleted from the
+% language definition file of the currently activated language.
+%    \begin{macrocode}
+\ccWhenAlly{%
+  \AddToHook{babel/*/foreign}{%
+    \pretocmd\BabelText
+      {\ccaVstructStart{Span}\ccaAddLang{\localeinfo{tag.bcp47}}}
+      {}{\cca@patch@error\BabelText}%
+    \apptocmd\BabelText
+      {\ccaVstructEnd{Span}}
+      {}{\cca@patch@error\BabelText}%
+    }%
+  \AtBeginDocument{\ActivateGenericHook{babel/*/foreign}}%
+}% /ccWhenAlly
+%    \end{macrocode}
+%
 %
 % \subsection{Lua injection}
 %
