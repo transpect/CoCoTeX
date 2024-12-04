@@ -46,11 +46,11 @@
 \def\cc@bidi{}
 \@tempswafalse
 \ifx\usescript\relax\else
-  \ifx\csname use@script@arabic\endcsname\@empty\@tempswatrue
-  \else\ifx\csname use@script@hebrew\endcsname\@empty\@tempswatrue
-    \else\ifx\csname use@script@amharic\endcsname\@empty\@tempswatrue
-      \else\ifx\csname use@script@ethiop\endcsname\@empty\@tempswatrue
-        \else\ifx\csname use@script@syriac\endcsname\@empty\@tempswatrue
+  \expandafter\ifx\csname use@script@arabic\endcsname\@empty\@tempswatrue
+  \else\expandafter\ifx\csname use@script@hebrew\endcsname\@empty\@tempswatrue
+    \else\expandafter\ifx\csname use@script@amharic\endcsname\@empty\@tempswatrue
+      \else\expandafter\ifx\csname use@script@ethiop\endcsname\@empty\@tempswatrue
+        \else\expandafter\ifx\csname use@script@syriac\endcsname\@empty\@tempswatrue
           \fi\fi\fi\fi\fi\fi
 \if@tempswa\def\cc@bidi{,bidi=basic}\fi
 \RequirePackage[silent\cc@bidi]{babel}
