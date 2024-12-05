@@ -2205,12 +2205,12 @@
     \def\ccf@reserve@htmltab{%
       \let\ccf@add@style\@empty
       \ifx\ccf@floatpos\@empty
-        \expandafter\ifx\csname \ccPrefix Float\the\ccf@int@cnt Captop\endcsname\relax\else
-          \htInitSkip\csname \ccPrefix Float\the\ccf@int@cnt Captop\endcsname
+        \expandafter\ifx\csname ccFloat\the\ccf@int@cnt Captop\endcsname\relax\else
+          \htInitSkip\csname ccFloat\the\ccf@int@cnt Captop\endcsname
           \advance\htInitSkip\ccf@sep@top%
         \fi
-        \expandafter\ifx\csname \ccPrefix Float\the\ccf@int@cnt Capbottom\endcsname\relax\else
-          \htAddToBottom\csname \ccPrefix Float\the\ccf@int@cnt Capbottom\endcsname
+        \expandafter\ifx\csname ccFloat\the\ccf@int@cnt Capbottom\endcsname\relax\else
+          \htAddToBottom\csname ccFloat\the\ccf@int@cnt Capbottom\endcsname
           \advance\htAddToBottom\ccf@sep@bottom%
         \fi
       \else
