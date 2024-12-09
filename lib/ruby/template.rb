@@ -38,8 +38,9 @@ module CoCoTeX
 
     # updates the mandatory argument in the macrocode environments.
     def update_code()
-      @content = @content.gsub(/\\fileversion/, @file_version)
+      @content = @content.gsub(/\\fileversion/, "v#{@file_version}")
       @content = @content.gsub(/\\filedate/, @file_date)
+      @content = @content.gsub(/\\NeedsTeXFormat{LaTeX2e}\[[0-9\/]+\]/, "\\NeedsTeXFormat{LaTeX2e}[#{@min_tex_version}]")
       @content = @content.gsub(/\n%    \\begin{macrocode}[\n\s\t]*\n%    \\end{macrocode}\n/, "\n")
       @content = @content.gsub(/\n[\n]+/, "\n")
       recount_code_lines()
@@ -72,6 +73,7 @@ module CoCoTeX
     # determins the current time and file version and compares it with the values stored in the VERSION file in the base directory
     def update_template
       file_version = @content.match(/\\def\\fileversion\{([^}]+)\}/)[1]
+      @min_tex_version = @content.match(/\\def\\ccMinTeXVersion\{([^}]+)\}/)[1]
       _f = Tomlib::load(File.read(File.join(BASE_DIR, "VERSION")))
       current = _f.to_o
       if file_version != format("%s.%s.%s", current.version.major, current.version.minor, current.version.patch)
