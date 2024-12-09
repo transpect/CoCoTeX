@@ -2422,7 +2422,7 @@
            \fi
            \global\advance\ht@table@height\dimexpr\rowHeight+\insertHt\relax
            \expandafter\ifnum\numexpr\ht@currow-\ht@theadrows-\ht@tfootrows\relax>\numexpr\ht@min@p@rows\relax\relax
-             \ifdim\ht@table@height<\dimexpr\ht@init@pagegoal-\baselineskip\relax\else
+             \ifdim\ht@table@height<\ht@init@pagegoal\else
                % \ifdim\rowHeight>2\baselineskip\relax
                %   \IfPropText{table}{allow-cell-breaks}{true}{\ht@find@row@break@point}{\ht@find@row@break@point}%
                % \else
