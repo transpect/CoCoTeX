@@ -139,36 +139,42 @@
 \newif\if@cc@pdf@two \@cc@pdf@twofalse
 %    \end{macrocode}
 % \end{macro}
-% {\CoCoTeX} supports two accessibility standards, PDF/UA-1 and
-% PDF/UA-2. If the \texttt{a11y}\index{a11y} class option is set,
-% PDF/UA-1 is produced, if \texttt{a11y20}\index{a11y20} is set,
-% PDF/UA-2 is produced.
 %    \begin{macrocode}
 \let\cc@pdf@std A
 \ExplSyntaxOn
-  \keys_define:nn { cocotex/cls }
-  {
+\keys_define:nn { cocotex/cls }
+{
 %    \end{macrocode}
 % Options for the aimed PDF standard. Currently supported are PDF/X,
 % PDF/A and PDF/UA.
 %    \begin{macrocode}
-    pdf-standard .choice:,
-    pdf-standard / X .code:n = { \let\cc@pdf@std X },
-    pdf-standard / A .code:n = { \let\cc@pdf@std A },
-    pdf-standard / UA .code:n = { \let\cc@pdf@std U },
-    pdf-standard .initial:n = A,
+  pdf-standard .choice:,
+  pdf-standard / X .code:n = { \let\cc@pdf@std X },
+  pdf-standard / A .code:n = { \let\cc@pdf@std A },
+  pdf-standard / UA .code:n =
+  {
+    \let\cc@pdf@std U
+    \PassOptionsToPackage{init}{coco-accessibility}%
+  },
+  pdf-standard .initial:n = A,
 %    \end{macrocode}
 % Options for the aimed PDF version. Currently supported are PDF 1.3
 % through 1.7 and PDF 2.0. Default is 1.7.
 %    \begin{macrocode}
-    pdf-version .choices:nn =
-      { 1.3, 1.4, 1.5, 1.6, 1.7, 2.0 }
-      {
-        \sys_ensure_backend:
-        \exp_args:Ne\pdf_version_gset:n{\tl_use:N \l_keys_choice_tl}
-      },
-    pdf-version .initial:n = { 1.7 },
-  }
+  pdf-version .choices:nn =
+    { 1.3, 1.4, 1.5, 1.6, 1.7, 2.0 }
+    {
+      \sys_ensure_backend:
+      \exp_args:Ne\pdf_version_gset:n{\tl_use:N \l_keys_choice_tl}
+    },
+  pdf-version .initial:n = { 1.7 },
+}
+%    \end{macrocode}
+% \deprecated {\CoCoTeX} supports two accessibility standards,
+% PDF/UA-1 and PDF/UA-2. If the \texttt{a11y}\index{a11y} class option
+% is set, PDF/UA-1 is produced, if \texttt{a11y20}\index{a11y20} is
+% set, PDF/UA-2 is produced.
+%    \begin{macrocode}
   % LEGACY
   \DeclareOptionX{a11y}{%
     \sys_ensure_backend:

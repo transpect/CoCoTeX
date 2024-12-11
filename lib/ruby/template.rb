@@ -102,6 +102,7 @@ module CoCoTeX
       end
       #@file_date = Time.now.strftime("%Y/%m/%d")
       @content = @content.gsub(/\\def\\fileversion\{([^}]+)\}/, "")
+      @content = @content.gsub(/\\def\\ccMinTeXVersion\{([^}]+)\}/, "")
     end
 
     def set_components

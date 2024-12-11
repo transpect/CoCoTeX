@@ -242,12 +242,14 @@
 % \begin{macro}{\cct@title@process@bkl} writes the document's main
 %   language into the Info dictionary if no accessibility features are
 %   active. If it \textit{is} active, the document language is handled
-%   by ltpdfa.
+%   by ltpdfa. The language tag is extracted via babel's ini
+%   configuration file or the main document language.
 %    \begin{macrocode}
 \def\cct@title@process@bkl{%
-  \ifx\cct@lang@id\@undefined\else
-    \ccUnlessAlly{\cct@write@hr@infodict{pdflang}{\cct@lang@id}}%
-  \fi
+  \ccUnlessAlly{%
+    \edef\cct@lang@id{\localeinfo*{name.english}}%tag.bcp47
+    \cct@write@hr@infodict{pdflang}{\cct@lang@id}%}%
+  }%
 }
 %    \end{macrocode}
 % \end{macro}

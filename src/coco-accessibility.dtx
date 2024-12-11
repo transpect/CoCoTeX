@@ -42,14 +42,6 @@
 % create hard copies. This should increase compatibility with other
 % packages and make all our lifes easier.
 %
-% We start with adopting \lstinline{ltpdfa}'s package options.
-% \begin{macro}{\cca@lang@id} is the ISO 639-2 code for the document's
-%   main language. As default, we assume Modern English.
-%    \begin{macrocode}
-\def\cca@lang@id{eng}%
-\DeclareOptionX{lang-id}{\gdef\cca@lang@id{#1}}
-%    \end{macrocode}
-% \end{macro}
 % \begin{macro}{\if@cc@do@ally} is a simple switch that indicates active
 %   (\lstinline{\relax}) or inactive (everything else) accessibility
 %   features.
@@ -195,8 +187,15 @@
 % we hard-code \lstinline{pdftex} as render engine:
 %    \begin{macrocode}
   \directlua{ltpdfa.config.driver = "\luaescapestring{pdftex}"}
-  \directlua{ltpdfa.config.lang = '\luaescapestring{\cca@lang@id}'}
-  \directlua{ltpdfa.init()}%
+%    \end{macrocode}
+% \begin{macro}{\cca@lang@id} is the IETF language tag for the
+%   document's main language.
+%    \begin{macrocode}
+  \AtBeginDocument{%
+    \edef\cca@lang@id{\localeinfo*{tag.bcp47}}% tag.bcp47
+    \directlua{ltpdfa.config.lang = '\luaescapestring{\cca@lang@id}'}%
+    \directlua{ltpdfa.init()}%
+  }%
 %    \end{macrocode}
 % Initial setup of ltpdfa
 %    \begin{macrocode}
