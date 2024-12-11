@@ -187,15 +187,12 @@
     \PassOptionsToPackage{init}{coco-accessibility}}%
 \ExplSyntaxOff
 %    \end{macrocode}
-% \lstinline{lang-id} is the ISO-639/2 identifier of the document's
+% \deprecated \lstinline{lang-id} is the ISO-639/2 identifier of the document's
 % main language. This is neccessary for the PDF meta data and
 % \textit{different} from the main language name given via the
 % \lstinline{main} key.
 %    \begin{macrocode}
-\DeclareOptionX{lang-id}{%
-  \PassOptionsToPackage{\CurrentOption}{coco-accessibility}%
-  \PassOptionsToPackage{\CurrentOption}{coco-title}%
-}
+\DeclareOptionX{lang-id}{}
 %    \end{macrocode}
 % If set, \lstinline{nodetree} triggers extensive debgging output from the ltpdfa package.
 %    \begin{macrocode}
