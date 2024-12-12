@@ -1644,7 +1644,7 @@
   \if@cc@pdf@two
     \ccaVstructStart{Title}%
   \else
-    \ccaVstructStart{H\the\numexpr\cch@total@nesting@level+\@ne\relax}%
+    \ccaVstructStart{H\the\numexpr\cch@total@nesting@level\relax}%
     \ifnum\cch@total@nesting@level>\cch@max@nesting@level
       \global\cch@max@nesting@level=\cch@total@nesting@level\relax
     \fi
@@ -1662,7 +1662,7 @@
   \if@cc@pdf@two
     \ccaVstructEnd{Title}%
   \else
-    \ccaVstructEnd{H\the\numexpr\cch@total@nesting@level+\@ne\relax}%
+    \ccaVstructEnd{H\the\numexpr\cch@total@nesting@level\relax}%
   \fi}
 %    \end{macrocode}
 % \end{macro}

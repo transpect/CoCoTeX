@@ -36,8 +36,6 @@
 % \subsection{Hard dependencies}
 %
 %    \begin{macrocode}
-\RequirePackage{kvoptions-patch}
-\RequirePackage{xkeyval}
 \RequirePackage{etoolbox}
 %    \end{macrocode}
 % Default hook label for {\CoCoTeX} modules:
@@ -52,7 +50,11 @@
 % information messages to the shell.
 %    \begin{macrocode}
 \newif\if@cc@debug \@cc@debugfalse
-\DeclareOptionX{debug}{\global\@cc@debugtrue}
+\ExplSyntaxOn
+\keys_define:nn { cocotex/kernel }
+{
+  debug .code:n = {\global\@cc@debugtrue}
+}
 %    \end{macrocode}
 % The \lstinline{debug-domain} option serves as a filter for log
 % messages. It takes a comma separated list of log message categories
@@ -63,20 +65,27 @@
 % Implies \lstinline{debug}.
 %    \begin{macrocode}
 \global\let\debug@domain@list\relax
-\DeclareOptionX{debug-domain}{%
-  \global\@cc@debugtrue
-  \if!#1!\else
-    \def\do##1{\listadd\debug@domain@list{##1}}%
-    \docsvlist{#1}%
-  \fi
-}%
+\keys_define:nn { cocotex/kernel }
+{
+  debug-domain .code:n = {%
+    \global\@cc@debugtrue
+    \if!#1!\else
+      \def\do##1{\listadd\debug@domain@list{##1}}%
+      \docsvlist{#1}%
+    \fi
+  }%
+}
 %    \end{macrocode}
 % The \lstinline{prefix} option will be explained below in
 % Sect.~\ref{sec:kernel:global-switches}.
 %    \begin{macrocode}
 \let\cc@prefix\@empty
-\DeclareOptionX{prefix}[]{\gdef\cc@prefix{#1}}%
-\ProcessOptionsX
+\keys_define:nn { cocotex/kernel }
+{
+  prefix .code:n = {\gdef\cc@prefix{#1}},%
+  prefix .initial:n = {}
+}
+\ProcessKeyOptions[cocotex/kernel]
 %    \end{macrocode}
 %
 %
