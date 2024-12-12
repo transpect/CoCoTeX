@@ -9,6 +9,10 @@
        2020
 - FIX: update `htmltabs.sty` external to account Tagging of empty
 	   cells
+- NEW: replaced old xkeyval class and package options with Expl3
+       markup
+- NEW: PDF-Version and PDF Standards are now handled by the LaTeX3
+       kernel where applicable.
 
 ## coco-kernel.dtx
 - NEW: Added some `\ignorespaces` at the end of Component macros
