@@ -20,7 +20,7 @@
 %%
 %% Maintainer: p.schulz@le-tex.de
 %%
-\NeedsTeXFormat{LaTeX2e}[2020/06/01]
+\NeedsTeXFormat{LaTeX2e}[]
 \ProvidesPackage{coco-floats}
     [\filedate \fileversion CoCoTeX floats module]
 \ExplSyntaxOn
@@ -1533,8 +1533,9 @@
 %    \begin{macrocode}
       \@tempdimb=\@tempa\@tempdimc\relax
 %    \end{macrocode}
-% This values is stored in \lstinline{cc@\cc@cur@cont
-% @adj@width-\the\@tempcnta} for each image.
+% This values is stored in
+% \lstinline{cc@\cc@cur@cont @adj@width-\the\@tempcnta}
+% for each image.
 %    \begin{macrocode}
       \csedef{cc@\cc@cur@cont @adj@width-\the\@tempcnta}{\the\@tempdimb}%
 %    \end{macrocode}
@@ -1564,11 +1565,11 @@
 %    \begin{macrocode}
     \cc@iterate{\@tempcnta}{\@ne}{\ccSubFloatCnt}{%
 %    \end{macrocode}
-% {\@tempdima} stores the sum of the widths of all images if they were
-% upscaled to match the highest image. We now calculate the ratio
-% between the width of the current, upscaled, image and and sum of the
-% widths of all upscaled images. The result is stored in {\@tempa} as
-% a rational number between $0$ and $1$.
+% \lstinline{\@tempdima} stores the sum of the widths of all images if
+% they were upscaled to match the highest image. We now calculate the
+% ratio between the width of the current, upscaled, image and and sum
+% of the widths of all upscaled images. The result is stored in
+% {\@tempa} as a rational number between $0$ and $1$.
 %    \begin{macrocode}
       \edef\@tempa{\CalcRatio{\csname  cc@\cc@cur@cont @adj@width-\the\@tempcnta\endcsname}{\@tempdima}}%
 %    \end{macrocode}

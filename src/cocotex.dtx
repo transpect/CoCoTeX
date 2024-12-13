@@ -12,7 +12,7 @@
 %%
 %% Maintainer: p.schulz@le-tex.de
 %%
-\NeedsTeXFormat{LaTeX2e}[2020/06/01]
+\NeedsTeXFormat{LaTeX2e}[]
 \ProvidesClass{cocotex}
     [\filedate \fileversion cocotex]
 %    \end{macrocode}
@@ -184,7 +184,7 @@
     },
   pdf-version  .initial:n = { 1.7 },
 %    \end{macrocode}
-% \deprecated The following two options are there for backard
+% \Deprecated The following two options are there for backard
 % compatibility and are considered legacy code. Both cause PDF/UA,
 % \lstinline{a11y} UA-1 and PDF v1.7, \lstinline{a11y20} UA-2 with PDF
 % v2.0.
@@ -192,7 +192,7 @@
   a11y         .code:n = { \keys_set:nn { cocotex/cls } { pdf-standard = UA-1, pdf-version=1.7 } },
   a11y20       .code:n = { \keys_set:nn { cocotex/cls } { pdf-standard = UA-2, pdf-version=2.0 } },
 %    \end{macrocode}
-% \deprecated \lstinline{lang-id} is the ISO-639/2 identifier of the document's
+% \Deprecated \lstinline{lang-id} is the ISO-639/2 identifier of the document's
 % main language. This is neccessary for the PDF meta data and
 % \textit{different} from the main language name given via the
 % \lstinline{main} key.

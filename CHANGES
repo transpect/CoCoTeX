@@ -4,15 +4,20 @@
 # 0.5.0
 
 ## general
-- FIX: improved whitespace handling in Container environments
-- NEW: Added hard requirement for LaTeX kernel version > texlive
-       2020
-- FIX: update `htmltabs.sty` external to account Tagging of empty
-	   cells
+- NEW: Added hard requirement for LaTeX kernel version, must now be at
+       least 2023/11/01 (i.e. texlive 2024 or newer).
 - NEW: replaced old xkeyval class and package options with Expl3
        markup
-- NEW: PDF-Version and PDF Standards are now handled by the LaTeX3
-       kernel where applicable.
+- NEW: Framework versioning, file dates and required minimal TeX
+       versions are now solely controlled via the VERSION file in the
+       source code's base folder.
+- FIX: improved whitespace handling in Container environments
+- FIX: update `htmltabs.sty` external to account for tagging of empty
+	   cells
+
+## cocotex.dtx
+- NEW: added options for PDF version and PDF standard; usage of one of
+       the PDF/X standards cause disabling of hyperref.
 
 ## coco-kernel.dtx
 - NEW: Added some `\ignorespaces` at the end of Component macros
@@ -49,8 +54,8 @@
 
 ## coco-floats.dtx
 - NEW: Changed how heights and widths of subfloats are calculated:
-       - sameheight mechanism is now only applied if neither
-         sub-figure has an width or height key.
+       - sameheight mechanism is now only applied if none of the
+         sub-figures has a fix width or height set.
        - added Attribute to locally de-activate sameheight mechanism
        - added Property `fix-dimen` which if not true prevents image
          files from being scaled to `\hsize`.
