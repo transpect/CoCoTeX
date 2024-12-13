@@ -165,7 +165,10 @@
       X-3, X-4, X-4P, X-5G, X-5N, X-5PG, X-6, X-6N, X-6P,
       UA-1, UA-2
     }
-    { \xdef\cc@pdf@std{ \tl_use:N \l_keys_choice_tl } },
+    {
+      \xdef\cc@pdf@standard{ \tl_use:N \l_keys_choice_tl }
+      \xdef\cc@pdf@std{\expandafter\@car\cc@pdf@standard\@nil}
+    },
   _pdfstandard .initial:n = A-2B,
   _pdfstandard / unknown .code:n =
     { \msg_warning:nnn{pdf}{unknown-standard}{#1} },
@@ -214,7 +217,15 @@
 %    \end{macrocode}
 % \lstinline{no-compress} disables PDF compression; useful for debugging the PDF source code.
 %    \begin{macrocode}
-  no-compress  .code:n = { \pdf_uncompress: },
+  no-compress  .code:n =
+  {
+    \ifx\pdfobjcompresslevel\@undefined
+      \edef\pdfobjcompresslevel{\pdfvariable objcompresslevel}%
+    \fi
+    \pdfcompresslevel=0
+    \pdfobjcompresslevel=0
+    \pdf_uncompress:
+  },
 %    \end{macrocode}
 % \lstinline{color-enc} serves two purposes: First, it controls the
 % colour space for colours invoked via the \lstinline{xcolor}
@@ -290,10 +301,10 @@
 %    \begin{macrocode}
 \msg_new:nnnn {cocotex/dtx} { wrong_pdf_version }
   {PDF/UA-2~requires~PDF~version~2.0~or~later!}
-  {You~want~to~create~a~PDF~that~conforms~to~the~\cc@pdf@std~standard,~which\\
+  {You~want~to~create~a~PDF~that~conforms~to~the~\cc@pdf@standard~standard,~which\\
   requires~at~least~`pdf-version=2.0',~but~you~requested~`pdf-version=\pdf_version:'}
-\str_if_eq:VnT \cc@pdf@std {UA-1}{ \PassOptionsToPackage{init}{coco-accessibility} }
-\str_if_eq:VnT \cc@pdf@std {UA-2}
+\str_if_eq:VnT \cc@pdf@std {U}{ \PassOptionsToPackage{init}{coco-accessibility} }
+\str_if_eq:VnT \cc@pdf@standard {UA-2}
   {
     \str_if_eq:eeF { 2.0 } {\pdf_version:}
       {
@@ -302,7 +313,6 @@
           { wrong_pdf_version }
       }
     \global\@cc@pdf@twotrue
-    \PassOptionsToPackage{init}{coco-accessibility}
   }
 \ExplSyntaxOff
 %    \end{macrocode}
@@ -512,13 +522,28 @@
 %
 % \subsection{Hyperref}
 %
+% The hyperref package allows some limited interactiveness of PDF
+% files insofar as that internal and external references become
+% click-able.
+%
+% PDF/X standards, however, must not be interative, so we disable all
+% hyperref markup by invoking the \lstinline{nohyperref} package,
+% which disables all \lstinline{hyperref} markup without rendering the
+% respective macros undefined. This way, we can generate linked and
+% unlinked PDFs from the same sources without the need to remove
+% makros from the tex files.
+%    \begin{macrocode}
+\if\cc@pdf@std X
+  \let\href\relax
+  \RequirePackage{nohyperref}
+\else
+%    \end{macrocode}
+% For PDF/A and PDF/UA, we enable/allow linking by invoking the normal
+% hyperref package\dots
 %    \begin{macrocode}
 \RequirePackage{hyperref}
 %    \end{macrocode}
-% Finally, some \lstinline{hyperref} settings
-%
-% \TODO{check, which of those are better placed inside the local
-% publisher's styles}
+% \dots  with some preset options:
 %    \begin{macrocode}
 \hypersetup{%
 %    \end{macrocode}
@@ -532,7 +557,7 @@
 %    \begin{macrocode}
    ,linktoc=none%
 %    \end{macrocode}
-% pdf broders are controlled via the coco-frame module, if necessary
+% pdf broders are controlled via the coco-frame module, if desired
 %    \begin{macrocode}
    ,pdfborder={0 0 0}%
 %    \end{macrocode}
@@ -543,22 +568,16 @@
    ,pdfencoding=unicode
    ,unicode=true
 %    \end{macrocode}
-% Bookmarks are numbered by default.
+% Bookmarks are numbered and open by default.
 %    \begin{macrocode}
    ,bookmarksnumbered=true%
    ,bookmarksopen=false%
+%    \end{macrocode}
+% index is linked by default unless the \lstinline{no-hyperindex}
+% class option is set.
+%    \begin{macrocode}
    ,hyperindex=\ifx\cc@no@hyperindex\relax false\else true\fi
 }
-%    \end{macrocode}
-% Disables PDF compression when the \lstinline{no-compress} document
-% option is set.
-%    \begin{macrocode}
-\ifx\cc@no@pdf@compression\relax
-  \ifx\pdfobjcompresslevel\@undefined
-    \edef\pdfobjcompresslevel{\pdfvariable objcompresslevel}%
-  \fi
-  \pdfcompresslevel=0
-  \pdfobjcompresslevel=0
 \fi
 %    \end{macrocode}
 %
