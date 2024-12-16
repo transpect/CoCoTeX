@@ -152,7 +152,8 @@
 % A-1b, A-1a, A-2b, A-2a, A-2u, A-3b, A-3a, A-3u, A-4,\\
 % X-3, X-4, X-4p, X-5g, X-5n, X-5pg, X-6, X-6n, X-6p,\\
 % UA-1 or UA-2.\\
-% Those choices are case-insensitive.
+% The choices are case-insensitive and the selected standard also
+% determines the PDF version later.
 %    \begin{macrocode}
   pdf-standard .code:n =
     {
@@ -173,24 +174,13 @@
   _pdfstandard / unknown .code:n =
     { \msg_warning:nnn{pdf}{unknown-standard}{#1} },
 %    \end{macrocode}
-% Options for the aimed PDF version. Currently supported are PDF 1.3
-% through 1.7 and PDF 2.0. Default is 1.7.
-%    \begin{macrocode}
-  pdf-version  .choices:nn =
-    { 1.3, 1.4, 1.5, 1.6, 1.7, 2.0 }
-    {
-      \sys_ensure_backend:
-      \exp_args:Ne \pdf_version_gset:n { \tl_use:N \l_keys_choice_tl }
-    },
-  pdf-version  .initial:n = { 1.7 },
-%    \end{macrocode}
 % \Deprecated The following two options are there for backard
 % compatibility and are considered legacy code. Both cause PDF/UA,
 % \lstinline{a11y} UA-1 and PDF v1.7, \lstinline{a11y20} UA-2 with PDF
 % v2.0.
 %    \begin{macrocode}
-  a11y         .code:n = { \keys_set:nn { cocotex/cls } { pdf-standard = UA-1, pdf-version=1.7 } },
-  a11y20       .code:n = { \keys_set:nn { cocotex/cls } { pdf-standard = UA-2, pdf-version=2.0 } },
+  a11y         .code:n = { \keys_set:nn { cocotex/cls } { pdf-standard = UA-1 } },
+  a11y20       .code:n = { \keys_set:nn { cocotex/cls } { pdf-standard = UA-2 } },
 %    \end{macrocode}
 % \Deprecated \lstinline{lang-id} is the ISO-639/2 identifier of the document's
 % main language. This is neccessary for the PDF meta data and
@@ -291,29 +281,24 @@
 \ProcessOptions
 \ProcessKeyOptions[cocotex/cls]
 %    \end{macrocode}
-% After processing the options, we need to do some checks since some
-% options depend on other options.
-%
-% First we check if the user requests one of the PDF/UA standards
-% which trigger initialization of the coco-accessibility
-% module. Further, we check if pdf version is 2.0 when the user
-% selects PDF/UA-2 and issue a soft error if this is not the case.
+% After processing the options, we determine the PDF version according
+% to the selected PDF standard. If no standard is selected, we default
+% to PDF version 1.7.
 %    \begin{macrocode}
-\msg_new:nnnn {cocotex/dtx} { wrong_pdf_version }
-  {PDF/UA-2~requires~PDF~version~2.0~or~later!}
-  {You~want~to~create~a~PDF~that~conforms~to~the~\cc@pdf@standard~standard,~which\\
-  requires~at~least~`pdf-version=2.0',~but~you~requested~`pdf-version=\pdf_version:'}
-\str_if_eq:VnT \cc@pdf@std {U}{ \PassOptionsToPackage{init}{coco-accessibility} }
-\str_if_eq:VnT \cc@pdf@standard {UA-2}
+\sys_ensure_backend:
+\prg_generate_conditional_variant:Nnn \regex_match_case:nn {nV} {T,F,TF}
+\regex_match_case:nVF
   {
-    \str_if_eq:eeF { 2.0 } {\pdf_version:}
-      {
-        \msg_error:nn
-          { cocotex/dtx }
-          { wrong_pdf_version }
-      }
-    \global\@cc@pdf@twotrue
-  }
+    { ^UA\-1 }   { \pdf_version_gset:n { 1.7 } }
+    { ^UA\-2 }   { \pdf_version_gset:n { 2.0 } }
+    { ^A\-1 }    { \pdf_version_gset:n { 1.4 } }
+    { ^A\-[23] } { \pdf_version_gset:n { 1.7 } }
+    { ^A\-4 }    { \pdf_version_gset:n { 2.0 } }
+    { ^X\-[123] }{ \pdf_version_gset:n { 1.4 } }
+    { ^X\-[45] } { \pdf_version_gset:n { 1.6 } }
+    { ^X\-6 }    { \pdf_version_gset:n { 2.0 } }
+  } \cc@pdf@standard
+  { \pdf_version_gset:n { 1.7 } }
 \ExplSyntaxOff
 %    \end{macrocode}
 %
