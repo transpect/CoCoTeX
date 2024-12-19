@@ -12,7 +12,7 @@
 %%
 %% Maintainer: p.schulz@le-tex.de
 %%
-\NeedsTeXFormat{LaTeX2e}[2020/06/01]
+\NeedsTeXFormat{LaTeX2e}[]
 \ProvidesClass{cocotex}
     [\filedate \fileversion cocotex]
 %    \end{macrocode}
@@ -20,9 +20,6 @@
 %
 % \section{Hard-coded requirements}
 %
-%    \begin{macrocode}
-\RequirePackage{xkeyval}
-%    \end{macrocode}
 % First,we set the default hook label for all {\CoCoTeX}
 % modules. Since some modules are ``stand-alone'', we do this in all
 % kernel files, i.e., here, in \lstinline{coco-kernel} and in
@@ -39,22 +36,29 @@
 % The \lstinline{main} option controls the document's main language
 % passed down to the \lstinline{babel} package.
 %    \begin{macrocode}
-\DeclareOptionX{main}{\PassOptionsToPackage{\CurrentOption}{babel}}
+\ExplSyntaxOn
+\keys_define:nn { cocotex/cls }
+{
+  main .code:n = { \PassOptionsToPackage{main=#1}{babel} },
 %    \end{macrocode}
 % The next two options are used for Spanish documents:
 %    \begin{macrocode}
-\DeclareOption{es-noindentfirst}{\PassOptionsToPackage{es-noindentfirst}{babel}}
-\DeclareOption{es-noshorthands}{\PassOptionsToPackage{es-noshorthands}{babel}}
+  es-noindentfirst .code:n = { \PassOptionsToPackage{es-noindentfirst}{babel} },
+  es-noshorthands  .code:n = { \PassOptionsToPackage{es-noshorthands}{babel} }
 %    \end{macrocode}
 % By default, we disable babel shorthands as its character encoding
 % may interfere with some {\CoCoTeX} functionality.
 %    \begin{macrocode}
+}
 \PassOptionsToPackage{shorthands=off}{babel}
 %    \end{macrocode}
 % The \lstinline{no-hyperindex} switch prevents \lstinline{hyperref}
 % from auto-linking index terms.
 %    \begin{macrocode}
-\DeclareOption{no-hyperindex}{\global\let\cc@no@hyperindex\relax}
+\keys_define:nn { cocotex/cls }
+{
+  no-hyperindex .code:n = {\global\let\cc@no@hyperindex\relax}
+}
 %    \end{macrocode}
 %
 % \subsection{The Publication Type}
@@ -84,16 +88,14 @@
 \newif\ifarticle    \articlefalse
 \newif\ifmonograph  \monographfalse
 \newif\ifjournal    \journalfalse
-\define@choicekey{cocotex.cls}{pubtype}[\cc@pub@type\nr]{collection,article,journal,mono}{%
-  \ifcase\nr\relax% collection
-    \global\collectiontrue
-  \or% article
-    \global\articletrue
-  \or% journal
-    \global\journaltrue
-  \else% monograph
-    \global\monographtrue
-  \fi
+\keys_define:nn { cocotex/cls }
+{
+  pubtype .choice:,
+  pubtype / collection .code:n = { \global\collectiontrue },
+  pubtype / article    .code:n = { \global\articletrue    },
+  pubtype / journal    .code:n = { \global\journaltrue    },
+  pubtype / mono       .code:n = { \global\monographtrue  },
+  pubtype           .initial:n = mono,
 }
 %    \end{macrocode}
 %
@@ -105,26 +107,29 @@
 % {\CoCoTeX} is used in conjunction with \textit{xerif}, this will be
 % \lstinline{tp}.
 %    \begin{macrocode}
-\DeclareOptionX{prefix}{\PassOptionsToPackage{\CurrentOption}{coco-kernel}}
+\keys_define:nn { cocotex/cls }
+{
+  prefix .code:n = { \PassOptionsToPackage{prefix=#1}{coco-kernel} },
 %    \end{macrocode}
 % The debugging options: trigger \lstinline{debug} will toggle on
 % debug mode, valued \lstinline{debug-domain} will determine the kinds
 % of messages printed to the console.
 %    \begin{macrocode}
-\DeclareOptionX{debug}{\PassOptionsToPackage{\CurrentOption}{coco-kernel}}
-\DeclareOptionX{debug-domain}{\PassOptionsToPackage{\CurrentOption}{coco-kernel}}
+  debug        .code:n = { \PassOptionsToPackage{debug}{coco-kernel} },
+  debug-domain .code:n = { \PassOptionsToPackage{debug-domain=#1}{coco-kernel} },
 %    \end{macrocode}
 % The \lstinline{silent} options attempts to supress most unneccessary
 % messages sent to the shell.
 %    \begin{macrocode}
-\DeclareOptionX{silent}{\PassOptionsToPackage{\CurrentOption}{coco-common}}
+  silent       .code:n = {\PassOptionsToPackage{silent}{coco-common}},
 %    \end{macrocode}
 % The \lstinline{nofigs} options disables the
 % \lstinline{\includegraphics} command and prints a placeholder
 % instead. This is inteded to ensure successful LaTeX runs even thou
 % image files may be missing.
 %    \begin{macrocode}
-\DeclareOptionX{nofigs}{\PassOptionsToPackage{\CurrentOption}{coco-floats}}
+   nofigs      .code:n = {\PassOptionsToPackage{nofigs}{coco-floats}},
+}
 %    \end{macrocode}
 %
 %
@@ -140,79 +145,77 @@
 %    \end{macrocode}
 % \end{macro}
 %    \begin{macrocode}
-\let\cc@pdf@std A
-\ExplSyntaxOn
 \keys_define:nn { cocotex/cls }
 {
 %    \end{macrocode}
-% Options for the aimed PDF standard. Currently supported are PDF/X,
-% PDF/A and PDF/UA.
+% Options for the aimed PDF standard. Currently supported:\\
+% A-1b, A-1a, A-2b, A-2a, A-2u, A-3b, A-3a, A-3u, A-4,\\
+% X-3, X-4, X-4p, X-5g, X-5n, X-5pg, X-6, X-6n, X-6p,\\
+% UA-1 or UA-2.\\
+% The choices are case-insensitive and the selected standard also
+% determines the PDF version later.
 %    \begin{macrocode}
-  pdf-standard .choice:,
-  pdf-standard / X .code:n = { \let\cc@pdf@std X },
-  pdf-standard / A .code:n = { \let\cc@pdf@std A },
-  pdf-standard / UA .code:n =
-  {
-    \let\cc@pdf@std U
-    \PassOptionsToPackage{init}{coco-accessibility}%
-  },
-  pdf-standard .initial:n = A,
-%    \end{macrocode}
-% Options for the aimed PDF version. Currently supported are PDF 1.3
-% through 1.7 and PDF 2.0. Default is 1.7.
-%    \begin{macrocode}
-  pdf-version .choices:nn =
-    { 1.3, 1.4, 1.5, 1.6, 1.7, 2.0 }
+  pdf-standard .code:n =
     {
-      \sys_ensure_backend:
-      \exp_args:Ne\pdf_version_gset:n{\tl_use:N \l_keys_choice_tl}
+      \exp_args:Nnx
+      \keys_set:nn {cocotex/cls} {_pdfstandard=\str_uppercase:n{#1}}
     },
-  pdf-version .initial:n = { 1.7 },
-}
+  _pdfstandard .choices:nn =
+    {
+      A-1B, A-1A, A-2B, A-2A, A-2U, A-3B, A-3A, A-3U, A-4,
+      X-3, X-4, X-4P, X-5G, X-5N, X-5PG, X-6, X-6N, X-6P,
+      UA-1, UA-2
+    }
+    {
+      \xdef\cc@pdf@standard{ \tl_use:N \l_keys_choice_tl }
+      \xdef\cc@pdf@std{\expandafter\@car\cc@pdf@standard\@nil}
+    },
+  _pdfstandard .initial:n = A-2B,
+  _pdfstandard / unknown .code:n =
+    { \msg_warning:nnn{pdf}{unknown-standard}{#1} },
 %    \end{macrocode}
-% \deprecated {\CoCoTeX} supports two accessibility standards,
-% PDF/UA-1 and PDF/UA-2. If the \texttt{a11y}\index{a11y} class option
-% is set, PDF/UA-1 is produced, if \texttt{a11y20}\index{a11y20} is
-% set, PDF/UA-2 is produced.
+% \Deprecated The following two options are there for backard
+% compatibility and are considered legacy code. Both cause PDF/UA,
+% \lstinline{a11y} UA-1 and PDF v1.7, \lstinline{a11y20} UA-2 with PDF
+% v2.0.
 %    \begin{macrocode}
-  % LEGACY
-  \DeclareOptionX{a11y}{%
-    \sys_ensure_backend:
-    \pdf_version_gset:n{1.7}%
-    \PassOptionsToPackage{init}{coco-accessibility}}%
-  \DeclareOptionX{a11y20}{%
-    \global\@cc@pdf@twotrue
-    \sys_ensure_backend:
-    \pdf_version_gset:n{2.0}%
-    \PassOptionsToPackage{init}{coco-accessibility}}%
-\ExplSyntaxOff
+  a11y         .code:n = { \keys_set:nn { cocotex/cls } { pdf-standard = UA-1 } },
+  a11y20       .code:n = { \keys_set:nn { cocotex/cls } { pdf-standard = UA-2 } },
 %    \end{macrocode}
-% \deprecated \lstinline{lang-id} is the ISO-639/2 identifier of the document's
+% \Deprecated \lstinline{lang-id} is the ISO-639/2 identifier of the document's
 % main language. This is neccessary for the PDF meta data and
 % \textit{different} from the main language name given via the
 % \lstinline{main} key.
 %    \begin{macrocode}
-\DeclareOptionX{lang-id}{}
+  lang-id      .code:n = {},
 %    \end{macrocode}
 % If set, \lstinline{nodetree} triggers extensive debgging output from the ltpdfa package.
 %    \begin{macrocode}
-\DeclareOptionX{nodetree}{\PassOptionsToPackage{\CurrentOption}{coco-accessibility}}
+  nodetree     .code:n = {\PassOptionsToPackage{nodetree}{coco-accessibility}},
 %    \end{macrocode}
 % \lstinline{showspaces} enables whitespaces processed by ltpdfa to be visible in the PDF.
 %    \begin{macrocode}
-\DeclareOptionX{showspaces}{\PassOptionsToPackage{\CurrentOption}{coco-accessibility}}
+  show-spaces  .code:n = {\PassOptionsToPackage{show-spaces}{coco-accessibility}},
 %    \end{macrocode}
 % \lstinline{no-spaces} disabes whitespace processing by \lstinline{ltpdfa}.
 %    \begin{macrocode}
-\DeclareOptionX{no-spaces}{\PassOptionsToPackage{\CurrentOption}{coco-accessibility}}
+  no-spaces    .code:n = {\PassOptionsToPackage{no-spaces}{coco-accessibility}},
 %    \end{macrocode}
 % \lstinline{no-paras} disables paragraph tagging via \lstinline{ltpdfa}.
 %    \begin{macrocode}
-\DeclareOptionX{no-paras}{\PassOptionsToPackage{\CurrentOption}{coco-accessibility}}
+  no-paras     .code:n = {\PassOptionsToPackage{no-paras}{coco-accessibility}},
 %    \end{macrocode}
 % \lstinline{no-compress} disables PDF compression; useful for debugging the PDF source code.
 %    \begin{macrocode}
-\DeclareOptionX{no-compress}{\let\cc@no@pdf@compression\relax}
+  no-compress  .code:n =
+  {
+    \ifx\pdfobjcompresslevel\@undefined
+      \edef\pdfobjcompresslevel{\pdfvariable objcompresslevel}%
+    \fi
+    \pdfcompresslevel=0
+    \pdfobjcompresslevel=0
+    \pdf_uncompress:
+  },
 %    \end{macrocode}
 % \lstinline{color-enc} serves two purposes: First, it controls the
 % colour space for colours invoked via the \lstinline{xcolor}
@@ -220,7 +223,7 @@
 % embedded into the PDF file when no explicit ICC profile is provided
 % by the user.
 %    \begin{macrocode}
-\DeclareOptionX{color-enc}{\PassOptionsToPackage{\CurrentOption}{coco-common}}
+  color-enc    .code:n = {\PassOptionsToPackage{color-enc=#1}{coco-common}},
 %    \end{macrocode}
 %
 %
@@ -234,7 +237,7 @@
 % font. This option tells the coco-scripts module which fonts to
 % pre-load. The values in is also passed down to \lstinline{\babelprovide}.
 %    \begin{macrocode}
-\DeclareOptionX{usescript}{\PassOptionsToPackage{\CurrentOption}{coco-script}}
+  usescript    .code:n = {\PassOptionsToPackage{usescript={#1}}{coco-script}},
 %    \end{macrocode}
 %
 %
@@ -244,23 +247,23 @@
 % collected and printed in a specific endnote section at the end of
 % the document.
 %    \begin{macrocode}
-\DeclareOptionX{endnotes}{\PassOptionsToPackage{\CurrentOption}{coco-notes}}
+  endnotes     .code:n = {\PassOptionsToPackage{endnotes}{coco-notes}},
 %    \end{macrocode}
 % The switch \lstinline{ennotoc} triggers headings in the Endnotes
 % area to \textit{not} appear in the table of contents (read:
 % \textit{e}nd-\textit{n}otes-\textit{no}-\textit{toc}).
 %    \begin{macrocode}
-\DeclareOptionX{ennotoc}{\PassOptionsToPackage{\CurrentOption}{coco-notes}}
+  ennotoc      .code:n = {\PassOptionsToPackage{ennotoc}{coco-notes}},
 %    \end{macrocode}
 % The switch \lstinline{endnoteswithchapters} triggers chapter
 % headings to be repeated as subsections within the endnote section.
 %    \begin{macrocode}
-\DeclareOptionX{endnoteswithchapters}{\PassOptionsToPackage{\CurrentOption}{coco-notes}}
+  endnoteswithchapters .code:n = {\PassOptionsToPackage{endnoteswithchapters}{coco-notes}},
 %    \end{macrocode}
 % The switch \lstinline{resetnotesperchapter} causes foot- and endnote
 % counters to be reset at the beginning of each new chapter.
 %    \begin{macrocode}
-\DeclareOptionX{resetnotesperchapter}{\PassOptionsToPackage{\CurrentOption}{coco-notes}}
+  resetnotesperchapter .code:n = {\PassOptionsToPackage{resetnotesperchapter}{coco-notes}},
 %    \end{macrocode}
 %
 %
@@ -269,19 +272,34 @@
 % All other unprocessed options are passed down to the base document
 % class:
 %    \begin{macrocode}
-\DeclareOptionX*{\PassOptionsToClass{\CurrentOption}{article}}
-\DeclareOptionX*{\PassOptionsToClass{\CurrentOption}{book}}
+}
+\DeclareOption*{\PassOptionsToClass{\CurrentOption}{article}}
+\DeclareOption*{\PassOptionsToClass{\CurrentOption}{book}}
 %    \end{macrocode}
 % Process the options.
 %    \begin{macrocode}
-\ExplSyntaxOn
-  \ProcessOptionsX
-  \ProcessKeyOptions[cocotex/cls]
-  
+\ProcessOptions
+\ProcessKeyOptions[cocotex/cls]
+%    \end{macrocode}
+% After processing the options, we determine the PDF version according
+% to the selected PDF standard. If no standard is selected, we default
+% to PDF version 1.7.
+%    \begin{macrocode}
+\sys_ensure_backend:
+\prg_generate_conditional_variant:Nnn \regex_match_case:nn {nV} {T,F,TF}
+\regex_match_case:nVF
+  {
+    { ^UA\-1 }   { \pdf_version_gset:n { 1.7 } }
+    { ^UA\-2 }   { \pdf_version_gset:n { 2.0 } }
+    { ^A\-1 }    { \pdf_version_gset:n { 1.4 } }
+    { ^A\-[23] } { \pdf_version_gset:n { 1.7 } }
+    { ^A\-4 }    { \pdf_version_gset:n { 2.0 } }
+    { ^X\-[123] }{ \pdf_version_gset:n { 1.4 } }
+    { ^X\-[45] } { \pdf_version_gset:n { 1.6 } }
+    { ^X\-6 }    { \pdf_version_gset:n { 2.0 } }
+  } \cc@pdf@standard
+  { \pdf_version_gset:n { 1.7 } }
 \ExplSyntaxOff
-\if\cc@pdf@std U
-    \PassOptionsToPackage{init}{coco-accessibility}%
-\fi
 %    \end{macrocode}
 %
 %
@@ -489,13 +507,28 @@
 %
 % \subsection{Hyperref}
 %
+% The hyperref package allows some limited interactiveness of PDF
+% files insofar as that internal and external references become
+% click-able.
+%
+% PDF/X standards, however, must not be interative, so we disable all
+% hyperref markup by invoking the \lstinline{nohyperref} package,
+% which disables all \lstinline{hyperref} markup without rendering the
+% respective macros undefined. This way, we can generate linked and
+% unlinked PDFs from the same sources without the need to remove
+% makros from the tex files.
+%    \begin{macrocode}
+\if\cc@pdf@std X
+  \let\href\relax
+  \RequirePackage{nohyperref}
+\else
+%    \end{macrocode}
+% For PDF/A and PDF/UA, we enable/allow linking by invoking the normal
+% hyperref package\dots
 %    \begin{macrocode}
 \RequirePackage{hyperref}
 %    \end{macrocode}
-% Finally, some \lstinline{hyperref} settings
-%
-% \TODO{check, which of those are better placed inside the local
-% publisher's styles}
+% \dots  with some preset options:
 %    \begin{macrocode}
 \hypersetup{%
 %    \end{macrocode}
@@ -509,7 +542,7 @@
 %    \begin{macrocode}
    ,linktoc=none%
 %    \end{macrocode}
-% pdf broders are controlled via the coco-frame module, if necessary
+% pdf broders are controlled via the coco-frame module, if desired
 %    \begin{macrocode}
    ,pdfborder={0 0 0}%
 %    \end{macrocode}
@@ -520,22 +553,16 @@
    ,pdfencoding=unicode
    ,unicode=true
 %    \end{macrocode}
-% Bookmarks are numbered by default.
+% Bookmarks are numbered and open by default.
 %    \begin{macrocode}
    ,bookmarksnumbered=true%
    ,bookmarksopen=false%
+%    \end{macrocode}
+% index is linked by default unless the \lstinline{no-hyperindex}
+% class option is set.
+%    \begin{macrocode}
    ,hyperindex=\ifx\cc@no@hyperindex\relax false\else true\fi
 }
-%    \end{macrocode}
-% Disables PDF compression when the \lstinline{no-compress} document
-% option is set.
-%    \begin{macrocode}
-\ifx\cc@no@pdf@compression\relax
-  \ifx\pdfobjcompresslevel\@undefined
-    \edef\pdfobjcompresslevel{\pdfvariable objcompresslevel}%
-  \fi
-  \pdfcompresslevel=0
-  \pdfobjcompresslevel=0
 \fi
 %    \end{macrocode}
 %

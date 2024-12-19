@@ -12,7 +12,7 @@
 %%
 %% requires LuaLaTeX!
 %%
-\NeedsTeXFormat{LaTeX2e}[2020/06/01]
+\NeedsTeXFormat{LaTeX2e}[]
 \ProvidesPackage{coco-script}
     [\filedate \fileversion CoCoTeX script module]
 %    \end{macrocode}
@@ -21,10 +21,14 @@
 % additional fonts that are to be loaded via the babel package.
 %    \begin{macrocode}
 \RequirePackage{coco-kernel}
-\RequirePackage{xkeyval}
 \let\usescript\relax
-\define@key{coco-script.sty}{usescript}{\def\usescript{#1}}
-\ProcessOptionsX
+\ExplSyntaxOn
+\keys_define:nn { cocotex/script }
+{
+  usescript .code:n = { \gdef\usescript{#1} }
+}
+\ProcessKeyOptions[cocotex/script]
+\ExplSyntaxOff
 
 \RequirePackage[quiet]{fontspec}
 \def\parse@script#1,#2,\relax{%

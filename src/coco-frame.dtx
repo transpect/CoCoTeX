@@ -11,7 +11,7 @@
 %%
 %% Maintainer: p.schulz@le-tex.de
 %%
-\NeedsTeXFormat{LaTeX2e}[2020/06/01]
+\NeedsTeXFormat{LaTeX2e}[]
 \ProvidesPackage{coco-frame}
     [\filedate \fileversion coco-frame]\relax
 %    \end{macrocode}
@@ -19,16 +19,16 @@
 %
 %    \begin{macrocode}
 \let\cc@frame@mode n
-\define@choicekey{coco-frame.sty}{frame}[\cc@frame@mode\nr]{none,crop,frame}{%
-  \ifcase\nr\relax% none
-    \let\cc@frame@mode n
-  \or% crop
-    \let\cc@frame@mode p
-  \else% frame
-    \let\cc@frame@mode w
-  \fi
-}%
-\ProcessOptionsX\relax
+\ExplSyntaxOn
+\keys_define:nn { cocotex/frame }
+{
+  frame .choice:,
+  frame / none  .code:n = { \global\let\cc@frame@mode n }
+  frame / crop  .code:n = { \global\let\cc@frame@mode p }
+  frame / frame .code:n = { \global\let\cc@frame@mode w }
+}
+\ProcessKeyOptions[cocotex/frame]
+\ExplSyntaxOff
 %    \end{macrocode}
 % \section{Cropmark printer}
 %

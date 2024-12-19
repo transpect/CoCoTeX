@@ -27,13 +27,9 @@
 %%
 %% requires LuaLaTeX and ltpdfa!
 %%
-\NeedsTeXFormat{LaTeX2e}[2020/06/01]
+\NeedsTeXFormat{LaTeX2e}[]
 \ProvidesPackage{coco-accessibility}
     [\filedate \fileversion CoCoTeX accessibility module]
-\RequirePackage{kvoptions-patch}
-\RequirePackage{xkeyval}
-\RequirePackage{atbegshi}
-\RequirePackage{xparse}
 %    \end{macrocode}
 % The \lstinline{ltpdfa} package re-defines too many standard LaTeX
 % macros, so we only use its lua code and define the interface
@@ -47,20 +43,22 @@
 %   features.
 %    \begin{macrocode}
 \newif\if@cc@do@ally \@cc@do@allyfalse
-\DeclareOptionX{init}{\global\@cc@do@allytrue}
-\DeclareOptionX{init-20}{\global\@cc@do@allytrue\global\@cc@pdf@twotrue}
+\ExplSyntaxOn
+\keys_define:nn { cocotex/a11y }
+{
+  init .code:n = {\global\@cc@do@allytrue},
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\cca@do@nodetree} if \lstinline{\relax}, show the node tree in
 %   the log and in the shell output.
 %    \begin{macrocode}
-\DeclareOptionX{nodetree}{\let\cca@do@nodetree\relax}
+  nodetree .code:n = {\let\cca@do@nodetree\relax},
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\cca@do@showspaces} if \lstinline{\relax}, show spaces
 %   in the pdf.
 %    \begin{macrocode}
-\DeclareOptionX{show-spaces}{\let\cca@do@showspaces\relax}
+  show-spaces .code:n = {\let\cca@do@showspaces\relax},
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\cca@do@dospaces} if \lstinline{\relax}, add
@@ -74,20 +72,27 @@
 %   width of that space to keep \LaTeX's typeface intact. This is
 %   activated by default.
 %    \begin{macrocode}
+}
 \let\cca@do@dospaces\relax
-\DeclareOptionX{no-spaces}{\let\cca@do@dospaces\@undefined}
+\keys_define:nn { cocotex/a11y }
+{
+  no-spaces .code:n = {\let\cca@do@dospaces\@undefined}
+}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\cca@do@doparas} if \lstinline{\relax}, add paragraph
 %   tagging.
 %    \begin{macrocode}
 \let\cca@do@doparas\relax
-\DeclareOptionX{no-paras}{\let\cca@do@doparas\@undefined}
+\keys_define:nn { cocotex/a11y }
+{
+  no-paras .code:n = {\let\cca@do@doparas\@undefined}
+}
 %    \end{macrocode}
 % \end{macro}
 % Processing the options.
 %    \begin{macrocode}
-\ProcessOptionsX
+\ProcessKeyOptions[cocotex/a11y]
 %    \end{macrocode}
 %
 % \begin{macro}{\cca@patch@error} is a generic error message that is
@@ -261,8 +266,8 @@
 \def\ccaProtect{\ccWhenAlly{\cca@protected@defs}}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\CsToStr} is a xparse helper macro which returns the name of
-%   a control sequence \#1.
+% \begin{macro}{\CsToStr} is a~helper macro which returns the name of
+%   a~control sequence \#1.
 %    \begin{macrocode}
 \ExplSyntaxOn
 \newcommand{\CsToStr}[1]{\cs_to_str:N #1}
@@ -512,7 +517,7 @@
 % \end{macro}
 % The following code patches the unstarred
 % \lstinline{\foreignlanguage} command in such a way that it
-% automatically tags its content with a \UsageTag{/Span} and adds a
+% automatically tags its content with a \DescribeTag{/Span} and adds a
 % \lstinline{/Lang} attribute to the Tag that is colleted from the
 % language definition file of the currently activated language.
 %    \begin{macrocode}
@@ -959,7 +964,7 @@
 % Finally, we hook \lstinline{ltpdfa}'s page processor into
 % \lstinline{AtBeginShipoutBox}:
 %    \begin{macrocode}
-\ccWhenAlly{\AtBeginShipout{\directlua{ltpdfa.pageprocessor(tex.box["AtBeginShipoutBox"])}}}%
+\ccWhenAlly{\AddToHook{shipout/before}{\directlua{ltpdfa.pageprocessor(tex.box["ShipoutBox"])}}}%
 %    \end{macrocode}
 % End of {\TeX} source code.
 %    \begin{macrocode}[numbers=none,gobble=1]

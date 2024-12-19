@@ -13,16 +13,9 @@
 %%
 %% Maintainer: p.schulz@le-tex.de
 %%
-\NeedsTeXFormat{LaTeX2e}[2020/06/01]
+\NeedsTeXFormat{LaTeX2e}[]
 \ProvidesPackage{coco-common}
     [\filedate \fileversion CoCoTeX common module]
-%    \end{macrocode}
-% Load key/value option parser packages in case coco-common is used
-% without the cls.
-%    \begin{macrocode}
-\RequirePackage{kvoptions-patch}
-\RequirePackage{xkeyval}
-\RequirePackage{iftex}
 %    \end{macrocode}
 % Default hook label for {\CoCoTeX} modules:
 %    \begin{macrocode}
@@ -42,25 +35,19 @@
 \def\cc@str@gray{gray}
 \def\cc@str@natural{natural}
 \let\cc@color@enc\cc@str@cmyk
-\define@choicekey{coco-common.sty}{color-enc}[\@cc@color@enc\nr]{srgb,rgb,gray,grey,cmy,cmyk,natural,none}[cmyk]{%
-  \let\cc@color@enc\@cc@color@enc
-  \ifcase\nr\relax% srgb
-    \global\let\cc@color@enc\cc@str@rgb
-  \or% rgb
-    \global\let\cc@color@enc\cc@str@rgb
-  \or% gray
-    \global\let\cc@color@enc\cc@str@gray
-  \or% grey
-    \global\let\cc@color@enc\cc@str@gray
-  \or% cmy
-    \global\let\cc@color@enc\cc@str@cmyk
-  \or% cmyk
-    \global\let\cc@color@enc\cc@str@cmyk
-  \or% natural, i.e. no conversion of color spaces takes place
-    \global\let\cc@color@enc\cc@str@natural
-  \else%none
-    \global\let\cc@color@enc\relax
-  \fi
+\ExplSyntaxOn
+\keys_define:nn { cocotex/common }
+{
+  color-enc .choice:,
+  color-enc / srgb .code:n = { \global\let\cc@color@enc\cc@str@rgb },
+  color-enc / rgb  .code:n = { \global\let\cc@color@enc\cc@str@rgb },
+  color-enc / gray .code:n = { \global\let\cc@color@enc\cc@str@gray },
+  color-enc / grey .code:n = { \global\let\cc@color@enc\cc@str@gray },
+  color-enc / cmy  .code:n = { \global\let\cc@color@enc\cc@str@cmyk },
+  color-enc / cmyk .code:n = { \global\let\cc@color@enc\cc@str@cmyk },
+  color-enc / natural .code:n = { \global\let\cc@color@enc\cc@str@natural },
+  color-enc / none .code:n = { \global\let\cc@color@enc\relax },
+  color-enc .initial:n = cmyk
 }
 %    \end{macrocode}
 %
@@ -71,21 +58,23 @@
 % messages sent to the shell.
 %    \begin{macrocode}
 \newif\if@cc@silent  \@cc@silentfalse
-\DeclareOptionX{silent}{\global\@cc@silenttrue}%
+\keys_define:nn { cocotex/common }
+{
+  silent .code:n = { \global\@cc@silenttrue }%
+}
 %    \end{macrocode}
 % Process the options
 %    \begin{macrocode}
-\ProcessOptionsX
+\ProcessKeyOptions[cocotex/common]
 %    \end{macrocode}
 % First, we set up the requested color model with both the newer LaTeX
 % Kernel and the xcolor package.
 %    \begin{macrocode}
 \ifx\cc@color@enc\relax\else
-  \ExplSyntaxOn
-    \tl_gset:Nn \l_color_fixed_model_tl {\cc@color@enc}%
-  \ExplSyntaxOff
+  \tl_gset:Nn \l_color_fixed_model_tl {\cc@color@enc}%
   \PassOptionsToPackage{\cc@color@enc}{xcolor}%
 \fi%
+\ExplSyntaxOff
 %    \end{macrocode}
 % \begin{macro}{\ccIfPreamble} is true as long as there has not been a
 %   \lstinline|\begin{document}|.

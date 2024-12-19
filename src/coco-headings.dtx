@@ -13,7 +13,7 @@
 %%
 %% Maintainer: p.schulz@le-tex.de
 %%
-\NeedsTeXFormat{LaTeX2e}[2020/06/01]
+\NeedsTeXFormat{LaTeX2e}[]
 \ProvidesPackage{coco-headings}
     [\filedate \fileversion CoCoTeX headings module]
 \RequirePackage{coco-meta}
@@ -94,8 +94,8 @@
 % \end{Attribute}
 % \begin{Attribute}{notag}{} is a flag that if set tags the entire
 %   heading and its Components as Artifacts. Content after the heading
-%   is \textit{not} tagged as its own \UsageTag{Sect}, but belongs to
-%   the \Usagetag{Sect} of the last, non-flagged, heading.
+%   is \textit{not} tagged as its own \DescribeTag{Sect}, but belongs to
+%   the \DescribeTag{Sect} of the last, non-flagged, heading.
 %    \begin{macrocode}
     \ccDeclareAttributeHandler*{notag}{%
       \let\ccaEnable\relax
@@ -366,7 +366,7 @@
         \ccUseProperty{toc-hook}%
         \ccIfProp{extended}{\ccUseProperty{extended-heading}}{}%
 %    \end{macrocode}
-% Here, we end the \UsageTagE{SectMeta} tag.
+% Here, we end the \DescribeTagE{SectMeta} tag.
 %    \begin{macrocode}
         \ccWhenAlly{\ccaStructEnd{SectMeta}}%
       \egroup%
@@ -1068,9 +1068,9 @@
 % \UsageProp{extended} Property to be non-empty.
 %
 % \UsageComponent{Abstract} and \UsageComponent{Keywords} are tagged
-% with \UsageTag{Abstract} and \UsageTag{Keyword}, their labels with
-% \UsageTag{AbstractLabel} and \UsageTag{KeywordsLabel}, and their
-% values with \UsageTag{AbstractText} and \UsageTag{KeywordsText},
+% with \DescribeTag{Abstract} and \DescribeTag{Keyword}, their labels with
+% \DescribeTag{AbstractLabel} and \DescribeTag{KeywordsLabel}, and their
+% values with \DescribeTag{AbstractText} and \DescribeTag{KeywordsText},
 % respectively.
 %    \begin{macrocode}
   \ccSetProperty{extended-heading}{%
@@ -1352,7 +1352,7 @@
 % \begin{Property}{toc-page-sep}{<any>} separator between the TocTitle
 %   and the page counter. The dotted line is tagged as
 %   \DescribeTag{leaders}, which is mapped to be an artifact of type
-%   \UsageTag{leaders}.
+%   \DescribeTag{leaders}.
 %    \begin{macrocode}
   \ccSetProperty{toc-page-sep}{\ccaAddKeep\ccaStructStart[Document]{leaders}\dotfill\ccaStructEnd{leaders}}%
 %    \end{macrocode}
@@ -1506,13 +1506,15 @@
 %    \begin{macrocode}
 \newcount\cch@max@nesting@level   \cch@max@nesting@level=\z@\relax
 %    \end{macrocode}
+% \end{macro}
 % Since PDF 1.7 allows only \DescribeTag{H1}--\DescribeTag{H6}, more
 % nesting levels need to be mapped to one of the Standard tags. The
 % Tagged PDF Best Practice Guide recommends mapping higher levels to
 % \DescribeTag{P}, which we do at the end of the document. All this is
 % not necessary if PDF/UA-2 is used, since first it allows any H$n$
 % for as long as H$n$s are nested sequentially, and second, because
-% then we use the \DescribeTag{Title} tag instead of \DescribeTag{Hn}.
+% then we can use the \DescribeTag{Title} tag instead of
+% \DescribeTag{Hn}.
 %    \begin{macrocode}
 \ccWhenAlly{\if@cc@pdf@two\else\AtEndDocument{\cch@add@h@rolemap}\fi}%
 %    \end{macrocode}
@@ -1600,7 +1602,7 @@
 }
 %    \end{macrocode}
 % In the \UsageHook{env/Heading/after} hook, first, the
-% \DescribeTagsE{SectMeta} Tag is closed. Only then, we open the tag
+% \DescribeTagE{SectMeta} Tag is closed. Only then, we open the tag
 % for actual \DescribeTagS{Sect}. Here, we also define the name of the
 % Tag to be re-used later in the \lstinline{\cchAutoClose}
 % mechanism. Finally, we move the \DescribeTag{Hn} Tagging node (which
@@ -1620,7 +1622,7 @@
 % the heading Container's environment is closed. In this case, we
 % don't move the node. For one, because it is likely not yet set, and
 % second because it most likely already is in the “right” spot,
-% i.e. inside the \UsageTag{Sect} tag.
+% i.e. inside the \DescribeTag{Sect} tag.
 %    \begin{macrocode}
     \ifx\cch@id@cur@head\@undefined\else
       \ccaMoveStruct{\cch@id@cur@head}%
@@ -1628,7 +1630,7 @@
 %    \end{macrocode}
 % If \UsageMacro{\cch@id@cur@meta} is undefined when the Heading
 % container's environment is closed, then this indicates an inline
-% heading. In this case, we don't need to move the \UsageTag{SectMeta}
+% heading. In this case, we don't need to move the \DescribeTag{SectMeta}
 % node, as it most likely already is in the right place.
 %    \begin{macrocode}
     \ifx\cch@id@cur@meta\@undefined\else
@@ -1644,7 +1646,7 @@
   \if@cc@pdf@two
     \ccaVstructStart{Title}%
   \else
-    \ccaVstructStart{H\the\numexpr\cch@total@nesting@level+\@ne\relax}%
+    \ccaVstructStart{H\the\numexpr\cch@total@nesting@level\relax}%
     \ifnum\cch@total@nesting@level>\cch@max@nesting@level
       \global\cch@max@nesting@level=\cch@total@nesting@level\relax
     \fi
@@ -1662,11 +1664,11 @@
   \if@cc@pdf@two
     \ccaVstructEnd{Title}%
   \else
-    \ccaVstructEnd{H\the\numexpr\cch@total@nesting@level+\@ne\relax}%
+    \ccaVstructEnd{H\the\numexpr\cch@total@nesting@level\relax}%
   \fi}
 %    \end{macrocode}
 % \end{macro}
-% The \UsageTag{SectMeta} tag is mapped to a simple \UsageTag{Div}.
+% The \DescribeTag{SectMeta} tag is mapped to a simple \DescribeTag{Div}.
 %    \begin{macrocode}
 \ccaAddRolemap{SectMeta}{Div}
 %    \end{macrocode}

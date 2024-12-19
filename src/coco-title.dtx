@@ -11,16 +11,13 @@
 %%
 %% Maintainer: p.schulz@le-tex.de
 %%
-\NeedsTeXFormat{LaTeX2e}[2020/06/01]
+\NeedsTeXFormat{LaTeX2e}[]
 \ProvidesPackage{coco-title}
     [\filedate \fileversion CoCoTeX title module]
 \RequirePackage{coco-meta}
 %    \end{macrocode}
-% \deprecated
-%    \begin{macrocode}
-\DeclareOptionX{lang-id}{}
-\ProcessOptionsX
-%    \end{macrocode}
+%
+%
 % \section{Top-Level Interface}
 %
 % \DescribeContainer{titlepage} is the main Container for the whole
@@ -1463,42 +1460,16 @@ from the Components given in the Meta Container.}}}
 %    \end{macrocode}
 %
 % \subsection{Encoding of the PDF-A Conformance}
-% As before, the parameters for the PDF conformity level are encoded
-% via specific Components in the titlepage Container:
-%    \begin{macrocode}
-  \ccAddToType{Components}{titlepage}{%
-%    \end{macrocode}
 %
-% \DescribeComponent{PDFAID} defines the PDF/A ID (Default: 2,
-%   meaning: PDF/A-2)
-%    \begin{macrocode}
-  \ccDeclareGlobalComponent[2]{PDFAID}%
-%    \end{macrocode}
-% \DescribeComponent{PDFALevel} defines the PDF/A Level (Default: A,
-%   meaning PDF/A-2A)
-%    \begin{macrocode}
-  \ccDeclareGlobalComponent[A]{PDFALevel}%
-%    \end{macrocode}
-% \DescribeComponent{PDFUAID} defines the PDF standard (Default: 1,
-%   meaning: PDF/UA-1). Use \lstinline|\ccPrefix PDFUAID{}| (i.e. set it to
-%   nothing) to make the document conform to the PDF/A standard, but
-%   \textbf{not} to the PDF/UA standard.
-%    \begin{macrocode}
-  \ccDeclareGlobalComponent[\if@cc@pdf@two2\else1\fi]{PDFUAID}}%
-%    \end{macrocode}
-% The checking if the values are valid, and the separation of the
-% various parts of the standard is done via a lua script in the
-% \lstinline{cct/document/meta}. The \lstinline{conformance}
-% DocumentInfo nodes are only written, if \textit{neither}
-% \lstinline{PDFAID}, \textit{nor} \lstinline{PDFALevel} is empty.
+% We assume that both PDF/UA standards also require conformity to
+% PDF/A2-a, so we let ltpdfa write that into the PDF file.
 %    \begin{macrocode}
   \AddToHook{cct/document/meta}{%
-    \ccIfCompEmpty{PDFAID}{}{\ccIfCompEmpty{PDFALevel}{}{%
-        \edef\x{\noexpand\ccaSetDocinfo{conformance}{%
-            pdfaid=\ccUseComp{PDFAID};%
-            level=\ccUseComp{PDFALevel}%
-            \ccIfCompEmpty{PDFUAID}{}{;pdfuaid=\ccUseComp{PDFUAID}}}}%
-        \x}}}
+    \edef\x{\noexpand\ccaSetDocinfo{conformance}{%
+        pdfaid=2;%
+        level=A%
+        ;pdfuaid=\if@cc@pdf@two2\else1\fi}}%
+    \x}%
 %    \end{macrocode}
 %
 %
@@ -1509,7 +1480,7 @@ from the Components given in the Meta Container.}}}
 % \DescribeTag{P} until the more appropriate \DescribeTag{Title} tag
 % becomes widely accepted with the PDF 2.0 Standard.
 %    \begin{macrocode}
-  \if@cc@pdf@two\else\ccaAddRolemap{Title}{H1}\fi
+  \if@cc@pdf@two\else\ccaAddRolemap{Title}{P}\fi
   \ccaAddRolemap{Titlepage}{Div}
 %    \end{macrocode}
 % 
