@@ -400,7 +400,7 @@
 %    \end{macrocode}
 % \begin{Component}{Label} represents a List item's local label.
 %    \begin{macrocode}
-    \ccDeclareComponent{Label}%
+    \ccDeclareComponent{Label}{}{}%
 %    \end{macrocode}
 % \end{Component}
 %    \begin{macrocode}
@@ -619,6 +619,9 @@
 %    \begin{macrocode}
 \def\cc@list{\cc@opt@empty\@cc@list}
 \def\@cc@list[#1]{%
+  \ifx\cc@is@counted\relax
+    \ccUntoggleCountedConditionals
+  \fi
   \ccl@advance@depth\@ne%
   \ccl@incr@count%
   \edef\ccl@cur@cont{\cc@cur@cont-\cclCurDepth}%
@@ -654,6 +657,7 @@
 %    \begin{macrocode}
   \ccSetPropertyX{prev-margin-right}{\ccl@rightskip}%
   \ccEvalType[\ccl@cur@cont]{Properties}%
+  \ccEvalType[\ccl@cur@cont]{Components}%
 %    \end{macrocode}
 % \end{Property}
 % \begin{macro}{\ccl@list@type} locally stores the current value of

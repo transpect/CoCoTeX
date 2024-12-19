@@ -35,6 +35,8 @@
 - NEW: Warning when a value is attempted to be assigned to a
        Component that is undefined
 - NEW: Added general error facility for patch commands
+- NEW: Added function to locally disable CountedConditionals in case
+       a Container instance occurs inside a Counted Component.
 - FIX: made group components long
 - FIX: LaTeX error when `\cc@iterate@res` is undefined
 
@@ -108,6 +110,8 @@
 ## coco-lists.dtx
 - FIX: typo in doc string
 - FIX: counting error
+- FIX: toggles Uncounted conditionals in case of lists in Counted
+       Components (like a Float)
 
 ## coco-script.dtx
 - FIX: Avoid `babel-lua` errors when `bidi` is not needed

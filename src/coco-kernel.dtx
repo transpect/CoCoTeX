@@ -1140,6 +1140,24 @@
 }
 %    \end{macrocode}
 % \end{macro}
+% 
+% \begin{macro}{\ccUntoggleCountedConditionals} is used to locally
+%   reset the conditional definitions in the case that a Container
+%   instance occurs in the value of a Counted Component.
+%    \begin{macrocode}
+\let\cc@reserved@if@comp\ccIfComp
+\let\cc@reserved@when@comp\ccWhenComp
+\let\cc@reserved@unless@comp\ccUnlessComp
+\let\cc@reserved@if@comp@empty\ccIfCompEmpty
+\def\ccUntoggleCountedConditionals{%
+  \let\cc@is@counted\@undefined
+  \let\ccIfComp\cc@reserved@if@comp
+  \let\ccWhenComp\cc@reserved@when@comp
+  \let\ccUnlessComp\cc@reserved@unless@comp
+  \let\ccIfCompEmpty\cc@reserved@if@comp@empty
+}
+%    \end{macrocode}
+% \end{macro}
 %
 %
 % \section{Properties}\label{sec:kernel:props}
