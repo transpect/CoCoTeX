@@ -209,10 +209,11 @@
 %    \begin{macrocode}
   no-compress  .code:n =
   {
+    \sys_ensure_backend:
     \ifx\pdfobjcompresslevel\@undefined
       \edef\pdfobjcompresslevel{\pdfvariable objcompresslevel}%
     \fi
-    \pdfcompresslevel=0
+    %\pdfcompresslevel=0
     \pdfobjcompresslevel=0
     \pdf_uncompress:
   },
@@ -289,8 +290,8 @@
 \prg_generate_conditional_variant:Nnn \regex_match_case:nn {nV} {T,F,TF}
 \regex_match_case:nVF
   {
-    { ^UA\-1 }   { \pdf_version_gset:n { 1.7 } }
-    { ^UA\-2 }   { \pdf_version_gset:n { 2.0 } }
+    { ^UA\-1 }   { \pdf_version_gset:n { 1.7 } \PassOptionsToPackage{init}{coco-accessibility} }
+    { ^UA\-2 }   { \pdf_version_gset:n { 2.0 } \PassOptionsToPackage{init}{coco-accessibility} }
     { ^A\-1 }    { \pdf_version_gset:n { 1.4 } }
     { ^A\-[23] } { \pdf_version_gset:n { 1.7 } }
     { ^A\-4 }    { \pdf_version_gset:n { 2.0 } }
