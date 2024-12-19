@@ -2008,7 +2008,14 @@
     \else
       \ccSanitizeStr\@cca@Gin@alt{\cca@Gin@alt}%
     \fi
-    \ccaAddAltText{\@cca@Gin@alt}%
+%    \end{macrocode}
+% If the alt-text contains unbalanced parentheses, the PDF-Syntax will
+% break, so we pass the text through hyperref's
+% \lstinline{\pdfstringdef} macro one more time to transform all
+% non-alphanumeric symbols to octals before we passit down to ltpdfa.
+%    \begin{macrocode}
+    \Hy@pdfstringdef\@@cca@Gin@alt{\@cca@Gin@alt}%
+    \ccaAddAltText{\@@cca@Gin@alt}%
     \ccaStructEnd{Figure}%
   \fi
 }
