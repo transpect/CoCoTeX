@@ -247,7 +247,7 @@
       \ccn@end@enotes
       \global\advance\realchap\@ne
       \ifx\ccn@reset@notes@per@chapter\relax\global\c@endnote\z@\fi
-      \def\ccn@par@number{\ccIfComp{TocNumber}{\ccUseComp{TocNumber}}{\ccUseComp{Number}}}%
+      \def\ccn@par@number{\ccIfComp{TocNumber}{\ccUseComp{TocNumber}}{\ccIfComp{Number}{\ccUseComp{Number}}{\relax}}}%
       \def\ccn@par@title{\ccIfComp{TocTitle}{\ccUseComp{TocTitle}}{\ccUseComp{Title}}}%
       \def\ccn@par@runtitle{\ccIfComp{RunTitle}{\ccUseComp{RunTitle}}{\ccUseComp{Title}}}%
       \addtoendnotes{%
