@@ -566,6 +566,19 @@
 \def\ccpgdefFromComp#1#2{\def\x{\cc@store@comp{x}}\expandafter\x\csname\ccPrefix #1\endcsname{#2}}
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{\ccdefTlFromComp} defines control sequence
+%   \InlineArg{1} such that it expands to the exact token list stored
+%   in Component \InlineArg{2}.
+%    \begin{macrocode}
+\def\ccdefTlFromComp#1#2{\edef#1{\expandafter\unexpanded\expandafter\expandafter\expandafter{\csname cc@\cc@cur@cont @#2\endcsname}}}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccgdefTlFromComp} global variant of
+%   \lstinline{\ccdefTlFromComp}.
+%    \begin{macrocode}
+\def\ccgdefTlFromComp#1#2{\xdef#1{\expandafter\unexpanded\expandafter\expandafter\expandafter{\csname cc@\cc@cur@cont @#2\endcsname}}}
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\strip@longprefix} is a helper macro to strip the
 %   prefix from the \lstinline{\meaning} of a \lstinline{\long} macro.
 %    \begin{macrocode}
