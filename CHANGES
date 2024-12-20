@@ -1,14 +1,23 @@
 ; -*- markdown -*-
 
 
-# 0.5.0
+# 1.0.0
 
 ## general
+- NEW: Added hard requirement for LaTeX kernel version, must now be at
+       least 2023/11/01 (i.e. texlive 2024 or newer).
+- NEW: replaced old xkeyval class and package options with Expl3
+       markup
+- NEW: Framework versioning, file dates and required minimal TeX
+       versions are now solely controlled via the VERSION file in the
+       source code's base folder.
 - FIX: improved whitespace handling in Container environments
-- NEW: Added hard requirement for LaTeX kernel version > texlive
-       2020
-- FIX: update `htmltabs.sty` external to account Tagging of empty
+- FIX: update `htmltabs.sty` external to account for tagging of empty
 	   cells
+
+## cocotex.dtx
+- NEW: added options for PDF version and PDF standard; usage of one of
+       the PDF/X standards cause disabling of hyperref.
 
 ## coco-kernel.dtx
 - NEW: Added some `\ignorespaces` at the end of Component macros
@@ -19,15 +28,15 @@
 - NEW: Added a way to define Macros from Counted Components without
        full expansion
 - NEW: Replaced old custom hook mechanism with LaTeX kernel hooks
-- NEW: Default PDF version is now 1.7 (or 2.0 if explicitly
-       required) instead of 1.3 iff accessibility features are
-       active
+- NEW: Default PDF version is determined by the selected PDF standard.
 - NEW: Fixed an issue where additions to a parent Container's Types
        were not passed down to its decendents if those were declared
        earlier
 - NEW: Warning when a value is attempted to be assigned to a
        Component that is undefined
 - NEW: Added general error facility for patch commands
+- NEW: Added function to locally disable CountedConditionals in case
+       a Container instance occurs inside a Counted Component.
 - FIX: made group components long
 - FIX: LaTeX error when `\cc@iterate@res` is undefined
 
@@ -46,8 +55,8 @@
 
 ## coco-floats.dtx
 - NEW: Changed how heights and widths of subfloats are calculated:
-       - sameheight mechanism is now only applied if neither
-         sub-figure has an width or height key.
+       - sameheight mechanism is now only applied if none of the
+         sub-figures has a fix width or height set.
        - added Attribute to locally de-activate sameheight mechanism
        - added Property `fix-dimen` which if not true prevents image
          files from being scaled to `\hsize`.
@@ -102,6 +111,8 @@
 ## coco-lists.dtx
 - FIX: typo in doc string
 - FIX: counting error
+- FIX: toggles Uncounted conditionals in case of lists in Counted
+       Components (like a Float)
 
 ## coco-script.dtx
 - FIX: Avoid `babel-lua` errors when `bidi` is not needed

@@ -20,13 +20,16 @@
 %%
 %% Maintainer: p.schulz@le-tex.de
 %%
-%% lualatex  -  texlive > 2019
-%%
-\NeedsTeXFormat{LaTeX2e}[2020/06/01]
+\NeedsTeXFormat{LaTeX2e}[]
 \ProvidesPackage{coco-floats}
     [\filedate \fileversion CoCoTeX floats module]
-\DeclareOptionX{nofigs}{\global\let\ccf@no@figs\relax}
-\ProcessOptionsX
+\ExplSyntaxOn
+\keys_define:nn { cocotex/floats }
+{
+  nofigs .code:n = {\global\let\ccf@no@figs\relax}
+}
+\ProcessKeyOptions[cocotex/floats]
+\ExplSyntaxOff
 %    \end{macrocode}
 %
 %
@@ -1530,8 +1533,9 @@
 %    \begin{macrocode}
       \@tempdimb=\@tempa\@tempdimc\relax
 %    \end{macrocode}
-% This values is stored in \lstinline{cc@\cc@cur@cont
-% @adj@width-\the\@tempcnta} for each image.
+% This values is stored in
+% \lstinline{cc@\cc@cur@cont @adj@width-\the\@tempcnta}
+% for each image.
 %    \begin{macrocode}
       \csedef{cc@\cc@cur@cont @adj@width-\the\@tempcnta}{\the\@tempdimb}%
 %    \end{macrocode}
@@ -1561,11 +1565,11 @@
 %    \begin{macrocode}
     \cc@iterate{\@tempcnta}{\@ne}{\ccSubFloatCnt}{%
 %    \end{macrocode}
-% {\@tempdima} stores the sum of the widths of all images if they were
-% upscaled to match the highest image. We now calculate the ratio
-% between the width of the current, upscaled, image and and sum of the
-% widths of all upscaled images. The result is stored in {\@tempa} as
-% a rational number between $0$ and $1$.
+% \lstinline{\@tempdima} stores the sum of the widths of all images if
+% they were upscaled to match the highest image. We now calculate the
+% ratio between the width of the current, upscaled, image and and sum
+% of the widths of all upscaled images. The result is stored in
+% {\@tempa} as a rational number between $0$ and $1$.
 %    \begin{macrocode}
       \edef\@tempa{\CalcRatio{\csname  cc@\cc@cur@cont @adj@width-\the\@tempcnta\endcsname}{\@tempdima}}%
 %    \end{macrocode}
@@ -2004,7 +2008,14 @@
     \else
       \ccSanitizeStr\@cca@Gin@alt{\cca@Gin@alt}%
     \fi
-    \ccaAddAltText{\@cca@Gin@alt}%
+%    \end{macrocode}
+% If the alt-text contains unbalanced parentheses, the PDF-Syntax will
+% break, so we pass the text through hyperref's
+% \lstinline{\pdfstringdef} macro one more time to transform all
+% non-alphanumeric symbols to octals before we passit down to ltpdfa.
+%    \begin{macrocode}
+    \Hy@pdfstringdef\@@cca@Gin@alt{\@cca@Gin@alt}%
+    \ccaAddAltText{\@@cca@Gin@alt}%
     \ccaStructEnd{Figure}%
   \fi
 }
@@ -2205,12 +2216,12 @@
     \def\ccf@reserve@htmltab{%
       \let\ccf@add@style\@empty
       \ifx\ccf@floatpos\@empty
-        \expandafter\ifx\csname \ccPrefix Float\the\ccf@int@cnt Captop\endcsname\relax\else
-          \htInitSkip\csname \ccPrefix Float\the\ccf@int@cnt Captop\endcsname
+        \expandafter\ifx\csname ccFloat\the\ccf@int@cnt Captop\endcsname\relax\else
+          \htInitSkip\csname ccFloat\the\ccf@int@cnt Captop\endcsname
           \advance\htInitSkip\ccf@sep@top%
         \fi
-        \expandafter\ifx\csname \ccPrefix Float\the\ccf@int@cnt Capbottom\endcsname\relax\else
-          \htAddToBottom\csname \ccPrefix Float\the\ccf@int@cnt Capbottom\endcsname
+        \expandafter\ifx\csname ccFloat\the\ccf@int@cnt Capbottom\endcsname\relax\else
+          \htAddToBottom\csname ccFloat\the\ccf@int@cnt Capbottom\endcsname
           \advance\htAddToBottom\ccf@sep@bottom%
         \fi
       \else

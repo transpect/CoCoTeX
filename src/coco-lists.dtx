@@ -18,7 +18,12 @@
 % \section{Preamble}
 %
 %    \begin{macrocode}
-\NeedsTeXFormat{LaTeX2e}[2020/06/01]
+%%
+%% Common document class for \textit{xerif} projects.
+%%
+%% Maintainer: p.schulz@le-tex.de
+%%
+\NeedsTeXFormat{LaTeX2e}[]
 \ProvidesPackage{coco-lists}
     [\filedate \fileversion CoCoTeX lists module]
 \RequirePackage{coco-common}
@@ -33,7 +38,11 @@
 % \MacroString{description} environments.
 %    \begin{macrocode}
 \newif\if@ccl@replace \@ccl@replacefalse
-\DeclareOptionX{replace}{\global\@ccl@replacetrue}%
+\ExplSyntaxOn
+\keys_define:nn { cocotex/lists }
+{
+  replace .code:n = {\global\@ccl@replacetrue}
+}
 %    \end{macrocode}
 % The option inherit defines how nested lists inherit their
 % properties. Currently, there are two ways: \lstinline{common}: All
@@ -69,6 +78,19 @@
 \def\ccl@ih@conseq{conseq}%
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{\ccl@inherit} stores the value of the
+%   \lstinline{inherit} package option.
+%    \begin{macrocode}
+\let\ccl@inherit\ccl@ih@common
+\keys_define:nn { cocotex/lists }
+{
+  inherit .choice:,
+  inherit / conseq .code:n = { \global\let\ccl@inherit\ccl@ih@conseq },
+  inherit / common .code:n = { \global\let\ccl@inherit\ccl@ih@common },
+  inherit .initial:n = common
+}
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\ccl@str@local} is a string for comparison. It
 %   represents the \lstinline{nesting=local} option.
 %    \begin{macrocode}
@@ -81,32 +103,24 @@
 \def\ccl@str@global{global}%
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccl@inherit} stores the value of the
-%   \lstinline{inherit} package option.
-%    \begin{macrocode}
-\let\ccl@inherit\ccl@ih@common
-\define@choicekey{coco-lists.sty}{inherit}[\@ccl@inherit\nr]{conseq,common}{%
-  \ifcase\nr\relax% conseq: nested lists of the same type inherit only from the previous level
-    \global\let\ccl@inherit\ccl@ih@conseq
-  \fi
-}
-%    \end{macrocode}
-% \end{macro}
 % \begin{macro}{\ccl@nesting} The nesting option sets whether the
 %   nesting level of a list should be counted list-specific (value
 %   \lstinline{local}), or globally (value \lstinline{global},
 %   default).
 %    \begin{macrocode}
 \let\ccl@nesting\ccl@str@global
-\define@choicekey{coco-lists.sty}{nesting}[\@ccl@nesting\nr]{local,global}{%
-  \ifcase\nr\relax% local
-    \global\let\ccl@nesting\ccl@str@local
-  \fi
+\keys_define:nn { cocotex/lists }
+{
+ nesting .choice:,
+ nesting / local  .code:n = {\global\let\ccl@nesting\ccl@str@local },
+ nesting / global .code:n = {\global\let\ccl@nesting\ccl@str@global },
+ nesting       .initial:n = global
 }
 %    \end{macrocode}
 % \end{macro}
 %    \begin{macrocode}
-\ProcessOptionsX
+\ProcessKeyOptions[cocotex/lists]
+\ExplSyntaxOff
 %    \end{macrocode}
 %
 % \section{The List Container}
@@ -386,7 +400,7 @@
 %    \end{macrocode}
 % \begin{Component}{Label} represents a List item's local label.
 %    \begin{macrocode}
-    \ccDeclareComponent{Label}%
+    \ccDeclareComponent{Label}{}{}%
 %    \end{macrocode}
 % \end{Component}
 %    \begin{macrocode}
@@ -605,6 +619,9 @@
 %    \begin{macrocode}
 \def\cc@list{\cc@opt@empty\@cc@list}
 \def\@cc@list[#1]{%
+  \ifx\cc@is@counted\relax
+    \ccUntoggleCountedConditionals
+  \fi
   \ccl@advance@depth\@ne%
   \ccl@incr@count%
   \edef\ccl@cur@cont{\cc@cur@cont-\cclCurDepth}%
@@ -640,6 +657,7 @@
 %    \begin{macrocode}
   \ccSetPropertyX{prev-margin-right}{\ccl@rightskip}%
   \ccEvalType[\ccl@cur@cont]{Properties}%
+  \ccEvalType[\ccl@cur@cont]{Components}%
 %    \end{macrocode}
 % \end{Property}
 % \begin{macro}{\ccl@list@type} locally stores the current value of

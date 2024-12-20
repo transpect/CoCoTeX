@@ -25,15 +25,11 @@
 %%
 %% Maintainer: p.schulz@le-tex.de
 %%
-%% lualatex  -  texlive > 2018
+%% requires LuaLaTeX and ltpdfa!
 %%
-\NeedsTeXFormat{LaTeX2e}[2020/06/01]
+\NeedsTeXFormat{LaTeX2e}[]
 \ProvidesPackage{coco-accessibility}
     [\filedate \fileversion CoCoTeX accessibility module]
-\RequirePackage{kvoptions-patch}
-\RequirePackage{xkeyval}
-\RequirePackage{atbegshi}
-\RequirePackage{xparse}
 %    \end{macrocode}
 % The \lstinline{ltpdfa} package re-defines too many standard LaTeX
 % macros, so we only use its lua code and define the interface
@@ -42,33 +38,27 @@
 % create hard copies. This should increase compatibility with other
 % packages and make all our lifes easier.
 %
-% We start with adopting \lstinline{ltpdfa}'s package options.
-% \begin{macro}{\cca@lang@id} is the ISO 639-2 code for the document's
-%   main language. As default, we assume Modern English.
-%    \begin{macrocode}
-\def\cca@lang@id{eng}%
-\DeclareOptionX{lang-id}{\gdef\cca@lang@id{#1}}
-%    \end{macrocode}
-% \end{macro}
 % \begin{macro}{\if@cc@do@ally} is a simple switch that indicates active
 %   (\lstinline{\relax}) or inactive (everything else) accessibility
 %   features.
 %    \begin{macrocode}
 \newif\if@cc@do@ally \@cc@do@allyfalse
-\DeclareOptionX{init}{\global\@cc@do@allytrue}
-\DeclareOptionX{init-20}{\global\@cc@do@allytrue\global\@cc@pdf@twotrue}
+\ExplSyntaxOn
+\keys_define:nn { cocotex/a11y }
+{
+  init .code:n = {\global\@cc@do@allytrue},
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\cca@do@nodetree} if \lstinline{\relax}, show the node tree in
 %   the log and in the shell output.
 %    \begin{macrocode}
-\DeclareOptionX{nodetree}{\let\cca@do@nodetree\relax}
+  nodetree .code:n = {\let\cca@do@nodetree\relax},
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\cca@do@showspaces} if \lstinline{\relax}, show spaces
 %   in the pdf.
 %    \begin{macrocode}
-\DeclareOptionX{show-spaces}{\let\cca@do@showspaces\relax}
+  show-spaces .code:n = {\let\cca@do@showspaces\relax},
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\cca@do@dospaces} if \lstinline{\relax}, add
@@ -82,20 +72,28 @@
 %   width of that space to keep \LaTeX's typeface intact. This is
 %   activated by default.
 %    \begin{macrocode}
+}
 \let\cca@do@dospaces\relax
-\DeclareOptionX{no-spaces}{\let\cca@do@dospaces\@undefined}
+\keys_define:nn { cocotex/a11y }
+{
+  no-spaces .code:n = {\let\cca@do@dospaces\@undefined}
+}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\cca@do@doparas} if \lstinline{\relax}, add paragraph
 %   tagging.
 %    \begin{macrocode}
 \let\cca@do@doparas\relax
-\DeclareOptionX{no-paras}{\let\cca@do@doparas\@undefined}
+\keys_define:nn { cocotex/a11y }
+{
+  no-paras .code:n = {\let\cca@do@doparas\@undefined}
+}
 %    \end{macrocode}
 % \end{macro}
 % Processing the options.
 %    \begin{macrocode}
-\ProcessOptionsX
+\ProcessKeyOptions[cocotex/a11y]
+\ExplSyntaxOff
 %    \end{macrocode}
 %
 % \begin{macro}{\cca@patch@error} is a generic error message that is
@@ -195,8 +193,15 @@
 % we hard-code \lstinline{pdftex} as render engine:
 %    \begin{macrocode}
   \directlua{ltpdfa.config.driver = "\luaescapestring{pdftex}"}
-  \directlua{ltpdfa.config.lang = '\luaescapestring{\cca@lang@id}'}
-  \directlua{ltpdfa.init()}%
+%    \end{macrocode}
+% \begin{macro}{\cca@lang@id} is the IETF language tag for the
+%   document's main language.
+%    \begin{macrocode}
+  \AtBeginDocument{%
+    \edef\cca@lang@id{\localeinfo*{tag.bcp47}}% tag.bcp47
+    \directlua{ltpdfa.config.lang = '\luaescapestring{\cca@lang@id}'}%
+    \directlua{ltpdfa.init()}%
+  }%
 %    \end{macrocode}
 % Initial setup of ltpdfa
 %    \begin{macrocode}
@@ -262,8 +267,8 @@
 \def\ccaProtect{\ccWhenAlly{\cca@protected@defs}}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\CsToStr} is a xparse helper macro which returns the name of
-%   a control sequence \#1.
+% \begin{macro}{\CsToStr} is a~helper macro which returns the name of
+%   a~control sequence \#1.
 %    \begin{macrocode}
 \ExplSyntaxOn
 \newcommand{\CsToStr}[1]{\cs_to_str:N #1}
@@ -503,6 +508,33 @@
 %    \end{macrocode}
 % \end{macro}
 %
+% \subsection{Language Tagging}
+%
+% \begin{macro}{\ccaAddLang} adds a \texttt{/Lang}(uage) attribute to
+%   the current node with the value \InlineArg{1}.
+%    \begin{macrocode}
+\DeclareAccessibilityCommand{\ccaAddLang}[1]{\directlua{ltpdfa.tagger.setLang('\luaescapestring{#1}')}}
+%    \end{macrocode}
+% \end{macro}
+% The following code patches the unstarred
+% \lstinline{\foreignlanguage} command in such a way that it
+% automatically tags its content with a \DescribeTag{/Span} and adds a
+% \lstinline{/Lang} attribute to the Tag that is colleted from the
+% language definition file of the currently activated language.
+%    \begin{macrocode}
+\ccWhenAlly{%
+  \AddToHook{babel/*/foreign}{%
+    \pretocmd\BabelText
+      {\ccaVstructStart{Span}\ccaAddLang{\localeinfo{tag.bcp47}}}
+      {}{\cca@patch@error\BabelText}%
+    \apptocmd\BabelText
+      {\ccaVstructEnd{Span}}
+      {}{\cca@patch@error\BabelText}%
+    }%
+  \AtBeginDocument{\ActivateGenericHook{babel/*/foreign}}%
+}% /ccWhenAlly
+%    \end{macrocode}
+%
 %
 % \subsection{Lua injection}
 %
@@ -570,7 +602,7 @@
 \AtBeginDocument{%
     \patchcmd\Hy@StartlinkName
       {\pdfstartlink}
-      {\Hy@pstringdef\@argii{#2}\ccaStructStart{Link}\ccaAddAltText{#2}\edef\@ltpdfmy@parent{\ccaGetStructParent}%
+      {\Hy@pstringdef\@argii{#2}\ccaStructStart{Link}\ccaAddAltText{\@argii}\edef\@ltpdfmy@parent{\ccaGetStructParent}%
        \pdfstartlink}
       {}{\cca@patch@error\Hy@StartlinkName}
 %    \end{macrocode}
@@ -585,7 +617,7 @@
 %    \begin{macrocode}
     \patchcmd\hyper@linkurl
       {\pdfstartlink}
-      {\Hy@pstringdef\@argii{#2}\ccaStructStart{Link}\ccaAddAltText{#2}\edef\@ltpdfmy@parent{\ccaGetStructParent}%
+      {\Hy@pstringdef\@argii{#2}\ccaStructStart{Link}\ccaAddAltText{\@argii}\edef\@ltpdfmy@parent{\ccaGetStructParent}%
        \pdfstartlink}
       {}{\cca@patch@error\hyper@linkurl}
 %    \end{macrocode}
@@ -662,20 +694,20 @@
 %    \begin{macrocode}
 \DeclareAccessibilityCommand{\ccaPagestyleArtifacts}{%
   \ifx\@oddhead\@empty\else
-    \pretocmd\@oddhead{\ccaStructStart[Document]{header}}{}{}%
-    \apptocmd\@oddhead{\ccaStructEnd{header}}{}{}%
+    \pretocmd\@oddhead{\ccaStructStart[Document]{header}\ccaDisable}{}{}%
+    \apptocmd\@oddhead{\ccaEnable\ccaStructEnd{header}}{}{}%
   \fi
   \ifx\@evenhead\@empty\else
-    \pretocmd\@evenhead{\ccaStructStart[Document]{header}}{}{}%
-    \apptocmd\@evenhead{\ccaStructEnd{header}}{}{}%
+    \pretocmd\@evenhead{\ccaStructStart[Document]{header}\ccaDisable}{}{}%
+    \apptocmd\@evenhead{\ccaEnable\ccaStructEnd{header}}{}{}%
   \fi
   \ifx\@oddfoot\@empty\else
-    \pretocmd\@oddfoot{\ccaStructStart[Document]{footer}}{}{}%
-    \apptocmd\@oddfoot{\ccaStructEnd{footer}}{}{}%
+    \pretocmd\@oddfoot{\ccaStructStart[Document]{footer}\ccaDisable}{}{}%
+    \apptocmd\@oddfoot{\ccaEnable\ccaStructEnd{footer}}{}{}%
   \fi
   \ifx\@evenfoot\@empty\else
-    \pretocmd\@evenfoot{\ccaStructStart[Document]{footer}}{}{}%
-    \apptocmd\@evenfoot{\ccaStructEnd{footer}}{}{}%
+    \pretocmd\@evenfoot{\ccaStructStart[Document]{footer}\ccaDisable}{}{}%
+    \apptocmd\@evenfoot{\ccaEnable\ccaStructEnd{footer}}{}{}%
   \fi}
 %    \end{macrocode}
 % \end{macro}
@@ -933,7 +965,7 @@
 % Finally, we hook \lstinline{ltpdfa}'s page processor into
 % \lstinline{AtBeginShipoutBox}:
 %    \begin{macrocode}
-\ccWhenAlly{\AtBeginShipout{\directlua{ltpdfa.pageprocessor(tex.box["AtBeginShipoutBox"])}}}%
+\ccWhenAlly{\AddToHook{shipout/before}{\directlua{ltpdfa.pageprocessor(tex.box["ShipoutBox"])}}}%
 %    \end{macrocode}
 % End of {\TeX} source code.
 %    \begin{macrocode}[numbers=none,gobble=1]

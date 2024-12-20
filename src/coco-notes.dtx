@@ -13,9 +13,7 @@
 %%
 %% Maintainer: p.schulz@le-tex.de
 %%
-%% lualatex  -  texlive > 2019
-%%
-\NeedsTeXFormat{LaTeX2e}[2020/06/01]
+\NeedsTeXFormat{LaTeX2e}[]
 \ProvidesPackage{coco-notes}
     [\filedate \fileversion le-tex coco notes module]
 %    \end{macrocode}
@@ -38,39 +36,47 @@
 %
 % The \lstinline{endnotes} option causes all footnotes to be rendered as endnotes.
 %    \begin{macrocode}
-\DeclareOption{endnotes}{\global\@ccn@use@entrue}
+\ExplSyntaxOn
+\keys_define:nn { cocotex/notes }
+{
+  endnotes .code:n = { \global\@ccn@use@entrue },
 %    \end{macrocode}
 % The option \lstinline{ennotoc} prevents headings in the Notes
 % section from creating entries in the Table of Contents.
 %    \begin{macrocode}
-\DeclareOption{ennotoc}{\global\let\ccn@en@no@toc\relax}
+  ennotoc  .code:n = { \global\let\ccn@en@no@toc\relax },
 %    \end{macrocode}
 % The option \lstinline{resetnotesperchapter} resets foot- and endnote
 % counters at the start of each \lstinline{chapter} level heading. If
 % omitted (default) foot- or endnotes are numbered throughout the
 % whole document
 %    \begin{macrocode}
-\DeclareOption{resetnotesperchapter}{\global\let\ccn@reset@notes@per@chapter\relax}
+  resetnotesperchapter .code:n = { \global\let\ccn@reset@notes@per@chapter\relax },
 %    \end{macrocode}
 % The option \lstinline{endnoteswithchapters} implies
 % \lstinline{endnotes} and causes chapter headings to be repeated in
 % the printnotes chapter as sections.
 %    \begin{macrocode}
-\DeclareOption{endnoteswithchapters}{\global\@ccn@use@entrue\global\let\ccn@en@with@chapters\relax}
+  endnoteswithchapters .code:n =
+  {
+    \global\@ccn@use@entrue
+    \global\let\ccn@en@with@chapters\relax
+  },
 %    \end{macrocode}
 % The option \lstinline{endnotelinks} is now defunct, because
 % back-linking is necessary for tagging.
 %    \begin{macrocode}
-\DeclareOption{endnotelinks}{}
-\ProcessOptions
+  endnotelinks .code:n = {}
+}
+\ProcessKeyOptions[cocotex/notes]
+\ExplSyntaxOff
 %    \end{macrocode}
 %
 %
 % \subsection{Hard Requirements}
 %
 % The \lstinline{footnote} package is mandatory since it provides the
-% \lstinline{\savenotes} and \lstinline{\spewnotes} macros needed in
-% other {\CoCoTeX} modules.
+% \lstinline{\savenotes} and \lstinline{\spewnotes} macros.
 %    \begin{macrocode}
 \RequirePackage{footnote}
 %    \end{macrocode}

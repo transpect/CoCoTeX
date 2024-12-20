@@ -39,7 +39,7 @@ module CoCoTeX
         end
       end
       @template.add_preface(content: File.read(File.join(@source_dir, "cocoDTXPreface.dtx")))
-      File.open(File.join(BASE_DIR, "VERSION"), "w") { |file| file.puts Tomlib::dump(@template.new_version) } if @template.new_version
+      File.open(File.join(BASE_DIR, "VERSION"), "w") { |file| file.puts Tomlib::dump(@template.current) }
       @template.update_code()
       File.open(File.join(@temp_dir, "cocotex.dtx"), "w") { |file| file.puts @template.content }
     end
