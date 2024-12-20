@@ -1082,7 +1082,16 @@
 %   the URL may break across lines. The character is neither printed
 %   nor does it occur in the hyperlink destination.
 %    \begin{macrocode}
-\DeclareRobustCommand*{\ccBurl}[1][\ccBurlTokenSep]{\begingroup\edef\ccBurlTokenSep{#1}\hyper@normalise\cc@url}
+\ExplSyntaxOn
+\DeclareRobustCommand*{\ccBurl}[1][\ccBurlTokenSep]{%
+  \begingroup
+    \tl_if_blank:eF { #1 }
+    {
+      \token_if_active:NT #1 { \edef#1{ \token_to_str:N #1 } }
+      \edef\ccBurlTokenSep{#1}
+    }
+    \hyper@normalise\cc@url}
+\ExplSyntaxOff%
 \cslet{\ccPrefix Burl}\ccBurl
 %    \end{macrocode}
 % \begin{macro}{\cc@url} is where the break point character is
