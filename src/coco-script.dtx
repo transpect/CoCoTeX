@@ -127,10 +127,39 @@
  BoldItalicFont = NotoSansMono-SemiBold.ttf,%
  Path = ./fonts/Noto/Mono/,%
  WordSpace = 1.25]
+%    \end{macrocode}
+% 
+% \begin{macro}{\textfallback} is a text command that switches to the
+%   serif fallback font for its argument \InlineArg{1}.
+%    \begin{macrocode}
 \DeclareTextFontCommand\textfallback{\fallbackfont}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\textsffallback} is a text command that switches to
+%   the sans-serif fallback font for its argument \InlineArg{1}.
+%    \begin{macrocode}
 \DeclareTextFontCommand\textsffallback{\sffallbackfont}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\textttfallback} is a text command that switches to
+%   the monospace fallback font for its argument \InlineArg{1}.
+%    \begin{macrocode}
 \DeclareTextFontCommand\textttfallback{\ttfallbackfont}
 %    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccFallback} is a ``smart'' font macro that detects if
+%   it has been used inside \texttt{rm}, \texttt{sf}, or \texttt{tt}
+%   contexts and switches to the corresponding fallback font
+%   automatically to print its argument \InlineArg{1}.
+%    \begin{macrocode}
+\DeclareTextFontCommand\ccFallback{%
+  \ccsTestFont{\ccs@rmdefault}
+    {\fallbackfont}
+    {\ccsTestFont{\ccs@sfdefault}
+      {\sffallbackfont}
+      {\ttfallbackfont}}}%
+%    \end{macrocode}
+% \end{macro}
 %
 %
 % \subsection{Emojis}
