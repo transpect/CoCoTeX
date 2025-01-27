@@ -286,8 +286,7 @@
 % \textbf{Style progammers need to make sure that no page breaks are
 % allowed within the \lstinline{heading-block}!}
 %    \begin{macrocode}
-        \tpIfPropVal{no-toc}{true}{}{\tp@make@toc}% ToC entries
-        \tpIfPropVal{no-BM}{true}{}{\tp@make@bookmarks}% Bookmarks
+        \tpGenerateToC
         \tpUseProperty{toc-hook}%
         \tpIfProp{extended}{\tpUseProperty{extended-heading}}{}%
       \egroup%
@@ -319,6 +318,23 @@
 }
 %    \end{macrocode}
 % \end{macro}
+% \end{macro}
+% 
+% \begin{macro}{\tpGenerateToC} is a macro to be used inside of the
+%   \lstinline{heading-block} Property, preferrably right after
+%   printing the \lstinline{Title} Component, which generates the ToC
+%   and Bookmark entries. It is self-deactivating, i.e., it should be
+%   used only once in each \lstinline{heading} Container, as only its
+%   first occurence generates the ToC and BM entries.
+%    \begin{macrocode}
+\def\tpGenerateToC{%
+  \ifx\tp@hd@open@toc\relax
+    \tpIfPropVal{no-toc}{true}{}{\tp@make@toc}% ToC entries
+    \tpIfPropVal{no-BM}{true}{}{\tp@make@bookmarks}% Bookmarks
+    \global\let\tp@hd@open@toc\@undefined
+  \fi
+}
+%    \end{macrocode}
 % \end{macro}
 % 
 % \begin{macro}{\tp@hd@use@hook} recursively includes a hook \#1 from the heading \#2's parent before expanding its own version.
@@ -727,6 +743,7 @@
   \let\tp@heading@label\relax
   \def\tpAuthorCnt{\z@}%
   \def\tpAffilCnt{\z@}%
+  \global\let\tp@hd@open@toc\relax
   \tp@reset@components{\tp@cur@cont}%
   }
 %    \end{macrocode}
