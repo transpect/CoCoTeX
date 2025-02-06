@@ -552,7 +552,7 @@
 % \lstinline{author-list-print-format} Property.
 %    \begin{macrocode}
       \ifnum\ccAuthorCnt>\z@
-        \ccdefFromCountedComp\cch@tempa{Author}{author-list-print-format}%
+        \ccedefFromCountedComp\cch@tempa{Author}{author-list-print-format}%
         \ifx\cch@tempa\relax\else
           \ccComponent{#1AuthorNameList}{\cch@tempa}%
         \fi
