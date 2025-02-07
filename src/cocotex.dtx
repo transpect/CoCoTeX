@@ -90,12 +90,12 @@
 \newif\ifjournal    \journalfalse
 \keys_define:nn { cocotex/cls }
 {
+  pubtype           .initial:n = mono,
   pubtype .choice:,
   pubtype / collection .code:n = { \global\collectiontrue },
   pubtype / article    .code:n = { \global\articletrue    },
   pubtype / journal    .code:n = { \global\journaltrue    },
   pubtype / mono       .code:n = { \global\monographtrue  },
-  pubtype           .initial:n = mono,
 }
 %    \end{macrocode}
 %
