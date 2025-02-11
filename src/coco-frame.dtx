@@ -52,7 +52,6 @@
     %/CropBox[\b@l@offset\space\b@u@offset\space\b@r@offset\space\b@o@offset]
     %/MediaBox[\b@l@offset\space\b@u@offset\space\b@r@offset\space\b@o@offset]
   }
-  \expandafter\pdfpageattr\expandafter{\@tempa}
 \fi
 %    \end{macrocode}
 % Apparently, the crop package relies on old pdf dimension macros. If
@@ -64,6 +63,9 @@
   \pdfpagewidth\paperwidth
   \pdfpageheight\paperheight
 }{}
+\ifx\cc@frame@mode p\relax
+  \expandafter\pdfpageattr\expandafter{\@tempa}
+\fi
 %    \end{macrocode}
 % Setting PDF boundaries
 %    \begin{macrocode}
