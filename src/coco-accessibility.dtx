@@ -610,7 +610,12 @@
 %    \begin{macrocode}
     \patchcmd\Hy@StartlinkName
       {#1}
-      {#1 /StructParent \@ltpdfmy@parent /Contents(\@argii)}
+      {#1
+       \ifx\ccaGetStructParent\cc@no@ccaGetStructParent\else
+         /StructParent \@ltpdfmy@parent
+         /Contents(\@argii)
+       \fi
+      }
       {}{\cca@patch@error\Hy@StartlinkName}
 %    \end{macrocode}
 % then we patch hyperref's general link macro, twice. Once for the Link's start tag
@@ -629,8 +634,10 @@
       }
       {/C[\@urlbordercolor]%
         \fi
-        /StructParent \@ltpdfmy@parent%
-        /Contents(\@argii)
+        \ifx\ccaGetStructParent\cc@no@ccaGetStructParent\else
+          /StructParent \@ltpdfmy@parent%
+          /Contents(\@argii)
+        \fi
       }{}{\cca@patch@error\hyper@linkurl}
 %    \end{macrocode}
 % finally, we patch the end tag for the link node into the
