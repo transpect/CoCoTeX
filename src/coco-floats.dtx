@@ -1983,11 +1983,11 @@
 %   text(s). Those can be submitted by the \UsageComponent{AltText}
 %   Component or by the \lstinline{alt} key in the optional argument
 %   of \lstinline{\includegraphics}. If both are given, the
-%   \lstinline{alt} key takes precedence. If neither is given, a
-%   \lstinline{--} is inserted.
+%   \lstinline{alt} key takes precedence.
 %    \begin{macrocode}
 \def\ccf@includesubgraphics{\cc@opt@empty\@ccf@includesubgraphics}%
 \def\@ccf@includesubgraphics[#1]#2{%
+  \let\@cca@Gin@alt\relax
   \def\@igopts{max width=\hsize,max height=\vsize}%
   \ccIfPropVal{fix-dimen}{true}{\apptocmd\@igopts{,width=\hsize}{}{}}{}%
   \if!#1!\else
@@ -2002,9 +2002,7 @@
   \if@cc@is@final
     \ifx\cca@Gin@alt\@undefined\let\cca@Gin@alt\relax\fi
     \ifx\relax\cca@Gin@alt\relax
-      \ccIfComp{AltText}
-        {\ccSanitizeStr\@cca@Gin@alt{\ccUseComp{AltText}}}
-        {\def\@cca@Gin@alt{--}}%
+      \ccWhenComp{AltText}{\ccSanitizeStr\@cca@Gin@alt{\ccUseComp{AltText}}}%
     \else
       \ccSanitizeStr\@cca@Gin@alt{\cca@Gin@alt}%
     \fi
@@ -2014,8 +2012,10 @@
 % \lstinline{\pdfstringdef} macro one more time to transform all
 % non-alphanumeric symbols to octals before we passit down to ltpdfa.
 %    \begin{macrocode}
-    \Hy@pdfstringdef\@@cca@Gin@alt{\@cca@Gin@alt}%
-    \ccaAddAltText{\@@cca@Gin@alt}%
+    \ifx\@cca@Gin@alt\relax\else
+      \Hy@pdfstringdef\@@cca@Gin@alt{\@cca@Gin@alt}%
+      \ccaAddAltText{\@@cca@Gin@alt}%
+    \fi
     \ccaStructEnd{Figure}%
   \fi
 }
