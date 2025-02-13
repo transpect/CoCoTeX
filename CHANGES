@@ -107,6 +107,7 @@
        DocumentInfo fields
 - FIX: Links now have /Contents attribute to make VeraPDF's PDF/UA1
        check happy
+- FIX: Error when Links occur in \ccaDisable context
 
 ## coco-lists.dtx
 - FIX: typo in doc string
