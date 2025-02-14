@@ -519,7 +519,7 @@
 % unlinked PDFs from the same sources without the need to remove
 % makros from the tex files.
 %    \begin{macrocode}
-\if\cc@pdf@std X
+\ifx\cc@pdf@std X
   \let\href\relax
   \RequirePackage{nohyperref}
 \else
