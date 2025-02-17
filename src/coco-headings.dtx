@@ -1549,22 +1549,24 @@
   \ccDebugMsg[a11y]{Calling AutoClose for \ccCurSecName\space (\ccCurSecLevel).}
   \ifx\ccPrevSecLevel\@undefined\else
     \ifx\ccCurSecLevel\@undefined\else
-      \ccDebugMsg[a11y]{prev: \ccPrevSecLevel, cur: \ccCurSecLevel, abs: \the\cch@total@nesting@level.}
-      \ifnum\ccPrevSecLevel=\ccCurSecLevel\relax
-        \ccDebugMsg[a11y]{Closing \the\cch@total@nesting@level.}
-        \global\advance\cch@total@nesting@level\m@ne\relax
-        \ccaVstructEnd{\csname cch@sec@\the\cch@total@nesting@level @name\endcsname}%
-      \else
-        \ifnum\ccPrevSecLevel<\ccCurSecLevel\relax
-          \csxdef{cch@prev@parent@level@\ccCurSecLevel}{\ccPrevSecLevel}%
+      \ifnum\cch@total@nesting@level=\@ne\relax\else
+        \ccDebugMsg[a11y]{prev: \ccPrevSecLevel, cur: \ccCurSecLevel, abs: \the\cch@total@nesting@level.}
+        \ifnum\ccPrevSecLevel=\ccCurSecLevel\relax
+          \ccDebugMsg[a11y]{Closing \the\cch@total@nesting@level.}
+          \global\advance\cch@total@nesting@level\m@ne\relax
+          \ccaVstructEnd{\csname cch@sec@\the\cch@total@nesting@level @name\endcsname}%
         \else
-          \ifnum\ccPrevSecLevel>\ccCurSecLevel\relax
-            \ccDebugMsg[a11y]{Closing (inner) \the\cch@total@nesting@level.}
-            \global\advance\cch@total@nesting@level\m@ne\relax
-            \ccaVstructEnd{\csname cch@sec@\the\cch@total@nesting@level @name\endcsname}%
-            \ifnum\cch@total@nesting@level=\@ne\relax\else
-              \xdef\ccPrevSecLevel{\csname cch@prev@parent@level@\ccPrevSecLevel\endcsname}%
-              \let\cca@next\cchAutoClose
+          \ifnum\ccPrevSecLevel<\ccCurSecLevel\relax
+            \csxdef{cch@prev@parent@level@\ccCurSecLevel}{\ccPrevSecLevel}%
+          \else
+            \ifnum\ccPrevSecLevel>\ccCurSecLevel\relax
+              \ccDebugMsg[a11y]{Closing (inner) \the\cch@total@nesting@level.}
+              \global\advance\cch@total@nesting@level\m@ne\relax
+              \ccaVstructEnd{\csname cch@sec@\the\cch@total@nesting@level @name\endcsname}%
+              \ifnum\cch@total@nesting@level=\@ne\relax\else
+                \xdef\ccPrevSecLevel{\csname cch@prev@parent@level@\ccPrevSecLevel\endcsname}%
+                \let\cca@next\cchAutoClose
+              \fi
             \fi
           \fi
         \fi
