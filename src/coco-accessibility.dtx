@@ -30,6 +30,10 @@
 \NeedsTeXFormat{LaTeX2e}[]
 \ProvidesPackage{coco-accessibility}
     [\filedate \fileversion CoCoTeX accessibility module]
+\@ifpackageloaded{etoolbox}   {}{\RequirePackage{etoolbox}}
+\@ifpackageloaded{graphicx}   {}{\RequirePackage{graphicx}}
+\@ifpackageloaded{iftex}      {}{\RequirePackage{iftex}}
+\@ifpackageloaded{coco-kernel}{}{\newif\if@cc@is@final\@cc@is@finaltrue}
 %    \end{macrocode}
 % The \lstinline{ltpdfa} package re-defines too many standard LaTeX
 % macros, so we only use its lua code and define the interface
@@ -80,6 +84,15 @@
 }
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{\cca@debug} if \lstinline{\relax}, print exhaustive
+%   debugging information.
+%    \begin{macrocode}
+\keys_define:nn { cocotex/a11y }
+{
+  debug .code:n = {\let\cca@debug\relax}
+}
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\cca@do@doparas} if \lstinline{\relax}, add paragraph
 %   tagging.
 %    \begin{macrocode}
@@ -103,7 +116,13 @@
 %   messes with the macro's original definition. \#1 is the CS token
 %   of the un-patchable macro.
 %    \begin{macrocode}
-\def\cca@patch@error{\cc@patch@error{a11y}}
+\ifdefined\cc@patch@error
+  \def\cca@patch@error{\cc@patch@error{a11y}}
+\else
+  \def\cca@patch@error#1{\PackageError{coco-accessibility}
+    {Could not patch \noexpand#1}
+    {You probably use a LaTeX package that re-defines the \noexpand#1 control sequence. It is apparently not compatbile with CoCoTeX. Sorry}}
+\fi
 %    \end{macrocode}
 % \end{macro}
 %
@@ -141,8 +160,12 @@
 %    \begin{macrocode}
 \ccWhenAlly{%
   \ifluatex\else
-    \ccPackageError{a11y}{engine}
-      {accessibility features require lualatex!}
+    \ifdefined\ccPackageError
+      \def\@tempa{\PackageError{coco-accessibility}}
+    \else
+      \def\@tempa{\ccPackageError{a11y}{engine}}
+    \fi
+    \@tempa{accessibility features require lualatex!}
       {You tried to use the accessibility features of CoCoTeX with an other TeX engine than lualatex. This will not work; lualatex is a hard requirement. Sorry.}
   \fi
   \RequirePackage{luatexbase-attr}
@@ -155,6 +178,7 @@
 % Additional hyperref setup to be executed at the very end of the
 % preamble.
 %    \begin{macrocode}
+  \AddToHook{env/document/before}{\@ifpackageloaded{hyperref}{}{\RequirePackage{hyperref}}}%
   \AtBeginDocument{%
     \hypersetup{%
       % pdfa=true% already set elsewhere
@@ -176,9 +200,13 @@
 %    \begin{macrocode}
   \directlua{ltpdfa = require('ltpdfa')}
   \directlua{ltpdfa.config.final = true}
-  \ifinlist{ltpdfa}\debug@domain@list
-    {\directlua{ltpdfa.config.debug = true}}
-    {\directlua{ltpdfa.config.debug = false}}
+  \ifdefined\debug@domain@list
+    \ifinlist{ltpdfa}\debug@domain@list
+      {\directlua{ltpdfa.config.debug = true}}
+      {\directlua{ltpdfa.config.debug = false}}
+  \else
+    \directlua{ltpdfa.config.debug = \ifx\cca@debug\relax true\else false\fi}%
+  \fi
   \directlua{ltpdfa.config.nodetree = \ifx\cca@do@nodetree\relax true\else false\fi}
   \directlua{ltpdfa.config.showspaces = \ifx\cca@do@showspaces\relax true\else false\fi}
   \directlua{ltpdfa.config.dospaces = \ifx\cca@do@dospaces\relax true\else false\fi}
@@ -198,8 +226,9 @@
 %   document's main language.
 %    \begin{macrocode}
   \AtBeginDocument{%
-    \edef\cca@lang@id{\localeinfo*{tag.bcp47}}% tag.bcp47
-    \directlua{ltpdfa.config.lang = '\luaescapestring{\cca@lang@id}'}%
+    \@ifpackageloaded{babel}{\edef\cca@lang@id{\localeinfo*{tag.bcp47}}% tag.bcp47
+      \directlua{ltpdfa.config.lang = '\luaescapestring{\cca@lang@id}'}%
+    }{\directlua{ltpdfa.config.lang = '\luaescapestring{en}'}}%
     \directlua{ltpdfa.init()}%
   }%
 %    \end{macrocode}
@@ -540,9 +569,10 @@
 %
 % Some features are realized by Lua code, so we tell LuaLaTeX to
 % include the code that is generated from material later in this
-% source file:
+% source file. However, the lua code is currently only needed in
+% conjunction with the \CoCoTeX's \lstinline{title} module.
 %    \begin{macrocode}
-\ccWhenAlly{\directlua{ally = require('coco-accessibility')}}
+\ccWhenAlly{\IfFileExists{coco-accessibility.lua}{\directlua{ally = require('coco-accessibility')}}{}}
 %    \end{macrocode}
 %
 % \subsection{Alternative Text Elements}
@@ -902,7 +932,9 @@
 %   placeholder tag node inserted immediately after the root tag node
 %   is opened. This can be used to be replaced by the document's main
 %   title tag node using the \UsageMacro{\ccaReplaceStruct} command,
-%   which should get this macro as its sole argument.
+%   which should get this macro as its sole argument. Since ltpdfa
+%   removes all empty structure elements, if the dummy left unused, it
+%   will be removed at the very end.
 %    \begin{macrocode}
     \ccaStructStart{dummy}%
       \ccaSaveCurStruct{cca@id@document@dummy}%
@@ -927,16 +959,16 @@
     }%
   }%
   \AtEndDocument{%
-    \ccDebugMsg[a11y]{Final AutoClose. \meaning\ccPrevSecLevel, \meaning\ccCurSecLevel}%
-    \cchResetNesting
-    \ccDebugMsg[a11y]{End Document}%
-    \if@backmatter\ccaVstructEnd{Backmatter}\fi
+    \@ifpackageloaded{coco-headings}{\cchResetNesting}{}%
+    \@ifclassloaded{cocotex}{\if@backmatter\ccaVstructEnd{Backmatter}\fi}{}%
     \ccaVstructEnd{Document}
-    \ifarticle\else
-      \ccaAddRolemap{Frontmatter}{Part}%
-      \ccaAddRolemap{Mainmatter}{Part}%
-      \ccaAddRolemap{Backmatter}{Part}%
-    \fi
+    \@ifclassloaded{cocotex}{%
+      \ifarticle\else
+        \ccaAddRolemap{Frontmatter}{Part}%
+        \ccaAddRolemap{Mainmatter}{Part}%
+        \ccaAddRolemap{Backmatter}{Part}%
+      \fi
+      }{}%
     \directlua{ltpdfa.endDocument()}%
   }%
 }
@@ -952,7 +984,6 @@
   \pretocmd{\)}{\ccaStructEnd{Formula}}{}{\cca@patch@error\)}
   \apptocmd{\[}{\ccaVstructStart{P}\ccaStructStart{Formula}}{}{\cca@patch@error\[}
   \pretocmd{\]}{\ccaStructEnd{Formula}\ccaVstructEnd{P}}{}{\cca@patch@error\]}
-
   \@ifpackageloaded{amsmath}{%
     \pretocmd{\start@align}{\ccaVstructStart{P}\ccaStructStart{Formula}}{}{\cca@patch@error\start@align}%
     \apptocmd{\endalign}{\ccaStructEnd{Formula}\ccaVstructEnd{P}}{}{\cca@patch@error\endalign}%
