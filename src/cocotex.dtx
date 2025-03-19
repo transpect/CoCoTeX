@@ -281,6 +281,7 @@
 %    \begin{macrocode}
 \ProcessOptions
 \ProcessKeyOptions[cocotex/cls]
+\cs_if_exist:NT \ccClassOptions{\exp_args:Nnx\keys_set:nn {cocotex/cls}{\ccClassOptions}}
 %    \end{macrocode}
 % After processing the options, we determine the PDF version according
 % to the selected PDF standard. If no standard is selected, we default
