@@ -157,6 +157,18 @@
           \vrule\@width\columnwidth\@height0.00005\p@\@depth0\p@
           \if@twocolumn
             \kern\columnsep\vrule\@width\columnwidth\@height0.00005\p@\@depth0\p@
+          \else
+            \ifx\col@number\@undefined\else
+              \ifnum\col@number<\tw@\relax
+              \else
+                \@tempcntb\col@number
+                \loop
+                  \advance\@tempcntb\m@ne
+                  \kern\columnsep\vrule\@width\columnwidth\@height0.00005\p@\@depth0\p@
+                \ifnum\@tempcntb>\@ne
+                \repeat
+              \fi
+            \fi
           \fi
           \ifodd\count\z@\else
             \vrule\@width1em\@height0.00005\p@\@depth0\p@%
@@ -198,6 +210,19 @@
           \if@twocolumn
             \hskip\columnwidth\rlap{\vrule height\textheight}%
             \hskip\columnsep\rlap{\vrule height\textheight}%
+          \else
+            \ifx\col@number\@undefined\else
+              \ifnum\col@number<\tw@\relax
+              \else
+                \@tempcntb\col@number
+                \loop
+                  \advance\@tempcntb\m@ne
+                  \hskip\columnwidth\rlap{\vrule height\textheight}%
+                  \hskip\columnsep\rlap{\vrule height\textheight}%
+                \ifnum\@tempcntb>\@ne
+                \repeat
+              \fi
+            \fi
           \fi
           \hfil\vrule height\textheight
         }%
