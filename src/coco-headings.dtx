@@ -333,10 +333,6 @@
 % \lstinline{heading} environment is in the source.
 %    \begin{macrocode}
       \ccUseProperty{before-heading-block}%
-%    \end{macrocode}
-% Labels to be used with LaTeX's cross reference mechanism are defined
-%    \begin{macrocode}
-      \ccCreateLabel{#2}% label facility
       \leftskip\ccUseProperty{margin-left}%
       \rightskip\ccUseProperty{margin-right}%
       \bgroup
@@ -571,6 +567,7 @@
 %    \begin{macrocode}
 \def\cchGenerateToC{%
   \ifx\cch@open@toc\relax
+    \ccCreateLabel{\ccCurSecName}% generate a new label for the bookmarks and toc
     \ccIfPropVal{no-toc}{true}{}{\cch@make@toc}% ToC entries
     \ccIfPropVal{no-BM}{true}{}{\cch@make@bookmarks}% Bookmarks
     \ccUseProperty{toc-hook}%
