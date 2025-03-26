@@ -339,10 +339,11 @@
 % \lstinline{\write}, which resets \lstinline{\lastskip}. After
 % \lstinline{\ccCreateLabel} was moved to \lstinline{\cchGenerateToC},
 % spacing in some publisher styles suddenly broke. So in order to
-% ``restore'' the previous behavior, we need to reset
-% \lstinline{\lastskip} manually:
+% preserve the exact previous behavior, we need to reset the
+% (vertical) \lstinline{\lastskip} manually while preserving
+% horizontal spacing:
 %    \begin{macrocode}
-      \@ifpackageloaded{coco-xerif}{\kern\z@}{}%
+      \@ifpackageloaded{coco-xerif}{\@bsphack\kern\z@\@esphack}{}%
       \leftskip\ccUseProperty{margin-left}%
       \rightskip\ccUseProperty{margin-right}%
       \bgroup
