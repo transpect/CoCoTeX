@@ -73,6 +73,22 @@
 \ifx\cc@color@enc\relax\else
   \tl_gset:Nn \l_color_fixed_model_tl {\cc@color@enc}%
   \PassOptionsToPackage{\cc@color@enc}{xcolor}%
+%    \end{macrocode}
+% We also set the built-in defaults in case they are not overridden
+% via the corresponding Components inside the \UsageContainer{Meta}
+% instance.
+%    \begin{macrocode}
+  \ifx\cc@color@enc\cc@str@cmyk
+    \def\cct@default@icc@comp{4}%
+    \def\cct@default@icc@iden{Coated FOGRA39}%
+  \else\ifx\cc@color@enc\cc@str@rgb
+      \def\cct@default@icc@comp{3}%
+      \def\cct@default@icc@iden{IEC 61966-2.1 Default RGB colour space - sRGB}%
+    \else
+      \def\cct@default@icc@comp{1}%
+      \def\cct@default@icc@iden{ISO Coated v2 - GREY 1c - (basICColor)}%
+    \fi
+  \fi
 \fi%
 \ExplSyntaxOff
 %    \end{macrocode}

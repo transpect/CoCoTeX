@@ -158,7 +158,7 @@
          \ccDebugMsg[pdfmeta]{Writing \string\setDocinfo[utf-8]{##2}{\expandafter\strip@prefix\meaning\cct@cur@data}}%
          \edef\x{\noexpand\ccaSetDocinfo[utf-8]{##2}}\expandafter\x\expandafter{\cct@cur@data}%
        \fi}
-     {\cct@write@hr@infodict{##1}{##3}}}%
+     {\cct@write@hr@infodict{##1}{##2}{##3}}}%
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\cct@write@pdf@meta@list} handles meta data that are
@@ -185,7 +185,7 @@
        \else
          \cct@split@pdf@meta{##4}{\and}%
        \fi}
-     {\cct@write@hr@infodict{##1}{##3}}}%
+     {\cct@write@hr@infodict{##1}{##2}{##3}}}%
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\cct@split@pdf@meta} is a helper function to split the
@@ -218,8 +218,13 @@
 %   entry via \lstinline{hyperref} with the key \InlineArg{1} and the
 %   value \InlineArg{2}.
 %    \begin{macrocode}
-  \def\cct@write@hr@infodict##1##2{%
-    \protected@edef\x{\noexpand\hypersetup{##1={\expandonce{##2}}}}\x
+  \def\cct@write@hr@infodict##1##2##3{%
+    \if\cc@pdf@std X%
+      \pdfstringdef\cct@cur@data{##3}%
+      \pdfextension info{/##2 (\cct@cur@data)}%
+    \else
+      \protected@edef\x{\noexpand\hypersetup{##1={\expandonce{##3}}}}\x
+    \fi
   }%
 %    \end{macrocode}
 % \end{macro}
@@ -227,12 +232,38 @@
 % start to collect the necessary data points:
 %    \begin{macrocode}
   \cct@title@insert@xmp
+  \ifx\cc@color@enc\relax\else
+    \cct@title@process@oi
+  \fi
   \cct@title@process@bkc
   \cct@title@process@bkt
   \cct@title@process@bkk
   \cct@title@process@bka
   \cct@title@process@bkl
 }
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\cct@title@process@oi} processes the OutputIntent,
+%   which is needed by both PDF/A, UA and X standards, but handled
+%   differently. Handling for PDF/UA is taken care of by
+%   \lstinline{ltpdfa}, while PDF/X is handled here, directly.
+%    \begin{macrocode}
+\def\cct@title@process@oi{%
+  \ccIfAlly
+  {\edef\x{\noexpand\ccaAddToConfig{intent}{\ccUseProperty{output-intent}}}\x}
+  {\if\cc@pdf@std X%
+    \immediate\pdfobj stream attr{/N \ccIfComp{IccComponents}{\ccUseComp{IccComponents}}{\cct@default@icc@comp}} file{\ccIfComp{IccProfileFile}{\ccUseComp{IccProfileFile}}{suppl/\cc@color@enc.icc}}
+    \pdfcatalog{%
+      /OutputIntents [ <<
+      /Type /OutputIntent
+      /S /GTS_PDFX
+      /DestOutputProfile \the\pdflastobj\space 0 R
+      /OutputConditionIdentifier(\ccIfComp{IccIdentifier}{\ccUseComp{IccIdentifier}}{\cct@default@icc@iden})
+      /RegistryName(http://www.color.org)
+      >> ]
+    }
+  \fi
+}}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -248,7 +279,7 @@
 \def\cct@title@process@bkl{%
   \ccUnlessAlly{%
     \edef\cct@lang@id{\localeinfo*{name.english}}%tag.bcp47
-    \cct@write@hr@infodict{pdflang}{\cct@lang@id}%}%
+    \cct@write@hr@infodict{pdflang}{}{\cct@lang@id}%}%
   }%
 }
 %    \end{macrocode}
@@ -349,7 +380,13 @@
     \begingroup
       \immediate\pdfobj stream attr {/Type /Metadata /Subtype /XML}
       file{##1}
-      \pdfcatalog{/Metadata \the\pdflastobj\space 0 R}
+      \pdfcatalog{/Metadata \the\pdflastobj\space 0 R }
+      \if\cc@pdf@std X%
+        \ccWhenComp{PDFConformity}{%
+          \pdfextension info{/GTS_PDFXConformance(\ccUseComp{PDFConformity}) }%
+          \pdfextension info{/GTS_PDFXVersion(\ccUseComp{PDFConformity}) }%
+        }
+      \fi
     \endgroup}%
   \include@xmp
 }
@@ -998,7 +1035,33 @@ from the Components given in the Meta Container.}}}
   \ccDeclareGlobalComponent{AddNoteIV}%
 %    \end{macrocode}
 % \end{Component}
+%
+%
+% \subsubsection{Colour Profile and Output Intent}
+%
+% \DescribeComponent{IccProfileFile} holds the path
+%   (relative to the main tex file) and name of the .icc file.
 %    \begin{macrocode}
+  \ccDeclareGlobalComponent{IccProfileFile}
+%    \end{macrocode}
+% \DescribeComponent{IccComponents} holds the number of
+%   components in the color profile
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{IccComponents}
+%    \end{macrocode}
+% \DescribeComponent{IccIdentifier} holds the identifier
+%   of the color profile
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{IccIdentifier}%
+%    \end{macrocode}
+% \end{macro}
+%
+%
+% \subsubsection{Colour Profile and Output Intent}
+%
+% \DescribeComponent{PDFConformity} holds the PDF conformity level
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent{PDFConformity}
 }
 %    \end{macrocode}
 % \end{macro}
@@ -1382,55 +1445,6 @@ from the Components given in the Meta Container.}}}
         {\ccUseComp{ShortTitle}}
         {\ccUseComp{Title}}}%
   }%
-}
-%    \end{macrocode}
-%
-%
-% \section{Accessibility Features}
-%
-% \subsection{Output Intent and ICC Profiles}
-%
-%    \begin{macrocode}
-\ifx\cc@color@enc\relax\else
-\ccWhenAlly{%
-%    \end{macrocode}
-% First, we declare some Components that represent the three necessary
-% parameters for the output intent:
-%    \begin{macrocode}
-  \ccAddToType{Components}{titlepage}{%
-%    \end{macrocode}
-% \DescribeComponent{IccProfileFile} holds the path
-%   (relative to the main tex file) and name of the .icc file.
-%    \begin{macrocode}
-    \ccDeclareGlobalComponent{IccProfileFile}
-%    \end{macrocode}
-% \DescribeComponent{IccComponents} holds the number of
-%   components in the color profile
-%    \begin{macrocode}
-    \ccDeclareGlobalComponent{IccComponents}
-%    \end{macrocode}
-% \DescribeComponent{IccIdentifier} holds the identifier
-%   of the color profile
-%    \begin{macrocode}
-    \ccDeclareGlobalComponent{IccIdentifier}}
-%    \end{macrocode}
-% The Components are composed via a new Property
-% \lstinline{output-intent} which we add to \lstinline{coco-title}'s
-% Properties list (\lstinline{\cc@color@enc} is set via the
-% \lstinline{coco-common} module):
-%    \begin{macrocode}
-  \ifx\cc@color@enc\cc@str@cmyk
-    \def\cca@default@icc@comp{4}%
-    \def\cca@default@icc@iden{Coated FOGRA39}%
-  \else\ifx\cc@color@enc\cc@str@rgb
-      \def\cca@default@icc@comp{3}%
-      \def\cca@default@icc@iden{IEC 61966-2.1 Default RGB colour space - sRGB}%
-    \else
-      \def\cca@default@icc@comp{1}%
-      \def\cca@default@icc@iden{ISO Coated v2 - GREY 1c - (basICColor)}%
-    \fi
-  \fi
-  \ccAddToType{Properties}{titlepage}{%
 %    \end{macrocode}
 % \begin{Property}{output-intent}{<see below>} sends the output intent
 %   information to the \texttt{ltpdfa} package. It must contain of
@@ -1446,29 +1460,31 @@ from the Components given in the Meta Container.}}}
 %     profile, etc.)
 % \end{description}
 %    \begin{macrocode}
-    \ccSetProperty{output-intent}{%
-      profile=\ccIfComp{IccProfileFile}{\ccUseComp{IccProfileFile}}{suppl/\cc@color@enc.icc};%
-      components=\ccIfComp{IccComponents}{\ccUseComp{IccComponents}}{\cca@default@icc@comp};%
-      identifier=\ccIfComp{IccIdentifier}{\ccUseComp{IccIdentifier}}{\cca@default@icc@iden}%
-  }}
+  \ccSetProperty{output-intent}{%
+    profile=\ccIfComp{IccProfileFile}{\ccUseComp{IccProfileFile}}{suppl/\cc@color@enc.icc};%
+    components=\ccIfComp{IccComponents}{\ccUseComp{IccComponents}}{\cct@default@icc@comp};%
+    identifier=\ccIfComp{IccIdentifier}{\ccUseComp{IccIdentifier}}{\cct@default@icc@iden}%
+  }
 %    \end{macrocode}
 % \end{Property}
-% The Component Handler which links the new Components to that
-% Property is added to titlepage's \lstinline{cct/document/meta}:
 %    \begin{macrocode}
-  \AddToHook{cct/document/meta}{\edef\x{\noexpand\ccaAddToConfig{intent}{\ccUseProperty{output-intent}}}\x}
+}
 %    \end{macrocode}
+%
+%
+% \section{Accessibility Features}
 %
 % \subsection{Encoding of the PDF-A Conformance}
 %
 % We assume that both PDF/UA standards also require conformity to
 % PDF/A2-a, so we let ltpdfa write that into the PDF file.
 %    \begin{macrocode}
+\ccWhenAlly{%
   \AddToHook{cct/document/meta}{%
     \edef\x{\noexpand\ccaSetDocinfo{conformance}{%
         pdfaid=2;%
-        level=A%
-        ;pdfuaid=\if@cc@pdf@two2\else1\fi}}%
+        level=A;%
+        pdfuaid=\if@cc@pdf@two2\else1\fi}}%
     \x}%
 %    \end{macrocode}
 %
@@ -1482,11 +1498,7 @@ from the Components given in the Meta Container.}}}
 %    \begin{macrocode}
   \if@cc@pdf@two\else\ccaAddRolemap{Title}{P}\fi
   \ccaAddRolemap{Titlepage}{Div}
-%    \end{macrocode}
-% 
-%    \begin{macrocode}
-}%ccWhenAlly
-\fi
+}%ccIfAlly
 %    \end{macrocode}
 %
 %

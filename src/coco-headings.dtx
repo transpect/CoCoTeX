@@ -580,7 +580,9 @@
   \ifx\cch@open@toc\relax
     \ccCreateLabel{\ccCurSecName}% generate a new label for the bookmarks and toc
     \ccIfPropVal{no-toc}{true}{}{\cch@make@toc}% ToC entries
-    \ccIfPropVal{no-BM}{true}{}{\cch@make@bookmarks}% Bookmarks
+    \if\cc@pdf@std X\else
+      \ccIfPropVal{no-BM}{true}{}{\cch@make@bookmarks}% Bookmarks
+    \fi
     \ccUseProperty{toc-hook}%
     \global\let\cch@open@toc\@undefined
   \fi
