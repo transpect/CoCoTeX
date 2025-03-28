@@ -522,18 +522,6 @@
 % files insofar as that internal and external references become
 % click-able.
 %
-% PDF/X standards, however, must not be interative, so we disable all
-% hyperref markup by invoking the \lstinline{nohyperref} package,
-% which disables all \lstinline{hyperref} markup without rendering the
-% respective macros undefined. This way, we can generate linked and
-% unlinked PDFs from the same sources without the need to remove
-% makros from the tex files.
-%    \begin{macrocode}
-\if\cc@pdf@std X
-  \let\href\relax
-  \RequirePackage{nohyperref}
-\else
-%    \end{macrocode}
 % For PDF/A and PDF/UA, we enable/allow linking by invoking the normal
 % hyperref package\dots
 %    \begin{macrocode}
@@ -574,6 +562,26 @@
 %    \begin{macrocode}
    ,hyperindex=\ifx\cc@no@hyperindex\relax false\else true\fi
 }
+\if\cc@pdf@std X
+%    \end{macrocode}
+% PDF/X standards, however, must not be interative, so we disable all
+% hyperref markup by setting hyperrefs draft option, which disables
+% all \lstinline{hyperref} markup without rendering the respective
+% user-level macros undefined. This way, we can generate linked and
+% unlinked PDFs from the same sources without the need to remove
+% makros from the tex files.
+%    \begin{macrocode}
+  \hypersetup{draft}
+%    \end{macrocode}
+% We also check if the frame module is already loaded. If not, we load
+% it with the \lstinline{pdfboxes} option to draw the pdf boarders,
+% which are required in the PDF/X standard.
+%    \begin{macrocode}
+  \AddToHook{begindocument}{%
+    \@ifpackageloaded{coco-frame.sty}{}{%
+      \RequirePackage[pdfboxes]{coco-frame}%
+    }%
+  }%
 \fi
 %    \end{macrocode}
 %

@@ -20,24 +20,71 @@
 %    \begin{macrocode}
 \let\cc@frame@mode n
 \ExplSyntaxOn
+\bool_new:N       \g_cocotex_frame_none_bool  \bool_set_true:N  \g_cocotex_frame_none_bool
+\bool_new:N       \g_cocotex_frame_guide_bool \bool_set_false:N \g_cocotex_frame_guide_bool
+\bool_new:N       \g_cocotex_frame_crops_bool \bool_set_false:N \g_cocotex_frame_crops_bool
+\bool_new:N       \g_cocotex_frame_boxes_bool \bool_set_false:N \g_cocotex_frame_boxes_bool
+\keys_define:nn { cocotex/frame }
+  {
+    guide     .code:n = {
+      \bool_gset_true:N \g_cocotex_frame_guide_bool
+      \bool_gset_false:N \g_cocotex_frame_none_bool
+    },
+    cropmarks .code:n = {
+      \bool_gset_true:N \g_cocotex_frame_crops_bool
+      \bool_gset_true:N \g_cocotex_frame_boxes_bool
+      \bool_gset_false:N \g_cocotex_frame_none_bool
+    },
+    pdfboxes  .code:n = {
+      \bool_gset_true:N \g_cocotex_frame_boxes_bool
+      \bool_gset_false:N \g_cocotex_frame_none_bool
+    }
+  }
+%    \end{macrocode}
+% LEGACY
+%    \begin{macrocode}
 \keys_define:nn { cocotex/frame }
 {
   frame .choice:,
-  frame / none  .code:n = { \global\let\cc@frame@mode n },
-  frame / crop  .code:n = { \global\let\cc@frame@mode p },
-  frame / frame .code:n = { \global\let\cc@frame@mode w }
+  frame / none  .code:n = { },%\bool_gset_false:N \g_cocotex_frame_print_bool \global\let\cc@frame@mode n
+  frame / crop  .code:n = { \keys_set:nn { cocotex/frame } {pdfboxes,cropmarks} },%\bool_gset_true:N  \g_cocotex_frame_print_bool \global\let\cc@frame@mode c
+  frame / frame .code:n = { \keys_set:nn { cocotex/frame } {frame} },%\bool_gset_false:N \g_cocotex_frame_print_bool \global\let\cc@frame@mode w
 }
 \ProcessKeyOptions[cocotex/frame]
-\ExplSyntaxOff
 %    \end{macrocode}
 % \section{Cropmark printer}
 %
+% Apparently, the crop package relies on old pdf dimension macros. If
+% they aren't defined, we load the \lstinline{luatex85} package and
+% set the values of the type area by hand:
 %    \begin{macrocode}
-\ifx\cc@frame@mode p\relax
-  \ifx\bleed\@undefined \newdimen\bleed \bleed4mm\relax\fi
-  \ifx\cc@frame@@offset\@undefined \newdimen\cc@frame@@offset \cc@frame@@offset4em\relax\fi
-  \voffset\dimexpr\cc@frame@@offset-1in\relax
-  \hoffset\dimexpr\cc@frame@@offset-1in\relax
+\@ifundefined{pdfpagewidth}{%
+  \RequirePackage{luatex85}
+  \pdfpagewidth\paperwidth
+  \pdfpageheight\paperheight
+}{}
+%    \end{macrocode}
+% Now, we determine the dimensions of the PDF boxes.
+%    \begin{macrocode}
+\bool_if:NT \g_cocotex_frame_boxes_bool
+{
+  \ifx\cc@frame@@offset\@undefined
+    \newdimen\cc@frame@@offset
+    \cc@frame@@offset4em\relax
+  \fi
+  \ifx\bleed\@undefined
+    \newdimen\bleed
+    \bleed4mm\relax
+  \fi
+  \bool_if:NTF \g_cocotex_frame_crops_bool
+  {%
+    \voffset\dimexpr\cc@frame@@offset-1in\relax
+    \hoffset\dimexpr\cc@frame@@offset-1in\relax
+  }
+  {
+    \bleed\z@\relax
+    \cc@frame@@offset\z@\relax
+  }
   \edef\l@offset{\strip@pt\dimexpr\cc@frame@@offset*7200/7227\relax}
   \edef\r@offset{\strip@pt\dimexpr(\cc@frame@@offset+\paperwidth)*7200/7227\relax}
   \edef\u@offset{\strip@pt\dimexpr(\cc@frame@@offset)*7200/7227\relax}
@@ -52,31 +99,22 @@
     %/CropBox[\b@l@offset\space\b@u@offset\space\b@r@offset\space\b@o@offset]
     %/MediaBox[\b@l@offset\space\b@u@offset\space\b@r@offset\space\b@o@offset]
   }
-\fi
 %    \end{macrocode}
-% Apparently, the crop package relies on old pdf dimension macros. If
-% they aren't defined, we load the \lstinline{luatex85} package and
-% set the values of the type area by hand:
+% and set them as PDF attributes:
 %    \begin{macrocode}
-\@ifundefined{pdfpagewidth}{%
-  \RequirePackage{luatex85}
-  \pdfpagewidth\paperwidth
-  \pdfpageheight\paperheight
-}{}
-\ifx\cc@frame@mode p\relax
   \expandafter\pdfpageattr\expandafter{\@tempa}
-\fi
 %    \end{macrocode}
 % Setting PDF boundaries
 %    \begin{macrocode}
-\ifx\cc@frame@mode n\relax\else
-  \ifx\cc@frame@mode p\relax
-    \edef\stockwidth{\the\dimexpr\paperwidth+\cc@frame@@offset+\cc@frame@@offset\relax}
-    \edef\stockheight{\the\dimexpr\paperheight+\cc@frame@@offset+\cc@frame@@offset\relax}
-  \fi
+  \edef\stockwidth{\the\dimexpr\paperwidth+\cc@frame@@offset+\cc@frame@@offset\relax}
+  \edef\stockheight{\the\dimexpr\paperheight+\cc@frame@@offset+\cc@frame@@offset\relax}
+}
 %    \end{macrocode}
-% Cropmarks and page area frames both are painted via the \lstinline{crop} package.
+% Cropmarks and page area frames both are painted via the
+% \lstinline{crop} package, which we load and setup if any of the
+% Module's modes is loaded via the package options.
 %    \begin{macrocode}
+\bool_if:NF \g_cocotex_frame_none_bool {
   \RequirePackage{crop}
   \renewcommand*\CROP@marks{%
     \CROP@setmarkcolor
@@ -89,96 +127,103 @@
     \hskip1in\relax
     \CROP@llc\null\hfill\CROP@loedge\hfill\null\CROP@lrc\hskip-1in\null
     \vskip-1in}%
-  \ifx\cc@frame@mode p\relax
-    \def\camcross{%
-      \smash{\rlap{%
-          \kern-0.15\p@
-          \vrule\@width0.3\p@\@height1.7mm\@depth1.7mm\relax
-          \kern-0.15\p@
-          \kern-1.7mm\relax
-          \vrule\@width0.3\p@\@height1.7mm\@depth1.7mm\relax
-          \kern-0.3\p@
-          \raise1.7mm\rlap{\vrule\@width3.4mm\@height\z@\@depth0.3\p@}%
-          \lower1.7mm\rlap{\vrule\@width3.4mm\@height0.3\p@\@depth\z@}%
-          \hbox{\vrule\@width3.4mm\@height0.15\p@\@depth0.15\p@}%
-          \kern-0.3\p@
-          \vrule\@width0.3\p@\@height1.7mm\@depth1.7mm\relax}}}
-    \def\cammcrossleft{%
-      \llap{\camcross\vrule\@width\dimexpr\bleed+2mm\relax\@height0.15\p@\@depth0.15\p@\kern\bleed}}
-    \def\cammcrossright{%
-      \rlap{\kern\bleed\vrule\@width\dimexpr\bleed+2mm\relax\@height0.15\p@\@depth0.15\p@\camcross}}
-    \def\cammcrossup{%
-      \rlap{\smash{\raise\dimexpr\cc@frame@@offset-2mm\relax\hbox{\camcross}%
-          \kern-0.15\p@\vrule\@width0.3\p@\@height\dimexpr\cc@frame@@offset-2mm\relax\@depth-\bleed}}}
-    \def\cammcrossdown{%
-      \rlap{\smash{\lower\dimexpr\cc@frame@@offset-2mm\relax\hbox{\camcross}%
-          \kern-0.15\p@\vrule\@width0.3\p@\@height-\bleed\@depth\dimexpr\cc@frame@@offset-2mm\relax}}}
-    \def\CROP@@ulc{\cammcrossup\cammcrossleft}
-    \def\CROP@@urc{\cammcrossup\cammcrossright}
-    \def\CROP@@llc{\cammcrossdown\cammcrossleft}
-    \def\CROP@@lrc{\cammcrossdown\cammcrossright}
-    \renewcommand*\CROP@@info{{%
-        \global\advance\CROP@index\@ne
-        \def\x{\discretionary{}{}{\hbox{\kern.5em---\kern.5em}}}%
-        \ifx\CROP@pagecolor\@empty
-        \else
-          \advance\dimen@\CROP@overlap
-        \fi
-        \hb@xt@\z@{%
-          \hss
-          \lower1em\vbox to\z@{\vss
-            \centering
-            \hsize\dimexpr\paperwidth-20\p@\relax
-            \normalfont
-            \large
-            \vskip5mm\relax
-            \addvspace{\bleed}}%
-          \hss}}%
-    }%
-    \crop[cam]
+}
 %    \end{macrocode}
-% the code for the page area frame
+% Now, we tell the crop package how to draw the crop marks:
 %    \begin{macrocode}
-  \else% w
-    \@tempdima\dimexpr\textheight\relax
-    \divide\@tempdima by\baselineskip
-    \multiply\@tempdima by65536\relax
-    \edef\cnt@baselines{\strip@pt\@tempdima}%
-    \def\cc@frame@lines{%
-      \@tempcnta\z@
-      \loop\advance\@tempcnta\@ne
-        \hsize1em\relax
-        \ifodd\count\z@
-          \vrule\@width1em\@height0.2\p@\@depth0.02\p@
-          \llap{\smash{\the\@tempcnta\,}}%
-        \fi%
-        \rlap{%
-          \ifodd\count\z@\else\fi
-          \vrule\@width\columnwidth\@height0.00005\p@\@depth0\p@
-          \if@twocolumn
-            \kern\columnsep\vrule\@width\columnwidth\@height0.00005\p@\@depth0\p@
+\bool_if:NT \g_cocotex_frame_crops_bool {%
+  \def\camcross{%
+    \smash{\rlap{%
+        \kern-0.15\p@
+        \vrule\@width0.3\p@\@height1.7mm\@depth1.7mm\relax
+        \kern-0.15\p@
+        \kern-1.7mm\relax
+        \vrule\@width0.3\p@\@height1.7mm\@depth1.7mm\relax
+        \kern-0.3\p@
+        \raise1.7mm\rlap{\vrule\@width3.4mm\@height\z@\@depth0.3\p@}%
+        \lower1.7mm\rlap{\vrule\@width3.4mm\@height0.3\p@\@depth\z@}%
+        \hbox{\vrule\@width3.4mm\@height0.15\p@\@depth0.15\p@}%
+        \kern-0.3\p@
+        \vrule\@width0.3\p@\@height1.7mm\@depth1.7mm\relax}}}
+  \def\cammcrossleft{%
+    \llap{\camcross\vrule\@width\dimexpr\bleed+2mm\relax\@height0.15\p@\@depth0.15\p@\kern\bleed}}
+  \def\cammcrossright{%
+    \rlap{\kern\bleed\vrule\@width\dimexpr\bleed+2mm\relax\@height0.15\p@\@depth0.15\p@\camcross}}
+  \def\cammcrossup{%
+    \rlap{\smash{\raise\dimexpr\cc@frame@@offset-2mm\relax\hbox{\camcross}%
+        \kern-0.15\p@\vrule\@width0.3\p@\@height\dimexpr\cc@frame@@offset-2mm\relax\@depth-\bleed}}}
+  \def\cammcrossdown{%
+    \rlap{\smash{\lower\dimexpr\cc@frame@@offset-2mm\relax\hbox{\camcross}%
+        \kern-0.15\p@\vrule\@width0.3\p@\@height-\bleed\@depth\dimexpr\cc@frame@@offset-2mm\relax}}}
+  \def\CROP@@ulc{\cammcrossup\cammcrossleft}
+  \def\CROP@@urc{\cammcrossup\cammcrossright}
+  \def\CROP@@llc{\cammcrossdown\cammcrossleft}
+  \def\CROP@@lrc{\cammcrossdown\cammcrossright}
+  \renewcommand*\CROP@@info{{%
+      \global\advance\CROP@index\@ne
+      \def\x{\discretionary{}{}{\hbox{\kern.5em---\kern.5em}}}%
+      \ifx\CROP@pagecolor\@empty
+      \else
+        \advance\dimen@\CROP@overlap
+      \fi
+      \hb@xt@\z@{%
+        \hss
+        \lower1em\vbox to\z@{\vss
+          \centering
+          \hsize\dimexpr\paperwidth-20\p@\relax
+          \normalfont
+          \large
+          \vskip5mm\relax
+          \addvspace{\bleed}}%
+        \hss}}%
+  }%
+  \crop[cam]
+}
+%    \end{macrocode}
+% The code for the page area guides
+%    \begin{macrocode}
+\bool_if:NT \g_cocotex_frame_guide_bool {%
+  \@tempdima\dimexpr\textheight\relax
+  \divide\@tempdima by\baselineskip
+  \multiply\@tempdima by65536\relax
+  \edef\cnt@baselines{\strip@pt\@tempdima}%
+  \def\cc@frame@lines{%
+    \@tempcnta\z@
+    \loop\advance\@tempcnta\@ne
+    \hsize1em\relax
+    \ifodd\count\z@
+      \vrule\@width1em\@height0.2\p@\@depth0.02\p@
+      \llap{\smash{\the\@tempcnta\,}}%
+    \fi%
+    \rlap{%
+      \ifodd\count\z@\else\fi
+      \vrule\@width\columnwidth\@height0.00005\p@\@depth0\p@
+      \if@twocolumn
+        \kern\columnsep\vrule\@width\columnwidth\@height0.00005\p@\@depth0\p@
+      \else
+        \ifx\col@number\@undefined\else
+          \ifnum\col@number<\tw@\relax
           \else
-            \ifx\col@number\@undefined\else
-              \ifnum\col@number<\tw@\relax
-              \else
-                \@tempcntb\col@number
-                \loop
-                  \advance\@tempcntb\m@ne
-                  \kern\columnsep\vrule\@width\columnwidth\@height0.00005\p@\@depth0\p@
-                \ifnum\@tempcntb>\@ne
-                \repeat
-              \fi
-            \fi
+            \@tempcntb\col@number
+            \loop
+            \advance\@tempcntb\m@ne
+            \kern\columnsep\vrule\@width\columnwidth\@height0.00005\p@\@depth0\p@
+            \ifnum\@tempcntb>\@ne
+            \repeat
           \fi
-          \ifodd\count\z@\else
-            \vrule\@width1em\@height0.00005\p@\@depth0\p@%
-            \llap{\smash{\the\@tempcnta\,}}%
-          \fi
-        }%
-        \break
-      \ifnum\@tempcnta<\cnt@baselines
-      \repeat}
-    \def\cc@frame@margin{%
+        \fi
+      \fi
+      \ifodd\count\z@\else
+        \vrule\@width1em\@height0.00005\p@\@depth0\p@%
+        \llap{\smash{\the\@tempcnta\,}}%
+      \fi
+    }%
+    \break
+    \ifnum\@tempcnta<\cnt@baselines
+    \repeat
+  }%
+  \def\cc@frame@margin{%
+    \ifdim\marginparwidth>\z@
       \vrule height\textheight%
       \hskip-\marginparwidth\relax
       \vbox to\textheight{\hsize\marginparwidth\relax
@@ -187,58 +232,58 @@
         \rlap{\vbox to\z@{\hrule width\marginparwidth}}%
       }%
       \vrule height\textheight%
-    }
-    \renewcommand*\CROP@@frame{%
-      \vskip0in%
-      \color[cmyk]{0.4,0,0,0}%
-      \ifodd\count\z@\let\@themargin\oddsidemargin\else\let\@themargin\evensidemargin\fi
-      \advance\@themargin1in
-      \moveright\@themargin
-      \vbox to\z@{\baselineskip\z@skip\lineskip\z@skip\lineskiplimit\z@
-        \vskip\topmargin\vbox to\z@{\vss\hrule width\textwidth}%
-        \vskip\headheight\vbox to\z@{\vss\hrule width\textwidth}%
-        \vskip\headsep\vbox to\z@{\vss\hrule width\textwidth}%
-        \hbox to\textwidth{%
-          \ifodd\count\z@
-            \rlap{\hskip\dimexpr\textwidth+\marginparsep+\marginparwidth\relax\cc@frame@margin}%
-          \else
-            \rlap{\hskip-\marginparsep\relax\cc@frame@margin}%
-          \fi
-          \llap{\vbox to\textheight{\tiny\let\@tempa\f@size\normalsize\let\f@size\@tempa\selectfont
-              \vskip\topskip\cc@frame@lines\null\vss}}%
-          \llap{\vrule height\textheight}%
-          \if@twocolumn
-            \hskip\columnwidth\rlap{\vrule height\textheight}%
-            \hskip\columnsep\rlap{\vrule height\textheight}%
-          \else
-            \ifx\col@number\@undefined\else
-              \ifnum\col@number<\tw@\relax
-              \else
-                \@tempcntb\col@number
-                \loop
-                  \advance\@tempcntb\m@ne
-                  \hskip\columnwidth\rlap{\vrule height\textheight}%
-                  \hskip\columnsep\rlap{\vrule height\textheight}%
-                \ifnum\@tempcntb>\@ne
-                \repeat
-              \fi
+    \fi
+  }
+  \renewcommand*\CROP@@frame{%
+    \vskip0in%
+    \color[cmyk]{0.4,0,0,0}%
+    \ifodd\count\z@\let\@themargin\oddsidemargin\else\let\@themargin\evensidemargin\fi
+    \advance\@themargin1in
+    \moveright\@themargin
+    \vbox to\z@{\baselineskip\z@skip\lineskip\z@skip\lineskiplimit\z@
+      \vskip\topmargin\vbox to\z@{\vss\hrule width\textwidth}%
+      \vskip\headheight\vbox to\z@{\vss\hrule width\textwidth}%
+      \vskip\headsep\vbox to\z@{\vss\hrule width\textwidth}%
+      \hbox to\textwidth{%
+        \ifodd\count\z@
+          \rlap{\hskip\dimexpr\textwidth+\marginparsep+\marginparwidth\relax\cc@frame@margin}%
+        \else
+          \rlap{\hskip-\marginparsep\relax\cc@frame@margin}%
+        \fi
+        \llap{\vbox to\textheight{\tiny\let\@tempa\f@size\normalsize\let\f@size\@tempa\selectfont
+            \vskip\topskip\cc@frame@lines\null\vss}}%
+        \llap{\vrule height\textheight}%
+        \if@twocolumn
+          \hskip\columnwidth\rlap{\vrule height\textheight}%
+          \hskip\columnsep\rlap{\vrule height\textheight}%
+        \else
+          \ifx\col@number\@undefined\else
+            \ifnum\col@number<\tw@\relax
+            \else
+              \@tempcntb\col@number
+              \loop
+              \advance\@tempcntb\m@ne
+              \hskip\columnwidth\rlap{\vrule height\textheight}%
+              \hskip\columnsep\rlap{\vrule height\textheight}%
+              \ifnum\@tempcntb>\@ne
+              \repeat
             \fi
           \fi
-          \hfil\vrule height\textheight
-        }%
-        \vbox to\z@{\vss\hrule width\textwidth}%
-        \vskip\footskip\vbox to\z@{\vss\hrule width\textwidth}%
-        \vss}%
-      \vbox to\z@{\baselineskip\z@skip\lineskip\z@skip\lineskiplimit\z@%
-        \vskip-0in\rlap{\hskip1in%
-          \vbox to\z@{\vbox to\z@{\vss\hrule width\paperwidth}%
-            \hbox to \paperwidth{\llap{\vrule height\paperheight}\hfil%
-              \vrule height\paperheight}%
-            \vbox to\z@{\vss\hrule width\paperwidth}%
-            \vss}}\vss}}
-    \crop[frame,noinfo]%
-  \fi
-\fi
+        \fi
+        \hfil\vrule height\textheight
+      }%
+      \vbox to\z@{\vss\hrule width\textwidth}%
+      \vskip\footskip\vbox to\z@{\vss\hrule width\textwidth}%
+      \vss}%
+    \vbox to\z@{\baselineskip\z@skip\lineskip\z@skip\lineskiplimit\z@%
+      \vskip-0in\rlap{\hskip1in%
+        \vbox to\z@{\vbox to\z@{\vss\hrule width\paperwidth}%
+          \hbox to \paperwidth{\llap{\vrule height\paperheight}\hfil%
+            \vrule height\paperheight}%
+          \vbox to\z@{\vss\hrule width\paperwidth}%
+          \vss}}\vss}}
+  \crop[frame,noinfo]%
+}
 %    \end{macrocode}
 %    \begin{macrocode}[gobble=1]
 %</frame>
