@@ -153,14 +153,16 @@
 \newif\if@cc@pdf@two \@cc@pdf@twofalse
 %    \end{macrocode}
 % \end{macro}
+% 
+%    \begin{macrocode}
+\str_new:N \g_cc_pdf_standard_str
+%    \end{macrocode}
 %    \begin{macrocode}
 \keys_define:nn { cocotex/cls }
 {
 %    \end{macrocode}
-% Options for the aimed PDF standard. Currently supported:\\
-% A-1b, A-1a, A-2b, A-2a, A-2u, A-3b, A-3a, A-3u, A-4,\\
-% X-3, X-4, X-4p, X-5g, X-5n, X-5pg, X-6, X-6n, X-6p,\\
-% UA-1 or UA-2.\\
+% Options for the aimed PDF standard. The value should match the following regex pattern:\\[1ex]
+% \lstinline{(UA|A|X)(-[0-9](+[A-Z](:[0-9]+)?)?)}\\[1ex]
 % The choices are case-insensitive and the selected standard also
 % determines the PDF version later.
 %    \begin{macrocode}
@@ -169,19 +171,8 @@
       \exp_args:Nnx
       \keys_set:nn {cocotex/cls} {_pdfstandard=\str_uppercase:n{#1}}
     },
-  _pdfstandard .choices:nn =
-    {
-      A-1B, A-1A, A-2B, A-2A, A-2U, A-3B, A-3A, A-3U, A-4,
-      X-3, X-4, X-4P, X-5G, X-5N, X-5PG, X-6, X-6N, X-6P,
-      UA-1, UA-2
-    }
-    {
-      \xdef\cc@pdf@standard{ \tl_use:N \l_keys_choice_tl }
-      \xdef\cc@pdf@std{\expandafter\@car\cc@pdf@standard\@nil}
-    },
-  _pdfstandard .initial:n = A-2B,
-  _pdfstandard / unknown .code:n =
-    { \msg_warning:nnn{pdf}{unknown-standard}{#1} },
+  _pdfstandard .str_set:N = \g_cc_pdf_standard_str,
+  _pdfstandard .initial:n = A-2A,
 %    \end{macrocode}
 % \Deprecated The following two options are there for backard
 % compatibility and are considered legacy code. Both cause PDF/UA,
@@ -292,23 +283,77 @@
 \ProcessKeyOptions[cocotex/cls]
 \cs_if_exist:NT \ccClassOptions{\exp_args:Nnx\keys_set:nn {cocotex/cls}{\ccClassOptions}}
 %    \end{macrocode}
-% After processing the options, we determine the PDF version according
-% to the selected PDF standard. If no standard is selected, we default
-% to PDF version 1.7.
+%
+%
+% \section{PDF-Version and Standard Conformity}
+%
+% After processing the options, we determine which PDF standard and
+% PDF version the document is supposed to conform to. If no standard
+% is selected, we default to PDF version 1.7.
 %    \begin{macrocode}
 \sys_ensure_backend:
+%    \end{macrocode}
+% \begin{macro}{\g_cc_pdfstd_seq} is a sequence that contains the PDF
+%   conformity from the value of the \lstinline{pdf-standard} class
+%   option. It has four elements: \lstinline{[standard, part,
+%   level, issue]}.
+%    \begin{macrocode}
+\seq_new:N \g_cc_pdfstd_seq
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\g_cc_pdfstd_macros_seq} is a list of CS names that
+%   the values from \lstinline{\g_cc_pdfstd_seq} are mapped onto. If
+%   the \lstinline{pdf-standard} Option lacks a field, the
+%   corresponding macro is un-defined.
+%    \begin{macrocode}
+\seq_const_from_clist:Nn \g_cc_pdfstd_macros_seq {cc@pdf@std, cc@pdf@part, cc@pdf@level, cc@pdf@issue }
+%    \end{macrocode}
+% \end{macro}
+% First, we extract the data fields from the option value:
+%    \begin{macrocode}
+\regex_extract_all:nVN { ^([UAX]+)\-([0-9]+)([A-Z]*)?:?(.*)? } \g_cc_pdf_standard_str \g_cc_pdfstd_seq
+%    \end{macrocode}
+% The first element contains the entire string, so we pop it from the
+% stack and throw it away.
+%    \begin{macrocode}
+\seq_pop_left:NN \g_cc_pdfstd_seq \l_tmpa_tl
+%    \end{macrocode}
+% \begin{macro}{\cc_map_pdfstd:nn} is a helper funktion that takes two arguments:
+%   \begin{ArgList}
+%     \item[1] is the value extracted from \lstinline{\g_cc_pdf_standard_str}
+%     \item[2] is the CS name of the macro that the value should be
+%       mapped to if it is not empty
+%   \end{ArgList}
+%    \begin{macrocode}
+\cs_new:Npn \cc_map_pdfstd:nn #1#2 {%
+  \str_if_empty:nTF { #1 }
+    {\cs_gset:cpn{#2}{}}
+    {\cs_gset:cpe{#2}{\str_if_eq:nnTF{#1}{UA}{U}{#1}}}
+}
+%    \end{macrocode}
+% \end{macro}
+% Now we can apply the macro to the list of extracted values:
+%    \begin{macrocode}
+\seq_map_pairwise_function:NNN \g_cc_pdfstd_seq \g_cc_pdfstd_macros_seq \cc_map_pdfstd:nn
+%    \end{macrocode}
+% Finally, we parse the original \lstinline{\g_cc_pdf_standard_str}
+% value a second time to determine the PDF version. We default to the
+% highest version posible to each given conformity level. If one of
+% the PDF/UA-Standards is used, we also initialize the
+% coco-accessibility module.
+%    \begin{macrocode}
 \prg_generate_conditional_variant:Nnn \regex_match_case:nn {nV} {T,F,TF}
 \regex_match_case:nVF
   {
     { ^UA\-1 }   { \pdf_version_gset:n { 1.7 } \PassOptionsToPackage{init}{coco-accessibility} }
-    { ^UA\-2 }   { \pdf_version_gset:n { 2.0 } \PassOptionsToPackage{init}{coco-accessibility} }
+    { ^UA\-2 }   { \pdf_version_gset:n { 2.0 } \PassOptionsToPackage{init}{coco-accessibility} \global\@cc@pdf@twotrue }
     { ^A\-1 }    { \pdf_version_gset:n { 1.4 } }
     { ^A\-[23] } { \pdf_version_gset:n { 1.7 } }
-    { ^A\-4 }    { \pdf_version_gset:n { 2.0 } }
+    { ^A\-4 }    { \pdf_version_gset:n { 2.0 } \global\@cc@pdf@twotrue }
     { ^X\-[123] }{ \pdf_version_gset:n { 1.4 } }
     { ^X\-[45] } { \pdf_version_gset:n { 1.6 } }
-    { ^X\-6 }    { \pdf_version_gset:n { 2.0 } }
-  } \cc@pdf@standard
+    { ^X\-6 }    { \pdf_version_gset:n { 2.0 } \global\@cc@pdf@twotrue }
+  } \g_cc_pdf_standard_str
   { \pdf_version_gset:n { 1.7 } }
 \ExplSyntaxOff
 %    \end{macrocode}

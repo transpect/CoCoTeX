@@ -381,12 +381,18 @@ function xmphandler.fromInfo()
       body = body .. "<dc:description><rdf:Alt>\n<rdf:li xml:lang='x-default'>" .. infoarray.Subject[1] .. "</rdf:li>\n</rdf:Alt></dc:description>\n"
    end
    if config.metadata.conformance then
-      pdfaver = pdfaver:gsub('PDFAID:PART', config.metadata.conformance.pdfaid)   
-      pdfaver = pdfaver:gsub('PDFAID:CONFORMANCE', config.metadata.conformance.level)
+      if (config.metadata.conformance.pdfaid) then
+	 pdfaver = pdfaver:gsub('PDFAID:PART', config.metadata.conformance.pdfaid)
+	 pdfaver = pdfaver:gsub('PDFAID:CONFORMANCE', config.metadata.conformance.level)
+      else
+	 pdfaver = ""
+      end
       if (config.metadata.conformance.pdfuaid) then
          pdfuaid = pdfuaid:gsub('PDFUAID:PART', config.metadata.conformance.pdfuaid)
          pdfaver = pdfaver .. pdfuaid
       end
+   else
+      pdfaver = ""
    end
    local f = io.open(tex.jobname..'.xmp', "w")
    f:write(xmphead .. pdfaver .. body .. xmpschema .. xmptail)

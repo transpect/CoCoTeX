@@ -244,8 +244,8 @@
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\cct@title@process@oi} processes the OutputIntent,
-%   which is needed by both PDF/A, UA and X standards, but handled
-%   differently. Handling for PDF/UA is taken care of by
+%   which is needed by each PDF/A, UA and X standards, but handled
+%   differently: handling for PDF/UA is taken care of by
 %   \lstinline{ltpdfa}, while PDF/X is handled here, directly.
 %    \begin{macrocode}
 \def\cct@title@process@oi{%
@@ -368,27 +368,30 @@
 %   meta data file into the pdf, if it exists. There are two versions,
 %   depending on whether coco-accessibility is active or not.
 %    \begin{macrocode}
-\def\cct@title@insert@xmp{\ccIfAlly{\cct@title@insert@xmp@ltpdfa}{\cct@title@insert@xmp@direct}}
+\def\cct@title@insert@xmp{%
+  \edef\cca@xmp@file@name{\ccUseComponentFrom{titlepage}{XmpFile}.xmp}%
+  \ccIfAlly
+    {\cct@title@insert@xmp@ltpdfa}
+    {\cct@title@insert@xmp@direct}%
+}
 %    \end{macrocode}
 % \begin{macro}{\cct@title@insert@xmp@direct} is the default version
 %   which writes the xmp meta data directly into the PDF.
 %    \begin{macrocode}
 \def\cct@title@insert@xmp@direct{%
-  \edef\include@xmp{\noexpand\@include@xmp{\ccUseComp{XmpFile}.xmp}}%
-  \def\@include@xmp##1{\IfFileExists{##1}{\@@include@xmp{##1}}{}}%
-  \def\@@include@xmp##1{%
+  \IfFileExists{\cca@xmp@file@name}{%
     \begingroup
       \immediate\pdfobj stream attr {/Type /Metadata /Subtype /XML}
-      file{##1}
+      file{\cca@xmp@file@name}
       \pdfcatalog{/Metadata \the\pdflastobj\space 0 R }
       \if\cc@pdf@std X%
-        \ccWhenComp{PDFConformity}{%
-          \pdfextension info{/GTS_PDFXConformance(\ccUseComp{PDFConformity}) }%
-          \pdfextension info{/GTS_PDFXVersion(\ccUseComp{PDFConformity}) }%
+        \ccWhenComp{PDFPart}{%
+          \pdfextension info{/GTS_PDFXConformance(\ccUseComp{PDFPart}\ccIfCompEmpty{PDFLevel}{}{\ccUseComp{PDFLevel}}\ccIfCompEmpty{PDFIssue}{}{:\ccUseComp{PDFIssue}}) }%
+          \pdfextension info{/GTS_PDFXVersion(\ccUseComp{PDFPart}\ccIfCompEmpty{PDFLevel}{}{\ccUseComp{PDFLevel}}\ccIfCompEmpty{PDFIssue}{}{:\ccUseComp{PDFIssue}}) }%
         }
       \fi
-    \endgroup}%
-  \include@xmp
+    \endgroup%
+  }{}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -402,7 +405,6 @@
 %   \lstinline{ltpdfa} generate the \lstinline{xmp} file.
 %    \begin{macrocode}
 \def\cct@title@insert@xmp@ltpdfa{%
-  \edef\cca@xmp@file@name{\ccUseComponentFrom{titlepage}{XmpFile}.xmp}%
   \IfFileExists{\cca@xmp@file@name}
     {\ccaAddToConfig{metadata}{xmpfile=\cca@xmp@file@name}%
      \directlua{ally.meta:extract()}}
@@ -1039,6 +1041,9 @@ from the Components given in the Meta Container.}}}
 %
 % \subsubsection{Colour Profile and Output Intent}
 %
+% The following Components control the output intent and included icc
+% profile for the document.
+%
 % \DescribeComponent{IccProfileFile} holds the path
 %   (relative to the main tex file) and name of the .icc file.
 %    \begin{macrocode}
@@ -1054,14 +1059,59 @@ from the Components given in the Meta Container.}}}
 %    \begin{macrocode}
   \ccDeclareGlobalComponent{IccIdentifier}%
 %    \end{macrocode}
-% \end{macro}
 %
 %
-% \subsubsection{Colour Profile and Output Intent}
 %
-% \DescribeComponent{PDFConformity} holds the PDF conformity level
+%\subsubsection{PDF Standard Conformance}
+%
+% The following Components control the PDF standard and conformity.
+%
+% The defaults for the following Components are determined by the
+% \lstinline{pdf-standard} class option. For instance, in
+% \lstinline{PDF/X-1a:2003}, \lstinline{X} is the Standard,
+% \lstinline{1} is the Part, \lstinline{a} is the Level, and
+% \lstinline{2003} is the year when the standard was issued.
+%
+% Passing it through the Meta container allows style authors to
+% override local settings:
+% \begin{lstlisting}[style=example,gobble=2]
+% \ccAddToType{Components}{titlepage}{%
+%   \if\cc@pdf@std X\relax
+%     \ccComponent{PDFStandard}{X}
+%     \ccComponent{PDFPart}{3}
+%     \ccComponent{PDFLevel}{}
+%     \ccComponent{PDFIssue}{2003}
+%   \else
+%     \ccComponent{PDFStandard}{A}
+%     \ccComponent{PDFPart}{2}
+%     \ccComponent{PDFLevel}{A}
+%     \ccComponent{PDFIssue}{}
+%   \fi
+% }
+% \end{lstlisting}
+% which would always generate \lstinline{PDF/X-3:2003} for any PDF/X
+% value requested via the class options, and always
+% \lstinline{PDF/A-2a} for any other value.
+%
+% \DescribeComponent{PDFStandard} is the PDF Standard
+% itself. Currently supported: X, A and UA.
 %    \begin{macrocode}
-  \ccDeclareGlobalComponent{PDFConformity}
+  \ccDeclareGlobalComponent[\cc@pdf@std]{PDFStandard}
+%    \end{macrocode}
+% \DescribeComponent{PDFPart} holds the selected part of the PDF
+% standard that the document should fulfill.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent[\cc@pdf@part]{PDFPart}
+%    \end{macrocode}
+% \DescribeComponent{PDFLevel} holds the standard-specific conformance
+% level.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent[\cc@pdf@level]{PDFLevel}
+%    \end{macrocode}
+% \DescribeComponent{PDFIssue} contains the issue year to which the
+% PDF Standard should conform.
+%    \begin{macrocode}
+  \ccDeclareGlobalComponent[\cc@pdf@issue]{PDFIssue}
 }
 %    \end{macrocode}
 % \end{macro}
@@ -1476,14 +1526,12 @@ from the Components given in the Meta Container.}}}
 %
 % \subsection{Encoding of the PDF-A Conformance}
 %
-% We assume that both PDF/UA standards also require conformity to
-% PDF/A2-a, so we let ltpdfa write that into the PDF file.
+% If we generate PDF/UA, metadata is left to the ltpdfa package, so we
+% only set the conformance level.
 %    \begin{macrocode}
 \ccWhenAlly{%
   \AddToHook{cct/document/meta}{%
     \edef\x{\noexpand\ccaSetDocinfo{conformance}{%
-        pdfaid=2;%
-        level=A;%
         pdfuaid=\if@cc@pdf@two2\else1\fi}}%
     \x}%
 %    \end{macrocode}
@@ -1491,7 +1539,7 @@ from the Components given in the Meta Container.}}}
 %
 % \subsection{Titlepage Specific Role Maps}
 %
-% According to the “Tagged PDF Best Practice Guide” page by the PDF
+% According to the “Tagged PDF Best Practice Guide” by the PDF
 % Association, the main title of the document should be mapped to
 % \DescribeTag{P} until the more appropriate \DescribeTag{Title} tag
 % becomes widely accepted with the PDF 2.0 Standard.
