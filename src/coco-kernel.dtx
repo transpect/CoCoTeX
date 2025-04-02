@@ -700,7 +700,7 @@
 %   \lstinline|{}|) within its Container, and \InlineArg{3} if it is
 %   either not existant or non-empty.
 %    \begin{macrocode}
-\long\def\ccIfCompEmpty#1#2#3{\expandafter\ifx\csname cc@\cc@cur@cont @#1\endcsname\cc@long@empty#2\else#3\fi}
+\long\def\ccIfCompEmpty#1#2#3{\expandafter\ifx\csname cc@\cc@cur@cont @#1\endcsname\cc@long@empty#2\else\expandafter\ifx\csname cc@\cc@cur@cont @#1\endcsname\@empty#2\else#3\fi\fi}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccIfCompFromEmpty} is a global variant of
@@ -712,7 +712,7 @@
 %   \item[4] is the \texttt{else}-branch
 %   \end{ArgList}
 %    \begin{macrocode}
-\long\def\ccIfCompFromEmpty#1#2#3#4{\expandafter\ifx\csname cc@#1@#2\endcsname\cc@long@empty#3\else#4\fi}
+\long\def\ccIfCompFromEmpty#1#2#3#4{\expandafter\ifx\csname cc@#1@#2\endcsname\cc@long@empty#3\else\expandafter\ifx\csname cc@#1@#2\endcsname\@empty#3\else#4\fi\fi}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\cc@check@empty} handles the distinction between empty
