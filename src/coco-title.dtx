@@ -386,8 +386,8 @@
       \pdfcatalog{/Metadata \the\pdflastobj\space 0 R }
       \if\cc@pdf@std X%
         \ccWhenComp{PDFPart}{%
-          \pdfextension info{/GTS_PDFXConformance(\ccUseComp{PDFPart}\ccIfCompEmpty{PDFLevel}{}{\ccUseComp{PDFLevel}}\ccIfCompEmpty{PDFIssue}{}{:\ccUseComp{PDFIssue}}) }%
-          \pdfextension info{/GTS_PDFXVersion(\ccUseComp{PDFPart}\ccIfCompEmpty{PDFLevel}{}{\ccUseComp{PDFLevel}}\ccIfCompEmpty{PDFIssue}{}{:\ccUseComp{PDFIssue}}) }%
+          \pdfextension info{/GTS_PDFXConformance(PDF/\ccUseComp{PDFStandard}-\ccUseComp{PDFPart}\ccIfCompEmpty{PDFLevel}{}{\ccUseComp{PDFLevel}}\ccIfCompEmpty{PDFIssue}{}{:\ccUseComp{PDFIssue}}) }%
+          \pdfextension info{/GTS_PDFXVersion(PDF/\ccUseComp{PDFStandard}-\ccUseComp{PDFPart}\ccIfCompEmpty{PDFLevel}{}{\ccUseComp{PDFLevel}}\ccIfCompEmpty{PDFIssue}{}{:\ccUseComp{PDFIssue}}) }%
         }
       \fi
     \endgroup%
