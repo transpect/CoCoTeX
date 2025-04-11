@@ -480,14 +480,18 @@
     \ccSetProperty{margin-outer}{\z@}%
 %    \end{macrocode}
 % \end{Property}
-% \begin{Property}{margin-left}{<skip>} horizontal space between the
-%   left page area boundary and the float.
+% \begin{Property}{margin-left}{<skip>, auto} horizontal space between
+%   the left page area boundary and the float. If auto, the left
+%   margin of the caption is controlled by the left margin of the
+%   Content object.
 %    \begin{macrocode}
     \ccSetProperty{margin-left}{\z@}%
 %    \end{macrocode}
 % \end{Property}
-% \begin{Property}{margin-right}{<skip>} horizontal space between the
-%   right page area boundary and the float.
+% \begin{Property}{margin-right}{<skip>, auto} horizontal space
+%   between the right page area boundary and the float. If auto, the
+%   right margin of the caption is controlled by the right margin of
+%   the Content object.
 %    \begin{macrocode}
     \ccSetProperty{margin-right}{\z@}%
 %    \end{macrocode}
@@ -506,12 +510,32 @@
     \ccSetProperty{fix-dimen}{false}%
 %    \end{macrocode}
 % \end{Property}
+% \begin{Property}{inline-content-h-sep}{<any>} how content instances
+%   inside the same \UsageComponent{Content} Component are separated
+%   horizontally.
+%    \begin{macrocode}
+    \ccSetProperty{inline-content-h-sep}{\hfill}%
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{inline-content-v-sep}{<any>} how content instances
+%   inside the same \UsageComponent{Content} Component are separated
+%   vertically.
+%    \begin{macrocode}
+    \ccSetProperty{inline-content-v-sep}{\par\hskip\ccf@margin@l}%
+%    \end{macrocode}
+% \end{Property}
 %
 %
 % \subsubsection{Properties for Float-Type Handlers}
 %
+% \begin{Property}{float-content}{<any>} is the material that is put
+%   into the \lstinline{\ccf@sub@box} for measuring.
+%    \begin{macrocode}
+    \ccSetProperty{float-content}{\ccUseComp{Content}}%
+%    \end{macrocode}
+% \end{Property}
 % \begin{Property}{subfloat-content}{<any>} is the material that is
-%   put into the \lstinline{\ccf@sub@box} for further processing.
+%   put into the \lstinline{\ccf@sub@box} for measuring.
 %    \begin{macrocode}
     \ccSetProperty{subfloat-content}{\ccUseComp{Content}}%
 %    \end{macrocode}
@@ -526,6 +550,14 @@
 %   second-level float type specific contents.
 %    \begin{macrocode}
     \ccSetProperty{subfloat-render}{\ccUseComp{Content}}%
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{measure-content}{<any>} defines how the width of
+%   single floats are measured (relevant if one of the horizontal
+%   margins is set to \texttt{auto}). By default, this does nothing,
+%   but the Property may be overridden by sub-Containers.
+%    \begin{macrocode}
+    \ccSetProperty{measure-content}{}
 %    \end{macrocode}
 % \end{Property}
 %
@@ -964,6 +996,9 @@
         {\ccf@create@counter
          \ccf@compose@listof}%
       \ccSubFloatCnt=\ccf@int@sub@flt@cnt\relax
+      \ifnum\ccSubFloatCnt=\z@\relax
+        \ccUseProperty{measure-content}%
+      \fi
       \ccf@test@caption{0}{}{top}%
       \ccf@test@caption{0}{}{bottom}%
       \bgroup
@@ -1003,6 +1038,36 @@
   }
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{\ccfAdjustMargins} adjusts the left and right
+%   margins of the final float according to which is set to
+%   \lstinline{auto}, where \InlineArg{1} is the width of the content
+%   object.
+%
+%   If both \UsageProperty{margin-left} and
+%   \UsageProperty{margin-right} are set to \texttt{auto}, the float
+%   is horizontally centered and the caption is the same width as the
+%   float. If only the right (or left margin) is set to \texttt{auto},
+%   the image and its caption gets aligned to the left (or right),
+%   respectively (note the inversion!).
+%    \begin{macrocode}
+\def\ccfAdjustMargins#1{%
+  \global\@tempdima=\dimexpr\textwidth-#1\relax
+  \ifdim\@tempdima>\z@\relax\ifdim\wd\ccf@sub@box>\z@\relax
+      \ccIfStrEqual{\ccUseProperty{margin-left}}{auto}
+       {\global\ccf@total@width=\textwidth\relax
+        \ccIfStrEqual{\ccUseProperty{margin-right}}{auto}
+          {\global\ccf@margin@l=.5\@tempdima\relax
+           \global\ccf@margin@r=.5\@tempdima\relax}
+          {\global\ccf@margin@l=\@tempdima\relax}%
+           \global\advance\ccf@total@width-\ccf@margin@r\relax}
+       {\ccIfStrEqual{\ccUseProperty{margin-right}}{auto}
+         {\global\ccf@total@width=\textwidth\relax
+          \global\ccf@margin@r=\@tempdima\relax
+          \global\advance\ccf@total@width-\ccf@margin@r\relax}
+         {}}%
+     \fi\fi}
+%    \end{macrocode}
+% \end{macro}
 %
 %
 % \subsection{The SubFloat Environment}
@@ -1029,9 +1094,10 @@
 %    \begin{macrocode}
 \def\endccSubFloat{%
   \ifhmode\unskip\fi
-  \setbox\ccf@sub@box\hbox{\ccGobble
+  \setbox\ccf@sub@box\hbox{%
+    \ccGobble
     \@cc@is@finalfalse
-    \let\includegraphics\ccf@measuresubgraphics
+    \let\includegraphics\ccf@measuregraphics
     \ccUseProperty{subfloat-content}%
   }%
   \expandafter\xdef\csname ccf@\cc@cur@cont @width-\the\ccSubFloatCnt\endcsname{\the\wd\ccf@sub@box}%
@@ -1296,8 +1362,7 @@
          {\ccf@addcontentsline}%
      \else
        \ccIfAttr{\ccfCapType}{subfloat}{}{\ccf@addcontentsline}%
-     \fi}%
-}
+     \fi}}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -1395,13 +1460,25 @@
 \def\ccf@set@hsize{%
   \expandafter\ccf@sub@sep\ccUseProperty{sub-float-sep}\relax%
   \global\ccf@total@width=\hsize\relax
-  \expandafter\ccf@margin@l\ccUseProperty{margin-left}\relax
-  \expandafter\ccf@margin@r\ccUseProperty{margin-right}\relax
-  \expandafter\ccf@margin@i\ccUseProperty{margin-inner}\relax
-  \expandafter\ccf@margin@o\ccUseProperty{margin-outer}\relax
+  \ccf@set@margin{l}{left}%
+  \ccf@set@margin{r}{right}%
+  \ccf@set@margin{i}{inner}%
+  \ccf@set@margin{o}{outer}%
   \ccf@set@margins
   \global\advance\ccf@total@width-\ccf@margin@r\relax
   }
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccf@set@margin} is used to set the internal margin macros
+%   \begin{ArgList}
+%     \item[1] is the location of the margin, either \texttt{l}, \texttt{r}, \texttt{i}, or \texttt{o}
+%   \end{ArgList}
+%    \begin{macrocode}
+\def\ccf@set@margin#1#2{%
+  \ccIfStrEqual{\ccUseProperty{margin-#2}}{auto}
+    {\csname ccf@margin@#1\endcsname=\z@\relax}
+    {\csname ccf@margin@#1\expandafter\endcsname\ccUseProperty{margin-#2}\relax}%
+}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ccf@set@margins} realises inner and outer margins
@@ -1917,14 +1994,19 @@
     \ccSetProperty{subfloat-same-height}{true}%
 %    \end{macrocode}
 % \end{Property}
-% \begin{Property}{subfloat-content}{<any>}
+% \begin{Property}{float-content}{<any>}
 %    \begin{macrocode}
-    \ccSetProperty{subfloat-content}{%
+    \ccSetProperty{float-content}{%
       \ifx\ccf@no@figs\relax
         \rule{0pt}{1pt}\rule{1pt}{0pt}%
       \else
         \ccUseComp{Fig}%
       \fi}%
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{subfloat-content}{<any>}
+%    \begin{macrocode}
+    \ccPropertyLet{subfloat-content}{float-content}
 %    \end{macrocode}
 % \end{Property}
 % \begin{Property}{float-render}{<any>} figure specific output
@@ -1937,10 +2019,64 @@
 %   routine for sub-floats.
 %    \begin{macrocode}
     \ccSetProperty{subfloat-render}{\ccfSubFigureRender}%
-  }%
-}
 %    \end{macrocode}
 % \end{Property}
+% \begin{Property}{measure-content}{<any>} figure specific content
+%   measuring mechanism.
+%    \begin{macrocode}
+    \ccSetProperty{measure-content}{\ccfMeasureFigContent}%
+%    \end{macrocode}
+% \end{Property}
+%    \begin{macrocode}
+  }}
+%    \end{macrocode}
+%
+%
+% \subsection{Measuring Single Fig Components for Variable Width Captions}
+%
+% \begin{macro}{\ccImageBreak} is used to separate multiple
+%   \lstinline{\includegrapics} inside the same \lstinline{Fig}
+%   component. By definition, those images are stacked
+%   \textit{vertically}.
+%    \begin{macrocode}
+\def\ccImageBreak{\ccUseProperty{inline-content-v-sep}}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccImageSep} is used to separate multiple
+%   \lstinline{\includegrapics} inside the same \lstinline{Fig}
+%   component. By definition, those images are stacked
+%   \textit{horizontally}.
+%    \begin{macrocode}
+\def\ccImageSep{\ccUseProperty{inline-content-h-sep}}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccfMeasureFigContent} measures the width of a
+%   single image. It further checks if \UsageProperty{margin-left}
+%   and/or \UsageProperty{margin-right} is set to \texttt{auto} and
+%   re-sets the internal margin and total width dimension registers
+%   accordingly.
+%    \begin{macrocode}
+\def\ccfMeasureFigContent{%
+  \ccaDisable\@cc@is@finalfalse
+  \bgroup
+%    \end{macrocode}
+% \textbf{Note:} Currently, if there are more than one
+% \lstinline{\includegraphics} separated by \lstinline{\ccImageBreak}
+% inside the same \UsageComponent{Fig} Component, we only measure the
+% \textit{last} occurence. This may change in a future update.
+%    \begin{macrocode}
+    \def\ccImageBreak{\egroup\global\setbox\ccf@sub@box\hbox\bgroup\ccGobble\let\includegraphics\ccf@measuregraphics}%
+    \global\setbox\ccf@sub@box\hbox{\ccGobble
+      \let\includegraphics\ccf@measuregraphics
+      \ccUseProperty{float-content}%
+    }%
+    \ccfAdjustMargins{\wd\ccf@sub@box}%
+  \egroup
+  \global\setbox\ccf@sub@box\box\voidb@x
+  \ccaEnable\@cc@is@finaltrue
+}
+%    \end{macrocode}
+% \end{macro}
 %
 %
 % \subsection{Figure Output Routines}
@@ -2021,15 +2157,15 @@
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ccf@measuresubgraphics} is an override of \LaTeX's
+% \begin{macro}{\ccf@measuregraphics} is an override of \LaTeX's
 %   \lstinline{\includegraphics} that is used to measure the natural
 %   dimensions of the included image. It also checks if the
 %   \lstinline{\includegraphics} has either an height or width
 %   explicitly given. if so, we de-activate the same-height
 %   calculations for the entire float.
 %    \begin{macrocode}
-\def\ccf@measuresubgraphics{\cc@opt@empty\@ccf@measuresubgraphics}
-\def\@ccf@measuresubgraphics[#1]#2{%
+\def\ccf@measuregraphics{\cc@opt@empty\@ccf@measuregraphics}
+\def\@ccf@measuregraphics[#1]#2{%
   \begingroup
     \setkeys{Gin}{#1}%
     \ifx\Gin@ewidth\Gin@exclamation
@@ -2205,6 +2341,7 @@
       }%
     \ccSetProperty{float-render}{\ccfTableRender}%
     \ccSetProperty{subfloat-render}{\ccfSubTableRender}%
+    \ccSetProperty{measure-content}{\ccfMeasureTabContent}
   }%
 }
 %    \end{macrocode}
@@ -2285,6 +2422,18 @@
     \@cc@is@finaltrue
     \ccfRenderSubFloats{\the\@tempcnta}{Content}%
   }}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccfMeasureTabContent} measures the width of a table
+%   in order to adjust the left and right margins if either is set to
+%   \texttt{auto}.
+%    \begin{macrocode}
+\def\ccfMeasureTabContent{%
+  \ccfGetTableContent
+  \ifvoid\ccf@floatbox\else
+    \ccfAdjustMargins{\wd\ccf@floatbox}%
+  \fi
+}
 %    \end{macrocode}
 % \end{macro}
 %
