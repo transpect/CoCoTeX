@@ -517,6 +517,15 @@
     \ccSetProperty{inline-content-h-sep}{\hfill}%
 %    \end{macrocode}
 % \end{Property}
+% \begin{Property}{inline-content-h-sep-auto}{<dim>} if multiple
+%   content instances inside the same \UsageComponent{Content}
+%   Component is measured frp auto calculation of left and right
+%   margins, this is the horizontal space that is inserted inbetween
+%   them.
+%    \begin{macrocode}
+    \ccSetProperty{inline-content-h-sep-auto}{0.5em}%
+%    \end{macrocode}
+% \end{Property}
 % \begin{Property}{inline-content-v-sep}{<any>} how content instances
 %   inside the same \UsageComponent{Content} Component are separated
 %   vertically.
@@ -2066,6 +2075,7 @@
 % \textit{last} occurence. This may change in a future update.
 %    \begin{macrocode}
     \def\ccImageBreak{\egroup\global\setbox\ccf@sub@box\hbox\bgroup\ccGobble\let\includegraphics\ccf@measuregraphics}%
+    \def\ccImageSep{\hskip\ccUseProperty{inline-content-h-sep-auto}}%
     \global\setbox\ccf@sub@box\hbox{\ccGobble
       \let\includegraphics\ccf@measuregraphics
       \ccUseProperty{float-content}%
