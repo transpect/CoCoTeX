@@ -1121,13 +1121,19 @@
   \edef\Url@String{\expandafter\strip@prefix\meaning\Url@String}%
   \edef\x{%
     \noexpand\def\noexpand\cc@break@link\unexpanded{##1}\ccBurlTokenSep\unexpanded{##2}\ccBurlTokenSep\noexpand\@nil{%
-      \noexpand\cc@url@sep\unexpanded{##1}%
+      \noexpand\cc@url@sep\noexpand\hbox\noexpand\bgroup\unexpanded{##1}\noexpand\egroup%
       \noexpand\if\relax\unexpanded{##2}\relax\noexpand\else
         \noexpand\cc@break@link\unexpanded{##2}\ccBurlTokenSep\noexpand\@nil
         \noexpand\fi
     }}\x
   \begingroup
-    \let\cc@url@sep\@empty
+    \edef\x{%
+      \noexpand\def\noexpand\cc@break@link\unexpanded{##1}\ccBurlTokenSep\unexpanded{##2}\ccBurlTokenSep\noexpand\@nil{%
+        \unexpanded{##1}%
+        \noexpand\if\relax\unexpanded{##2}\relax\noexpand\else
+          \noexpand\cc@break@link\unexpanded{##2}\ccBurlTokenSep\noexpand\@nil
+          \noexpand\fi
+      }}\x
     \edef\x{\noexpand\cc@break@link\unexpanded{#1}\ccBurlTokenSep\ccBurlTokenSep\noexpand\@nil}%
     \xdef\Url@String{\x}%
   \endgroup
