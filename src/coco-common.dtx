@@ -1128,10 +1128,16 @@
       \noexpand\ifx\noexpand\cc@url@sep\noexpand\@empty\noexpand\else
         \noexpand\egroup%
       \noexpand\fi
-      \noexpand\if\unexpanded{##1}\ccBurlTokenSep\noexpand\else
-        \noexpand\if\noexpand\space\unexpanded{##2}\noexpand\space\noexpand\else
-          \noexpand\cc@break@link\unexpanded{##2}\ccBurlTokenSep\noexpand\@nil
-        \noexpand\fi
+      \noexpand\if\noexpand\space\unexpanded{##2}\noexpand\space\noexpand\else
+        \ifx\ccBurlTokenSep\@empty
+          \noexpand\cc@break@link\unexpanded{##2}\noexpand\@nil
+        \else
+          \noexpand\if\ccBurlTokenSep\unexpanded{##1}\noexpand\else
+            \noexpand\if\ccBurlTokenSep\unexpanded{##2}\noexpand\else
+              \noexpand\cc@break@link\unexpanded{##2}\ccBurlTokenSep\noexpand\@nil
+            \noexpand\fi
+          \noexpand\fi
+        \fi
       \noexpand\fi
     }}\x
   \begingroup
