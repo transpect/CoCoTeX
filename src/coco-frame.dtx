@@ -41,6 +41,27 @@
     }
   }
 %    \end{macrocode}
+% The value of the \lstinline{offset} option is the space added
+% equally to all sides of the paper. Cropmarks are printed within this
+% margin. Default is \lstinline{4em}.
+%    \begin{macrocode}
+\dim_new:N   \g_coco_frame_offset_dim
+\dim_gset:Nn \g_coco_frame_offset_dim {4em}
+\keys_define:nn { cocotex/frame }
+{
+  offset .dim_gset:N = \g_coco_frame_offset_dim
+}
+%    \end{macrocode}
+% The bleed width is given via the \lstinline{bleed} package option.
+% Default is \lstinline{4mm}.
+%    \begin{macrocode}
+\dim_new:N   \g_coco_frame_bleed_dim
+\dim_gset:Nn \g_coco_frame_bleed_dim {4mm}
+\keys_define:nn { cocotex/frame }
+{
+  bleed .dim_gset:N = \g_coco_frame_bleed_dim
+}
+%    \end{macrocode}
 % LEGACY
 %    \begin{macrocode}
 \keys_define:nn { cocotex/frame }
@@ -70,11 +91,11 @@
 {
   \ifx\cc@frame@@offset\@undefined
     \newdimen\cc@frame@@offset
-    \cc@frame@@offset4em\relax
+    \cc@frame@@offset\g_coco_frame_offset_dim\relax
   \fi
   \ifx\bleed\@undefined
     \newdimen\bleed
-    \bleed4mm\relax
+    \bleed\g_coco_frame_bleed_dim\relax
   \fi
   \bool_if:NTF \g_cocotex_frame_crops_bool
   {%
@@ -129,56 +150,10 @@
     \vskip-1in}%
 }
 %    \end{macrocode}
-% Now, we tell the crop package how to draw the crop marks:
+% If the user requested them, we tell the crop package to draw the
+% crop marks:
 %    \begin{macrocode}
-\bool_if:NT \g_cocotex_frame_crops_bool {%
-  \def\camcross{%
-    \smash{\rlap{%
-        \kern-0.15\p@
-        \vrule\@width0.3\p@\@height1.7mm\@depth1.7mm\relax
-        \kern-0.15\p@
-        \kern-1.7mm\relax
-        \vrule\@width0.3\p@\@height1.7mm\@depth1.7mm\relax
-        \kern-0.3\p@
-        \raise1.7mm\rlap{\vrule\@width3.4mm\@height\z@\@depth0.3\p@}%
-        \lower1.7mm\rlap{\vrule\@width3.4mm\@height0.3\p@\@depth\z@}%
-        \hbox{\vrule\@width3.4mm\@height0.15\p@\@depth0.15\p@}%
-        \kern-0.3\p@
-        \vrule\@width0.3\p@\@height1.7mm\@depth1.7mm\relax}}}
-  \def\cammcrossleft{%
-    \llap{\camcross\vrule\@width\dimexpr\bleed+2mm\relax\@height0.15\p@\@depth0.15\p@\kern\bleed}}
-  \def\cammcrossright{%
-    \rlap{\kern\bleed\vrule\@width\dimexpr\bleed+2mm\relax\@height0.15\p@\@depth0.15\p@\camcross}}
-  \def\cammcrossup{%
-    \rlap{\smash{\raise\dimexpr\cc@frame@@offset-2mm\relax\hbox{\camcross}%
-        \kern-0.15\p@\vrule\@width0.3\p@\@height\dimexpr\cc@frame@@offset-2mm\relax\@depth-\bleed}}}
-  \def\cammcrossdown{%
-    \rlap{\smash{\lower\dimexpr\cc@frame@@offset-2mm\relax\hbox{\camcross}%
-        \kern-0.15\p@\vrule\@width0.3\p@\@height-\bleed\@depth\dimexpr\cc@frame@@offset-2mm\relax}}}
-  \def\CROP@@ulc{\cammcrossup\cammcrossleft}
-  \def\CROP@@urc{\cammcrossup\cammcrossright}
-  \def\CROP@@llc{\cammcrossdown\cammcrossleft}
-  \def\CROP@@lrc{\cammcrossdown\cammcrossright}
-  \renewcommand*\CROP@@info{{%
-      \global\advance\CROP@index\@ne
-      \def\x{\discretionary{}{}{\hbox{\kern.5em---\kern.5em}}}%
-      \ifx\CROP@pagecolor\@empty
-      \else
-        \advance\dimen@\CROP@overlap
-      \fi
-      \hb@xt@\z@{%
-        \hss
-        \lower1em\vbox to\z@{\vss
-          \centering
-          \hsize\dimexpr\paperwidth-20\p@\relax
-          \normalfont
-          \large
-          \vskip5mm\relax
-          \addvspace{\bleed}}%
-        \hss}}%
-  }%
-  \crop[cam]
-}
+\bool_if:NT \g_cocotex_frame_crops_bool {\crop[cam]}
 %    \end{macrocode}
 % The code for the page area guides
 %    \begin{macrocode}
