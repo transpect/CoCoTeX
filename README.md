@@ -12,6 +12,8 @@
 > [Dante2024.pdf](https://github.com/transpect/CoCoTeX/blob/main/doc/Dante2024.pdf),
 > which is the slides to a talk the main developer gave at the 2024
 > Dante Frühjahrestagung in Weimar in April 2024 (German only).
+>
+> Please note that the main development currently happens in the ally branch. If you need up-to-date source code (that might lack up-to-date documentation though), please look there.
 
 # CoCoTeX Kernel #
 
