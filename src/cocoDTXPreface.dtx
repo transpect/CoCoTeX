@@ -52,6 +52,8 @@
 \newdimen\LeftMarg \LeftMarg=2.5em\relax
 \def\macro{\begingroup
    \catcode`\\12
+   \catcode`\_11
+   \catcode`\:11
    \ifx\is@m@cro@\relax
      \let\is@sub@m@cro@\relax
    \fi
