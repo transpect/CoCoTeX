@@ -2036,6 +2036,13 @@
     \ccSetProperty{measure-content}{\ccfMeasureFigContent}%
 %    \end{macrocode}
 % \end{Property}
+% \begin{Property}{placement-tag}{<any>} when PDF tagging is active,
+%   this placement attribut is used.
+%    \begin{macrocode}
+    \ccSetProperty{placement-tag}{\ccaAddPlacement{Block}}
+%    \end{macrocode}
+% \end{Property}
+% 
 %    \begin{macrocode}
   }}
 %    \end{macrocode}
@@ -2142,7 +2149,7 @@
   \gdef\ccf@fig@path{#2}%
   \if@cc@is@final
     \ccaStructStart{Figure}%
-    \ccaAddPlacement{Block}%
+    \ccUseProperty{placement-tag}%
   \fi%
   \expandafter\ccf@ltx@includegraphics\expandafter[\@igopts]{#2}%
   \if@cc@is@final
@@ -2231,10 +2238,18 @@
 %   inline figures
 %    \begin{macrocode}
     \ccSetProperty{float-render}{\ccUseComp{Fig}}
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{placement-tag}{<any>} inline figures should be placed inline.
+%    \begin{macrocode}
+    \ccSetProperty{placement-tag}{\ccaAddPlacement{Inline}}
+%    \end{macrocode}
+% 
+% \end{Property}
+%    \begin{macrocode}
   }%
 }
 %    \end{macrocode}
-% \end{Property}
 %
 %
 % \subsubsection{Inline Figure User Macro}
