@@ -980,7 +980,7 @@
 %
 %    \begin{macrocode}
 \AtBeginDocument{%
-  \apptocmd{\(}{\ccaStructStart{Formula}}{}{\cca@patch@error\(}
+  \apptocmd{\(}{\ccaStructStart{Formula}\ccaAddPlacement{Inline}}{}{\cca@patch@error\(}
   \pretocmd{\)}{\ccaStructEnd{Formula}}{}{\cca@patch@error\)}
   \apptocmd{\[}{\ccaVstructStart{P}\ccaStructStart{Formula}}{}{\cca@patch@error\[}
   \pretocmd{\]}{\ccaStructEnd{Formula}\ccaVstructEnd{P}}{}{\cca@patch@error\]}
