@@ -466,8 +466,8 @@
 \newif\if@backmatter   \@backmatterfalse
 \ifarticle\else
   \renewcommand\frontmatter{%
-    \cleardoublepage
     \cchResetNesting
+    \cleardoublepage
     \global\@mainmatterfalse
     \global\@backmatterfalse
     \global\@frontmattertrue
@@ -475,9 +475,11 @@
     \pagenumbering{arabic}}
 
   \renewcommand\mainmatter{%
-    \if@frontmatter\ccaVstructEnd{Frontmatter}\fi
-    \cleardoublepage
     \cchResetNesting
+    \if@frontmatter
+      \ccaVstructEnd{Frontmatter}%
+    \fi
+    \cleardoublepage
     \global\@frontmatterfalse
     \global\@backmatterfalse
     \global\@mainmattertrue
@@ -485,9 +487,11 @@
   }
 
   \renewcommand\backmatter{%
-    \if@mainmatter\ccaStructEnd{Mainmatter}\fi%
-    \cleardoublepage
     \cchResetNesting
+    \if@mainmatter
+      \ccaVstructEnd{Mainmatter}
+    \fi%
+    \cleardoublepage
     \global\@mainmatterfalse
     \global\@frontmatterfalse
     \global\@backmattertrue

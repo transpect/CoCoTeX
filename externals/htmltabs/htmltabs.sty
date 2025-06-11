@@ -1518,7 +1518,7 @@
         }%
         \global\setbox\htCellBox\vbox{%
           \ccaStructStart{TD}%
-          \ccaAddToStruct{\ht@structID@TR}%
+          \ifx\ht@structID@TR\@undefined\else\ccaAddToStruct{\ht@structID@TR}\fi%
           \csxdef{dummy-\ht@therow-\ht@thecol}{\ccaGetCurStruct{idx}}%
           \ccaStructEnd{TD}%
         }%
@@ -1608,7 +1608,7 @@
               \ccaAddKeep{}%
               \expandafter\ccaReplaceStruct\expandafter{\@target}%
             \else
-              \ccaAddToStruct{\ht@structID@TR}%
+              \ifx\ht@structID@TR\@undefined\else\ccaAddToStruct{\ht@structID@TR}\fi%
             \fi
             \ccaStructEnd{\ht@cell@struct}%
           \fi
@@ -2276,7 +2276,7 @@
           \expandafter\unvbox\csname #1\endcsname%
           \nointerlineskip%
           \box\htRowBox
-          \ccaMoveStruct{\ht@structID@TR}%
+          \ifx\ht@structID@TR\@undefined\else\ccaMoveStruct{\ht@structID@TR}\fi%
           \nopagebreak%
           \if@ht@ally\ifnum\ht@currow=#3\relax
               \ccaVstructEnd{#4}%
@@ -2307,7 +2307,7 @@
           \ht@insert@page@breakers
         }{}%
         \box\htRowBox%
-        \ccaMoveStruct{\ht@structID@TR}%
+        \ifx\ht@structID@TR\@undefined\else\ccaMoveStruct{\ht@structID@TR}\fi%
         \ht@spewnotes
         \nopagebreak
         \if@ht@ally\ifnum\ht@currow=\ht@maxrow\relax
