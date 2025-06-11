@@ -2420,7 +2420,7 @@
   \ccUseComp{Content}%
   \ccaStructStart{Table}%
   \ifx\ht@structID@THead\@undefined
-    \ccaMoveChildren{\ht@structID@TBody}%
+    \ifx\ht@structID@TBody\@undefined\else\ccaMoveStruct{\ht@structID@TBody}\fi%
   \else
     \ccaMoveStruct{\ht@structID@THead}%
     \ifx\ht@structID@TBody\@undefined\else\ccaMoveStruct{\ht@structID@TBody}\fi%
