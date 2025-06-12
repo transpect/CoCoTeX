@@ -948,7 +948,7 @@
     \else
       \letcs\ccl@label{ccl@label@type@\ccUseProperty{enum-type}}%
     \fi
-    \ccComponent{Label}{\ccl@label{\ccl@item@cnt}}
+    \ccComponent{Label}{\ccl@label{\ccl@item@cnt}\ccUseProperty{default-label-sep}}
   }%
 %    \end{macrocode}
 % \end{macro}
@@ -977,7 +977,8 @@
 % By default, numeric \UsageComponent{Label} are followed by a period to accommodate
 % {\LaTeX} customs.\UsageProperty{label}
 %    \begin{macrocode}
-  \ccSetProperty{label}{\ccUseComp{Label}.}}
+  \ccSetProperty{default-label-sep}{.}
+  \ccSetProperty{label}{\ccUseComp{Label}}}
 %    \end{macrocode}
 %
 % \subsubsection{Available Counting Styles}
@@ -1021,7 +1022,7 @@
 %    \begin{macrocode}
 \ccDeclareList{Enumerate}{numbered}{}
 \ccDeclareNested{Enumerate}{1}{% (
-  \ccSetProperty{label}{\ccUseComp{Label})}%
+  \ccSetProperty{default-label-sep}{)}%
   \ccSetProperty{enum-type}{alph}%
 }
 \ccDeclareNested{Enumerate}{2}{\ccSetProperty{enum-type}{roman}}
