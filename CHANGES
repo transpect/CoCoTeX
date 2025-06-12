@@ -37,6 +37,7 @@
 - NEW: Added general error facility for patch commands
 - NEW: Added function to locally disable CountedConditionals in case
        a Container instance occurs inside a Counted Component.
+- NEW: Added a way to locally add to Property lists
 - FIX: made group components long
 - FIX: LaTeX error when `\cc@iterate@res` is undefined
 
@@ -114,6 +115,7 @@
 - FIX: counting error
 - FIX: toggles Uncounted conditionals in case of lists in Counted
        Components (like a Float)
+- FIX: Final period was added to all numbered list labels.
 
 ## coco-script.dtx
 - FIX: Avoid `babel-lua` errors when `bidi` is not needed
