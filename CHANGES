@@ -76,6 +76,8 @@
 - NEW: XMP meta data are parsed and written into the Document Info
        Dictionary when ltpdfa is used.
 - NEW: Write document language with disabled a11y features
+- NEW: Number of columns in the FundingBlock can now be controlled
+	   locally via the new Component FundingColumns
 - FIX: XMP meta data now take preference over Meta container
        Components if the XMP does exist.
 - FIX: pdfcreator and pdfproducer metadata were used the wrong way.
