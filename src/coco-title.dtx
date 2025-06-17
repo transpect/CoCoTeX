@@ -1534,8 +1534,7 @@ from the Components given in the Meta Container.}}}
     \edef\x{\noexpand\ccaSetDocinfo{conformance}{%
         \if\cc@pdf@std U
           pdfuaid=\if@cc@pdf@two2\else1\fi
-        \fi
-        \if\cc@pdf@std A
+        \else
           ;pdfaid=\cc@pdf@part
           ;level=\cc@pdf@level
         \fi
