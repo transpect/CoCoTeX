@@ -1532,7 +1532,14 @@ from the Components given in the Meta Container.}}}
 \ccWhenAlly{%
   \AddToHook{cct/document/meta}{%
     \edef\x{\noexpand\ccaSetDocinfo{conformance}{%
-        pdfuaid=\if@cc@pdf@two2\else1\fi}}%
+        \if\cc@pdf@std U
+          pdfuaid=\if@cc@pdf@two2\else1\fi
+        \fi
+        \if\cc@pdf@std A
+          ;pdfaid=\cc@pdf@part
+          ;level=\cc@pdf@level
+        \fi
+      }}%
     \x}%
 %    \end{macrocode}
 %
