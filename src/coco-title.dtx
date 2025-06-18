@@ -1199,10 +1199,11 @@ from the Components given in the Meta Container.}}}
 %    \end{macrocode}
 % Fallback for the width in case someone sets up a fixed value for a fund's width.
 %    \begin{macrocode}
-  \ccSetProperty{fund-width}{\dimexpr((\textwidth - (\ccUseProperty{funding-sep}*(\ccUseComp{FundingColumns}-1)))/\ccUseComp{FundingColumns})\relax}
+  \ccSetProperty{funding-columns}{\ccUseComp{FundingColumns}}
+  \ccSetProperty{fund-width}{\dimexpr((\textwidth - (\ccUseProperty{funding-sep}*(\ccUseProperty{funding-columns}-1)))/\ccUseProperty{funding-columns})\relax}
   \ccSetProperty{fund-vertical-sep}{\baselineskip}%
   \ccSetProperty{fund-sep}{%
-    \expandafter\@tempcnta\CalcModulo{\ccCurCount}{\ccUseComp{FundingColumns}}%
+    \expandafter\@tempcnta\CalcModulo{\ccCurCount}{\ccUseProperty{funding-columns}}%
     \strut
       \ifnum\@tempcnta=\z@
       \ifnum\ccCurCount<\ccTotalCount\relax
