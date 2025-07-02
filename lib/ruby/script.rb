@@ -149,14 +149,14 @@ module CoCoTeX
 
     # creates a directory if that doesn't exist, yet
     def create_or_exist(dir:)
-      unless Dir.exists?(dir)
+      unless Dir.exist?(dir)
         shell_command("mkdir --parents #{dir}", ignore_test: true)
       end
     end
 
     # clears the temporary folder given by the --temp option
     def clear_temp
-      return if @debug or @options.keep_temp or !Dir.exists?(@temp_dir)
+      return if @debug or @options.keep_temp or !Dir.exist?(@temp_dir)
       shell_command("rm -rf #{@temp_dir} ")
     end
 
