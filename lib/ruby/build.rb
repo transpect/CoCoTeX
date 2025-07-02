@@ -32,7 +32,7 @@ module CoCoTeX
       @template = CoCoTeX::Template.new(source: _template_content)
       for component in @template.components
         comp_path = File.join(@source_dir, "#{component}.dtx")
-        if File.exists?(comp_path)
+        if File.exist?(comp_path)
           @template.merge_component(name: component, content: File.read(comp_path))
         else
           $log.fatal("Source file #{color_str(comp_path)} not found! Aborting!")
