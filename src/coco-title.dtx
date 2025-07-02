@@ -1528,7 +1528,7 @@ from the Components given in the Meta Container.}}}
 \ccWhenAlly{%
   \AddToHook{cct/document/meta}{%
     \edef\x{\noexpand\ccaSetDocinfo{conformance}{%
-        \if\cc@pdf@std U
+        \if\cc@pdf@std U%
           pdfuaid=\if@cc@pdf@two2\else1\fi
         \else
           ;pdfaid=\cc@pdf@part
