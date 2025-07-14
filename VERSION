@@ -1,12 +1,12 @@
 [version]
 major = "0"
 minor = "6"
-patch = "1"
+patch = "2"
 
 [date]
 year = "2025"
 month = "07"
-day = "02"
+day = "14"
 
 [tex]
 year = "2023"

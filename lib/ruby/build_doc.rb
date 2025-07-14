@@ -28,7 +28,7 @@ module CoCoTeX
       prepare_manual
       build_manual
       create_or_exist(dir: @doc_dir)
-      shell_command("mv #{@manual_out} #{@doc_dir}") if File.exists?(@manual_out)
+      shell_command("mv #{@manual_out} #{@doc_dir}") if File.exist?(@manual_out)
       clear_temp unless @debug or @options.quick
     end
 
@@ -40,7 +40,7 @@ module CoCoTeX
       prepare_doc
       build_doc
       create_or_exist(dir: @doc_dir)
-      shell_command("mv #{@source_doc_out} #{@doc_dir}") if File.exists?(@source_doc_out)
+      shell_command("mv #{@source_doc_out} #{@doc_dir}") if File.exist?(@source_doc_out)
       clear_temp unless @debug or @options.quick
     end
 
@@ -65,13 +65,13 @@ module CoCoTeX
 
     # runs LaTeX for the end usere manual
     def build_manual
-      run_while_status("1st TeX run") do do_tex_run end
+      run_while_status("1st TeX run") do do_tex_run(true) end
       unless @options.quick
-        run_while_status("2nd TeX run") do do_tex_run end
-        run_while_status("3rd TeX run") do do_tex_run end
+        run_while_status("2nd TeX run") do do_tex_run(true) end
+        run_while_status("3rd TeX run") do do_tex_run(true) end
         run_while_status("Generating Index") do do_makeindex(manual: true) end
-        run_while_status("4th TeX run") do do_tex_run end
-        run_while_status("5th TeX run") do do_tex_run end
+        run_while_status("4th TeX run") do do_tex_run(true) end
+        run_while_status("5th TeX run") do do_tex_run(true) end
       end
       @manual_out = File.join(@temp_dir, "manual.pdf")
     end
@@ -91,11 +91,13 @@ module CoCoTeX
 
     def resolve_dependencies
       return if @options.quick
-      shell_command("cd #{@temp_dir} ; ln -s #{File.join(EXT_DIR, "htmltabs", "htmltabs.sty")} .") unless File.exists?(File.join(@temp_dir, "htmltabs.sty"))
+      shell_command("cd #{@temp_dir} ; ln -s #{File.join(EXT_DIR, "htmltabs", "htmltabs.sty")} .") unless File.exist?(File.join(@temp_dir, "htmltabs.sty"))
+      shell_command("cd #{@temp_dir} ; ln -s #{File.join(EXT_DIR, "ltpdfa", "suppl")} .") unless File.exist?(File.join(@temp_dir, "ltpdfa"))
+      shell_command("cd #{@temp_dir} ; ln -s #{File.join(EXT_DIR, "ltpdfa", "ltpdfa")} .") unless File.exist?(File.join(@temp_dir, "ltpdfa"))
       xf = resolve_path(@options.xerif_fonts) if @options.xerif_fonts
-      if xf && Dir.exists?(xf)
+      if xf && Dir.exist?(xf)
         $log.info("using #{xf}.")
-        shell_command("cd #{@temp_dir} ; ln -s #{xf} fonts") unless File.exists?(File.join(@temp_dir, "fonts"))
+        shell_command("cd #{@temp_dir} ; ln -s #{xf} fonts") unless File.exist?(File.join(@temp_dir, "fonts"))
       else
         $log.info("Collecting xerif-fonts (this may take a while, you can checkout the svn repo yourself and use the --xerif-fonts option to specify the path to the fonts)")
         o,e,s = shell_command_capture("cd #{@temp_dir} ; svn co https://subversion.le-tex.de/common/xerif-fonts/ fonts")
@@ -149,8 +151,9 @@ module CoCoTeX
 
 
     # issues a single LaTeX run
-    def do_tex_run
-      cmd = "cd #{@temp_dir} ; #{@tex_engine} -interaction=nonstopmode #{@doc_main}.#{@doc_suffix}"
+    def do_tex_run(with_ltpdfa = false)
+      ltpdfa = with_ltpdfa ? " LUAINPUTS=.:ltpdfa: ; CLUAINPUTS=.:ltpdfa//: ;TEXINPUTS=.:ltpdfa: ; " : ""
+      cmd = "cd #{@temp_dir} ; #{ltpdfa}#{@tex_engine} -interaction=nonstopmode #{@doc_main}.#{@doc_suffix}"
       _cmd = check_shell_command(cmd)
       st = nil
       err = ""
