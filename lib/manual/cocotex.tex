@@ -1,6 +1,9 @@
 \documentclass[UKenglish,a4paper,oneside,pubtype=l3doc]{cocotex}
 \usepackage{cocotex-doc}
 
+\usepackage{examples/boxes}
+
+
 \Fileversion{\fileversion}
 \Filedate{\filedate}
 
@@ -10,25 +13,27 @@
   \AuthorNameList{le-tex publishing services GmbH}
 \end{Meta}
 
-\includeonly{%
-   coco-overview%
-  ,coco-design%
-  % ,coco-headings%
-  % ,coco-floats%
-  % ,coco-scripts%
-  % ,coco-notes%
-  % ,coco-title%
-  % ,coco-lists%
-  % ,coco-frame%
-  % ,coco-accessibility%
-  % ,coco-cls%
-  % ,coco-common%
-  ,coco-customize%
-}
+% \includeonly{%
+% coco-quickstart
+% ,coco-overview%
+% ,coco-design%
+% ,coco-headings%
+% ,coco-floats%
+% ,coco-scripts%
+% ,coco-notes%
+% ,coco-title%
+% ,coco-lists%
+% ,coco-frame%
+% ,coco-accessibility%
+% ,coco-cls%
+% ,coco-customize%
+% ,coco-common%
+% }
 
 \begin{document}
 \Maketitle
 \mainmatter
+\include{coco-quickstart}
 \include{coco-overview}
 \include{coco-design}
 
@@ -58,9 +63,9 @@
   \BMTitle{CoCoTeX's Backend}
 \end{Heading}
 
+\include{coco-kernel}
 \include{coco-cls}
 \include{coco-common}
-\include{coco-customize}
 \clearpage
 \backmatter
 \PrintIndex

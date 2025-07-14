@@ -1,0 +1,28 @@
+%% Declarations for lists used in the end-user manual
+
+%% coco-lists is *not* auto-loaded with the cocotex docment class, so
+%% we need to load it manually.
+%%
+%% the replace option causes default LaTeX list environments to be
+%% replaced by coco-list containers
+\RequirePackage[replace]{coco-lists}
+\ccAddToType{Properties}{Itemize}{%
+  \ccSetProperty{label-sep}{\z@}%
+  \ccSetProperty{indent}{-1em}%
+  \ccSetProperty{label-align}{left}%
+  \ccSetProperty{margin-left}{auto}%
+}
+
+% out unnumbered list label is a little red square
+\def\myitemlabel#1{\raise.25ex\hbox{\color{spot!#1}\rule{1ex}{1ex}}}
+% first level list labels use a full colored square
+\ccAddToType{Properties}{Itemize-1}{\ccSetProperty{default-label}{\myitemlabel{100}}}
+
+% second level unnumbered list labels use a 50\% colored square
+\ccAddToType{Properties}{Itemize-2}{\ccSetProperty{default-label}{\myitemlabel{50}}}
+
+% third level unnumbered list labels use a 30\% colored square
+\ccAddToType{Properties}{Itemize-3}{\ccSetProperty{default-label}{\myitemlabel{30}}}
+
+% fourth level unnumbered list labels use a 10\% colored square
+\ccAddToType{Properties}{Itemize-4}{\ccSetProperty{default-label}{\myitemlabel{10}}}

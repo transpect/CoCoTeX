@@ -1,25 +1,28 @@
-\begin{heading}[label=chap:headings]{chapter}
-  \tpTitle{coco-headings.sty}
-\end{heading}
+\begin{Heading}[label=chap:headings]{chapter}
+  \Title{coco-headings.sty}
+  \Subtitle{The {\CoCoTeX} module for headings and table of contents entries}
+\end{Heading}
 \index{coco-headings|textbf}
 
+\endinput
+
 This module handles the processing and typesetting of heading
-complexes. It's top-level Namespace is \texttt{heading}.
+complexes. It's top-level Namespace is \texttt{Heading}.
 
-\begin{heading}[label=sec:hdg]{section}
-  \tpTitle{User Macros}
-\end{heading}
+\begin{Heading}[label=sec:hdg]{section}
+  \Title{User Macros}
+\end{Heading}
 
-\begin{heading}[label=sec:hdg:headingenv]{subsection}
-  \tpTitle{The \mytexttt{heading} Environment}
-\end{heading}
+\begin{Heading}[label=sec:hdg:headingenv]{subsection}
+  \Title{The \mytexttt{Heading} Environment}
+\end{Heading}
 
-In the {\LaTeX} code, headings are represented in the \textit{heading}\index[tex]{heading@\texttt{heading}*}
+In the {\LaTeX} code, headings are represented in the \textit{Heading}\index[tex]{heading@\texttt{Heading}*}
 environment.
 \begin{lstlisting}[style=tex]
-\begin{heading}[<Options>]{<Level>}
-  \tpTitle{<Main Title>}
-\end{heading}
+\begin{Heading}[<Options>]{<Level>}
+  \Title{<Main Title>}
+\end{Heading}
 \end{lstlisting}
 The mandatory argument of that environment specifies the name of the
 heading level, in most cases this is something like \textit{part},
@@ -27,11 +30,11 @@ heading level, in most cases this is something like \textit{part},
 be an arbitrary string as long as the heading environment has been
 declared (see \fullref{sec:hdg:decl}).
 
-\begin{heading}[label=sec:hdg:comp:options]{subsubsection}
-  \tpTitle{Heading Options}
-\end{heading}
+\begin{Heading}[label=sec:hdg:comp:options]{subsubsection}
+  \Title{Heading Options}
+\end{Heading}
 
-The following options for \lstinline{heading} environments are implemented:
+The following options for \lstinline{Heading} environments are implemented:
 \begin{description}
 \item[label=<label>] Label for the heading. This can be used to
   reference the heading with \LaTeX's crossref macros like
@@ -42,44 +45,44 @@ The following options for \lstinline{heading} environments are implemented:
   \lstinline{auto}.
 \end{description}
 
-\begin{heading}[label=sec:hdg:comp]{subsection}
-  \tpTitle{Pre-Defined Components}
-\end{heading}
+\begin{Heading}[label=sec:hdg:comp]{subsection}
+  \Title{Pre-Defined Components}
+\end{Heading}
 
-\begin{heading}[label=sec:hdg:comp:predef]{subsubsection}
-  \tpTitle{Components}
-\end{heading}
+\begin{Heading}[label=sec:hdg:comp:predef]{subsubsection}
+  \Title{Components}
+\end{Heading}
 
 The pre-defined components of a heading are:
 \begin{description}
-\item[\string\tpTitle]\index[tex]{tpTitle@\texttt{\textbackslash tpTitle}} The heading's main title,
-\item[\string\tpSubtitle] its subtitle\index[tex]{tpSubtitle@\texttt{\textbackslash tpSubtitle}},
-\item[\string\tpAuthor] the section or chapter's author\index[tex]{tpAuthor@\texttt{\textbackslash tpAuthor}},
-\item[\string\tpNumber] the counter of the heading,\index[tex]{tpNumber@\texttt{\textbackslash tpNumber}}
-\item[\string\tpQuote] a quote,\index[tex]{tpQuote@\texttt{\textbackslash tpQuote}}
-\item[\string\tpQuoteSource] the quote's source,\index[tex]{tpQuoteSource@\texttt{\textbackslash tpQuoteSource}}
+\item[\string\Title]\index[tex]{Title@\texttt{\textbackslash Title}} The heading's main title,
+\item[\string\Subtitle] its subtitle\index[tex]{Subtitle@\texttt{\textbackslash Subtitle}},
+\item[\string\Author] the section or chapter's author\index[tex]{Author@\texttt{\textbackslash Author}},
+\item[\string\Number] the counter of the heading,\index[tex]{Number@\texttt{\textbackslash Number}}
+\item[\string\Quote] a quote,\index[tex]{Quote@\texttt{\textbackslash Quote}}
+\item[\string\QuoteSource] the quote's source,\index[tex]{QuoteSource@\texttt{\textbackslash QuoteSource}}
 \end{description}
 The only mandatory Component of a heading is the \lstinline{Title}
 component. All other components may be omitted.
 
-\begin{heading}{subsubsection}
-  \tpTitle{Extended Components}
-\end{heading}
+\begin{Heading}{subsubsection}
+  \Title{Extended Components}
+\end{Heading}
 
 There is an extended set of predefined components when a heading level is using the property \lstinline{extended}:
 \begin{description}
-\item[\string\tpAbstract] an abstract\index[tex]{tpAbstract@\texttt{\textbackslash tpAbstract}}
-\item[\string\tpAbstractLabel] the Title for the abstract (``Abstract'' if omitted),\index[tex]{tpAbstractTitle@\texttt{\textbackslash tpAbstractLabel}}
-\item[\string\tpKeywords] a list of keywords \index[tex]{tpKeywords@\texttt{\textbackslash tpKeywords}}
-\item[\string\tpKeywordsLabel] the Title of the list of keywords (``Keywords'' if omitted)\index[tex]{tpKeywordsTitle@\texttt{\textbackslash tpKeywordsLabel}}
-\item[\string\tpDOI] the DOI of contribution\index[tex]{tpKeywords@\texttt{\textbackslash tpKeywords}}
-\item[\string\tpDOILabel] the title of the DOI (``DOI'' if omitted)\index[tex]{tpKeywordsTitle@\texttt{\textbackslash tpKeywordsLabel}}
+\item[\string\Abstract] an abstract\index[tex]{Abstract@\texttt{\textbackslash Abstract}}
+\item[\string\AbstractLabel] the Title for the abstract (``Abstract'' if omitted),\index[tex]{AbstractTitle@\texttt{\textbackslash AbstractLabel}}
+\item[\string\Keywords] a list of keywords \index[tex]{Keywords@\texttt{\textbackslash Keywords}}
+\item[\string\KeywordsLabel] the Title of the list of keywords (``Keywords'' if omitted)\index[tex]{KeywordsTitle@\texttt{\textbackslash KeywordsLabel}}
+\item[\string\DOI] the DOI of contribution\index[tex]{Keywords@\texttt{\textbackslash Keywords}}
+\item[\string\DOILabel] the title of the DOI (``DOI'' if omitted)\index[tex]{KeywordsTitle@\texttt{\textbackslash KeywordsLabel}}
 \end{description}
 
 
-\begin{heading}[label=sec:hdg:comp:overrides]{subsubsection}
-  \tpTitle{Overrides}\index{Headings!Overrides}
-\end{heading}
+\begin{Heading}[label=sec:hdg:comp:overrides]{subsubsection}
+  \Title{Overrides}\index{Headings!Overrides}
+\end{Heading}
 
 The components \lstinline{Title}\index{Title},
 \lstinline{Subtitle}\index{Subtitle},
@@ -93,35 +96,35 @@ Component contents when used in the running page header or footer
 
 They are
 \begin{description}
-\item[\string\tpRunTitle]\index[tex]{tpRunTitle@\texttt{\textbackslash tpRunTitle}}
-\item[\string\tpRunSubtitle]\index[tex]{tpRunSubtitle@\texttt{\textbackslash tpRunSubtitle}}
-\item[\string\tpRunAuthor]\index[tex]{tpRunAuthor@\texttt{\textbackslash tpRunAuthor}}
-\item[\string\tpRunNumber]\index[tex]{tpRunNumber@\texttt{\textbackslash tpRunNumber}}
+\item[\string\RunTitle]\index[tex]{RunTitle@\texttt{\textbackslash RunTitle}}
+\item[\string\RunSubtitle]\index[tex]{RunSubtitle@\texttt{\textbackslash RunSubtitle}}
+\item[\string\RunAuthor]\index[tex]{RunAuthor@\texttt{\textbackslash RunAuthor}}
+\item[\string\RunNumber]\index[tex]{RunNumber@\texttt{\textbackslash RunNumber}}
 \end{description}
 for the running head,
 \begin{description}
-\item[\string\tpTocTitle]\index[tex]{tpTocTitle@\texttt{\textbackslash tpTocTitle}}
-\item[\string\tpTocSubtitle]\index[tex]{tpTocSubtitle@\texttt{\textbackslash tpTocSubtitle}}
-\item[\string\tpTocAuthor]\index[tex]{tpTocAuthor@\texttt{\textbackslash tpTocAuthor}}
-\item[\string\tpTocNumber]\index[tex]{tpTocNumber@\texttt{\textbackslash tpTocNumber}}
+\item[\string\TocTitle]\index[tex]{TocTitle@\texttt{\textbackslash TocTitle}}
+\item[\string\TocSubtitle]\index[tex]{TocSubtitle@\texttt{\textbackslash TocSubtitle}}
+\item[\string\TocAuthor]\index[tex]{TocAuthor@\texttt{\textbackslash TocAuthor}}
+\item[\string\TocNumber]\index[tex]{TocNumber@\texttt{\textbackslash TocNumber}}
 \end{description}
 for the entries in the ToC, and
 \begin{description}
-\item[\string\tpBMTitle]\index[tex]{tpBMTitle@\texttt{\textbackslash tpBMTitle}}
-\item[\string\tpBMSubtitle]\index[tex]{tpBMSubtitle@\texttt{\textbackslash tpBMSubtitle}}
-\item[\string\tpBMAuthor]\index[tex]{tpBMAuthor@\texttt{\textbackslash tpBMAuthor}}
-\item[\string\tpBMNumber]\index[tex]{tpBMNumber@\texttt{\textbackslash tpBMNumber}}
+\item[\string\BMTitle]\index[tex]{BMTitle@\texttt{\textbackslash BMTitle}}
+\item[\string\BMSubtitle]\index[tex]{BMSubtitle@\texttt{\textbackslash BMSubtitle}}
+\item[\string\BMAuthor]\index[tex]{BMAuthor@\texttt{\textbackslash BMAuthor}}
+\item[\string\BMNumber]\index[tex]{BMNumber@\texttt{\textbackslash BMNumber}}
 \end{description}
 for the bookmarks.
 
 One example of their usage is:
 \begin{lstlisting}[style=tex]
-\begin{heading}{chapter}
-  \tpTitle{A Heading with some additional Text}
-  \tpRunTitle{A Heading}
-  \tpTocTitle{My Heading}
-  \tpBMTitle{Heading}
-\end{heading}
+\begin{Heading}{chapter}
+  \Title{A Heading with some additional Text}
+  \RunTitle{A Heading}
+  \TocTitle{My Heading}
+  \BMTitle{Heading}
+\end{Heading}
 \end{lstlisting}
 would print \textit{“A Heading with some additional Text”} in the
 text, but \textit{“A Heading”} in the running head, \textit{“My
@@ -141,9 +144,9 @@ contents of the actual heading component is used for the bookmarks.
 The resulting ranking of override macros can be represented as
 follows:
 \begin{itemize}
-\item \lstinline{\tpToc<Component>} $\gg$ \lstinline{\tp<Component>}
-\item \lstinline{\tpRun<Component>} $\gg$ \lstinline{\tp<Component>}
-\item \lstinline{\tpBM<Component>} $\gg$ \lstinline{\tpToc<Component>} $\gg$ \lstinline{\tp<Component>},
+\item \lstinline{\Toc<Component>} $\gg$ \lstinline{\<Component>}
+\item \lstinline{\Run<Component>} $\gg$ \lstinline{\<Component>}
+\item \lstinline{\BM<Component>} $\gg$ \lstinline{\Toc<Component>} $\gg$ \lstinline{\<Component>},
 \end{itemize}
 where $x\gg y$ means that $x$ takes priority over $y$
 
@@ -161,29 +164,29 @@ One special case is the empty override\index{Overrides!Empty}
 macro. It causes the Component content to be ignored when printing the
 running head or ToC, respectively. E.g.,
 \begin{lstlisting}[style=tex]
-\begin{heading}{chapter}
-  \tpNumber{Chapter 1:}
-  \tpTitle{A Heading with some additional Text}
-  \tpTocNumber{1:}
-  \tpTocTitle{My Heading}
-  \tpRunNumber{}
-  \tpRunTitle{A Heading}
-\end{heading}
+\begin{Heading}{chapter}
+  \Number{Chapter 1:}
+  \Title{A Heading with some additional Text}
+  \TocNumber{1:}
+  \TocTitle{My Heading}
+  \RunNumber{}
+  \RunTitle{A Heading}
+\end{Heading}
 \end{lstlisting}
 would print \textit{“Chapter 1: A Heading with some additional Text”}
 in the main text body; \textit{“1: My Heading”} in the ToC, and
 \textit{“A Heading”} (without number!) in the running head. Also, note
-that the \textit{order} of the Components within the \texttt{heading}
+that the \textit{order} of the Components within the \texttt{Heading}
 environment doesn't matter.
 
-\begin{heading}[label=sec:hdg:decl]{section}
-  \tpTitle{Creating New Heading Levels}\index{Headings!Creating New}
-\end{heading}
+\begin{Heading}[label=sec:hdg:decl]{section}
+  \Title{Creating New Heading Levels}\index{Headings!Creating New}
+\end{Heading}
 
 The configuration of heading environments is done via the
-\lstinline{\tpDeclareHeading} command:
+\lstinline{\ccDeclareHeading} command:
 \begin{lstlisting}[style=tex]
-\tpDeclareHeading[<parent>]{<numeric_level>}{<name>}{%
+\ccDeclareHeading[<parent>]{<numeric_level>}{<name>}{%
   <set_properties>
 }
 \end{lstlisting}
@@ -204,12 +207,12 @@ assignments, see below.
 
 
 \addtocontents{toc}{\protect\newpage}
-\begin{heading}[label=sec:hdg:props]{section}
-  \tpTitle{Heading Properties}\index{Headings!Properties}\index{Properties!Headings}
-\end{heading}
+\begin{Heading}[label=sec:hdg:props]{section}
+  \Title{Heading Properties}\index{Headings!Properties}\index{Properties!Headings}
+\end{Heading}
 
 Headings are configured by property assignments using the
-\lstinline{\tpSetProperty} command, see \fullref{sec:set_props}.
+\lstinline{\ccSetProperty} command, see \fullref{sec:set_props}.
 
 In this section, the properties that are available to headings via the
 \lstinline{coco-heading} module are listed.
@@ -217,19 +220,19 @@ In this section, the properties that are available to headings via the
 \ref{fig:headingprops} gives an overview of the pre-defined
 properties used in headings environments.
 
-\begin{tpFigure}[float-pos=h]
-  \tpNumber{Fig. 1}
-  \tpFig{\includegraphics{images/heading-props.pdf}}
-  \tpCaption{Effect of Properties on Components in the rendering of a heading environment.}
-  \tpLegend{\textcolor{spot}{red} properties are dimensions; \textcolor{mblue}{blue} properties represent format markup and its scope in the default settings; \textcolor{mpurp}{purple} properties represent arbitrary {\LaTeX} markup}
+\begin{Figure}[float-pos=h]
+  \Number{Fig. 1}
+  \Fig{\includegraphics{images/heading-props.pdf}}
+  \Caption{Effect of Properties on Components in the rendering of a heading environment.}
+  \Legend{\textcolor{spot}{red} properties are dimensions; \textcolor{mblue}{blue} properties represent format markup and its scope in the default settings; \textcolor{mpurp}{purple} properties represent arbitrary {\LaTeX} markup}
   \label{fig:headingprops}
-\end{tpFigure}
+\end{Figure}
 
 \endinput
 
-\begin{heading}[label=sec:hdg:props:undef]{subsection}
-  \tpTitle{Undefinable Properties}
-\end{heading}
+\begin{Heading}[label=sec:hdg:props:undef]{subsection}
+  \Title{Undefinable Properties}
+\end{Heading}
 
 “Undefinable Properties” are properties that are generated during the
 evaluation of the heading environment and therefore cannot be set
@@ -240,7 +243,7 @@ manually in a heading's declaration.\footnote{Technically, they can,
 \describeUProp{hang-number}
 
 This property can be used to print the content of the
-\lstinline{\tpNumber} Component within an \lstinline{\hbox} of a fixed
+\lstinline{\Number} Component within an \lstinline{\hbox} of a fixed
 width and moved to the left by that same amount.
 
 How wide that “hanging indent” is, depends on the values of the
@@ -249,9 +252,9 @@ How wide that “hanging indent” is, depends on the values of the
 \fullref{sec:hdg:indent} for more details.
 
 
-\begin{heading}[label=sec:hdg:props:para]{subsection}
-  \tpTitle{Paragraph Control}\index{Headings!Spaces}
-\end{heading}
+\begin{Heading}[label=sec:hdg:props:para]{subsection}
+  \Title{Paragraph Control}\index{Headings!Spaces}
+\end{Heading}
 
 \describeProp{interline-para}{\lstinline{<any>}}{\lstinline{<empty>}}
 
@@ -275,7 +278,7 @@ is the par macro that is expanded immediately before the heading is printed.
 
 The default value is
 \begin{lstlisting}[style=tex]
-\tpIfProp{interline-para}{\if@noskipsec \leavevmode \fi}{}%
+\ccIfProp{interline-para}{\if@noskipsec \leavevmode \fi}{}%
 \par\global\@afterindenttrue%
 \end{lstlisting}
 
@@ -292,30 +295,30 @@ If non-empty, this property causes the paragraph after the heading to
 be indented by \lstinline{\parindent}.
 
 
-\begin{heading}[label=sec:hdg:props:format]{subsection}
-  \tpTitle{Formatting Headings}\index{Headings!Format}\index{Format!Headings}
-\end{heading}
+\begin{Heading}[label=sec:hdg:props:format]{subsection}
+  \Title{Formatting Headings}\index{Headings!Format}\index{Format!Headings}
+\end{Heading}
 
 \describeProp{title-format}{\lstinline{<any>}}{\texttt{\string\bfseries}}
 
 The format of the main title. It corresponds to the 6th argument of
 \LaTeX's \lstinline{\@startsection} macro.
 
-This property is applied to the \lstinline{\tpNumber} Component (if
+This property is applied to the \lstinline{\Number} Component (if
 non-empty) as well.
 
 \describeProp{subtitle-format}{\lstinline{<any>}}{\texttt{\string\normalfont}}
 
-The format of the \lstinline{\tpSubtitle} Component of the heading, if it exists.
+The format of the \lstinline{\Subtitle} Component of the heading, if it exists.
 
 \describeProp{author-format}{\lstinline{<any>}}{\texttt{\string\normalfont}}
 
-The format of the \lstinline{\tpAuthor} Component of the heading, if it exists.
+The format of the \lstinline{\Author} Component of the heading, if it exists.
 
 \describeProp{quote-format}{\lstinline{<any>}}{\texttt{\string\raggedleft}}
 
-The format of the \lstinline{\tpQuote} Component of the heading, if it exists. It
-also applies to the \lstinline{\tpQuoteSource} component
+The format of the \lstinline{\Quote} Component of the heading, if it exists. It
+also applies to the \lstinline{\QuoteSource} component
 
 \describeProp{quote-source-format}{\lstinline{<any>}}{\texttt{<empty>}}
 
@@ -328,23 +331,23 @@ the block that consists of all the heading's Components.
 
 By default, this property is defined as
 \begin{lstlisting}[style=tex]
-\tpUseProperty{title-format}%
-\tpIfComp{Number}
-  {\tpUseProperty{hang-number}}
+\ccUseProperty{title-format}%
+\ccIfComp{Number}
+  {\ccUseProperty{hang-number}}
   {\leftskip0pt}%
-{\tpUseComp{Title}}\par%
-\tpIfComp{Subtitle}
-  {{\tpUseProperty{subtitle-format}\tpUseComp{Subtitle}}\par}
+{\ccUseComp{Title}}\par%
+\ccIfComp{Subtitle}
+  {{\ccUseProperty{subtitle-format}\ccUseComp{Subtitle}}\par}
   {}%
-\tpIfComp{Author}
-  {{\tpUseProperty{author-format}\tpUseComp{Author}}\par}
+\ccIfComp{Author}
+  {{\ccUseProperty{author-format}\ccUseComp{Author}}\par}
   {}%
-\tpIfComp{Quote}
+\ccIfComp{Quote}
   {\bgroup
-     \tpUseProperty{quote-format}%
-     \tpUseComp{Quote}\par
-     \tpIfComp{QuoteSource}
-       {{\tpUseProperty{quote-source-format}--\space\tpUseComp{Quote}}\par}
+     \ccUseProperty{quote-format}%
+     \ccUseComp{Quote}\par
+     \ccIfComp{QuoteSource}
+       {{\ccUseProperty{quote-source-format}--\space\ccUseComp{Quote}}\par}
        {}%
    \egroup
   }{}%
@@ -357,15 +360,15 @@ non-empty \lstinline{extended} Property.
 
 By default is is defined as follows:
 \begin{lstlisting}[style=tex]
-\tpIfComp{Abstract}
+\ccIfComp{Abstract}
   {\par\vskip\baselineskip
-   {\bfseries\tpIfComp{AbstractTitle}{\tpUseComp{AbstractTitle}}{Abstract}}\par
-   {\itshape\small\tpUseComp{Abstract}}\par}
+   {\bfseries\ccIfComp{AbstractTitle}{\ccUseComp{AbstractTitle}}{Abstract}}\par
+   {\itshape\small\ccUseComp{Abstract}}\par}
   {}%
-\tpIfComp{Keywords}
+\ccIfComp{Keywords}
   {\par\vskip\baselineskip
-   {\bfseries\tpIfComp{KeywordsTtitle}{\tpUseComp{KeywordsTitle}}{Keywords}}\par
-   {\itshape\small\tpUseComp{Keywords}\par}}
+   {\bfseries\ccIfComp{KeywordsTtitle}{\ccUseComp{KeywordsTitle}}{Keywords}}\par
+   {\itshape\small\ccUseComp{Keywords}\par}}
 {}%
 \end{lstlisting}
 
@@ -416,7 +419,7 @@ that heading level is \textit{not} incremented. The appearance of the
 automatic counter is set by \LaTeX's default \lstinline{\the<level>}
 macros.
 
-\lstinline{heading} environments that bear the \lstinline{nonumber}
+\lstinline{Heading} environments that bear the \lstinline{nonumber}
 attribute are not counted automatically. This corresponds to the
 behaviour of starred {\LaTeX} heading macros.
 
@@ -434,12 +437,12 @@ Alignment of the number within its fixed-width \lstinline{\hbox}.
 \describeProp{number-sep}{\lstinline{<any>}}{\texttt{\string\space}}%
 
 The value of this property is by default printed between the
-\lstinline{\tpNumber} Component and the \lstinline{\tpTitle}
+\lstinline{\Number} Component and the \lstinline{\Title}
 Component.
 
-\begin{heading}[label=sec:hdg:run]{subsection}
-  \tpTitle{Running Header}\index{Headings!Running}
-\end{heading}
+\begin{Heading}[label=sec:hdg:run]{subsection}
+  \Title{Running Header}\index{Headings!Running}
+\end{Heading}
 
 \describeProp{running-level}{\textit{any defined heading name}}{\lstinline{<empty>}}%
 
@@ -456,8 +459,8 @@ environment.
 
 This property's default value is
 \begin{lstlisting}[style=tex]
-\tpIfComp{RunAuthor}{\tpUseComp{RunAuthor}:\space}{}%
-\tpUseComp{RunTitle}%
+\ccIfComp{RunAuthor}{\ccUseComp{RunAuthor}:\space}{}%
+\ccUseComp{RunTitle}%
 \end{lstlisting}
 Note that, by default, it uses the running head override Components
 instead of the regular heading Components, see
@@ -467,7 +470,7 @@ instead of the regular heading Components, see
 
 Is a property that allows some additional handling of running header
 Components. It is expanded at the very end of a heading and has the
-various \lstinline{tpRun*} Components available to be used.
+various \lstinline{Run*} Components available to be used.
 
 A common use case for this Property is when you have a collection of
 chapters by different authors and want the author's names on top of
@@ -476,16 +479,16 @@ vice versa).
 
 You use
 \begin{lstlisting}
-\tpDeclareHeading{0}{chapter}{%
+\ccDeclareHeading{0}{chapter}{%
   ...
-  \tpSetProperty{running-heading}{\tpUseComp{RunTitle}}% content is  \chaptermark
-  \tpSetProperty{running-extra}{%
-    \tpIfComp{RunAuthor}
-      {\xdef\authormark{\tpUseComp{RunAuthor}}}
+  \ccSetProperty{running-heading}{\ccUseComp{RunTitle}}% content is  \chaptermark
+  \ccSetProperty{running-extra}{%
+    \ccIfComp{RunAuthor}
+      {\xdef\authormark{\ccUseComp{RunAuthor}}}
       {\global\let\authormark\@empty}%
   }%
   ...
-}%% /tpDeclareHeading
+}%% /ccDeclareHeading
 \end{lstlisting}
 as properties for the \lstinline{chapter} heading level, and define
 the headings page style as follows\footnote{To simplify, the output of
@@ -505,14 +508,14 @@ the headings page style as follows\footnote{To simplify, the output of
 }
 \end{lstlisting}
 If a chapter has no author (i.e.,
-\lstinline{\tpAuthor} is empty or missing), the chapter title is put
+\lstinline{\Author} is empty or missing), the chapter title is put
 on the heading of both sides, but if the author exist, their name is
 printed on the head of even (or right hand) pages.
 
 
-\begin{heading}[label=sec:hdg:bkm]{subsection}
-  \tpTitle{PDF-Bookmarks}\index{Headings!Bookmarks}\index{Bookmarks}\index{pdf-Bookmarks|see{Bookmarks}}
-\end{heading}
+\begin{Heading}[label=sec:hdg:bkm]{subsection}
+  \Title{PDF-Bookmarks}\index{Headings!Bookmarks}\index{Bookmarks}\index{pdf-Bookmarks|see{Bookmarks}}
+\end{Heading}
 
 
 \describeProp{bookmark-level}{\lstinline{<num>}}{\lstinline{<empty>}}%
@@ -525,15 +528,15 @@ natural level is to be passed to the bookmark mechanism.
 
 Format of the bookmark entry. It is defined by default as
 \begin{lstlisting}[style=tex]
-\tpIfComp{BMNumber}{\tpUseComp{BMNumber}\space}{}%
-\tpUseComp{BMTitle}%
+\ccIfComp{BMNumber}{\ccUseComp{BMNumber}\space}{}%
+\ccUseComp{BMTitle}%
 \end{lstlisting}
 Please refer to \fullref{sec:hdg:comp:overrides} for the fallback
 chain for bookmarks.
 
-\begin{heading}[label=sec:hdg:toc]{subsection}
-  \tpTitle{Table of Contents Properties}\index{Headings!Table of Contents}\index{Table of Contents}
-\end{heading}
+\begin{Heading}[label=sec:hdg:toc]{subsection}
+  \Title{Table of Contents Properties}\index{Headings!Table of Contents}\index{Table of Contents}
+\end{Heading}
 
 \describeProp{toc-page-sep}{\lstinline{<any>}}{\texttt{\string\dotfill}}
 
@@ -546,11 +549,11 @@ Format of the page number.
 
 \describeProp{toc-number-width}{\lstinline{<dimen>}}{}
 
-Actual width of the \lstinline{\tpTocNumber}.
+Actual width of the \lstinline{\TocNumber}.
 
 \describeProp{toc-number-align}{\texttt{left}, \texttt{right}}{\texttt{left}}
 
-Alignment of the \lstinline{\tpToCNumber} within its
+Alignment of the \lstinline{\ToCNumber} within its
 \lstinline{\hbox}.
 
 \describeProp{toc-title-format}{\lstinline{<any>}}{}
@@ -604,13 +607,13 @@ used to set margins, \texttt{\string\parindent}, etc.
 
 The deafult value is:
 \begin{lstlisting}[style=tex]
-\addvspace{\tpUseProperty{toc-margin-top}}%
+\addvspace{\ccUseProperty{toc-margin-top}}%
 \parindent \z@
 \let\\\@centercr
 \hyphenpenalty=\@M
-\rightskip \tpUseProperty{toc-margin-right} \@plus 1fil\relax
+\rightskip \ccUseProperty{toc-margin-right} \@plus 1fil\relax
 \parfillskip -\rightskip
-\leftskip\tpUseProperty{toc-margin-left}%
+\leftskip\ccUseProperty{toc-margin-left}%
 \end{lstlisting}
 
 
@@ -621,7 +624,7 @@ Contains stuff to happen \textit{after} the entry is printed.
 The deafult value is:
 \begin{lstlisting}[style=tex]
 \par
-\addvspace{\tpUseProperty{toc-margin-bottom}}%
+\addvspace{\ccUseProperty{toc-margin-bottom}}%
 \end{lstlisting}
 
 
@@ -631,18 +634,18 @@ Controls the output of the ToC entry.
 
 The deafult value is:
 \begin{lstlisting}[style=tex]
-\tpUseProperty{toc-title-format}%
-\tpIfComp{TocNumber}
-  {\tpUseProperty{toc-hang-number}}
+\ccUseProperty{toc-title-format}%
+\ccIfComp{TocNumber}
+  {\ccUseProperty{toc-hang-number}}
   {\leftskip0pt\leavevmode}%
-\tpIfComp{TocAuthor}{\tpUseComp{TocAuthor}:\space}{}%
-\tpUseComp{TocTitle}%
-\tpUseProperty{toc-page-sep}\tpUseComp{TocPage}%
+\ccIfComp{TocAuthor}{\ccUseComp{TocAuthor}:\space}{}%
+\ccUseComp{TocTitle}%
+\ccUseProperty{toc-page-sep}\ccUseComp{TocPage}%
 \end{lstlisting}
 
-\begin{heading}[label=sec:hdg:hooks]{section}
-  \tpTitle{Hooks}
-\end{heading}
+\begin{Heading}[label=sec:hdg:hooks]{section}
+  \Title{Hooks}
+\end{Heading}
 \index{Headings!Hooks|textbf}
 
 Hooks for headings are declared for each heading level, that is why
@@ -669,9 +672,9 @@ insertion of a \lstinline{\nopagebreak}.
 
 
 
-\begin{heading}[label=sec:hdg:indent]{section}
-  \tpTitle{Indentation}
-\end{heading}
+\begin{Heading}[label=sec:hdg:indent]{section}
+  \Title{Indentation}
+\end{Heading}
 \index{Headings!Margins|textbf}\index{Headings!Indentation|textbf}\index{Indentation!Headings|textbf}\index{Margins!Headings|textbf}
 
 The three properties \lstinline{margin-left}, \lstinline{indent}, and
@@ -690,20 +693,20 @@ respectively, make use of the \lstinline{hang-number} or
 If you want to indent something else than the Number component, you
 can make use of the calculated values manually:
 \begin{lstlisting}
-\tpSetProperty{heading-block}{%
+\ccSetProperty{heading-block}{%
   \bgroup
-    \tpUseProperty{title-format}%
-    \hskip\tpUseProperty{indent}%
-    \tpUseComp{Title}\par
+    \ccUseProperty{title-format}%
+    \hskip\ccUseProperty{indent}%
+    \ccUseComp{Title}\par
   \egroup}
 \end{lstlisting}
 would discard the Number component alltogether and indent the first
 line of the Title component by the (calculated) value of
 \lstinline{indent}.
 
-\begin{heading}[label=sec:hdg:hd-indent]{subsection}
-  \tpTitle{Indention of Printed Headings}
-\end{heading}
+\begin{Heading}[label=sec:hdg:hd-indent]{subsection}
+  \Title{Indention of Printed Headings}
+\end{Heading}
 
 The \lstinline{indent} property controls the indent of the first line
 relative to the margin. If the value is \textit{negative}, the first
@@ -712,12 +715,12 @@ positive, the first line indent is \textit{added} to the
 margin. \ref{fig:indent} illustrates the Properties relevant for
 indentation.
 
-\begin{tpFigure}[float-pos=b!]
-  \tpNumber{Fig. 2}
-  \tpFig{\includegraphics[scale=.7]{images/heading-indent.pdf}}
-  \tpCaption{Heading properties for margins and indentation}
+\begin{Figure}[float-pos=b!]
+  \Number{Fig. 2}
+  \Fig{\includegraphics[scale=.7]{images/heading-indent.pdf}}
+  \Caption{Heading properties for margins and indentation}
   \label{fig:indent}
-\end{tpFigure}
+\end{Figure}
 
 If the value of the \lstinline{indent} and \lstinline{margin-left}
 Properties is \texttt{auto} or \texttt{auto-global}, then their
@@ -727,20 +730,20 @@ always takes the \lstinline{number-format},
 \lstinline{heading-format}, and \lstinline{number-sep} properties into
 consideration.
 
-\begin{heading}{paragraph}
-  \tpTitle{indent: auto-global; margin-left: <any>}
-\end{heading}
+\begin{Heading}{paragraph}
+  \Title{indent: auto-global; margin-left: <any>}
+\end{Heading}
 
 
-\begin{tpFigure}[float-pos=t!]
-  \tpNumber{Fig. 3}
-  \tpFig{\includegraphics[scale=.7,]{images/heading-auto-global.pdf}}
-  \tpCaption{\lstinline{indent} set to \lstinline{auto-global} for
+\begin{Figure}[float-pos=t!]
+  \Number{Fig. 3}
+  \Fig{\includegraphics[scale=.7,]{images/heading-auto-global.pdf}}
+  \Caption{\lstinline{indent} set to \lstinline{auto-global} for
     the heading levels~1 through~3. The \lstinline{x-number-width}
     properties represent the respective \textit{maximum number width}
     for each heading level~\lstinline{x}.}
   \label{fig:auto-global}
-\end{tpFigure}
+\end{Figure}
 
 If \lstinline{indent} is set to \lstinline{auto-global}, then the
 hanging indent of the first line of an item is set to the negative of
@@ -751,70 +754,70 @@ of the widest number, resulting in a \textit{hanging indent} that is
 the same for all headings and exactly the width of the widest
 number. \ref{fig:auto-global} illustrates this behaviour.
 
-\begin{heading}{paragraph}
-  \tpTitle{indent: auto}
-\end{heading}
+\begin{Heading}{paragraph}
+  \Title{indent: auto}
+\end{Heading}
 
 With \lstinline{indent} set to \lstinline{auto}, the calculated first
 line indent is set to the width of the widest number in the same
 heading level.
 
-\begin{heading}{paragraph}
-  \tpTitle{margin-left: auto}
-\end{heading}
+\begin{Heading}{paragraph}
+  \Title{margin-left: auto}
+\end{Heading}
 
 With \lstinline{margin-left} set to \lstinline{auto}, the calculated
 value for both properties is set to the width of the widest number of
 the same heading level \textit{plus} the left margin of the
 \textit{preceeding} heading level.
 
-\begin{heading}{paragraph}
-  \tpTitle{margin-left: <dimen>}
-\end{heading}
+\begin{Heading}{paragraph}
+  \Title{margin-left: <dimen>}
+\end{Heading}
 
 
 If \lstinline{margin-left} is set to a fixed value then this value
 will be used as left margin.
 
-\begin{heading}{paragraph}
-  \tpTitle{margin-left: <empty>, indent: <auto>}
-\end{heading}
+\begin{Heading}{paragraph}
+  \Title{margin-left: <empty>, indent: <auto>}
+\end{Heading}
 
 
 If \lstinline{margin-left} is not set but \lstinline{indent} is set to
 \lstinline{auto}, then the calculated left margin will be set to the
 calculated width of the indent.
 
-\begin{heading}{paragraph}
-  \tpTitle{margin-left: <empty>, indent: <empty>}
-\end{heading}
+\begin{Heading}{paragraph}
+  \Title{margin-left: <empty>, indent: <empty>}
+\end{Heading}
 
 If both Properties are unset, no indent or margin will be used at all.
 
 
-\begin{heading}[label=sec:hdg:toc-indent]{subsection}
-  \tpTitle{Indention in the Table of Contents}\index{Indentation!Table of Contents}\index{Margins!Table of Contents}\index{Table of Contents!Indentation}\index{Table of Contents!Margins}
-\end{heading}
+\begin{Heading}[label=sec:hdg:toc-indent]{subsection}
+  \Title{Indention in the Table of Contents}\index{Indentation!Table of Contents}\index{Margins!Table of Contents}\index{Table of Contents!Indentation}\index{Table of Contents!Margins}
+\end{Heading}
 
 Indentation in ToC entries works the same as in the actual heading
 environments. Simply add \lstinline{toc-} to the left of the property
 names to set up the ToC specific behaviour.
 
 
-\begin{heading}[label=sec:hdg:unnumbered-indent]{subsection}
-  \tpTitle{Indention of unnumbered headings}
-\end{heading}
+\begin{Heading}[label=sec:hdg:unnumbered-indent]{subsection}
+  \Title{Indention of unnumbered headings}
+\end{Heading}
 
 Unnumbered headings of a level with indention will be indented as
 well, unless you explicitely set the \lstinline{\leftskip} register to
 0pt when the \lstinline{Number} or \lstinline{TocNumber} Components
 for a heading instance are empty.  You can do that by inserting
 \begin{lstlisting}
-\tpIfComp{Number}{}{\leftskip=0pt}%
+\ccIfComp{Number}{}{\leftskip=0pt}%
 \end{lstlisting}
 or
 \begin{lstlisting}
-\tpIfComp{TocNumber}{}{\leftskip=0pt}%
+\ccIfComp{TocNumber}{}{\leftskip=0pt}%
 \end{lstlisting}
 respectively at the very top of the overrides for
 \lstinline{heading-block} and \lstinline{toc-heading}.

@@ -1,5 +1,6 @@
 \begin{Heading}[label=chap:common]{chapter}
-  \tpTitle{coco-common.sty}
+  \Title{coco-common.sty}
+  \Subtitle{Commonly used methods that are not part of the {\CoCoTeX} Kernel}
 \end{Heading}
 \index{coco-common|textbf}
 
@@ -9,18 +10,18 @@ provides the basic facilities for Component, Namespace, Hook, and
 Property handling.
 
 \begin{Heading}[label=sec:use_props]{section}
-  \tpTitle{Using Properties}
+  \Title{Using Properties}
 \end{Heading}
 
 \begin{Heading}[label=sec:set_props]{subsection}
-  \tpTitle{Setting and Using Property}\index{Properties!Setup}\index{Properties!Usage}
+  \Title{Setting and Using Property}\index{Properties!Setup}\index{Properties!Usage}
 \end{Heading}
 
 Properties are set up using one of either commands
 \begin{lstlisting}[style=tex]
-\tpSetProperty{<name>}{<val>}
+\ccSetProperty{<name>}{<val>}
 \ccSetPropVal{<name>}{<val>}
-\tpSetPropertyX{<name>}{<val>}
+\ccSetPropertyX{<name>}{<val>}
 \end{lstlisting}
 With
 \lstinline{\ccSetPropVal}\index[tex]{SetPropVal@\texttt{\textbackslash
@@ -29,21 +30,21 @@ prior to the assignment. Use this if you want to assign the current
 value of a {\LaTeX} control sequence (e.g., a length register) to a
 property.
 
-\lstinline{\tpSetPropertyX}\index[tex]{tpSetPropertyX@\texttt{\textbackslash
-    tpSetPropertyX}} is another variant of \lstinline{\tpSetProperty}
+\lstinline{\ccSetPropertyX}\index[tex]{tpSetPropertyX@\texttt{\textbackslash
+    tpSetPropertyX}} is another variant of \lstinline{\ccSetProperty}
 except that it expands the value \#2 \textit{fully} before assigning
 it to the property macro with the name \#1.  Use this if you need to
 use conditionals to determine the actual values of Properties that
 otherwise expect fixed named or dimensional values.
 
 
-When using \lstinline{\tpSetProperty}\index[tex]{SetProperty@\texttt{\textbackslash tpSetProperty}}, the second argument may not be
+When using \lstinline{\ccSetProperty}\index[tex]{SetProperty@\texttt{\textbackslash tpSetProperty}}, the second argument may not be
 expanded until the property is evaluated. Use this if
 \lstinline{<value>} is a string.
 
 Values can be retrieved with the command\index[tex]{UsePropVal@\texttt{\textbackslash tpUsePropVal}}
 \begin{lstlisting}[style=tex]
-\tpUseProperty{<name>}
+\ccUseProperty{<name>}
 \end{lstlisting}
 
 A user can define her your own properties, but they will most likely
@@ -52,7 +53,7 @@ to wrongly mis-use pre-defined Properties of the {\CoCoTeX}
 modules.
 
 \begin{Heading}{subsection}
-  \tpTitle{Default Property Sets}\index{Properties!Default}\index{Default Property Set|textbf}
+  \Title{Default Property Sets}\index{Properties!Default}\index{Default Property Set|textbf}
 \end{Heading}
 
 Each Namespace has its own \textit{Default Property Set} that is
@@ -62,32 +63,32 @@ Namespaces\index{Namespace!Child} are evaluated.
 You can extend the default Properties of a \lstinline{<Namespace>} by
 using\index[tex]{AddToDefault@\texttt{\textbackslash tpAddToDefault}}
 \begin{lstlisting}[style=tex]
-\tpAddToDefault{<Namespace>}{<setProperties>}
+\ccAddToDefault{<Namespace>}{<setProperties>}
 \end{lstlisting}
-where \lstinline{<setProperties>} is a list of \lstinline{\tpSetProperty}
+where \lstinline{<setProperties>} is a list of \lstinline{\ccSetProperty}
 assignments.\Hack{\newpage}
 
 \begin{Heading}{section}
-  \tpTitle{Evaluating Properties}
+  \Title{Evaluating Properties}
 \end{Heading}
 
 \begin{Heading}{subsection}
-  \tpTitle{Conditionals}\index{Properties!Conditionals}
+  \Title{Conditionals}\index{Properties!Conditionals}
 \end{Heading}
 
 There are two conditionals:
 \begin{lstlisting}[style=tex]
-\tpIfProp{<name>}{<then>}{<else>}
-\tpIfPropVal{<name>}{<value>}{<then>}{<else>}
+\ccIfProp{<name>}{<then>}{<else>}
+\ccIfPropVal{<name>}{<value>}{<then>}{<else>}
 \end{lstlisting}
-The first conditional \lstinline{\tpIfProp}\index[tex]{IfProp@\texttt{\textbackslash tpIfProp}} checks if a property with
+The first conditional \lstinline{\ccIfProp}\index[tex]{IfProp@\texttt{\textbackslash tpIfProp}} checks if a property with
 the name \lstinline{<name>} is defined \textit{or} set to a value
 other than an empty pair or brackets. If the macro is defined
 \lstinline{and} non-empty, the instructions in the \lstinline{<then>}
 branch are executed. Otherwise, the instructions in the
 \lstinline{<else>} branch are executed.
 
-The conditional \lstinline{\tpIfPropVal}\index[tex]{IfPropVal@\texttt{\textbackslash tpIfPropVal}} also checks if the Property
+The conditional \lstinline{\ccIfPropVal}\index[tex]{IfPropVal@\texttt{\textbackslash tpIfPropVal}} also checks if the Property
 is defined and also if the current Value of that Property is equal to
 \lstinline{<value>}. Both \lstinline{<value>} and the Value of the
 Property are fully expanded before the comparision. If both expansions
@@ -95,31 +96,31 @@ are equal, \lstinline{<then>} is executed, otherwise
 \lstinline{<else>} is executed.
 
 \begin{Heading}{subsection}
-  \tpTitle{Evaluation and Inheritance of Properties}\index{Properties!Evaluation}\index{Properties!Inheritance}
+  \Title{Evaluation and Inheritance of Properties}\index{Properties!Evaluation}\index{Properties!Inheritance}
 \end{Heading}
 
 The evaluation of macros is done with the macro\index[tex]{CascadeProp@\texttt{\textbackslash tpCascadeProp}}:
 \begin{lstlisting}[style=tex]
-\tpCascadeProps{<namespace>}{<top-level-namespace>}
+\ccCascadeProps{<namespace>}{<top-level-namespace>}
 \end{lstlisting}
 This macro recursivly loads a \lstinline{<namespace>}'s properties, the
 properties of the namespace's parent, and the default properties of the
 \lstinline{<top-level-namespace>} (in reverse order).
 
 \begin{Heading}[label=sec:common:components]{section}
-  \tpTitle{Using Components}\index{Component!Usage}
+  \Title{Using Components}\index{Component!Usage}
 \end{Heading}
 
 The macro\index[tex]{tpUseComp@\texttt{\textbackslash tpUseComp}}
 \begin{lstlisting}[style=tex]
-\tpUseComp{<Component>}
+\ccUseComp{<Component>}
 \end{lstlisting}
 is used to expand the contents of a Component with the name
 \lstinline{<Component>}.
 
 The conditional\index[tex]{tpIfComp@\texttt{\textbackslash tpIfComp}}
 \begin{lstlisting}[style=tex]
-\tpIfComp{<Component>}{<True>}{<False>}
+\ccIfComp{<Component>}{<True>}{<False>}
 \end{lstlisting}
 can be used to check the value of a Component with the name
 \lstinline{<Component>}.
@@ -133,7 +134,7 @@ In all other cases, \lstinline{<True>} is expanded. Is is also the
 case, when the arguent of the Component macro is left empty.
 
 \begin{Heading}[label=sec:common:components]{section}
-  \tpTitle{Using Hooks}\index{Hooks!Usage}
+  \Title{Using Hooks}\index{Hooks!Usage}
 \end{Heading}
 
 Hooks are Namespace-specific, yet globally defined, landing points for
@@ -147,15 +148,15 @@ The second big difference is the scope: Hooks are global, that is they
 can be filled at every point in the tex code. Properties, on the other
 hand, can only be altered within certain macros or environments.
 
-A Hook is declared with the \lstinline{\tpDeclareHook} macro which
+A Hook is declared with the \lstinline{\ccDeclareHook} macro which
 takes the Hook's name as argument:
 \begin{lstlisting}
-\tpDeclareHook{<Hook-Name>}
+\ccDeclareHook{<Hook-Name>}
 \end{lstlisting}
 
 To add code to a hook, simply use
 \begin{lstlisting}[style=tex]
-\tpAddToHook[<namespace>]{<Hook-Name>}{<Appendix}
+\ccAddToHook[<namespace>]{<Hook-Name>}{<Appendix}
 \end{lstlisting}
 where \lstinline{<Hook-Name>} is the name of the Hook, and
 \lstinline{<Appendix>} is the code you'd like to add to the hook. If
@@ -164,9 +165,9 @@ to the currently active Namespace.
 
 The Hook is used with the macro
 \begin{lstlisting}[style=tex]
-\tpUseHook{<Hook-name>}
+\ccUseHook{<Hook-name>}
 \end{lstlisting}
-Make sure that \lstinline{\tp@namespace} is set correctly or else you
+Make sure that \lstinline{\cc@namespace} is set correctly or else you
 may expand the wrong Hook.
 
 A Hook can be re-used.

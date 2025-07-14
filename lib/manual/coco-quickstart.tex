@@ -1,0 +1,271 @@
+\begin{Heading}{chapter}
+  \Title{Quick Start}
+  \RefLabel{chap:quickstart}
+\end{Heading}
+
+Thank you for using \CoCoTeX.
+
+In this introductory chapter, we are getting familiar with \CoCoTeX's
+design principles and how to use it to define the following boxes:
+
+\begin{Info}[\Title{Info box}]
+  This box holds some general information.
+\end{Info}
+
+Source code:
+\begin{lstlisting}
+\begin{Info}[\Title{Info box}]
+  This box holds some general information.
+\end{Info}
+\end{lstlisting}
+
+\begin{Background}
+  This box type holds background information if you are interested
+  into the inner workings of the {\CoCoTeX} framework. It can also
+  have a title.
+\end{Background}
+
+Source code:
+\begin{lstlisting}
+\begin{Background}
+  This box type holds background information if you are interested
+  into the inner workings of the {\CoCoTeX} framework. It can also
+  have a title.
+\end{Background}
+\end{lstlisting}
+
+\begin{Alert}[\Title{Alert box}]
+  This box holds important information and common error sources.
+\end{Alert}
+
+Source code:
+\begin{lstlisting}
+\begin{Alert}[\Title{Alert box}]
+  This box holds important information and common error sources.
+\end{Alert}
+\end{lstlisting}
+
+\begin{Alert}[\Icon{\faCircleExclamation}]
+  Alert box with an alternative icon but no title
+\end{Alert}
+
+Source code:
+\begin{lstlisting}
+\begin{Alert}[\Icon{\faCircleExclamation}]
+  Alert box with an alternative icon no title
+\end{Alert}
+\end{lstlisting}
+As you can see, each of those boxes contain three pieces of
+information: They may or may not have a \textbf{title}, they have an
+\textbf{icon} that can be set freely, and they have a mandatory
+\textbf{content}.
+
+
+The \textit{general idea} of a “box” is what in the {\CoCoTeX}
+Framework is called a \textbf{Container}. Each box you can see in this
+pdf is an \textbf{Instance} of that Container. Each of those
+Containers is defined by the three informational data pieces they
+share, namely the \textit{Title}, the \textit{Icon} and the
+\textit{Content}. We call those pieces of Information
+\textbf{Components} of a Container. The instructions, how those
+Components are typeset is stored in so-called
+\textbf{Properties}. Both Components and Properties are called the
+\textbf{Types} of a Container.
+
+In this documentation, there are three “flavours“ of the more abstract
+Container “Box”, namely \textit{Info}, \textit{Background}, and
+\textit{Alert}. We call those flavours \textbf{Subcontainer} or
+\textbf{Child Containers}, since they \textbf{inherit} the Properties
+and Components from the abstract Box Container.
+
+We start with the most abstract Container \textbf{Box}. TO define a
+new Container, we use the \UsageMacro{\ccDeclareContainer} macro which
+takes two arguments, the \textit{name} of the Container and the
+\textit{body} of the declaration.
+\begin{lstlisting}
+\ccDeclareContainer{Box}{%
+  …
+}
+\end{lstlisting}
+In the body, we declare the two Types that define this Container using
+the \UsageMacro{\ccDeclareType} macro, which also takes two argumets, the name of the Data Type and its declaration body:
+\begin{lstlisting}
+\ccDeclareContainer{Box}{%
+  \ccDeclareType{Components}{…}
+  \ccDeclareType{Properties}{…}
+}
+\end{lstlisting}
+We start with the Components. Each Component is declared with the
+\UsageMacro{\ccDeclareComponent} macro. This macro has three mandatory
+argument, althouggh in this tutorial we use only the first one which
+holds the \textit{name} of the Component.
+\begin{lstlisting}
+\ccDeclareContainer{Box}{%
+  \ccDeclareType{Components}{%
+    \ccDeclareComponent{Title}{}{}
+    \ccDeclareComponent{Icon}{}{}
+    \ccDeclareComponent{Content}{}{}
+  }
+  \ccDeclareType{Properties}{…}
+}
+\end{lstlisting}
+As mentioned before, the Properties define how the Components are
+processed. Let us think about how we could to process our components:
+Maybe, we want to manipulate the size of the icon and its color. So,
+let us invent Properties that hold those kinds of information. To
+define a Property, we use the macro \UsageMacro{\ccSetProperty} which
+takes two arguments, first name of the Property and second its
+definition. As a convention, Property names are lower-case and words
+are separated by hyphen:
+\begin{lstlisting}
+\ccDeclareContainer{Box}{%
+  \ccDeclareType{Components}{…}
+  \ccDeclareType{Properties}{
+    \ccSetProperty{icon-color}{black}
+    \ccSetProperty{icon-size}{\fontsize{24bp}{32bp}}
+  }
+}
+\end{lstlisting}
+Finally, we need to define how the Icons are printed. We want the
+icons to overlap the box on the left-side and we don't want the icon
+to spread the lines. for that, we use the plain\TeX primitives
+\lstinline{\llap} and \lstinline{\smash}. The icon itself is placed in
+a narrow vbox that grows into its depth (\lstinline{\vtop}) that we
+need to lower a bit. Inside that vbox, we print the Icon. Remember
+that the Icon is a Component. To print the content of a component, we
+use the \UsageMacro{\ccUseComp} macro which take a Component's name as
+argument.
+\begin{lstlisting}
+\ccDeclareContainer{Box}{%
+  \ccDeclareType{Components}{…}
+  \ccDeclareType{Properties}{%
+    …
+    \ccSetProperty{icon-format}{%
+      \llap{\smash{\lower1ex\vtop{%
+            \hsize32bp
+            \ccUseProperty{icon-size}\selectfont%
+            \color{\ccUseProperty{icon-color}}%
+            \ccUseComp{Icon}%
+          }% /vtop
+        }% /smash
+      }% /llap
+    }% /ccSetProperty{icon-format}
+  }% /ccDeclareType{Properties}
+}
+\end{lstlisting}
+As you can see, properties are small snippets of {\LaTeX} code that
+sort, format and use Components, but also other Properties.
+
+We also need some properties to process the Title Component. We want
+the Title to set in bold-face and sans-serif font. For this, we
+declare a property \texttt{title-face}. Another property,
+\texttt{title-format}, combines the \texttt{font-face} Property with
+the Title Component:
+\begin{lstlisting}
+\ccDeclareContainer{Box}{%
+  \ccDeclareType{Components}{…}
+  \ccDeclareType{Properties}{%
+    \ccSetProperty{title-face}{\bfseries\sffamily}
+    \ccSetProperty{title-format}{%
+      \bgroup
+        \ccUseProperty{title-face}
+        \ccUseComp{Title}
+      \egroup
+    }%
+  }% /ccDeclareType
+}% /ccDeclareContainer
+\end{lstlisting}
+In order to make a Container instanciable, we need to declare a
+corresponding {\LaTeX} environment using the \lstinline{\ccDeclareEnv}
+macro. This macro takes two arguments, the meaning of which will be
+explained in a bit.
+
+\begin{Background}
+  Strictly speaking, \texttt{\string\ccDeclareEnv} does not
+  define a {\LaTeX} environment \texttt{<container\_name>}, but two
+  macros \protect\texttt{\textbackslash<container\_name>} and
+  \texttt{\textbackslash end<container\_name>}.
+\end{Background}
+
+By default, the environment is conveniently called the same as the
+Container:
+\begin{lstlisting}
+\ccDeclareContainer{Box}{%
+  \ccDeclareType{Components}{…}
+  \ccDeclareType{Properties}{…}
+  \ccDeclareEnv{}{}
+}
+\end{lstlisting}
+The environment declaration alone does nothing on its own, yet, but we
+will look into that later.
+
+Let us first declare out Sub Containers, starting with the Background
+Container:
+\begin{lstlisting}
+\ccDeclareContainer{Background}{%
+}
+\end{lstlisting}
+Now, we need to tell the Background Container that it should inherit
+the Components and Properties from the Box Container. For that, we use
+the \UsageMacro{\ccInherit} macro, which takes two arguments. First
+the Types we want to inherit, and second the Container from which we
+want to inherit the Types.
+\begin{lstlisting}
+\ccDeclareContainer{Background}{%
+  \ccInherit{Components,Properties}{Box}
+}
+\end{lstlisting}
+Now, we want to specify two things that are prototypical for the
+Background boxes: They have the Atom symbol as icon, and their color
+is always green. We can do this by utilizing the Parent Container's
+Types:
+\begin{lstlisting}
+\ccDeclareContainer{Background}{%
+  \ccInherit{Components,Properties}{Box}
+  \ccDeclareType{Components}{\Icon{\faAtom}}
+  \ccDeclareType{Properties}{
+    \ccSetProperty{icon-color}{green}
+  }
+}
+\end{lstlisting}
+Since we already inherited the Box's Components, we can immediately
+use the Icon Component and give it a fix value.
+
+By re-declaring an already existing Property name
+(\texttt{icon-color}), we can override the value that came from the
+Parent Container.
+
+The only thing left to do is to declare Background's environment. For
+that, we now use the two arguments of the \UsageMacro{\ccDeclareEnv}
+macro. The first argument tells {\CoCoTeX} what should happen at the
+begin, and the second what should happen before the end of the
+environment:
+\begin{lstlisting}
+\ccDeclareContainer{Background}{%
+  \ccInherit{Components,Properties}{Box}
+  \ccDeclareType{Components}{…}
+  \ccDeclareType{Properties}{…}
+  \ccDeclareEnv{\begin{Box}}{\end{Box}}
+}
+\end{lstlisting}
+With that, we define an environment \texttt{Background} that does
+nothing on its own but to call the parent container's own environment.
+
+We can now start to process the parent's environment. Since
+\lstinline{\ccDeclareEnv} already defines the low-level macros that
+constitute a {\LaTeX} enviroment, we need to use
+\lstinline{\RenewDocumentEnvironment} (or
+\lstinline{\DeclareDocumentEnvironment}).
+
+At the beginning of that environment, we need to invoke the macro
+\lstinline{\ccEvalType} which takes one argument, the name of a
+Type. We need to call this macro twice, one time for each of your two
+data types \texttt{Properties} and \texttt{Components}.
+\begin{lstlisting}
+\RenewDocumentEnvironment{Box}{ }{
+  \ccEvalType{Properties}%
+  \ccEvalType{Components}%
+}{%
+}
+\end{lstlisting}
+TODO: explain briefly the concept behind Type evaluation.

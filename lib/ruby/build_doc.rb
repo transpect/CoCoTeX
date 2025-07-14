@@ -94,6 +94,7 @@ module CoCoTeX
       shell_command("cd #{@temp_dir} ; ln -s #{File.join(EXT_DIR, "htmltabs", "htmltabs.sty")} .") unless File.exist?(File.join(@temp_dir, "htmltabs.sty"))
       shell_command("cd #{@temp_dir} ; ln -s #{File.join(EXT_DIR, "ltpdfa", "suppl")} .") unless File.exist?(File.join(@temp_dir, "ltpdfa"))
       shell_command("cd #{@temp_dir} ; ln -s #{File.join(EXT_DIR, "ltpdfa", "ltpdfa")} .") unless File.exist?(File.join(@temp_dir, "ltpdfa"))
+      shell_command("cd #{@temp_dir} ; ln -s #{File.join(BASE_DIR, "examples")} .") unless Dir.exist?(File.join(@temp_dir, "examples"))
       xf = resolve_path(@options.xerif_fonts) if @options.xerif_fonts
       if xf && Dir.exist?(xf)
         $log.info("using #{xf}.")

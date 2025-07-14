@@ -1,0 +1,89 @@
+\RequirePackage{coco-common}
+% Note: you'll need texlive at least from may 2025 for the following
+% package to be available, or install it manually!
+\RequirePackage{fontawesome6}
+\RequirePackage{tcolorbox}
+
+\newtcolorbox{mybox}[1][]{%
+  ,colframe=\ccUseComp{icon-color}%
+  ,boxrule=1pt
+  ,halign=left
+  ,IfEmptyF={#1}{%
+     title={#1\strut}%
+    ,colbacktitle=\ccUseComp{icon-color}%
+    ,coltitle={white}%
+    ,toptitle=2bp}%
+}
+
+%% most abstract box type
+\ccDeclareContainer{Box}{%
+  \ccDeclareType{Components}{%
+    \ccDeclareComponent{Title}{}{}
+    \ccDeclareComponent{Icon}{}{}
+    \ccDeclareComponent{Content}{}{}
+  }
+  \ccDeclareType{Properties}{%
+    \ccSetProperty{icon-color}{black}
+    \ccSetProperty{icon-size}{\fontsize{24bp}{32bp}}
+    \ccSetProperty{icon-format}{%
+      \llap{\smash{\lower1ex\vtop{%
+            \hsize32bp
+            \ccUseProperty{icon-size}\selectfont%
+            \color{\ccUseProperty{icon-color}}%
+            \ccUseComp{Icon}%
+          }}}}
+    \ccSetProperty{title-face}{\bfseries\sffamily}
+    \ccSetProperty{title-format}{%
+      \bgroup
+        \ccUseProperty{title-face}
+        \ccUseComp{Title}
+      \egroup
+    }
+  }
+  \ccDeclareEnv{}{}
+}
+
+%% Child container for background boxes
+\ccDeclareContainer{Background}{%
+  \ccInherit{Components,Properties}{Box}
+  \ccDeclareType{Components}{\Icon{\faAtom}}
+  \ccDeclareType{Properties}{
+    \ccSetProperty{icon-color}{green}
+  }
+  \ccDeclareEnv{\begin{Box}}{\end{Box}}
+}
+
+\RenewDocumentEnvironment{Box}{ o +b }{
+  \ccEvalType{Properties}%
+  \ccEvalType{Components}%
+  \IfNoValueF{#1}{#1}%
+  %\Content{#3}% we can't use lstinline if we store the contents here.
+}{%
+  \ccUseProperty{icon-format}%
+  \ccIfComp{Title}
+    {\begin{mybox}[\ccUseProperty{title-format}]}%
+    {\begin{mybox}}
+     % \ccUseComp{Content}% istead, we process the environment body directly
+      #2
+  \end{mybox}
+}
+
+%% Child container for alert boxes
+\ccDeclareContainer{Alert}{%
+  \ccInherit{Components,Properties}{Box}
+  \ccDeclareType{Components}{\Icon{\faTriangleExclamation}}
+  \ccDeclareType{Properties}{
+    \ccSetProperty{icon-color}{red}
+  }
+  \ccDeclareEnv{\begin{Box}}{\end{Box}}
+}
+
+%% Child container for general information boxes
+\ccDeclareContainer{Info}{%
+  \ccInherit{Components,Properties}{Box}
+  \ccDeclareType{Components}{\Icon{\faCircleInfo}}
+  \ccDeclareType{Properties}{
+    \ccSetProperty{icon-color}{blue}
+  }
+  \ccDeclareEnv{\begin{Box}}{\end{Box}}
+}

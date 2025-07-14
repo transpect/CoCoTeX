@@ -1,0 +1,55 @@
+%% this style file holds the Property Declarations for the floats in
+%% the end-user manual
+
+% general float properties
+\ccAddToType{Properties}{float}{%
+  \ccSetProperty{number-sep}{\enskip}%
+  \ccSetProperty{number-face}{\bfseries\small\sffamily}%
+  \ccSetProperty{caption-face}{\sffamily\small\RaggedRight}%
+  \ccSetProperty{intext-skip-above}{1\baselineskip}%
+  \ccSetProperty{intext-skip-below}{\dimexpr1\baselineskip-2.5bp\relax}%
+  \ccSetProperty{subcaption-valign-above}{bottom}%
+  \ccSetProperty{subcaption-valign-below}{top}%
+}
+
+% Overrides for figures
+\ccAddToType{Properties}{Figure}{%
+  \ccSetProperty{caption-bottom}{}%
+  \ccSetProperty{caption-top}{%
+    \ccWhenComp{Number}{{\ccUseProperty{number-face}\ccUseComp{Number}\ccUseProperty{number-sep}}}%
+    \ccUseComp{Caption}%
+  }%
+  \ccSetProperty{caption-sep-top}{1bp}
+  \ccSetProperty{caption-sep-bottom}{4bp}
+}
+
+% Overrides for tables
+\ccAddToType{Properties}{Table}{%
+  \ccSetProperty{caption-top}{%
+    \ccWhenComp{Number}{{\ccUseProperty{number-face}\ccUseComp{Number}\ccUseProperty{number-sep}}}%
+    \ccUseComp{Caption}%
+    \ccWhenComp{Source}{\\\ccUseComp{Source}}%
+  }%
+  \ccSetProperty{caption-bottom}{\ccUseComp{Legend}}%
+  \ccSetProperty{caption-sep-top}{1bp}%% vertical space between top caption and content
+  \ccSetProperty{caption-sep-bottom}{4bp}
+}
+
+% html setup for tables
+\RequirePackage{htmltabs}
+
+% general table settings
+\SetHTClass{}{%
+  \SetClassProp{table}{margin}{0bp}%
+  \SetClassProp{table}{break-table}{true}%
+  \SetClassProp{table}{border}{2bp solid spot}%
+  \SetClassProp{table}{border-top}{none}%
+  \SetClassProp[thead]{td}{background-color}{spot}%
+  \SetClassProp[thead]{td}{font-weight}{bold}%
+  \SetClassProp[thead]{td}{vertical-align}{middle}%
+  \SetClassProp[thead]{td}{color}{white}%
+  \SetClassProp{td}{padding}{2bp 0.5mm 1bp}%
+  \SetClassProp{td}{border-style}{none}%
+  \SetClassProp{td}{font-family}{sans-serif}%
+  \SetClassProp{td}{font-size}{x-small}%
+}

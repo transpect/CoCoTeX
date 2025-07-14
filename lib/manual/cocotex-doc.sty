@@ -54,7 +54,6 @@
 \let\myttfamily\ttfamily
 \DeclareTextFontCommand{\mytexttt}{\myttfamily}
 \def\ttfamily{\myttfamily\small}
-\def\titlefont{\mybfseries\sffamily\color{spot}}
 
 \let\mytextbf\textbf
 \def\textbf#1{{\small\bfseries\color{spot}#1\/}}
@@ -79,21 +78,7 @@
 %%%%%%%%%
 % Lists %
 %%%%%%%%%
-
-\RequirePackage[replace]{coco-lists}
-\ccAddToType{Properties}{Itemize}{%
-  \ccSetProperty{label-sep}{\z@}%
-  \ccSetProperty{indent}{-1em}%
-  \ccSetProperty{label-align}{left}%
-  \ccSetProperty{margin-left}{auto}%
-}
-
-\def\myitemlabel#1{\raise.25ex\hbox{\color{spot!#1}\rule{1ex}{1ex}}}
-\ccAddToType{Properties}{Itemize-1}{\ccSetProperty{default-label}{\myitemlabel{100}}}
-\ccAddToType{Properties}{Itemize-2}{\ccSetProperty{default-label}{\myitemlabel{50}}}
-\ccAddToType{Properties}{Itemize-3}{\ccSetProperty{default-label}{\myitemlabel{30}}}
-\ccAddToType{Properties}{Itemize-4}{\ccSetProperty{default-label}{\myitemlabel{10}}}
-
+\RequirePackage{examples/cclists}
 
 %%%%%%%%%%%%%%%
 % page styles %
@@ -205,162 +190,14 @@
 % Headings %
 %%%%%%%%%%%%
 
-\ccAddToType{Properties}{Heading}{%
-  \ccSetProperty{before-heading-block}{\parindent\z@ \parskip\z@ \leftskip\z@}
-  \ccSetProperty{heading-block}{%
-    \ccUseProperty{title-face}%
-    \ccIfComp{Number}{\ccUseProperty{hang-number}}{\leftskip0pt}%
-    \ccUseComp{Title}\par%
-    \ccWhenComp{Subtitle}{{\ccUseProperty{subtitle-face}\ccUseComp{Subtitle}}\par}%
-  }%
-  \ccSetProperty{indent}{auto-global}%
-  \ccSetProperty{number-sep}{\enskip}
-}
-
-\ccDeclareHeading{-1}{part}{%
-  \ccSetProperty{heading-par}{\clearpage
-    \par\global\@afterindenttrue
-  }
-  \ccSetProperty{before-heading}{%
-    \thispagestyle{part}%
-  }
-  \ccSetProperty{title-face}{\Huge\titlefont}
-  \ccSetProperty{after-heading-block}{\vfill}
-  \ccSetProperty{heading-block}{%
-    \ccUseProperty{title-face}%
-    \cchHeadTagStart
-    \ccWhenComp{Number}{Part~\ccUseComp{Number}:}%
-    \par
-    \ccUseComp{Title}%
-    \cchHeadTagEnd
-    \par
-  }
-  \ccSetProperty{indent}{}
-  \ccSetProperty{toc-margin-top}{2\baselineskip}
-  \ccSetProperty{toc-title-face}{\bfseries\sffamily}
-  \ccSetProperty{toc-margin-left}{\z@}
-  \ccSetProperty{toc-indent}{\z@}
-  \ccSetProperty{toc-page-format}{\hfill}
-  \ccSetProperty{toc-number-format}{Part~\ccUseComp{TocNumber}\enskip}
-}
-
-\ccDeclareHeading{0}{chapter}{%
-  \ccSetProperty{heading-par}{\clearpage
-    \par
-    \global\@afterindenttrue
-  }
-  \ccSetProperty{before-heading}{%
-    \thispagestyle{chapfirst}%
-    \addtocontents{lof}{\protect\addvspace{1\baselineskip}}%
-    \addtocontents{lot}{\protect\addvspace{1\baselineskip}}%
-    \setcounter{section}{0}%
-  }
-  \ccSetProperty{title-face}{\huge\titlefont}
-  \ccSetProperty{after-skip}{3\baselineskip}%
-  \ccSetProperty{indent}{}
-  \ccSetProperty{toc-margin-top}{1\baselineskip}
-  \ccSetProperty{toc-title-face}{\bfseries\sffamily}
-}
-
-\ccDeclareHeading[chapter]{0}{toc}{%
-  \ccSetProperty{heading-par}{\par
-    \global\@afterindenttrue
-  }%
-}
-
-\ccDeclareHeading{1}{section}{%
-  \ccSetProperty{before-heading}{\raggedright\setcounter{subsection}{0}}%
-  \ccSetProperty{before-skip}{2.5\baselineskip}
-  \ccSetProperty{after-skip}{16bp}%
-  \ccSetProperty{title-face}{\LARGE\titlefont\color{spot!95}}%
-  \ccSetProperty{toc-margin-bottom}{\z@}
-  \ccSetProperty{toc-margin-top}{\z@}
-}
-
-\ccDeclareHeading{2}{subsection}{%
-  \ccSetProperty{before-heading}{\raggedright\setcounter{subsubsection}{0}}%
-  \ccSetProperty{before-skip}{2\baselineskip}
-  \ccSetProperty{after-skip}{6bp}%
-  \ccSetProperty{title-face}{\large\titlefont\color{spot!90}}%
-  \ccSetProperty{toc-margin-bottom}{\z@}
-  \ccSetProperty{toc-margin-top}{\z@}
-}
-
-\ccDeclareHeading{3}{subsubsection}{%
-  \ccSetProperty{before-heading}{\raggedright}%
-  \ccSetProperty{before-skip}{1.5\baselineskip}
-  \ccSetProperty{before-heading}{\raggedright}%
-  \ccSetProperty{before-skip}{1.5\baselineskip}
-  \ccSetProperty{after-skip}{1sp}%
-  \ccSetProperty{title-format}{\normalsize\titlefont\color{spot!85}}%
-}
-
-\ccDeclareHeading{4}{paragraph}{%
-  \ccSetProperty{before-skip}{1\baselineskip}
-  \ccSetProperty{after-skip}{1sp}%
-  \ccSetProperty{title-face}{\normalsize\titlefont\color{spot!80}}%
-  \ccSetProperty{numbering}{}
-}
-
-\ccDeclareHeading{5}{subparagraph}{%
-  \ccSetProperty{before-skip}{.5\baselineskip}%
-  \ccSetProperty{after-skip}{-.5em}%
-  \ccSetProperty{title-face}{\small\titlefont\color{spot!75}}%
-  \ccSetProperty{numbering}{}
-}
-
+\RequirePackage{examples/headings}
 \usepackage{ragged2e}
 
 %%%%%%%%%%
 % Floats %
 %%%%%%%%%%
 
-\ccAddToType{Properties}{float}{%
-  \ccSetProperty{number-sep}{\enskip}%
-  \ccSetProperty{number-face}{\bfseries\small\sffamily}%
-  \ccSetProperty{caption-face}{\sffamily\small\RaggedRight}%
-  \ccSetProperty{intext-skip-above}{1\baselineskip}%
-  \ccSetProperty{intext-skip-below}{\dimexpr1\baselineskip-2.5bp\relax}%
-  \ccSetProperty{subcaption-valign-above}{bottom}%
-  \ccSetProperty{subcaption-valign-below}{top}%
-}
-
-\ccAddToType{Properties}{Figure}{%
-  \ccSetProperty{caption-bottom}{}%
-  \ccSetProperty{caption-top}{%
-    \ccWhenComp{Number}{{\ccUseProperty{number-face}\ccUseComp{Number}\ccUseProperty{number-sep}}}%
-    \ccUseComp{Caption}%
-  }%
-  \ccSetProperty{caption-sep-top}{1bp}
-  \ccSetProperty{caption-sep-bottom}{4bp}
-}
-
-\ccAddToType{Properties}{Table}{%
-  \ccSetProperty{caption-top}{%
-    \ccWhenComp{Number}{{\ccUseProperty{number-face}\ccUseComp{Number}\ccUseProperty{number-sep}}}%
-    \ccUseComp{Caption}%
-    \ccWhenComp{Source}{\\\ccUseComp{Source}}%
-  }%
-  \ccSetProperty{caption-bottom}{\ccUseComp{Legend}}%
-  \ccSetProperty{caption-sep-top}{1bp}%% vertical space between top caption and content
-  \ccSetProperty{caption-sep-bottom}{4bp}
-}
-
-\RequirePackage{htmltabs}
-\SetHTClass{}{%
-  \SetClassProp{table}{margin}{0bp}%
-  \SetClassProp{table}{break-table}{true}%
-  \SetClassProp{table}{border}{2bp solid spot}%
-  \SetClassProp{table}{border-top}{none}%
-  \SetClassProp[thead]{td}{background-color}{spot}%
-  \SetClassProp[thead]{td}{font-weight}{bold}%
-  \SetClassProp[thead]{td}{vertical-align}{middle}%
-  \SetClassProp[thead]{td}{color}{white}%
-  \SetClassProp{td}{padding}{2bp 0.5mm 1bp}%
-  \SetClassProp{td}{border-style}{none}%
-  \SetClassProp{td}{font-family}{sans-serif}%
-  \SetClassProp{td}{font-size}{x-small}%
-}
+\RequirePackage{examples/ccfloats}
 
 \newcommand*{\fullref}[1]{\hyperref[{#1}]{\autoref*{#1} “\nameref*{#1}”}}
 
@@ -581,8 +418,8 @@
 
 
 %% Generic
-\RequirePackage{fontawesome}
-\def\ccDocSymbol#1{\ifvmode\leavevmode\fi\lower1\p@\hbox{#1}}
+\RequirePackage{fontawesome6}
+\def\ccDocSymbol#1{\ifvmode\leavevmode\fi\lower1\p@\hbox{\faIcon{#1}}}
 \def\ccDocString#1#2#3{{\small\ttfamily\mybfseries\color{#1}\if!#2!\else#2\,\fi#3}}
 
 %% abstract container for doc elements
@@ -635,7 +472,7 @@
 %%%%%%%%%%%%%%
 % Properties %
 %%%%%%%%%%%%%%
-\def\PropertySymbol{\ccDocSymbol\faGear}
+\def\PropertySymbol{\ccDocSymbol{gear}}
 \def\PropertyString#1{\ccDocString{propcolor!75}{\PropertySymbol}{#1}}
 
 \ccDeclareContainer{Properties}{%
@@ -679,7 +516,7 @@
 %%%%%%%%%%%%%%
 % Containers %
 %%%%%%%%%%%%%%
-\def\ContainerSymbol{\ccDocSymbol\faCube}
+\def\ContainerSymbol{\ccDocSymbol{cube}}
 \def\ContainerString#1{\ccDocString{contcolor!75}{\ContainerSymbol}{#1}}
 \ccDeclareContainer{Container}{%
   \ccInherit{Components,Attributes,Properties}{CoCoDoc}%
@@ -694,7 +531,7 @@
 %%%%%%%%%%%%%%
 % Components %
 %%%%%%%%%%%%%%
-\def\ComponentSymbol{\ccDocSymbol\faSignIn}
+\def\ComponentSymbol{\ccDocSymbol{right-to-bracket}}
 \def\ComponentString#1{\ccDocString{compcolor!75}{\ComponentSymbol}{#1}}
 \ccDeclareContainer{Component}{%
   \ccInherit{Components,Attributes,Properties}{DomainedDoc}%
@@ -722,7 +559,7 @@
 %%%%%%%%%
 % Hooks %
 %%%%%%%%%
-\def\HookSymbol{\ccDocSymbol\faIndent}
+\def\HookSymbol{\ccDocSymbol{indent}}
 \def\HookString#1{\ccDocString{hookcolor!75}{\HookSymbol}{#1}}
 \ccDeclareContainer{Hook}{%
   \ccInherit{Components,Attributes,Properties}{CoCoDoc}%
@@ -738,7 +575,7 @@
 %%%%%%%%
 % Tags %
 %%%%%%%%
-\def\TagSymbol{\ccDocSymbol\faTag}
+\def\TagSymbol{\ccDocSymbol{tag}}
 \def\TagString#1{\ccDocString{tagscolor!75}{\TagSymbol}{#1}}
 % Tag Description
 \def\DescribeTag#1{\ccDocString{tagscolor}{\TagSymbol}{<#1/>}\index[tags]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\noexpand\doc@handleencap{main}}}
@@ -752,7 +589,7 @@
 %%%%%%%%%%%%%%
 % Attributes %
 %%%%%%%%%%%%%%
-\def\AttrSymbol{\ccDocSymbol\faChain}
+\def\AttrSymbol{\ccDocSymbol{link}}
 \def\AttrString#1{\ccDocString{attrcolor!75}{\AttrSymbol}{#1}}
 % Attr Description, #1 name, #2 expected value
 \ccDeclareContainer{Attribute}{%

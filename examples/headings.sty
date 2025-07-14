@@ -1,0 +1,120 @@
+%% style file holds the declarations for the various heading levels of
+%% the end-user manual
+\def\titlefont{\mybfseries\sffamily\color{spot}}
+
+%% General heading properties
+\ccAddToType{Properties}{Heading}{%
+  \ccSetProperty{before-heading-block}{\parindent\z@ \parskip\z@ \leftskip\z@}
+  \ccSetProperty{heading-block}{%
+    \ccUseProperty{title-face}%
+    \ccIfComp{Number}{\ccUseProperty{hang-number}}{\leftskip0pt}%
+    \ccUseComp{Title}\par%
+    \ccWhenComp{Subtitle}{{\ccUseProperty{subtitle-face}\ccUseComp{Subtitle}}\par}%
+  }%
+  \ccSetProperty{indent}{auto-global}%
+  \ccSetProperty{number-sep}{\enskip}
+  \ccSetProperty{subtitle-face}{\titlefont}
+}
+
+%% Part level headings
+\ccDeclareHeading{-1}{part}{%
+  \ccSetProperty{heading-par}{\clearpage
+    \par\global\@afterindenttrue
+  }
+  \ccSetProperty{before-heading}{%
+    \thispagestyle{part}%
+  }
+  \ccSetProperty{title-face}{\Huge\titlefont}
+  \ccSetProperty{subtitle-face}{\huge\titlefont}
+  \ccSetProperty{after-heading-block}{\vfill}
+  \ccSetProperty{heading-block}{%
+    \ccUseProperty{title-face}%
+    \cchHeadTagStart
+    \ccWhenComp{Number}{Part~\ccUseComp{Number}:}%
+    \par
+    \ccUseComp{Title}%
+    \cchHeadTagEnd
+    \par
+  }
+  \ccSetProperty{indent}{}
+  \ccSetProperty{toc-margin-top}{2\baselineskip}
+  \ccSetProperty{toc-title-face}{\bfseries\sffamily}
+  \ccSetProperty{toc-margin-left}{\z@}
+  \ccSetProperty{toc-indent}{\z@}
+  \ccSetProperty{toc-page-format}{\hfill}
+  \ccSetProperty{toc-number-format}{Part~\ccUseComp{TocNumber}\enskip}
+}
+
+%% chapter level heading
+\ccDeclareHeading{0}{chapter}{%
+  \ccSetProperty{heading-par}{\clearpage
+    \par
+    \global\@afterindenttrue
+  }
+  \ccSetProperty{before-heading}{%
+    \thispagestyle{chapfirst}%
+    \addtocontents{lof}{\protect\addvspace{1\baselineskip}}%
+    \addtocontents{lot}{\protect\addvspace{1\baselineskip}}%
+    \setcounter{section}{0}%
+  }
+  \ccSetProperty{title-face}{\huge\titlefont}
+  \ccSetProperty{subtitle-face}{\large\titlefont}
+  \ccSetProperty{after-skip}{3\baselineskip}%
+  \ccSetProperty{indent}{auto}
+  \ccSetProperty{toc-margin-top}{1\baselineskip}
+  \ccSetProperty{toc-title-face}{\bfseries\sffamily}
+}
+
+%% special heading level for the table of contents, which inherits
+%% from chapter
+\ccDeclareHeading[chapter]{0}{toc}{%
+  \ccSetProperty{heading-par}{\par
+    \global\@afterindenttrue
+  }%
+}
+
+%% section level heading
+\ccDeclareHeading{1}{section}{%
+  \ccSetProperty{before-heading}{\raggedright\setcounter{subsection}{0}}%
+  \ccSetProperty{before-skip}{2.5\baselineskip}
+  \ccSetProperty{after-skip}{16bp}%
+  \ccSetProperty{title-face}{\LARGE\titlefont\color{spot!95}}%
+  \ccSetProperty{toc-margin-bottom}{\z@}
+  \ccSetProperty{toc-margin-top}{\z@}
+}
+
+%% subsection level heading
+\ccDeclareHeading{2}{subsection}{%
+  \ccSetProperty{before-heading}{\raggedright\setcounter{subsubsection}{0}}%
+  \ccSetProperty{before-skip}{2\baselineskip}
+  \ccSetProperty{after-skip}{6bp}%
+  \ccSetProperty{title-face}{\large\titlefont\color{spot!90}}%
+  \ccSetProperty{toc-margin-bottom}{\z@}
+  \ccSetProperty{toc-margin-top}{\z@}
+}
+
+%% subsubsection level heading
+\ccDeclareHeading{3}{subsubsection}{%
+  \ccSetProperty{before-heading}{\raggedright}%
+  \ccSetProperty{before-skip}{1.5\baselineskip}
+  \ccSetProperty{before-heading}{\raggedright}%
+  \ccSetProperty{before-skip}{1.5\baselineskip}
+  \ccSetProperty{after-skip}{1sp}%
+  \ccSetProperty{title-format}{\normalsize\titlefont\color{spot!85}}%
+}
+
+%% paragraph level heading
+\ccDeclareHeading{4}{paragraph}{%
+  \ccSetProperty{before-skip}{1\baselineskip}
+  \ccSetProperty{after-skip}{1sp}%
+  \ccSetProperty{title-face}{\normalsize\titlefont\color{spot!80}}%
+  \ccSetProperty{numbering}{}
+}
+
+%% subparagraph level heading
+\ccDeclareHeading{5}{subparagraph}{%
+  \ccSetProperty{before-skip}{.5\baselineskip}%
+  \ccSetProperty{after-skip}{-.5em}%
+  \ccSetProperty{title-face}{\small\titlefont\color{spot!75}}%
+  \ccSetProperty{numbering}{}
+}
