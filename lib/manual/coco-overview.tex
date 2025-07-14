@@ -60,39 +60,38 @@ it uses some newly added concepts like Hooks and Sockets..
 
 The following packages are requied by the various {\CoCoTeX} modules:
 \begin{description}
-\item[\ttfamily coco-kernel*] requires \texttt{kvoptions-patch},
-  \texttt{xkeyval}, and \texttt{etoolbox}
-\item[\ttfamily coco-common*] requires \texttt{coco-kernel}, \texttt{iftex},
+\item[\ttfamily coco-kernel*] \textit{requires} \texttt{etoolbox}
+\item[\ttfamily coco-common*] \textit{requires} \texttt{coco-kernel},
   \texttt{xcolor}, and \texttt{graphicx}
-\item[\ttfamily coco-floats*] requires \texttt{coco-common} and
-  \texttt{rotating}, \texttt{grffile}, \texttt{footnote},
-  \texttt{adjustbox}, and \texttt{stfloats} and supports
+\item[\ttfamily coco-floats*] \textit{requires} \texttt{coco-common}
+  and \texttt{rotating}, \texttt{grffile}, \texttt{footnote},
+  \texttt{adjustbox}, and \texttt{stfloats} and \textit{supports}
   \texttt{tabularx}, \texttt{tabulary}, and
   \texttt{htmltabs}\footnote{The \texttt{htmltabs.sty} is included in
     \CoCoTeX's main GitHub Repository in the
     \texttt{externals/htmltabs/} folder}
-\item[\ttfamily coco-meta*] requires \texttt{coco-common}
-\item[\ttfamily coco-heading*] requires \texttt{coco-meta}, and
+\item[\ttfamily coco-meta*] \textit{requires} \texttt{coco-common}
+\item[\ttfamily coco-heading*] \textit{requires} \texttt{coco-meta}, and
   \texttt{bookmark}
-\item[\ttfamily coco-notes*] requires \texttt{footnote}, and \texttt{endnotes}
-\item[\ttfamily coco-title*] requires \texttt{coco-meta}
-\item[\ttfamily coco-accessibility] requires lua\LaTeX, \texttt{coco-kernel},
+\item[\ttfamily coco-notes*] \textit{requires} \texttt{footnote}, and \texttt{endnotes}
+\item[\ttfamily coco-title*] \textit{requires} \texttt{coco-meta}
+\item[\ttfamily coco-accessibility] \textit{requires} lua\LaTeX, \texttt{coco-kernel},
   and \texttt{ltpdfa}\footnote{\texttt{ltpfa} is included in the
     \texttt{externals/ltpdfa} folder in CoCoTeX's GitHub
     repository. Note that CoCoTeX uses only the .lua files from that
-    package}. Older {\LaTeX} kernel versions require
+    package}. Older {\LaTeX} kernel versions \textit{require}
   \texttt{atbegshi}, \texttt{xparse}, \texttt{luatexbase-attr}, and
   \texttt{atveryend}
-\item[\ttfamily coco-lists] requires \texttt{coco-common}, \texttt{footnote},
+\item[\ttfamily coco-lists] \textit{requires} \texttt{coco-common}, \texttt{footnote},
   and \texttt{endnotes}
-\item[\ttfamily coco-frame] requires \texttt{luatex85}, and \texttt{crop}
-\item[\ttfamily coco-script] requires \texttt{coco-kernel}, \texttt{babel},
+\item[\ttfamily coco-frame] \textit{requires} \texttt{luatex85}, and \texttt{crop}
+\item[\ttfamily coco-script] \textit{requires} \texttt{coco-kernel}, \texttt{babel},
   \texttt{fontspec} (and therefore {lua\LaTeX} or Xe\LaTeX), and
   \texttt{filecontents}
 \end{description}
 
 The {\CoCoTeX} class file \texttt{cocotex.cls} includes most (namely
-those indicated with an asterisk in the list above) {\CoCoTeX} modules
+those indicated with an asterisk * in the list above) {\CoCoTeX} modules
 and requires \textit{additionally} the \texttt{index} and
 \texttt{hyperref} packages. Note that all those packages might have
 secondary dependencies.
@@ -100,8 +99,8 @@ secondary dependencies.
 {\CoCoTeX} itself is designed to run with all {\LaTeX} engines,
 however, in partiular the \texttt{coco-script} and
 \texttt{coco-accessibility} modules require {lua\LaTeX}, therefore
-those modules are either not loaded (coco-script), or it is
-loaded but not activated (coco-accessibility) by default.
+those modules are either not loaded (\texttt{coco-script}), or it is
+loaded but not activated (\texttt{coco-accessibility}) by default.
 
 
 \begin{Heading}{subsection}

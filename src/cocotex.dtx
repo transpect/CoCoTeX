@@ -90,7 +90,7 @@
 \newif\ifjournal
 \keys_define:nn { cocotex/cls }
 {
-  pubtype .choices:nn = { collection, article, journal, mono }
+  pubtype .choices:nn = { collection, article, journal, mono, l3doc }
   {
     \global\collectionfalse
     \global\articlefalse
@@ -102,6 +102,7 @@
       { article }    { \global\articletrue    }
       { journal }    { \global\journaltrue    }
       { mono }       { \global\monographtrue  }
+      { l3doc }      { \global\monographtrue  }
     }
   },
   pubtype           .initial:n = mono,
