@@ -591,7 +591,10 @@
 %   characters further down the Unicode range, the entire string is
 %   converted to hexadecimal UTF-16.
 %    \begin{macrocode}
-\DeclareAccessibilityCommand{\ccaAddAltText}[1]{\if@cc@is@final\directlua{ltpdfa.tagger.addAltText(ltpdfa.metadata.utf8toPDFenc('\luaescapestring{#1}'))}\fi}
+\DeclareAccessibilityCommand{\ccaAddAltText}[1]{\if@cc@is@final
+    \Hy@pdfstringdef\@cca@alt{#1}%
+    \directlua{ltpdfa.tagger.addAltText(ltpdfa.metadata.utf8toPDFenc('\luaescapestring{\@cca@alt}'))}
+  \fi}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\cca@Gin@alt} is the captured value of the
