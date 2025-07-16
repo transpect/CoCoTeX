@@ -593,7 +593,7 @@
 %    \begin{macrocode}
 \DeclareAccessibilityCommand{\ccaAddAltText}[1]{\if@cc@is@final
     \Hy@pdfstringdef\@cca@alt{#1}%
-    \directlua{ltpdfa.tagger.addAltText(ltpdfa.metadata.utf8toPDFenc('\luaescapestring{\@cca@alt}'))}
+    \directlua{ltpdfa.tagger.addAltText(ltpdfa.metadata.utf8toPDFenc('\luaescapestring{\@cca@alt}'))}%
   \fi}
 %    \end{macrocode}
 % \end{macro}
