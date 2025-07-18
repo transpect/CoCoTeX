@@ -70,6 +70,8 @@ local function isDocEncoding(str)
    for c in utf.values(str) do
       if c > 255 then
          return false
+      elseif c == 160 then
+         return false
       else
          c = pdfDocEncoding[c + 1]
 	 val = val .. string.char(c)
