@@ -110,8 +110,16 @@ local function structElems(selem, childarray, head) -- parent
       end
       local parentname = "struct_" .. selem.parent.idx
       local addTxt = ""
+
       if (selem.altText) then
-         addTxt = "\n/Alt (" .. selem.altText .. ")"
+         if (selem.altText[2] == false) then
+            -- escape postscript special chars
+            local tmp = escapePSString(selem.altText[1])
+            addTxt = "\n/Alt (" .. tmp .. ")"
+         else
+            -- no need for escaping
+            addTxt = "\n/Alt <" .. selem.altText[1] .. ">"
+         end
       end
       if (selem.neededID) then
          addTxt = addTxt .. "\n/ID (" .. selem.neededID .. ")"
@@ -186,7 +194,7 @@ local function structParent(head, curr, number)
       log("ps: structParent %d", number)
    end
    local n = node.new(a_whatsit_node, subtype_special)
-   node.setfield(n,"data","ps:[ {ThisPage} <</StructParents " .. number .. "/Tabs/S>> /PUT pdfmark")
+   node.setfield(n,"data","ps:[ {ThisPage} <</StructParents " .. number .. "/Tabs/S>> /PUT pdfmark [/Private<</letex:page " .. number .. ">>/BDC pdfmark [/EMC pdfmark")
    return node.insert_after(head,curr,n)
 end
 

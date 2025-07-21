@@ -63,6 +63,45 @@ local xmphandler  = {}
 require("lualibs-lpeg")
 require("lualibs-unicode")
 
+-- takes a pdfdoc encoded string and escapes '(',')', '\\'
+local function escapePdfString(str)
+   if str == nil then return false end
+   local bs = string.byte("\\")
+   local klo = string.byte("(")
+   local klc = string.byte(")")
+   local bscnt = 0
+   local val = ""
+   for idx = 1, #str do
+      local b = str:byte(idx)
+      if b == bs then
+         if bscnt == 1 then
+            bscnt = 0 --flop
+            val = val .. '\\'
+         else
+            bscnt = 1 -- flip
+            val = val .. '\\'
+         end
+         --log("BACKSLASH at %d %d: %s", idx, bscnt, str)
+      elseif (bscnt == 0 and b == klo) then
+         bscnt = 0
+         val = val .. '\\('
+      elseif (bscnt == 0 and b == klc) then
+         bscnt = 0
+         val = val .. '\\)'
+      elseif (bscnt == 1 and (b > 47 and b < 56)) then -- octal
+         bscnt = 0
+         val = val .. string.char(b)
+      elseif (bscnt == 1) then -- all other cases or what??
+         bscnt = 0
+         val = val .. '\\' .. string.char(b)
+      else
+         val = val .. string.char(b)
+         bscnt = 0
+      end
+   end
+   return val
+end
+
 -- helper reducing utf-8 to pdfdocencoding
 local function isDocEncoding(str)
    if str == nil then return false end
@@ -70,12 +109,23 @@ local function isDocEncoding(str)
    for c in utf.values(str) do
       if c > 255 then
          return false
-      elseif c == 160 then
-         return false
       else
          c = pdfDocEncoding[c + 1]
-	 val = val .. string.char(c)
+         if c < 128 then
+            val = val .. string.char(c)
+         else
+            val = val .. string.format("\\%.3o", c)
+         end
       end
+   end
+   return val
+end
+
+local function pdfencToUtf8(str)
+   local val = ""
+   for idx = 1, #str do
+      local c = str:byte(idx)
+      val = val .. pdfDocEncoding[c]
    end
    return val
 end
@@ -85,7 +135,6 @@ local function utf8ToUtf16(arg)
    local u16val = utf.utf8_to_utf16_be(arg)
    return u16val
 end
-
 -- convert UTF-16 from hyperref to pdf UTF-8
 local function utf16ToUtf8(arg)
    -- unescape octal \xxx
@@ -95,25 +144,28 @@ local function utf16ToUtf8(arg)
    return u8val
 end
 
--- convert utf8 to pdfencoding
-local function utf8toPDFenc(str)
-   local tmp = isDocEncoding(str) -- try to reduce to pdfenc
-   local ret
-   if (tmp == false) then
-      ret = utf8ToUtf16(str)
-   else
-      ret = tmp
-   end
-   return ret
-end
-
--- converts octal to ascii
 local function expandOctal(str)
    -- unescape octal \xxx
    local val = str:gsub("\\([0-7][0-7][0-7])", function(k) return string.char(tonumber(k,8)) end)
    return val
 end
 
+local function altToPDF(str, enc)
+   local tmp = isDocEncoding(str) -- try to reduce to pdfenc
+   local res
+   local hex
+   if (tmp == false) then
+      -- escapePdfStringUTF8(str) does not work because special
+      -- characters are still read as byte :-(
+      res = utf8ToUtf16(str)
+      res = res:gsub(".", function(char) return string.format("%02x", char:byte()) end)
+      hex = true
+   else
+      res = escapePdfString(tmp)
+      hex = false
+   end
+   return res, hex
+end
 --------------------------------------------
 local xmphead = [[<?xpacket begin="" id="W5M0MpCehiHzreSzNTczkc9d"?>
 <x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="Adobe XMP Core 5.4-c005 78.147326, 2012/08/23-13:03:03        ">
@@ -341,7 +393,7 @@ function xmphandler.fromFile(filename)
 end
 
 -- writes jobname.xmp
--- TODO use infoarray that always is utf-8
+-- TODO escape xml special chars
 function xmphandler.fromInfo()
    local body = ""
    if (config.metadata.KeywordList and config.metadata.KeywordList[1][1] ~= '') then
@@ -384,10 +436,10 @@ function xmphandler.fromInfo()
    end
    if config.metadata.conformance then
       if (config.metadata.conformance.pdfaid) then
-	 pdfaver = pdfaver:gsub('PDFAID:PART', config.metadata.conformance.pdfaid)
-	 pdfaver = pdfaver:gsub('PDFAID:CONFORMANCE', config.metadata.conformance.level)
+         pdfaver = pdfaver:gsub('PDFAID:PART', config.metadata.conformance.pdfaid)   
+         pdfaver = pdfaver:gsub('PDFAID:CONFORMANCE', config.metadata.conformance.level)
       else
-	 pdfaver = ""
+         pdfaver = ""
       end
       if (config.metadata.conformance.pdfuaid) then
          pdfuaid = pdfuaid:gsub('PDFUAID:PART', config.metadata.conformance.pdfuaid)
@@ -471,7 +523,18 @@ local function getDocInfo()
             return nil
          end
          local str = val[1]
-	 str = utf8toPDFenc(str)
+         local tmp = isDocEncoding(str) -- try to reduce to pdfenc
+         -- with hexstrings strange display things happen if PDFDocEncoding :-(
+         -- so put all as UTF16
+         -- if (tmp == false) then
+         str = utf8ToUtf16(str)
+         -- else
+            -- if > 127 we get it \octal encoded
+            -- with hexstrings strange display things happen if PDFDocEncoding :-(
+            -- so put all as UTF16
+         --   tmp = expandOctal(tmp)
+         --   str = tmp
+         --end
          str = str:gsub(".", function(char) return string.format("%02x", char:byte()) end)
          info[name] = str
       end
@@ -489,7 +552,7 @@ local metadata = {
    getDocInfo = getDocInfo,
    xmphandler = xmphandler,
    utf16ToUtf8 = utf16ToUtf8,
-   utf8toPDFenc = utf8toPDFenc,
+   altToPDF = altToPDF,
 }
 return metadata
 
