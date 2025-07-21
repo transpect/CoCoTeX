@@ -239,10 +239,10 @@ end
 
 local function structParent(head, curr, number)
    pdf.setpageattributes(" /Tabs /S /StructParents " .. number)
-   return head, curr
-   --local m = node.new(a_whatsit_node, subtype_pdfliteral)
-   --node.setfield(m,"data", "/Private <<letex:page " .. number .. "/letex:job(" .. config.jobname .. ")>> BDC EMC")
-   --return node.insert_after(head, curr, m)
+   --return head, curr
+   local m = node.new(a_whatsit_node, subtype_pdfliteral)
+   node.setfield(m,"data", "/Private <</letex:page " .. number .. "/letex:job(" .. config.jobname .. ")>> BDC EMC")
+   return node.insert_after(head, curr, m)
 end
 
 --- see getStructParent, start with 1
