@@ -225,6 +225,8 @@ local function getAttribute(name)
    tex.print(luatexbase.attributes[name])
 end
 local function beginDocument(page)
+   -- compute pdfsafe jobname
+   config.jobname = md5.sumhexa(tex.jobname) -- or md5.sumhexa(tex.jobname)
    if config.tounicode and string.len(config.tounicode) > 0 then
       log("ZZZZZ %s", config.tounicode)
       ltpdfa.odriver.addToUnicode(config.tounicode) -- ????? want this in nodelist without attributes

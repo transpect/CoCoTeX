@@ -15,6 +15,7 @@ local bdcs    = config.bdcs
 
 local structnum = config.structnumstart
 local structtree = ltpdfa.structtree
+local metadata = ltpdfa.metadata
 local stree = structtree.stree
 local openedarray  = stree.openedarray -- opened autoclose structs
 local ftable = lua.get_functions_table()
@@ -170,8 +171,9 @@ local function pstructEnd(name)
    structEnd_(name)
 end
 
-local function addAltText(desc)
-   stree.current.altText = desc
+local function addAltText(desc, enc)
+   local str, hex = metadata.altToPDF(desc, enc)
+   stree.current.altText = {str, hex}
 end
 
 local function addID(id)

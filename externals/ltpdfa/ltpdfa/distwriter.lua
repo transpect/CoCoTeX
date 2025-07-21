@@ -128,11 +128,18 @@ local function structElems(idx, selem)
    local addTxt = " "
    if (selem.neededID) then
       addTxt = addTxt .. "/ID(" .. selem.neededID .. ")"
+   else
+      addTxt = addTxt .. "/ID(" .. selem.ID .. ")"
    end
    if (selem.altText) then
-      -- escape postscript special chars selem.altText
-      local tmp = escapePSString(selem.altText)
-      addTxt = "\n/Alt (" .. tmp .. ")"
+      if (selem.altText[2] == false) then
+         -- escape postscript special chars
+         local tmp = escapePSString(selem.altText[1])
+         addTxt = "\n/Alt (" .. tmp .. ")"
+      else
+         -- no need for escaping
+         addTxt = "\n/Alt <" .. selem.altText[1] .. ">"
+      end
    end
    if (selem.Lang) then
       addTxt = "\n/Lang(" .. selem.Lang .. ")"
@@ -258,12 +265,14 @@ local function endMC(head, curr, attr, after)
 end
 
 -- create StructParents for current page
+-- write letex Private tags /Private<</letex:page integer /letex:jobname >>
 local function structParent(head, curr, number)
    if (config.debug) then
       log("ps: structParent %d", number)
    end
    local n = node.new(a_whatsit_node, subtype_special)
-   node.setfield(n,"data","ps:[ {ThisPage} <</Tabs/S>> /PUT pdfmark")
+   local private = "[/Private<</letex:page " .. number .. " /letex:job (" .. config.jobname .. ") >>/BDC pdfmark [/EMC pdfmark"
+   node.setfield(n,"data","ps:[ {ThisPage} <</Tabs/S>> /PUT pdfmark " .. private)
    return node.insert_after(head,curr,n)
 end
 

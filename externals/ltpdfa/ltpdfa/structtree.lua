@@ -73,8 +73,6 @@ local removed = false -- structRemove sets this, ignoreNext too
 local inmath = 0
 local ignore = false
 
-local found_empty = true
-
 --[[ this is our main struct
    'root' => contains tree of StructElem objects
    classmap, rolemap
@@ -104,14 +102,18 @@ function dumpStructs(T, level)
       log("%s%s => %s",indent, k, v)
    end
    if (T.attributes) then
-      log("%sdumping sattributes", indent)
-      dumpArray(T.attributes,1, level)
+      if (config.debug) then
+	 log("%sdumping sattributes", indent)
+	 dumpArray(T.attributes,1, level)
+      end
    end
    if (T.childs) then
       log("%sNumChilds %d", indent, #T.childs)
       for k,v in ipairs(T.childs) do
-	 log("%sdumping child %s", indent, k)
-	 dumpStructs(v, level + 1)
+	 if (config.debug) then
+	    log("%sdumping child %s", indent, k)
+	    dumpStructs(v, level + 1)
+	 end
       end
    end
 end
@@ -550,7 +552,7 @@ local function postProcessFigs()
          log("Warning: very small x-ppos %d", v.parent)
       end
       if ( (ppos.y2 - ppos.y1) < 100) then
-	 if config.debug then
+	 if (config.debug) then
 	    log("Warning: very small y-ppos %d (%d/%d)(%.2f/%.2f)\n => %.2f", v.parent, ppos.y1, ppos.y2, fbox.y1, fbox.y2, (fbox.y2 - fbox.y1))
 	    dumpArray(v,true)
 	 end
@@ -635,7 +637,6 @@ local function removeEmptyStructs_(parent)
             else
                debug_log("Removing empty Struct %s(%d) from parent %s(%d)", child.type, child.idx, parent.type, parent.idx)
                table.remove(parent.childs, i)
-	       found_empty = true
             end
          else
             i = i + 1
@@ -649,10 +650,7 @@ local function removeEmptyStructs_(parent)
 end
 
 local function removeEmptyStructs()
-   while found_empty do
-      found_empty = false
-      removeEmptyStructs_(stree.root)
-   end
+   removeEmptyStructs_(stree.root)
 end
 
 local function splitPath(nstr, delimiter)
@@ -862,7 +860,6 @@ local function finalizeDoc(head)
    -- if config.doparas then
    --    processParas()
    -- end
-   if not config.debug then log("==> ltpdfa fininalizing...") end
    if config.dospaces then
       ltpdfa.spaceprocessor.cleanUp()      
    end
@@ -917,11 +914,9 @@ local function finalizeDoc(head)
    head = writer.roleMap(ltpdfa.structtree.stree, head)
    head = writer.IDTree(ltpdfa.structtree.stree, head)
    head = writer.docLang(ltpdfa.config.lang, head)
-   if config.debug then
+   if (config.debug) then
       log("dump of opened")
       dumpArray(ltpdfa.structtree.stree.openedarray)
-   else
-      log("==> Done.\n")
    end
 end
 --[[
@@ -1239,19 +1234,6 @@ local function replaceStruct(idx)
    end
 end
 
--- deletes source at idx and moves all child nodes to current
-local function moveChilds(idx)
-   local idx = tonumber(idx)
-   local source = stree.structarray[idx]
-   if source then
-      debug_log("===> Moving Children of %s to %s", idx, stree.current.type)
-      source.parent:removeChild(source)
-      for k,v in pairs(source.childs) do
-	 table.insert(stree.current.childs, v)
-      end
-   end
-end
-
 -- deletes source at idx and inserts as child into current
 local function moveToStruct(idx)
    local idx = tonumber(idx)
@@ -1298,6 +1280,7 @@ local structtree = { -- module table
    readPosFile      = readPosFile,
    closePosFile     = closePosFile,
    markPara         = markPara,
+   moveChilds       = moveChilds,
    structRemove     = structRemove,
    getCurrentStruct = getCurrentStruct,
    ignoreNext       = ignoreNext,
@@ -1305,7 +1288,6 @@ local structtree = { -- module table
    pushStruct       = pushStruct,
    addFigure        = addFigure,
    moveStruct       = moveToStruct,
-   moveChilds       = moveChilds,
    replaceStruct    = replaceStruct,
 }
 
