@@ -990,6 +990,8 @@
   \@ifpackageloaded{amsmath}{%
     \pretocmd{\start@align}{\ccaVstructStart{P}\ccaStructStart{Formula}}{}{\cca@patch@error\start@align}%
     \apptocmd{\endalign}{\ccaStructEnd{Formula}\ccaVstructEnd{P}}{}{\cca@patch@error\endalign}%
+    \pretocmd{\mathdisplay}{\ccaVstructStart{P}\ccaStructStart{Formula}}{}{\cca@patch@error\mathdisplay}%
+    \apptocmd{\endmathdisplay}{\ccaStructEnd{Formula}\ccaVstructEnd{P}}{}{\cca@patch@error\endmathdisplay}%
   }{}%
 }
 %    \end{macrocode}
