@@ -1178,6 +1178,18 @@ local function markPara(head, context)
    return writer.markPara(head, tail, context)
 end
 
+local function moveChilds(idx)
+   local idx = tonumber(idx)
+   local source = stree.structarray[idx]
+   if source then
+      debug_log("===> Moving Children of %s to %s", idx, stree.current.type)
+      source.parent:removeChild(source)
+      for k,v in pairs(source.childs) do
+        table.insert(stree.current.childs, v)
+      end
+   end
+end
+
 --[[
    remove current struct from tree
    only works correctly if no content has been added ...
