@@ -362,18 +362,6 @@ local function savepos(head, curr, index, start)
    end
 end
 
-local function moveChilds(idx)
-   local idx = tonumber(idx)
-   local source = stree.structarray[idx]
-   if source then
-      debug_log("===> Moving Children of %s to %s", idx, stree.current.type)
-      source.parent:removeChild(source)
-      for k,v in pairs(source.childs) do
-        table.insert(stree.current.childs, v)
-      end
-   end
-end
-
 local writer = {
    init = init,
    addToUnicode   = addToUnicode,
