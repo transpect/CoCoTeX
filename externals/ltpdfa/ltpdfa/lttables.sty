@@ -55,6 +55,7 @@
   \let\stopTHead\relax
   \let\startTBody\relax
   \let\stopTBody\relax
+  \let\addFigure\@lt@nop@addFigure
 }
 \newcommand{\ltpdfa@unprotectForTable}{%
   \let\myTRStart\@myTRStart
@@ -71,6 +72,7 @@
   \let\stopTHead\@stopTHead
   \let\startTBody\@startTBody
   \let\stopTBody\@stopTBody
+  \let\addFigure\@lt@save@addFigure
 }
 \let\@lt@save@@unprotectForTable\ltpdfa@unprotectForTable
 \let\@lt@save@@protectForTable\ltpdfa@protectForTable

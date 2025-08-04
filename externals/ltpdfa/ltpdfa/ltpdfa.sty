@@ -127,7 +127,7 @@
 \newcommand*{\pstructStart}[2][]{\directlua{ltpdfa.tagger.pstructStart('\luaescapestring{#2}','\luaescapestring{#1}')}}
 \newcommand*{\pstructEnd}[1]{\directlua{ltpdfa.tagger.pstructEnd('\luaescapestring{#1}')}}
 
-\newcommand*{\addAltText}[1]{\directlua{ltpdfa.tagger.addAltText('\luaescapestring{#1}')}}
+\newcommand*{\addAltText}[2][hyperref]{\directlua{ltpdfa.tagger.addAltText('\luaescapestring{#2}','\luaescapestring{#1}')}}
 \newcommand*{\addLastLink}{\directlua{ltpdfa.tagger.addLastLink()}}
 \newcommand*{\addSubLink}{\directlua{ltpdfa.tagger.addLastLink(true)}}
 \newcommand*{\addNumbering}[1]{\directlua{ltpdfa.tagger.addNumbering('\luaescapestring{#1}')}}
@@ -261,9 +261,15 @@
 }
 {\@lt@save@vstructEnd{Artifact}\@restoreLtpdfa\@inartifactfalse}
 
+
+%% check ??? war in ltpdfm
+\AtBeginShipout{\directlua{ltpdfa.pageprocessor(tex.box["AtBeginShipoutBox"])}}%
+
 \ifltpdfa@noautotag\relax\else\RequirePackage{ltpdfm}\fi
+
 \@ifpackageloaded{hyperref}{%
   \ifltpdfa@disable\relax\else\RequirePackage{ltpdfhyper}\fi
+  \@ifpackageloaded{breakurl}{\RequirePackage{ltbreakurl}}{\relax}%
 }{
   \RequirePackage{nohyperref}
   \let\NoHyper\relax

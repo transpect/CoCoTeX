@@ -2166,8 +2166,8 @@
 % non-alphanumeric symbols to octals before we passit down to ltpdfa.
 %    \begin{macrocode}
     \ifx\@cca@Gin@alt\relax\else
-      \Hy@pdfstringdef\@@cca@Gin@alt{\@cca@Gin@alt}%
-      \ccaAddAltText{\@@cca@Gin@alt}%
+      %\Hy@pdfstringdef\@@cca@Gin@alt{\@cca@Gin@alt}%
+      \ccaAddAltText{\@cca@Gin@alt}%
     \fi
     \ccaStructEnd{Figure}%
   \fi

@@ -19,7 +19,7 @@ hyphnode.mode = 0
 hyphnode.data = "q 0 0 1 RG 1.8 w 5 0 m 5 7 l S Q"
 -----------------------------------------------------------
 local function init()
-   log("pdfwriter init")
+   debug_log("pdfwriter init")
    -- compression settings has no effect, if objects already written before
    if (config.debug) then
       pdf.setcompresslevel(0)
@@ -155,7 +155,14 @@ end
 local function addAttribute(selem, attr, str, pdfobj)
    local attrval = selem[attr]
    if (attrval) then
-      if (attr == "altText") then attr = "Alt" end
+      if (attr == "altText") then
+         -- altText became array
+         if (attrval[2] == false) then
+            return str .. "/Alt (" .. attrval[1] .. ") "
+         else
+            return str .. "/Alt <" .. attrval[1] .. "> "
+         end
+      end
       if (attr == "neededID") then
          attr = "ID"
          table.insert(idarray, selem.ID)
@@ -232,7 +239,10 @@ end
 
 local function structParent(head, curr, number)
    pdf.setpageattributes(" /Tabs /S /StructParents " .. number)
-   return head, curr
+   --return head, curr
+   local m = node.new(a_whatsit_node, subtype_pdfliteral)
+   node.setfield(m,"data", "/Private <</letex:page " .. number .. "/letex:job(" .. config.jobname .. ")>> BDC EMC")
+   return node.insert_after(head, curr, m)
 end
 
 --- see getStructParent, start with 1
@@ -267,7 +277,7 @@ local function parentTree(stree, head)
       if (not treeval) then
 	 if (config.debug) then
 	    dumpArray(value)
-	    log("parenttree (length=%d) at %d has no treeval", #value, key)
+	    debug_log("parenttree (length=%d) at %d has no treeval", #value, key)
 	 end
          goto continue
       end
@@ -318,7 +328,7 @@ local function intent(head)
    local profile = config.intent.profile
    local filename = kpse.find_file(profile)
    if filename == nil then
-      log("Profile %s could not be found!!!", profile)
+      debug_log("Profile %s could not be found!!!", profile)
       return
    else
       debug_log("Using profile %s", filename)
