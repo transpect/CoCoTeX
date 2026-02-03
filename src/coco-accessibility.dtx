@@ -963,7 +963,7 @@
   }%
   \AtEndDocument{%
     \@ifpackageloaded{coco-headings}{\cchResetNesting}{}%
-    \@ifclassloaded{cocotex}{\if@backmatter\ccaVstructEnd{Backmatter}\fi}{}%
+    \@ifclassloaded{cocotex}{\if@backmatter\ccaVstructEnd{Backmatter}\else\if@mainmatter\ccaVstructEnd{Mainmatter}\else\if@frontmatter\ccaVstructEnd{Frontmatter}\fi\fi\fi}{}%
     \ccaVstructEnd{Document}
     \@ifclassloaded{cocotex}{%
       \ifarticle\else
