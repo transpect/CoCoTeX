@@ -1746,6 +1746,16 @@
 \letcs\TitleBreak{\ccPrefix Break}
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{\texthashchar} prints a hash character (#), which is
+%   especially supposed to be used for the \tpBMTitle{…} macro, in case
+%   the authors want/need a literal hash character in the PDF bookmark.
+%    \begin{macrocode}
+\begingroup
+  \catcode `\#=\active\gdef#{\string#}
+  \gdef\texthashchar{\string#}%
+\endgroup
+%    \end{macrocode}
+% \end{macro}
 %    \begin{macrocode}[numbers=none,gobble=1]
 %</headings>
 %    \end{macrocode}
