@@ -2491,6 +2491,7 @@
   \global\ht@init@pagegoal=\textheight\relax
 }%
 \def\ht@expand@macro@borders{{%
+  \if@ht@ally\@cc@is@finalfalse\fi
   \advance\ht@currow\m@ne
   \ht@Iterate{\ht@curcol}{1}{\the\ht@maxcol}{\SetCellProp{is-lower}{true}}%
   \@ht@CalculateRowHeights
