@@ -147,6 +147,11 @@
 \DeclareTextFontCommand\textttfallback{\ttfallbackfont}
 %    \end{macrocode}
 % \end{macro}
+% \texttt is mapped to Noto to support a large amount of glyphs
+% that are neither supported by Computer Modern Mono nor Latin Modern Mono.
+%    \begin{macrocode}
+\let\ttfamily\ttfallbackfont
+%    \end{macrocode}
 % \begin{macro}{\ccFallback} is a ``smart'' font macro that detects if
 %   it has been used inside \texttt{rm}, \texttt{sf}, or \texttt{tt}
 %   contexts and switches to the corresponding fallback font
