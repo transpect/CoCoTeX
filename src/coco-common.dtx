@@ -508,7 +508,10 @@
 % \begin{macro}{\ccTocLink} is used to link list entries to their
 %   destination.
 %    \begin{macrocode}
-        \long\def\ccTocLink####1{\hyper@linkstart{link}{\@contentsline@destination}{####1}\hyper@linkend}%
+        \def\ccTocLink{\@ifnextchar[{\cc@toc@link}{\cc@toc@link[]}}%]
+        \long\def\cc@toc@link[####1]####2{%
+          \if!####1!\else\def\ccAltOverride{####1}\fi
+          \hyper@linkstart{link}{\@contentsline@destination}{####2}\hyper@linkend}%
 %    \end{macrocode}
 % \end{macro}
 %    \begin{macrocode}

@@ -644,7 +644,15 @@
 \AtBeginDocument{%
     \patchcmd\Hy@StartlinkName
       {\pdfstartlink}
-      {\Hy@pstringdef\@argii{#2}\ccaStructStart{Link}\ccaAddAltText{#2}\edef\@ltpdfmy@parent{\ccaGetStructParent}%
+      {\Hy@pstringdef\@argii{#2}%
+        \ccaStructStart{Link}%
+        \ifx\ccAltOverride\@undefined
+          \ccaAddAltText{#2}%
+        \else
+          \ccaAddAltText{\ccAltOverride}%
+          \global\let\ccAltOverride\@undefined
+        \fi
+        \edef\@ltpdfmy@parent{\ccaGetStructParent}%
        \pdfstartlink}
       {}{\cca@patch@error\Hy@StartlinkName}
 %    \end{macrocode}
@@ -664,7 +672,15 @@
 %    \begin{macrocode}
     \patchcmd\hyper@linkurl
       {\pdfstartlink}
-      {\Hy@pstringdef\@argii{#2}\ccaStructStart{Link}\ccaAddAltText{#2}\edef\@ltpdfmy@parent{\ccaGetStructParent}%
+      {\Hy@pstringdef\@argii{#2}%
+        \ccaStructStart{Link}%
+        \ifx\ccAltOverride\@undefined
+          \ccaAddAltText{#2}%
+        \else
+          \ccaAddAltText{\ccAltOverride}%
+          \global\let\ccAltOverride\@undefined
+        \fi
+        \edef\@ltpdfmy@parent{\ccaGetStructParent}%
        \pdfstartlink}
       {}{\cca@patch@error\hyper@linkurl}
 %    \end{macrocode}
