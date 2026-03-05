@@ -510,8 +510,11 @@
 %    \begin{macrocode}
         \def\ccTocLink{\@ifnextchar[{\cc@toc@link}{\cc@toc@link[]}}%]
         \long\def\cc@toc@link[####1]####2{%
+          \let\href\@secondoftwo%
           \if!####1!\else\def\ccAltOverride{####1}\fi
-          \hyper@linkstart{link}{\@contentsline@destination}{####2}\hyper@linkend}%
+          \hyper@linkstart{link}{\@contentsline@destination}{####2}\hyper@linkend
+          \let\cc@link@in@link\@undefined
+        }%
 %    \end{macrocode}
 % \end{macro}
 %    \begin{macrocode}
