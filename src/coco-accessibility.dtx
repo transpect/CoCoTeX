@@ -1009,19 +1009,19 @@
 %
 %    \begin{macrocode}
 \AtBeginDocument{%
-  \apptocmd{\(}{\ccaStructStart{Formula}\ccaAddPlacement{Inline}}{}{\cca@patch@error\(}
-  \pretocmd{\)}{\ccaStructEnd{Formula}}{}{\cca@patch@error\)}
-  \apptocmd{\[}{\if@cca@eqn@para\ccaVstructStart{P}\fi\ccaStructStart{Formula}\ccaAddPlacement{Block}}{}{\cca@patch@error\[}
-  \pretocmd{\]}{\ccaStructEnd{Formula}\if@cca@eqn@para\ccaVstructEnd{P}\fi}{}{\cca@patch@error\]}
+  \apptocmd{\(}{\if@cc@is@final\ccaStructStart{Formula}\ccaAddPlacement{Inline}\fi}{}{\cca@patch@error\(}
+  \pretocmd{\)}{\if@cc@is@final\ccaStructEnd{Formula}\fi}{}{\cca@patch@error\)}
+  \apptocmd{\[}{\if@cc@is@final\if@cca@eqn@para\ccaVstructStart{P}\fi\ccaStructStart{Formula}\ccaAddPlacement{Block}\fi}{}{\cca@patch@error\[}
+  \pretocmd{\]}{\if@cc@is@final\ccaStructEnd{Formula}\if@cca@eqn@para\ccaVstructEnd{P}\fi\fi}{}{\cca@patch@error\]}
   \@ifpackageloaded{amsmath}{%
-    \pretocmd{\start@align}{\if@cca@eqn@para\ccaVstructStart{P}\fi
-      \ccaStructStart{Formula}\ccaAddPlacement{Block}}{}{\cca@patch@error\start@align}%
-    \apptocmd{\endalign}{\ccaStructEnd{Formula}%
-      \if@cca@eqn@para\ccaVstructEnd{P}\fi}{}{\cca@patch@error\endalign}%
-    \pretocmd{\mathdisplay}{\if@cca@eqn@para\ccaVstructStart{P}\fi
-      \ccaStructStart{Formula}\ccaAddPlacement{Block}}{}{\cca@patch@error\mathdisplay}%
-    \apptocmd{\endmathdisplay}{\ccaStructEnd{Formula}%
-      \if@cca@eqn@para\ccaVstructEnd{P}\fi}{}{\cca@patch@error\endmathdisplay}%
+    \pretocmd{\start@align}{\if@cc@is@final\if@cca@eqn@para\ccaVstructStart{P}\fi
+      \ccaStructStart{Formula}\ccaAddPlacement{Block}\fi}{}{\cca@patch@error\start@align}%
+    \apptocmd{\endalign}{\if@cc@is@final\ccaStructEnd{Formula}%
+      \if@cca@eqn@para\ccaVstructEnd{P}\fi\fi}{}{\cca@patch@error\endalign}%
+    \pretocmd{\mathdisplay}{\if@cc@is@final\if@cca@eqn@para\ccaVstructStart{P}\fi
+      \ccaStructStart{Formula}\ccaAddPlacement{Block}\fi}{}{\cca@patch@error\mathdisplay}%
+    \apptocmd{\endmathdisplay}{\if@cc@is@final\ccaStructEnd{Formula}%
+      \if@cca@eqn@para\ccaVstructEnd{P}\fi\fi}{}{\cca@patch@error\endmathdisplay}%
   }{}%
 }
 %    \end{macrocode}

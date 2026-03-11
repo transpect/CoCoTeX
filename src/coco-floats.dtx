@@ -1315,7 +1315,7 @@
 \def\ccf@addcontentsline{%
   \ccWhenComp{ListofEntry}{%
     \protected@write\@auxout
-      {\ccGobble\ccaProtect}%
+      {\ccGobble\ccaProtect\@cc@is@finalfalse}%
       {\string\@writefile{\ccf@cap@list@type}
         {\protect\ccContentsline
           {\ifnum\ccSubFloatCnt>\z@\ccIfAttr{\ccfCapType}{subfloat}{sub}{}\fi\ccfCapType}
