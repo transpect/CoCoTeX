@@ -334,7 +334,7 @@ local function intent(head)
       debug_log("Using profile %s", filename)
    end
    local iccstream = pdf.immediateobj("streamfile", filename, "/N " .. config.intent.components)
-   local nstr = "<</Type/OutputIntent /RegistryName(http://www.color.org) /S/GTS_PDFA1 /OutputCondition() /OutputConditionIdentifier (" .. config.intent.identifier .. ") /DestOutputProfile " .. iccstream .. " 0 R>>"
+   local nstr = "<</Type/OutputIntent /RegistryName(http://www.color.org) /Info (" .. config.intent.identifier .. ") /S/GTS_PDFA1 /OutputCondition() /OutputConditionIdentifier (" .. config.intent.identifier .. ") /DestOutputProfile " .. iccstream .. " 0 R>>"
    local intentobjnum = pdf.immediateobj(nstr)
    pdf.setcatalog( '/OutputIntents [ ' .. intentobjnum .. ' 0 R ]')
 end
