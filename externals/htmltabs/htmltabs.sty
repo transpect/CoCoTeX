@@ -2209,6 +2209,7 @@
 \def\ht@spewnotes{\if@savingnotes\else\global\HT@ftn\expandafter{\expandafter}\the\HT@ftn\fi}%
 \newbox\ht@footnotebox
 \long\def\ht@footnotetext#1{\global\setbox\ht@footnotebox\vbox{\unvbox\ht@footnotebox%
+    \ccaDisable
     \reset@font\footnotesize
     \interlinepenalty\interfootnotelinepenalty
     \splittopskip\footnotesep
