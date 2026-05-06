@@ -1,16 +1,6 @@
 ![GitHub Release](https://img.shields.io/github/v/release/transpect/CoCoTeX?include_prereleases) ![GitHub (Pre-)Release Date](https://img.shields.io/github/release-date-pre/transpect/CoCoTeX) ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/transpect/cocotex/total)
 
 > [!WARNING]  
-> This is a pre-release!
->
-> The end user interface is currently being refactored, so expect
-> code-breaking changes in the next few weeks! Active development
-> branch is [ally](https://github.com/transpect/CoCoTeX/tree/ally)!
->
-> Note that CoCoTeX from version 0.5.0 onwards needs a LaTeX
-> kernel from **2020/06/01** or later!
-
-> [!WARNING]  
 > The end-user documentation (`doc/manual.pdf`) is incomplete and to
 > be considered a Work in Progress!
 >
@@ -33,13 +23,13 @@ documentation) and the user manual for the CoCoTeX framework.
 CoCoTeX is a programming framework for (Lua)LaTeX While it is intended
 to be used with and has been developed parallel to le-tex's
 [xerif](https://github.com/transpect/xerif), it can be used
-stand-alone as a LaTeX package.
+stand-alone as a LaTeX package family.
 
 CoCoTeX is developed to "simplify" common requirements by various
 publishers like complex headings, floats with more than one caption,
-foreign language support, titlepages, etc. It adopts some principles
-from object-oriented programming like inheritance, mixins, and
-overloading of functionalities.
+foreign language support, titlepages, etc. It adopts some features
+from object-oriented programming like inheritance, polymorphism,
+mixins, and partial or complete overloading of functionalities.
 
 ## Installation ##
 
