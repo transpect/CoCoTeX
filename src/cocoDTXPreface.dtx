@@ -40,7 +40,7 @@
 \usepackage{newtxtext,newtxmath}
 \definecolor{link}{cmyk}{0.00,0.00,0.00,1.00}
 \definecolor{spot}{cmyk}{0.00,0.82,0.59,0.18}
-\definecolor{contcolor}{cmyk}{0.00,0.00,1.00,0.20}
+\definecolor{contcolor}{cmyk}{0.00,0.33,0.67,0.19}
 \definecolor{compcolor}{cmyk}{1.00,1.00,0.00,0.00}
 \definecolor{hookcolor}{cmyk}{1.00,0.00,1.00,0.00}
 \definecolor{propcolor}{cmyk}{0.09,0.90,0.00,0.15}
@@ -50,6 +50,15 @@
 \makeatletter
 \PageIndex
 \newdimen\LeftMarg \LeftMarg=2.5em\relax
+
+\RequirePackage{fontawesome}
+\def\ccDocSymbol#1{\ifvmode\leavevmode\fi\lower1\p@\hbox{#1}}
+\def\ccDocString#1#2#3{{\small\ttfamily\mybfseries\color{#1}\if!#2!\else#2\,\fi#3}}
+
+%%%%%%%%%%
+% Macros %
+%%%%%%%%%%
+
 \def\macro{\begingroup
    \catcode`\\12
    \catcode`\_11
@@ -64,9 +73,9 @@
   \let\saved@indexname\saved@macroname
   \ifhmode\par\fi
   \ifx\is@sub@m@cro@\relax
-    \submacrosection{\string#1}\ignorespaces
+    \PrintMacroName[50]{#1}\ignorespaces
   \else
-    \macrosection{\string#1}\ignorespaces
+    \PrintMacroName{#1}\ignorespaces
   \fi
   \@bsphack
   \begingroup
@@ -74,73 +83,24 @@
     \SpecialMainIndex{#1}\nobreak
   \endgroup
   \@esphack
+  \enskip
   \ignorespaces
 }
 \def\endmacro{\relax}
 
-\protected\def\PrintMacroName#1{{\ccDocString{spot!75}{}{\string#1}}}
+\protected\def\PrintMacroName{\@ifnextchar[\print@macro@name{\print@macro@name[75]}}%]
+\protected\def\print@macro@name[#1]#2{{\ccDocString{spot!#1}{}{\string#2}}}
+
+\def\UsageMacro#1{\PrintMacroName{#1}\SpecialMacroIndex{#1}}
 
 \def\DescriptionDomain#1{\def\description@domain{#1}}
 \DescriptionDomain{Generic}
+\def\str@generic{Generic}
+\def\print@domain{\ifx\description@domain\str@generic\else\space(\description@domain)\fi}
 
-\def\Component{\@ifnextchar[{\@component}{\@component[]}}%]
-\def\@component[#1]#2{%
-  \let\@argi\@empty
-  \if!#1!\else
-    \def\@argii{ (#1)}%
-  \fi
-  \componentsection{#2#1}%
-  \index[components]{#2\actualchar\string\verb\quotechar*\verbatimchar\string#2\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{main}}%
-  \ignorespaces
-  }%
-\let\endComponent\relax
-
-\def\@print@component#1#2{%
-  \let\@argii\@empty
-  \if!#2!\else
-    \def\@argii{ (#2)}%
-  \fi
-  {\ccDocString{compcolor!75}{\ComponentSymbol}{#1\@argii}}}%
-
-\RequirePackage{fontawesome}
-\def\ccDocSymbol#1{\ifvmode\leavevmode\fi\lower1\p@\hbox{#1}}
-\def\ccDocString#1#2#3{{\small\ttfamily\mybfseries\color{#1}\if!#2!\else#2\,\fi#3}}
-
-\def\ContainerSymbol{\ccDocSymbol\faCube}
-\def\ContainerString#1{\ccDocString{contcolor!75}{\ContainerSymbol}{#1}}
-
-\def\ComponentSymbol{\ccDocSymbol\faSignIn}
-\def\ComponentString#1{\ccDocString{compcolor!75}{\ComponentSymbol}{#1}}
-
-\def\PropertySymbol{\ccDocSymbol\faGear}
-\def\PropertyString#1{\ccDocString{propcolor!75}{\PropertySymbol}{#1}}
-
-\def\HookSymbol{\ccDocSymbol\faIndent}
-\def\HookString#1{\ccDocString{hookcolor!75}{\HookSymbol}{#1}}
-
-\def\TagSymbol{\ccDocSymbol\faTag}
-\def\TagString#1{\ccDocString{tagscolor!75}{\TagSymbol}{#1}}
-
-\def\AttrSymbol{\ccDocSymbol\faChain}
-\def\AttrString#1{\ccDocString{attrcolor!75}{\AttrSymbol}{#1}}
-
-\def\MacroString#1{\ccDocString{spot!75}{}{#1}}
-
-
-\def\DescribeComponent#1{\@print@component{#1}{}}
-\def\DescribeLabeledComp#1{\@print@component{#1}{LC}}
-\def\DescribeCountedComp#1{\@print@component{#1}{CC}}
-\def\DescribeGroupComp#1{\@print@component{#1}{GC}}
-\def\DescribeCollectionComp#1{\@print@component{#1}{CL}}
-\def\DescribeOverrideComp#1{\@print@component{#1}{OR}}
-\def\AlsoOverride#1{\index[components]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{main}}}
-
-\def\UsageMacro#1{\PrintMacroName{#1}\SpecialMacroIndex{#1}}
-\def\UsageComponent#1{%
-  \ccDocString{compcolor}{\ComponentSymbol}{#1}%
-  \index[components]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{usage}}}
-\def\UsageComp#1{\index[components]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{usage}}}
-\def\DescribeComp#1{\index[components]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{main}}}
+%%%%%%%%%%%%%
+% Arguments %
+%%%%%%%%%%%%%
 
 \newenvironment{ArgList}{%
   \ifhmode\par\vskip\parskip\fi
@@ -169,46 +129,132 @@
   \endgroup
   \let\is@opt\@undefined}
 
+
+%%%%%%%%%%%%%%
+% Components %
+%%%%%%%%%%%%%%
+
+\def\ComponentSymbol{\ccDocSymbol\faSignIn}
+\def\ComponentString#1{\ccDocString{compcolor!75}{\ComponentSymbol}{#1}}
+
+\def\Component{\@ifnextchar[{\@component}{\@component[]}}%]
+\def\@component[#1]#2{%
+  \par\vskip.5\baselineskip
+  \@print@component{#2}{#1}%
+  \index[components]{#2\actualchar\string\verb\quotechar*\verbatimchar\string#2\verbatimchar\print@domain\noexpand\doc@handleencap{main}}%
+  \enskip
+  \ignorespaces
+  }%
+\let\endComponent\relax
+
+\def\@print@component#1#2{%
+  \let\@argii\@empty
+  \if!#2!\else
+    \def\@argii{ (#2)}%
+  \fi
+  {\ccDocString{compcolor!75}{\ComponentSymbol}{#1\@argii}}}%
+
+
+\def\MacroString#1{\ccDocString{spot!75}{}{#1}}
+
+\def\DescribeComponent#1{\@print@component{#1}{}}
+\def\DescribeLabeledComp#1{\@print@component{#1}{LC}}
+\def\DescribeCountedComp#1{\@print@component{#1}{CC}}
+\def\DescribeGroupComp#1{\@print@component{#1}{GC}}
+\def\DescribeCollectionComp#1{\@print@component{#1}{CL}}
+\def\DescribeOverrideComp#1{\@print@component{#1}{OR}}
+\def\AlsoOverride#1{\index[components]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\print@domain\noexpand\doc@handleencap{main}}}
+
+\def\UsageComponent#1{%
+  \ccDocString{compcolor}{\ComponentSymbol}{#1}%
+  \index[components]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\print@domain\noexpand\doc@handleencap{usage}}}
+\def\UsageComp#1{\index[components]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\print@domain\noexpand\doc@handleencap{usage}}}
+\def\DescribeComp#1{\index[components]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\print@domain\noexpand\doc@handleencap{main}}}
+
+
+%%%%%%%%%%%%%%
+% Containers %
+%%%%%%%%%%%%%%
+
+\def\ContainerSymbol{\ccDocSymbol\faCube}
+\def\ContainerString#1{\ccDocString{contcolor!75}{\ContainerSymbol}{#1}}
 \def\DescribeContainer#1{%
-  \containersection{#1}%
+  \par\vskip.5\baselineskip
+  \ContainerString{#1}%
   \index[containers]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\noexpand\doc@handleencap{main}}%
+  \enskip
+  \ignorespaces
 }
 \def\UsageContainer#1{\ccDocString{contcolor}{\ContainerSymbol}{#1}\index[containers]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\noexpand\doc@handleencap{usage}}}
 
-\def\PrintProperty#1{{\ccDocString{propcolor!75}{\PropertySymbol}{#1}}}
+%%%%%%%%%%%%%%
+% Properties %
+%%%%%%%%%%%%%%
+
+\def\PropertySymbol{\ccDocSymbol\faGear}
+\def\PropertyString#1{\ccDocString{propcolor!75}{\PropertySymbol}{#1}}
+
 \def\Property#1#2{% #1 is the name, #2 is the data type
-  \propertysection{#1}{\ttfamily\footnotesize\mybfseries #2}\enskip%
+  \par\vskip.5\baselineskip
+  \PropertyString{#1}\enskip{\ttfamily\footnotesize\mybfseries #2}%
   \@bsphack
-  \index[properties]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{main}}%
-  \@esphack\ignorespaces
+  \index[properties]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\print@domain\noexpand\doc@handleencap{main}}%
+  \@esphack
+  \enskip
+  \ignorespaces
 }
 \let\endProperty\relax
 
+\def\DescribeProperty#1{\index[properties]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\print@domain\noexpand\doc@handleencap{main}}}
+\def\UsageProperty#1{\index[properties]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\print@domain\noexpand\doc@handleencap{usage}}}
+\def\UsageProp#1{\PropertyString{#1}\UsageProperty{#1}}
+
+%%%%%%%%%%%%%%
+% Attributes %
+%%%%%%%%%%%%%%
+
+\def\AttrSymbol{\ccDocSymbol\faChain}
+\def\AttrString#1{\ccDocString{attrcolor!75}{\AttrSymbol}{#1}}
 
 \def\PrintAttribute#1{\ccDocString{attrcolor!75}{\AttrSymbol}{#1}}
 \def\Attribute#1#2{%
-  \attrsection{#1}{\ttfamily\footnotesize\mybfseries #2}\enskip%
+  \par\vskip.5\baselineskip
+  \PrintAttribute{#1}\enskip{\ttfamily\footnotesize\mybfseries #2}%
   \@bsphack
-  \index[attributes]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{main}}%
+  \index[attributes]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\print@domain\noexpand\doc@handleencap{main}}%
   \@esphack
+  \enskip
   \ignorespaces
-  }
+}
 \let\endAttribute\relax
 
-\def\DescribeProperty#1{\index[properties]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{main}}}
-\def\UsageProperty#1{\index[properties]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\space(\description@domain)\noexpand\doc@handleencap{usage}}}
-\def\UsageProp#1{\PrintProperty{#1}\UsageProperty{#1}}
+%%%%%%%%
+% Tags %
+%%%%%%%%
+
+\def\TagSymbol{\ccDocSymbol\faTag}
+\def\TagString#1{\ccDocString{tagscolor!75}{\TagSymbol}{#1}}
 
 \def\DescribeTagS#1{\ccDocString{tagscolor}{\TagSymbol}{<#1>}\index[tags]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\noexpand\doc@handleencap{usage}}}
 \def\DescribeTagE#1{\ccDocString{tagscolor}{\TagSymbol}{</#1>}\index[tags]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\noexpand\doc@handleencap{usage}}}
 \def\DescribeTag#1{\ccDocString{tagscolor}{\TagSymbol}{<#1/>}\index[tags]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\noexpand\doc@handleencap{usage}}}
 
+%%%%%%%%%
+% Hooks %
+%%%%%%%%%
+
+\def\HookSymbol{\ccDocSymbol\faIndent}
+\def\HookString#1{\ccDocString{hookcolor!75}{\HookSymbol}{#1}}
 
 \def\DescribeHook#1{%
-  \hooksection{#1}\enskip%
+  \HookString{#1}\enskip%
   \index[hooks]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\noexpand\doc@handleencap{main}}%
 }
 \def\UsageHook#1{\ccDocString{hookcolor}{\HookSymbol}{#1}\index[hooks]{#1\actualchar\string\verb\quotechar*\verbatimchar\string#1\verbatimchar\noexpand\doc@handleencap{usage}}}
+
+%%%%%%%%%%%%
+% Listings %
+%%%%%%%%%%%%
 
 \lstset{%
   basicstyle={\ttfamily\color{spot}},
@@ -251,6 +297,8 @@
 \newunicodechar{ܝ}{?}
 \newunicodechar{ܝ}{?}
 \newunicodechar{ܐ}{?}
+
+
 \let\macrocode\relax
 \newcount\myCodeline \myCodeline\z@
 \lstnewenvironment{macrocode}[1][]{%
@@ -509,34 +557,6 @@
   {-.5em}%
   {\small\mathversion{bold}\titlefont\color{spot!75}}}
 
-\newcommand\macrosection{\@startsection{macrosec}{99}{\z@}%
-  {0.5\baselineskip}%
-  {-.5em}%
-  {\small\ttfamily\mybfseries\color{spot!75}}*}
-\newcommand\submacrosection{\@startsection{macrosec}{99}{\z@}%
-  {0.5\baselineskip}%
-  {-.5em}%
-  {\small\ttfamily\mybfseries\color{spot!50}}*}
-\newcommand\propertysection{\@startsection{propsec}{99}{\z@}%
-  {1sp}%
-  {-.5em}%
-  {\small\ttfamily\mybfseries\color{propcolor!75}}*}
-\newcommand\componentsection{\@startsection{compsec}{99}{\z@}%
-  {0.5\baselineskip}%
-  {-.5em}%
-  {\small\ttfamily\mybfseries\color{compcolor!75}}*}
-\newcommand\containersection{\@startsection{contsec}{99}{\z@}%
-  {0.5\baselineskip}%
-  {-.5em}%
-  {\small\ttfamily\mybfseries\color{contcolor!75}}*}
-\newcommand\hooksection{\@startsection{hooksec}{99}{\z@}%
-  {0.5\baselineskip}%
-  {-.5em}%
-  {\small\ttfamily\mybfseries\color{hookcolor!75}}*}
-\newcommand\attrsection{\@startsection{attrsec}{99}{\z@}%
-  {0.5\baselineskip}%
-  {-.5em}%
-  {\small\ttfamily\mybfseries\color{attrcolor!75}}*}
 
 \lstdefinestyle{macrocode}{language=[AlLaTeX]TeX,
   keepspaces=false,                   % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
