@@ -698,6 +698,37 @@
         \fi
       }{}{\cca@patch@error\hyper@linkurl}
 %    \end{macrocode}
+% The same for links to external files.
+%
+% Note that URLs that do \textit{not} start with a protocoll (e.g.,
+% \lstinline{ftp://} or \lstinline{https://}) are treated as file
+% links by hyperref!
+%    \begin{macrocode}
+    \patchcmd\hyper@linkfile
+      {\pdfstartlink}
+      {\Hy@pstringdef\@argii{#2}%
+        \ccaStructStart{Link}%
+        \ifx\ccAltOverride\@undefined
+          \ccaAddAltText{#2}%
+        \else
+          \ccaAddAltText{\ccAltOverride}%
+          \global\let\ccAltOverride\@undefined
+        \fi
+        \edef\@ltpdfmy@parent{\ccaGetStructParent}%
+       \pdfstartlink}
+      {}{\cca@patch@error\hyper@linkfile}
+    \patchcmd\hyper@linkfile
+      {/C[\@filebordercolor]%
+        \fi
+      }
+      {/C[\@urlbordercolor]%
+        \fi
+        \ifx\ccaGetStructParent\cc@no@ccaGetStructParent\else
+          /StructParent \@ltpdfmy@parent%
+          /Contents(\@argii)
+        \fi
+      }{}{\cca@patch@error\hyper@linkfileX}
+%    \end{macrocode}
 % finally, we patch the end tag for the link node into the
 % \lstinline{\close@pdflink} macro:
 %    \begin{macrocode}
