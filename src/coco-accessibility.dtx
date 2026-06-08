@@ -887,21 +887,32 @@
   \def\Ginclude@graphics#1{\if@cc@is@final\ccaFigureStart{}\fi\ltx@Ginclude@graphics{#1}\if@cc@is@final\ccaFigureEnd{}\fi}%
 }
 %    \end{macrocode}
-%
+% The following code is some markup injected into the
+% \lstinline{\Ginclude@@pdftex} macro. We store the patch code in a
+% macro because we need to encapsulate it in two different ways
+% depending on whether or not the \lstinline{htmltabs} package is
+% loaded at the begining of the document.
 %    \begin{macrocode}
-\apptocmd\Ginclude@@pdftex{\if@cc@is@final%
+\def\cca@Ginclude@patch{\if@cc@is@final%
   \def\@tempa{!}%
   \ccaAddFigure{\Gin@llx}{\Gin@lly}{\Gin@urx}{\Gin@ury}
     {\ifx\Gin@scalex\@tempa\else \Gin@scalex\fi}
     {\ifx\Gin@scaley\@tempa\else \Gin@scaley\fi}
-    {\ifGin@clip true\else false\fi}\fi}%rwi/rhi
-    {}{}
+    {\ifGin@clip true\else false\fi}\fi}
+%    \end{macrocode}
+% Now, we can prepare the htmltabs hooks. We need to be careful about
+% when tagging is written into the pdf. Only at the very last pass of
+% each table, we may inject tagging structures.
+%    \begin{macrocode}
 \AtBeginDocument{%
   \@ifpackageloaded{htmltabs}{%
     \let\ltx@ht@valign@box\ht@valign@box
-    \def\ht@valign@box{\if@ht@final@render\@cc@is@finaltrue\fi\ltx@ht@valign@box}
+    \def\ht@valign@box{\if@ht@final@render\@cc@is@finaltrue\fi\ltx@ht@valign@box}%
     \let\ltx@ht@RenderCell\ht@RenderCell
-    \def\ltx@ht@RenderCell{\@cc@is@finalfalse\ltx@ht@RenderCell}}{}}
+    \def\ltx@ht@RenderCell{\@cc@is@finalfalse\ltx@ht@RenderCell}%
+    \apptocmd\Ginclude@@pdftex{\if@ht@final@render\cca@Ginclude@patch\fi}{}{}}
+  {\apptocmd\Ginclude@@pdftex{\cca@Ginclude@patch}{}{}}%
+}
 %    \end{macrocode}
 %
 %
