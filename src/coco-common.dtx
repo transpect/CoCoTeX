@@ -236,6 +236,22 @@
   {
     \edef #1 { \text_purify:n { #2 } }
   }
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ccCalcBaselineOffset} calculates the offset of a
+%   dimension to a full multiple of baselineskip.
+%   \begin{ArgList}
+%   \item[1] csname of the dimension register where the offset is stored
+%   \item[2] height of which the baseline offset is calculated
+%   \end{ArgList}
+%    \begin{macrocode}
+\DeclareDocumentCommand{\ccCalcBaselineOffset}{ m m }{%
+  \fp_set:Nn \l_tmpa_fp { 1 - ( ( ( #2 ) / \baselineskip ) - floor( ( #2 ) / \baselineskip ) ) }%
+  \dim_gset:Nn #1 {\fp_compare:nTF
+    {\l_tmpa_fp = 1.0}
+    { \z@ }
+    { \fp_to_dim:n { \l_tmpa_fp * \baselineskip  }}}%
+}
 \ExplSyntaxOff
 %    \end{macrocode}
 % \end{macro}
