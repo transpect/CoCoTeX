@@ -356,7 +356,22 @@
 %   keywords.
 %    \begin{macrocode}
 \def\cct@title@process@bkk{%
-  \cct@write@pdf@meta@list{pdfkeywords}{Keywords}{\ccWhenComp{Keywords}{\ccUseComp{Keywords}}}{\ccaAddKeyword}{\ccUseProperty{keywords-sep}}%
+  \begingroup
+    \cct@relax@textcmd
+    \cct@write@pdf@meta@list{pdfkeywords}{Keywords}{\ccWhenComp{Keywords}{\ccUseComp{Keywords}}}{\ccaAddKeyword}{\ccUseProperty{keywords-sep}}%
+  \endgroup
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\cct@relax@textcmd} is a helper macro to disable text
+%   commands.
+%    \begin{macrocode}
+\def\cct@relax@textcmd{%
+  \let\textit\relax
+  \let\textbf\relax
+  \let\textsf\relax
+  \let\textmd\relax
+  \let\textrm\relax
 }
 %    \end{macrocode}
 % \end{macro}
