@@ -1,19 +1,12 @@
 % \chapter{coco-lists.dtx}\DescriptionDomain{List}
 %    \begin{macrocode}[numbers=none,gobble=1]
-%<*lists>
+%<*list>
 %    \end{macrocode}
 %
 % This module provides handlers for list-like environments like item
-% lists, enumerations, glossaries and descriptions.
+% lists, enumerations, glossaries and descriptions. List containers
+% are derived from the more abstract Block container.
 %
-% \textbf{Note:} The \lstinline{coco-lists} module diverges somewhat
-% from the other {\CoCoTeX} modules insofar as that its main Container
-% does not follow the \CoCoTeX's usual ``collect all--process later''
-% approach, but all Properties are processed at the beginning of each
-% Container's instances and the contents are processed as they are
-% parsed by the \lstinline{\LaTeX} interpreter, just like ``reguar''
-% {\LaTeX} lists. Configuration of lists, however, follows the
-% {\CoCoTeX} playbook.
 %
 % \section{Preamble}
 %
@@ -26,7 +19,7 @@
 \NeedsTeXFormat{LaTeX2e}[]
 \ProvidesPackage{coco-lists}
     [\filedate \fileversion CoCoTeX lists module]
-\RequirePackage{coco-common}
+\RequirePackage{coco-block}
 %    \end{macrocode}
 %
 %
@@ -133,6 +126,7 @@
 % \subsection{List Properties}
 %
 %    \begin{macrocode}
+  \ccInherit{Properties}{Block}%
   \ccDeclareType{Properties}{%
 %    \end{macrocode}
 %
@@ -142,10 +136,7 @@
 %   beginning of a (nested) list.
 %    \begin{macrocode}
     \ccSetProperty{before-list}{% at the very beginning of each (nested) list
-      \if@noskipsec \leavevmode \fi
-      \ifvmode\else
-        \unskip \par
-      \fi
+      \ccUseProperty{before-block}%
 %    \end{macrocode}
 %   \DescribeTagS{L} is the opening List tag
 %    \begin{macrocode}
@@ -166,39 +157,20 @@
 %
 % \subsubsection{List Margins}
 %
-% \begin{Property}{margin-top}{<skip>} is the vertical skip at the
-%   beginning of each List instance.
+% The default values for the Properties \UsageProperty{margin-top},
+% \UsageProperty{margin-bottom}, \UsageProperty{margin-left}, and
+% \UsageProperty{margin-right} from the Block container are
+% overridden:
 %    \begin{macrocode}
-    %% list margins
     \ccSetProperty{margin-top}{\z@}%
-%    \end{macrocode}
-% \end{Property}
-% \begin{Property}{margin-bottom}{<skip>} is the vertical skip at the
-%   end of each List instance.
-%    \begin{macrocode}
-    \ccSetProperty{margin-bottom}{\z@}% vertical space before the list.
-%    \end{macrocode}
-% \end{Property}
-% \begin{Property}{margin-left}{[auto|<skip>]} is the horizontal space
-%   to the left of each list instance, from left boundary of the page
-%   area.  \lstinline{auto} means that the left margin is set to the
-%   width of widest label + \UsageProp{prev-margin-left}. The value is
-%   passed through \lstinline{\dimexpr}, so basic arithmatic is
-%   allowed.
-%    \begin{macrocode}
+    \ccSetProperty{margin-bottom}{\z@}%
     \ccSetProperty{margin-left}{\csname leftmargin\@roman\cclCurDepth\endcsname-\ccUseProperty{label-sep}+\ccUseProperty{prev-margin-left}}%
+    \ccSetProperty{margin-right}{\z@}% horizontal space to the right of each list item
 %    \end{macrocode}
-% \end{Property}
 % \begin{Property}{max-label-width}{<dimen>} is the maximum space reserved
 %   for a list item's label.
 %    \begin{macrocode}
     \ccSetProperty{max-label-width}{.33\textwidth}%
-%    \end{macrocode}
-% \end{Property}
-% \begin{Property}{margin-right}{<skip>} is the right margin of the
-%   list instance.
-%    \begin{macrocode}
-    \ccSetProperty{margin-right}{\z@}% horizontal space to the right of each list item
 %    \end{macrocode}
 % \end{Property}
 %
@@ -209,13 +181,6 @@
 %   advanced by the value of the \UsageProp{par-skip} Property.
 %    \begin{macrocode}
     \ccSetProperty{item-sep}{\z@}%
-%    \end{macrocode}
-% \end{Property}
-% \begin{Property}{after-indent}{[true|false]} determins whether the
-%   text paragraph after the (top-level) list is indented
-%   (\lstinline{true}) or not (\lstinline{false}).
-%    \begin{macrocode}
-    \ccSetProperty{after-indent}{false}%
 %    \end{macrocode}
 % \end{Property}
 % \begin{Property}{at-begin-item-body}{<any>} is expanded right at the
@@ -287,24 +252,6 @@
         \cclItemIndent-\ccUseProperty{indent}%
       \fi
     }%
-%    \end{macrocode}
-% \end{Property}
-% \begin{Property}{par-indent}{<skip>} is the indent of the first line
-%   of a *new* paragraph inside a list item
-%    \begin{macrocode}
-    \ccSetProperty{par-indent}{\parindent}%
-%    \end{macrocode}
-% \end{Property}
-% \begin{Property}{par-fill-skip}{<skip>} is the skip at the end of
-%   the last line of each paragraph inside a list item
-%    \begin{macrocode}
-    \ccSetProperty{par-fill-skip}{\@flushglue}%
-%    \end{macrocode}
-% \end{Property}
-% \begin{Property}{par-skip}{<dimen>} vertical space between two
-%   adjacent paragraphs inside the same List item
-%    \begin{macrocode}
-    \ccSetProperty{par-skip}{\z@}%
 %    \end{macrocode}
 % \end{Property}
 %
@@ -389,9 +336,11 @@
       \ccUseProperty{label-box}%
       \hskip\ccUseProperty{label-sep}%
     }%
-  }%
 %    \end{macrocode}
 % \end{Property}
+%    \begin{macrocode}
+  }%
+%    \end{macrocode}
 %
 % \subsection{List Components}
 %
@@ -405,7 +354,7 @@
 % \end{Component}
 %    \begin{macrocode}
   }%
-  \ccDeclareEnv{cc@list}{endcc@list}%
+  \ccDeclareEnv{\cc@list}{\endcc@list}%
 }
 %    \end{macrocode}
 %
@@ -611,7 +560,7 @@
 % \subsection{The List Environment}
 %
 % List environments have the same name as their respective containers
-% (preixed by the \lstinline{\ccPrefix}). However, they all call the
+% (prefixed by the \lstinline{\ccPrefix}). However, they all call the
 % low-level macros \lstinline{\cc@list} and \lstinline{\endcc@list}.
 %
 % \begin{macro}{\cc@list} is begin macro for the generalized coco-list
@@ -673,8 +622,8 @@
 % The exact values of the margins are calculated.
 %    \begin{macrocode}
   \cclCalculateMarginLeft%
-  \cclCalculateVMargin{top}%
-  \cclCalculateVMargin{bottom}%
+  \ccbCalculateVMargin{top}%
+  \ccbCalculateVMargin{bottom}%
 %    \end{macrocode}
 % \begin{macro}{\Item} is a used to separate the single items of a
 %   list.
@@ -750,25 +699,7 @@
 % \UsageProp{after-indent} Property.
 %    \begin{macrocode}
   \ifnum\cclCurDepth=\z@\relax
-    \ccIfPropVal{after-indent}{false}{%
-      \global\@afterindentfalse
-      \aftergroup\cc@afterbox}{}%
-  \fi
-}
-%    \end{macrocode}
-% \end{macro}
-% \begin{macro}{\cclCalculateVMargin} generates a macro that sets the
-%   internal margin
-%   Properties\DescribeProperty{int-margin-top}\DescribeProperty{int-margin-bottom}%
-%   \UsageProperty{margin-top}\UsageProperty{margin-bottom} of the
-%   (nested) list. \#1 is the orientation (\lstinline{top} or
-%   \lstinline{bottom}).
-%    \begin{macrocode}
-\def\cclCalculateVMargin#1{%
-  \ifdim\ccUseProperty{margin-#1}=\z@\relax
-    \ccSetProperty{int-margin-#1}{\relax}%
-  \else
-    \ccSetProperty{int-margin-#1}{\addvspace{\ccUseProperty{margin-#1}}}%
+    \ccUseProperty{after-block}%
   \fi
 }
 %    \end{macrocode}
@@ -1148,5 +1079,5 @@
 \fi
 %    \end{macrocode}
 %    \begin{macrocode}[numbers=none,gobble=1]
-%</lists>
+%</list>
 %    \end{macrocode}

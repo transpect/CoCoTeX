@@ -1,0 +1,208 @@
+% \chapter{coco-block.dtx}\DescriptionDomain{Block}
+%    \begin{macrocode}[numbers=none,gobble=1]
+%<*block>
+%    \end{macrocode}
+%
+% This module provides handlers for generic block elements. Blocks are
+% typographical elements that are optically separated from the main
+% text body, like framed boxes, quotes, transcripts, etc. This module
+% provides the abstract base container for those elements.
+%
+% \textbf{Note:} The \lstinline{coco-block} modules diverge somewhat
+% from the other {\CoCoTeX} modules insofar as that Container derived
+% from Block do not follow the \CoCoTeX's usual ``collect all--process
+% later'' approach, but all Properties are processed at the beginning
+% of each Container's instances and the contents are processed as they
+% are parsed by the \lstinline{\LaTeX} interpreter. Configuration of
+% block sub-containers, however, follow the {\CoCoTeX} playbook.
+%
+%
+% \section{Preamble}
+%
+%    \begin{macrocode}
+%%
+%% Base style for \textit{xerif} block elements.
+%%
+%% Maintainer: p.schulz@le-tex.de
+%%
+\NeedsTeXFormat{LaTeX2e}[]
+\ProvidesPackage{coco-block}
+    [\filedate \fileversion CoCoTeX block module]
+\RequirePackage{coco-block}
+%    \end{macrocode}
+%
+%
+% \section{The Abstract Block Container}
+%
+% \DescribeContainer{Block} is the most abstract Container for all
+% block elements.
+%    \begin{macrocode}
+\ccDeclareContainer{Block}{%
+%    \end{macrocode}
+%
+%
+% \subsection{Block Properties}
+%
+% The common properties of block elements
+%    \begin{macrocode}
+  \ccDeclareType{Properties}{%
+%    \end{macrocode}
+%
+%
+% \subsubsection{Margins}
+%
+% Margins are the spaces outside of the block element.
+%
+% \begin{Property}{margin-top}{<skip>} is the vertical skip at the
+%   beginning of each Block instance.
+%    \begin{macrocode}
+    \ccSetProperty{margin-top}{\z@}%
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{margin-bottom}{<skip>} is the vertical skip at the
+%   end of each Block instance.
+%    \begin{macrocode}
+    \ccSetProperty{margin-bottom}{\z@}% vertical space before the list.
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{margin-left}{[auto|<skip>]} is the horizontal space
+%   to the left of each block instance, from the left boundary of the
+%   page area. The value is passed through \lstinline{\dimexpr}, so
+%   basic arithmatic is allowed.
+%    \begin{macrocode}
+    \ccSetProperty{margin-left}{1em}%
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{margin-right}{<skip>} is the right margin of the
+%   list instance.
+%    \begin{macrocode}
+    \ccSetProperty{margin-right}{1em}% horizontal space to the right of each list item
+%    \end{macrocode}
+% \end{Property}
+%
+%
+% \subsubsection{Paragraph Control}
+%
+% \begin{Property}{par-indent}{<skip>} is the indent of the first line
+%   of a *new* paragraph inside a block instance
+%    \begin{macrocode}
+    \ccSetProperty{par-indent}{\parindent}%
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{par-fill-skip}{<skip>} is the skip at the end of
+%   the last line of each paragraph inside a block instance
+%    \begin{macrocode}
+    \ccSetProperty{par-fill-skip}{\@flushglue}%
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{par-skip}{<dimen>} vertical space between two
+%   adjacent paragraphs inside the block element
+%    \begin{macrocode}
+    \ccSetProperty{par-skip}{\z@}%
+%    \end{macrocode}
+% \end{Property}
+%
+%
+% \subsubsection{Formatting}
+%
+% \begin{Property}{block-format}
+%    \begin{macrocode}
+    \ccSetProperty{block-format}{%
+      \ccUseProperty{int-margin-top}%
+    }%
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{before-block} is applied at the very beginning of
+%   a~Block instance.
+%    \begin{macrocode}
+    \ccSetProperty{before-block}{%
+      \if@noskipsec \leavevmode \fi
+      \ifvmode\else
+        \unskip \par
+      \fi
+    }
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{after-block} is applied at the very end of a~Block
+%   instance.
+%    \begin{macrocode}
+    \ccSetProperty{after-block}{%
+      \ccIfPropVal{after-indent}{false}{%
+        \global\@afterindentfalse
+        \aftergroup\cc@afterbox}{}%
+    }
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{after-indent}{[true|false]} determines whether the
+%   text paragraph after the (top-level) block element is indented
+%   (\lstinline{true}) or not (\lstinline{false}).
+%    \begin{macrocode}
+    \ccSetProperty{after-indent}{false}%
+%    \end{macrocode}
+% \end{Property}
+%    \begin{macrocode}
+  }% /ccDeclareType{Properties}
+  \ccDeclareEnv{cc@block}{endcc@block}%
+}% /ccDeclareContainer{Block}
+%    \end{macrocode}
+%
+%
+%  \section{The Generic Block Environment}
+%
+% \begin{macro}{\cc@block} is called at the beginnning of the internal
+%   block environment.
+%    \begin{macrocode}
+\long\def\cc@block{\cc@opt@empty\@cc@block}
+\long\def\@cc@block[#1]{%
+%    \end{macrocode}
+% Preparing the block parameters
+%    \begin{macrocode}
+  \ccbCalculateVMargin{top}%
+  \ccbCalculateVMargin{bottom}%
+%    \end{macrocode}
+% printing the block
+%    \begin{macrocode}
+  \ccUseProperty{before-block}%
+  \ccUseProperty{int-margin-top}%
+  \leftskip\dimexpr\ccUseProperty{margin-left}\relax%
+  \rightskip\dimexpr\ccUseProperty{margin-right}\relax%
+  \ccUseProperty{block-format}%
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\endcc@block} is called at end of the internal block
+%   environment.
+%    \begin{macrocode}
+\long\def\endcc@block{%
+  \ccUseProperty{int-margin-bottom}%
+  \ccUseProperty{after-block}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+%
+% \section{Helper Macros}
+%
+% \begin{macro}{\ccbCalculateVMargin} generates a macro that sets the
+%   internal margin
+%   Properties\DescribeProperty{int-margin-top}\DescribeProperty{int-margin-bottom}%
+%   \UsageProperty{margin-top}\UsageProperty{margin-bottom} of the
+%   (nested) block element. \#1 is the orientation (\lstinline{top} or
+%   \lstinline{bottom}).
+%    \begin{macrocode}
+\def\ccbCalculateVMargin#1{%
+\message{^^J===> #1, \csmeaning{cc@\cc@cur@cont @margin-#1}}
+  \ifdim\ccUseProperty{margin-#1}=\z@\relax
+    \ccSetProperty{int-margin-#1}{\relax}%
+  \else
+    \ccSetProperty{int-margin-#1}{\addvspace{\ccUseProperty{margin-#1}}}%
+  \fi
+}
+%    \end{macrocode}
+% \end{macro}
+%
+%
+%
+%    \begin{macrocode}[numbers=none,gobble=1]
+%</block>
+%    \end{macrocode}

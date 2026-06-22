@@ -1,0 +1,124 @@
+% \chapter{coco-transcript.dtx}\DescriptionDomain{List}
+%    \begin{macrocode}[numbers=none,gobble=1]
+%<*transcript>
+%    \end{macrocode}
+%
+% This module provides handlers transcripts, i.\,e., quotations of
+% recorded speech.
+%
+%
+% \section{Preamble}
+%
+%    \begin{macrocode}
+%%
+%% Common document class for \textit{xerif} projects.
+%%
+%% Maintainer: p.schulz@le-tex.de
+%%
+\NeedsTeXFormat{LaTeX2e}[]
+\ProvidesPackage{coco-transcript}
+    [\filedate \fileversion CoCoTeX transcript module]
+\RequirePackage{coco-block}
+%    \end{macrocode}
+%
+%
+% \subsection{Package Options}\label{sec:coco-lists:options}
+%
+%    \begin{macrocode}
+\ExplSyntaxOn
+\keys_define:nn { cocotex/transcript }
+{
+}
+\ProcessKeyOptions[cocotex/transcript]
+\ExplSyntaxOff
+%    \end{macrocode}
+%
+% \section{The Transcript Container}
+%
+% \DescribeContainer{Transcript} is a Container for transcript block
+% elements. It inherits Properties from the Block container.
+%    \begin{macrocode}
+\ccDeclareContainer{Transcript}{%
+  \ccInherit{Properties}{Block}%
+  \ccDeclareType{Properties}{%
+%    \end{macrocode}
+% 
+%    \begin{macrocode}
+    \ccSetProperty{before-speaker}{}%
+    \ccSetProperty{speaker-face}{}%
+    \ccSetProperty{after-speaker}{}%
+    \ccSetProperty{speaker-format}{%
+      \ccUseProperty{before-speaker}%
+      \bgroup
+        \ccUseProperty{speaker-face}%
+        \ccUseComp{Speaker}%
+        \ccUseProperty{after-speaker}%
+      \egroup
+    }%
+%    \end{macrocode}
+% 
+%    \begin{macrocode}
+    \ccSetProperty{before-line}{}%
+    \ccSetProperty{line-face}{}%
+    \ccSetProperty{after-line}{}%
+    \ccSetProperty{line-format}{%
+      \ccUseProperty{before-line}%
+      \bgroup
+        \ccUseProperty{line-face}\ccUseComp{Line}%
+        \ccUseProperty{after-line}%
+      \egroup
+    }%
+%    \end{macrocode}
+% 
+%    \begin{macrocode}
+    \ccSetProperty{before-transcript-line}{\ifvmode\else\par\fi}%
+    \ccSetProperty{after-transcript-line}{\par}%
+    \ccSetProperty{speaker-sep}{\enskip}%
+    \ccSetProperty{transcript-format}{%
+      \ccUseProperty{before-transcript-line}%
+      \ccIfCompEmpty{Speaker}{}{%
+        \ccUseProperty{speaker-format}%
+        \ccUseProperty{speaker-sep}}%
+      \ccUseProperty{line-format}%
+      \ccUseProperty{after-transcript-line}%
+    }%
+    \ccSetProperty{margin-right}{1em\@plus 1fil}
+%    \end{macrocode}
+%    \begin{macrocode}
+  }%
+  \ccDeclareType{Components}{%
+    \ccDeclareComponent{Speaker}%
+    \ccDeclareComponent{Line}%
+  }%
+  \ccDeclareEnv{\cc@transcript}{\endcc@transcript}%
+}
+%    \end{macrocode}
+% 
+%    \begin{macrocode}
+\long\def\cc@transcript{\cc@opt@empty\@cc@transcript}
+\long\def\@cc@transcript[#1]{%
+%    \end{macrocode}
+% \begin{macro}{\ccTranscriptLine}
+%   \begin{ArgList}
+%     \item[1] Speaker
+%     \item[2] Dialogue line(s)
+%   \end{ArgList}
+%    \begin{macrocode}
+  \expandafter\long\expandafter\def\csname\ccPrefix TranscriptLine\endcsname{\cc@opt@empty\cc@transcript@line}%
+  \long\def\cc@transcript@line[##1]##2{%
+    \ccComponent{Speaker}{##1}%
+    \ccComponent{Line}{##2}%
+    \ccUseProperty{transcript-format}%
+  }%
+%    \end{macrocode}
+% \end{macro}
+%    \begin{macrocode}
+  \ccEvalType[\cc@cur@cont]{Properties}%
+  \@cc@block[#1]%
+}
+\long\def\endcc@transcript{%
+  \endcc@block
+}
+%    \begin{macrocode}[numbers=none,gobble=1]
+%</transcript>
+%    \end{macrocode}
