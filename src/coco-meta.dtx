@@ -190,7 +190,21 @@
 \def\ccDeclareRole{\cc@opt@second\cc@declare@role}%
 \def\cc@declare@role[#1]#2{%
   \ccDeclareComponentGroup[%
-    {\ccDeclareAttributeHandler*{corresp}{\ccSetProperty{is-corresp}{true}}}%
+%    \end{macrocode}
+% \begin{Attribute}{corresp}{} marks the Role member as the main
+%   contact. It locally sets a Property \UsageProperty{is-corresp} to
+%   a value true.
+%    \begin{macrocode}
+    \ccDeclareAttributeHandler*{corresp}{\ccSetProperty{is-corresp}{true}}%
+%    \end{macrocode}
+% \end{Attribute}
+% \begin{Attribute}{deceased}{} marks the Role member as deceased. It
+%   sets an internal Property \UsageProperty{is-deceased}.
+%    \begin{macrocode}
+    \ccDeclareAttributeHandler*{deceased}{\ccSetProperty{is-deceased}{true}}%
+%    \end{macrocode}
+% \end{Attribute}
+%    \begin{macrocode}
   ]{#2}{%
 %    \end{macrocode}
 %
@@ -718,20 +732,12 @@
 %   generated.
 %    \begin{macrocode}
   \ccSetProperty{role-full-name-format}{%
-    \if\ccUseComp{Honorific}\relax
-    \else
-      \ccUseComp{Honorific}\space
-    \fi
+    \ccWhenComp{Honorific}{\ccUseComp{Honorific}\space}%
     \ccUseComp{FirstName}\space
-    \if\ccUseComp{MidName}\relax
-    \else
-      \ccUseComp{MidName}\space
-    \fi
+    \ccWhenComp{MidName}{\ccUseComp{MidName}\space}%
     \ccUseComp{LastName}%
-    \if\ccUseComp{Lineage}\relax
-    \else
-      \space\ccUseComp{Lineage}%
-    \fi%
+    \ccWhenComp{Lineage}{\space\ccUseComp{Lineage}}%
+    \ccWhenProp{is-deceased}{\ccUseProperty{deceased-mark}}\relax%
   }%
 %    \end{macrocode}
 % \end{Property}
@@ -852,6 +858,12 @@
 %   Component.
 %    \begin{macrocode}
   \ccSetProperty{corresp-sep}{,\space}%
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{deceased-mark}{<any>} is the default marker for
+%   Role member that are flagged as deceased.
+%    \begin{macrocode}
+  \ccSetProperty{deceased-mark}{\textsuperscript{\dagger}}%
 %    \end{macrocode}
 % \end{Property}
 %
