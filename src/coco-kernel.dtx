@@ -446,6 +446,20 @@
   \ignorespaces}
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{\ccInheritTo} inherits Types from a given Container
+%   into another given Container. It is a user-friendly interface for
+%   the generic \UsageMacro{\cc@do@inherit} macro.
+%   \begin{ArgList}
+%   \item[1]is a comma-separated list of Types that should be
+%     inherited
+%   \item[2]is a comma-separated list of Container names which the
+%     Types should be inherited from
+%   \item[3] is the target container
+%   \end{ArgList}
+%    \begin{macrocode}
+\def\ccInheritTo#1#2#3{\cc@inherit{#1}{#2}{#3}}
+%    \end{macrocode}
+% \end{macro}
 % \end{macro}
 %
 % \section{Components}
@@ -769,11 +783,7 @@
 \def\ccDeclareComponentGroup{\cc@opt@empty\cc@declare@component@group}%
 \def\cc@declare@component@group[#1]#2#3{%
   \csnumgdef{cc#2Cnt}{\z@}%
-  \def\@argi{#1}\ifx\@argi\@empty
-    \csgdef{cc@type@Attributes@\cc@cur@cont @cc#2}{}%
-  \else
-    \csgappto{cc@type@Attributes@\cc@cur@cont @cc#2}{#1}%
-  \fi
+  \csgdef{cc@type@Attributes@\cc@cur@cont @cc#2}{#1}%
   \long\csdef{\ccPrefix#2}{\cc@opt@empty{\csname cc@group@#2\endcsname}}%
   \long\csdef{cc@group@#2}[##1]{%
     \def\cc@cnt@grp{cc#2}%
@@ -1587,9 +1597,22 @@
 %    \end{macrocode}
 % First we check if the Container Instance has a dedicated Attribtue Type defined
 %    \begin{macrocode}
-  \expandafter\ifx\csname cc@type@#1@Attributes\endcsname\relax
+  \expandafter\ifx\csname cc@type@Attributes@#1\endcsname\relax
 %    \end{macrocode}
-% If so, we parse the Attribute list.
+% If the Container has no Attributes type defined, we check if the
+% Container instance has, in fact, Attributes
+%    \begin{macrocode}
+    \if!#2!\else
+%    \end{macrocode}
+% If so, we issue a warning since we cannot know how to deal with the
+% Attributes.
+%    \begin{macrocode}
+      \ccPackageWarning{Kernel}{Attribute}
+        {Container instance on line \inputlineno\space has Attributes,^^Jbut Container `#1' provides no Attribute handlers!}
+    \fi
+  \else
+%    \end{macrocode}
+% Otherwise, we parse the Attribute list.
 %    \begin{macrocode}
     \ccParseAttributes{#1}{#2}%
 %    \end{macrocode}
@@ -1638,19 +1661,6 @@
 % Type, thus parsing the Attributes.
 %    \begin{macrocode}
     \ccEvalType[#1]{Attributes}%
-  \else
-%    \end{macrocode}
-% If the Container has no Attributes type defined, we check if the
-% Container instance has, in fact, Attributes
-%    \begin{macrocode}
-    \if!#2!\else
-%    \end{macrocode}
-% If so, we issue a warning since we cannot know how to deal with the
-% Attributes.
-%    \begin{macrocode}
-      \ccPackageWarning{Kernel}{Attribute}
-        {Container instance on line \inputlineno\space has Attributes,^^Jbut Container `#1' provides no Attribute handlers!}
-    \fi
   \fi
   \ignorespaces}
 %    \end{macrocode}
