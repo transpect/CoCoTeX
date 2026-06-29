@@ -20,8 +20,8 @@
 %% original source files, as listed above, are part of the
 %% same distribution. (The sources need not necessarily be
 %% in the same archive or directory.)
-\def\fileversion{0.3.4}%
-\def\filedate{2024-09-09}%
+\def\fileversion{0.3.5}%
+\def\filedate{2026-06-29}%
 \NeedsTeXFormat{LaTeX2e}[2018/12/01]
 \ProvidesPackage{htmltabs}
     [\filedate\space\fileversion\space htmltabs]
@@ -473,7 +473,8 @@
 \def\ht@parse@color@prop{%
   \ht@debugmsg{prop}{Parsing color for \ifx\ht@apply\@undefined\else[\ht@apply]\fi{\ht@scope}{\ht@prop}; input: "\ht@val"}%
   \global\let\ht@color@val\@empty
-  \ifx\ht@val\@empty\else
+  \ifx\ht@val\@empty
+  \else
     \edef\ht@next@token{\expandafter\@car\ht@val\@nil}%
     \def\@tempa{\#}%
     \ifx\ht@next@token\@tempa
@@ -486,12 +487,10 @@
 
 \def\ht@parse@and@set@color@prop{%
   \ht@debugmsg{prop}{Processing \ifx\ht@apply\@undefined\else[\ht@apply]\fi{\ht@scope}{\ht@prop}; input: "\ht@val"}%
-  \ifx\ht@val\@empty\else
-    \ht@parse@color@prop
-    \let\ht@no@expand\relax
-    \edef\ht@apply@color{\noexpand\ht@apply@prop{internal-\ht@prop}}%
-    \expandafter\ht@apply@color\expandafter{\ht@color@val}%
-  \fi
+  \ht@parse@color@prop
+  \let\ht@no@expand\relax
+  \edef\ht@apply@color{\noexpand\ht@apply@prop{internal-\ht@prop}}%
+  \expandafter\ht@apply@color\expandafter{\ht@color@val}%
 }
 \def\ht@parse@border@prop{%
   \ht@debugmsg{prop}{Parsing Border for \ifx\ht@apply\@undefined\else[\ht@apply]\fi{\ht@scope}{\ht@prop}}%
