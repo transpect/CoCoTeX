@@ -191,7 +191,6 @@
 %   \lstinline{bottom}).
 %    \begin{macrocode}
 \def\ccbCalculateVMargin#1{%
-\message{^^J===> #1, \csmeaning{cc@\cc@cur@cont @margin-#1}}
   \ifdim\ccUseProperty{margin-#1}=\z@\relax
     \ccSetProperty{int-margin-#1}{\relax}%
   \else
