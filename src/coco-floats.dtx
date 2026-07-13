@@ -969,10 +969,18 @@
 %   \item[\#1] float position (optional)\UsageProperty{before-float}
 %   \end{description}
 %    \begin{macrocode}
+\newif\if@cc@prev@state \@cc@prev@statetrue
 \def\ccf@float{\cc@opt@empty\@ccf@float}
 \def\@ccf@float[#1]{%
   \par
   \begingroup
+    \if@ht@in@table
+      \if@ht@final@render\else
+        \@cc@prev@statefalse
+      \fi
+    \else
+      \if@cc@is@final\else\@cc@prev@statefalse\fi
+    \fi
     \@cc@is@finalfalse
     \global\advance\ccf@int@cnt\@ne
     \ccEvalType{FloatEnvInfo}%
@@ -988,7 +996,7 @@
     \ccUseProperty{before-float}%
     \ccf@set@env
     \ifx\ccf@floatpos\@empty\else\savenotes\fi
-    \@cc@is@finaltrue
+    \if@cc@prev@state\@cc@is@finaltrue\fi
     \ignorespaces}
 %    \end{macrocode}
 % \end{macro}
@@ -1011,7 +1019,7 @@
       \ccf@test@caption{0}{}{top}%
       \ccf@test@caption{0}{}{bottom}%
       \bgroup
-        \@cc@is@finaltrue
+        \if@cc@prev@state\@cc@is@finaltrue\fi
 %    \end{macrocode}
 % Floats as a whole are tagged as \DescribeTag{Aside} when PDF/UA
 % standard is 2.0, or as \DescribeTag{Div}, otherwise.
@@ -1289,7 +1297,7 @@
     \bgroup
       \UseHook{cc/listof/##1/before}% was list-of-before-hook-##1
       \ccUseProperty{list-of-before-entry}%
-      \@cc@is@finaltrue
+      \if@cc@prev@state\@cc@is@finaltrue\fi
       \ccUseProperty{list-of-block}%
       \UseHook{cc/listof/##1/after}% was list-of-after-hook-##1
       \ccUseProperty{list-of-after-entry}%
@@ -1518,7 +1526,7 @@
   \ccf@make@outer@caption{top}%
   \ifnum\the\ccSubFloatCnt=\z@\relax
     \bgroup\advance\hsize-\ccf@margin@l
-      \@cc@is@finaltrue
+      \if@cc@prev@state\@cc@is@finaltrue\fi
       \ccUseProperty{float-render}%
     \egroup
   \else
@@ -1529,7 +1537,7 @@
     \ifx\ccf@has@subcapt@bottom\@empty\ccf@calc@row@ht{bottom}\fi%
     \bgroup
       \advance\hsize-\ccf@margin@l
-      \@cc@is@finaltrue
+      \if@cc@prev@state\@cc@is@finaltrue\fi
       \ccUseProperty{subfloat-render}%
     \egroup
     \let\ccf@prefix\@empty
@@ -1736,7 +1744,8 @@
   \ifdim\my@wda>\my@wdb\relax
     \expandafter\global\expandafter\let\csname ccf@has@#2capt@#3\endcsname\@empty
   \fi
-  \ccaEnable\@cc@is@finaltrue
+  \ccaEnable
+  \if@cc@prev@state\@cc@is@finaltrue\fi
 }
 %    \end{macrocode}
 % \end{macro}
@@ -1801,6 +1810,7 @@
 %   \item[\#2] is the vertical alignment (\texttt{top}, \texttt{middle}, \texttt{bottom})\UsageProperty{caption-face}\UsageProperty{caption-face-top}\UsageProperty{caption-face-bottom}\UsageProperty{caption-top}\UsageProperty{caption-bottom}\UsageProperty{label-pos}\UsageProperty{subcaption-face}\UsageProperty{subcaption-face-top}\UsageProperty{subcaption-face-bottom}\UsageProperty{subcaption-top}\UsageProperty{subcaption-bottom}\UsageProperty{sublabel-pos}
 % \end{description}
 %    \begin{macrocode}
+\NewHook{cc/float/caption/before}%
 \long\def\ccf@make@caption#1#2{%
   \ccf@capt@top@offset{#1}%
   \ifnum\the\ccSubFloatCnt=\z@\relax
@@ -1817,6 +1827,7 @@
     \def\ccf@caption@box{\setbox\@tempboxa\vbox to \cc@tempskipa\bgroup}%
   \fi
   \ccf@caption@box%
+    \UseHook{cc/float/caption/before}%
     \ccIfStrEqual{#2}{top}{}{\if@ccf@break@capt\else\vss\fi}%
     \ccUseProperty{\ccf@prefix caption-face}%
     \ccUseProperty{\ccf@prefix caption-face-#1}%
@@ -2090,7 +2101,8 @@
     \ccfAdjustMargins{\wd\ccf@sub@box}%
   \egroup
   \global\setbox\ccf@sub@box\box\voidb@x
-  \ccaEnable\@cc@is@finaltrue
+  \ccaEnable
+  \if@cc@prev@state\@cc@is@finaltrue\fi
 }
 %    \end{macrocode}
 % \end{macro}
@@ -2444,7 +2456,7 @@
     \ccfGetTableContent
     \@cc@is@finalfalse
     \ccComponent{Content}{\unvbox\ccf@floatbox}%
-    \@cc@is@finaltrue
+    \if@cc@prev@state\@cc@is@finaltrue\fi
     \ccfRenderSubFloats{\the\@tempcnta}{Content}%
   }}
 %    \end{macrocode}
