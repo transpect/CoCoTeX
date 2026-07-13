@@ -1,7 +1,12 @@
 ; -*- markdown -*-
 
+# 0.6.5
 
-# 1.0.0
+## coco-accessibility
+- NEW: Added way to add actual text atributes to the currently open
+       struct element
+
+# 0.6.0
 
 ## general
 - NEW: Added hard requirement for LaTeX kernel version, must now be at
