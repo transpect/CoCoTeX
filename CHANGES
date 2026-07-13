@@ -6,6 +6,10 @@
 - NEW: Added way to add actual text atributes to the currently open
        struct element
 
+## coco-floats
+- NEW: Hook before caption is rendered
+- FIX: prevent double tagging of Caption when Figure in Table (don't ask...)
+
 # 0.6.0
 
 ## general
