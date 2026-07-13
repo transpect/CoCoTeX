@@ -69,7 +69,7 @@
   frame .choice:,
   frame / none  .code:n = { },%\bool_gset_false:N \g_cocotex_frame_print_bool \global\let\cc@frame@mode n
   frame / crop  .code:n = { \keys_set:nn { cocotex/frame } {pdfboxes,cropmarks} },%\bool_gset_true:N  \g_cocotex_frame_print_bool \global\let\cc@frame@mode c
-  frame / frame .code:n = { \keys_set:nn { cocotex/frame } {frame} },%\bool_gset_false:N \g_cocotex_frame_print_bool \global\let\cc@frame@mode w
+  frame / frame .code:n = { \keys_set:nn { cocotex/frame } {guide} },%\bool_gset_false:N \g_cocotex_frame_print_bool \global\let\cc@frame@mode w
 }
 \ProcessKeyOptions[cocotex/frame]
 %    \end{macrocode}
