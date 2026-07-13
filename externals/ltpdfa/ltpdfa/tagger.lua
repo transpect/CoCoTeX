@@ -176,6 +176,12 @@ local function addAltText(desc, enc)
    stree.current.altText = {str, hex}
 end
 
+-- lup 2026-07-13
+local function addActualText(desc, enc)
+   local str, hex = metadata.altToPDF(desc, enc)
+   stree.current.actualText = {str, hex}
+end
+
 local function addID(id)
    if id == 'auto' then
       stree.current.neededID = stree.current.type .. stree.current.idx
@@ -259,6 +265,7 @@ end
 -- public part
 local inputtagger = {
    addAltText      = addAltText,
+   addActualText   = addActualText,
    addRolemap      = addRolemap,
    addColSpan      = addColSpan,
    addRowSpan      = addRowSpan,

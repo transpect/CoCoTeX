@@ -11,7 +11,7 @@ local idarray = {}
 local idobjarray = {}
 local partreeobj
 local idtreeobj
-local strkeys = {"neededID", "T", "Lang", "altText", "E", "ActualText"}
+local strkeys = {"neededID", "T", "Lang", "altText", "E", "actualText"}
 local rmstr = ""
 -- now create hyphnode
 local hyphnode = node.new(a_whatsit_node, subtype_pdfliteral)
@@ -163,6 +163,16 @@ local function addAttribute(selem, attr, str, pdfobj)
             return str .. "/Alt <" .. attrval[1] .. "> "
          end
       end
+
+      -- lup 2026-07-13
+      if (attr == "actualText") then
+         if (attrval[2] == false) then
+            return str .. "/ActualText (" .. attrval[1] .. ") "
+         else
+            return str .. "/ActualText <" .. attrval[1] .. "> "
+         end
+      end
+
       if (attr == "neededID") then
          attr = "ID"
          table.insert(idarray, selem.ID)

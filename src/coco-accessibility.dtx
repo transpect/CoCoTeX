@@ -606,6 +606,19 @@
   \fi}
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{\ccaAddActualText}
+%   \begin{syntax}
+%     \cs{\ccaAddActualText} \oarg{tagger} \marg{actual}
+%   \end{syntax}
+%   is used to provide an \marg{actual} text attribute to the current
+%   struct element. Screenreaders read the actual text rather than the
+%   tag's content.
+%    \begin{macrocode}
+\DeclareAccessibilityCommand{\ccaAddActualText}[2][hyperref]{\if@cc@is@final
+    \directlua{ltpdfa.tagger.addActualText('\luaescapestring{#2}', '\luaescapestring{#1}')}%
+  \fi}
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\cca@Gin@alt} is the captured value of the
 %   \lstinline{alt} key from the optional argument of the
 %   \lstinline{\includegraphics} command. This can be used to pass its
