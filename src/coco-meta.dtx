@@ -963,7 +963,6 @@
     \ccWhenComp{Institute}{\ccUseComp{Institute}}%
     \ccWhenComp{Department}{, \ccUseComp{Department}}%
     \ccWhenComp{Address}{, \ccUseComp{Address}}%
-    % \ccWhenComp{ROR}{\space\ccUseProperty{ror-format}}% for backward compatibility not in default!
   }%
 %    \end{macrocode}
 % \end{Property}
@@ -980,6 +979,7 @@
   \ccSetProperty{affil-block-item-face}{}%
 %    \end{macrocode}
 % \end{Property}
+% \changes{0.6.6}{2026-07-17}{print ROR after Affiliation}
 % \begin{Property}{affil-block-item-format} is the format of each
 %   entry in the \UsageComponent{AffilBlock} list
 %    \begin{macrocode}
@@ -987,8 +987,9 @@
     \textsuperscript{\ccUseComp{AffilID}}%
     \bgroup
       \ccUseProperty{affil-block-item-face}%
-      \ccUseComp{Affiliation}
+      \ccUseComp{Affiliation}%
     \egroup%
+    \ccWhenComp{ROR}{\space\ccUseProperty{ror-format}}%
     \ifnum\ccCurCount<\ccTotalCount\relax\ccUseProperty{affil-sep}\fi%
   }
 %    \end{macrocode}
