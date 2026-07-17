@@ -1075,7 +1075,7 @@
 %   from a Component with the name \InlineArg{1} and the label
 %   \InlineArg{2}.
 %    \begin{macrocode}
-\def\ccCompLink#1#2{%
+\DeclareRobustCommand{\ccCompLink}[2]{%
   \protected@edef\@argi{\expandonce{\ccUseComp{#1}}}%
   \expandafter\href\expandafter{\@argi}{#2}%
 }

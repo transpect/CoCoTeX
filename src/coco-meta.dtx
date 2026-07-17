@@ -989,7 +989,7 @@
       \ccUseProperty{affil-block-item-face}%
       \ccUseComp{Affiliation}%
     \egroup%
-    \ccWhenComp{ROR}{\space\ccUseProperty{ror-format}}%
+    \ccWhenComp{ROR}{\ccUseProperty{ror-sep}\ccUseProperty{ror-format}}%
     \ifnum\ccCurCount<\ccTotalCount\relax\ccUseProperty{affil-sep}\fi%
   }
 %    \end{macrocode}
@@ -1013,16 +1013,34 @@
      }}
 %    \end{macrocode}
 % \end{Property}
-% \changes{0.6.6}{2026-07-17}{added ror-format Property fo print ROR link}
+% \changes{0.6.6}{2026-07-17}{added ror formating Properties to print the ROR link}
+% \begin{Property}{ror-sep}{<any>} the separator between the ROR logo and the preceeding text
+%    \begin{macrocode}
+  \ccSetProperty{ror-sep}{\space}
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{ror-height}{<dimen>} the height of the ROR
+%   logo. Should be set such that the ROR type matches the x-height of
+%   the preceeding text.
+%    \begin{macrocode}
+  \ccSetProperty{ror-height}{1.07em}
+%    \end{macrocode}
+% \end{Property}
+% \begin{Property}{ror-voffset}{<dimen>} vertical offset of the ROR
+%   image. Depends on the font and font-size; should be set such that
+%   the ROR type is flush with the baseline of the preceeding text and
+%   the upwards arrow symbols below the type are placed under the
+%   baseline.
+%    \begin{macrocode}
+  \ccSetProperty{ror-voffset}{-0.26em}
+%    \end{macrocode}
+% \end{Property}
 % \begin{Property}{ror-format}{<any>} is the format for printing the \UsageComponent{ROR} link.
 %    \begin{macrocode}
   \ccSetProperty{ror-format}{%
     \ccWhenComp{ROR}{%
-      \if\cc@pdf@std X%
-        \ccCompLink{ROR}{\includegraphics[height=1em]{logos/ROR_cmyk.pdf}}%
-      \else
-        \ccCompLink{ROR}{\includegraphics[height=1em]{logos/ROR_rgb.pdf}}%
-      \fi
+      \raise\ccUseProperty{ror-voffset}\hbox{%
+        \expandafter\href\expandafter{\ccUseComp{ROR}}{\includegraphics[height=\ccUseProperty{ror-height}]{logos/ROR_\ifx\cc@color@enc\cc@str@cmyk cmyk\else rgb\fi.pdf}}}%
     }%
   }
 %    \end{macrocode}
