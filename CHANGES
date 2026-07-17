@@ -1,5 +1,13 @@
 ; -*- markdown -*-
 
+# 0.6.6
+
+## coco-meta
+- NEW: Added the ROR Counted Component to the Affil Component Block
+
+## coco-title
+- NEW: Added the PubROR Global Component to titlepage Container
+
 # 0.6.5
 
 ## coco-accessibility

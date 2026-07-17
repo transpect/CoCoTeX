@@ -670,6 +670,15 @@
     \ccDeclareCountedComponent{AffilID}%
 %    \end{macrocode}
 % \end{Component}
+% \changes{0.6.6}{2026-07-17}{added ROR Counted Component to Affiliation}
+% \begin{Component}[OR]{ROR} is the Research Organization Registry, a
+%   unique identifier for research institutes. It is usually an URL to
+%   the ror.org domain.
+%    \begin{macrocode}
+    \ccDeclareCountedComponent{ROR}
+%    \end{macrocode}
+% \end{Component}
+% 
 %    \begin{macrocode}
   }%
   \ccDeclareGroupHandler{Affil}{%
@@ -954,6 +963,7 @@
     \ccWhenComp{Institute}{\ccUseComp{Institute}}%
     \ccWhenComp{Department}{, \ccUseComp{Department}}%
     \ccWhenComp{Address}{, \ccUseComp{Address}}%
+    % \ccWhenComp{ROR}{\space\ccUseProperty{ror-format}}% for backward compatibility not in default!
   }%
 %    \end{macrocode}
 % \end{Property}
@@ -1000,6 +1010,20 @@
        \egroup
        \par
      }}
+%    \end{macrocode}
+% \end{Property}
+% \changes{0.6.6}{2026-07-17}{added ror-format Property fo print ROR link}
+% \begin{Property}{ror-format}{<any>} is the format for printing the \UsageComponent{ROR} link.
+%    \begin{macrocode}
+  \ccSetProperty{ror-format}{%
+    \ccWhenComp{ROR}{%
+      \if\cc@pdf@std X%
+        \ccCompLink{ROR}{\includegraphics[height=1em]{logos/ROR_CMYK.pdf}}%
+      \else
+        \ccCompLink{ROR}{\includegraphics[height=1em]{logos/ROR_RGB.pdf}}%
+      \fi
+    }%
+  }
 %    \end{macrocode}
 % \end{Property}
 %
