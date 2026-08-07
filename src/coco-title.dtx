@@ -396,14 +396,19 @@
 \def\cct@title@insert@xmp@direct{%
   \IfFileExists{\cca@xmp@file@name}{%
     \begingroup
+      \edef\@tempa{\ifx\cc@titlepage@PDFLevel\relax\else\cc@titlepage@PDFLevel\fi\ifx\cc@titlepage@PDFIssue\relax\else:\cc@titlepage@PDFIssue\fi}
       \immediate\pdfobj stream attr {/Type /Metadata /Subtype /XML}
       file{\cca@xmp@file@name}
       \pdfcatalog{/Metadata \the\pdflastobj\space 0 R }
+      % According to Acrobat Preflight, PDF/X-4 does not allow PDFXVersion in DocumentInfo:
       \if\cc@pdf@std X%
-        \ccWhenComp{PDFPart}{%
-          \pdfextension info{/GTS_PDFXConformance(PDF/\ccUseComp{PDFStandard}-\ccUseComp{PDFPart}\ccIfCompEmpty{PDFLevel}{}{\ccUseComp{PDFLevel}}\ccIfCompEmpty{PDFIssue}{}{:\ccUseComp{PDFIssue}}) }%
-          \pdfextension info{/GTS_PDFXVersion(PDF/\ccUseComp{PDFStandard}-\ccUseComp{PDFPart}\ccIfCompEmpty{PDFLevel}{}{\ccUseComp{PDFLevel}}\ccIfCompEmpty{PDFIssue}{}{:\ccUseComp{PDFIssue}}) }%
-        }
+        \expandafter\ifnum\ccUseComp{PDFPart}=4\relax
+        \else
+          \ccWhenComp{PDFPart}{%
+            \pdfextension info{/GTS_PDFXConformance(PDF/\ccUseComp{PDFStandard}-\ccUseComp{PDFPart}\@tempa) }%
+            \pdfextension info{/GTS_PDFXVersion(PDF/\ccUseComp{PDFStandard}-\ccUseComp{PDFPart}\@tempa) }%
+          }
+        \fi
       \fi
     \endgroup%
   }{}%
