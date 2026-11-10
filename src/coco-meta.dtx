@@ -326,10 +326,6 @@
     \ccUnlessComp{ShortCiteName}{\ccComponent{ShortCiteName}{\ccUseProperty{#1-short-cite-name-format}}}%
     \ccUnlessComp{PDFInfoName}{\ccComponent{PDFInfoName}{\ccUseProperty{#1-pdfinfo-name-format}}}%
     \ccUnlessComp{CorrespondenceAs}{\ccComponent{CorrespondenceAs}{\ccUseProperty{#1-correspondence-as-format}}}%
-    \ccWhenComp{AffilRef}{\ccWhenComp{Affiliation}{%
-        \ccPackageError{Meta}{Ambiguity}
-          {You cannot use both Containers AffilRef and Affiliation in the same `\ccPrefix#2' Sub-Container}
-          {At least one `\ccPrefix#2' Sub-Container contains both AffilRef and Affiliation. This is not allowed. Please decide for one affiliation strategy: Either two lists with cross-references, or affiliations directly as an author's meta-data.}}}%
   }%
 %    \end{macrocode}
 %
